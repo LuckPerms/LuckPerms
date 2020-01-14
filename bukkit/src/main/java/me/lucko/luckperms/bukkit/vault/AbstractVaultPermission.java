@@ -34,7 +34,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Function;
 
 /**
  * An extended abstraction of the Vault {@link Permission} API.
@@ -53,11 +52,6 @@ import java.util.function.Function;
  */
 @SuppressWarnings("deprecation")
 public abstract class AbstractVaultPermission extends Permission {
-
-    // when upgrading and forwarding requests, all world strings are passed through this function.
-    // it lets the overriding class define some custom behaviour for world handling.
-    protected Function<String, String> worldMappingFunction = Function.identity();
-
     public AbstractVaultPermission() {
         super.plugin = JavaPlugin.getProvidingPlugin(Permission.class);
     }
@@ -94,36 +88,37 @@ public abstract class AbstractVaultPermission extends Permission {
     public abstract boolean groupAddPermission(String world, String name, String permission);
     public abstract boolean groupRemovePermission(String world, String name, String permission);
 
-    private String world(String world) {
-        return this.worldMappingFunction.apply(world);
+    /* allow implementations to override and implement custom world remapping / handling rules */
+    protected String convertWorld(String world) {
+        return world;
     }
 
-    private String world(World world) {
+    private String convertWorld(World world) {
         if (world == null) {
             return null;
         }
-        return world(world.getName());
+        return convertWorld(world.getName());
     }
 
-    private String world(Player player) {
+    private String convertWorld(Player player) {
         if (player == null) {
             return null;
         }
-        return world(player.getWorld());
+        return convertWorld(player.getWorld());
     }
 
     @Override
     public final boolean has(String world, String player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userHasPermission(world(world), lookupUuid(player), permission);
+        return userHasPermission(convertWorld(world), lookupUuid(player), permission);
     }
 
     @Override
     public final boolean has(World world, String player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userHasPermission(world(world), lookupUuid(player), permission);
+        return userHasPermission(convertWorld(world), lookupUuid(player), permission);
     }
 
     @Override
@@ -137,21 +132,21 @@ public abstract class AbstractVaultPermission extends Permission {
     public final boolean playerHas(String world, String player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userHasPermission(world(world), lookupUuid(player), permission);
+        return userHasPermission(convertWorld(world), lookupUuid(player), permission);
     }
 
     @Override
     public final boolean playerHas(World world, String player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userHasPermission(world(world), lookupUuid(player), permission);
+        return userHasPermission(convertWorld(world), lookupUuid(player), permission);
     }
 
     @Override
     public final boolean playerHas(String world, OfflinePlayer player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userHasPermission(world(world), player.getUniqueId(), permission);
+        return userHasPermission(convertWorld(world), player.getUniqueId(), permission);
     }
 
     @Override
@@ -165,229 +160,229 @@ public abstract class AbstractVaultPermission extends Permission {
     public final boolean playerAdd(String world, String player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userAddPermission(world(world), lookupUuid(player), permission);
+        return userAddPermission(convertWorld(world), lookupUuid(player), permission);
     }
 
     @Override
     public final boolean playerAdd(World world, String player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userAddPermission(world(world), lookupUuid(player), permission);
+        return userAddPermission(convertWorld(world), lookupUuid(player), permission);
     }
 
     @Override
     public final boolean playerAdd(String world, OfflinePlayer player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userAddPermission(world(world), player.getUniqueId(), permission);
+        return userAddPermission(convertWorld(world), player.getUniqueId(), permission);
     }
 
     @Override
     public final boolean playerAdd(Player player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userAddPermission(world(player), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userAddPermission(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), permission);
     }
 
     @Override
     public final boolean playerRemove(String world, String player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userRemovePermission(world(world), lookupUuid(player), permission);
+        return userRemovePermission(convertWorld(world), lookupUuid(player), permission);
     }
 
     @Override
     public final boolean playerRemove(String world, OfflinePlayer player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userRemovePermission(world(world), player.getUniqueId(), permission);
+        return userRemovePermission(convertWorld(world), player.getUniqueId(), permission);
     }
 
     @Override
     public final boolean playerRemove(World world, String player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userRemovePermission(world(world), lookupUuid(player), permission);
+        return userRemovePermission(convertWorld(world), lookupUuid(player), permission);
     }
 
     @Override
     public final boolean playerRemove(Player player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userRemovePermission(world(player), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userRemovePermission(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), permission);
     }
 
     @Override
     public final boolean groupHas(String world, String group, String permission) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(permission, "permission");
-        return groupHasPermission(world(world), group, permission);
+        return groupHasPermission(convertWorld(world), group, permission);
     }
 
     @Override
     public final boolean groupHas(World world, String group, String permission) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(permission, "permission");
-        return groupHasPermission(world(world), group, permission);
+        return groupHasPermission(convertWorld(world), group, permission);
     }
 
     @Override
     public final boolean groupAdd(String world, String group, String permission) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(permission, "permission");
-        return groupAddPermission(world(world), group, permission);
+        return groupAddPermission(convertWorld(world), group, permission);
     }
 
     @Override
     public final boolean groupAdd(World world, String group, String permission) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(permission, "permission");
-        return groupAddPermission(world(world), group, permission);
+        return groupAddPermission(convertWorld(world), group, permission);
     }
 
     @Override
     public final boolean groupRemove(String world, String group, String permission) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(permission, "permission");
-        return groupRemovePermission(world(world), group, permission);
+        return groupRemovePermission(convertWorld(world), group, permission);
     }
 
     @Override
     public final boolean groupRemove(World world, String group, String permission) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(permission, "permission");
-        return groupRemovePermission(world(world), group, permission);
+        return groupRemovePermission(convertWorld(world), group, permission);
     }
 
     @Override
     public final boolean playerInGroup(String world, String player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userInGroup(world(world), lookupUuid(player), group);
+        return userInGroup(convertWorld(world), lookupUuid(player), group);
     }
 
     @Override
     public final boolean playerInGroup(World world, String player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userInGroup(world(world), lookupUuid(player), group);
+        return userInGroup(convertWorld(world), lookupUuid(player), group);
     }
 
     @Override
     public final boolean playerInGroup(String world, OfflinePlayer player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userInGroup(world(world), player.getUniqueId(), group);
+        return userInGroup(convertWorld(world), player.getUniqueId(), group);
     }
 
     @Override
     public final boolean playerInGroup(Player player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userInGroup(world(player), ((OfflinePlayer) player).getUniqueId(), group);
+        return userInGroup(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), group);
     }
 
     @Override
     public final boolean playerAddGroup(String world, String player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userAddGroup(world(world), lookupUuid(player), group);
+        return userAddGroup(convertWorld(world), lookupUuid(player), group);
     }
 
     @Override
     public final boolean playerAddGroup(World world, String player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userAddGroup(world(world), lookupUuid(player), group);
+        return userAddGroup(convertWorld(world), lookupUuid(player), group);
     }
 
     @Override
     public final boolean playerAddGroup(String world, OfflinePlayer player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userAddGroup(world(world), player.getUniqueId(), group);
+        return userAddGroup(convertWorld(world), player.getUniqueId(), group);
     }
 
     @Override
     public final boolean playerAddGroup(Player player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userAddGroup(world(player), ((OfflinePlayer) player).getUniqueId(), group);
+        return userAddGroup(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), group);
     }
 
     @Override
     public final boolean playerRemoveGroup(String world, String player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userRemoveGroup(world(world), lookupUuid(player), group);
+        return userRemoveGroup(convertWorld(world), lookupUuid(player), group);
     }
 
     @Override
     public final boolean playerRemoveGroup(World world, String player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userRemoveGroup(world(world), lookupUuid(player), group);
+        return userRemoveGroup(convertWorld(world), lookupUuid(player), group);
     }
 
     @Override
     public final boolean playerRemoveGroup(String world, OfflinePlayer player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userRemoveGroup(world(world), player.getUniqueId(), group);
+        return userRemoveGroup(convertWorld(world), player.getUniqueId(), group);
     }
 
     @Override
     public final boolean playerRemoveGroup(Player player, String group) {
         Objects.requireNonNull(player, "player");
-        return userRemoveGroup(world(player), ((OfflinePlayer) player).getUniqueId(), group);
+        return userRemoveGroup(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), group);
     }
 
     @Override
     public final String[] getPlayerGroups(String world, String player) {
         Objects.requireNonNull(player, "player");
-        return userGetGroups(world(world), lookupUuid(player));
+        return userGetGroups(convertWorld(world), lookupUuid(player));
     }
 
     @Override
     public final String[] getPlayerGroups(World world, String player) {
         Objects.requireNonNull(player, "player");
-        return userGetGroups(world(world), lookupUuid(player));
+        return userGetGroups(convertWorld(world), lookupUuid(player));
     }
 
     @Override
     public final String[] getPlayerGroups(String world, OfflinePlayer player) {
         Objects.requireNonNull(player, "player");
-        return userGetGroups(world(world), player.getUniqueId());
+        return userGetGroups(convertWorld(world), player.getUniqueId());
     }
 
     @Override
     public final String[] getPlayerGroups(Player player) {
         Objects.requireNonNull(player, "player");
-        return userGetGroups(world(player), ((OfflinePlayer) player).getUniqueId());
+        return userGetGroups(convertWorld(player), ((OfflinePlayer) player).getUniqueId());
     }
 
     @Override
     public final String getPrimaryGroup(String world, String player) {
         Objects.requireNonNull(player, "player");
-        return userGetPrimaryGroup(world(world), lookupUuid(player));
+        return userGetPrimaryGroup(convertWorld(world), lookupUuid(player));
     }
 
     @Override
     public final String getPrimaryGroup(World world, String player) {
         Objects.requireNonNull(player, "player");
-        return userGetPrimaryGroup(world(world), lookupUuid(player));
+        return userGetPrimaryGroup(convertWorld(world), lookupUuid(player));
     }
 
     @Override
     public final String getPrimaryGroup(String world, OfflinePlayer player) {
         Objects.requireNonNull(player, "player");
-        return userGetPrimaryGroup(world(world), player.getUniqueId());
+        return userGetPrimaryGroup(convertWorld(world), player.getUniqueId());
     }
 
     @Override
     public final String getPrimaryGroup(Player player) {
         Objects.requireNonNull(player, "player");
-        return userGetPrimaryGroup(world(player), ((OfflinePlayer) player).getUniqueId());
+        return userGetPrimaryGroup(convertWorld(player), ((OfflinePlayer) player).getUniqueId());
     }
 
 }
