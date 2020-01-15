@@ -26,7 +26,7 @@
 package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -69,7 +69,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MigrationZPermissions extends SubCommand<Object> {
+public class MigrationZPermissions extends ChildCommand<Object> {
     public MigrationZPermissions(LocaleManager locale) {
         super(CommandSpec.MIGRATION_COMMAND.localize(locale), "zpermissions", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }

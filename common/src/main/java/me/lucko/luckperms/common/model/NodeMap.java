@@ -345,6 +345,7 @@ public final class NodeMap {
     }
 
     private static final class ImmutableSetMultimapCache<K, V> extends Cache<ImmutableSetMultimap<K, V>> {
+        @SuppressWarnings("rawtypes")
         private static final Constructor<ImmutableSetMultimap> IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR;
         static {
             try {

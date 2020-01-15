@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.parent;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -56,7 +56,7 @@ import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import java.time.Duration;
 import java.util.List;
 
-public class ParentAddTemp extends SharedSubCommand {
+public class ParentAddTemp extends GenericChildCommand {
     public ParentAddTemp(LocaleManager locale) {
         super(CommandSpec.PARENT_ADD_TEMP.localize(locale), "addtemp", CommandPermission.USER_PARENT_ADD_TEMP, CommandPermission.GROUP_PARENT_ADD_TEMP, Predicates.inRange(0, 1));
     }

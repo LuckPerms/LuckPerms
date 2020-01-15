@@ -75,7 +75,7 @@ public final class PermissionDescriptionProxy implements PermissionDescription, 
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public @NonNull CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(@NonNull String s) {
         return (CompletableFuture) this.handle.findAssignedSubjects(s);
     }

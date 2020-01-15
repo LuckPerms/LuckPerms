@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.permission;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -53,7 +53,7 @@ import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.List;
 
-public class PermissionSet extends SharedSubCommand {
+public class PermissionSet extends GenericChildCommand {
     public PermissionSet(LocaleManager locale) {
         super(CommandSpec.PERMISSION_SET.localize(locale), "set", CommandPermission.USER_PERM_SET, CommandPermission.GROUP_PERM_SET, Predicates.is(0));
     }

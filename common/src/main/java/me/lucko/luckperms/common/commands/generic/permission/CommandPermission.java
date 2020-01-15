@@ -27,15 +27,16 @@ package me.lucko.luckperms.common.commands.generic.permission;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.command.abstraction.SharedMainCommand;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericParentCommand;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 
-public class CommandPermission<T extends PermissionHolder> extends SharedMainCommand<T> {
-    public CommandPermission(LocaleManager locale, boolean user) {
-        super(CommandSpec.PERMISSION.localize(locale), "Permission", user, ImmutableList.<SharedSubCommand>builder()
+public class CommandPermission<T extends PermissionHolder> extends GenericParentCommand<T> {
+    public CommandPermission(LocaleManager locale, HolderType type) {
+        super(CommandSpec.PERMISSION.localize(locale), "Permission", type, ImmutableList.<GenericChildCommand>builder()
                 .add(new PermissionInfo(locale))
                 .add(new PermissionSet(locale))
                 .add(new PermissionUnset(locale))

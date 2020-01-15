@@ -25,9 +25,8 @@
 
 package me.lucko.luckperms.sponge;
 
-import com.google.common.base.Splitter;
-
 import me.lucko.luckperms.common.command.CommandManager;
+import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -46,9 +45,6 @@ import java.util.ListIterator;
 import java.util.Optional;
 
 public class SpongeCommandExecutor extends CommandManager implements CommandCallable {
-    private static final Splitter TAB_COMPLETE_ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN);
-    private static final Splitter ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
-
     private final LPSpongePlugin plugin;
 
     public SpongeCommandExecutor(LPSpongePlugin plugin) {
@@ -57,20 +53,18 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
     }
 
     @Override
-    public @NonNull CommandResult process(@NonNull CommandSource source, @NonNull String s) {
-        Sender lpSender = this.plugin.getSenderFactory().wrap(source);
-        List<String> arguments = processSelectors(source, CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(s)));
-
-        onCommand(lpSender, "lp", arguments);
+    public @NonNull CommandResult process(@NonNull CommandSource source, @NonNull String args) {
+        Sender wrapped = this.plugin.getSenderFactory().wrap(source);
+        List<String> arguments = processSelectors(source, ArgumentTokenizer.EXECUTE.tokenizeInput(args));
+        executeCommand(wrapped, "lp", arguments);
         return CommandResult.success();
     }
 
     @Override
-    public @NonNull List<String> getSuggestions(@NonNull CommandSource source, @NonNull String s, @Nullable Location<World> location) {
-        Sender lpSender = this.plugin.getSenderFactory().wrap(source);
-        List<String> arguments = processSelectors(source, CommandManager.stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(s)));
-
-        return onTabComplete(lpSender, arguments);
+    public @NonNull List<String> getSuggestions(@NonNull CommandSource source, @NonNull String args, @Nullable Location<World> location) {
+        Sender wrapped = this.plugin.getSenderFactory().wrap(source);
+        List<String> arguments = processSelectors(source, ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args));
+        return tabCompleteCommand(wrapped, arguments);
     }
 
     @Override

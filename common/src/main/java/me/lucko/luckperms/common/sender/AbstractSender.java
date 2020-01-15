@@ -134,7 +134,7 @@ public final class AbstractSender<T> implements Sender {
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof AbstractSender)) return false;
-        final AbstractSender that = (AbstractSender) o;
+        final AbstractSender<?> that = (AbstractSender<?>) o;
         return this.getUniqueId().equals(that.getUniqueId());
     }
 

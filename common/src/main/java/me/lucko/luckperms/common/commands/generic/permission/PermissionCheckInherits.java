@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -51,7 +51,7 @@ import net.luckperms.api.util.Tristate;
 import java.util.List;
 import java.util.Optional;
 
-public class PermissionCheckInherits extends SharedSubCommand {
+public class PermissionCheckInherits extends GenericChildCommand {
     public PermissionCheckInherits(LocaleManager locale) {
         super(CommandSpec.PERMISSION_CHECK_INHERITS.localize(locale), "checkinherits", CommandPermission.USER_PERM_CHECK_INHERITS, CommandPermission.GROUP_PERM_CHECK_INHERITS, Predicates.is(0));
     }

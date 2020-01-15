@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.SortedSet;
 import java.util.UUID;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class ApiActionLog implements ActionLog {
     private final Log handle;
 

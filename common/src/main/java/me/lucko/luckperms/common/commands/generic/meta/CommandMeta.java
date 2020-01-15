@@ -27,17 +27,18 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.command.abstraction.SharedMainCommand;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericParentCommand;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 
 import net.luckperms.api.node.ChatMetaType;
 
-public class CommandMeta<T extends PermissionHolder> extends SharedMainCommand<T> {
-    public CommandMeta(LocaleManager locale, boolean user) {
-        super(CommandSpec.META.localize(locale), "Meta", user, ImmutableList.<SharedSubCommand>builder()
+public class CommandMeta<T extends PermissionHolder> extends GenericParentCommand<T> {
+    public CommandMeta(LocaleManager locale, HolderType type) {
+        super(CommandSpec.META.localize(locale), "Meta", type, ImmutableList.<GenericChildCommand>builder()
                 .add(new MetaInfo(locale))
                 .add(new MetaSet(locale))
                 .add(new MetaUnset(locale))

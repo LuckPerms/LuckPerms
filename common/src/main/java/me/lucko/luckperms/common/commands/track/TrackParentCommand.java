@@ -23,23 +23,17 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group;
+package me.lucko.luckperms.common.commands.track;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.Command;
-import me.lucko.luckperms.common.command.abstraction.MainCommand;
+import me.lucko.luckperms.common.command.abstraction.ParentCommand;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
-import me.lucko.luckperms.common.commands.generic.other.HolderClear;
-import me.lucko.luckperms.common.commands.generic.other.HolderEditor;
-import me.lucko.luckperms.common.commands.generic.other.HolderShowTracks;
-import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
-import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.CaffeineFactory;
@@ -49,9 +43,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class GroupMainCommand extends MainCommand<Group, String> {
+public class TrackParentCommand extends ParentCommand<Track, String> {
 
-    // we use a lock per unique group
+    // we use a lock per unique track
     // this helps prevent race conditions where commands are being executed concurrently
     // and overriding each other.
     // it's not a great solution, but it mostly works.
@@ -59,20 +53,15 @@ public class GroupMainCommand extends MainCommand<Group, String> {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build(key -> new ReentrantLock());
 
-    public GroupMainCommand(LocaleManager locale) {
-        super(CommandSpec.GROUP.localize(locale), "Group", 2, ImmutableList.<Command<Group, ?>>builder()
-                .add(new GroupInfo(locale))
-                .add(new CommandPermission<>(locale, false))
-                .add(new CommandParent<>(locale, false))
-                .add(new CommandMeta<>(locale, false))
-                .add(new HolderEditor<>(locale, false))
-                .add(new GroupListMembers(locale))
-                .add(new GroupSetWeight(locale))
-                .add(new GroupSetDisplayName(locale))
-                .add(new HolderShowTracks<>(locale, false))
-                .add(new HolderClear<>(locale, false))
-                .add(new GroupRename(locale))
-                .add(new GroupClone(locale))
+    public TrackParentCommand(LocaleManager locale) {
+        super(CommandSpec.TRACK.localize(locale), "Track", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<Track>>builder()
+                .add(new TrackInfo(locale))
+                .add(new TrackAppend(locale))
+                .add(new TrackInsert(locale))
+                .add(new TrackRemove(locale))
+                .add(new TrackClear(locale))
+                .add(new TrackRename(locale))
+                .add(new TrackClone(locale))
                 .build()
         );
     }
@@ -83,8 +72,8 @@ public class GroupMainCommand extends MainCommand<Group, String> {
     }
 
     @Override
-    protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        return StorageAssistant.loadGroup(target, sender, plugin, true);
+    protected Track getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        return StorageAssistant.loadTrack(target, sender, plugin);
     }
 
     @Override
@@ -93,12 +82,12 @@ public class GroupMainCommand extends MainCommand<Group, String> {
     }
 
     @Override
-    protected void cleanup(Group group, LuckPermsPlugin plugin) {
+    protected void cleanup(Track track, LuckPermsPlugin plugin) {
 
     }
 
     @Override
     protected List<String> getTargets(LuckPermsPlugin plugin) {
-        return new ArrayList<>(plugin.getGroupManager().getAll().keySet());
+        return new ArrayList<>(plugin.getTrackManager().getAll().keySet());
     }
 }

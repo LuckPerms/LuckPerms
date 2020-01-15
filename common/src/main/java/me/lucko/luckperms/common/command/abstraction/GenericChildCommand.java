@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.locale.command.Argument;
 import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -42,7 +43,7 @@ import java.util.function.Predicate;
  * A sub command which can be be applied to both groups and users.
  * This doesn't extend the other Command or SubCommand classes to avoid generics hell.
  */
-public abstract class SharedSubCommand {
+public abstract class GenericChildCommand {
 
     private final LocalizedCommandSpec spec;
 
@@ -62,7 +63,7 @@ public abstract class SharedSubCommand {
      */
     private final Predicate<? super Integer> argumentCheck;
 
-    public SharedSubCommand(LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission, Predicate<? super Integer> argumentCheck) {
+    public GenericChildCommand(LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission, Predicate<? super Integer> argumentCheck) {
         this.spec = spec;
         this.name = name;
         this.userPermission = userPermission;
@@ -119,8 +120,15 @@ public abstract class SharedSubCommand {
         }
     }
 
-    public boolean isAuthorized(Sender sender, boolean user) {
-        return user ? this.userPermission.isAuthorized(sender) : this.groupPermission.isAuthorized(sender);
+    public boolean isAuthorized(Sender sender, HolderType type) {
+        switch (type) {
+            case USER:
+                return this.userPermission.isAuthorized(sender);
+            case GROUP:
+                return this.groupPermission.isAuthorized(sender);
+            default:
+                throw new AssertionError(type);
+        }
     }
 
     public String getDescription() {

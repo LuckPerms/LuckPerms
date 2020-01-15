@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.log;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
-public class LogTrackHistory extends SubCommand<Log> {
+public class LogTrackHistory extends ChildCommand<Log> {
     private static final int ENTRIES_PER_PAGE = 10;
 
     public LogTrackHistory(LocaleManager locale) {

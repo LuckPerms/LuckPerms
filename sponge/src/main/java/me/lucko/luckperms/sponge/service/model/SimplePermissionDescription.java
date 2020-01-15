@@ -81,7 +81,7 @@ public final class SimplePermissionDescription implements LPPermissionDescriptio
         return Optional.ofNullable(this.owner);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public CompletableFuture<Map<LPSubjectReference, Boolean>> findAssignedSubjects(String id) {
         LPSubjectCollection collection = this.service.getCollection(id);

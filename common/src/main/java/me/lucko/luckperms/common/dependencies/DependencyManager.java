@@ -192,7 +192,7 @@ public class DependencyManager {
             }
 
             try {
-                this.plugin.getBootstrap().getPluginClassLoader().loadJar(source.file);
+                this.plugin.getBootstrap().getPluginClassLoader().addJarToClasspath(source.file);
                 this.loaded.put(source.dependency, source.file);
             } catch (Throwable e) {
                 this.plugin.getLogger().severe("Failed to load dependency jar '" + source.file.getFileName().toString() + "'.");

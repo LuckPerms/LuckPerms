@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.commands.migration;
 import com.google.common.collect.ImmutableBiMap;
 
 import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.Command;
-import me.lucko.luckperms.common.command.abstraction.MainCommand;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ParentCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -41,13 +41,11 @@ import me.lucko.luckperms.common.util.Predicates;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class MigrationMainCommand extends MainCommand<Object, Object> {
+public class MigrationParentCommand extends ParentCommand<Object, Void> {
     private static final Map<String, String> PLUGINS = ImmutableBiMap.<String, String>builder()
             // bukkit
             .put("me.lucko.luckperms.bukkit.migration.MigrationGroupManager",       "org.anjocaido.groupmanager.GroupManager")
@@ -61,22 +59,22 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
             .build().inverse();
 
     private final ReentrantLock lock = new ReentrantLock();
-    private List<Command<Object, ?>> commands = null;
+    private List<Command<Object>> commands = null;
     private boolean display = true;
 
-    public MigrationMainCommand(LocaleManager locale) {
-        super(CommandSpec.MIGRATION.localize(locale), "Migration", 1, null);
+    public MigrationParentCommand(LocaleManager locale) {
+        super(CommandSpec.MIGRATION.localize(locale), "Migration", Type.NO_TARGET_ARGUMENT, null);
     }
 
     @Override
-    public synchronized @NonNull Optional<List<Command<Object, ?>>> getChildren() {
+    public synchronized @NonNull List<Command<Object>> getChildren() {
         if (this.commands == null) {
             this.commands = getAvailableCommands(getSpec().getLocaleManager());
 
             // Add dummy command to show in the list.
             if (this.commands.isEmpty()) {
                 this.display = false;
-                this.commands.add(new SubCommand<Object>(CommandSpec.MIGRATION_COMMAND.localize(getSpec().getLocaleManager()), "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
+                this.commands.add(new ChildCommand<Object>(CommandSpec.MIGRATION_COMMAND.localize(getSpec().getLocaleManager()), "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
                     @Override
                     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
                         return CommandResult.SUCCESS;
@@ -84,8 +82,7 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
                 });
             }
         }
-
-        return Optional.of(this.commands);
+        return this.commands;
     }
 
     @Override
@@ -100,21 +97,21 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Command<Object, ?>> getAvailableCommands(LocaleManager locale) {
-        List<Command<Object, ?>> l = new ArrayList<>();
+    private static List<Command<Object>> getAvailableCommands(LocaleManager locale) {
+        List<Command<Object>> available = new ArrayList<>();
 
         for (Map.Entry<String, String> plugin : PLUGINS.entrySet()) {
             try {
                 Class.forName(plugin.getKey());
-                l.add((SubCommand<Object>) Class.forName(plugin.getValue()).getConstructor(LocaleManager.class).newInstance(locale));
+                available.add((ChildCommand<Object>) Class.forName(plugin.getValue()).getConstructor(LocaleManager.class).newInstance(locale));
             } catch (Throwable ignored) {}
         }
 
-        return l;
+        return available;
     }
 
     @Override
-    protected ReentrantLock getLockForTarget(Object target) {
+    protected ReentrantLock getLockForTarget(Void target) {
         return this.lock; // share a lock between all migration commands
     }
 
@@ -122,16 +119,18 @@ public class MigrationMainCommand extends MainCommand<Object, Object> {
 
     @Override
     protected List<String> getTargets(LuckPermsPlugin plugin) {
-        return Collections.emptyList(); // only used for tab complete, we're not bothered about it for this command.
+        // should never be called if we specify Type.NO_TARGET_ARGUMENT in the constructor
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    protected Object parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        return this; // can't return null, but we don't need a target
+    protected Void parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        // should never be called if we specify Type.NO_TARGET_ARGUMENT in the constructor
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    protected Object getTarget(Object target, LuckPermsPlugin plugin, Sender sender) {
+    protected Object getTarget(Void target, LuckPermsPlugin plugin, Sender sender) {
         return this; // can't return null, but we don't need a target
     }
 

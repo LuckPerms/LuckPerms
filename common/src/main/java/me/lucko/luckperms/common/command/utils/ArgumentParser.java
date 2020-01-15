@@ -25,10 +25,14 @@
 
 package me.lucko.luckperms.common.command.utils;
 
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.commands.user.UserMainCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
+import me.lucko.luckperms.common.commands.user.UserParentCommand;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
@@ -210,13 +214,39 @@ public class ArgumentParser {
 
     public static UUID parseUserTarget(int index, List<String> args, LuckPermsPlugin plugin, Sender sender) {
         final String target = args.get(index);
-        return UserMainCommand.parseTargetUniqueId(target, plugin, sender);
+        return UserParentCommand.parseTargetUniqueId(target, plugin, sender);
     }
 
-    public abstract static class ArgumentException extends CommandException {}
-    public static class DetailedUsageException extends ArgumentException {}
-    public static class InvalidServerWorldException extends ArgumentException {}
-    public static class PastDateException extends ArgumentException {}
+    public abstract static class ArgumentException extends CommandException {
+
+    }
+
+    public static class DetailedUsageException extends ArgumentException {
+        @Override
+        public CommandResult handle(Sender sender) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CommandResult handle(Sender sender, String label, Command<?> command) {
+            command.sendDetailedUsage(sender, label);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        @Override
+        public CommandResult handle(Sender sender, GenericChildCommand command) {
+            command.sendDetailedUsage(sender);
+            return CommandResult.INVALID_ARGS;
+        }
+    }
+
+    public static class PastDateException extends ArgumentException {
+        @Override
+        public CommandResult handle(Sender sender) {
+            Message.PAST_DATE_ERROR.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
+    }
 
     public static class InvalidDateException extends ArgumentException {
         private final String invalidDate;
@@ -225,8 +255,10 @@ public class ArgumentParser {
             this.invalidDate = invalidDate;
         }
 
-        public String getInvalidDate() {
-            return this.invalidDate;
+        @Override
+        public CommandResult handle(Sender sender) {
+            Message.ILLEGAL_DATE_ERROR.send(sender, this.invalidDate);
+            return CommandResult.INVALID_ARGS;
         }
     }
 
@@ -237,8 +269,10 @@ public class ArgumentParser {
             this.invalidPriority = invalidPriority;
         }
 
-        public String getInvalidPriority() {
-            return this.invalidPriority;
+        @Override
+        public CommandResult handle(Sender sender) {
+            Message.META_INVALID_PRIORITY.send(sender, this.invalidPriority);
+            return CommandResult.INVALID_ARGS;
         }
     }
 

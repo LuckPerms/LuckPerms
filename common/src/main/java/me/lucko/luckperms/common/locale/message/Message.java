@@ -255,7 +255,7 @@ public enum Message {
     LIST_TRACKS_EMPTY("&b{}&a is not on any tracks.", true),
 
     CONTEXT_PAIR_INLINE("&3{}=&b{}", false),
-    CONTEXT_PAIR__GLOBAL_INLINE("&eglobal", false),
+    CONTEXT_PAIR_GLOBAL_INLINE("&eglobal", false),
     CONTEXT_PAIR_SEP("&a, ", false),
 
     CONTEXT_PAIR("&8(&7{}=&f{}&8)", false),
@@ -493,14 +493,14 @@ public enum Message {
     }
 
     private String getTranslatedMessage(@Nullable LocaleManager localeManager) {
-        String prefix = null;
+        String message = null;
         if (localeManager != null) {
-            prefix = localeManager.getTranslation(this);
+            message = localeManager.getTranslation(this);
         }
-        if (prefix == null) {
-            prefix = this.getMessage();
+        if (message == null) {
+            message = this.getMessage();
         }
-        return prefix;
+        return message;
     }
 
     private String format(@Nullable LocaleManager localeManager, Object... objects) {
@@ -553,10 +553,7 @@ public enum Message {
         return new String(b);
     }
 
-    /**
-     * Prints this Message enum in a yml format, for reading by the locale manager
-     * @param args not needed
-     */
+    /*
     public static void main(String[] args) {
         for (Message message : values()) {
             String key = message.name().replace('_', '-').toLowerCase();
@@ -575,5 +572,6 @@ public enum Message {
             }
         }
     }
+    */
 
 }

@@ -25,10 +25,8 @@
 
 package me.lucko.luckperms.bukkit;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-
 import me.lucko.luckperms.common.command.CommandManager;
+import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
 
 import org.bukkit.command.Command;
@@ -40,10 +38,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.List;
 
 public class BukkitCommandExecutor extends CommandManager implements CommandExecutor, TabExecutor {
-    private static final Splitter TAB_COMPLETE_ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN);
-    private static final Splitter ARGUMENT_SPLITTER = Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
-    private static final Joiner ARGUMENT_JOINER = Joiner.on(' ');
-
     private final LPBukkitPlugin plugin;
 
     public BukkitCommandExecutor(LPBukkitPlugin plugin) {
@@ -53,18 +47,16 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
 
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = stripQuotes(ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
-
-        onCommand(lpSender, label, arguments);
+        Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
+        List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(args);
+        executeCommand(wrapped, label, arguments);
         return true;
     }
 
     @Override
     public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = stripQuotes(TAB_COMPLETE_ARGUMENT_SPLITTER.splitToList(ARGUMENT_JOINER.join(args)));
-
-        return onTabComplete(lpSender, arguments);
+        Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
+        List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args);
+        return tabCompleteCommand(wrapped, arguments);
     }
 }

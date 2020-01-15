@@ -26,14 +26,14 @@
 package me.lucko.luckperms.nukkit;
 
 import me.lucko.luckperms.common.command.CommandManager;
+import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandExecutor;
 import cn.nukkit.command.CommandSender;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 public class NukkitCommandExecutor extends CommandManager implements CommandExecutor {
     private final LPNukkitPlugin plugin;
@@ -45,9 +45,9 @@ public class NukkitCommandExecutor extends CommandManager implements CommandExec
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Sender lpSender = this.plugin.getSenderFactory().wrap(sender);
-
-        onCommand(lpSender, label, new ArrayList<>(Arrays.asList(args)));
+        Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
+        List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(args);
+        executeCommand(wrapped, label, arguments);
         return true;
     }
 }

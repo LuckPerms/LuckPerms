@@ -88,6 +88,7 @@ public final class SubjectCollectionProxy implements SubjectCollection, ProxiedS
         return this.handle.getLoadedSubjects().stream().map(LPSubject::sponge).collect(ImmutableCollectors.toSet());
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull CompletableFuture<Set<String>> getAllIdentifiers() {
         return (CompletableFuture) this.handle.getAllIdentifiers();
@@ -103,11 +104,13 @@ public final class SubjectCollectionProxy implements SubjectCollection, ProxiedS
         return this.handle.getService().getReferenceFactory().obtain(getIdentifier(), subjectIdentifier);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(@NonNull String s) {
         return (CompletableFuture) this.handle.getAllWithPermission(s);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull CompletableFuture<Map<SubjectReference, Boolean>> getAllWithPermission(@NonNull Set<Context> set, @NonNull String s) {
         return (CompletableFuture) this.handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s);

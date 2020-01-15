@@ -26,7 +26,7 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -46,7 +46,7 @@ import org.spongepowered.api.Sponge;
 
 import java.util.List;
 
-public class ParentRemove extends SubCommand<LPSubjectData> {
+public class ParentRemove extends ChildCommand<LPSubjectData> {
     public ParentRemove(LocaleManager locale) {
         super(CommandSpec.SPONGE_PARENT_REMOVE.localize(locale), "remove", CommandPermission.SPONGE_PARENT_REMOVE, Predicates.inRange(0, 1));
     }

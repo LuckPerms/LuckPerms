@@ -68,6 +68,7 @@ public final class SubjectCollectionProxy implements SubjectCollection, ProxiedS
         return this.handle.hasRegistered(s).join();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull Iterable<Subject> getAllSubjects() {
         // this will lazily load all subjects. it will initially just get the identifiers of each subject, and will initialize dummy
@@ -80,6 +81,7 @@ public final class SubjectCollectionProxy implements SubjectCollection, ProxiedS
                 ).join();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull Map<Subject, Boolean> getAllWithPermission(@NonNull String s) {
         // again, these methods will lazily load subjects.
@@ -92,6 +94,7 @@ public final class SubjectCollectionProxy implements SubjectCollection, ProxiedS
                 ).join();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> set, @NonNull String s) {
         return (Map) this.handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s)

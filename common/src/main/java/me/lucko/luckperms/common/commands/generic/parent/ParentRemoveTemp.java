@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.parent;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -51,7 +51,7 @@ import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 
-public class ParentRemoveTemp extends SharedSubCommand {
+public class ParentRemoveTemp extends GenericChildCommand {
     public ParentRemoveTemp(LocaleManager locale) {
         super(CommandSpec.PARENT_REMOVE_TEMP.localize(locale), "removetemp", CommandPermission.USER_PARENT_REMOVE_TEMP, CommandPermission.GROUP_PARENT_REMOVE_TEMP, Predicates.is(0));
     }

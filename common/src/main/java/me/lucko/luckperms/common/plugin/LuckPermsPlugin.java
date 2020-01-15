@@ -261,7 +261,7 @@ public interface LuckPermsPlugin {
      */
     Sender getConsoleSender();
 
-    default List<Command<?, ?>> getExtraCommands() {
+    default List<Command<?>> getExtraCommands() {
         return Collections.emptyList();
     }
 

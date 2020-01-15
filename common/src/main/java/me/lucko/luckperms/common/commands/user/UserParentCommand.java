@@ -29,7 +29,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.Command;
-import me.lucko.luckperms.common.command.abstraction.MainCommand;
+import me.lucko.luckperms.common.command.abstraction.ParentCommand;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
 import me.lucko.luckperms.common.commands.generic.other.HolderClear;
 import me.lucko.luckperms.common.commands.generic.other.HolderEditor;
@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -54,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-public class UserMainCommand extends MainCommand<User, UserIdentifier> {
+public class UserParentCommand extends ParentCommand<User, UserIdentifier> {
 
     // we use a lock per unique user
     // this helps prevent race conditions where commands are being executed concurrently
@@ -64,17 +65,17 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build(key -> new ReentrantLock());
 
-    public UserMainCommand(LocaleManager locale) {
-        super(CommandSpec.USER.localize(locale), "User", 2, ImmutableList.<Command<User, ?>>builder()
+    public UserParentCommand(LocaleManager locale) {
+        super(CommandSpec.USER.localize(locale), "User", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<User>>builder()
                 .add(new UserInfo(locale))
-                .add(new CommandPermission<>(locale, true))
-                .add(new CommandParent<>(locale, true))
-                .add(new CommandMeta<>(locale, true))
-                .add(new HolderEditor<>(locale, true))
+                .add(new CommandPermission<>(locale, HolderType.USER))
+                .add(new CommandParent<>(locale, HolderType.USER))
+                .add(new CommandMeta<>(locale, HolderType.USER))
+                .add(new HolderEditor<>(locale, HolderType.USER))
                 .add(new UserPromote(locale))
                 .add(new UserDemote(locale))
-                .add(new HolderShowTracks<>(locale, true))
-                .add(new HolderClear<>(locale, true))
+                .add(new HolderShowTracks<>(locale, HolderType.USER))
+                .add(new HolderClear<>(locale, HolderType.USER))
                 .add(new UserClone(locale))
                 .build()
         );

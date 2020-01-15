@@ -138,7 +138,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof Node)) return false;
-        return Equality.KEY_VALUE_EXPIRY_CONTEXTS.equals(this, ((AbstractNode) o));
+        return Equality.KEY_VALUE_EXPIRY_CONTEXTS.equals(this, ((AbstractNode<?, ?>) o));
     }
 
     @Override

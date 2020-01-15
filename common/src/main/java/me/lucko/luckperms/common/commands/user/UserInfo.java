@@ -29,7 +29,7 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class UserInfo extends SubCommand<User> {
+public class UserInfo extends ChildCommand<User> {
     public UserInfo(LocaleManager locale) {
         super(CommandSpec.USER_INFO.localize(locale), "info", CommandPermission.USER_INFO, Predicates.alwaysFalse());
     }

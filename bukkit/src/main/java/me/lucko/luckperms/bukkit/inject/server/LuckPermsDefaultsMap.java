@@ -113,12 +113,9 @@ public final class LuckPermsDefaultsMap implements Map<Boolean, Set<Permission>>
     }
 
     // return wrappers around this map impl
-    @Override
-    public @NonNull Collection<Set<Permission>> values() { return this.values; }
-    @Override
-    public @NonNull Set<Entry<Boolean, Set<Permission>>> entrySet() { return this.entrySet; }
-    @Override
-    public @NonNull Set<Boolean> keySet() { return KEY_SET; }
+    @Override public @NonNull Collection<Set<Permission>> values() { return this.values; }
+    @Override public @NonNull Set<Entry<Boolean, Set<Permission>>> entrySet() { return this.entrySet; }
+    @Override public @NonNull Set<Boolean> keySet() { return KEY_SET; }
 
     // return accurate results for the Map spec
     @Override public int size() { return 2; }

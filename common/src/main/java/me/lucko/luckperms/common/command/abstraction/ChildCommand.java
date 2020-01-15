@@ -36,9 +36,9 @@ import java.util.function.Predicate;
 /**
  * Abstract SubCommand class
  */
-public abstract class SubCommand<T> extends Command<T, Void> {
+public abstract class ChildCommand<T> extends Command<T> {
 
-    public SubCommand(LocalizedCommandSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck) {
+    public ChildCommand(LocalizedCommandSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck) {
         super(spec, name, permission, argumentCheck);
     }
 

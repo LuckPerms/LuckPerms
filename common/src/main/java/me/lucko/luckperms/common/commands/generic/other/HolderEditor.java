@@ -28,13 +28,14 @@ package me.lucko.luckperms.common.commands.generic.other;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -44,9 +45,9 @@ import me.lucko.luckperms.common.web.WebEditor;
 import java.util.Collections;
 import java.util.List;
 
-public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
-    public HolderEditor(LocaleManager locale, boolean user) {
-        super(CommandSpec.HOLDER_EDITOR.localize(locale), "editor", user ? CommandPermission.USER_EDITOR : CommandPermission.GROUP_EDITOR, Predicates.alwaysFalse());
+public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
+    public HolderEditor(LocaleManager locale, HolderType type) {
+        super(CommandSpec.HOLDER_EDITOR.localize(locale), "editor", type == HolderType.USER ? CommandPermission.USER_EDITOR : CommandPermission.GROUP_EDITOR, Predicates.alwaysFalse());
     }
 
     @Override

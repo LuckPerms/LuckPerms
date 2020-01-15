@@ -146,7 +146,7 @@ public final class MessageUtils {
 
     public static String contextSetToString(LocaleManager localeManager, ContextSet set) {
         if (set.isEmpty()) {
-            return Message.CONTEXT_PAIR__GLOBAL_INLINE.asString(localeManager);
+            return Message.CONTEXT_PAIR_GLOBAL_INLINE.asString(localeManager);
         }
 
         StringBuilder sb = new StringBuilder();

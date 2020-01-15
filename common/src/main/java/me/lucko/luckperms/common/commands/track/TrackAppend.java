@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
@@ -47,7 +47,7 @@ import net.luckperms.api.model.data.DataMutateResult;
 
 import java.util.List;
 
-public class TrackAppend extends SubCommand<Track> {
+public class TrackAppend extends ChildCommand<Track> {
     public TrackAppend(LocaleManager locale) {
         super(CommandSpec.TRACK_APPEND.localize(locale), "append", CommandPermission.TRACK_APPEND, Predicates.not(1));
     }

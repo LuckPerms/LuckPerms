@@ -32,6 +32,6 @@ import java.nio.file.Path;
  */
 public interface PluginClassLoader {
 
-    void loadJar(Path file);
+    void addJarToClasspath(Path file);
 
 }

@@ -160,7 +160,7 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
         return this.loadLatch;
     }
 
-    // getters for the injected sponge instances
+    // getters for the injected velocity instances
 
     public ProxyServer getProxy() {
         return this.proxy;

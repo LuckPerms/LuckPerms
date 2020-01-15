@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
@@ -46,7 +46,7 @@ import net.luckperms.api.model.data.DataMutateResult;
 
 import java.util.List;
 
-public class TrackRemove extends SubCommand<Track> {
+public class TrackRemove extends ChildCommand<Track> {
     public TrackRemove(LocaleManager locale) {
         super(CommandSpec.TRACK_REMOVE.localize(locale), "remove", CommandPermission.TRACK_REMOVE, Predicates.not(1));
     }

@@ -34,7 +34,7 @@ import com.google.common.collect.ImmutableSet;
 import com.zaxxer.hikari.HikariDataSource;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -78,7 +78,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 // Only supports the latest versions of the PP API. (it seems to change randomly almost every release)
-public class MigrationPowerfulPerms extends SubCommand<Object> {
+public class MigrationPowerfulPerms extends ChildCommand<Object> {
     public MigrationPowerfulPerms(LocaleManager locale) {
         super(CommandSpec.MIGRATION_POWERFULPERMS.localize(locale), "powerfulperms", CommandPermission.MIGRATION, Predicates.not(5));
     }

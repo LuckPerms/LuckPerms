@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -44,7 +44,7 @@ import net.luckperms.api.event.cause.DeletionCause;
 
 import java.util.List;
 
-public class TrackRename extends SubCommand<Track> {
+public class TrackRename extends ChildCommand<Track> {
     public TrackRename(LocaleManager locale) {
         super(CommandSpec.TRACK_RENAME.localize(locale), "rename", CommandPermission.TRACK_RENAME, Predicates.not(1));
     }

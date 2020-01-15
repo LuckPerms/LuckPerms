@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -45,7 +45,7 @@ import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 
-public class GroupRename extends SubCommand<Group> {
+public class GroupRename extends ChildCommand<Group> {
     public GroupRename(LocaleManager locale) {
         super(CommandSpec.GROUP_RENAME.localize(locale), "rename", CommandPermission.GROUP_RENAME, Predicates.not(1));
     }

@@ -72,7 +72,7 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
 
     private VelocitySenderFactory senderFactory;
     private VelocityConnectionListener connectionListener;
-    private CommandManager commandManager;
+    private VelocityCommandExecutor commandManager;
     private StandardUserManager userManager;
     private StandardGroupManager groupManager;
     private StandardTrackManager trackManager;
@@ -126,8 +126,8 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerCommands() {
-        this.commandManager = new CommandManager(this);
-        this.bootstrap.getProxy().getCommandManager().register(new VelocityCommandExecutor(this, this.commandManager), "luckpermsvelocity", "lpv", "vperm", "vperms", "vpermission", "vpermissions");
+        this.commandManager = new VelocityCommandExecutor(this);
+        this.bootstrap.getProxy().getCommandManager().register(this.commandManager, "luckpermsvelocity", "lpv", "vperm", "vperms", "vpermission", "vpermissions");
     }
 
     @Override

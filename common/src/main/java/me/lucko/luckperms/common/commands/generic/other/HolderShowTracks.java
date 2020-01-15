@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.other;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
@@ -52,9 +52,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> {
-    public HolderShowTracks(LocaleManager locale, boolean user) {
-        super(CommandSpec.HOLDER_SHOWTRACKS.localize(locale), "showtracks", user ? CommandPermission.USER_SHOW_TRACKS : CommandPermission.GROUP_SHOW_TRACKS, Predicates.alwaysFalse());
+public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T> {
+    public HolderShowTracks(LocaleManager locale, HolderType type) {
+        super(CommandSpec.HOLDER_SHOWTRACKS.localize(locale), "showtracks", type == HolderType.USER ? CommandPermission.USER_SHOW_TRACKS : CommandPermission.GROUP_SHOW_TRACKS, Predicates.alwaysFalse());
     }
 
     @Override

@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.util.Predicates;
 
 import java.util.List;
 
-public class TrackInfo extends SubCommand<Track> {
+public class TrackInfo extends ChildCommand<Track> {
     public TrackInfo(LocaleManager locale) {
         super(CommandSpec.TRACK_INFO.localize(locale), "info", CommandPermission.TRACK_INFO, Predicates.alwaysFalse());
     }
