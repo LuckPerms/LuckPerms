@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -54,7 +54,7 @@ import net.luckperms.api.node.ChatMetaType;
 
 import java.util.List;
 
-public class MetaRemoveChatMeta extends SharedSubCommand {
+public class MetaRemoveChatMeta extends GenericChildCommand {
     private final ChatMetaType type;
 
     public MetaRemoveChatMeta(LocaleManager locale, ChatMetaType type) {

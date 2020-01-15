@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.user;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
@@ -45,7 +45,7 @@ import net.luckperms.api.model.data.DataType;
 import java.util.List;
 import java.util.UUID;
 
-public class UserClone extends SubCommand<User> {
+public class UserClone extends ChildCommand<User> {
     public UserClone(LocaleManager locale) {
         super(CommandSpec.USER_CLONE.localize(locale), "clone", CommandPermission.USER_CLONE, Predicates.not(1));
     }

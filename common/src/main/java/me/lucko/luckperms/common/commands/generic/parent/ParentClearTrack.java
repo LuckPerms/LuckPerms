@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.parent;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -54,7 +54,7 @@ import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
-public class ParentClearTrack extends SharedSubCommand {
+public class ParentClearTrack extends GenericChildCommand {
     public ParentClearTrack(LocaleManager locale) {
         super(CommandSpec.PARENT_CLEAR_TRACK.localize(locale), "cleartrack", CommandPermission.USER_PARENT_CLEAR_TRACK, CommandPermission.GROUP_PARENT_CLEAR_TRACK, Predicates.is(0));
     }

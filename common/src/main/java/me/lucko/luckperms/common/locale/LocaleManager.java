@@ -95,10 +95,10 @@ public class LocaleManager {
 
                 // might be the entries for command specifications - take care for malformed entries of differing types.
                 if (entry.getKey().equals("command-specs") && entry.getValue() instanceof Map) {
-                    Map<?, ?> commandKeys = (Map) entry.getValue();
+                    Map<?, ?> commandKeys = (Map<?, ?>) entry.getValue();
 
                     // key is the command id, value is a map of the commands attributes
-                    for (Map.Entry commandKey : commandKeys.entrySet()) {
+                    for (Map.Entry<?, ?> commandKey : commandKeys.entrySet()) {
 
                         // just try catch, can't be bothered with safe casting every single value.
                         try {

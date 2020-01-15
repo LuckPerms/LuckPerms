@@ -44,7 +44,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class FileWatcher {
-    private static final WatchEvent.Kind[] KINDS = new WatchEvent.Kind[]{
+    @SuppressWarnings("unchecked")
+    private static final WatchEvent.Kind<Path>[] KINDS = new WatchEvent.Kind[]{
             StandardWatchEventKinds.ENTRY_CREATE,
             StandardWatchEventKinds.ENTRY_DELETE,
             StandardWatchEventKinds.ENTRY_MODIFY

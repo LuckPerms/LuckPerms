@@ -53,13 +53,13 @@ public final class ImmutableCollectors {
             ImmutableSet.Builder::build
     );
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> Collector<T, ImmutableList.Builder<T>, ImmutableList<T>> toList() {
-        //noinspection unchecked
         return (Collector) LIST;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> Collector<T, ImmutableSet.Builder<T>, ImmutableSet<T>> toSet() {
-        //noinspection unchecked
         return (Collector) SET;
     }
 

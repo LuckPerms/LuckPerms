@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.commands.generic.other;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -49,9 +50,9 @@ import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 
-public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
-    public HolderClear(LocaleManager locale, boolean user) {
-        super(CommandSpec.HOLDER_CLEAR.localize(locale), "clear", user ? CommandPermission.USER_CLEAR : CommandPermission.GROUP_CLEAR, Predicates.alwaysFalse());
+public class HolderClear<T extends PermissionHolder> extends ChildCommand<T> {
+    public HolderClear(LocaleManager locale, HolderType type) {
+        super(CommandSpec.HOLDER_CLEAR.localize(locale), "clear", type == HolderType.USER ? CommandPermission.USER_CLEAR : CommandPermission.GROUP_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override

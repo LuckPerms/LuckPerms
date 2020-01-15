@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.sponge.calculator.SpongeCalculatorFactory;
-import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
+import me.lucko.luckperms.sponge.commands.SpongeParentCommand;
 import me.lucko.luckperms.sponge.context.SpongeContextManager;
 import me.lucko.luckperms.sponge.context.WorldCalculator;
 import me.lucko.luckperms.sponge.listeners.SpongeConnectionListener;
@@ -280,8 +280,8 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public List<Command<?, ?>> getExtraCommands() {
-        return Collections.singletonList(new SpongeMainCommand(this));
+    public List<Command<?>> getExtraCommands() {
+        return Collections.singletonList(new SpongeParentCommand(this));
     }
 
     public SpongeSenderFactory getSenderFactory() {

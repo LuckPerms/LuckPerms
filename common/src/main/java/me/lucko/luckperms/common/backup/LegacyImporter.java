@@ -34,6 +34,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.sender.DummySender;
 import me.lucko.luckperms.common.sender.Sender;
@@ -207,7 +208,6 @@ public class LegacyImporter implements Runnable {
     }
 
     private static class ImportCommand extends DummySender {
-        private static final Splitter ARGUMENT_SPLITTER = Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings();
         private static final Splitter SPACE_SPLITTER = Splitter.on(" ");
 
         private final CommandManager commandManager;
@@ -241,7 +241,7 @@ public class LegacyImporter implements Runnable {
             }
 
             try {
-                List<String> args = CommandManager.stripQuotes(ARGUMENT_SPLITTER.splitToList(getCommand()));
+                List<String> args = ArgumentTokenizer.EXECUTE.tokenizeInput(getCommand());
 
                 // rewrite rule for switchprimarygroup command
                 if (args.size() >= 3 && args.get(0).equals("user") && args.get(2).equals("switchprimarygroup")) {
@@ -250,7 +250,7 @@ public class LegacyImporter implements Runnable {
                     args.add(3, "switchprimarygroup");
                 }
 
-                CommandResult result = this.commandManager.onCommand(this, "lp", args, Runnable::run).get();
+                CommandResult result = this.commandManager.executeCommand(this, "lp", args, Runnable::run).get();
                 setResult(result);
             } catch (Exception e) {
                 setResult(CommandResult.FAILURE);

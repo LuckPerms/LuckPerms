@@ -62,6 +62,7 @@ public final class SubjectDataProxy implements SubjectData, ProxiedServiceObject
                 this.ref.resolveLp().thenApply(LPSubject::getTransientSubjectData);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
         return (Map) handle().thenApply(handle -> handle.getAllPermissions().entrySet().stream()
@@ -95,6 +96,7 @@ public final class SubjectDataProxy implements SubjectData, ProxiedServiceObject
         return handle().thenCompose(handle -> handle.clearPermissions(CompatibilityUtil.convertContexts(contexts)));
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull Map<Set<Context>, List<org.spongepowered.api.service.permission.SubjectReference>> getAllParents() {
         return (Map) handle().thenApply(handle -> handle.getAllParents().entrySet().stream()
@@ -104,6 +106,7 @@ public final class SubjectDataProxy implements SubjectData, ProxiedServiceObject
                 ))).join();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull List<org.spongepowered.api.service.permission.SubjectReference> getParents(@NonNull Set<Context> contexts) {
         return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts))).join();
@@ -129,6 +132,7 @@ public final class SubjectDataProxy implements SubjectData, ProxiedServiceObject
         return handle().thenCompose(handle -> handle.clearParents(CompatibilityUtil.convertContexts(contexts)));
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull Map<Set<Context>, Map<String, String>> getAllOptions() {
         return (Map) handle().thenApply(handle -> handle.getAllOptions().entrySet().stream()

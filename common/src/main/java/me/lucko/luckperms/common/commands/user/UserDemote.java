@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.commands.user;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -52,7 +52,7 @@ import net.luckperms.api.track.DemotionResult;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class UserDemote extends SubCommand<User> {
+public class UserDemote extends ChildCommand<User> {
     public UserDemote(LocaleManager locale) {
         super(CommandSpec.USER_DEMOTE.localize(locale), "demote", CommandPermission.USER_DEMOTE, Predicates.is(0));
     }

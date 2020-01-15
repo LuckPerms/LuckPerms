@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.log;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LogNotify extends SubCommand<Log> {
+public class LogNotify extends ChildCommand<Log> {
     private static final String IGNORE_NODE = "luckperms.log.notify.ignoring";
 
     public LogNotify(LocaleManager locale) {

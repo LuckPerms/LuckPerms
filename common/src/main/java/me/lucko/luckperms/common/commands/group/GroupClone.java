@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
@@ -45,7 +45,7 @@ import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 
-public class GroupClone extends SubCommand<Group> {
+public class GroupClone extends ChildCommand<Group> {
     public GroupClone(LocaleManager locale) {
         super(CommandSpec.GROUP_CLONE.localize(locale), "clone", CommandPermission.GROUP_CLONE, Predicates.not(1));
     }

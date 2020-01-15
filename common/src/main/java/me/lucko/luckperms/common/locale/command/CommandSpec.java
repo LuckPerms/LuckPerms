@@ -633,10 +633,7 @@ public enum CommandSpec {
         return new LocalizedCommandSpec(this, localeManager);
     }
 
-    /**
-     * Prints this CommandSpec enum in a yml format, for reading by the {@link me.lucko.luckperms.common.locale.LocaleManager}
-     * @param args not needed
-     */
+    /*
     public static void main(String[] args) {
         System.out.println("command-specs:");
 
@@ -660,5 +657,6 @@ public enum CommandSpec {
             }
         }
     }
+    */
 
 }

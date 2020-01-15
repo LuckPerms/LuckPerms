@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -53,7 +53,7 @@ import net.luckperms.api.node.NodeEqualityPredicate;
 
 import java.util.List;
 
-public class UserSwitchPrimaryGroup extends SharedSubCommand {
+public class UserSwitchPrimaryGroup extends GenericChildCommand {
     public UserSwitchPrimaryGroup(LocaleManager locale) {
         super(CommandSpec.USER_SWITCHPRIMARYGROUP.localize(locale), "switchprimarygroup", CommandPermission.USER_PARENT_SWITCHPRIMARYGROUP, null, Predicates.not(1));
     }

@@ -26,7 +26,7 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -41,7 +41,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 
 import java.util.List;
 
-public class OptionUnset extends SubCommand<LPSubjectData> {
+public class OptionUnset extends ChildCommand<LPSubjectData> {
     public OptionUnset(LocaleManager locale) {
         super(CommandSpec.SPONGE_OPTION_UNSET.localize(locale), "unset", CommandPermission.SPONGE_OPTION_UNSET, Predicates.is(0));
     }

@@ -46,7 +46,6 @@ import net.luckperms.api.util.Tristate;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class CheckCommand extends SingleCommand {
     public CheckCommand(LocaleManager locale) {
@@ -79,7 +78,7 @@ public class CheckCommand extends SingleCommand {
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return TabCompleter.create()
-                .at(0, CompletionSupplier.startsWith(() -> plugin.getBootstrap().getPlayerList().collect(Collectors.toList())))
+                .at(0, CompletionSupplier.startsWith(() -> plugin.getBootstrap().getPlayerList()))
                 .at(1, TabCompletions.permissions(plugin))
                 .complete(args);
     }

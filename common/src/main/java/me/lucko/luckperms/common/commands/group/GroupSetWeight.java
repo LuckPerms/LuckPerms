@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
@@ -47,7 +47,7 @@ import net.luckperms.api.node.NodeType;
 
 import java.util.List;
 
-public class GroupSetWeight extends SubCommand<Group> {
+public class GroupSetWeight extends ChildCommand<Group> {
     public GroupSetWeight(LocaleManager locale) {
         super(CommandSpec.GROUP_SETWEIGHT.localize(locale), "setweight", CommandPermission.GROUP_SET_WEIGHT, Predicates.not(1));
     }

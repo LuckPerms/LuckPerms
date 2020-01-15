@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -62,7 +62,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.OptionalInt;
 
-public class MetaSetTempChatMeta extends SharedSubCommand {
+public class MetaSetTempChatMeta extends GenericChildCommand {
     private final ChatMetaType type;
 
     public MetaSetTempChatMeta(LocaleManager locale, ChatMetaType type) {

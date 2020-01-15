@@ -58,7 +58,7 @@ public final class HeldNodeImpl<T extends Comparable<T>> implements HeldNode<T> 
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof HeldNodeImpl)) return false;
-        final HeldNodeImpl other = (HeldNodeImpl) o;
+        final HeldNodeImpl<?> other = (HeldNodeImpl<?>) o;
         return this.getHolder().equals(other.getHolder()) && this.getNode().equals(other.getNode());
     }
 

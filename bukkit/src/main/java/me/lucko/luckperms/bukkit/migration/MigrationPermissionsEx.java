@@ -28,7 +28,7 @@ package me.lucko.luckperms.bukkit.migration;
 import com.google.common.base.Strings;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -74,7 +74,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class MigrationPermissionsEx extends SubCommand<Object> {
+public class MigrationPermissionsEx extends ChildCommand<Object> {
     private static final Method GET_DATA_METHOD;
     private static final Field TIMED_PERMISSIONS_FIELD;
     private static final Field TIMED_PERMISSIONS_TIME_FIELD;

@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
@@ -45,7 +45,7 @@ import net.luckperms.api.node.types.InheritanceNode;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GroupInfo extends SubCommand<Group> {
+public class GroupInfo extends ChildCommand<Group> {
     public GroupInfo(LocaleManager locale) {
         super(CommandSpec.GROUP_INFO.localize(locale), "info", CommandPermission.GROUP_INFO, Predicates.alwaysFalse());
     }

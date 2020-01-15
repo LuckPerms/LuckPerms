@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -52,7 +52,7 @@ import net.luckperms.api.node.types.DisplayNameNode;
 
 import java.util.List;
 
-public class GroupSetDisplayName extends SubCommand<Group> {
+public class GroupSetDisplayName extends ChildCommand<Group> {
     public GroupSetDisplayName(LocaleManager locale) {
         super(CommandSpec.GROUP_SET_DISPLAY_NAME.localize(locale), "setdisplayname", CommandPermission.GROUP_SET_DISPLAY_NAME, Predicates.is(0));
     }

@@ -129,6 +129,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
         )).join();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull List<Subject> getParents() {
         return (List) handle().thenApply(handle -> handle.getParents(getActiveContextSet()).stream()
@@ -136,6 +137,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
                 .collect(ImmutableCollectors.toList())).join();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull List<Subject> getParents(@NonNull Set<Context> contexts) {
         return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()

@@ -26,18 +26,12 @@
 package me.lucko.luckperms.common.dependencies;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.ByteStreams;
 
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHelper;
 
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -319,6 +313,7 @@ public enum Dependency {
         return s.replace("{}", ".");
     }
 
+    /*
     public static void main(String[] args) throws Exception {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
@@ -346,6 +341,7 @@ public enum Dependency {
             }
         }
     }
+    */
 
     public List<URL> getUrls() {
         return this.urls;

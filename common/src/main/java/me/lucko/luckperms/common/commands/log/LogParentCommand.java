@@ -29,24 +29,21 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.abstraction.Command;
-import me.lucko.luckperms.common.command.abstraction.MainCommand;
+import me.lucko.luckperms.common.command.abstraction.ParentCommand;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
-public class LogMainCommand extends MainCommand<Log, Object> {
+public class LogParentCommand extends ParentCommand<Log, Void> {
     private final ReentrantLock lock = new ReentrantLock();
 
-    public LogMainCommand(LocaleManager locale) {
-        super(CommandSpec.LOG.localize(locale), "Log", 1, ImmutableList.<Command<Log, ?>>builder()
+    public LogParentCommand(LocaleManager locale) {
+        super(CommandSpec.LOG.localize(locale), "Log", Type.NO_TARGET_ARGUMENT, ImmutableList.<Command<Log>>builder()
                 .add(new LogRecent(locale))
                 .add(new LogSearch(locale))
                 .add(new LogNotify(locale))
@@ -58,17 +55,12 @@ public class LogMainCommand extends MainCommand<Log, Object> {
     }
 
     @Override
-    protected ReentrantLock getLockForTarget(Object target) {
+    protected ReentrantLock getLockForTarget(Void target) {
         return this.lock; // all commands target the same log, so we share a lock between all "targets"
     }
 
     @Override
-    protected Object parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        return this;
-    }
-
-    @Override
-    protected Log getTarget(Object target, LuckPermsPlugin plugin, Sender sender) {
+    protected Log getTarget(Void target, LuckPermsPlugin plugin, Sender sender) {
         Log log = plugin.getStorage().getLog().join();
 
         if (log == null) {
@@ -85,33 +77,14 @@ public class LogMainCommand extends MainCommand<Log, Object> {
 
     @Override
     protected List<String> getTargets(LuckPermsPlugin plugin) {
-        return null; // only used for tab completion in super, and we override this method
+        // should never be called if we specify Type.NO_TARGET_ARGUMENT in the constructor
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        final List<Command<Log, ?>> subs = getChildren().get().stream()
-                .filter(s -> s.isAuthorized(sender))
-                .collect(Collectors.toList());
-
-        if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return subs.stream()
-                        .map(m -> m.getName().toLowerCase())
-                        .collect(Collectors.toList());
-            }
-
-            return subs.stream()
-                    .map(m -> m.getName().toLowerCase())
-                    .filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        Optional<Command<Log, ?>> o = subs.stream()
-                .filter(s -> s.getName().equalsIgnoreCase(args.get(0)))
-                .limit(1)
-                .findAny();
-
-        return o.map(cmd -> cmd.tabComplete(plugin, sender, args.subList(1, args.size()))).orElseGet(Collections::emptyList);
+    protected Void parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        // should never be called if we specify Type.NO_TARGET_ARGUMENT in the constructor
+        throw new UnsupportedOperationException();
     }
+
 }

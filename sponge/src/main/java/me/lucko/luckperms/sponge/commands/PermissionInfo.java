@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.commands;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SubCommand;
+import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -44,7 +44,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 import java.util.List;
 import java.util.Map;
 
-public class PermissionInfo extends SubCommand<LPSubjectData> {
+public class PermissionInfo extends ChildCommand<LPSubjectData> {
     public PermissionInfo(LocaleManager locale) {
         super(CommandSpec.SPONGE_PERMISSION_INFO.localize(locale), "info", CommandPermission.SPONGE_PERMISSION_INFO, Predicates.alwaysFalse());
     }

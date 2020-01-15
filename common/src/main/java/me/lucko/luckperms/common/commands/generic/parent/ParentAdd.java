@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.parent;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -52,7 +52,7 @@ import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
 
-public class ParentAdd extends SharedSubCommand {
+public class ParentAdd extends GenericChildCommand {
     public ParentAdd(LocaleManager locale) {
         super(CommandSpec.PARENT_ADD.localize(locale), "add", CommandPermission.USER_PARENT_ADD, CommandPermission.GROUP_PARENT_ADD, Predicates.is(0));
     }

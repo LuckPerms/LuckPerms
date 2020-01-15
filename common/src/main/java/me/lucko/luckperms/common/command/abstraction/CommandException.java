@@ -25,9 +25,22 @@
 
 package me.lucko.luckperms.common.command.abstraction;
 
+import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.sender.Sender;
+
 /**
  * Exception to be thrown if there is an error processing a command
  */
-public class CommandException extends Exception {
+public abstract class CommandException extends Exception {
+
+    public abstract CommandResult handle(Sender sender);
+
+    public CommandResult handle(Sender sender, String label, Command<?> command) {
+        return handle(sender);
+    }
+
+    public CommandResult handle(Sender sender, GenericChildCommand command) {
+        return handle(sender);
+    }
 
 }

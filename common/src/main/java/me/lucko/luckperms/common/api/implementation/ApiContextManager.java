@@ -41,12 +41,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.Objects;
 import java.util.Optional;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class ApiContextManager implements net.luckperms.api.context.ContextManager {
     private final LuckPermsPlugin plugin;
     private final ContextManager handle;
 
-    public ApiContextManager(LuckPermsPlugin plugin, ContextManager handle) {
+    public ApiContextManager(LuckPermsPlugin plugin, ContextManager<?> handle) {
         this.plugin = plugin;
         this.handle = handle;
     }

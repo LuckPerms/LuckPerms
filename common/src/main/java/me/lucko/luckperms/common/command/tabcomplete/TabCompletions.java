@@ -52,8 +52,8 @@ public final class TabCompletions {
     private final CompletionSupplier contexts;
 
     public TabCompletions(LuckPermsPlugin plugin) {
-        this.groups = CompletionSupplier.startsWith(() -> plugin.getGroupManager().getAll().keySet());
-        this.tracks = CompletionSupplier.startsWith(() -> plugin.getTrackManager().getAll().keySet());
+        this.groups = CompletionSupplier.startsWith(() -> plugin.getGroupManager().getAll().keySet().stream());
+        this.tracks = CompletionSupplier.startsWith(() -> plugin.getTrackManager().getAll().keySet().stream());
         this.permissions = partial -> {
             PermissionRegistry cache = plugin.getPermissionRegistry();
 

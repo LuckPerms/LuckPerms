@@ -128,11 +128,13 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
         return handle().thenApply(handle -> handle.isChildOf(CompatibilityUtil.convertContexts(contexts), this.service.getReferenceFactory().obtain(parent))).join();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull List<SubjectReference> getParents() {
         return (List) handle().thenApply(handle -> handle.getParents(getActiveContextSet())).join();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public @NonNull List<SubjectReference> getParents(@NonNull Set<Context> contexts) {
         return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts))).join();

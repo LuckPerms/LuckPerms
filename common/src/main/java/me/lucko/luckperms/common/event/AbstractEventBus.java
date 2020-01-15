@@ -137,7 +137,7 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
      * @param plugin the plugin
      */
     protected void unregisterHandlers(P plugin) {
-        this.bus.unregister(sub -> ((LuckPermsEventSubscription) sub).getPlugin() == plugin);
+        this.bus.unregister(sub -> ((LuckPermsEventSubscription<?>) sub).getPlugin() == plugin);
     }
 
     @Override

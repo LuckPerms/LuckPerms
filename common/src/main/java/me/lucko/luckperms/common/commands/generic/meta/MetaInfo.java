@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.command.CommandResult;
-import me.lucko.luckperms.common.command.abstraction.SharedSubCommand;
+import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
@@ -67,7 +67,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 
-public class MetaInfo extends SharedSubCommand {
+public class MetaInfo extends GenericChildCommand {
     private static String processLocation(Node node, PermissionHolder holder) {
         String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName();
         return location.equalsIgnoreCase(holder.getObjectName()) ? "self" : location;

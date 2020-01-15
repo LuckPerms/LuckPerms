@@ -39,10 +39,10 @@ import java.util.function.Predicate;
 /**
  * Represents a single "main" command (one without any children)
  */
-public abstract class SingleCommand extends Command<Void, Void> {
+public abstract class SingleCommand extends Command<Void> {
 
     public SingleCommand(LocalizedCommandSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck) {
-        super(spec, name, permission, argumentCheck, null);
+        super(spec, name, permission, argumentCheck);
     }
 
     @Override

@@ -37,6 +37,7 @@ import java.util.function.Predicate;
 public final class Predicates {
     private Predicates() {}
 
+    @SuppressWarnings("rawtypes")
     private static final Predicate FALSE = new Predicate() {
         @Override public boolean test(Object o) { return false; }
         @Override
@@ -46,6 +47,7 @@ public final class Predicates {
         @Override
         public @NonNull Predicate negate() { return TRUE; }
     };
+    @SuppressWarnings("rawtypes")
     private static final Predicate TRUE = new Predicate() {
         @Override public boolean test(Object o) { return true; }
         @Override
@@ -56,13 +58,13 @@ public final class Predicates {
         public @NonNull Predicate negate() { return FALSE; }
     };
 
+    @SuppressWarnings("unchecked")
     public static <T> Predicate<T> alwaysFalse() {
-        //noinspection unchecked
         return FALSE;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> Predicate<T> alwaysTrue() {
-        //noinspection unchecked
         return TRUE;
     }
 
