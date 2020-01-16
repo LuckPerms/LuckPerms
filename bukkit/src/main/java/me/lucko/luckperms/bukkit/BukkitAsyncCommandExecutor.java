@@ -63,7 +63,7 @@ public class BukkitAsyncCommandExecutor extends BukkitCommandExecutor implements
             return;
         }
 
-        String commandLabel = buffer.substring(1, firstSpace);
+        String commandLabel = buffer.substring(0, firstSpace);
         Command command = this.plugin.getBootstrap().getServer().getCommandMap().getCommand(commandLabel);
         if (command != this.command) {
             return;
