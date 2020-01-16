@@ -112,15 +112,6 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         this.senderFactory = new BukkitSenderFactory(this);
     }
 
-    private static boolean isBrigadierSupported() {
-        try {
-            Class.forName("com.mojang.brigadier.CommandDispatcher");
-            return true;
-        } catch (ClassNotFoundException var1) {
-            return false;
-        }
-    }
-
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
@@ -150,15 +141,24 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerCommands() {
-        this.commandManager = new BukkitCommandExecutor(this);
-        PluginCommand cmd = this.bootstrap.getCommand("luckperms");
-        cmd.setExecutor(this.commandManager);
-        cmd.setTabCompleter(this.commandManager);
+        PluginCommand command = this.bootstrap.getCommand("luckperms");
+        if (command == null) {
+            getLogger().severe("Unable to register /luckperms command with the server");
+            return;
+        }
+
+        if (isAsyncTabCompleteSupported()) {
+            this.commandManager = new BukkitAsyncCommandExecutor(this);
+        } else {
+            this.commandManager = new BukkitCommandExecutor(this);
+        }
+
+        this.commandManager.register(command);
 
         // setup brigadier
         if (isBrigadierSupported()) {
             try {
-                LuckPermsBrigadier.register(this, cmd);
+                LuckPermsBrigadier.register(this, command);
             } catch (Exception e) {
                 if (!(e instanceof RuntimeException && e.getMessage().contains("not supported by the server"))) {
                     e.printStackTrace();
@@ -357,6 +357,23 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             this.bootstrap.saveResource("config.yml", false);
         }
         return configFile;
+    }
+
+    private static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException var1) {
+            return false;
+        }
+    }
+
+    private static boolean isBrigadierSupported() {
+        return classExists("com.mojang.brigadier.CommandDispatcher");
+    }
+
+    private static boolean isAsyncTabCompleteSupported() {
+        return classExists("com.destroystokyo.paper.event.server.AsyncTabCompleteEvent");
     }
 
     @Override

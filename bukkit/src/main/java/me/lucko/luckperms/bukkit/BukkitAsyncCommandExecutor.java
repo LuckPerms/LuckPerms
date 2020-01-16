@@ -25,46 +25,56 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.common.command.CommandManager;
+import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
+
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
 
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.command.TabExecutor;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 import java.util.List;
 
-public class BukkitCommandExecutor extends CommandManager implements CommandExecutor, TabExecutor {
-    protected final LPBukkitPlugin plugin;
-    protected final PluginCommand command;
-
-    public BukkitCommandExecutor(LPBukkitPlugin plugin, PluginCommand command) {
-        super(plugin);
-        this.plugin = plugin;
-        this.command = command;
+public class BukkitAsyncCommandExecutor extends BukkitCommandExecutor implements Listener {
+    public BukkitAsyncCommandExecutor(LPBukkitPlugin plugin, PluginCommand command) {
+        super(plugin, command);
     }
 
     public void register() {
-        this.command.setExecutor(this);
-        this.command.setTabCompleter(this);
+        super.register();
+        this.plugin.getBootstrap().getServer().getPluginManager().registerEvents(this, this.plugin.getBootstrap());
     }
 
-    @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(args);
-        executeCommand(wrapped, label, arguments);
-        return true;
+    @EventHandler(ignoreCancelled = true)
+    public void onAsyncTabComplete(AsyncTabCompleteEvent e) {
+        if (!e.isCommand()) {
+            return;
+        }
+
+        String buffer = e.getBuffer();
+        if (buffer.charAt(0) == '/') {
+            buffer = buffer.substring(1);
+        }
+
+        int firstSpace = buffer.indexOf(' ');
+        if (firstSpace < 0) {
+            return;
+        }
+
+        String commandLabel = buffer.substring(1, firstSpace);
+        Command command = this.plugin.getBootstrap().getServer().getCommandMap().getCommand(commandLabel);
+        if (command != this.command) {
+            return;
+        }
+
+        Sender wrapped = this.plugin.getSenderFactory().wrap(e.getSender());
+        List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(buffer.substring(firstSpace + 1));
+        List<String> completions = tabCompleteCommand(wrapped, arguments);
+
+        e.setCompletions(completions);
+        e.setHandled(true);
     }
 
-    @Override
-    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args);
-        return tabCompleteCommand(wrapped, arguments);
-    }
 }
