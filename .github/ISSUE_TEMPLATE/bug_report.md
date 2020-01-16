@@ -14,6 +14,10 @@ assignees: ''
     For general questions, please use the question template or join our Discord located
     at https://discord.gg/luckperms
 
+    Before creating this issue, make sure you checked the FAQ page on the wiki first, as many
+    questions get answered there.
+    https://github.com/lucko/LuckPerms/wiki/FAQ
+
     Please provide config files and console errors through sites like https://hasteb.in and
     make sure that all sensitive data like usernames and passwords are removed/redacted.
 -->
