@@ -129,6 +129,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> CANCEL_FAILED_LOGINS = booleanKey("cancel-failed-logins", false);
 
     /**
+     * If LuckPerms should attempt to resolve Vanilla command target selectors for LP commands.
+     */
+    public static final ConfigKey<Boolean> RESOLVE_COMMAND_SELECTORS = booleanKey("resolve-command-selectors", false);
+
+    /**
      * Controls how temporary add commands should behave
      */
     public static final ConfigKey<TemporaryNodeMergeStrategy> TEMPORARY_ADD_BEHAVIOUR = customKey(c -> {

@@ -27,18 +27,36 @@ package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.sender.Sender;
 
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
+import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 public class BukkitCommandExecutor extends CommandManager implements CommandExecutor, TabExecutor {
+    private static final boolean SELECT_ENTITIES_SUPPORTED;
+
+    static {
+        boolean selectEntitiesSupported = false;
+        try {
+            Server.class.getMethod("selectEntities", CommandSender.class, String.class);
+            selectEntitiesSupported = true;
+        } catch (NoSuchMethodException e) {
+            // ignore
+        }
+        SELECT_ENTITIES_SUPPORTED = selectEntitiesSupported;
+    }
+
     protected final LPBukkitPlugin plugin;
     protected final PluginCommand command;
 
@@ -56,7 +74,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(args);
+        List<String> arguments = processSelectors(sender, ArgumentTokenizer.EXECUTE.tokenizeInput(args));
         executeCommand(wrapped, label, arguments);
         return true;
     }
@@ -64,7 +82,51 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
     @Override
     public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args);
+        List<String> arguments = processSelectors(sender, ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args));
         return tabCompleteCommand(wrapped, arguments);
+    }
+
+    private List<String> processSelectors(CommandSender sender, List<String> args) {
+        if (!SELECT_ENTITIES_SUPPORTED) {
+            return args;
+        }
+
+        if (!this.plugin.getConfiguration().get(ConfigKeys.RESOLVE_COMMAND_SELECTORS)) {
+            return args;
+        }
+
+        ListIterator<String> it = args.listIterator();
+        while (it.hasNext()) {
+            String arg = it.next();
+            if (arg.isEmpty() || arg.charAt(0) != '@') {
+                continue;
+            }
+
+            List<Player> matchedPlayers;
+            try {
+                matchedPlayers = this.plugin.getBootstrap().getServer().selectEntities(sender, arg).stream()
+                        .filter(e -> e instanceof Player)
+                        .map(e -> ((Player) e))
+                        .collect(Collectors.toList());
+            } catch (IllegalArgumentException e) {
+                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + sender + " executing " + args);
+                e.printStackTrace();
+                continue;
+            }
+
+            if (matchedPlayers.isEmpty()) {
+                continue;
+            }
+
+            if (matchedPlayers.size() > 1) {
+                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + sender + " executing " + args +
+                        ": ambiguous result (more than one player matched) - " + matchedPlayers);
+                continue;
+            }
+
+            Player player = matchedPlayers.get(0);
+            it.set(player.getUniqueId().toString());
+        }
+        return args;
     }
 }
