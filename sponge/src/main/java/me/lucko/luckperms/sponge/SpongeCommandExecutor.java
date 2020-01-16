@@ -27,6 +27,7 @@ package me.lucko.luckperms.sponge;
 
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.sender.Sender;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -43,6 +44,7 @@ import org.spongepowered.api.world.World;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class SpongeCommandExecutor extends CommandManager implements CommandCallable {
     private final LPSpongePlugin plugin;
@@ -88,20 +90,41 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
     }
 
     private List<String> processSelectors(CommandSource source, List<String> args) {
+        if (!this.plugin.getConfiguration().get(ConfigKeys.RESOLVE_COMMAND_SELECTORS)) {
+            return args;
+        }
+
         ListIterator<String> it = args.listIterator();
         while (it.hasNext()) {
-            String element = it.next();
-            if (element.startsWith("@")) {
-                try {
-                    Selector.parse(element).resolve(source).stream()
-                            .filter(e -> e instanceof Player)
-                            .map(e -> ((Player) e))
-                            .findFirst()
-                            .ifPresent(player -> it.set(player.getUniqueId().toString()));
-                } catch (IllegalArgumentException e) {
-                    // ignored
-                }
+            String arg = it.next();
+            if (arg.isEmpty() || arg.charAt(0) != '@') {
+                continue;
             }
+
+            List<Player> matchedPlayers;
+            try {
+                matchedPlayers = Selector.parse(arg).resolve(source).stream()
+                        .filter(e -> e instanceof Player)
+                        .map(e -> ((Player) e))
+                        .collect(Collectors.toList());
+            } catch (IllegalArgumentException e) {
+                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + source + " executing " + args);
+                e.printStackTrace();
+                continue;
+            }
+
+            if (matchedPlayers.isEmpty()) {
+                continue;
+            }
+
+            if (matchedPlayers.size() > 1) {
+                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + source + " executing " + args +
+                        ": ambiguous result (more than one player matched) - " + matchedPlayers);
+                continue;
+            }
+
+            Player player = matchedPlayers.get(0);
+            it.set(player.getUniqueId().toString());
         }
         return args;
     }
