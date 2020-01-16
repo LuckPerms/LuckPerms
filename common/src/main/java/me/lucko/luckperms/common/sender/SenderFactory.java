@@ -50,17 +50,17 @@ public abstract class SenderFactory<T> {
         return this.plugin;
     }
 
-    protected abstract UUID getUniqueId(T t);
+    protected abstract UUID getUniqueId(T sender);
 
-    protected abstract String getName(T t);
+    protected abstract String getName(T sender);
 
-    protected abstract void sendMessage(T t, String s);
+    protected abstract void sendMessage(T sender, String message);
 
-    protected abstract void sendMessage(T t, Component message);
+    protected abstract void sendMessage(T sender, Component message);
 
-    protected abstract Tristate getPermissionValue(T t, String node);
+    protected abstract Tristate getPermissionValue(T sender, String node);
 
-    protected abstract boolean hasPermission(T t, String node);
+    protected abstract boolean hasPermission(T sender, String node);
 
     public final Sender wrap(T sender) {
         Objects.requireNonNull(sender, "sender");
