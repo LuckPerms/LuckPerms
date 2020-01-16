@@ -4,7 +4,7 @@ plugins {
 
 repositories {
     mavenLocal()
-    maven { url 'https://repo.potestas.xyz/main/' }
+    maven { url 'https://repo.nukkitx.com/main/' }
 }
 
 dependencies {

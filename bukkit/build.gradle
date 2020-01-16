@@ -3,14 +3,14 @@ plugins {
 }
 
 repositories {
-    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url 'https://papermc.io/repo/repository/maven-public/' }
     maven { url 'https://libraries.minecraft.net/' }
 }
 
 dependencies {
     compile project(':common')
 
-    compileOnly 'org.spigotmc:spigot-api:1.14-R0.1-SNAPSHOT'
+    compileOnly 'com.destroystokyo.paper:paper-api:1.15.1-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:text-adapter-bukkit:3.0.2'
     compileOnly 'me.lucko:commodore:1.5'
     compileOnly('net.milkbowl.vault:VaultAPI:1.6') {
