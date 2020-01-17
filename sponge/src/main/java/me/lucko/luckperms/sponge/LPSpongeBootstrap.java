@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.util.MoreFiles;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
@@ -203,6 +204,10 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
         return this.game;
     }
 
+    public Optional<Server> getServer() {
+        return this.game.isServerAvailable() ? Optional.of(this.game.getServer()) : Optional.empty();
+    }
+
     public Scheduler getSpongeScheduler() {
         return this.spongeScheduler;
     }
@@ -232,13 +237,13 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
     @Override
     public String getServerBrand() {
-        return getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
+        return this.game.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
     }
 
     @Override
     public String getServerVersion() {
-        PluginContainer api = getGame().getPlatform().getContainer(Platform.Component.API);
-        PluginContainer impl = getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION);
+        PluginContainer api = this.game.getPlatform().getContainer(Platform.Component.API);
+        PluginContainer impl = this.game.getPlatform().getContainer(Platform.Component.IMPLEMENTATION);
         return api.getName() + ": " + api.getVersion().orElse("null") + " - " + impl.getName() + ": " + impl.getVersion().orElse("null");
     }
     
@@ -265,55 +270,45 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
 
     @Override
     public Optional<Player> getPlayer(UUID uniqueId) {
-        if (!getGame().isServerAvailable()) {
-            return Optional.empty();
-        }
-
-        return getGame().getServer().getPlayer(uniqueId);
+        return getServer().flatMap(s -> s.getPlayer(uniqueId));
     }
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        if (!getGame().isServerAvailable()) {
-            return Optional.empty();
-        }
-
-        return getGame().getServer().getGameProfileManager().get(username)
+        return getServer().flatMap(server -> server.getGameProfileManager().get(username)
                 .thenApply(p -> Optional.of(p.getUniqueId()))
                 .exceptionally(x -> Optional.empty())
-                .join();
+                .join()
+        );
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        if (!getGame().isServerAvailable()) {
-            return Optional.empty();
-        }
-
-        return getGame().getServer().getGameProfileManager().get(uniqueId)
+        return getServer().flatMap(server -> server.getGameProfileManager().get(uniqueId)
                 .thenApply(GameProfile::getName)
                 .exceptionally(x -> Optional.empty())
-                .join();
+                .join()
+        );
     }
 
     @Override
     public int getPlayerCount() {
-        return getGame().isServerAvailable() ? getGame().getServer().getOnlinePlayers().size() : 0;
+        return getServer().map(server -> server.getOnlinePlayers().size()).orElse(0);
     }
 
     @Override
     public Stream<String> getPlayerList() {
-        return getGame().isServerAvailable() ? getGame().getServer().getOnlinePlayers().stream().map(Player::getName) : Stream.empty();
+        return getServer().map(server -> server.getOnlinePlayers().stream().map(Player::getName)).orElseGet(Stream::empty);
     }
 
     @Override
     public Stream<UUID> getOnlinePlayers() {
-        return getGame().isServerAvailable() ? getGame().getServer().getOnlinePlayers().stream().map(Player::getUniqueId) : Stream.empty();
+        return getServer().map(server -> server.getOnlinePlayers().stream().map(Player::getUniqueId)).orElseGet(Stream::empty);
     }
 
     @Override
     public boolean isPlayerOnline(UUID uniqueId) {
-        return getGame().isServerAvailable() ? getGame().getServer().getPlayer(uniqueId).map(Player::isOnline).orElse(false) : false;
+        return getServer().flatMap(server -> server.getPlayer(uniqueId).map(Player::isOnline)).orElse(false);
     }
     
 }

@@ -57,7 +57,7 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
     @Override
     public @NonNull CommandResult process(@NonNull CommandSource source, @NonNull String args) {
         Sender wrapped = this.plugin.getSenderFactory().wrap(source);
-        List<String> arguments = processSelectors(source, ArgumentTokenizer.EXECUTE.tokenizeInput(args));
+        List<String> arguments = resolveSelectors(source, ArgumentTokenizer.EXECUTE.tokenizeInput(args));
         executeCommand(wrapped, "lp", arguments);
         return CommandResult.success();
     }
@@ -65,7 +65,7 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
     @Override
     public @NonNull List<String> getSuggestions(@NonNull CommandSource source, @NonNull String args, @Nullable Location<World> location) {
         Sender wrapped = this.plugin.getSenderFactory().wrap(source);
-        List<String> arguments = processSelectors(source, ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args));
+        List<String> arguments = resolveSelectors(source, ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args));
         return tabCompleteCommand(wrapped, arguments);
     }
 
@@ -89,13 +89,12 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
         return Text.of("/luckperms");
     }
 
-    private List<String> processSelectors(CommandSource source, List<String> args) {
+    private List<String> resolveSelectors(CommandSource source, List<String> args) {
         if (!this.plugin.getConfiguration().get(ConfigKeys.RESOLVE_COMMAND_SELECTORS)) {
             return args;
         }
 
-        ListIterator<String> it = args.listIterator();
-        while (it.hasNext()) {
+        for (ListIterator<String> it = args.listIterator(); it.hasNext(); ) {
             String arg = it.next();
             if (arg.isEmpty() || arg.charAt(0) != '@') {
                 continue;
@@ -126,6 +125,7 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
             Player player = matchedPlayers.get(0);
             it.set(player.getUniqueId().toString());
         }
+
         return args;
     }
 

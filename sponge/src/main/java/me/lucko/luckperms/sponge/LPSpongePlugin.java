@@ -256,19 +256,17 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     public Stream<Sender> getOnlineSenders() {
-        if (!this.bootstrap.getGame().isServerAvailable()) {
-            return Stream.empty();
-        }
-
         return Stream.concat(
                 Stream.of(getConsoleSender()),
-                this.bootstrap.getGame().getServer().getOnlinePlayers().stream().map(s -> this.senderFactory.wrap(s))
+                this.bootstrap.getServer().map(server -> server.getOnlinePlayers().stream().map(s -> this.senderFactory.wrap(s))).orElseGet(Stream::empty)
         );
     }
 
     @Override
     public Sender getConsoleSender() {
-        if (!this.bootstrap.getGame().isServerAvailable()) {
+        if (this.bootstrap.getGame().isServerAvailable()) {
+            return this.senderFactory.wrap(this.bootstrap.getGame().getServer().getConsole());
+        } else {
             return new DummySender(this, Sender.CONSOLE_UUID, Sender.CONSOLE_NAME) {
                 @Override
                 protected void consumeMessage(String s) {
@@ -276,7 +274,6 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
                 }
             };
         }
-        return this.senderFactory.wrap(this.bootstrap.getGame().getServer().getConsole());
     }
 
     @Override

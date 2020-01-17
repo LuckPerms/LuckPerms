@@ -149,7 +149,8 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     protected RuntimeException reportException(String file, Exception ex) throws RuntimeException {
         this.plugin.getLogger().warn("Exception thrown whilst performing i/o: " + file);
         ex.printStackTrace();
-        throw Throwables.propagate(ex);
+        Throwables.throwIfUnchecked(ex);
+        throw new RuntimeException(ex);
     }
 
     @Override
