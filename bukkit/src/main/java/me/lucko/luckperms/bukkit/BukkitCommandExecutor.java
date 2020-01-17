@@ -74,7 +74,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = processSelectors(sender, ArgumentTokenizer.EXECUTE.tokenizeInput(args));
+        List<String> arguments = resolveSelectors(sender, ArgumentTokenizer.EXECUTE.tokenizeInput(args));
         executeCommand(wrapped, label, arguments);
         return true;
     }
@@ -82,11 +82,11 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
     @Override
     public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = processSelectors(sender, ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args));
+        List<String> arguments = resolveSelectors(sender, ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args));
         return tabCompleteCommand(wrapped, arguments);
     }
 
-    private List<String> processSelectors(CommandSender sender, List<String> args) {
+    private List<String> resolveSelectors(CommandSender sender, List<String> args) {
         if (!SELECT_ENTITIES_SUPPORTED) {
             return args;
         }
@@ -95,8 +95,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
             return args;
         }
 
-        ListIterator<String> it = args.listIterator();
-        while (it.hasNext()) {
+        for (ListIterator<String> it = args.listIterator(); it.hasNext(); ) {
             String arg = it.next();
             if (arg.isEmpty() || arg.charAt(0) != '@') {
                 continue;
@@ -127,6 +126,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
             Player player = matchedPlayers.get(0);
             it.set(player.getUniqueId().toString());
         }
+
         return args;
     }
 }

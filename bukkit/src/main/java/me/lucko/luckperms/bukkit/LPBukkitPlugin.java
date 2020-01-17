@@ -148,12 +148,12 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         }
 
         if (isAsyncTabCompleteSupported()) {
-            this.commandManager = new BukkitAsyncCommandExecutor(this);
+            this.commandManager = new BukkitAsyncCommandExecutor(this, command);
         } else {
-            this.commandManager = new BukkitCommandExecutor(this);
+            this.commandManager = new BukkitCommandExecutor(this, command);
         }
 
-        this.commandManager.register(command);
+        this.commandManager.register();
 
         // setup brigadier
         if (isBrigadierSupported()) {
