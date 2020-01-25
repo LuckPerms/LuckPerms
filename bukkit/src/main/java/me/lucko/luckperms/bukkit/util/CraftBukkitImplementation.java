@@ -27,23 +27,24 @@ package me.lucko.luckperms.bukkit.util;
 
 import org.bukkit.Bukkit;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public final class CraftBukkitImplementation {
     private CraftBukkitImplementation() {}
 
-    private static final String SERVER_PACKAGE_VERSION = getServerPackageVersion();
-    private static final boolean CHAT_COMPATIBLE = !SERVER_PACKAGE_VERSION.startsWith(".v1_7_");
+    private static final String SERVER_PACKAGE_VERSION;
+    private static final boolean CHAT_COMPATIBLE;
 
-    private static String getServerPackageVersion() {
+    static {
         Class<?> server = Bukkit.getServer().getClass();
-        if (!server.getSimpleName().equals("CraftServer")) {
-            return ".";
-        }
-        if (server.getName().equals("org.bukkit.craftbukkit.CraftServer")) {
-            // Non versioned class
-            return ".";
+        Matcher matcher = Pattern.compile("^org\\.bukkit\\.craftbukkit\\.(\\w+)\\.CraftServer$").matcher(server.getName());
+        if (matcher.matches()) {
+            SERVER_PACKAGE_VERSION = '.' + matcher.group(1) + '.';
+            CHAT_COMPATIBLE = !SERVER_PACKAGE_VERSION.startsWith(".v1_7_");
         } else {
-            String version = server.getName().substring("org.bukkit.craftbukkit".length());
-            return version.substring(0, version.length() - "CraftServer".length());
+            SERVER_PACKAGE_VERSION = ".";
+            CHAT_COMPATIBLE = true;
         }
     }
 
