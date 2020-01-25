@@ -46,6 +46,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
@@ -96,6 +97,7 @@ public final class Track {
     }
 
     public void setGroups(List<String> groups) {
+        Objects.requireNonNull(groups, "groups");
         this.groups.clear();
         this.groups.addAll(groups);
     }

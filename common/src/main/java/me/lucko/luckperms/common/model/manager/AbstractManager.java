@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -67,6 +68,13 @@ public abstract class AbstractManager<I, C, T extends C> implements Manager<I, C
         if (id != null) {
             this.objects.remove(sanitizeIdentifier(id));
         }
+    }
+
+    @Override
+    public void retainAll(Collection<I> ids) {
+        this.objects.keySet().stream()
+                .filter(g -> !ids.contains(g))
+                .forEach(this::unload);
     }
 
     protected I sanitizeIdentifier(I i) {

@@ -47,6 +47,8 @@ import java.util.Set;
  */
 public final class SqlNode {
 
+    public static final int NULL_ID = -1;
+
     public static SqlNode fromNode(Node node) {
         ContextSet contexts = node.getContexts();
 
@@ -78,11 +80,7 @@ public final class SqlNode {
 
 
         long expiry = node.hasExpiry() ? node.getExpiry().getEpochSecond() : 0L;
-        return new SqlNode(node.getKey(), node.getValue(), server, world, expiry, contexts.immutableCopy(), -1);
-    }
-
-    public static SqlNode fromSqlFields(String permission, boolean value, String server, String world, long expiry, String contexts) {
-        return new SqlNode(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(GsonProvider.normal(), contexts).immutableCopy(), -1);
+        return new SqlNode(node.getKey(), node.getValue(), server, world, expiry, contexts.immutableCopy(), NULL_ID);
     }
 
     public static SqlNode fromSqlFields(long sqlId, String permission, boolean value, String server, String world, long expiry, String contexts) {
@@ -142,7 +140,7 @@ public final class SqlNode {
     }
 
     public long getSqlId() {
-        if (this.sqlId == -1) {
+        if (this.sqlId == NULL_ID) {
             throw new IllegalStateException("sql id not set");
         }
         return this.sqlId;

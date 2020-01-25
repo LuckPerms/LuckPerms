@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorage;
-import me.lucko.luckperms.common.util.ThrowingRunnable;
+import me.lucko.luckperms.common.util.Throwing;
 
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
@@ -92,7 +92,7 @@ public class Storage {
         }, this.plugin.getBootstrap().getScheduler().async());
     }
 
-    private CompletableFuture<Void> makeFuture(ThrowingRunnable runnable) {
+    private CompletableFuture<Void> makeFuture(Throwing.Runnable runnable) {
         return CompletableFuture.runAsync(() -> {
             try {
                 runnable.run();

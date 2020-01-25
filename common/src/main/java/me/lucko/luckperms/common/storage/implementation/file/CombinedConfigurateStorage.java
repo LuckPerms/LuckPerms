@@ -27,13 +27,10 @@ package me.lucko.luckperms.common.storage.implementation.file;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.Track;
-import me.lucko.luckperms.common.model.manager.group.GroupManager;
-import me.lucko.luckperms.common.model.manager.track.TrackManager;
 import me.lucko.luckperms.common.node.model.HeldNodeImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
+import me.lucko.luckperms.common.util.Iterators;
 
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
@@ -290,32 +287,17 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     @Override
     public void loadAllGroups() throws IOException {
         List<String> groups = new ArrayList<>();
-
         this.groupsLoader.apply(false, true, root -> {
             groups.addAll(root.getChildrenMap().keySet().stream()
                     .map(Object::toString)
                     .collect(Collectors.toList()));
         });
 
-        boolean success = true;
-        for (String g : groups) {
-            try {
-                loadGroup(g);
-            } catch (Exception e) {
-                e.printStackTrace();
-                success = false;
-            }
-        }
-
-        if (!success) {
+        if (!Iterators.tryIterate(groups, this::loadGroup)) {
             throw new RuntimeException("Exception occurred whilst loading a group");
         }
 
-        GroupManager<?> gm = this.plugin.getGroupManager();
-        gm.getAll().values().stream()
-                .map(Group::getName)
-                .filter(g -> !groups.contains(g))
-                .forEach(gm::unload);
+        this.plugin.getGroupManager().retainAll(groups);
     }
 
     @Override
@@ -345,32 +327,17 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     @Override
     public void loadAllTracks() throws IOException {
         List<String> tracks = new ArrayList<>();
-
         this.tracksLoader.apply(false, true, root -> {
             tracks.addAll(root.getChildrenMap().keySet().stream()
                     .map(Object::toString)
                     .collect(Collectors.toList()));
         });
 
-        boolean success = true;
-        for (String t : tracks) {
-            try {
-                loadTrack(t);
-            } catch (Exception e) {
-                e.printStackTrace();
-                success = false;
-            }
-        }
-
-        if (!success) {
+        if (!Iterators.tryIterate(tracks, this::loadTrack)) {
             throw new RuntimeException("Exception occurred whilst loading a track");
         }
 
-        TrackManager<?> tm = this.plugin.getTrackManager();
-        tm.getAll().values().stream()
-                .map(Track::getName)
-                .filter(t -> !tracks.contains(t))
-                .forEach(tm::unload);
+        this.plugin.getTrackManager().retainAll(tracks);
     }
 
 }

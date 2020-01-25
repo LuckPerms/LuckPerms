@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.model.manager;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -76,5 +77,13 @@ public interface Manager<I, C, T extends C> extends Function<I, T> {
      * @param id The object id to unload
      */
     void unload(I id);
+
+    /**
+     * Calls {@link #unload(Object)} for all objects currently
+     * loaded not in the given collection of ids.
+     *
+     * @param ids the ids to retain
+     */
+    void retainAll(Collection<I> ids);
 
 }
