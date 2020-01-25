@@ -65,6 +65,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * A map of nodes held by a {@link PermissionHolder}.
@@ -272,12 +273,18 @@ public final class NodeMap {
         this.inheritanceMap.remove(context);
     }
 
-    void setContent(Collection<? extends Node> set) {
+    void setContent(Iterable<? extends Node> set) {
         this.map.clear();
         this.inheritanceMap.clear();
         for (Node n : set) {
             add(n);
         }
+    }
+
+    void setContent(Stream<? extends Node> stream) {
+        this.map.clear();
+        this.inheritanceMap.clear();
+        stream.forEach(this::add);
     }
 
     void setContent(Multimap<ImmutableContextSet, ? extends Node> multimap) {

@@ -71,6 +71,7 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Represents an object that can hold permissions, (a user or group)
@@ -233,8 +234,13 @@ public abstract class PermissionHolder {
         getPlugin().getEventDispatcher().dispatchDataRecalculate(this);
     }
 
-    public void setNodes(DataType type, Collection<? extends Node> set) {
+    public void setNodes(DataType type, Iterable<? extends Node> set) {
         getData(type).setContent(set);
+        invalidateCache();
+    }
+
+    public void setNodes(DataType type, Stream<? extends Node> stream) {
+        getData(type).setContent(stream);
         invalidateCache();
     }
 

@@ -25,8 +25,15 @@
 
 package me.lucko.luckperms.common.util;
 
-public interface ThrowingRunnable {
+public interface Throwing {
 
-    void run() throws Exception;
+    @FunctionalInterface
+    interface Runnable {
+        void run() throws Exception;
+    }
 
+    @FunctionalInterface
+    interface Consumer<T> {
+        void accept(T t) throws Exception;
+    }
 }
