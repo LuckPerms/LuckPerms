@@ -86,8 +86,17 @@ public interface SchedulerAdapter {
     SchedulerTask asyncRepeating(Runnable task, long interval, TimeUnit unit);
 
     /**
-     * Shuts down this executor instance
+     * Shuts down the scheduler instance.
+     *
+     * <p>{@link #asyncLater(Runnable, long, TimeUnit)} and {@link #asyncRepeating(Runnable, long, TimeUnit)}.</p>
      */
-    void shutdown();
+    void shutdownScheduler();
+
+    /**
+     * Shuts down the executor instance.
+     *
+     * <p>{@link #async()} and {@link #executeAsync(Runnable)}.</p>
+     */
+    void shutdownExecutor();
 
 }
