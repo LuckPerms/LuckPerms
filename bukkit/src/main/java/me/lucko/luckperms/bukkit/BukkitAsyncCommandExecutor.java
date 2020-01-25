@@ -54,6 +54,10 @@ public class BukkitAsyncCommandExecutor extends BukkitCommandExecutor implements
         }
 
         String buffer = e.getBuffer();
+        if (buffer.isEmpty()) {
+            return;
+        }
+
         if (buffer.charAt(0) == '/') {
             buffer = buffer.substring(1);
         }
