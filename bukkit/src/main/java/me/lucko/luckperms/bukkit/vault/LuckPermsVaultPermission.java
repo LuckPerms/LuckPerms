@@ -51,7 +51,6 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
-import net.luckperms.api.util.Tristate;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Bukkit;
@@ -192,9 +191,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionHolder user = lookupUser(uuid);
         QueryOptions queryOptions = getQueryOptions(uuid, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
-
-        Tristate result = permissionData.checkPermission(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result();
-        return result != Tristate.UNDEFINED ? result.asBoolean() : org.bukkit.permissions.Permission.DEFAULT_PERMISSION.getValue(queryOptions.option(BukkitContextManager.OP_OPTION).orElse(false));
+        return permissionData.checkPermission(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result().asBoolean();
     }
 
     @Override
