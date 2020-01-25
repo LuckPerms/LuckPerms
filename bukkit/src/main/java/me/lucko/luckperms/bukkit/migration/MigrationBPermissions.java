@@ -182,6 +182,8 @@ public class MigrationBPermissions extends ChildCommand<Object> {
         });
 
         log.log("Success! Migration complete.");
+        log.log("Don't forget to remove the bPermissions jar from your plugins folder & restart the server. " +
+                "LuckPerms may not take over as the server permission handler until this is done.");
         return CommandResult.SUCCESS;
     }
 

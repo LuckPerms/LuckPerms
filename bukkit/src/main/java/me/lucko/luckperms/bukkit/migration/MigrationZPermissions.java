@@ -193,6 +193,8 @@ public class MigrationZPermissions extends ChildCommand<Object> {
 
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
+        log.log("Don't forget to remove the zPermissions jar from your plugins folder & restart the server. " +
+                "LuckPerms may not take over as the server permission handler until this is done.");
         return CommandResult.SUCCESS;
     }
 
