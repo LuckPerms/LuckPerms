@@ -64,7 +64,10 @@ public class WorldCalculator implements ContextCalculator<Player> {
         List<World> worlds = this.plugin.getBootstrap().getServer().getWorlds();
         ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
         for (World world : worlds) {
-            builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
+            String name = world.getName().toLowerCase();
+            if (!name.trim().isEmpty()) {
+                builder.add(DefaultContextKeys.WORLD_KEY, name);
+            }
         }
         return builder.build();
     }

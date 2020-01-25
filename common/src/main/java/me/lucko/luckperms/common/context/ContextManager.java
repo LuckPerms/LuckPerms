@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
 import net.luckperms.api.query.QueryOptions;
@@ -60,14 +61,6 @@ public abstract class ContextManager<T> {
     protected ContextManager(LuckPermsPlugin plugin, Class<T> subjectClass) {
         this.plugin = plugin;
         this.subjectClass = subjectClass;
-    }
-
-    public ImmutableContextSet getPotentialContexts() {
-        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
-        for (ContextCalculator<? super T> calculator : this.calculators) {
-            builder.addAll(calculator.estimatePotentialContexts());
-        }
-        return builder.build();
     }
 
     public Class<T> getSubjectClass() {
@@ -119,22 +112,19 @@ public abstract class ContextManager<T> {
 
     protected QueryOptions calculate(T subject) {
         ImmutableContextSet.Builder accumulator = new ImmutableContextSetImpl.BuilderImpl();
-
         for (ContextCalculator<? super T> calculator : this.calculators) {
             try {
                 calculator.calculate(subject, accumulator::add);
             } catch (Throwable e) {
-                ContextManager.this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject);
+                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject);
                 e.printStackTrace();
             }
         }
-
         return formQueryOptions(subject, accumulator.build());
     }
 
     private QueryOptions calculateStatic() {
         ImmutableContextSet.Builder accumulator = new ImmutableContextSetImpl.BuilderImpl();
-
         for (StaticContextCalculator calculator : this.staticCalculators) {
             try {
                 calculator.calculate(accumulator::add);
@@ -143,8 +133,23 @@ public abstract class ContextManager<T> {
                 e.printStackTrace();
             }
         }
-
         return formQueryOptions(accumulator.build());
+    }
+
+    public ImmutableContextSet getPotentialContexts() {
+        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        for (ContextCalculator<? super T> calculator : this.calculators) {
+            ContextSet potentialContexts;
+            try {
+                potentialContexts = calculator.estimatePotentialContexts();
+            } catch (Throwable e) {
+                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst estimating potential contexts");
+                e.printStackTrace();
+                continue;
+            }
+            builder.addAll(potentialContexts);
+        }
+        return builder.build();
     }
 
     private final class StaticLookupCache extends ExpiringCache<QueryOptions> {
