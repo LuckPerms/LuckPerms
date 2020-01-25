@@ -101,8 +101,12 @@ public class SpongeSchedulerAdapter implements SchedulerAdapter {
     }
 
     @Override
-    public void shutdown() {
+    public void shutdownScheduler() {
         Iterators.tryIterate(this.tasks, Task::cancel);
     }
 
+    @Override
+    public void shutdownExecutor() {
+        // do nothing
+    }
 }

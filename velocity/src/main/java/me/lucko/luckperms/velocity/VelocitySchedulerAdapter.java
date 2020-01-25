@@ -80,8 +80,12 @@ public class VelocitySchedulerAdapter implements SchedulerAdapter {
     }
 
     @Override
-    public void shutdown() {
+    public void shutdownScheduler() {
         Iterators.tryIterate(this.tasks, ScheduledTask::cancel);
     }
 
+    @Override
+    public void shutdownExecutor() {
+        // do nothing
+    }
 }

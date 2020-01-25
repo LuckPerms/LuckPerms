@@ -205,6 +205,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     public final void disable() {
+        getLogger().info("Starting shutdown process...");
+
+        // cancel delayed/repeating tasks
+        getBootstrap().getScheduler().shutdownScheduler();
+
         // shutdown permission vault and verbose handler tasks
         this.permissionRegistry.close();
         this.verboseHandler.close();
@@ -233,9 +238,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // unregister api
         ApiRegistrationUtil.unregisterProvider();
 
-        // shutdown scheduler
-        getLogger().info("Shutting down internal scheduler...");
-        getBootstrap().getScheduler().shutdown();
+        // shutdown async executor pool
+        getBootstrap().getScheduler().shutdownExecutor();
 
         getLogger().info("Goodbye!");
     }

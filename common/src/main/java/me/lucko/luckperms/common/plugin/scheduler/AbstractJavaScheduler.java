@@ -73,8 +73,17 @@ public abstract class AbstractJavaScheduler implements SchedulerAdapter {
     }
 
     @Override
-    public void shutdown() {
+    public void shutdownScheduler() {
         this.scheduler.shutdown();
+        try {
+            this.scheduler.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void shutdownExecutor() {
         this.schedulerWorkerPool.delegate.shutdown();
         try {
             this.schedulerWorkerPool.delegate.awaitTermination(1, TimeUnit.MINUTES);
