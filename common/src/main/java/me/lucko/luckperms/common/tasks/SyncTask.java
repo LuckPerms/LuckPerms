@@ -80,6 +80,10 @@ public class SyncTask implements Runnable {
 
         this.plugin.performPlatformDataSync();
 
+        // Just to be sure...
+        this.plugin.getGroupManager().invalidateAllGroupCaches();
+        this.plugin.getUserManager().invalidateAllUserCaches();
+
         this.plugin.getEventDispatcher().dispatchPostSync();
     }
 
