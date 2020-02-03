@@ -189,7 +189,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // run an update instantly.
         getLogger().info("Performing initial data load...");
         try {
-            new SyncTask(this, true).run();
+            new SyncTask(this).run();
         } catch (Exception e) {
             e.printStackTrace();
         }
