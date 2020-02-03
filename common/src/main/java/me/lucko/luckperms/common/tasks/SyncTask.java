@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.event.cause.CreationCause;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,14 +41,8 @@ import java.util.concurrent.TimeUnit;
 public class SyncTask implements Runnable {
     private final LuckPermsPlugin plugin;
 
-    /**
-     * If this task is being called before the server has fully started
-     */
-    private final boolean initialUpdate;
-
-    public SyncTask(LuckPermsPlugin plugin, boolean initialUpdate) {
+    public SyncTask(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        this.initialUpdate = initialUpdate;
     }
 
     /**
@@ -72,11 +65,8 @@ public class SyncTask implements Runnable {
         // Reload all tracks
         this.plugin.getStorage().loadAllTracks().join();
 
-        // Refresh all online users.
-        CompletableFuture<Void> userUpdateFut = this.plugin.getUserManager().updateAllUsers();
-        if (!this.initialUpdate) {
-            userUpdateFut.join();
-        }
+        // Reload all online users.
+        this.plugin.getUserManager().loadAllUsers().join();
 
         this.plugin.performPlatformDataSync();
 
@@ -97,7 +87,7 @@ public class SyncTask implements Runnable {
 
         @Override
         protected Void perform() {
-            new SyncTask(this.plugin, false).run();
+            new SyncTask(this.plugin).run();
             return null;
         }
     }

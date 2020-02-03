@@ -34,15 +34,18 @@ import me.lucko.luckperms.common.model.manager.AbstractManager;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.Iterators;
 
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class AbstractUserManager<T extends User> extends AbstractManager<UUID, User, T> implements UserManager<T> {
@@ -132,16 +135,17 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     }
 
     @Override
-    public CompletableFuture<Void> updateAllUsers() {
-        return CompletableFuture.runAsync(
-                () -> {
-                    Stream.concat(
-                        getAll().keySet().stream(),
-                        this.plugin.getBootstrap().getOnlinePlayers()
-                    ).forEach(u -> this.plugin.getStorage().loadUser(u, null).join());
-                },
-                this.plugin.getBootstrap().getScheduler().async()
-        );
+    public CompletableFuture<Void> loadAllUsers() {
+        Set<UUID> ids = Stream.concat(
+                getAll().keySet().stream(),
+                this.plugin.getBootstrap().getOnlinePlayers()
+        ).collect(Collectors.toSet());
+
+        return CompletableFuture.runAsync(() -> {
+            Iterators.tryIterate(ids, id -> {
+                this.plugin.getStorage().loadUser(id, null).join();
+            });
+        }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override

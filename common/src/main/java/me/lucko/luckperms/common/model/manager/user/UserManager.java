@@ -77,7 +77,7 @@ public interface UserManager<T extends User> extends Manager<UUID, User, T> {
     /**
      * Reloads the data of all *online* users
      */
-    CompletableFuture<Void> updateAllUsers();
+    CompletableFuture<Void> loadAllUsers();
 
     /**
      * Invalidates the cached data for *loaded* users.
