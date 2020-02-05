@@ -116,9 +116,11 @@ public final class LuckPermsPermissionMap extends ForwardingMap<String, Permissi
 
     @Override
     public void putAll(@NonNull Map<? extends String, ? extends Permission> m) {
-        for (Map.Entry<? extends String, ? extends Permission> ent : m.entrySet()) {
-            put(ent.getKey(), ent.getValue());
+        for (Map.Entry<? extends String, ? extends Permission> e : m.entrySet()) {
+            this.plugin.getPermissionRegistry().insert(e.getKey());
+            super.put(e.getKey(), inject(e.getValue()));
         }
+        update();
     }
 
     @Override
