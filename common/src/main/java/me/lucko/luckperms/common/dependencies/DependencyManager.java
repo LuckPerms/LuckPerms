@@ -61,6 +61,8 @@ public class DependencyManager {
     private final LuckPermsPlugin plugin;
     private final MessageDigest digest;
     private final DependencyRegistry registry;
+    private final Path libsDirectory;
+
     private final EnumMap<Dependency, Path> loaded = new EnumMap<>(Dependency.class);
     private final Map<ImmutableSet<Dependency>, IsolatedClassLoader> loaders = new HashMap<>();
     private RelocationHandler relocationHandler = null;
@@ -73,6 +75,22 @@ public class DependencyManager {
             throw new RuntimeException(e);
         }
         this.registry = new DependencyRegistry(plugin);
+
+        this.libsDirectory = this.plugin.getBootstrap().getDataDirectory().resolve("libs");
+        try {
+            MoreFiles.createDirectoriesIfNotExists(this.libsDirectory);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to create libs directory", e);
+        }
+
+        Path oldLibsDirectory = this.plugin.getBootstrap().getDataDirectory().resolve("lib");
+        if (Files.exists(oldLibsDirectory)) {
+            try {
+                MoreFiles.deleteDirectory(oldLibsDirectory);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private synchronized RelocationHandler getRelocationHandler() {
@@ -80,16 +98,6 @@ public class DependencyManager {
             this.relocationHandler = new RelocationHandler(this);
         }
         return this.relocationHandler;
-    }
-
-    private Path getSaveDirectory() {
-        Path saveDirectory = this.plugin.getBootstrap().getDataDirectory().resolve("lib");
-        try {
-            MoreFiles.createDirectoriesIfNotExists(saveDirectory);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to create lib directory", e);
-        }
-        return saveDirectory;
     }
 
     public IsolatedClassLoader obtainClassLoaderWith(Set<Dependency> dependencies) {
@@ -129,8 +137,6 @@ public class DependencyManager {
     }
 
     public void loadDependencies(Set<Dependency> dependencies) {
-        Path saveDirectory = getSaveDirectory();
-
         // create a list of file sources
         List<Source> sources = new ArrayList<>();
 
@@ -141,7 +147,7 @@ public class DependencyManager {
             }
 
             try {
-                Path file = downloadDependency(saveDirectory, dependency);
+                Path file = downloadDependency(dependency);
                 sources.add(new Source(dependency, file));
             } catch (Throwable e) {
                 this.plugin.getLogger().severe("Exception whilst downloading dependency " + dependency.name());
@@ -163,7 +169,7 @@ public class DependencyManager {
                 }
 
                 Path input = source.file;
-                Path output = input.getParent().resolve("remapped-" + input.getFileName().toString());
+                Path output = this.libsDirectory.resolve(source.dependency.getFileName() + "-remapped.jar");
 
                 // if the remapped file exists already, just use that.
                 if (Files.exists(output)) {
@@ -201,9 +207,8 @@ public class DependencyManager {
         }
     }
 
-    private Path downloadDependency(Path saveDirectory, Dependency dependency) throws Exception {
-        String fileName = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
-        Path file = saveDirectory.resolve(fileName);
+    private Path downloadDependency(Dependency dependency) throws Exception {
+        Path file = this.libsDirectory.resolve(dependency.getFileName() + ".jar");
 
         // if the file already exists, don't attempt to re-download it.
         if (Files.exists(file)) {

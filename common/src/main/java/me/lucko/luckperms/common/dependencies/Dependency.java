@@ -343,6 +343,10 @@ public enum Dependency {
     }
     */
 
+    public String getFileName() {
+        return name().toLowerCase().replace('_', '-') + "-" + this.version;
+    }
+
     public List<URL> getUrls() {
         return this.urls;
     }
