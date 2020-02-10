@@ -12,7 +12,7 @@ dependencies {
 
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.1-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:text-adapter-bukkit:3.0.2'
-    compileOnly 'me.lucko:commodore:1.6'
+    compileOnly 'me.lucko:commodore:1.7'
     compileOnly('net.milkbowl.vault:VaultAPI:1.6') {
         exclude(module: 'bukkit')
     }
