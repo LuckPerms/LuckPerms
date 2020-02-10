@@ -31,6 +31,7 @@ import net.luckperms.api.node.metadata.NodeMetadataKey;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.time.Duration;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
@@ -111,8 +112,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
             throw new IllegalArgumentException("duration must be positive");
         }
         long seconds = Objects.requireNonNull(unit, "unit").toSeconds(duration);
-        long timeNow = System.currentTimeMillis() / 1000L;
-        return expiry(timeNow + seconds);
+        return expiry(Duration.ofSeconds(seconds));
     }
 
     /**
