@@ -63,6 +63,9 @@ public class ContextsFile {
 
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             JsonObject data = GsonProvider.normal().fromJson(reader, JsonObject.class);
+            if (data == null) {
+                return;
+            }
 
             if (data.has("static-contexts")) {
                 this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).immutableCopy();
