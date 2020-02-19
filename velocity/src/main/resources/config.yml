@@ -132,7 +132,7 @@ data:
       # It helps you get rid of annoying "SSL certificate ERROR" spamming your console.
       # More properties definitions for MySQL can be found at
       # https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-configuration-properties.html
-      #####
+      #
       #useSSL: false
       #verifyServerCertificate: false
 
