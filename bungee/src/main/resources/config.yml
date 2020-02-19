@@ -133,6 +133,15 @@ data:
     properties:
       useUnicode: true
       characterEncoding: utf8
+      # If you are running local Database instance(For example: MySQL) on the same server of minecraft.
+      # You may have the following two options uncommented.(Remove the leading "#")
+      # Since there is no need to encrypt DB connection.
+      # It helps you get rid of annoying "SSL certificate ERROR" spamming your console.
+      # More properties definitions for MySQL can be found at
+      # https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-configuration-properties.html
+      #####
+      #useSSL: false
+      #verifyServerCertificate: false
 
   # The prefix for all LuckPerms SQL tables.
   # - Change this is you want to use different tables for different servers.
