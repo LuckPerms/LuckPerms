@@ -133,18 +133,18 @@ data:
     connection-timeout: 5000 # 5 seconds
 
     # This setting allows you to define extra properties for connections.
+    #
+    # By default, the following options are set to enable utf8 encoding. (you may need to remove
+    # these if you are using PostgreSQL)
+    #   useUnicode: true
+    #   characterEncoding: utf8
+    #
+    # You can also use this section to disable SSL connections, by setting:
+    #   useSSL: false
+    #   verifyServerCertificate: false
     properties:
       useUnicode: true
       characterEncoding: utf8
-      # If you are running local Database instance(For example: MySQL) on the same server of minecraft.
-      # You may have the following two options uncommented.(Remove the leading "#")
-      # Since there is no need to encrypt DB connection.
-      # It helps you get rid of annoying "SSL certificate ERROR" spamming your console.
-      # More properties definitions for MySQL can be found at
-      # https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-configuration-properties.html
-      #
-      #useSSL: false
-      #verifyServerCertificate: false
 
   # The prefix for all LuckPerms SQL tables.
   # - Change this is you want to use different tables for different servers.
