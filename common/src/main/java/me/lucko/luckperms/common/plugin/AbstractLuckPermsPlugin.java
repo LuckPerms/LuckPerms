@@ -232,7 +232,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // close file watcher
         if (this.fileWatcher != null) {
-            //this.fileWatcher.close();
+            this.fileWatcher.close();
         }
 
         // unregister api
