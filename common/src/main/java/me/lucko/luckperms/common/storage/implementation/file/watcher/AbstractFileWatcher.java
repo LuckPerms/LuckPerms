@@ -183,7 +183,11 @@ public abstract class AbstractFileWatcher implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
-        this.service.close();
+    public void close() {
+        try {
+            this.service.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
