@@ -49,7 +49,7 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.storage.implementation.file.FileWatcher;
+import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
