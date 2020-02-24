@@ -50,7 +50,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
-import me.lucko.luckperms.common.storage.implementation.file.FileWatcher;
+import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
@@ -232,7 +232,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // close file watcher
         if (this.fileWatcher != null) {
-            this.fileWatcher.close();
+            //this.fileWatcher.close();
         }
 
         // unregister api
