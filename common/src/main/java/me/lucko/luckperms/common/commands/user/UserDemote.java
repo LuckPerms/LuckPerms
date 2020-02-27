@@ -82,7 +82,7 @@ public class UserDemote extends ChildCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        boolean silent = args.remove("-s");
+        boolean dontShowTrackProgress = args.remove("-s");
         MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, getPermission().get(), context)) {
@@ -130,7 +130,7 @@ public class UserDemote extends ChildCommand<User> {
                 String groupTo = result.getGroupTo().get();
 
                 Message.USER_DEMOTE_SUCCESS.send(sender, user.getFormattedDisplayName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
-                if (!silent) {
+                if (!dontShowTrackProgress) {
                     Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupTo, groupFrom, true));
                 }
 
