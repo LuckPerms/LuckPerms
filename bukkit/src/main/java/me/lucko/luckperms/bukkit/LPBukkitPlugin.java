@@ -333,6 +333,10 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             return;
         }
 
+        if (!callerIsSync && this.bootstrap.isServerStopping()) {
+            return;
+        }
+
         User user = getUserManager().getIfLoaded(player.getUniqueId());
         boolean value;
 

@@ -88,6 +88,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     private final CountDownLatch loadLatch = new CountDownLatch(1);
     private final CountDownLatch enableLatch = new CountDownLatch(1);
     private boolean serverStarting = true;
+    private boolean serverStopping = false;
 
     // if the plugin has been loaded on an incompatible version
     private boolean incompatibleVersion = false;
@@ -150,6 +151,8 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
             return;
         }
 
+        this.serverStopping = true;
+        this.serverStopping = false;
         this.startTime = Instant.now();
         try {
             this.plugin.enable();
@@ -167,8 +170,8 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
             return;
         }
 
+        this.serverStopping = true;
         this.plugin.disable();
-        this.serverStarting = true;
     }
 
     @Override
@@ -183,6 +186,10 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
 
     public boolean isServerStarting() {
         return this.serverStarting;
+    }
+
+    public boolean isServerStopping() {
+        return this.serverStopping;
     }
 
     // provide information about the plugin
