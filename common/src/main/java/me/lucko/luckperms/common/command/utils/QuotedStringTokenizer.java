@@ -44,7 +44,7 @@ public class QuotedStringTokenizer {
         while (hasNext()) {
             output.add(readString());
         }
-        if (!omitEmptyStringAtEnd && isWhitespace(peek(-1))) {
+        if (!omitEmptyStringAtEnd && this.cursor > 0 && isWhitespace(peek(-1))) {
             output.add("");
         }
         return output;
