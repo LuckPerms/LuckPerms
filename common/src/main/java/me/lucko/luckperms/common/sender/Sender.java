@@ -48,10 +48,6 @@ public interface Sender {
     UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     /** The name used by the console sender. */
     String CONSOLE_NAME = "Console";
-    /** The uuid used by the 'import' sender. */
-    UUID IMPORT_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    /** The name used by the 'import' sender. */
-    String IMPORT_NAME = "Import";
 
     /**
      * Gets the plugin instance the sender is from.
@@ -157,16 +153,7 @@ public interface Sender {
      * @return if the sender is the console
      */
     default boolean isConsole() {
-        return CONSOLE_UUID.equals(getUniqueId()) || IMPORT_UUID.equals(getUniqueId());
-    }
-
-    /**
-     * Gets whether this sender is an import process
-     *
-     * @return if the sender is an import process
-     */
-    default boolean isImport() {
-        return IMPORT_UUID.equals(getUniqueId());
+        return CONSOLE_UUID.equals(getUniqueId());
     }
 
     /**

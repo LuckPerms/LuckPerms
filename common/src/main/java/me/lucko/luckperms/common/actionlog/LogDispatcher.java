@@ -29,14 +29,11 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.log.LogNotify;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
 import net.luckperms.api.event.log.LogBroadcastEvent;
 import net.luckperms.api.event.log.LogNotifyEvent;
-
-import java.util.Optional;
 
 public class LogDispatcher {
     private final LuckPermsPlugin plugin;
@@ -61,20 +58,11 @@ public class LogDispatcher {
     }
 
     public void dispatch(LoggedAction entry, Sender sender) {
-        // set the event to cancelled if the sender is import
-        if (!this.plugin.getEventDispatcher().dispatchLogPublish(sender.isImport(), entry)) {
+        if (!this.plugin.getEventDispatcher().dispatchLogPublish(false, entry)) {
             this.plugin.getStorage().logAction(entry);
         }
 
-        // don't dispatch log entries sent by an import process
-        if (sender.isImport()) {
-            return;
-        }
-
-        Optional<InternalMessagingService> messagingService = this.plugin.getMessagingService();
-        if (!sender.isImport() && messagingService.isPresent()) {
-            messagingService.get().pushLog(entry);
-        }
+        this.plugin.getMessagingService().ifPresent(service -> service.pushLog(entry));
 
         boolean shouldCancel = !this.plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY);
         if (!this.plugin.getEventDispatcher().dispatchLogBroadcast(shouldCancel, entry, LogBroadcastEvent.Origin.LOCAL)) {
