@@ -457,7 +457,7 @@ public enum Message {
     FILE_NOT_WITHIN_DIRECTORY("&cError: File &4{}&c must be a direct child of the data directory.", true),
     IMPORT_FILE_DOESNT_EXIST("&cError: File &4{}&c does not exist.", true),
     IMPORT_FILE_NOT_READABLE("&cError: File &4{}&c is not readable.", true),
-    IMPORT_FILE_READ_FAILURE("&cAn unexpected error occured whilst reading from the import file.", true),
+    IMPORT_FILE_READ_FAILURE("&cAn unexpected error occured whilst reading from the import file. (is it the correct format?)", true),
 
     IMPORT_PROGRESS("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferrors.", true),
     IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferror.", true),

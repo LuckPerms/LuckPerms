@@ -74,7 +74,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -139,10 +138,6 @@ public class CommandManager {
     }
 
     public CompletableFuture<CommandResult> executeCommand(Sender sender, String label, List<String> args) {
-        return executeCommand(sender, label, args, this.executor);
-    }
-
-    public CompletableFuture<CommandResult> executeCommand(Sender sender, String label, List<String> args, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return execute(sender, label, args);
@@ -151,7 +146,7 @@ public class CommandManager {
                 e.printStackTrace();
                 return null;
             }
-        }, executor);
+        }, this.executor);
     }
 
     public boolean hasPermissionForAny(Sender sender) {

@@ -45,15 +45,6 @@ public final class StorageAssistant {
     private StorageAssistant() {}
 
     public static Group loadGroup(String target, Sender sender, LuckPermsPlugin plugin, boolean auditTemporary) {
-        // special handling for the importer
-        if (sender.isImport()) {
-            Group group = plugin.getGroupManager().getIfLoaded(target);
-            if (group == null) {
-                Message.GROUP_NOT_FOUND.send(sender, target);
-            }
-            return group;
-        }
-
         Group group = plugin.getStorage().loadGroup(target).join().orElse(null);
         if (group == null) {
             // failed to load, but it might be a display name.
@@ -77,15 +68,7 @@ public final class StorageAssistant {
     }
 
     public static Track loadTrack(String target, Sender sender, LuckPermsPlugin plugin) {
-        Track track;
-
-        // special handling for the importer
-        if (sender.isImport()) {
-            track = plugin.getTrackManager().getIfLoaded(target);
-        } else {
-            track = plugin.getStorage().loadTrack(target).join().orElse(null);
-        }
-
+        Track track = plugin.getStorage().loadTrack(target).join().orElse(null);
         if (track == null) {
             Message.TRACK_NOT_FOUND.send(sender, target);
             return null;
@@ -95,13 +78,6 @@ public final class StorageAssistant {
     }
 
     public static void save(User user, Sender sender, LuckPermsPlugin plugin) {
-        // special handling for the importer
-        if (sender.isImport()) {
-            // join calls to save users - as we always load them
-            plugin.getStorage().saveUser(user).join();
-            return;
-        }
-
         try {
             plugin.getStorage().saveUser(user).get();
         } catch (Exception e) {
@@ -117,13 +93,6 @@ public final class StorageAssistant {
     }
 
     public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
-        // special handling for the importer
-        if (sender.isImport()) {
-            // allow the buffer to handle things
-            plugin.getStorage().saveGroup(group);
-            return;
-        }
-
         try {
             plugin.getStorage().saveGroup(group).get();
         } catch (Exception e) {
@@ -142,13 +111,6 @@ public final class StorageAssistant {
     }
 
     public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
-        // special handling for the importer
-        if (sender.isImport()) {
-            // allow the buffer to handle things
-            plugin.getStorage().saveTrack(track);
-            return;
-        }
-
         try {
             plugin.getStorage().saveTrack(track).get();
         } catch (Exception e) {

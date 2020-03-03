@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.commands.misc;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.backup.Importer;
-import me.lucko.luckperms.common.backup.LegacyImporter;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -48,7 +47,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 
 public class ImportCommand extends SingleCommand {
@@ -92,46 +90,22 @@ public class ImportCommand extends SingleCommand {
             return CommandResult.FAILURE;
         }
 
-        if (path.getFileName().toString().endsWith(".json.gz")) {
-            return exportModern(plugin, sender, path);
-        } else {
-            return exportLegacy(plugin, sender, path);
-        }
-    }
-
-    private CommandResult exportModern(LuckPermsPlugin plugin, Sender sender, Path path) {
-        JsonObject data;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
-            data = GsonProvider.normal().fromJson(reader, JsonObject.class);;
-        } catch (IOException e) {
-            e.printStackTrace();
-            Message.IMPORT_FILE_READ_FAILURE.send(sender);
-            return CommandResult.FAILURE;
-        }
-
-        return runImporter(plugin, sender, () -> new Importer(plugin, sender, data));
-    }
-
-    private CommandResult exportLegacy(LuckPermsPlugin plugin, Sender sender, Path path) {
-        List<String> commands;
-        try {
-            commands = Files.readAllLines(path, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Message.IMPORT_FILE_READ_FAILURE.send(sender);
-            return CommandResult.FAILURE;
-        }
-
-        return runImporter(plugin, sender, () -> new LegacyImporter(plugin.getCommandManager(), sender, commands));
-    }
-
-    private CommandResult runImporter(LuckPermsPlugin plugin, Sender sender, Supplier<Runnable> importerSupplier) {
         if (!this.running.compareAndSet(false, true)) {
             Message.IMPORT_ALREADY_RUNNING.send(sender);
             return CommandResult.STATE_ERROR;
         }
 
-        Runnable importer = importerSupplier.get();
+        JsonObject data;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
+            data = GsonProvider.normal().fromJson(reader, JsonObject.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Message.IMPORT_FILE_READ_FAILURE.send(sender);
+            this.running.set(false);
+            return CommandResult.FAILURE;
+        }
+
+        Importer importer = new Importer(plugin, sender, data);
 
         // Run the importer in its own thread.
         plugin.getBootstrap().getScheduler().executeAsync(() -> {
@@ -144,4 +118,5 @@ public class ImportCommand extends SingleCommand {
 
         return CommandResult.SUCCESS;
     }
+
 }

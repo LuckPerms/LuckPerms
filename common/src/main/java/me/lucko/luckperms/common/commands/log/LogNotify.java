@@ -87,7 +87,7 @@ public class LogNotify extends ChildCommand<Log> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
-        if (sender.isConsole() || sender.isImport()) {
+        if (sender.isConsole()) {
             Message.LOG_NOTIFY_CONSOLE.send(sender);
             return CommandResult.SUCCESS;
         }
