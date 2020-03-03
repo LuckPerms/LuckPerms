@@ -50,12 +50,13 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -123,10 +124,10 @@ public class Exporter implements Runnable {
     private JsonObject exportGroups() {
         JsonObject out = new JsonObject();
         List<Group> groups = this.plugin.getGroupManager().getAll().values().stream()
-                .sorted((o1, o2) -> {
-                    int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
-                    return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
-                }).collect(Collectors.toList());
+                .sorted(Comparator.<Group>comparingInt(o -> o.getWeight().orElse(0)).reversed()
+                        .thenComparing(Group::getName)
+                )
+                .collect(Collectors.toList());
 
         for (Group group : groups) {
             out.add(group.getName(), new JObject()
@@ -138,7 +139,9 @@ public class Exporter implements Runnable {
 
     private JsonObject exportTracks() {
         JsonObject out = new JsonObject();
-        Collection<? extends Track> tracks = this.plugin.getTrackManager().getAll().values();
+        Collection<Track> tracks = this.plugin.getTrackManager().getAll().values().stream()
+                .sorted(Comparator.comparing(Track::getName))
+                .collect(Collectors.toList());
 
         for (Track track : tracks) {
             out.add(track.getName(), new JObject()
@@ -167,7 +170,7 @@ public class Exporter implements Runnable {
         Set<CompletableFuture<Void>> futures = new HashSet<>();
 
         AtomicInteger userCount = new AtomicInteger(0);
-        Map<UUID, JsonObject> out = Collections.synchronizedMap(new HashMap<>());
+        Map<UUID, JsonObject> out = Collections.synchronizedMap(new TreeMap<>());
 
         // iterate through each user.
         for (UUID uuid : users) {
