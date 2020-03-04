@@ -42,8 +42,8 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAmount;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -54,18 +54,15 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
     protected ImmutableContextSet.Builder context;
     protected final Map<NodeMetadataKey<?>, Object> metadata;
 
-    protected AbstractNodeBuilder() {
-        this.value = true;
-        this.expireAt = 0L;
-        this.context = new ImmutableContextSetImpl.BuilderImpl();
-        this.metadata = new IdentityHashMap<>();
-    }
-
     protected AbstractNodeBuilder(boolean value, long expireAt, ImmutableContextSet context, Map<NodeMetadataKey<?>, Object> metadata) {
         this.value = value;
         this.expireAt = expireAt;
         this.context = new ImmutableContextSetImpl.BuilderImpl().addAll(context);
         this.metadata = new HashMap<>(metadata);
+    }
+
+    protected AbstractNodeBuilder() {
+        this(true, 0L, ImmutableContextSet.empty(), Collections.emptyMap());
     }
 
     @Override

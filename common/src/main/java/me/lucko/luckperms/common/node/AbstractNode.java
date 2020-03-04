@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.node;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.node.utils.ShorthandParser;
 
@@ -74,7 +75,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
         this.value = value;
         this.expireAt = expireAt;
         this.contexts = contexts;
-        this.metadata = metadata;
+        this.metadata = ImmutableMap.copyOf(metadata);
 
         this.resolvedShorthand = this instanceof PermissionNode ? ImmutableList.copyOf(ShorthandParser.expandShorthand(this.key)) : ImmutableList.of();
 
