@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.query;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import net.luckperms.api.context.ContextSet;
@@ -45,7 +46,7 @@ public class QueryOptionsImpl implements QueryOptions {
     private final QueryMode mode;
     private final ImmutableContextSet context;
     private final byte flags;
-    private final Map<OptionKey<?>, Object> options;
+    private final ImmutableMap<OptionKey<?>, Object> options;
     private final int hashCode;
 
     private Set<Flag> flagsSet = null;
@@ -54,7 +55,7 @@ public class QueryOptionsImpl implements QueryOptions {
         this.mode = mode;
         this.context = context;
         this.flags = flags;
-        this.options = options;
+        this.options = ImmutableMap.copyOf(options);
         this.hashCode = calculateHashCode();
     }
 
