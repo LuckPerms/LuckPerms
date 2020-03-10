@@ -151,7 +151,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
             return;
         }
 
-        this.serverStopping = true;
+        this.serverStarting = true;
         this.serverStopping = false;
         this.startTime = Instant.now();
         try {
