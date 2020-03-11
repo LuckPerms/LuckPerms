@@ -36,6 +36,7 @@ import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -51,11 +52,11 @@ public class QueryOptionsImpl implements QueryOptions {
 
     private Set<Flag> flagsSet = null;
 
-    QueryOptionsImpl(QueryMode mode, ImmutableContextSet context, byte flags, Map<OptionKey<?>, Object> options) {
+    QueryOptionsImpl(QueryMode mode, @Nullable ImmutableContextSet context, byte flags, @Nullable Map<OptionKey<?>, Object> options) {
         this.mode = mode;
         this.context = context;
         this.flags = flags;
-        this.options = ImmutableMap.copyOf(options);
+        this.options = options == null ? null : ImmutableMap.copyOf(options);
         this.hashCode = calculateHashCode();
     }
 
@@ -104,6 +105,9 @@ public class QueryOptionsImpl implements QueryOptions {
 
     @Override
     public @NonNull Map<OptionKey<?>, Object> options() {
+        if (this.options == null) {
+            return ImmutableMap.of();
+        }
         return this.options;
     }
 
