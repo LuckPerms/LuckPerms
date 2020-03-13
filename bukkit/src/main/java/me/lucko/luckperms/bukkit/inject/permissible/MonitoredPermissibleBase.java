@@ -28,10 +28,10 @@ package me.lucko.luckperms.bukkit.inject.permissible;
 import me.lucko.luckperms.bukkit.inject.dummy.DummyPermissibleBase;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
-import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
 import org.bukkit.permissions.PermissibleBase;
@@ -70,7 +70,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
     }
 
     private void logCheck(PermissionCheckEvent.Origin origin, String permission, boolean result) {
-        this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.name, QueryOptions.defaultContextualOptions(), permission, TristateResult.of(Tristate.of(result)));
+        this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.name, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.of(Tristate.of(result)));
         this.plugin.getPermissionRegistry().offer(permission);
     }
 

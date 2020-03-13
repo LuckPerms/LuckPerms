@@ -30,6 +30,7 @@ import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
@@ -113,7 +114,7 @@ public class BungeePermissionCheckListener implements Listener {
         Tristate result = Tristate.of(e.hasPermission());
         String name = "internal/" + e.getSender().getName();
 
-        this.plugin.getVerboseHandler().offerPermissionCheckEvent(me.lucko.luckperms.common.verbose.event.PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, name, QueryOptions.defaultContextualOptions(), permission, TristateResult.of(result));
+        this.plugin.getVerboseHandler().offerPermissionCheckEvent(me.lucko.luckperms.common.verbose.event.PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, name, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.of(result));
         this.plugin.getPermissionRegistry().offer(permission);
     }
 
@@ -130,7 +131,7 @@ public class BungeePermissionCheckListener implements Listener {
         Tristate result = e.getResult();
         String name = "internal/" + e.getSender().getName();
 
-        this.plugin.getVerboseHandler().offerPermissionCheckEvent(me.lucko.luckperms.common.verbose.event.PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK, name, QueryOptions.defaultContextualOptions(), permission, TristateResult.of(result));
+        this.plugin.getVerboseHandler().offerPermissionCheckEvent(me.lucko.luckperms.common.verbose.event.PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK, name, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.of(result));
         this.plugin.getPermissionRegistry().offer(permission);
     }
 }

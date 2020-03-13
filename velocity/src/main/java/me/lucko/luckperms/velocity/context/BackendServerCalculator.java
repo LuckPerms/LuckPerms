@@ -29,6 +29,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
 import net.luckperms.api.context.ContextCalculator;
@@ -68,7 +69,7 @@ public class BackendServerCalculator implements ContextCalculator<Player> {
     @Override
     public ContextSet estimatePotentialContexts() {
         Collection<RegisteredServer> servers = this.plugin.getBootstrap().getProxy().getAllServers();
-        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (RegisteredServer server : servers) {
             builder.add(DefaultContextKeys.WORLD_KEY, server.getServerInfo().getName().toLowerCase());
         }

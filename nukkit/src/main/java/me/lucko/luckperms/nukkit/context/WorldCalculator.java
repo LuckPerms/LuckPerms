@@ -26,6 +26,7 @@
 package me.lucko.luckperms.nukkit.context;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import net.luckperms.api.context.ContextCalculator;
@@ -63,7 +64,7 @@ public class WorldCalculator implements ContextCalculator<Player> {
     @Override
     public ContextSet estimatePotentialContexts() {
         Collection<Level> worlds = this.plugin.getBootstrap().getServer().getLevels().values();
-        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (Level world : worlds) {
             builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
         }

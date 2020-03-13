@@ -45,64 +45,91 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} applicable for the given key.
      *
+     * <p>Prefer using the {@link Node#builder(String)} accessor.</p>
+     *
      * @param key the key
      * @return the node builder
+     * @see Node#builder(String)
      */
     @NonNull NodeBuilder<?, ?> forKey(String key);
 
     /**
      * Gets a {@link NodeBuilder} for {@link PermissionNode}s.
      *
+     * <p>Prefer using the {@link PermissionNode#builder()} accessor.</p>
+     *
      * @return the node builder
+     * @see PermissionNode#builder()
      */
     PermissionNode.@NonNull Builder forPermission();
 
     /**
      * Gets a {@link NodeBuilder} for {@link RegexPermissionNode}s.
      *
+     * <p>Prefer using the {@link RegexPermissionNode#builder()} accessor.</p>
+     *
      * @return the node builder
+     * @see RegexPermissionNode#builder()
      */
     RegexPermissionNode.@NonNull Builder forRegexPermission();
 
     /**
      * Gets a {@link NodeBuilder} for {@link InheritanceNode}s.
      *
+     * <p>Prefer using the {@link InheritanceNode#builder()} accessor.</p>
+     *
      * @return the node builder
+     * @see InheritanceNode#builder()
      */
     InheritanceNode.@NonNull Builder forInheritance();
 
     /**
      * Gets a {@link NodeBuilder} for {@link PrefixNode}s.
      *
+     * <p>Prefer using the {@link PrefixNode#builder()} accessor.</p>
+     *
      * @return the node builder
+     * @see PrefixNode#builder()
      */
     PrefixNode.@NonNull Builder forPrefix();
 
     /**
      * Gets a {@link NodeBuilder} for {@link SuffixNode}s.
      *
+     * <p>Prefer using the {@link SuffixNode#builder()} accessor.</p>
+     *
      * @return the node builder
+     * @see SuffixNode#builder()
      */
     SuffixNode.@NonNull Builder forSuffix();
 
     /**
      * Gets a {@link NodeBuilder} for {@link MetaNode}s.
      *
+     * <p>Prefer using the {@link MetaNode#builder()} accessor.</p>
+     *
      * @return the node builder
+     * @see MetaNode#builder()
      */
     MetaNode.@NonNull Builder forMeta();
 
     /**
      * Gets a {@link NodeBuilder} for {@link WeightNode}s.
      *
+     * <p>Prefer using the {@link WeightNode#builder()} accessor.</p>
+     *
      * @return the node builder
+     * @see WeightNode#builder()
      */
     WeightNode.@NonNull Builder forWeight();
 
     /**
      * Gets a {@link NodeBuilder} for {@link DisplayNameNode}s.
      *
+     * <p>Prefer using the {@link DisplayNameNode#builder()} accessor.</p>
+     *
      * @return the node builder
+     * @see DisplayNameNode#builder()
      */
     DisplayNameNode.@NonNull Builder forDisplayName();
 

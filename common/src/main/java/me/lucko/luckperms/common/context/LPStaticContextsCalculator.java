@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.context;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
@@ -54,7 +55,7 @@ public class LPStaticContextsCalculator implements StaticContextCalculator {
 
     @Override
     public ContextSet estimatePotentialContexts() {
-        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         calculate(builder::add);
         return builder.build();
     }

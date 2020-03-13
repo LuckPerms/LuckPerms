@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
@@ -56,7 +57,6 @@ import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.ChatMetaType;
-import net.luckperms.api.query.QueryOptions;
 
 import java.time.Duration;
 import java.util.List;
@@ -119,7 +119,7 @@ public class MetaSetTempChatMeta extends GenericChildCommand {
 
         // determine the priority to set at
         if (priority == Integer.MIN_VALUE) {
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, QueryOptions.defaultContextualOptions().toBuilder().context(context).build());
+            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(context).build());
             metaAccumulator.complete();
             priority = metaAccumulator.getChatMeta(this.type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 1;
 

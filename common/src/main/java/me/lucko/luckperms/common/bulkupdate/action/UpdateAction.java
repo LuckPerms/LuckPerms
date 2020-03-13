@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.bulkupdate.action;
 
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.query.QueryField;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
@@ -58,7 +59,7 @@ public class UpdateAction implements Action {
     public Node apply(Node from) {
         switch (this.field) {
             case PERMISSION:
-                return Node.builder(this.value)
+                return NodeBuilders.determineMostApplicable(this.value)
                         .value(from.getValue())
                         .expiry(from.getExpiry())
                         .context(from.getContexts())

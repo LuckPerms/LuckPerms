@@ -36,12 +36,12 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
 import java.util.function.BiFunction;
@@ -304,7 +304,7 @@ public final class ArgumentPermissions {
             throw new IllegalStateException("Unable to get a User for " + sender.getUniqueId() + " - " + sender.getName());
         }
 
-        PermissionCache permissionData = user.getCachedData().getPermissionData(QueryOptions.defaultContextualOptions().toBuilder().context(contextSet).build());
+        PermissionCache permissionData = user.getCachedData().getPermissionData(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(contextSet).build());
         TristateResult result = permissionData.checkPermission(Inheritance.key(targetGroupName), PermissionCheckEvent.Origin.INTERNAL);
         return result.result() != Tristate.TRUE || result.processorClass() != MapProcessor.class;
     }

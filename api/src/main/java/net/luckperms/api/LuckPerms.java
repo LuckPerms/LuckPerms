@@ -41,6 +41,7 @@ import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.NodeBuilderRegistry;
 import net.luckperms.api.platform.Platform;
 import net.luckperms.api.platform.PluginMetadata;
+import net.luckperms.api.query.QueryOptionsRegistry;
 import net.luckperms.api.track.Track;
 import net.luckperms.api.track.TrackManager;
 
@@ -171,6 +172,14 @@ public interface LuckPerms {
      * @return the node builder registry
      */
     @NonNull NodeBuilderRegistry getNodeBuilderRegistry();
+
+    /**
+     * Gets the {@link QueryOptionsRegistry}.
+     *
+     * @return the query options registry
+     * @since 5.1
+     */
+    @NonNull QueryOptionsRegistry getQueryOptionsRegistry();
 
     /**
      * Gets the {@link MetaStackFactory}.

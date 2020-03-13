@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Iterators;
@@ -52,7 +53,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.node.types.InheritanceNode;
-import net.luckperms.api.query.QueryOptions;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -77,7 +77,7 @@ public class ParentInfo extends GenericChildCommand {
 
         // get the holders nodes
         List<InheritanceNode> nodes = new LinkedList<>();
-        holder.normalData().copyInheritanceNodesTo(nodes, QueryOptions.nonContextual());
+        holder.normalData().copyInheritanceNodesTo(nodes, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
 
         // remove irrelevant types (these are displayed in the other info commands)
         nodes.removeIf(node -> !node.getValue());

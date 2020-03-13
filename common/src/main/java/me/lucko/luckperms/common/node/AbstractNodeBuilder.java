@@ -62,7 +62,7 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
     }
 
     protected AbstractNodeBuilder() {
-        this(true, 0L, ImmutableContextSet.empty(), Collections.emptyMap());
+        this(true, 0L, ImmutableContextSetImpl.EMPTY, Collections.emptyMap());
     }
 
     @Override

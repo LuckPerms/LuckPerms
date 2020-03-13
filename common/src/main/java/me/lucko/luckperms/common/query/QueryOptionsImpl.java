@@ -28,6 +28,8 @@ package me.lucko.luckperms.common.query;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.Flag;
@@ -44,6 +46,9 @@ import java.util.Optional;
 import java.util.Set;
 
 public class QueryOptionsImpl implements QueryOptions {
+    public static final QueryOptions DEFAULT_CONTEXTUAL = new QueryOptionsImpl(QueryMode.CONTEXTUAL, ImmutableContextSetImpl.EMPTY, FlagUtils.DEFAULT_FLAGS, null);
+    public static final QueryOptions DEFAULT_NON_CONTEXTUAL = new QueryOptionsImpl(QueryMode.NON_CONTEXTUAL, null, FlagUtils.DEFAULT_FLAGS, null);
+
     private final QueryMode mode;
     private final ImmutableContextSet context;
     private final byte flags;
@@ -58,10 +63,6 @@ public class QueryOptionsImpl implements QueryOptions {
         this.flags = flags;
         this.options = options == null ? null : ImmutableMap.copyOf(options);
         this.hashCode = calculateHashCode();
-    }
-
-    byte getFlagsByte() {
-        return this.flags;
     }
 
     @Override

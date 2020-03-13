@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.context.ContextSetComparator;
 import me.lucko.luckperms.common.node.comparator.NodeComparator;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.model.InheritanceOrigin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
@@ -113,25 +114,25 @@ public final class NodeMap {
 
     public LinkedHashSet<Node> asSet() {
         LinkedHashSet<Node> set = new LinkedHashSet<>();
-        copyTo(set, QueryOptions.nonContextual());
+        copyTo(set, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
         return set;
     }
 
     public SortedSet<Node> asSortedSet() {
         SortedSet<Node> set = new TreeSet<>(NodeWithContextComparator.reverse());
-        copyTo(set, QueryOptions.nonContextual());
+        copyTo(set, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
         return set;
     }
 
     public LinkedHashSet<InheritanceNode> inheritanceAsSet() {
         LinkedHashSet<InheritanceNode> set = new LinkedHashSet<>();
-        copyInheritanceNodesTo(set, QueryOptions.nonContextual());
+        copyInheritanceNodesTo(set, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
         return set;
     }
 
     public SortedSet<InheritanceNode> inheritanceAsSortedSet() {
         SortedSet<InheritanceNode> set = new TreeSet<>(NodeWithContextComparator.reverse());
-        copyInheritanceNodesTo(set, QueryOptions.nonContextual());
+        copyInheritanceNodesTo(set, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
         return set;
     }
 
