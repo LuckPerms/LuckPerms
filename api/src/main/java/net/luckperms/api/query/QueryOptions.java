@@ -94,7 +94,7 @@ public interface QueryOptions {
      * @return the default non contextual query options
      */
     static @NonNull QueryOptions nonContextual() {
-        return DefaultQueryOptions.nonContextual();
+        return LuckPermsProvider.get().getQueryOptionsRegistry().defaultNonContextualOptions();
     }
 
     /**
@@ -107,7 +107,7 @@ public interface QueryOptions {
      * @return the default contextual query options
      */
     static @NonNull QueryOptions defaultContextualOptions() {
-        return DefaultQueryOptions.contextual();
+        return LuckPermsProvider.get().getQueryOptionsRegistry().defaultContextualOptions();
     }
 
     /**

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.inheritance;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
 import net.luckperms.api.query.QueryOptions;
 
@@ -40,14 +41,14 @@ public class InheritanceHandler {
 
     public InheritanceHandler(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        this.nonContextualGraph = new InheritanceGraph(plugin, QueryOptions.nonContextual());
-        this.defaultContextualGraph = new InheritanceGraph(plugin, QueryOptions.defaultContextualOptions());
+        this.nonContextualGraph = new InheritanceGraph(plugin, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
+        this.defaultContextualGraph = new InheritanceGraph(plugin, QueryOptionsImpl.DEFAULT_CONTEXTUAL);
     }
 
     public InheritanceGraph getGraph(QueryOptions queryOptions) {
-        if (queryOptions == QueryOptions.nonContextual()) {
+        if (queryOptions == QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL) {
             return this.nonContextualGraph;
-        } else if (queryOptions == QueryOptions.defaultContextualOptions()) {
+        } else if (queryOptions == QueryOptionsImpl.DEFAULT_CONTEXTUAL) {
             return this.defaultContextualGraph;
         } else {
             return new InheritanceGraph(this.plugin, queryOptions);

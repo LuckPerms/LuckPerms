@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.context.ContextSet;
@@ -110,12 +111,12 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
     @Override
     public @NonNull List<Node> getNodes() {
-        return this.handle.getOwnNodes(QueryOptions.nonContextual());
+        return this.handle.getOwnNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
     }
 
     @Override
     public @NonNull SortedSet<Node> getDistinctNodes() {
-        return this.handle.getOwnNodesSorted(QueryOptions.nonContextual());
+        return this.handle.getOwnNodesSorted(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
     }
 
     @Override

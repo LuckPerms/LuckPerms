@@ -23,7 +23,9 @@
  *  SOFTWARE.
  */
 
-package net.luckperms.api.query;
+package me.lucko.luckperms.common.query;
+
+import net.luckperms.api.query.QueryOptions;
 
 /**
  * Some default {@link QueryOptions} instances.
@@ -33,27 +35,12 @@ final class DefaultQueryOptions {
         throw new AssertionError();
     }
 
-    private static boolean setup = false;
-    private static QueryOptions contextual;
-    private static QueryOptions nonContextual;
-
-    private static void setup() {
-        if (setup) {
-            return;
-        }
-        setup = true;
-        contextual = QueryOptions.builder(QueryMode.CONTEXTUAL).build();
-        nonContextual = QueryOptions.builder(QueryMode.NON_CONTEXTUAL).build();
-    }
-
     static QueryOptions contextual() {
-        setup();
-        return contextual;
+        return QueryOptionsImpl.DEFAULT_CONTEXTUAL;
     }
 
     static QueryOptions nonContextual() {
-        setup();
-        return nonContextual;
+        return QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL;
     }
 
 }

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.sponge.context;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import net.luckperms.api.context.ContextCalculator;
@@ -73,11 +74,11 @@ public class WorldCalculator implements ContextCalculator<Subject> {
     public ContextSet estimatePotentialContexts() {
         Game game = this.plugin.getBootstrap().getGame();
         if (!game.isServerAvailable()) {
-            return ImmutableContextSet.empty();
+            return ImmutableContextSetImpl.EMPTY;
         }
 
         Collection<World> worlds = game.getServer().getWorlds();
-        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (World world : worlds) {
             builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
         }

@@ -27,10 +27,10 @@ package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.WeightNode;
-import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -51,7 +51,7 @@ public class WeightCache extends Cache<OptionalInt> {
     protected @NonNull OptionalInt supply() {
         boolean seen = false;
         int best = 0;
-        for (Node n : this.group.getOwnNodes(QueryOptions.nonContextual())) {
+        for (Node n : this.group.getOwnNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)) {
             if (n instanceof WeightNode) {
                 WeightNode weightNode = (WeightNode) n;
                 int value = weightNode.getWeight();

@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.api.implementation.ApiMessagingService;
 import me.lucko.luckperms.common.api.implementation.ApiMetaStackFactory;
 import me.lucko.luckperms.common.api.implementation.ApiNodeBuilderRegistry;
 import me.lucko.luckperms.common.api.implementation.ApiPlatform;
+import me.lucko.luckperms.common.api.implementation.ApiQueryOptionsRegistry;
 import me.lucko.luckperms.common.api.implementation.ApiTrackManager;
 import me.lucko.luckperms.common.api.implementation.ApiUserManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -50,6 +51,7 @@ import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.NodeBuilderRegistry;
 import net.luckperms.api.platform.Platform;
 import net.luckperms.api.platform.PluginMetadata;
+import net.luckperms.api.query.QueryOptionsRegistry;
 import net.luckperms.api.track.TrackManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -149,6 +151,11 @@ public class LuckPermsApiProvider implements LuckPerms {
     @Override
     public @NonNull NodeBuilderRegistry getNodeBuilderRegistry() {
         return ApiNodeBuilderRegistry.INSTANCE;
+    }
+
+    @Override
+    public @NonNull QueryOptionsRegistry getQueryOptionsRegistry() {
+        return ApiQueryOptionsRegistry.INSTANCE;
     }
 
     @Override

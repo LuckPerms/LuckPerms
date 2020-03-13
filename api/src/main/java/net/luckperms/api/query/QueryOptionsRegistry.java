@@ -23,42 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bungee.context;
-
-import com.imaginarycode.minecraft.redisbungee.RedisBungee;
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-
-import net.luckperms.api.context.ContextConsumer;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.context.StaticContextCalculator;
+package net.luckperms.api.query;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class RedisBungeeCalculator implements StaticContextCalculator {
-    private static final String PROXY_KEY = "proxy";
+/**
+ * A registry providing useful {@link QueryOptions} instances.
+ *
+ * @since 5.1
+ */
+public interface QueryOptionsRegistry {
 
-    @Override
-    public void calculate(@NonNull ContextConsumer consumer) {
-        RedisBungeeAPI redisBungee = RedisBungee.getApi();
-        if (redisBungee != null) {
-            consumer.accept(PROXY_KEY, redisBungee.getServerId());
-        }
-    }
+    /**
+     * Gets the default {@link QueryMode#CONTEXTUAL contextual}
+     * query options.
+     *
+     * <p>Prefer using the {@link QueryOptions#defaultContextualOptions()} accessor.</p>>
+     *
+     * @return the default contextual query options
+     * @see QueryOptions#defaultContextualOptions()
+     */
+    @NonNull QueryOptions defaultContextualOptions();
 
-    @Override
-    public ContextSet estimatePotentialContexts() {
-        RedisBungeeAPI redisBungee = RedisBungee.getApi();
-        if (redisBungee == null) {
-            return ImmutableContextSetImpl.EMPTY;
-        }
+    /**
+     * Gets the default {@link QueryMode#NON_CONTEXTUAL non contextual}
+     * query options.
+     *
+     * <p>Prefer using the {@link QueryOptions#nonContextual()} accessor.</p>>
+     *
+     * @return the default non contextual query options
+     * @see QueryOptions#nonContextual()
+     */
+    @NonNull QueryOptions defaultNonContextualOptions();
 
-        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (String server : redisBungee.getAllServers()) {
-            builder.add(PROXY_KEY, server);
-        }
-        return builder.build();
-    }
 }

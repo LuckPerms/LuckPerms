@@ -27,6 +27,7 @@ package me.lucko.luckperms.bungee.context;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
@@ -67,7 +68,7 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
     @Override
     public ContextSet estimatePotentialContexts() {
         Collection<ServerInfo> servers = this.plugin.getBootstrap().getProxy().getServers().values();
-        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (ServerInfo server : servers) {
             builder.add(DefaultContextKeys.WORLD_KEY, server.getName().toLowerCase());
         }

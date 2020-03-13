@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.TextUtils;
@@ -56,7 +57,6 @@ import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
-import net.luckperms.api.query.QueryOptions;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -89,7 +89,7 @@ public class MetaInfo extends GenericChildCommand {
         Set<MetaNode> meta = new LinkedHashSet<>();
 
         // Collect data
-        for (Node node : holder.resolveInheritedNodes(QueryOptions.nonContextual())) {
+        for (Node node : holder.resolveInheritedNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)) {
             if (!NodeType.META_OR_CHAT_META.matches(node)) {
                 continue;
             }

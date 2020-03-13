@@ -137,7 +137,7 @@ public abstract class ContextManager<T> {
     }
 
     public ImmutableContextSet getPotentialContexts() {
-        ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (ContextCalculator<? super T> calculator : this.calculators) {
             ContextSet potentialContexts;
             try {

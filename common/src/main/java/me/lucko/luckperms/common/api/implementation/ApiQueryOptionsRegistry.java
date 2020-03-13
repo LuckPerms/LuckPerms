@@ -23,42 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bungee.context;
+package me.lucko.luckperms.common.api.implementation;
 
-import com.imaginarycode.minecraft.redisbungee.RedisBungee;
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-
-import net.luckperms.api.context.ContextConsumer;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.context.StaticContextCalculator;
+import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.query.QueryOptionsRegistry;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class RedisBungeeCalculator implements StaticContextCalculator {
-    private static final String PROXY_KEY = "proxy";
+public final class ApiQueryOptionsRegistry implements QueryOptionsRegistry {
+    public static final ApiQueryOptionsRegistry INSTANCE = new ApiQueryOptionsRegistry();
 
-    @Override
-    public void calculate(@NonNull ContextConsumer consumer) {
-        RedisBungeeAPI redisBungee = RedisBungee.getApi();
-        if (redisBungee != null) {
-            consumer.accept(PROXY_KEY, redisBungee.getServerId());
-        }
+    private ApiQueryOptionsRegistry() {
+
     }
 
     @Override
-    public ContextSet estimatePotentialContexts() {
-        RedisBungeeAPI redisBungee = RedisBungee.getApi();
-        if (redisBungee == null) {
-            return ImmutableContextSetImpl.EMPTY;
-        }
+    public @NonNull QueryOptions defaultContextualOptions() {
+        return QueryOptionsImpl.DEFAULT_CONTEXTUAL;
+    }
 
-        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (String server : redisBungee.getAllServers()) {
-            builder.add(PROXY_KEY, server);
-        }
-        return builder.build();
+    @Override
+    public @NonNull QueryOptions defaultNonContextualOptions() {
+        return QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL;
     }
 }

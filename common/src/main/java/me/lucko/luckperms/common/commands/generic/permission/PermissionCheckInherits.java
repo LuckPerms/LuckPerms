@@ -39,13 +39,13 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
-import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
 import java.util.List;
@@ -66,7 +66,7 @@ public class PermissionCheckInherits extends GenericChildCommand {
         String node = ArgumentParser.parseString(0, args);
         MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
 
-        Optional<Node> match = holder.resolveInheritedNodes(QueryOptions.nonContextual()).stream()
+        Optional<Node> match = holder.resolveInheritedNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL).stream()
                 .filter(n -> n.getKey().equalsIgnoreCase(node) && n.getContexts().equals(context))
                 .findFirst();
 

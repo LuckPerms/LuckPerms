@@ -150,20 +150,16 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
 
         if (this.options == null) {
             if (this.mode == QueryMode.NON_CONTEXTUAL) {
-                QueryOptionsImpl defaults = (QueryOptionsImpl) QueryOptions.nonContextual();
-                //noinspection ConstantConditions
-                if (defaults != null && defaults.getFlagsByte() == flags) {
+                if (FlagUtils.DEFAULT_FLAGS == flags) {
                     // mode same, contexts null, flags same, options null
                     // so therefore, equal to default - return that instead!
-                    return defaults;
+                    return QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL;
                 }
             } else if (this.mode == QueryMode.CONTEXTUAL) {
-                QueryOptionsImpl defaults = (QueryOptionsImpl) QueryOptions.defaultContextualOptions();
-                //noinspection ConstantConditions
-                if (defaults != null && defaults.getFlagsByte() == flags && this.context.isEmpty()) {
+                if (FlagUtils.DEFAULT_FLAGS == flags && this.context.isEmpty()) {
                     // mode same, contexts empty, flags same, options null
                     // so therefore, equal to default - return that instead!
-                    return defaults;
+                    return QueryOptionsImpl.DEFAULT_CONTEXTUAL;
                 }
             }
         }

@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -53,7 +54,6 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
-import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.service.permission.PermissionService;
@@ -302,7 +302,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             // remove all prefixes/suffixes from the user
             this.holder.removeIf(this.type, contexts, type.nodeType()::matches, false);
 
-            MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, QueryOptions.defaultContextualOptions().toBuilder().context(contexts).build());
+            MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(contexts).build());
             metaAccumulator.complete();
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
