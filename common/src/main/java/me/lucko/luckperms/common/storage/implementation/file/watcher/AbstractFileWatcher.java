@@ -126,10 +126,7 @@ public abstract class AbstractFileWatcher implements AutoCloseable {
             WatchKey key;
             try {
                 key = this.service.take();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                break;
-            } catch (ClosedWatchServiceException e) {
+            } catch (InterruptedException | ClosedWatchServiceException e) {
                 break;
             }
 
