@@ -50,7 +50,7 @@ public class QuotedStringTokenizer {
         return output;
     }
 
-    private static boolean isQuotedStringStart(char c) {
+    private static boolean isQuoteCharacter(char c) {
         // return c == '"' || c == '“' || c == '”';
         return c == '\u0022' || c == '\u201C' || c == '\u201D';
     }
@@ -60,7 +60,7 @@ public class QuotedStringTokenizer {
     }
 
     private String readString() {
-        if (isQuotedStringStart(peek())) {
+        if (isQuoteCharacter(peek())) {
             return readQuotedString();
         } else {
             return readUnquotedString();
@@ -85,7 +85,7 @@ public class QuotedStringTokenizer {
         skip(); // skip start quote
 
         final int start = this.cursor;
-        while (hasNext() && !isQuotedStringStart(peek())) {
+        while (hasNext() && !isQuoteCharacter(peek())) {
             skip();
         }
         final int end = this.cursor;
