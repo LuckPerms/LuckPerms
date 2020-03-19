@@ -25,6 +25,11 @@
 
 package me.lucko.luckperms.common.dependencies.classloader;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+
+import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -33,34 +38,56 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 
 public class ReflectionClassLoader implements PluginClassLoader {
-    private static final Method ADD_URL_METHOD;
-
-    static {
-        try {
-            ADD_URL_METHOD = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            ADD_URL_METHOD.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
-
     private final URLClassLoader classLoader;
 
-    public ReflectionClassLoader(Object plugin) throws IllegalStateException {
-        ClassLoader classLoader = plugin.getClass().getClassLoader();
+    @SuppressWarnings("Guava") // we can't use java.util.Function because old Guava versions are used at runtime
+    private final Supplier<Method> addUrlMethod;
+
+    public ReflectionClassLoader(LuckPermsBootstrap bootstrap) throws IllegalStateException {
+        ClassLoader classLoader = bootstrap.getClass().getClassLoader();
         if (classLoader instanceof URLClassLoader) {
             this.classLoader = (URLClassLoader) classLoader;
         } else {
             throw new IllegalStateException("ClassLoader is not instance of URLClassLoader");
         }
+
+        this.addUrlMethod = Suppliers.memoize(() -> {
+            if (getJavaMajorVersion() >= 9) {
+                bootstrap.getPluginLogger().info("It is safe to ignore any warning printed following this message " +
+                        "starting with 'WARNING: An illegal reflective access operation has occurred, Illegal reflective " +
+                        "access by " + getClass().getName() + "'.");
+                bootstrap.getPluginLogger().info("This is intended, and will not have any impact the operation of LuckPerms.");
+            }
+
+            try {
+                Method addUrlMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+                addUrlMethod.setAccessible(true);
+                return addUrlMethod;
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
     public void addJarToClasspath(Path file) {
         try {
-            ADD_URL_METHOD.invoke(this.classLoader, file.toUri().toURL());
+            this.addUrlMethod.get().invoke(this.classLoader, file.toUri().toURL());
         } catch (IllegalAccessException | InvocationTargetException | MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static int getJavaMajorVersion() {
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.")) {
+            version = version.substring(2, 3);
+        } else {
+            int dot = version.indexOf(".");
+            if (dot != -1) {
+                version = version.substring(0, dot);
+            }
+        }
+        return Integer.parseInt(version);
     }
 }
