@@ -59,7 +59,6 @@ import net.luckperms.api.LuckPerms;
 
 import okhttp3.OkHttpClient;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.EnumSet;
@@ -134,7 +133,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
             try {
                 this.fileWatcher = new FileWatcher(this, getBootstrap().getDataDirectory());
-            } catch (IOException e) {
+            } catch (Throwable e) {
+                // catch throwable here, seems some JVMs throw UnsatisfiedLinkError when trying
+                // to create a watch service. see: https://github.com/lucko/LuckPerms/issues/2066
+                getLogger().warn("Error occurred whilst trying to create a file watcher:");
                 e.printStackTrace();
             }
         }
