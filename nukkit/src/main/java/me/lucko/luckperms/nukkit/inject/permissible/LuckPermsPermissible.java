@@ -26,12 +26,12 @@
 package me.lucko.luckperms.nukkit.inject.permissible;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.calculator.DefaultsProcessor;
@@ -215,8 +215,11 @@ public class LuckPermsPermissible extends PermissibleBase {
 
     @Override
     public Map<String, PermissionAttachmentInfo> getEffectivePermissions() {
-        return this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).getPermissionMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, entry -> new PermissionAttachmentInfo(this.player, entry.getKey(), null, entry.getValue())));
+        Map<String, Boolean> permissionMap = this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).getPermissionMap();
+
+        ImmutableMap.Builder<String, PermissionAttachmentInfo> builder = ImmutableMap.builder();
+        permissionMap.forEach((key, value) -> builder.put(key, new PermissionAttachmentInfo(this.player, key, null, value)));
+        return builder.build();
     }
 
     @Override
