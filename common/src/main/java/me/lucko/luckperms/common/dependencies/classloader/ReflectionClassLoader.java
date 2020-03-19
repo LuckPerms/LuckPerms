@@ -56,7 +56,7 @@ public class ReflectionClassLoader implements PluginClassLoader {
                 bootstrap.getPluginLogger().info("It is safe to ignore any warning printed following this message " +
                         "starting with 'WARNING: An illegal reflective access operation has occurred, Illegal reflective " +
                         "access by " + getClass().getName() + "'.");
-                bootstrap.getPluginLogger().info("This is intended, and will not have any impact the operation of LuckPerms.");
+                bootstrap.getPluginLogger().info("This is intended, and will not have any impact on the operation of LuckPerms.");
             }
 
             try {
