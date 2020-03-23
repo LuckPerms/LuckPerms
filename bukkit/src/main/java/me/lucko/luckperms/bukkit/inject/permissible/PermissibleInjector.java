@@ -33,7 +33,7 @@ import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.PermissionAttachment;
 
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Injects a {@link LuckPermsPermissible} into a {@link Player}.
@@ -100,7 +100,7 @@ public final class PermissibleInjector {
         // Move attachments over from the old permissible
 
         //noinspection unchecked
-        List<PermissionAttachment> attachments = (List<PermissionAttachment>) PERMISSIBLE_BASE_ATTACHMENTS_FIELD.get(oldPermissible);
+        Collection<PermissionAttachment> attachments = (Collection<PermissionAttachment>) PERMISSIBLE_BASE_ATTACHMENTS_FIELD.get(oldPermissible);
 
         newPermissible.convertAndAddAttachments(attachments);
         attachments.clear();

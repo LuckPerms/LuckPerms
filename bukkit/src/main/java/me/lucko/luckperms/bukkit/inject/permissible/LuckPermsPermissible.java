@@ -56,6 +56,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -351,10 +352,12 @@ public class LuckPermsPermissible extends PermissibleBase {
      *
      * Some (clever/dumb??) plugins attempt to add/remove/query attachments using reflection.
      *
+     * Some bukkit forks change the attachments list to be a set, so support both interfaces.
+     *
      * An instance of this map is injected into the super instance so these plugins continue
      * to work with LuckPerms.
      */
-    private final class FakeAttachmentList implements List<PermissionAttachment> {
+    private final class FakeAttachmentList implements List<PermissionAttachment>, Set<PermissionAttachment> {
 
         @Override
         public boolean add(PermissionAttachment attachment) {
@@ -397,6 +400,11 @@ public class LuckPermsPermissible extends PermissibleBase {
         @Override
         public Iterator<PermissionAttachment> iterator() {
             return ImmutableList.<PermissionAttachment>copyOf(LuckPermsPermissible.this.hookedAttachments).iterator();
+        }
+
+        @Override
+        public Spliterator<PermissionAttachment> spliterator() {
+            return ImmutableList.<PermissionAttachment>copyOf(LuckPermsPermissible.this.hookedAttachments).spliterator();
         }
 
         @Override
