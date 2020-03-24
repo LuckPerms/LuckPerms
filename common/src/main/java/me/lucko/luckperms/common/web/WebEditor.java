@@ -137,6 +137,7 @@ public final class WebEditor {
         try {
             pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
         } catch (IOException e) {
+            new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
             Message.EDITOR_UPLOAD_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }
