@@ -52,7 +52,7 @@ public class ReflectionClassLoader implements PluginClassLoader {
         }
 
         this.addUrlMethod = Suppliers.memoize(() -> {
-            if (getJavaMajorVersion() >= 9) {
+            if (isJava9OrNewer()) {
                 bootstrap.getPluginLogger().info("It is safe to ignore any warning printed following this message " +
                         "starting with 'WARNING: An illegal reflective access operation has occurred, Illegal reflective " +
                         "access by " + getClass().getName() + "'.");
@@ -78,16 +78,13 @@ public class ReflectionClassLoader implements PluginClassLoader {
         }
     }
 
-    private static int getJavaMajorVersion() {
-        String version = System.getProperty("java.version");
-        if (version.startsWith("1.")) {
-            version = version.substring(2, 3);
-        } else {
-            int dot = version.indexOf(".");
-            if (dot != -1) {
-                version = version.substring(0, dot);
-            }
+    private static boolean isJava9OrNewer() {
+        try {
+            // method was added in the Java 9 release
+            Runtime.class.getMethod("version");
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
         }
-        return Integer.parseInt(version);
     }
 }
