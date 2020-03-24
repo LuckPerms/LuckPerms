@@ -227,7 +227,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
 
         // perform unhooking from bukkit objects 1 tick later.
         // this allows plugins listening after us on MONITOR to still have intact permissions data
-        this.plugin.getBootstrap().getServer().getScheduler().runTaskLaterAsynchronously(this.plugin.getBootstrap(), () -> {
+        this.plugin.getBootstrap().getServer().getScheduler().runTaskLater(this.plugin.getBootstrap(), () -> {
             // Remove the custom permissible
             try {
                 PermissibleInjector.uninject(player, true);
