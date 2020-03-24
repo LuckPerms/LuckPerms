@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 
 import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -36,7 +37,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
-abstract class AbstractContextSet implements ContextSet {
+public abstract class AbstractContextSet implements ContextSet {
 
     protected abstract SetMultimap<String, String> backing();
 
@@ -89,7 +90,7 @@ abstract class AbstractContextSet implements ContextSet {
         return value.toLowerCase();
     }
 
-    private static boolean stringIsEmpty(String s) {
+    public static boolean stringIsEmpty(String s) {
         if (s.isEmpty()) {
             return true;
         }
@@ -99,6 +100,10 @@ abstract class AbstractContextSet implements ContextSet {
             }
         }
         return true;
+    }
+
+    public static boolean shouldIgnoreEntry(String key, String value) {
+        return (key.equalsIgnoreCase(DefaultContextKeys.SERVER_KEY) || key.equalsIgnoreCase(DefaultContextKeys.WORLD_KEY)) && value.equalsIgnoreCase("global");
     }
 
 }

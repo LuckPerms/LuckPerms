@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.commands.user.UserParentCommand;
+import me.lucko.luckperms.common.context.contextset.AbstractContextSet;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -175,26 +176,26 @@ public class ArgumentParser {
 
     private static MutableContextSet parseContext(int fromIndex, List<String> args) {
         MutableContextSet contextSet = new MutableContextSetImpl();
-        List<String> pairs = args.subList(fromIndex, args.size());
-        for (int i = 0; i < pairs.size(); i++) {
-            String pair = pairs.get(i);
-            int index = pair.indexOf('=');
+        List<String> entries = args.subList(fromIndex, args.size());
+        for (int i = 0; i < entries.size(); i++) {
+            String entry = entries.get(i);
+            int sep = entry.indexOf('=');
 
             String key;
             String value;
 
-            if (index != -1) {
-                key = pair.substring(0, index);
-                value = pair.substring(index + 1);
+            if (sep != -1) {
+                key = entry.substring(0, sep);
+                value = entry.substring(sep + 1);
             } else {
                 key = i == 1 ? DefaultContextKeys.WORLD_KEY : DefaultContextKeys.SERVER_KEY;
-                value = pair;
+                value = entry;
             }
 
-            if (key.equals("") || key.trim().isEmpty()) {
-                continue;
-            }
-            if (value.equals("") || value.trim().isEmpty()) {
+            if (AbstractContextSet.stringIsEmpty(key) ||
+                    AbstractContextSet.stringIsEmpty(value) ||
+                    // TODO reconsider a better place to insert / avoid this special case
+                    AbstractContextSet.shouldIgnoreEntry(key, value)) {
                 continue;
             }
 
