@@ -52,6 +52,8 @@ import me.lucko.luckperms.common.util.ProgressLogger;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
 
 import org.bukkit.Bukkit;
 
@@ -79,7 +81,6 @@ import java.util.stream.Collectors;
 
 public class MigrationPermissionsEx extends ChildCommand<Object> {
     private static final Method GET_DATA_METHOD;
-    private static final Method GET_USER_METHOD;
     private static final Field TIMED_PERMISSIONS_FIELD;
     private static final Field TIMED_PERMISSIONS_TIME_FIELD;
     private static final Field NATIVE_INTERFACE_FIELD;
@@ -87,9 +88,6 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
         try {
             GET_DATA_METHOD = PermissionEntity.class.getDeclaredMethod("getData");
             GET_DATA_METHOD.setAccessible(true);
-
-            GET_USER_METHOD = PermissionManager.class.getDeclaredMethod("getUser", String.class, String.class, boolean.class);
-            GET_USER_METHOD.setAccessible(true);
 
             TIMED_PERMISSIONS_FIELD = PermissionEntity.class.getDeclaredField("timedPermissions");
             TIMED_PERMISSIONS_FIELD.setAccessible(true);
@@ -188,7 +186,7 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
 
         Collection<String> userIdentifiers = manager.getBackend().getUserIdentifiers();
         Iterators.tryIterate(userIdentifiers, id -> {
-            PermissionUser user = (PermissionUser) GET_USER_METHOD.invoke(manager, id, null, false);
+            PermissionUser user = new PermissionUser(id, manager.getBackend().getUserData(id), manager);
             if (isUserEmpty(user)) {
                 return;
             }
@@ -282,7 +280,10 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
             for (String node : worldData.getValue()) {
                 if (node.isEmpty()) continue;
                 long expiry = timedPermissionsTime.getOrDefault(Strings.nullToEmpty(world) + ":" + node, 0L);
-                holder.setNode(DataType.NORMAL, MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
+                Node n = MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build();
+                if (!n.hasExpired()) {
+                    holder.setNode(DataType.NORMAL, n, true);
+                }
             }
         }
 
@@ -310,10 +311,15 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
                     }
                 }
 
-                holder.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(parentName)).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build(), true);
+                InheritanceNode n = Inheritance.builder(MigrationUtils.standardizeName(parentName)).withContext(DefaultContextKeys.WORLD_KEY, world).expiry(expiry).build();
+                if (n.hasExpired()) {
+                    continue;
+                }
+
+                holder.setNode(DataType.NORMAL, n, true);
 
                 // migrate primary groups
-                if (world == null && holder instanceof User && expiry == 0) {
+                if (world.equals("global") && holder instanceof User && expiry == 0) {
                     if (parent.getRank() < primaryWeight) {
                         primary = parent.getName();
                         primaryWeight = parent.getRank();
