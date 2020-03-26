@@ -169,11 +169,10 @@ public final class SubjectDataProxy implements SubjectData, ProxiedServiceObject
     public boolean setOption(@NonNull Set<Context> contexts, @NonNull String key, String value) {
         if (value == null) {
             handle().thenCompose(handle -> handle.unsetOption(CompatibilityUtil.convertContexts(contexts), key));
-            return true;
         } else {
             handle().thenCompose(handle -> handle.setOption(CompatibilityUtil.convertContexts(contexts), key, value));
-            return true;
         }
+        return true;
     }
 
     @Override

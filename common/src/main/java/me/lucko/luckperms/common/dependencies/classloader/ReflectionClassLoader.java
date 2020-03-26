@@ -78,6 +78,7 @@ public class ReflectionClassLoader implements PluginClassLoader {
         }
     }
 
+    @SuppressWarnings("JavaReflectionMemberAccess")
     private static boolean isJava9OrNewer() {
         try {
             // method was added in the Java 9 release
