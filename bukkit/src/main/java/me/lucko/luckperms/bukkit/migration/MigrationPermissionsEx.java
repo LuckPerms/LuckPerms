@@ -67,6 +67,7 @@ import ru.tehkode.permissions.events.PermissionEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -78,6 +79,7 @@ import java.util.stream.Collectors;
 
 public class MigrationPermissionsEx extends ChildCommand<Object> {
     private static final Method GET_DATA_METHOD;
+    private static final Method GET_USER_METHOD;
     private static final Field TIMED_PERMISSIONS_FIELD;
     private static final Field TIMED_PERMISSIONS_TIME_FIELD;
     private static final Field NATIVE_INTERFACE_FIELD;
@@ -85,6 +87,9 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
         try {
             GET_DATA_METHOD = PermissionEntity.class.getDeclaredMethod("getData");
             GET_DATA_METHOD.setAccessible(true);
+
+            GET_USER_METHOD = PermissionManager.class.getDeclaredMethod("getUser", String.class, String.class, boolean.class);
+            GET_USER_METHOD.setAccessible(true);
 
             TIMED_PERMISSIONS_FIELD = PermissionEntity.class.getDeclaredField("timedPermissions");
             TIMED_PERMISSIONS_FIELD.setAccessible(true);
@@ -181,8 +186,14 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
         // Increment the max weight from the group migrations. All user meta should override.
         int userWeight = maxWeight + 5;
 
-        Iterators.tryIterate(manager.getUsers(), user -> {
-            UUID u = BukkitUuids.lookupUuid(log, user.getIdentifier());
+        Collection<String> userIdentifiers = manager.getBackend().getUserIdentifiers();
+        Iterators.tryIterate(userIdentifiers, id -> {
+            PermissionUser user = (PermissionUser) GET_USER_METHOD.invoke(manager, id, null, false);
+            if (isUserEmpty(user)) {
+                return;
+            }
+
+            UUID u = BukkitUuids.lookupUuid(log, id);
             if (u == null) {
                 return;
             }
@@ -219,6 +230,28 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static boolean isUserEmpty(PermissionUser user) {
+        for (List<String> permissions : user.getAllPermissions().values()) {
+            if (!permissions.isEmpty()) {
+                return false;
+            }
+        }
+
+        for (List<PermissionGroup> parents : user.getAllParents().values()) {
+            if (!parents.isEmpty()) {
+                return false;
+            }
+        }
+
+        for (Map<String, String> options : user.getAllOptions().values()) {
+            if (!options.isEmpty()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static void migrateEntity(PermissionEntity entity, PermissionHolder holder, int weight) {
