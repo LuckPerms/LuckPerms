@@ -103,19 +103,6 @@ public class TreeNode {
         });
     }
 
-    public TreeNode forceInsert(String s) {
-        Map<String, TreeNode> childMap = getChildMap();
-        return childMap.compute(s, (key, prev) -> {
-            if (prev != null) {
-                return prev;
-            }
-
-            // dirty the cache & return a new node
-            this.cachedDeepSize = Integer.MIN_VALUE;
-            return new TreeNode(this);
-        });
-    }
-
     public Optional<Map<String, TreeNode>> getChildren() {
         return Optional.ofNullable(this.children);
     }
