@@ -55,12 +55,14 @@ import net.luckperms.api.model.data.DataType;
 
 import org.bukkit.Bukkit;
 
+import ru.tehkode.permissions.NativeInterface;
 import ru.tehkode.permissions.PermissionEntity;
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.PermissionsData;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
+import ru.tehkode.permissions.events.PermissionEvent;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -78,6 +80,7 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
     private static final Method GET_DATA_METHOD;
     private static final Field TIMED_PERMISSIONS_FIELD;
     private static final Field TIMED_PERMISSIONS_TIME_FIELD;
+    private static final Field NATIVE_INTERFACE_FIELD;
     static {
         try {
             GET_DATA_METHOD = PermissionEntity.class.getDeclaredMethod("getData");
@@ -88,6 +91,9 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
 
             TIMED_PERMISSIONS_TIME_FIELD = PermissionEntity.class.getDeclaredField("timedPermissionsTime");
             TIMED_PERMISSIONS_TIME_FIELD.setAccessible(true);
+
+            NATIVE_INTERFACE_FIELD = PermissionManager.class.getDeclaredField("nativeI");
+            NATIVE_INTERFACE_FIELD.setAccessible(true);
         } catch (NoSuchMethodException | NoSuchFieldException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -112,6 +118,13 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
 
         PermissionsEx pex = (PermissionsEx) Bukkit.getPluginManager().getPlugin("PermissionsEx");
         PermissionManager manager = pex.getPermissionsManager();
+
+        // hack to work around accessing pex async
+        try {
+            disablePexEvents(manager);
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
 
         log.log("Calculating group weightings.");
         int i = 0;
@@ -184,6 +197,13 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
             plugin.getStorage().saveUser(lpUser);
             log.logProgress("Migrated {} users so far.", userCount.incrementAndGet(), ProgressLogger.DEFAULT_NOTIFY_FREQUENCY);
         });
+
+        // re-enable events
+        try {
+            enablePexEvents(manager);
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
 
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
@@ -319,5 +339,41 @@ public class MigrationPermissionsEx extends ChildCommand<Object> {
             world = "global";
         }
         return world.toLowerCase();
+    }
+
+    /*
+     * Hack to workaround issue with accessing PEX async.
+     * See: https://github.com/lucko/LuckPerms/issues/2102
+     */
+
+    private static void disablePexEvents(PermissionManager manager) throws ReflectiveOperationException {
+        NativeInterface nativeInterface = (NativeInterface) NATIVE_INTERFACE_FIELD.get(manager);
+        NATIVE_INTERFACE_FIELD.set(manager, new DisabledEventsNativeInterface(nativeInterface));
+    }
+
+    private static void enablePexEvents(PermissionManager manager) throws ReflectiveOperationException {
+        NativeInterface nativeInterface = (NativeInterface) NATIVE_INTERFACE_FIELD.get(manager);
+        while (nativeInterface instanceof DisabledEventsNativeInterface) {
+            nativeInterface = ((DisabledEventsNativeInterface) nativeInterface).delegate;
+            NATIVE_INTERFACE_FIELD.set(manager, nativeInterface);
+        }
+    }
+
+    private static final class DisabledEventsNativeInterface implements NativeInterface {
+        private final NativeInterface delegate;
+
+        private DisabledEventsNativeInterface(NativeInterface delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void callEvent(PermissionEvent permissionEvent) {
+            // do nothing!
+        }
+
+        @Override public String UUIDToName(UUID uuid) { return this.delegate.UUIDToName(uuid); }
+        @Override public UUID nameToUUID(String s) { return this.delegate.nameToUUID(s); }
+        @Override public boolean isOnline(UUID uuid) { return this.delegate.isOnline(uuid); }
+        @Override public UUID getServerUUID() { return this.delegate.getServerUUID(); }
     }
 }
