@@ -639,13 +639,12 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     }
 
     private void appendNode(ConfigurationNode base, String key, ConfigurationNode attributes, String keyFieldName) {
+        ConfigurationNode appended = base.getAppendedNode();
         if (this.loader instanceof YamlLoader) {
             // create a map node with a single entry of key --> attributes
-            ConfigurationNode appended = base.getAppendedNode();
             appended.getNode(key).setValue(attributes);
         } else {
             // include the attributes and key in the same map
-            ConfigurationNode appended = base.getAppendedNode();
             appended.getNode(keyFieldName).setValue(key);
             appended.mergeValuesFrom(attributes);
         }
