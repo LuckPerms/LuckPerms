@@ -78,6 +78,7 @@ public class MetaAccumulator {
     private final SortedMap<Integer, String> prefixes;
     private final SortedMap<Integer, String> suffixes;
     private int weight = 0;
+    private String primaryGroup;
 
     private final MetaStack prefixStack;
     private final MetaStack suffixStack;
@@ -112,6 +113,9 @@ public class MetaAccumulator {
         // perform final changes
         if (!this.meta.containsKey(Weight.NODE_KEY) && this.weight != 0) {
             this.meta.put(Weight.NODE_KEY, String.valueOf(this.weight));
+        }
+        if (this.primaryGroup != null && !this.meta.containsKey("primarygroup")) {
+            this.meta.put("primarygroup", this.primaryGroup);
         }
 
         this.state.set(State.COMPLETE);
@@ -150,6 +154,11 @@ public class MetaAccumulator {
         this.weight = Math.max(this.weight, weight);
     }
 
+    public void setPrimaryGroup(String primaryGroup) {
+        ensureState(State.ACCUMULATING);
+        this.primaryGroup = primaryGroup;
+    }
+
     // read methods
 
     public ListMultimap<String, String> getMeta() {
@@ -177,6 +186,11 @@ public class MetaAccumulator {
         return this.weight;
     }
 
+    public String getPrimaryGroup() {
+        ensureState(State.COMPLETE);
+        return this.primaryGroup;
+    }
+
     public MetaStack getPrefixStack() {
         ensureState(State.COMPLETE);
         return this.prefixStack;
@@ -194,6 +208,7 @@ public class MetaAccumulator {
                 "prefixes=" + this.prefixes + ", " +
                 "suffixes=" + this.suffixes + ", " +
                 "weight=" + this.weight + ", " +
+                "primaryGroup=" + this.primaryGroup + ", " +
                 "prefixStack=" + this.prefixStack + ", " +
                 "suffixStack=" + this.suffixStack + ")";
     }

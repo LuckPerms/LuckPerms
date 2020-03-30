@@ -48,41 +48,51 @@ public interface CachedMetaData extends CachedData {
     @Nullable String getMetaValue(String key);
 
     /**
-     * Gets the user's highest priority prefix, or null if the user has no prefixes
+     * Gets the holder's highest priority prefix, or null if the holder has no prefixes
      *
      * @return a prefix string, or null
      */
     @Nullable String getPrefix();
 
     /**
-     * Gets the user's highest priority suffix, or null if the user has no suffixes
+     * Gets the holder's highest priority suffix, or null if the holder has no suffixes
      *
      * @return a suffix string, or null
      */
     @Nullable String getSuffix();
 
     /**
-     * Gets an immutable copy of the meta this user has.
+     * Gets an immutable copy of the meta this holder has.
      *
      * @return an immutable map of meta
      */
     @NonNull Map<String, List<String>> getMeta();
 
     /**
-     * Gets an immutable sorted map of all of the prefixes the user has, whereby the first value is the highest priority
-     * prefix.
+     * Gets an immutable sorted map of all of the prefixes the holder has, whereby the first
+     * value is the highest priority prefix.
      *
      * @return a sorted map of prefixes
      */
     @NonNull SortedMap<Integer, String> getPrefixes();
 
     /**
-     * Gets an immutable sorted map of all of the suffixes the user has, whereby the first value is the highest priority
-     * suffix.
+     * Gets an immutable sorted map of all of the suffixes the holder has, whereby the first
+     * value is the highest priority suffix.
      *
      * @return a sorted map of suffixes
      */
     @NonNull SortedMap<Integer, String> getSuffixes();
+
+    /**
+     * Gets the name of the holders primary group.
+     *
+     * <p>Will return {@code null} for Group holder types.</p>
+     *
+     * @return the name of the primary group
+     * @since 5.1
+     */
+    @Nullable String getPrimaryGroup();
 
     /**
      * Gets the definition used for the prefix stack

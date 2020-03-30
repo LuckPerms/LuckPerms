@@ -66,16 +66,6 @@ public class User extends PermissionHolder {
         getPlugin().getEventDispatcher().dispatchUserCacheLoad(this, this.cachedData);
     }
 
-    @Override
-    protected void invalidateCache() {
-        super.invalidateCache();
-
-        // invalidate our caches
-        if (this.primaryGroup instanceof PrimaryGroupHolder.AbstractContextual) {
-            ((PrimaryGroupHolder.AbstractContextual) this.primaryGroup).invalidateCache();
-        }
-    }
-
     public UUID getUniqueId() {
         return this.uniqueId;
     }

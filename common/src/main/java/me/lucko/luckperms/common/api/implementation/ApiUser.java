@@ -30,10 +30,12 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -70,7 +72,12 @@ public class ApiUser extends ApiPermissionHolder implements net.luckperms.api.mo
 
     @Override
     public @NonNull String getPrimaryGroup() {
-        return this.handle.getPrimaryGroup().getValue();
+        QueryOptions queryOptions = this.handle.getPlugin().getQueryOptionsForUser(this.handle)
+                .orElseGet(() -> this.handle.getPlugin().getContextManager().getStaticQueryOptions());
+
+        String value = this.handle.getCachedData().getMetaData(queryOptions).getPrimaryGroup(MetaCheckEvent.Origin.LUCKPERMS_API);
+        Objects.requireNonNull(value, "value"); // assert nonnull
+        return value;
     }
 
     @Override

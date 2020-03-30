@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
+import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.processor.MapProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
@@ -273,13 +274,16 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         if (user instanceof Group) { // npc
             return this.plugin.getConfiguration().get(ConfigKeys.VAULT_NPC_GROUP);
         }
-        String value = ((User) user).getPrimaryGroup().getValue();
+
+        QueryOptions queryOptions = getQueryOptions(uuid, world);
+        MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
+        String value = metaData.getPrimaryGroup(MetaCheckEvent.Origin.THIRD_PARTY_API);
+
         Group group = getGroup(value);
         if (group != null) {
-            value = group.getPlainDisplayName();
+            return group.getPlainDisplayName();
         }
 
-        this.plugin.getVerboseHandler().offerMetaCheckEvent(MetaCheckEvent.Origin.THIRD_PARTY_API, user.getPlainDisplayName(), QueryOptionsImpl.DEFAULT_CONTEXTUAL, "primarygroup", value);
         return value;
     }
 

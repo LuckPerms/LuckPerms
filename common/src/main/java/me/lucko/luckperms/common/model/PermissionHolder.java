@@ -347,11 +347,11 @@ public abstract class PermissionHolder {
         return ImmutableMap.copyOf(map);
     }
 
-    public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, QueryOptions queryOptions) {
-        if (accumulator == null) {
-            accumulator = MetaAccumulator.makeFromConfig(this.plugin);
-        }
+    public MetaAccumulator accumulateMeta(QueryOptions queryOptions) {
+        return accumulateMeta(MetaAccumulator.makeFromConfig(this.plugin), queryOptions);
+    }
 
+    public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, QueryOptions queryOptions) {
         InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(queryOptions);
         Iterable<PermissionHolder> traversal = graph.traverse(this);
         for (PermissionHolder holder : traversal) {
@@ -369,6 +369,12 @@ public abstract class PermissionHolder {
             }
         }
 
+        if (this instanceof User) {
+            String primaryGroup = ((User) this).getPrimaryGroup().calculateValue(queryOptions);
+            accumulator.setPrimaryGroup(primaryGroup);
+        }
+
+        accumulator.complete();
         return accumulator;
     }
 
