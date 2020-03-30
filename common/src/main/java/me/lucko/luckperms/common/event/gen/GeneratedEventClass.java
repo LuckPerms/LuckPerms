@@ -44,7 +44,6 @@ import net.luckperms.api.event.util.Param;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -60,23 +59,13 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
  */
 public class GeneratedEventClass {
 
-    /** The MethodHandles.lookup() method */
-    private static final Method METHOD_HANDLES_LOOKUP;
-    static {
-        try {
-            METHOD_HANDLES_LOOKUP = MethodHandles.class.getMethod("lookup");
-        } catch (NoSuchMethodException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
-
     /**
      * A loading cache of event types to {@link GeneratedEventClass}es.
      */
     private static final Map<Class<? extends LuckPermsEvent>, GeneratedEventClass> CACHE = LoadingMap.of(clazz -> {
         try {
             return new GeneratedEventClass(clazz);
-        } catch (ReflectiveOperationException e) {
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     });
@@ -92,17 +81,16 @@ public class GeneratedEventClass {
     }
 
     /**
-     * The constructor used to create instances of the generated class
+     * A method handle for the constructor of the event class.
      */
-    private final Constructor<? extends AbstractEvent> constructor;
+    private final MethodHandle constructor;
 
     /**
      * An array of {@link MethodHandle}s, which can set values for each of the properties in the event class.
      */
     private final MethodHandle[] setters;
 
-    private GeneratedEventClass(Class<? extends LuckPermsEvent> eventClass) throws ReflectiveOperationException {
-
+    private GeneratedEventClass(Class<? extends LuckPermsEvent> eventClass) throws Throwable {
         // get a TypeDescription for the event class
         TypeDescription eventClassType = new TypeDescription.ForLoadedType(eventClass);
 
@@ -125,7 +113,7 @@ public class GeneratedEventClass {
                     .intercept(FixedValue.value(eventClassType))
                 // implement AbstractEvent#mh by calling & returning the value of MethodHandles.lookup()
                 .method(named("mhl").and(returns(MethodHandles.Lookup.class)).and(takesArguments(0)))
-                    .intercept(MethodCall.invoke(METHOD_HANDLES_LOOKUP))
+                    .intercept(MethodCall.invoke(MethodHandles.class.getMethod("lookup")))
                 // implement a toString method
                 .withToString();
 
@@ -135,29 +123,24 @@ public class GeneratedEventClass {
                 .sorted(Comparator.comparingInt(o -> o.getAnnotation(Param.class).value()))
                 .toArray(Method[]::new);
 
-        // for each method on the event interface annotated with @Param
+        // for each property, define a field on the generated class to hold the value
         for (Method method : properties) {
-            if (!method.isAnnotationPresent(Param.class)) {
-                continue;
-            }
-
-            // define a field on the generated class to hold the value
             builder = builder.defineField(method.getName(), method.getReturnType(), Visibility.PRIVATE);
         }
 
         // finish building, load the class, get a constructor
         Class<? extends AbstractEvent> generatedClass = builder.make().load(GeneratedEventClass.class.getClassLoader()).getLoaded();
-        this.constructor = generatedClass.getDeclaredConstructor(LuckPerms.class);
+        this.constructor = MethodHandles.publicLookup().in(generatedClass)
+                .findConstructor(generatedClass, MethodType.methodType(void.class, LuckPerms.class))
+                .asType(MethodType.methodType(AbstractEvent.class, LuckPerms.class));
 
         // create a dummy instance of the generated class & get the method handle lookup instance
-        MethodHandles.Lookup lookup = this.constructor.newInstance(new Object[]{null}).mhl();
+        MethodHandles.Lookup lookup = ((AbstractEvent) this.constructor.invoke((Object) null)).mhl();
 
-        // get 'setter' MethodHandles
+        // get 'setter' MethodHandles for each property
         this.setters = new MethodHandle[properties.length];
         for (int i = 0; i < properties.length; i++) {
             Method method = properties[i];
-
-            // obtain a setter MethodHandle for the property
             this.setters[i] = lookup.findSetter(generatedClass, method.getName(), method.getReturnType())
                     .asType(MethodType.methodType(void.class, new Class[]{AbstractEvent.class, Object.class}));
         }
@@ -177,7 +160,7 @@ public class GeneratedEventClass {
         }
 
         // create a new instance of the event
-        final AbstractEvent event = this.constructor.newInstance(api);
+        final AbstractEvent event = (AbstractEvent) this.constructor.invokeExact(api);
 
         // set the properties onto the event instance
         for (int i = 0; i < this.setters.length; i++) {
