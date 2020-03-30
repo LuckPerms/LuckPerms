@@ -29,6 +29,7 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 
+import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
@@ -54,7 +55,9 @@ public class WorldCalculator implements ContextCalculator<Player> {
     public void calculate(@NonNull Player subject, @NonNull ContextConsumer consumer) {
         Set<String> seen = new HashSet<>();
         String world = subject.getWorld().getName().toLowerCase();
-        while (seen.add(world)) {
+        // seems like world names can sometimes be the empty string
+        // see: https://github.com/lucko/LuckPerms/issues/2119
+        while (Context.isValidValue(world) && seen.add(world)) {
             consumer.accept(DefaultContextKeys.WORLD_KEY, world);
             world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
         }
@@ -66,7 +69,7 @@ public class WorldCalculator implements ContextCalculator<Player> {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (World world : worlds) {
             String name = world.getName().toLowerCase();
-            if (!name.trim().isEmpty()) {
+            if (Context.isValidValue(name)) {
                 builder.add(DefaultContextKeys.WORLD_KEY, name);
             }
         }

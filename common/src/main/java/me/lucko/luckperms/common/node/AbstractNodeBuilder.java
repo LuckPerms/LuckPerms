@@ -119,7 +119,7 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
     @Override
     public @NonNull B withContext(@NonNull String key, @NonNull String value) {
         // TODO reconsider a better place to insert / avoid this special case
-        if (AbstractContextSet.shouldIgnoreEntry(key, value)) {
+        if (AbstractContextSet.isGlobalServerWorldEntry(key, value)) {
             return (B) this;
         }
         this.context.add(key, value);
