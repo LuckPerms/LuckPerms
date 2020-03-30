@@ -302,8 +302,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
             // remove all prefixes/suffixes from the user
             this.holder.removeIf(this.type, contexts, type.nodeType()::matches, false);
 
-            MetaAccumulator metaAccumulator = this.holder.accumulateMeta(null, QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(contexts).build());
-            metaAccumulator.complete();
+            MetaAccumulator metaAccumulator = this.holder.accumulateMeta(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(contexts).build());
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
 

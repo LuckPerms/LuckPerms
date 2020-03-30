@@ -238,8 +238,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         }
 
         // find the max inherited priority & add 10
-        MetaAccumulator metaAccumulator = holder.accumulateMeta(null, createQueryOptionsForWorldSet(world));
-        metaAccumulator.complete();
+        MetaAccumulator metaAccumulator = holder.accumulateMeta(createQueryOptionsForWorldSet(world));
         int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 10;
 
         Node node = type.builder(value, priority)

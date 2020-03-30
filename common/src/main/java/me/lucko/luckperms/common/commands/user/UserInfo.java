@@ -50,6 +50,7 @@ import net.luckperms.api.query.QueryOptions;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class UserInfo extends ChildCommand<User> {
@@ -64,14 +65,19 @@ public class UserInfo extends ChildCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
+        Optional<QueryOptions> queryOptions = plugin.getQueryOptionsForUser(user);
+
         Message status = plugin.getBootstrap().isPlayerOnline(user.getUniqueId()) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
+
+        String primaryGroup = user.getCachedData().getMetaData(queryOptions.orElseGet(() -> plugin.getContextManager().getStaticQueryOptions()))
+                .getPrimaryGroup(MetaCheckEvent.Origin.INTERNAL);
 
         Message.USER_INFO_GENERAL.send(sender,
                 user.getUsername().orElse("Unknown"),
                 user.getUniqueId(),
                 user.getUniqueId().version() == 4 ? "&2mojang" : "&8offline",
                 status.asString(plugin.getLocaleManager()),
-                user.getPrimaryGroup().getValue()
+                primaryGroup
         );
 
         List<InheritanceNode> parents = user.normalData().inheritanceAsSortedSet().stream()
@@ -103,16 +109,16 @@ public class UserInfo extends ChildCommand<User> {
         String prefix = "&bNone";
         String suffix = "&bNone";
         String meta = "&bNone";
-        QueryOptions queryOptions = plugin.getQueryOptionsForUser(user).orElse(null);
-        if (queryOptions != null) {
-            ContextSet contextSet = queryOptions.context();
-            if (contextSet != null && !contextSet.isEmpty()) {
+
+        if (queryOptions.isPresent()) {
+            ContextSet contextSet = queryOptions.get().context();
+            if (!contextSet.isEmpty()) {
                 context = contextSet.toSet().stream()
                         .map(e -> MessageUtils.contextToString(plugin.getLocaleManager(), e.getKey(), e.getValue()))
                         .collect(Collectors.joining(" "));
             }
 
-            MetaCache data = user.getCachedData().getMetaData(queryOptions);
+            MetaCache data = user.getCachedData().getMetaData(queryOptions.get());
             String prefixValue = data.getPrefix(MetaCheckEvent.Origin.INTERNAL);
             if (prefixValue != null) {
                 prefix = "&f\"" + prefixValue + "&f\"";

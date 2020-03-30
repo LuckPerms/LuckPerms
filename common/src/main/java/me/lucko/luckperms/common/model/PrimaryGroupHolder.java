@@ -25,18 +25,13 @@
 
 package me.lucko.luckperms.common.model;
 
-import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
-import me.lucko.luckperms.common.model.manager.group.GroupManager;
 
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryOptions;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -49,9 +44,10 @@ public interface PrimaryGroupHolder {
     /**
      * Gets the name of the primary group, or null.
      *
+     * @param queryOptions the query options to lookup with
      * @return the name of the primary group, or null.
      */
-    String getValue();
+    String calculateValue(QueryOptions queryOptions);
 
     /**
      * Gets the primary group which is stored against the user's data.
@@ -80,7 +76,7 @@ public interface PrimaryGroupHolder {
         }
 
         @Override
-        public String getValue() {
+        public String calculateValue(QueryOptions queryOptions) {
             return this.value;
         }
 
@@ -99,42 +95,14 @@ public interface PrimaryGroupHolder {
         }
     }
 
-    /**
-     * Abstract implementation of {@link PrimaryGroupHolder} which caches all lookups by context.
-     */
-    abstract class AbstractContextual extends Stored {
-        private final Map<QueryOptions, Optional<String>> cache = LoadingMap.of(this::calculateValue);
 
-        AbstractContextual(User user) {
-            super(user);
-        }
-
-        protected abstract @NonNull Optional<String> calculateValue(QueryOptions queryOptions);
-
-        public void invalidateCache() {
-            this.cache.clear();
-        }
-
-        @Override
-        public final String getValue() {
-            QueryOptions queryOptions = this.user.getPlugin().getQueryOptionsForUser(this.user).orElse(null);
-            if (queryOptions == null) {
-                queryOptions = this.user.getPlugin().getContextManager().getStaticQueryOptions();
-            }
-
-            return Objects.requireNonNull(this.cache.get(queryOptions))
-                    .orElseGet(() -> getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME));
-        }
-
-    }
-
-    class AllParentsByWeight extends AbstractContextual {
+    class AllParentsByWeight extends Stored {
         public AllParentsByWeight(User user) {
             super(user);
         }
 
         @Override
-        protected @NonNull Optional<String> calculateValue(QueryOptions queryOptions) {
+        public String calculateValue(QueryOptions queryOptions) {
             InheritanceGraph graph = this.user.getPlugin().getInheritanceHandler().getGraph(queryOptions);
 
             // fully traverse the graph, obtain a list of permission holders the user inherits from in weight order.
@@ -143,20 +111,22 @@ public interface PrimaryGroupHolder {
             // return the name of the first found group
             for (PermissionHolder holder : traversal) {
                 if (holder instanceof Group) {
-                    return Optional.of(((Group) holder).getName());
+                    return ((Group) holder).getName();
                 }
             }
-            return Optional.empty();
+
+            // fallback to stored
+            return super.calculateValue(queryOptions);
         }
     }
 
-    class ParentsByWeight extends AbstractContextual {
+    class ParentsByWeight extends Stored {
         public ParentsByWeight(User user) {
             super(user);
         }
 
         @Override
-        protected @NonNull Optional<String> calculateValue(QueryOptions queryOptions) {
+        public String calculateValue(QueryOptions queryOptions) {
             Set<Group> groups = new LinkedHashSet<>();
             for (InheritanceNode node : this.user.getOwnInheritanceNodes(queryOptions)) {
                 Group group = this.user.getPlugin().getGroupManager().getIfLoaded(node.getGroupName());
@@ -176,7 +146,7 @@ public interface PrimaryGroupHolder {
                 }
             }
 
-            return bestGroup == null ? Optional.empty() : Optional.of(bestGroup.getName());
+            return bestGroup == null ? super.calculateValue(queryOptions) : bestGroup.getName();
         }
     }
 }

@@ -119,8 +119,7 @@ public class MetaSetTempChatMeta extends GenericChildCommand {
 
         // determine the priority to set at
         if (priority == Integer.MIN_VALUE) {
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(context).build());
-            metaAccumulator.complete();
+            MetaAccumulator metaAccumulator = holder.accumulateMeta(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(context).build());
             priority = metaAccumulator.getChatMeta(this.type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 1;
 
             if (holder instanceof Group) {
