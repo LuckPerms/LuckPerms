@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.DurationParser;
 
+import net.luckperms.api.context.Context;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
@@ -192,10 +193,8 @@ public class ArgumentParser {
                 value = entry;
             }
 
-            if (AbstractContextSet.stringIsEmpty(key) ||
-                    AbstractContextSet.stringIsEmpty(value) ||
-                    // TODO reconsider a better place to insert / avoid this special case
-                    AbstractContextSet.shouldIgnoreEntry(key, value)) {
+            // TODO reconsider a better place to insert / avoid this special case
+            if (!Context.isValidKey(key) || !Context.isValidValue(value) || AbstractContextSet.isGlobalServerWorldEntry(key, value)) {
                 continue;
             }
 

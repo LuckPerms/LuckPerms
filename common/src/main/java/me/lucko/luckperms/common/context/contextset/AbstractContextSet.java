@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.context.contextset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 
+import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 
@@ -76,7 +77,7 @@ public abstract class AbstractContextSet implements ContextSet {
 
     static String sanitizeKey(String key) {
         Objects.requireNonNull(key, "key is null");
-        if (stringIsEmpty(key)) {
+        if (!Context.isValidKey(key)) {
             throw new IllegalArgumentException("key is (effectively) empty");
         }
         return key.toLowerCase();
@@ -84,25 +85,13 @@ public abstract class AbstractContextSet implements ContextSet {
 
     static String sanitizeValue(String value) {
         Objects.requireNonNull(value, "value is null");
-        if (stringIsEmpty(value)) {
+        if (!Context.isValidValue(value)) {
             throw new IllegalArgumentException("value is (effectively) empty");
         }
         return value.toLowerCase();
     }
 
-    public static boolean stringIsEmpty(String s) {
-        if (s.isEmpty()) {
-            return true;
-        }
-        for (char c : s.toCharArray()) {
-            if (c != ' ') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean shouldIgnoreEntry(String key, String value) {
+    public static boolean isGlobalServerWorldEntry(String key, String value) {
         return (key.equalsIgnoreCase(DefaultContextKeys.SERVER_KEY) || key.equalsIgnoreCase(DefaultContextKeys.WORLD_KEY)) && value.equalsIgnoreCase("global");
     }
 

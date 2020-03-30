@@ -26,11 +26,61 @@
 package net.luckperms.api.context;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents an individual context pair.
+ *
+ * <p>Context keys and values may not be null or empty. A key/value will be
+ * deemed empty if it's length is zero, or if it consists of only space
+ * characters.</p>
  */
 public interface Context {
+
+    /**
+     * Tests whether {@code key} is valid.
+     *
+     * <p>Context keys and values may not be null or empty. A key/value will be
+     * deemed empty if it's length is zero, or if it consists of only space
+     * characters.</p>
+     *
+     * <p>An exception is thrown when an invalid key is added to a {@link ContextSet}.</p>
+     *
+     * @param key the key to test
+     * @return true if valid, false otherwise.
+     * @since 5.1
+     */
+    static boolean isValidKey(@Nullable String key) {
+        if (key == null || key.isEmpty()) {
+            return false;
+        }
+
+        // look for a non-whitespace character
+        for (int i = 0, n = key.length(); i < n; i++) {
+            if (key.charAt(i) != ' ') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Tests whether {@code value} is valid.
+     *
+     * <p>Context keys and values may not be null or empty. A key/value will be
+     * deemed empty if it's length is zero, or if it consists of only space
+     * characters.</p>
+     *
+     * <p>An exception is thrown when an invalid value is added to a {@link ContextSet}.</p>
+     *
+     * @param value the value to test
+     * @return true if valid, false otherwise.
+     * @since 5.1
+     */
+    static boolean isValidValue(@Nullable String value) {
+        return isValidKey(value); // the same for now...
+    }
 
     /**
      * Gets the context key.
