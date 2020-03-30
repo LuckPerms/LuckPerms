@@ -21,6 +21,7 @@ dependencies {
     compile 'com.github.ben-manes.caffeine:caffeine:2.8.0'
     compile 'com.squareup.okhttp3:okhttp:3.14.4'
     compile 'com.squareup.okio:okio:1.17.4'
+    compile 'net.bytebuddy:byte-buddy:1.10.9'
     compile('me.lucko.configurate:configurate-core:3.5') {
         exclude(module: 'guava')
     }

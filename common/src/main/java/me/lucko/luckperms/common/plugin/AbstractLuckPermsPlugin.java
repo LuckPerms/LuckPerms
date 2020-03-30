@@ -250,6 +250,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 Dependency.CAFFEINE,
                 Dependency.OKIO,
                 Dependency.OKHTTP,
+                Dependency.BYTEBUDDY,
                 Dependency.EVENT
         );
     }
