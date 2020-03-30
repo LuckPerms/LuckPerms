@@ -176,6 +176,7 @@ public abstract class CalculatedSubject implements LPSubject {
                 accumulator.accumulateMeta(entry.getKey(), entry.getValue());
             }
         }
+        accumulator.complete();
     }
 
     @Override
