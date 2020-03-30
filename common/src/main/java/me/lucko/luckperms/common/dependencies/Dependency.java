@@ -127,6 +127,13 @@ public enum Dependency {
             Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
+    BYTEBUDDY(
+            "net{}bytebuddy",
+            "byte-buddy",
+            "1.10.9",
+            "B7nKbi+XDLA/SyVlHfHy/OJx1JG0TgQJgniHeG9pLU0=",
+            Relocation.of("bytebuddy", "net{}bytebuddy")
+    ),
     COMMODORE(
             "me{}lucko",
             "commodore",

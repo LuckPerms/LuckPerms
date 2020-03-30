@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.api.implementation.ApiPermissionHolder;
 import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
-import me.lucko.luckperms.common.event.gen.GeneratedEventSpec;
+import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
 import me.lucko.luckperms.common.event.model.EntitySourceImpl;
 import me.lucko.luckperms.common.event.model.SenderPlatformEntity;
 import me.lucko.luckperms.common.event.model.UnknownSource;
@@ -132,7 +132,11 @@ public final class EventDispatcher {
     
     @SuppressWarnings("unchecked")
     private <T extends LuckPermsEvent> T generate(Class<T> eventClass, Object... params) {
-        return (T) GeneratedEventSpec.lookup(eventClass).newInstance(this.eventBus.getApiProvider(), params);
+        try {
+            return (T) GeneratedEventClass.generate(eventClass).newInstance(this.eventBus.getApiProvider(), params);
+        } catch (Throwable e) {
+            throw new RuntimeException("Exception occurred whilst generating event instance", e);
+        }
     }
 
     public void dispatchExtensionLoad(Extension extension) {
