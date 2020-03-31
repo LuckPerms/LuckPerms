@@ -23,9 +23,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.context;
+package me.lucko.luckperms.sponge.service.model;
 
-import me.lucko.luckperms.common.context.ProxiedContextCalculator;
+import me.lucko.luckperms.common.context.ForwardingContextCalculator;
 
 import net.luckperms.api.context.ContextConsumer;
 
@@ -38,27 +38,27 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SpongeProxiedContextCalculator implements ProxiedContextCalculator<Subject> {
+public class ContextCalculatorProxy implements ForwardingContextCalculator<Subject> {
     private final ContextCalculator<Subject> delegate;
 
-    public SpongeProxiedContextCalculator(ContextCalculator<Subject> delegate) {
+    public ContextCalculatorProxy(ContextCalculator<Subject> delegate) {
         this.delegate = delegate;
     }
 
     @Override
     public void calculate(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
-        this.delegate.accumulateContexts(subject, new ProxiedContextSet(consumer));
+        this.delegate.accumulateContexts(subject, new ForwardingContextSet(consumer));
     }
 
     @Override
-    public Object getDelegate() {
+    public Object delegate() {
         return this.delegate;
     }
 
-    private static final class ProxiedContextSet implements Set<Context> {
+    private static final class ForwardingContextSet implements Set<Context> {
         private final ContextConsumer consumer;
 
-        private ProxiedContextSet(ContextConsumer consumer) {
+        private ForwardingContextSet(ContextConsumer consumer) {
             this.consumer = consumer;
         }
 

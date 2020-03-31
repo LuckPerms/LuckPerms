@@ -36,15 +36,15 @@ import java.util.Set;
 /**
  * Implements a {@link Set} of {@link Context}s, delegating all calls to a {@link ImmutableContextSet}.
  */
-public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet {
+public class ForwardingImmutableContextSet extends AbstractForwardingContextSet {
     private final ImmutableContextSet delegate;
 
-    public DelegatingImmutableContextSet(ImmutableContextSet delegate) {
+    public ForwardingImmutableContextSet(ImmutableContextSet delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public ImmutableContextSet getDelegate() {
+    public ImmutableContextSet delegate() {
         return this.delegate;
     }
 
@@ -70,11 +70,11 @@ public class DelegatingImmutableContextSet extends AbstractDelegatingContextSet 
 
     @Override
     public String toString() {
-        return "DelegatingImmutableContextSet(delegate=" + this.getDelegate() + ")";
+        return "ForwardingImmutableContextSet(delegate=" + this.delegate() + ")";
     }
 
     private final class ContextSetIterator implements Iterator<Context> {
-        private final Iterator<net.luckperms.api.context.Context> it = DelegatingImmutableContextSet.this.delegate.iterator();
+        private final Iterator<net.luckperms.api.context.Context> it = ForwardingImmutableContextSet.this.delegate.iterator();
 
         @Override
         public boolean hasNext() {

@@ -165,8 +165,8 @@ public abstract class ContextManager<T> {
 
     private static String getCalculatorClass(ContextCalculator<?> calculator) {
         Class<?> calculatorClass;
-        if (calculator instanceof ProxiedContextCalculator) {
-            calculatorClass = ((ProxiedContextCalculator<?>) calculator).getDelegate().getClass();
+        if (calculator instanceof ForwardingContextCalculator) {
+            calculatorClass = ((ForwardingContextCalculator<?>) calculator).delegate().getClass();
         } else {
             calculatorClass = calculator.getClass();
         }

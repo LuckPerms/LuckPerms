@@ -51,25 +51,21 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
     }
 
     @Override
-    protected net.luckperms.api.model.group.Group getDelegateFor(me.lucko.luckperms.common.model.Group internal) {
-        if (internal == null) {
-            return null;
-        }
-
-        return internal.getApiDelegate();
+    protected net.luckperms.api.model.group.Group proxy(me.lucko.luckperms.common.model.Group internal) {
+        return internal == null ? null : internal.getApiProxy();
     }
 
     @Override
     public @NonNull CompletableFuture<net.luckperms.api.model.group.Group> createAndLoadGroup(@NonNull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
         return this.plugin.getStorage().createAndLoadGroup(name, CreationCause.API)
-                .thenApply(this::getDelegateFor);
+                .thenApply(this::proxy);
     }
 
     @Override
     public @NonNull CompletableFuture<Optional<net.luckperms.api.model.group.Group>> loadGroup(@NonNull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
-        return this.plugin.getStorage().loadGroup(name).thenApply(opt -> opt.map(this::getDelegateFor));
+        return this.plugin.getStorage().loadGroup(name).thenApply(opt -> opt.map(this::proxy));
     }
 
     @Override
@@ -102,13 +98,13 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
     @Override
     public net.luckperms.api.model.group.Group getGroup(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return getDelegateFor(this.handle.getIfLoaded(name));
+        return proxy(this.handle.getIfLoaded(name));
     }
 
     @Override
     public @NonNull Set<net.luckperms.api.model.group.Group> getLoadedGroups() {
         return this.handle.getAll().values().stream()
-                .map(this::getDelegateFor)
+                .map(this::proxy)
                 .collect(ImmutableCollectors.toSet());
     }
 

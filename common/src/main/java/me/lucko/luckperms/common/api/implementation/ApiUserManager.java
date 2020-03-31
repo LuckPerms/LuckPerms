@@ -51,11 +51,8 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
-    protected net.luckperms.api.model.user.User getDelegateFor(User internal) {
-        if (internal == null) {
-            return null;
-        }
-        return new ApiUser(internal);
+    protected net.luckperms.api.model.user.User proxy(User internal) {
+        return internal == null ? null : internal.getApiProxy();
     }
 
     @Override
@@ -68,7 +65,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
         }
 
         return this.plugin.getStorage().loadUser(uniqueId, username)
-                .thenApply(this::getDelegateFor);
+                .thenApply(this::proxy);
     }
 
     @Override
@@ -110,19 +107,19 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     @Override
     public net.luckperms.api.model.user.User getUser(@NonNull UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uuid");
-        return getDelegateFor(this.handle.getIfLoaded(uniqueId));
+        return proxy(this.handle.getIfLoaded(uniqueId));
     }
 
     @Override
     public net.luckperms.api.model.user.User getUser(@NonNull String username) {
         Objects.requireNonNull(username, "name");
-        return getDelegateFor(this.handle.getByUsername(username));
+        return proxy(this.handle.getByUsername(username));
     }
 
     @Override
     public @NonNull Set<net.luckperms.api.model.user.User> getLoadedUsers() {
         return this.handle.getAll().values().stream()
-                .map(this::getDelegateFor)
+                .map(this::proxy)
                 .collect(ImmutableCollectors.toSet());
     }
 
