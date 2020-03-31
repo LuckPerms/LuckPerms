@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class User extends PermissionHolder {
-    private final ApiUser apiDelegate = new ApiUser(this);
+    private final ApiUser apiProxy = new ApiUser(this);
 
     /**
      * The users Mojang UUID
@@ -89,8 +89,8 @@ public class User extends PermissionHolder {
         return getFormattedDisplayName();
     }
 
-    public ApiUser getApiDelegate() {
-        return this.apiDelegate;
+    public ApiUser getApiProxy() {
+        return this.apiProxy;
     }
 
     @Override

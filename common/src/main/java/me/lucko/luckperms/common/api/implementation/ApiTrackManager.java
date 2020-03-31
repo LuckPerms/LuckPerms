@@ -47,25 +47,21 @@ public class ApiTrackManager extends ApiAbstractManager<Track, net.luckperms.api
     }
 
     @Override
-    protected net.luckperms.api.track.Track getDelegateFor(Track internal) {
-        if (internal == null) {
-            return null;
-        }
-
-        return internal.getApiDelegate();
+    protected net.luckperms.api.track.Track proxy(Track internal) {
+        return internal == null ? null : internal.getApiProxy();
     }
 
     @Override
     public @NonNull CompletableFuture<net.luckperms.api.track.Track> createAndLoadTrack(@NonNull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
         return this.plugin.getStorage().createAndLoadTrack(name, CreationCause.API)
-                .thenApply(this::getDelegateFor);
+                .thenApply(this::proxy);
     }
 
     @Override
     public @NonNull CompletableFuture<Optional<net.luckperms.api.track.Track>> loadTrack(@NonNull String name) {
         name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
-        return this.plugin.getStorage().loadTrack(name).thenApply(opt -> opt.map(this::getDelegateFor));
+        return this.plugin.getStorage().loadTrack(name).thenApply(opt -> opt.map(this::proxy));
     }
 
     @Override
@@ -88,13 +84,13 @@ public class ApiTrackManager extends ApiAbstractManager<Track, net.luckperms.api
     @Override
     public net.luckperms.api.track.Track getTrack(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return getDelegateFor(this.handle.getIfLoaded(name));
+        return proxy(this.handle.getIfLoaded(name));
     }
 
     @Override
     public @NonNull Set<net.luckperms.api.track.Track> getLoadedTracks() {
         return this.handle.getAll().values().stream()
-                .map(this::getDelegateFor)
+                .map(this::proxy)
                 .collect(ImmutableCollectors.toSet());
     }
 

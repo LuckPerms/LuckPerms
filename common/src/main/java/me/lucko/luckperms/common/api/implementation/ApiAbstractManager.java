@@ -36,6 +36,6 @@ public abstract class ApiAbstractManager<I, E, H> {
         this.handle = handle;
     }
 
-    protected abstract E getDelegateFor(I internal);
+    protected abstract E proxy(I internal);
 
 }

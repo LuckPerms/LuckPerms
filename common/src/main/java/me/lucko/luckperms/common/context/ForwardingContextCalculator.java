@@ -23,19 +23,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.context;
+package me.lucko.luckperms.common.context;
 
-import net.luckperms.api.context.ContextSet;
-
-import org.spongepowered.api.service.context.Context;
-
-import java.util.Set;
+import net.luckperms.api.context.ContextCalculator;
 
 /**
- * Represents an object which is a {@link Set} of {@link Context}s, delegating all calls to a {@link ContextSet}.
+ * Represents a {@link ContextCalculator} which delegates calls to another object.
  */
-public interface DelegatingContextSet extends Set<Context> {
+public interface ForwardingContextCalculator<T> extends ContextCalculator<T> {
 
-    ContextSet getDelegate();
+    Object delegate();
 
 }

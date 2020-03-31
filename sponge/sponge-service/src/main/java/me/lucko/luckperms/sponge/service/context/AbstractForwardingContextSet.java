@@ -30,30 +30,30 @@ import org.spongepowered.api.service.context.Context;
 import java.util.AbstractSet;
 import java.util.Set;
 
-abstract class AbstractDelegatingContextSet extends AbstractSet<Context> implements DelegatingContextSet {
+abstract class AbstractForwardingContextSet extends AbstractSet<Context> implements ForwardingContextSet {
 
     @Override
     public int size() {
-        return getDelegate().size();
+        return delegate().size();
     }
 
     @Override
     public boolean isEmpty() {
-        return getDelegate().isEmpty();
+        return delegate().isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
         if (o instanceof Context) {
             Context context = (Context) o;
-            return !context.getKey().isEmpty() && !context.getValue().isEmpty() && getDelegate().contains(context.getKey(), context.getValue());
+            return !context.getKey().isEmpty() && !context.getValue().isEmpty() && delegate().contains(context.getKey(), context.getValue());
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return getDelegate().hashCode();
+        return delegate().hashCode();
     }
 
     @Override
@@ -62,8 +62,8 @@ abstract class AbstractDelegatingContextSet extends AbstractSet<Context> impleme
             return true;
         }
 
-        if (o instanceof DelegatingContextSet) {
-            return getDelegate().equals(((DelegatingContextSet) o).getDelegate());
+        if (o instanceof ForwardingContextSet) {
+            return delegate().equals(((ForwardingContextSet) o).delegate());
         }
 
         if (o instanceof Set) {
