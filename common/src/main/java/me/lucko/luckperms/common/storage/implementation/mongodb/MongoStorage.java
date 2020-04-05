@@ -250,7 +250,7 @@ public class MongoStorage implements StorageImplementation {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
 
-                    UUID uuid = d.get("_id", UUID.class);
+                    UUID uuid = getDocumentId(d);
                     Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
                     Set<Node> results = nodes.stream()
                             .map(bulkUpdate::apply)
@@ -354,8 +354,7 @@ public class MongoStorage implements StorageImplementation {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
-                Document d = cursor.next();
-                uuids.add(d.get("_id", UUID.class));
+                uuids.add(getDocumentId(cursor.next()));
             }
         }
         return uuids;
@@ -368,7 +367,7 @@ public class MongoStorage implements StorageImplementation {
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
-                UUID holder = d.get("_id", UUID.class);
+                UUID holder = getDocumentId(d);
 
                 Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
                 for (Node e : nodes) {
@@ -601,8 +600,8 @@ public class MongoStorage implements StorageImplementation {
 
         Set<UUID> conflicting = new HashSet<>();
         try (MongoCursor<Document> cursor = c.find(new Document("name", username)).iterator()) {
-            if (cursor.hasNext()) {
-                conflicting.add(cursor.next().get("_id", UUID.class));
+            while (cursor.hasNext()) {
+                conflicting.add(getDocumentId(cursor.next()));
             }
         }
         conflicting.remove(uniqueId);
@@ -621,7 +620,7 @@ public class MongoStorage implements StorageImplementation {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
         Document doc = c.find(new Document("name", username.toLowerCase())).first();
         if (doc != null) {
-            return doc.get("_id", UUID.class);
+            return getDocumentId(doc);
         }
         return null;
     }
@@ -634,6 +633,17 @@ public class MongoStorage implements StorageImplementation {
             return doc.get("name", String.class);
         }
         return null;
+    }
+
+    private static UUID getDocumentId(Document doc) {
+        Object id = doc.get("_id");
+        if (id instanceof UUID) {
+            return (UUID) id;
+        } else if (id instanceof String) {
+            return UUID.fromString((String) id);
+        } else {
+            throw new IllegalArgumentException("Unknown id type: " + id.getClass().getName());
+        }
     }
 
     private static Document userToDoc(User user) {
