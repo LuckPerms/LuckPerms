@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.bukkit.util.CraftBukkitImplementation;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
@@ -78,12 +77,13 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
-        if (CraftBukkitImplementation.isChatCompatible() && sender instanceof Player) {
+        if (sender instanceof Player) {
             TextAdapter.sendComponent(sender, message);
-        } else {
-            // Fallback to legacy format
-            sendMessage(sender, TextUtils.toLegacy(message));
+            return;
         }
+
+        // Fallback to legacy format
+        sendMessage(sender, TextUtils.toLegacy(message));
     }
 
     @Override
