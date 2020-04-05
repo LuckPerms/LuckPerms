@@ -66,8 +66,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HttpsURLConnection;
-
 public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
     // init during load
@@ -120,13 +118,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.localeManager.tryLoad(this, getBootstrap().getConfigDirectory().resolve("lang.yml"));
 
         // setup a bytebin instance
-        this.bytebin = new BytebinClient(
-                new OkHttpClient.Builder()
-                        .hostnameVerifier(HttpsURLConnection.getDefaultHostnameVerifier())
-                        .build(),
-                getConfiguration().get(ConfigKeys.BYTEBIN_URL),
-                "luckperms"
-        );
+        this.bytebin = new BytebinClient(new OkHttpClient(), getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
