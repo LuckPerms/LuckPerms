@@ -57,7 +57,7 @@ use-server-uuid-cache: false
 # How the plugin should store data
 #
 # - The various options are explained in more detail on the wiki:
-#   https://github.com/lucko/LuckPerms/wiki/Choosing-a-Storage-type
+#   https://github.com/lucko/LuckPerms/wiki/Storage-types
 #
 # - Possible options:
 #
