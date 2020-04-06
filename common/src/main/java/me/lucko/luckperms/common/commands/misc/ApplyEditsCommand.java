@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -59,10 +58,10 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -165,9 +164,8 @@ public class ApplyEditsCommand extends SingleCommand {
         Set<Node> before = new HashSet<>(holder.normalData().immutable().values());
         Set<Node> after = new HashSet<>(NodeJsonSerializer.deserializeNodes(data.getAsJsonArray("nodes")));
 
-        Map.Entry<Set<Node>, Set<Node>> diff = diff(before, after);
-        Set<Node> diffAdded = diff.getKey();
-        Set<Node> diffRemoved = diff.getValue();
+        Set<Node> diffAdded = getAdded(before, after);
+        Set<Node> diffRemoved = getRemoved(before, after);
 
         int additions = diffAdded.size();
         int deletions = diffRemoved.size();
@@ -212,23 +210,27 @@ public class ApplyEditsCommand extends SingleCommand {
             track = plugin.getStorage().createAndLoadTrack(id, CreationCause.WEB_EDITOR).join();
         }
 
-        Set<String> before = new LinkedHashSet<>(track.getGroups());
-        Set<String> after = new LinkedHashSet<>();
+        List<String> before = track.getGroups();
+        List<String> after = new ArrayList<>();
         data.getAsJsonArray("groups").forEach(e -> after.add(e.getAsString()));
 
-        Map.Entry<Set<String>, Set<String>> diff = diff(before, after);
-        Set<String> diffAdded = diff.getKey();
-        Set<String> diffRemoved = diff.getValue();
+        if (before.equals(after)) {
+            return false;
+        }
+
+        Set<String> diffAdded = getAdded(before, after);
+        Set<String> diffRemoved = getRemoved(before, after);
 
         int additions = diffAdded.size();
         int deletions = diffRemoved.size();
 
-        if (additions == 0 && deletions == 0) {
-            return false;
+        track.setGroups(after);
+
+        if (hasBeenReordered(before, after, diffAdded, diffRemoved)) {
+            LoggedAction.build().source(sender).target(track)
+                    .description("webeditor", "reorder", after)
+                    .build().submit(plugin, sender);
         }
-
-        track.setGroups(new ArrayList<>(after));
-
         for (String n : diffAdded) {
             LoggedAction.build().source(sender).target(track)
                     .description("webeditor", "add", n)
@@ -245,12 +247,8 @@ public class ApplyEditsCommand extends SingleCommand {
 
         Message.APPLY_EDITS_SUCCESS.send(sender, "track", track.getName());
         Message.APPLY_EDITS_SUCCESS_SUMMARY.send(sender, additions, additionsSummary, deletions, deletionsSummary);
-        for (String n : diffAdded) {
-            Message.APPLY_EDITS_DIFF_ADDED.send(sender, n);
-        }
-        for (String n : diffRemoved) {
-            Message.APPLY_EDITS_DIFF_REMOVED.send(sender, n);
-        }
+        Message.APPLY_EDITS_DIFF_REMOVED.send(sender, before);
+        Message.APPLY_EDITS_DIFF_ADDED.send(sender, after);
         StorageAssistant.save(track, sender, plugin);
         return true;
     }
@@ -315,17 +313,26 @@ public class ApplyEditsCommand extends SingleCommand {
                 (n.hasExpiry() ? " &7(" + DurationFormatter.CONCISE.format(n.getExpiryDuration()) + ")" : "");
     }
 
-    private static <T> Map.Entry<Set<T>, Set<T>> diff(Set<T> before, Set<T> after) {
-        // entries in before but not after are being removed
-        // entries in after but not before are being added
-
+    private static <T> Set<T> getAdded(Collection<T> before, Collection<T> after) {
         Set<T> added = new LinkedHashSet<>(after);
         added.removeAll(before);
+        return added;
+    }
 
+    private static <T> Set<T> getRemoved(Collection<T> before, Collection<T> after) {
         Set<T> removed = new LinkedHashSet<>(before);
         removed.removeAll(after);
+        return removed;
+    }
 
-        return Maps.immutableEntry(added, removed);
+    private static <T> boolean hasBeenReordered(List<T> before, List<T> after, Collection<T> diffAdded, Collection<T> diffRemoved) {
+        after = new ArrayList<>(after);
+        before = new ArrayList<>(before);
+
+        after.removeAll(diffAdded);
+        before.removeAll(diffRemoved);
+
+        return !before.equals(after);
     }
 
     @Override
