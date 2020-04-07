@@ -189,9 +189,9 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     protected void setupPlatformHooks() {
         // inject our own custom permission maps
         Runnable[] injectors = new Runnable[]{
-                new InjectorSubscriptionMap(this),
-                new InjectorPermissionMap(this),
-                new InjectorDefaultsMap(this),
+                new InjectorSubscriptionMap(this)::inject,
+                new InjectorPermissionMap(this)::inject,
+                new InjectorDefaultsMap(this)::inject,
                 new PermissibleMonitoringInjector(this, PermissibleMonitoringInjector.Mode.INJECT)
         };
 
@@ -317,9 +317,9 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         }
 
         // uninject custom maps
-        InjectorSubscriptionMap.uninject();
-        InjectorPermissionMap.uninject();
-        InjectorDefaultsMap.uninject();
+        new InjectorSubscriptionMap(this).uninject();
+        new InjectorPermissionMap(this).uninject();
+        new InjectorDefaultsMap(this).uninject();
         new PermissibleMonitoringInjector(this, PermissibleMonitoringInjector.Mode.UNINJECT).run();
 
         // unhook vault
