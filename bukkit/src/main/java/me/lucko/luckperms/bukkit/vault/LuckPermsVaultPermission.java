@@ -55,7 +55,6 @@ import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.milkbowl.vault.permission.Permission;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -100,7 +99,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         Objects.requireNonNull(player, "player");
 
         // are they online?
-        Player onlinePlayer = Bukkit.getPlayerExact(player);
+        Player onlinePlayer = this.plugin.getBootstrap().getServer().getPlayerExact(player);
         if (onlinePlayer != null) {
             return onlinePlayer.getUniqueId();
         }
@@ -112,7 +111,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         }
 
         // are we on the main thread?
-        if (!this.plugin.getBootstrap().isServerStarting() && Bukkit.isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
+        if (!this.plugin.getBootstrap().isServerStarting() && this.plugin.getBootstrap().getServer().isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
             throw new RuntimeException(
                     "The operation to lookup a UUID for '" + player + "' was cancelled by LuckPerms. This is NOT a bug. \n" +
                     "The lookup request was made on the main server thread. It is not safe to execute a request to \n" +
@@ -163,7 +162,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         }
 
         // are we on the main thread?
-        if (!this.plugin.getBootstrap().isServerStarting() && Bukkit.isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
+        if (!this.plugin.getBootstrap().isServerStarting() && this.plugin.getBootstrap().getServer().isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
             throw new RuntimeException(
                     "The operation to load user data for '" + uuid + "' was cancelled by LuckPerms. This is NOT a bug. \n" +
                     "The lookup request was made on the main server thread. It is not safe to execute a request to \n" +

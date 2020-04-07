@@ -27,7 +27,6 @@ package me.lucko.luckperms.bukkit.inject.server;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.SimplePluginManager;
@@ -41,7 +40,7 @@ import java.util.Set;
 /**
  * Injects a {@link LuckPermsDefaultsMap} info the {@link PluginManager}.
  */
-public class InjectorDefaultsMap implements Runnable {
+public class InjectorDefaultsMap {
     private static final Field DEFAULT_PERMISSIONS_FIELD;
 
     static {
@@ -61,10 +60,9 @@ public class InjectorDefaultsMap implements Runnable {
         this.plugin = plugin;
     }
 
-    @Override
-    public void run() {
+    public void inject() {
         try {
-            LuckPermsDefaultsMap defaultsMap = inject();
+            LuckPermsDefaultsMap defaultsMap = tryInject();
             if (defaultsMap != null) {
                 this.plugin.setDefaultPermissionMap(defaultsMap);
             }
@@ -74,7 +72,7 @@ public class InjectorDefaultsMap implements Runnable {
         }
     }
 
-    private LuckPermsDefaultsMap inject() throws Exception {
+    private LuckPermsDefaultsMap tryInject() throws Exception {
         Objects.requireNonNull(DEFAULT_PERMISSIONS_FIELD, "DEFAULT_PERMISSIONS_FIELD");
         PluginManager pluginManager = this.plugin.getBootstrap().getServer().getPluginManager();
 
@@ -98,11 +96,11 @@ public class InjectorDefaultsMap implements Runnable {
         return newMap;
     }
 
-    public static void uninject() {
+    public void uninject() {
         try {
             Objects.requireNonNull(DEFAULT_PERMISSIONS_FIELD, "DEFAULT_PERMISSIONS_FIELD");
 
-            PluginManager pluginManager = Bukkit.getServer().getPluginManager();
+            PluginManager pluginManager = this.plugin.getBootstrap().getServer().getPluginManager();
             if (!(pluginManager instanceof SimplePluginManager)) {
                 return;
             }

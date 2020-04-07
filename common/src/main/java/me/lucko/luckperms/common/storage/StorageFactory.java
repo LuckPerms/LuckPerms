@@ -82,16 +82,11 @@ public class StorageFactory {
         } else {
             StorageType type = this.plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             this.plugin.getLogger().info("Loading storage provider... [" + type.name() + "]");
-            storage = makeInstance(type);
+            storage = new Storage(this.plugin, createNewImplementation(type));
         }
 
         storage.init();
         return storage;
-    }
-
-    private Storage makeInstance(StorageType type) {
-        // make a base implementation
-        return new Storage(this.plugin, createNewImplementation(type));
     }
 
     private StorageImplementation createNewImplementation(StorageType method) {
