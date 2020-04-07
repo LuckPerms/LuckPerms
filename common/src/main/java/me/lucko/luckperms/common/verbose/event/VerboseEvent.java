@@ -54,16 +54,16 @@ public abstract class VerboseEvent implements VariableEvaluator {
     private final QueryOptions checkQueryOptions;
 
     /**
-     * The stack trace when the check took place
+     * The throwable created when the check took place
      */
-    private final StackTraceElement[] checkTrace;
+    private final Throwable checkTrace;
 
     /**
      * The name of the thread where the check took place
      */
     private final String checkThread;
 
-    protected VerboseEvent(String checkTarget, QueryOptions checkQueryOptions, StackTraceElement[] checkTrace, String checkThread) {
+    protected VerboseEvent(String checkTarget, QueryOptions checkQueryOptions, Throwable checkTrace, String checkThread) {
         this.checkTarget = checkTarget;
         this.checkQueryOptions = checkQueryOptions;
         this.checkTrace = checkTrace;
@@ -79,7 +79,7 @@ public abstract class VerboseEvent implements VariableEvaluator {
     }
 
     public StackTraceElement[] getCheckTrace() {
-        return this.checkTrace;
+        return this.checkTrace.getStackTrace();
     }
 
     public String getCheckThread() {
@@ -107,7 +107,7 @@ public abstract class VerboseEvent implements VariableEvaluator {
                 })
                 .add("trace", new JArray()
                         .consume(arr -> {
-                            int overflow = tracePrinter.process(this.checkTrace, StackTracePrinter.elementToString(arr::add));
+                            int overflow = tracePrinter.process(getCheckTrace(), StackTracePrinter.elementToString(arr::add));
                             if (overflow != 0) {
                                 arr.add("... and " + overflow + " more");
                             }

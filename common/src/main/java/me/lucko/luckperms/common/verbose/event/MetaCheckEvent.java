@@ -46,7 +46,7 @@ public class MetaCheckEvent extends VerboseEvent {
      */
     private final String result;
 
-    public MetaCheckEvent(Origin origin, String checkTarget, QueryOptions checkQueryOptions, StackTraceElement[] checkTrace, String checkThread, String key, String result) {
+    public MetaCheckEvent(Origin origin, String checkTarget, QueryOptions checkQueryOptions, Throwable checkTrace, String checkThread, String key, String result) {
         super(checkTarget, checkQueryOptions, checkTrace, checkThread);
         this.origin = origin;
         this.key = key;
