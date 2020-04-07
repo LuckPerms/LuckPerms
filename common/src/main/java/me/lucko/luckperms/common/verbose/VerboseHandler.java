@@ -80,7 +80,7 @@ public class VerboseHandler implements AutoCloseable {
             return;
         }
 
-        StackTraceElement[] trace = new Exception().getStackTrace();
+        Throwable trace = new Throwable();
         String thread = Thread.currentThread().getName();
 
         // add the check data to a queue to be processed later.
@@ -105,7 +105,7 @@ public class VerboseHandler implements AutoCloseable {
             return;
         }
 
-        StackTraceElement[] trace = new Exception().getStackTrace();
+        Throwable trace = new Throwable();
         String thread = Thread.currentThread().getName();
 
         // add the check data to a queue to be processed later.
