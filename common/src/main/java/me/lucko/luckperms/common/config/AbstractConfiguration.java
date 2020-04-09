@@ -69,11 +69,11 @@ public class AbstractConfiguration implements LuckPermsConfiguration {
 
         // if values are null, must be loading for the first time
         if (this.values == null) {
-            this.values = new Object[ConfigKeys.size()];
+            this.values = new Object[ConfigKeys.getKeys().size()];
             reload = false;
         }
 
-        for (ConfigKey<?> key : ConfigKeys.getKeys().values()) {
+        for (ConfigKey<?> key : ConfigKeys.getKeys()) {
             // don't reload enduring keys.
             if (reload && key instanceof ConfigKeyTypes.EnduringKey) {
                 continue;

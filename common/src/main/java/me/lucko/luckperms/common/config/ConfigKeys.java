@@ -46,12 +46,11 @@ import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -539,60 +538,35 @@ public final class ConfigKeys {
      */
     public static final ConfigKey<String> TREE_VIEWER_URL_PATTERN = stringKey("tree-viewer-url", "https://luckperms.net/treeview/#");
 
-    private static final Map<String, ConfigKey<?>> KEYS;
-    private static final int SIZE;
+    private static final List<ConfigKeyTypes.BaseConfigKey<?>> KEYS;
 
     static {
-        Map<String, ConfigKey<?>> keys = new LinkedHashMap<>();
-        Field[] values = ConfigKeys.class.getFields();
-        int i = 0;
+        // get a list of all keys
+        KEYS = Arrays.stream(ConfigKeys.class.getFields())
+                .filter(f -> Modifier.isStatic(f.getModifiers()))
+                .filter(f -> ConfigKey.class.equals(f.getType()))
+                .map(f -> {
+                    try {
+                        return (ConfigKeyTypes.BaseConfigKey<?>) f.get(null);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(ImmutableCollectors.toList());
 
-        for (Field f : values) {
-            // ignore non-static fields
-            if (!Modifier.isStatic(f.getModifiers())) {
-                continue;
-            }
-
-            // ignore fields that aren't configkeys
-            if (!ConfigKey.class.equals(f.getType())) {
-                continue;
-            }
-
-            try {
-                // get the key instance
-                ConfigKeyTypes.BaseConfigKey<?> key = (ConfigKeyTypes.BaseConfigKey<?>) f.get(null);
-                // set the ordinal value of the key.
-                key.ordinal = i++;
-                // add the key to the return map
-                keys.put(f.getName(), key);
-            } catch (Exception e) {
-                throw new RuntimeException("Exception processing field: " + f, e);
-            }
+        // set ordinal values
+        for (int i = 0; i < KEYS.size(); i++) {
+            KEYS.get(i).ordinal = i;
         }
-
-        KEYS = ImmutableMap.copyOf(keys);
-        SIZE = i;
     }
 
     /**
-     * Gets a map of the keys defined in this class.
-     *
-     * <p>The string key in the map is the {@link Field#getName() field name}
-     * corresponding to each key.</p>
+     * Gets a list of the keys defined in this class.
      *
      * @return the defined keys
      */
-    public static Map<String, ConfigKey<?>> getKeys() {
+    public static List<? extends ConfigKey<?>> getKeys() {
         return KEYS;
-    }
-
-    /**
-     * Gets the number of defined keys.
-     *
-     * @return how many keys are defined in this class
-     */
-    public static int size() {
-        return SIZE;
     }
 
 }
