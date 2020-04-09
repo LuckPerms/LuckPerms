@@ -6,7 +6,7 @@ dependencies {
     compile project(':common')
     compile project(':sponge:sponge-service')
 
-    compileOnly('org.spongepowered:spongeapi:7.1.0') {
+    compileOnly('org.spongepowered:spongeapi:7.2.0') {
         exclude(module: 'configurate-core')
         exclude(module: 'configurate-hocon')
         exclude(module: 'configurate-gson')
