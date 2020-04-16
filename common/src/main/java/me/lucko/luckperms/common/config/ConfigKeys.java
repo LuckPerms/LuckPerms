@@ -26,7 +26,9 @@
 package me.lucko.luckperms.common.config;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
+import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
@@ -45,6 +47,7 @@ import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.query.meta.MetaValueSelector;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -53,6 +56,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -270,6 +274,22 @@ public final class ConfigKeys {
      * has resolved the inheritance tree
      */
     public static final ConfigKey<Boolean> POST_TRAVERSAL_INHERITANCE_SORT = booleanKey("post-traversal-inheritance-sort", false);
+
+    /**
+     * The meta value selector
+     */
+    public static final ConfigKey<MetaValueSelector> META_VALUE_SELECTOR = customKey(c -> {
+        SimpleMetaValueSelector.Strategy defaultStrategy = SimpleMetaValueSelector.Strategy.parse(c.getString("meta-value-selection-default", "inheritance"));
+        Map<String, SimpleMetaValueSelector.Strategy> strategies = c.getStringMap("meta-value-selection", ImmutableMap.of()).entrySet().stream()
+                .map(e -> {
+                    SimpleMetaValueSelector.Strategy parse = SimpleMetaValueSelector.Strategy.parse(e.getValue());
+                    return parse == null ? null : Maps.immutableEntry(e.getKey(), parse);
+                })
+                .filter(Objects::nonNull)
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return new SimpleMetaValueSelector(strategies, defaultStrategy);
+    });
 
     /**
      * The configured group weightings
