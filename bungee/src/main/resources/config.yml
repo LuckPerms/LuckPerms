@@ -416,6 +416,22 @@ apply-global-groups: true
 apply-global-world-groups: true
 
 # +----------------------------------------------------------------------------------------------+ #
+# | Meta lookup settings                                                                         | #
+# +----------------------------------------------------------------------------------------------+ #
+
+# Defines how meta values should be selected.
+#
+# - Possible options:
+#   => inheritance      Selects the meta value that was inherited first
+#   => highest-number   Selects the highest numerical meta value
+#   => lowest-number    Selects the lowest numerical meta value
+meta-value-selection-default: inheritance
+
+# Defines how meta values should be selected per key.
+meta-value-selection:
+#  max-homes: highest-number
+
+# +----------------------------------------------------------------------------------------------+ #
 # | Inheritance settings                                                                         | #
 # +----------------------------------------------------------------------------------------------+ #
 

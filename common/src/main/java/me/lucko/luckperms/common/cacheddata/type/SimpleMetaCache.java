@@ -30,12 +30,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Multimaps;
 
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.MetaStack;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.query.meta.MetaValueSelector;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -50,6 +53,8 @@ import java.util.SortedMap;
  */
 public class SimpleMetaCache implements CachedMetaData {
 
+    private final LuckPermsPlugin plugin;
+
     /** The query options this container is holding data for */
     private final QueryOptions queryOptions;
 
@@ -62,12 +67,16 @@ public class SimpleMetaCache implements CachedMetaData {
     protected MetaStack prefixStack = null;
     protected MetaStack suffixStack = null;
 
-    public SimpleMetaCache(QueryOptions queryOptions) {
+    public SimpleMetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions) {
+        this.plugin = plugin;
         this.queryOptions = queryOptions;
     }
 
     public void loadMeta(MetaAccumulator meta) {
         this.meta = Multimaps.asMap(ImmutableListMultimap.copyOf(meta.getMeta()));
+
+        final MetaValueSelector metaValueSelector = this.queryOptions.option(MetaValueSelector.KEY)
+                .orElseGet(() -> this.plugin.getConfiguration().get(ConfigKeys.META_VALUE_SELECTOR));
 
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         for (Map.Entry<String, List<String>> e : this.meta.entrySet()) {
@@ -75,8 +84,12 @@ public class SimpleMetaCache implements CachedMetaData {
                 continue;
             }
 
-            // take the value which was accumulated first
-            builder.put(e.getKey(), e.getValue().get(0));
+            final String selected = metaValueSelector.selectValue(e.getKey(), e.getValue());
+            if (selected == null) {
+                throw new NullPointerException(metaValueSelector + " returned null");
+            }
+
+            builder.put(e.getKey(), selected);
         }
         this.flattenedMeta = builder.build();
 
