@@ -29,17 +29,14 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Multimaps;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
-
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.query.meta.MetaValueSelector;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -75,7 +72,7 @@ public class SimpleMetaCache implements CachedMetaData {
     public void loadMeta(MetaAccumulator meta) {
         this.meta = Multimaps.asMap(ImmutableListMultimap.copyOf(meta.getMeta()));
 
-        final MetaValueSelector metaValueSelector = this.queryOptions.option(MetaValueSelector.KEY)
+        MetaValueSelector metaValueSelector = this.queryOptions.option(MetaValueSelector.KEY)
                 .orElseGet(() -> this.plugin.getConfiguration().get(ConfigKeys.META_VALUE_SELECTOR));
 
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
@@ -84,7 +81,7 @@ public class SimpleMetaCache implements CachedMetaData {
                 continue;
             }
 
-            final String selected = metaValueSelector.selectValue(e.getKey(), e.getValue());
+            String selected = metaValueSelector.selectValue(e.getKey(), e.getValue());
             if (selected == null) {
                 throw new NullPointerException(metaValueSelector + " returned null");
             }
