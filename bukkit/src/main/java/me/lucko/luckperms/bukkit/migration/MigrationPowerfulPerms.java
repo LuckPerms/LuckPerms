@@ -25,14 +25,9 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import com.github.gustav9797.PowerfulPermsAPI.CachedGroup;
-import com.github.gustav9797.PowerfulPermsAPI.Group;
-import com.github.gustav9797.PowerfulPermsAPI.Permission;
-import com.github.gustav9797.PowerfulPermsAPI.PermissionManager;
-import com.github.gustav9797.PowerfulPermsAPI.PowerfulPermsPlugin;
+import com.github.gustav9797.PowerfulPermsAPI.*;
 import com.google.common.collect.ImmutableSet;
 import com.zaxxer.hikari.HikariDataSource;
-
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -54,25 +49,14 @@ import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.ProgressLogger;
-
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeBuilder;
-
 import org.bukkit.Bukkit;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.sql.*;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -293,12 +277,12 @@ public class MigrationPowerfulPerms extends ChildCommand<Object> {
         }
 
         String server = p.getServer();
-        if (server != null && (server.equalsIgnoreCase("all") || server.equalsIgnoreCase("*"))) {
+        if (server != null && (server.equalsIgnoreCase("all") || server.equalsIgnoreCase("*") || server.isEmpty())) {
             server = null;
         }
 
         String world = p.getWorld();
-        if (world != null && (world.equalsIgnoreCase("all") || world.equalsIgnoreCase("*"))) {
+        if (world != null && (world.equalsIgnoreCase("all") || world.equalsIgnoreCase("*") || world.isEmpty())) {
             world = null;
         }
 
