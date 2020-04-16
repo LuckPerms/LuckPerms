@@ -43,7 +43,14 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
 
     @Override
     public @NonNull String selectValue(@NonNull String key, @NonNull List<String> values) {
-        return this.strategies.getOrDefault(key, this.defaultStrategy).select(values);
+        switch (values.size()) {
+            case 0:
+                throw new IllegalArgumentException("values is empty");
+            case 1:
+                return values.get(0);
+            default:
+                return this.strategies.getOrDefault(key, this.defaultStrategy).select(values);
+        }
     }
 
     public enum Strategy {
