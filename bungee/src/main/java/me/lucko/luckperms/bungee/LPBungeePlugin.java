@@ -49,7 +49,6 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
-
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -118,7 +117,8 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerCommands() {
         this.commandManager = new CommandManager(this);
-        this.bootstrap.getProxy().getPluginManager().registerCommand(this.bootstrap, new BungeeCommandExecutor(this, this.commandManager));
+        BungeeCommandExecutor command = new BungeeCommandExecutor(this, this.commandManager);
+        command.register();
 
         // disable the default Bungee /perms command so it gets handled by the Bukkit plugin
         this.bootstrap.getProxy().getDisabledCommands().add("perms");

@@ -29,21 +29,19 @@ import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.sender.Sender;
-
 import org.bukkit.Server;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.TabExecutor;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
 
-public class BukkitCommandExecutor extends CommandManager implements CommandExecutor, TabExecutor {
+public class BukkitCommandExecutor extends CommandManager implements CommandExecutor, TabExecutor, Listener {
     private static final boolean SELECT_ENTITIES_SUPPORTED;
 
     static {
@@ -69,6 +67,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
     public void register() {
         this.command.setExecutor(this);
         this.command.setTabCompleter(this);
+        this.plugin.getBootstrap().getServer().getPluginManager().registerEvents(this, this.plugin.getBootstrap());
     }
 
     @Override
@@ -84,6 +83,36 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
         Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
         List<String> arguments = resolveSelectors(sender, ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args));
         return tabCompleteCommand(wrapped, arguments);
+    }
+
+    // Support LP commands prefixed with a '/' from the console.
+    @EventHandler(ignoreCancelled = true)
+    public void onConsoleCommand(ServerCommandEvent e) {
+        if (!(e.getSender() instanceof ConsoleCommandSender)) {
+            return;
+        }
+
+        String buffer = e.getCommand();
+        if (buffer.isEmpty() || buffer.charAt(0) != '/') {
+            return;
+        }
+
+        buffer = buffer.substring(1);
+
+        String commandLabel;
+        int firstSpace = buffer.indexOf(' ');
+        if (firstSpace == -1) {
+            commandLabel = buffer;
+        } else {
+            commandLabel = buffer.substring(0, firstSpace);
+        }
+
+        Command command = this.plugin.getBootstrap().getServer().getCommandMap().getCommand(commandLabel);
+        if (command != this.command) {
+            return;
+        }
+
+        e.setCommand(buffer);
     }
 
     private List<String> resolveSelectors(CommandSender sender, List<String> args) {
