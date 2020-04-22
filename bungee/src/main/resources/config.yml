@@ -135,13 +135,14 @@ data:
     # these if you are using PostgreSQL)
     #   useUnicode: true
     #   characterEncoding: utf8
-    #
-    # You can also use this section to disable SSL connections, by setting:
-    #   useSSL: false
-    #   verifyServerCertificate: false
-    properties:
-      useUnicode: true
-      characterEncoding: utf8
+      #
+      # If you encounter SSL errors in the console ("Establishing SSL connection without ...") will
+      # you need to uncomment "useSSL: false" and "verifyServerCertificate: false" below to fix this.
+      properties:
+        useUnicode: true
+        characterEncoding: utf8
+        #useSSL: false
+        #verifyServerCertificate: false
 
   # The prefix for all LuckPerms SQL tables.
   # - Change this is you want to use different tables for different servers.
