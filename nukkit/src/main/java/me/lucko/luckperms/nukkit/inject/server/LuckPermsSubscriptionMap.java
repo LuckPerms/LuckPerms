@@ -95,7 +95,7 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Set<Permissi
 
         String permission = ((String) key);
 
-        Set<Permissible> result = super.get(key);
+        LPSubscriptionValueSet result = (LPSubscriptionValueSet) super.get(key);
         if (result == null) {
             // calculate a new map - always!
             result = new LPSubscriptionValueSet(permission);

@@ -136,24 +136,25 @@ data:
     #   useUnicode: true
     #   characterEncoding: utf8
     #
-    # You can also use this section to disable SSL connections, by setting:
-    #   useSSL: false
-    #   verifyServerCertificate: false
+    # You can also use this section to disable SSL connections, by uncommenting the 'useSSL' and
+    # 'verifyServerCertificate' options below.
     properties:
       useUnicode: true
       characterEncoding: utf8
+      #useSSL: false
+      #verifyServerCertificate: false
 
   # The prefix for all LuckPerms SQL tables.
   # - Change this is you want to use different tables for different servers.
-  table_prefix: 'luckperms_'
+  table-prefix: 'luckperms_'
 
   # The prefix to use for all LuckPerms collections. Change this if you want to use different
   # collections for different servers. The default is no prefix.
-  mongodb_collection_prefix: ''
+  mongodb-collection-prefix: ''
 
   # MongoDB ClientConnectionURI for use with replica sets and custom connection options
   # - See https://docs.mongodb.com/manual/reference/connection-string/
-  mongodb_connection_URI: ''
+  mongodb-connection-uri: ''
 
 # Define settings for a "split" storage setup.
 #

@@ -461,17 +461,23 @@ public final class ConfigKeys {
     /**
      * The prefix for any SQL tables
      */
-    public static final ConfigKey<String> SQL_TABLE_PREFIX = enduringKey(stringKey("data.table_prefix", "luckperms_"));
+    public static final ConfigKey<String> SQL_TABLE_PREFIX = enduringKey(customKey(c -> {
+        return c.getString("data.table-prefix", c.getString("data.table_prefix", "luckperms_"));
+    }));
 
     /**
      * The prefix for any MongoDB collections
      */
-    public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = enduringKey(stringKey("data.mongodb_collection_prefix", ""));
+    public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = enduringKey(customKey(c -> {
+        return c.getString("data.mongodb-collection-prefix", c.getString("data.mongodb_collection_prefix", ""));
+    }));
 
     /**
      * MongoDB ClientConnectionURI to override default connection options
      */
-    public static final ConfigKey<String> MONGODB_CONNECTION_URI = enduringKey(stringKey("data.mongodb_connection_URI", ""));
+    public static final ConfigKey<String> MONGODB_CONNECTION_URI = enduringKey(customKey(c -> {
+        return c.getString("data.mongodb-connection-uri", c.getString("data.mongodb_connection_URI", ""));
+    }));
 
     /**
      * The name of the storage method being used
