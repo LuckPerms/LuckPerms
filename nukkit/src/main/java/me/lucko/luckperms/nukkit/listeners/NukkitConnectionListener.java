@@ -158,7 +158,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
 
         } catch (Throwable t) {
             this.plugin.getLogger().warn("Exception thrown when setting up permissions for " +
-                    player.getUniqueId() + " - " + player.getName() + " - denying login.");
+                    player.getServerId() + " - " + player.getName() + " - denying login.");
             t.printStackTrace();
 
             e.setCancelled();

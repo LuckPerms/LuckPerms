@@ -1,6 +1,6 @@
 name: LuckPerms
 version: ${pluginVersion}
-api: ["2.0.0"]
+api: ["1.0.5"]
 description: A permissions plugin
 author: Luck
 website: https://luckperms.net
