@@ -62,7 +62,7 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.query.QueryOptions;
 
-import cn.nukkit.Player;
+import cn.nukkit.player.Player;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginManager;
@@ -216,7 +216,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
         for (Player player : this.bootstrap.getServer().getOnlinePlayers().values()) {
             this.bootstrap.getScheduler().executeAsync(() -> {
                 try {
-                    User user = this.connectionListener.loadUser(player.getUniqueId(), player.getName());
+                    User user = this.connectionListener.loadUser(player.getServerId(), player.getName());
                     if (user != null) {
                         this.bootstrap.getScheduler().executeSync(() -> {
                             try {
@@ -248,7 +248,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
                 player.setOp(false);
             }
 
-            final User user = getUserManager().getIfLoaded(player.getUniqueId());
+            final User user = getUserManager().getIfLoaded(player.getServerId());
             if (user != null) {
                 user.getCachedData().invalidate();
                 getUserManager().unload(user.getUniqueId());
@@ -267,7 +267,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
             return;
         }
 
-        User user = getUserManager().getIfLoaded(player.getUniqueId());
+        User user = getUserManager().getIfLoaded(player.getServerId());
         boolean value;
 
         if (user != null) {

@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
 import net.luckperms.api.platform.Platform;
 
-import cn.nukkit.Player;
+import cn.nukkit.player.Player;
 import cn.nukkit.plugin.PluginBase;
 
 import java.io.InputStream;
@@ -207,7 +207,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
 
     @Override
     public Stream<UUID> getOnlinePlayers() {
-        return getServer().getOnlinePlayers().values().stream().map(Player::getUniqueId);
+        return getServer().getOnlinePlayers().values().stream().map(Player::getServerId);
     }
 
     @Override

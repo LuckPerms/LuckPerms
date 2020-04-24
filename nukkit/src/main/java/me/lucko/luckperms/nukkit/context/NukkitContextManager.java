@@ -38,7 +38,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 
-import cn.nukkit.Player;
+import cn.nukkit.player.Player;
 
 import java.util.concurrent.TimeUnit;
 

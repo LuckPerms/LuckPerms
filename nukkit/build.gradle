@@ -4,13 +4,13 @@ plugins {
 
 repositories {
     mavenLocal()
-    maven { url 'https://repo.nukkitx.com/main/' }
+    maven { url 'https://repo.nukkitx.com/maven-snapshots/' }
 }
 
 dependencies {
     compile project(':common')
 
-    compileOnly 'cn.nukkit:nukkit:1.0-SNAPSHOT'
+    compileOnly 'cn.nukkit:nukkit:2.0.0-SNAPSHOT'
 }
 
 processResources {

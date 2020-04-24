@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.util.TextUtils;
 import net.kyori.text.Component;
 import net.luckperms.api.util.Tristate;
 
-import cn.nukkit.Player;
+import cn.nukkit.player.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
 
@@ -55,7 +55,7 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected UUID getUniqueId(CommandSender sender) {
         if (sender instanceof Player) {
-            return ((Player) sender).getUniqueId();
+            return ((Player) sender).getServerId();
         }
         return Sender.CONSOLE_UUID;
     }

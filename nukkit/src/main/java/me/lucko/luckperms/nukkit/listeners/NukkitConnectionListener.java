@@ -33,7 +33,7 @@ import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.nukkit.inject.permissible.PermissibleInjector;
 
-import cn.nukkit.Player;
+import cn.nukkit.player.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
@@ -123,21 +123,21 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
         final Player player = e.getPlayer();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Processing login for " + player.getUniqueId() + " - " + player.getName());
+            this.plugin.getLogger().info("Processing login for " + player.getServerId() + " - " + player.getName());
         }
 
-        final User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
+        final User user = this.plugin.getUserManager().getIfLoaded(player.getServerId());
 
         /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
         if (user == null) {
-            this.deniedLogin.add(player.getUniqueId());
+            this.deniedLogin.add(player.getServerId());
 
-            if (!getUniqueConnections().contains(player.getUniqueId())) {
-                this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() +
+            if (!getUniqueConnections().contains(player.getServerId())) {
+                this.plugin.getLogger().warn("User " + player.getServerId() + " - " + player.getName() +
                         " doesn't have data pre-loaded, they have never been processed during pre-login in this session." +
                         " - denying login.");
             } else {
-                this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() +
+                this.plugin.getLogger().warn("User " + player.getServerId() + " - " + player.getName() +
                         " doesn't currently have data pre-loaded, but they have been processed before in this session." +
                         " - denying login.");
             }
@@ -175,10 +175,10 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
            If the connection was cancelled here, we need to do something to clean up the data that was loaded. */
 
         // Check to see if this connection was denied at LOW. Even if it was denied at LOW, their data will still be present.
-        if (this.deniedLogin.remove(e.getPlayer().getUniqueId())) {
+        if (this.deniedLogin.remove(e.getPlayer().getServerId())) {
             // This is a problem, as they were denied at low priority, but are now being allowed.
             if (!e.isCancelled()) {
-                this.plugin.getLogger().severe("Player connection was re-allowed for " + e.getPlayer().getUniqueId());
+                this.plugin.getLogger().severe("Player connection was re-allowed for " + e.getPlayer().getServerId());
                 e.setCancelled();
             }
         }
@@ -188,7 +188,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
-        handleDisconnect(player.getUniqueId());
+        handleDisconnect(player.getServerId());
 
         // perform unhooking from nukkit objects 1 tick later.
         // this allows plugins listening after us on MONITOR to still have intact permissions data

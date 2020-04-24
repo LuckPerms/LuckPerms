@@ -27,12 +27,13 @@ package me.lucko.luckperms.nukkit;
 
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
-import cn.nukkit.utils.Logger;
+import org.slf4j.Logger;
+
 
 public class NukkitPluginLogger implements PluginLogger {
     private final Logger logger;
 
-    public NukkitPluginLogger(cn.nukkit.plugin.PluginLogger logger) {
+    public NukkitPluginLogger(Logger logger) {
         this.logger = logger;
     }
 
@@ -43,7 +44,7 @@ public class NukkitPluginLogger implements PluginLogger {
 
     @Override
     public void warn(String s) {
-        this.logger.warning(s);
+        this.logger.warn(s);
     }
 
     @Override

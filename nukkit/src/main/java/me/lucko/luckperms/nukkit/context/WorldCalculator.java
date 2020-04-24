@@ -37,7 +37,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import cn.nukkit.Player;
+import cn.nukkit.player.Player;
 import cn.nukkit.level.Level;
 
 import java.util.Collection;
@@ -63,7 +63,7 @@ public class WorldCalculator implements ContextCalculator<Player> {
 
     @Override
     public ContextSet estimatePotentialContexts() {
-        Collection<Level> worlds = this.plugin.getBootstrap().getServer().getLevels().values();
+        Set<Level> worlds = this.plugin.getBootstrap().getServer().getLevels();
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (Level world : worlds) {
             builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());

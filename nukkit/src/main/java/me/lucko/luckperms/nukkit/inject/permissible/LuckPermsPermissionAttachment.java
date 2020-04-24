@@ -272,7 +272,7 @@ public class LuckPermsPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public void unsetPermission(String name, boolean value) {
+    public void unsetPermission(String name) {
         Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
@@ -293,14 +293,14 @@ public class LuckPermsPermissionAttachment extends PermissionAttachment {
     }
 
     @Override
-    public void unsetPermission(Permission permission, boolean value) {
-        unsetPermission(permission.getName(), value);
+    public void unsetPermission(Permission permission) {
+        unsetPermission(permission.getName());
     }
 
     @Override
     public void unsetPermissions(List<String> permissions) {
         for (String perm : permissions) {
-            unsetPermission(perm, true);
+            unsetPermission(perm);
         }
     }
 
@@ -367,7 +367,7 @@ public class LuckPermsPermissionAttachment extends PermissionAttachment {
             Boolean previous = LuckPermsPermissionAttachment.this.perms.get(permission);
 
             // proxy the call back through the PermissionAttachment instance
-            unsetPermission(permission, true);
+            unsetPermission(permission);
 
             // return the previous value
             return previous;

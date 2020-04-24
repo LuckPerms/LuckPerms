@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
-import cn.nukkit.Player;
+import cn.nukkit.player.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.EventHandler;

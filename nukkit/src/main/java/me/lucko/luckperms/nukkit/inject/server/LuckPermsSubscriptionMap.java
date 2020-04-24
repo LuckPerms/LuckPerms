@@ -32,7 +32,7 @@ import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import cn.nukkit.Player;
+import cn.nukkit.player.Player;
 import cn.nukkit.permission.Permissible;
 import cn.nukkit.plugin.PluginManager;
 
