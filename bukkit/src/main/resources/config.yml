@@ -342,6 +342,16 @@ log-notify: true
 #                                     value was inherited from a group not on the given track.
 #
 #   => lowest_not_on_track_<track>    Same as above, except takes the value with the lowest weight.
+#
+#   => highest_from_group_<group>     Selects the value with the highest weight, but only if the
+#                                     value was inherited from the given group.
+#
+#   => lowest_from_group_<group>      Same as above, except takes the value with the lowest weight.
+#
+#   => highest_not_from_group_<group> Selects the value with the highest weight, but only if the
+#                                     value was not inherited from the given group.
+#
+#   => lowest_not_from_group_<group>  Same as above, except takes the value with the lowest weight.
 meta-formatting:
   prefix:
     format:
