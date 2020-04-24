@@ -26,6 +26,7 @@ shadowJar {
     dependencies {
         include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
+        include(dependency('com.google.code.gson:.*'))
     }
 
     relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
