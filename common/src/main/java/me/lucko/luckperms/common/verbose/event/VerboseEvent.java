@@ -54,6 +54,11 @@ public abstract class VerboseEvent implements VariableEvaluator {
     private final QueryOptions checkQueryOptions;
 
     /**
+     * The time when the check took place
+     */
+    private final long checkTime;
+
+    /**
      * The throwable created when the check took place
      */
     private final Throwable checkTrace;
@@ -63,9 +68,10 @@ public abstract class VerboseEvent implements VariableEvaluator {
      */
     private final String checkThread;
 
-    protected VerboseEvent(String checkTarget, QueryOptions checkQueryOptions, Throwable checkTrace, String checkThread) {
+    protected VerboseEvent(String checkTarget, QueryOptions checkQueryOptions, long checkTime, Throwable checkTrace, String checkThread) {
         this.checkTarget = checkTarget;
         this.checkQueryOptions = checkQueryOptions;
+        this.checkTime = checkTime;
         this.checkTrace = checkTrace;
         this.checkThread = checkThread;
     }
@@ -76,6 +82,10 @@ public abstract class VerboseEvent implements VariableEvaluator {
 
     public QueryOptions getCheckQueryOptions() {
         return this.checkQueryOptions;
+    }
+
+    public long getCheckTime() {
+        return this.checkTime;
     }
 
     public StackTraceElement[] getCheckTrace() {
@@ -105,6 +115,7 @@ public abstract class VerboseEvent implements VariableEvaluator {
                         );
                     }
                 })
+                .add("time", this.checkTime)
                 .add("trace", new JArray()
                         .consume(arr -> {
                             int overflow = tracePrinter.process(getCheckTrace(), StackTracePrinter.elementToString(arr::add));

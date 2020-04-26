@@ -80,11 +80,12 @@ public class VerboseHandler implements AutoCloseable {
             return;
         }
 
+        long time = System.currentTimeMillis();
         Throwable trace = new Throwable();
         String thread = Thread.currentThread().getName();
 
         // add the check data to a queue to be processed later.
-        this.queue.offer(new PermissionCheckEvent(origin, checkTarget, checkQueryOptions, trace, thread, permission, result));
+        this.queue.offer(new PermissionCheckEvent(origin, checkTarget, checkQueryOptions, time, trace, thread, permission, result));
     }
 
     /**
@@ -105,11 +106,12 @@ public class VerboseHandler implements AutoCloseable {
             return;
         }
 
+        long time = System.currentTimeMillis();
         Throwable trace = new Throwable();
         String thread = Thread.currentThread().getName();
 
         // add the check data to a queue to be processed later.
-        this.queue.offer(new MetaCheckEvent(origin, checkTarget, checkQueryOptions, trace, thread, key, result));
+        this.queue.offer(new MetaCheckEvent(origin, checkTarget, checkQueryOptions, time, trace, thread, key, result));
     }
 
     /**
