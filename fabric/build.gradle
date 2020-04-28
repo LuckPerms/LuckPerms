@@ -2,7 +2,7 @@ import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.1'
-    id 'fabric-loom' version '0.2.6-SNAPSHOT'
+    id 'fabric-loom' version '0.2.7-SNAPSHOT'
 }
 
 repositories {
@@ -16,7 +16,7 @@ configurations {
 
 def minecraftVersion = "1.14.4"
 def yarnBuild = "build.15"
-def loaderVersion = "0.7.2+build.174"
+def loaderVersion = "0.8.2+build.194"
 
 dependencies {
     // Fabric Stuff, We don't specifically target only a single version but yarn mappings require a version to be specified.
