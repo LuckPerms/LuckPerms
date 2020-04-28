@@ -230,7 +230,6 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     @Override
     public boolean isPlayerOnline(UUID uniqueId) {
-        ProxiedPlayer player = getProxy().getPlayer(uniqueId);
-        return player != null && player.isConnected();
+        return getProxy().getPlayer(uniqueId) != null;
     }
 }
