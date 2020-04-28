@@ -27,7 +27,6 @@ package me.lucko.luckperms.fabric;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
 
 public class LPFabricServerBootstrap extends AbstractFabricBootstrap implements DedicatedServerModInitializer {

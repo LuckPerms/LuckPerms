@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import net.fabricmc.fabric.api.event.server.ServerStartCallback;
 import net.fabricmc.fabric.api.event.server.ServerStopCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.launch.common.FabricLauncherBase;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.entity.player.PlayerEntity;
@@ -53,10 +54,12 @@ import java.util.stream.Stream;
 public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 
     private static final String MODID = "luckperms";
+    private static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MODID)
+            .orElseThrow(() -> new RuntimeException("Could not get the LuckPerms mod container. This a bug with fabric loader and should be reported."));
 
     public AbstractFabricBootstrap() {
         this.classLoader = new FabricClassLoader();
-        this.schedulerAdapter = new FabricSchedulerAdapter(this);
+        // fixme: Load deps first
         this.plugin = new LPFabricPlugin(this);
     }
 
@@ -68,7 +71,7 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
     /**
      * A scheduler adapter for the platform
      */
-    private final SchedulerAdapter schedulerAdapter;
+    private SchedulerAdapter schedulerAdapter;
 
     /**
      * The plugin class loader.
@@ -116,8 +119,7 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 
     @Override
     public String getVersion() {
-        // This should NEVER fail since this method is only invoked if LuckPerms is loaded.
-        return FabricLoader.getInstance().getModContainer(MODID).orElseThrow(RuntimeException::new).getMetadata().getVersion().getFriendlyString();
+        return MOD_CONTAINER.getMetadata().getVersion().getFriendlyString();
     }
 
     @Override
@@ -201,6 +203,7 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
      * Starts LuckPerms
      */
     protected final void onInitialize() {
+        this.plugin = new LPFabricPlugin(this);
         try {
             this.plugin.load();
         } finally {
@@ -209,10 +212,14 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
         // Register the Server startup/shutdown events now
         ServerStartCallback.EVENT.register(this::onStartServer);
         ServerStopCallback.EVENT.register(this::onStopServer);
+        this.plugin.setupFabricListeners();
     }
 
     private void onStartServer(MinecraftServer server) {
         this.startTime = Instant.now();
+        // We need to create a new scheduler adapter every time we start the server.
+        // This is because an integrated server will shutdown the executor services, which cannot be started back up.
+        this.schedulerAdapter = new FabricSchedulerAdapter(this);
         this.plugin.enable();
     }
 

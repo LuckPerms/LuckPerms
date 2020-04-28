@@ -37,7 +37,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.StandardGroupManager;
 import me.lucko.luckperms.common.model.manager.track.StandardTrackManager;
 import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
-import me.lucko.luckperms.common.plugin.AbstractLuckPermsMod;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
@@ -87,19 +86,19 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     public LPFabricPlugin(AbstractFabricBootstrap bootstrap) {
         this.bootstrap = bootstrap;
-        // Events also have to be registered this early.
+    }
+
+    protected void setupFabricListeners() {
+        // Events are registered very early on, and persist between game states
         EarlyLoginCallback.EVENT.register(this.getConnectionListener()::onEarlyLogin);
         PlayerLoginCallback.EVENT.register(this.getConnectionListener()::onLogin);
         PlayerQuitCallback.EVENT.register(this.getConnectionListener()::onDisconnect);
-		FabricEventListeners listeners = new FabricEventListeners(this);
-		PlayerWorldChangeCallback.EVENT.register(listeners::onWorldChange);
+        FabricEventListeners listeners = new FabricEventListeners(this);
+        PlayerWorldChangeCallback.EVENT.register(listeners::onWorldChange);
         RespawnPlayerCallback.EVENT.register(listeners::onPlayerRespawn);
-    }
 
-    @Override
-    protected void initializeMod() {
+        // Command registration also need to occur early, and will persist across game states as well.
         this.commandManager = new FabricCommandExecutor(this);
-        // Registration of commands in Fabric are handled through it's own API, however we need to let fabric know about the commands now or it will be too late to register commands once the server starts.
         CommandRegistry.INSTANCE.register(false, dispatcher -> {
             for (String alias : COMMAND_ALIASES) {
                 LiteralCommandNode<ServerCommandSource> lp = literal(alias)
@@ -155,7 +154,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerPlatformListeners() {
-    	// Registers too late for fabric. Also event registrations survive between client worlds.
+    	// Registers too late for fabric. Also we cannot invoke this more than once since the event listeners persist across game states
     }
 
     @Override
@@ -165,7 +164,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerCommands() {
-        // Registers too late for fabric.
+        // Registers too late for fabric. Also we cannot invoke this more than once since the event listeners persist across game states
     }
 
     @Override

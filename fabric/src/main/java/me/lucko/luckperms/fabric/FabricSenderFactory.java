@@ -36,11 +36,11 @@ import me.lucko.luckperms.fabric.adapter.FabricTextAdapter;
 import net.kyori.text.Component;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class FabricSenderFactory extends SenderFactory<ServerCommandSource> {
@@ -58,11 +58,11 @@ public class FabricSenderFactory extends SenderFactory<ServerCommandSource> {
 
     @Override
     protected UUID getUniqueId(ServerCommandSource commandSource) {
-        try {
-            return commandSource.getEntityOrThrow().getUuid();
-        } catch (CommandSyntaxException ignored) {
-            return Sender.CONSOLE_UUID;
+        if (commandSource.getEntity() instanceof ServerPlayerEntity) {
+            return commandSource.getEntity().getUuid();
         }
+
+        return Sender.CONSOLE_UUID;
     }
 
     @Override
@@ -89,17 +89,24 @@ public class FabricSenderFactory extends SenderFactory<ServerCommandSource> {
 
     @Override
     protected Tristate getPermissionValue(ServerCommandSource commandSource, String node) {
-        try {
-            ServerPlayerEntity player = commandSource.getPlayer();
+        // TODO: Route through Fabric API's PermissionProviders
+        Entity entity = commandSource.getEntity();
 
-            User user = this.getPlugin().getUserManager().getByUsername(player.getGameProfile().getName());
-            QueryOptionsCache<ServerPlayerEntity> q = this.plugin.getContextManager().getCacheFor(player);
+        if (entity instanceof ServerPlayerEntity) {
+            final ServerPlayerEntity player = (ServerPlayerEntity) entity;
+            User user = this.getPlugin().getUserManager().getIfLoaded(player.getGameProfile().getId());
 
-            PermissionCache permissionData = user.getCachedData().getPermissionData(q.getQueryOptions());
+            if (user == null) {
+                return Tristate.UNDEFINED;
+            }
+
+            QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
+
+            PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
 
             return permissionData.checkPermission(node, PermissionCheckEvent.Origin.INTERNAL).result();
-        } catch (CommandSyntaxException e) {
-            return Tristate.UNDEFINED; // This will only ever occur if an entity is proxied via /execute.
         }
+
+        return Tristate.UNDEFINED;
     }
 }
