@@ -176,6 +176,10 @@ public final class LuckPermsPermissionMap extends ForwardingMap<String, Permissi
         // iterate through the current known children.
         // the first time this method is called for a given permission, the children map will contain only the permission itself.
         for (Map.Entry<String, Boolean> e : children.entrySet()) {
+            if (e == null || e.getKey() == null || e.getValue() == null) {
+                continue;
+            }
+
             if (accumulator.containsKey(e.getKey())) {
                 continue; // Prevent infinite loops
             }
