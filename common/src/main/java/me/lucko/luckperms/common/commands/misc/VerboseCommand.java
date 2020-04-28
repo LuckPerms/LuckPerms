@@ -119,11 +119,7 @@ public class VerboseCommand extends SingleCommand {
                     try {
                         id = listener.uploadPasteData(plugin.getBytebin());
                     } catch (UnsuccessfulRequestException e) {
-                        if (e.getResponse().code() == 403) {
-                            Message.GENERIC_HTTP_FORBIDDEN_FAILURE.send(sender);
-                        } else {
-                            Message.GENERIC_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
-                        }
+                        Message.GENERIC_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
                         return CommandResult.STATE_ERROR;
                     } catch (IOException e) {
                         new RuntimeException("Error uploading data to bytebin", e).printStackTrace();

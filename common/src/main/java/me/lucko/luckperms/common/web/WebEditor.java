@@ -137,11 +137,7 @@ public final class WebEditor {
         try {
             pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
         } catch (UnsuccessfulRequestException e) {
-            if (e.getResponse().code() == 403) {
-                Message.EDITOR_HTTP_FORBIDDEN_FAILURE.send(sender);
-            } else {
-                Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
-            }
+            Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
             return CommandResult.STATE_ERROR;
         } catch (IOException e) {
             new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
