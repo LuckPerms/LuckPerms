@@ -62,11 +62,6 @@ public class ApiPlatform implements Platform, PluginMetadata {
     }
 
     @Override
-    public Platform.@NonNull Environment getEnvironment() {
-        return this.plugin.getBootstrap().getEnvironment();
-    }
-
-    @Override
     public @NonNull Set<UUID> getUniqueConnections() {
         return Collections.unmodifiableSet(this.plugin.getConnectionListener().getUniqueConnections());
     }

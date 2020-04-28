@@ -40,9 +40,4 @@ public class LPFabricServerBootstrap extends AbstractFabricBootstrap implements 
     public MinecraftServer getServer() {
         return (MinecraftServer) FabricLoader.getInstance().getGameInstance();
     }
-
-    @Override
-    public Platform.Environment getEnvironment() {
-        return Platform.Environment.SERVER;
-    }
 }

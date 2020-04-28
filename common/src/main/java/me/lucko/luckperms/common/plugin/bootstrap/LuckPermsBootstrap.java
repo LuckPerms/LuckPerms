@@ -110,13 +110,6 @@ public interface LuckPermsBootstrap {
     Platform.Type getType();
 
     /**
-     * Gets the environment type this instance of LuckPerms is running on.
-     *
-     * @return the environment type
-     */
-    Platform.Environment getEnvironment();
-
-    /**
      * Gets the name or "brand" of the running platform
      *
      * @return the server brand

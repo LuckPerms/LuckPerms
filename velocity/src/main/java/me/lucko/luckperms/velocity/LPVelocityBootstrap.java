@@ -188,11 +188,6 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public Platform.Environment getEnvironment() {
-        return Platform.Environment.PROXY;
-    }
-
-    @Override
     public String getServerBrand() {
         return this.proxy.getVersion().getName();
     }

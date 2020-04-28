@@ -45,13 +45,6 @@ public interface Platform {
     Platform.@NonNull Type getType();
 
     /**
-     * Gets the type of environment LuckPerms is running on.
-     *
-     * @return the environment LuckPerms is running on.
-     */
-    Platform.@NonNull Environment getEnvironment();
-
-    /**
      * Gets the unique players which have connected to the server since it started.
      *
      * @return the unique connections
@@ -93,30 +86,6 @@ public interface Platform {
          * Gets a readable name for the platform type.
          *
          * @return a readable name
-         */
-        public @NonNull String getFriendlyName() {
-            return this.friendlyName;
-        }
-    }
-
-    /**
-     * Represents the environment LuckPerms is being run on.
-     */
-    enum Environment {
-        CLIENT("Client"),
-        SERVER("Server"),
-        PROXY("Proxy");
-
-        private final String friendlyName;
-
-        Environment(String friendlyName) {
-            this.friendlyName = friendlyName;
-        }
-
-        /**
-         * Gets a readable name for the environment type.
-         *
-         * @return a readable name.
          */
         public @NonNull String getFriendlyName() {
             return this.friendlyName;

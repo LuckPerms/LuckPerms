@@ -163,11 +163,6 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public Platform.Environment getEnvironment() {
-        return Platform.Environment.SERVER;
-    }
-
-    @Override
     public String getServerBrand() {
         return getServer().getName();
     }

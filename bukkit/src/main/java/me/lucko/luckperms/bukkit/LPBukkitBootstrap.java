@@ -216,11 +216,6 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public Platform.Environment getEnvironment() {
-        return Platform.Environment.SERVER;
-    }
-
-    @Override
     public String getServerBrand() {
         return getServer().getName();
     }

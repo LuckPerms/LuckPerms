@@ -48,7 +48,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
 /**
- * Since fabric can run on both a client and server, we have to leave some details of the environment to each platform's bootstrap.
+ * Since fabric can run on both an integrated server (which belongs to a client) and a dedicated server, we have to leave some details to each platform's environment.
  */
 public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 

@@ -54,9 +54,4 @@ public class LPFabricClientBootstrap extends AbstractFabricBootstrap implements 
 
         throw new IllegalStateException("Server is not available currently on the client.");
     }
-
-    @Override
-    public Platform.Environment getEnvironment() {
-        return Platform.Environment.CLIENT;
-    }
 }

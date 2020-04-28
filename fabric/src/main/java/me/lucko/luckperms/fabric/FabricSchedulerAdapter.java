@@ -26,18 +26,19 @@
 package me.lucko.luckperms.fabric;
 
 import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.common.util.Throwing;
 
 import java.util.concurrent.Executor;
 
 public class FabricSchedulerAdapter extends AbstractJavaScheduler {
-    private final AbstractFabricBootstrap bootstrap;
+    private final Executor serverExecutor;
 
     public FabricSchedulerAdapter(AbstractFabricBootstrap bootstrap) {
-        this.bootstrap = bootstrap;
+        this.serverExecutor = r -> bootstrap.getServer().executeSync(r);
     }
 
     @Override
     public Executor sync() {
-        return this.bootstrap.getServer();
+        return this.serverExecutor;
     }
 }

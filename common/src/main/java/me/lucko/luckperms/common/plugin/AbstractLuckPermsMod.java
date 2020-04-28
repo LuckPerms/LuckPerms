@@ -364,7 +364,7 @@ public abstract class AbstractLuckPermsMod implements LuckPermsPlugin {
     private void displayBanner(Sender sender) {
         sender.sendMessage("        __    ");
         sender.sendMessage("  |    |__)   " + "LuckPerms v" + getBootstrap().getVersion());
-        sender.sendMessage("  |___ |      " + "Running on " + getBootstrap().getType().getFriendlyName() + " (" + getBootstrap().getEnvironment().getFriendlyName() + ")" + " - " + getBootstrap().getServerBrand());
+        sender.sendMessage("  |___ |      " + "Running on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand());
         sender.sendMessage("");
     }
 }
