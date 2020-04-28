@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 import me.lucko.luckperms.common.web.AbstractHttpClient;
 import me.lucko.luckperms.common.web.BytebinClient;
+import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
@@ -255,7 +256,7 @@ public class VerboseListener {
      * @param bytebin the bytebin instance to upload with
      * @return the url
      */
-    public String uploadPasteData(BytebinClient bytebin) {
+    public String uploadPasteData(BytebinClient bytebin) throws IOException, UnsuccessfulRequestException {
         // retrieve variables
         String startDate = DATE_FORMAT.format(this.startTime);
         String endDate = DATE_FORMAT.format(Instant.now());
@@ -295,12 +296,7 @@ public class VerboseListener {
             e.printStackTrace();
         }
 
-        try {
-            return bytebin.postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return bytebin.postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
     }
 
     private static String getTristateColor(Tristate tristate) {

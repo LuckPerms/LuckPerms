@@ -136,9 +136,16 @@ public final class WebEditor {
         String pasteId;
         try {
             pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+        } catch (UnsuccessfulRequestException e) {
+            if (e.getResponse().code() == 403) {
+                Message.EDITOR_HTTP_FORBIDDEN_FAILURE.send(sender);
+            } else {
+                Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
+            }
+            return CommandResult.STATE_ERROR;
         } catch (IOException e) {
             new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
-            Message.EDITOR_UPLOAD_FAILURE.send(sender);
+            Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }
 
@@ -156,7 +163,7 @@ public final class WebEditor {
         return CommandResult.SUCCESS;
     }
 
-    public static JsonObject readDataFromBytebin(BytebinClient bytebin, String id) {
+    public static JsonObject readDataFromBytebin(BytebinClient bytebin, String id) throws IOException, UnsuccessfulRequestException {
         Request request = new Request.Builder()
                 .header("User-Agent", bytebin.getUserAgent())
                 .url(bytebin.getUrl() + id)
@@ -174,8 +181,6 @@ public final class WebEditor {
                     }
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

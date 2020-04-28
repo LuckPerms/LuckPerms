@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.treeview.TreeView;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.Uuids;
+import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -46,6 +47,7 @@ import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,7 +93,23 @@ public class TreeCommand extends SingleCommand {
 
         Message.TREE_UPLOAD_START.send(sender);
         PermissionCache permissionData = user == null ? null : user.getCachedData().getPermissionData(plugin.getQueryOptionsForUser(user).orElse(plugin.getContextManager().getStaticQueryOptions()));
-        String id = view.uploadPasteData(plugin.getBytebin(), sender, user, permissionData);
+
+        String id;
+        try {
+            id = view.uploadPasteData(plugin.getBytebin(), sender, user, permissionData);
+        } catch (UnsuccessfulRequestException e) {
+            if (e.getResponse().code() == 403) {
+                Message.GENERIC_HTTP_FORBIDDEN_FAILURE.send(sender);
+            } else {
+                Message.GENERIC_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
+            }
+            return CommandResult.STATE_ERROR;
+        } catch (IOException e) {
+            new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
+            Message.GENERIC_HTTP_UNKNOWN_FAILURE.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
         String url = plugin.getConfiguration().get(ConfigKeys.TREE_VIEWER_URL_PATTERN) + id;
 
         Message.TREE_URL.send(sender);

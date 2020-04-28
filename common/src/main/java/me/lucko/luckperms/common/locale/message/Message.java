@@ -142,6 +142,10 @@ public enum Message {
     TREE_EMPTY("&cUnable to generate tree. No results were found.", true),
     TREE_URL("&aPermission tree URL:", true),
 
+    GENERIC_HTTP_REQUEST_FAILURE("&cUnable to communicate with the web app. (response code &4{}&c, message='{}')", true),
+    GENERIC_HTTP_FORBIDDEN_FAILURE("&cUnable to communicate with the web app - '&4forbidden access&c' error &4403&3. You network provider or firewall (antivirus / content filter?) may have blocked access to the resource.", true),
+    GENERIC_HTTP_UNKNOWN_FAILURE("&cUnable to communicate with the web app. Check the console for errors.", true),
+
     SEARCH_SEARCHING("&aSearching for users and groups with &bpermissions {}&a...", true),
     SEARCH_SEARCHING_MEMBERS("&aSearching for users and groups who inherit from &b{}&a...", true),
     SEARCH_RESULT("&aFound &b{}&a entries from &b{}&a users and &b{}&a groups.", true),
@@ -163,8 +167,11 @@ public enum Message {
 
     EDITOR_NO_MATCH("&cUnable to open editor. No objects matched the desired type.", true),
     EDITOR_START("&7Preparing a new editor session. Please wait...", true),
-    EDITOR_UPLOAD_FAILURE("&cUnable to upload permission data to the editor.", true),
     EDITOR_URL("&aClick the link below to open the editor:", true),
+
+    EDITOR_HTTP_REQUEST_FAILURE("&cUnable to communicate with the editor. (response code &4{}&c, message='{}')", true),
+    EDITOR_HTTP_FORBIDDEN_FAILURE("&cUnable to communicate with the editor - '&4forbidden access&c' error &4403&3. You network provider or firewall (antivirus / content filter?) may have blocked access to the resource.", true),
+    EDITOR_HTTP_UNKNOWN_FAILURE("&cUnable to communicate with the editor. Check the console for errors.", true),
 
     CHECK_RESULT("&aPermission check result on user &b{}&a for permission &b{}&a: &f{}", true),
 

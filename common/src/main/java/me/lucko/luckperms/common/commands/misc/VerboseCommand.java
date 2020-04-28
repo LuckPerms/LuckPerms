@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.InvalidFilterException;
 import me.lucko.luckperms.common.verbose.VerboseFilter;
 import me.lucko.luckperms.common.verbose.VerboseListener;
+import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -47,6 +48,7 @@ import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -112,7 +114,23 @@ public class VerboseCommand extends SingleCommand {
                     Message.VERBOSE_OFF.send(sender);
                 } else {
                     Message.VERBOSE_UPLOAD_START.send(sender);
-                    String id = listener.uploadPasteData(plugin.getBytebin());
+
+                    String id;
+                    try {
+                        id = listener.uploadPasteData(plugin.getBytebin());
+                    } catch (UnsuccessfulRequestException e) {
+                        if (e.getResponse().code() == 403) {
+                            Message.GENERIC_HTTP_FORBIDDEN_FAILURE.send(sender);
+                        } else {
+                            Message.GENERIC_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
+                        }
+                        return CommandResult.STATE_ERROR;
+                    } catch (IOException e) {
+                        new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
+                        Message.GENERIC_HTTP_UNKNOWN_FAILURE.send(sender);
+                        return CommandResult.STATE_ERROR;
+                    }
+
                     String url = plugin.getConfiguration().get(ConfigKeys.VERBOSE_VIEWER_URL_PATTERN) + id;
 
                     Message.VERBOSE_RESULTS_URL.send(sender);

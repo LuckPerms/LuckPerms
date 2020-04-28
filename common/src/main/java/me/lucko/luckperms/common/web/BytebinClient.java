@@ -65,7 +65,7 @@ public class BytebinClient extends AbstractHttpClient {
     }
 
     @Override
-    public Response makeHttpRequest(Request request) throws IOException {
+    public Response makeHttpRequest(Request request) throws IOException, UnsuccessfulRequestException {
         return super.makeHttpRequest(request);
     }
 
@@ -78,7 +78,7 @@ public class BytebinClient extends AbstractHttpClient {
      * @return the key of the resultant content
      * @throws IOException if an error occurs
      */
-    public Content postContent(byte[] buf, MediaType contentType, boolean allowModification) throws IOException {
+    public Content postContent(byte[] buf, MediaType contentType, boolean allowModification) throws IOException, UnsuccessfulRequestException {
         RequestBody body = RequestBody.create(contentType, buf);
 
         Request.Builder requestBuilder = new Request.Builder()
@@ -117,7 +117,7 @@ public class BytebinClient extends AbstractHttpClient {
      * @param contentType the type of the content
      * @throws IOException if an error occurs
      */
-    public void modifyContent(Content existingContent, byte[] buf, MediaType contentType) throws IOException {
+    public void modifyContent(Content existingContent, byte[] buf, MediaType contentType) throws IOException, UnsuccessfulRequestException {
         if (!existingContent.modifiable) {
             throw new IllegalArgumentException("Existing content is not modifiable");
         }

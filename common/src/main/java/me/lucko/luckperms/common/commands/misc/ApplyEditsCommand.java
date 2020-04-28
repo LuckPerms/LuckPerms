@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.Uuids;
+import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.web.WebEditor;
 
 import net.luckperms.api.actionlog.Action;
@@ -57,6 +58,7 @@ import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -79,7 +81,22 @@ public class ApplyEditsCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        JsonObject data = WebEditor.readDataFromBytebin(plugin.getBytebin(), code);
+        JsonObject data;
+        try {
+            data = WebEditor.readDataFromBytebin(plugin.getBytebin(), code);
+        } catch (UnsuccessfulRequestException e) {
+            if (e.getResponse().code() == 403) {
+                Message.EDITOR_HTTP_FORBIDDEN_FAILURE.send(sender);
+            } else {
+                Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
+            }
+            return CommandResult.STATE_ERROR;
+        } catch (IOException e) {
+            new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
+            Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
         if (data == null) {
             Message.APPLY_EDITS_UNABLE_TO_READ.send(sender, code);
             return CommandResult.FAILURE;
