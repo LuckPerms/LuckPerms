@@ -57,7 +57,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     public AbstractUserManager(LuckPermsPlugin plugin, UserHousekeeper.TimeoutSettings timeoutSettings) {
         this.plugin = plugin;
         this.housekeeper = new UserHousekeeper(plugin, this, timeoutSettings);
-        this.plugin.getBootstrap().getScheduler().asyncRepeating(this.housekeeper, 10, TimeUnit.SECONDS);
+        this.plugin.getBootstrap().getScheduler().asyncRepeating(this.housekeeper, 30, TimeUnit.SECONDS);
     }
 
     @Override
