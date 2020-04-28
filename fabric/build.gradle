@@ -59,7 +59,8 @@ shadowJar {
         exclude('net.fabricmc:.*')
         include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
-        // Stop the mappings from ending up in the output jar
+        // We don't want to include the mappings in the jar do we?
+        exclude '/mappings/*'
     }
 
     relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
