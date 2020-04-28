@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.bukkit;
 
+import me.lucko.luckperms.bukkit.util.CommandMapUtil;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -113,7 +114,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
             commandLabel = buffer.substring(0, firstSpace);
         }
 
-        Command command = this.plugin.getBootstrap().getServer().getCommandMap().getCommand(commandLabel);
+        Command command = CommandMapUtil.getCommandMap(this.plugin.getBootstrap().getServer()).getCommand(commandLabel);
         if (command != this.command) {
             return;
         }

@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit;
 
 import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
 
+import me.lucko.luckperms.bukkit.util.CommandMapUtil;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
 
@@ -62,7 +63,7 @@ public class BukkitAsyncCommandExecutor extends BukkitCommandExecutor {
         }
 
         String commandLabel = buffer.substring(0, firstSpace);
-        Command command = this.plugin.getBootstrap().getServer().getCommandMap().getCommand(commandLabel);
+        Command command = CommandMapUtil.getCommandMap(this.plugin.getBootstrap().getServer()).getCommand(commandLabel);
         if (command != this.command) {
             return;
         }
