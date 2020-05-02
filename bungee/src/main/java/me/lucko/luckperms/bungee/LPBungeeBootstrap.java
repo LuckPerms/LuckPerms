@@ -79,6 +79,9 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     private final CountDownLatch loadLatch = new CountDownLatch(1);
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
+    // if the plugin has been loaded on an incompatible version
+    private boolean incompatibleVersion = false;
+
     public LPBungeeBootstrap() {
         this.schedulerAdapter = new BungeeSchedulerAdapter(this);
         this.classLoader = new ReflectionClassLoader(this);
@@ -111,6 +114,11 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     public void onLoad() {
         this.logger = new JavaPluginLogger(getLogger());
 
+        if (checkIncompatibleVersion()) {
+            this.incompatibleVersion = true;
+            return;
+        }
+
         try {
             this.plugin.load();
         } finally {
@@ -120,6 +128,21 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     @Override
     public void onEnable() {
+        if (this.incompatibleVersion) {
+            getLogger().severe("----------------------------------------------------------------------");
+            getLogger().severe("Your proxy version is not compatible with this build of LuckPerms. :(");
+            getLogger().severe("");
+            getLogger().severe("This is most likely because you are using an old/outdated version of BungeeCord.");
+            getLogger().severe("If you need 1.7 support, replace your BungeeCord.jar file with the latest build of");
+            getLogger().severe("'Travertine' from here:");
+            getLogger().severe("==> https://papermc.io/downloads#Travertine");
+            getLogger().severe("");
+            getLogger().severe("The proxy will now shutdown.");
+            getLogger().severe("----------------------------------------------------------------------");
+            getProxy().stop();
+            return;
+        }
+
         this.startTime = Instant.now();
         try {
             this.plugin.enable();
@@ -130,6 +153,10 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     @Override
     public void onDisable() {
+        if (this.incompatibleVersion) {
+            return;
+        }
+
         this.plugin.disable();
     }
 
@@ -231,5 +258,14 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     @Override
     public boolean isPlayerOnline(UUID uniqueId) {
         return getProxy().getPlayer(uniqueId) != null;
+    }
+
+    private static boolean checkIncompatibleVersion() {
+        try {
+            Class<?> aClass = Class.forName("com.google.gson.internal.bind.TreeTypeAdapter");
+            return false;
+        } catch (ClassNotFoundException e) {
+            return true;
+        }
     }
 }
