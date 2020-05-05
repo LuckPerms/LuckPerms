@@ -80,7 +80,12 @@ public class GroupParentCommand extends ParentCommand<Group, String> {
 
     @Override
     protected String parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        return target.toLowerCase();
+        Group group = plugin.getGroupManager().getByDisplayName(target);
+        if (group != null) {
+            return group.getName();
+        } else {
+            return target.toLowerCase();
+        }
     }
 
     @Override
