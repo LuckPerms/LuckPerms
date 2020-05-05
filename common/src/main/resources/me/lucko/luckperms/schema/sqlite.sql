@@ -7,7 +7,7 @@ CREATE TABLE `{prefix}user_permissions` (
   `value`      BOOL                NOT NULL,
   `server`     VARCHAR(36)         NOT NULL,
   `world`      VARCHAR(36)         NOT NULL,
-  `expiry`     INT(11)             NOT NULL,
+  `expiry`     BIGINT              NOT NULL,
   `contexts`   VARCHAR(200)        NOT NULL
 );
 CREATE INDEX `{prefix}user_permissions_uuid` ON `{prefix}user_permissions` (`uuid`);
@@ -19,7 +19,7 @@ CREATE TABLE `{prefix}group_permissions` (
   `value`      BOOL                NOT NULL,
   `server`     VARCHAR(36)         NOT NULL,
   `world`      VARCHAR(36)         NOT NULL,
-  `expiry`     INT(11)             NOT NULL,
+  `expiry`     BIGINT              NOT NULL,
   `contexts`   VARCHAR(200)        NOT NULL
 );
 CREATE INDEX `{prefix}group_permissions_name` ON `{prefix}group_permissions` (`name`);
