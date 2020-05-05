@@ -37,6 +37,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.Protocol;
 
 /**
  * An implementation of {@link Messenger} using Redis.
@@ -55,16 +56,12 @@ public class RedisMessenger implements Messenger {
         this.consumer = consumer;
     }
 
-    public void init(String address, String password) {
+    public void init(String address, String password, boolean ssl) {
         String[] addressSplit = address.split(":");
         String host = addressSplit[0];
-        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 6379;
+        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
 
-        if (password.equals("")) {
-            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port);
-        } else {
-            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, 0, password);
-        }
+        this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password, ssl);
 
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             this.sub = new Subscription(this);

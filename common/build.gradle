@@ -36,7 +36,7 @@ dependencies {
         exclude(module: 'toml4j')
     }
     compile 'com.zaxxer:HikariCP:3.4.2'
-    compile 'redis.clients:jedis:3.2.0'
+    compile 'redis.clients:jedis:3.3.0'
     compile 'org.mongodb:mongo-java-driver:3.12.2'
     compile 'org.yaml:snakeyaml:1.23'
 }

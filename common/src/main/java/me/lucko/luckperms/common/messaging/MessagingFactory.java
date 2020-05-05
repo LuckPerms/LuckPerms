@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.messaging;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.messaging.redis.RedisMessenger;
 import me.lucko.luckperms.common.messaging.sql.SqlMessenger;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -121,7 +122,16 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
         @Override
         public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
             RedisMessenger redis = new RedisMessenger(getPlugin(), incomingMessageConsumer);
-            redis.init(getPlugin().getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getPlugin().getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
+
+            LuckPermsConfiguration config = getPlugin().getConfiguration();
+            String address = config.get(ConfigKeys.REDIS_ADDRESS);
+            String password = config.get(ConfigKeys.REDIS_PASSWORD);
+            if (password.isEmpty()) {
+                password = null;
+            }
+            boolean ssl = config.get(ConfigKeys.REDIS_SSL);
+
+            redis.init(address, password, ssl);
             return redis;
         }
     }

@@ -540,9 +540,14 @@ public final class ConfigKeys {
     public static final ConfigKey<String> REDIS_ADDRESS = enduringKey(stringKey("redis.address", null));
 
     /**
-     * The password in use by the redis server, or an empty string if there is no passworld
+     * The password in use by the redis server, or an empty string if there is no password
      */
     public static final ConfigKey<String> REDIS_PASSWORD = enduringKey(stringKey("redis.password", ""));
+
+    /**
+     * If the redis connection should use SSL
+     */
+    public static final ConfigKey<Boolean> REDIS_SSL = enduringKey(booleanKey("redis.ssl", false));
 
     /**
      * The URL of the bytebin instance used to upload data

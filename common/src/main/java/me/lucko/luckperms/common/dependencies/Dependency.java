@@ -210,8 +210,8 @@ public enum Dependency {
     JEDIS(
             "redis.clients",
             "jedis",
-            "3.2.0",
-            "+S7KUSPPUC9xDj10tANcMLC3EtPxqxv8JJiaDClgQwc=",
+            "3.3.0",
+            "HuTfz9xW/mi1fwVQ3xgPmd6qwTRMF/3fyMzw2LmOgy4=",
             Relocation.of("jedis", "redis{}clients{}jedis"),
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
