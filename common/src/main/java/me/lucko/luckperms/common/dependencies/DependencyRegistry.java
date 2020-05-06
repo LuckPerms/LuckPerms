@@ -41,6 +41,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Applies LuckPerms specific behaviour for {@link Dependency}s.
+ */
 public class DependencyRegistry {
 
     private static final ListMultimap<StorageType, Dependency> STORAGE_DEPENDENCIES = ImmutableListMultimap.<StorageType, Dependency>builder()
@@ -103,20 +106,7 @@ public class DependencyRegistry {
         }
     }
 
-    private static boolean classExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    private static boolean slf4jPresent() {
-        return classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory");
-    }
-
-    public static boolean shouldAutoLoad(Dependency dependency) {
+    public boolean shouldAutoLoad(Dependency dependency) {
         switch (dependency) {
             // all used within 'isolated' classloaders, and are therefore not
             // relocated.
@@ -129,6 +119,19 @@ public class DependencyRegistry {
             default:
                 return true;
         }
+    }
+
+    private static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    private static boolean slf4jPresent() {
+        return classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory");
     }
 
 }

@@ -30,11 +30,15 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHelper;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * The dependencies used by LuckPerms.
+ */
 public enum Dependency {
 
     ASM(
@@ -281,13 +285,11 @@ public enum Dependency {
             Relocation.of("toml4j", "com{}moandjiezana{}toml")
     );
 
-    private final List<URL> urls;
+    private final String mavenRepoPath;
     private final String version;
     private final byte[] checksum;
     private final List<Relocation> relocations;
 
-    private static final String MAVEN_CENTRAL_REPO = "https://repo1.maven.org/maven2/";
-    private static final String LUCK_MIRROR_REPO = "https://nexus.lucko.me/repository/maven-central/";
     private static final String MAVEN_FORMAT = "%s/%s/%s/%s-%s.jar";
 
     Dependency(String groupId, String artifactId, String version, String checksum) {
@@ -295,21 +297,13 @@ public enum Dependency {
     }
 
     Dependency(String groupId, String artifactId, String version, String checksum, Relocation... relocations) {
-        String path = String.format(MAVEN_FORMAT,
+        this.mavenRepoPath = String.format(MAVEN_FORMAT,
                 rewriteEscaping(groupId).replace(".", "/"),
                 rewriteEscaping(artifactId),
                 version,
                 rewriteEscaping(artifactId),
                 version
         );
-        try {
-            this.urls = ImmutableList.of(
-                    new URL(LUCK_MIRROR_REPO + path),
-                    new URL(MAVEN_CENTRAL_REPO + path)
-            );
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e); // propagate
-        }
         this.version = version;
         this.checksum = Base64.getDecoder().decode(checksum);
         this.relocations = ImmutableList.copyOf(relocations);
@@ -319,53 +313,71 @@ public enum Dependency {
         return s.replace("{}", ".");
     }
 
-    /*
-    public static void main(String[] args) throws Exception {
-        java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
-
-        for (Dependency dependency : values()) {
-            List<byte[]> hashes = new java.util.ArrayList<>();
-            for (URL url : dependency.getUrls()) {
-                java.net.URLConnection connection = url.openConnection();
-                connection.setRequestProperty("User-Agent", "luckperms");
-
-                try (java.io.InputStream in = connection.getInputStream()) {
-                    byte[] bytes = com.google.common.io.ByteStreams.toByteArray(in);
-                    if (bytes.length == 0) {
-                        throw new RuntimeException("Empty stream");
-                    }
-
-                    hashes.add(digest.digest(bytes));
-                }
-            }
-
-            for (int i = 0; i < hashes.size(); i++) {
-                byte[] hash = hashes.get(i);
-                if (!java.util.Arrays.equals(hash, dependency.getChecksum())) {
-                    System.out.println("NO MATCH - REPO " + i + " - " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
-                }
-            }
-        }
-    }
-    */
-
     public String getFileName() {
         return name().toLowerCase().replace('_', '-') + "-" + this.version;
     }
 
-    public List<URL> getUrls() {
-        return this.urls;
-    }
-
-    public String getVersion() {
-        return this.version;
+    String getMavenRepoPath() {
+        return this.mavenRepoPath;
     }
 
     public byte[] getChecksum() {
         return this.checksum;
     }
 
+    public boolean checksumMatches(byte[] hash) {
+        return Arrays.equals(this.checksum, hash);
+    }
+
     public List<Relocation> getRelocations() {
         return this.relocations;
     }
+
+    /**
+     * Creates a {@link MessageDigest} suitable for computing the checksums
+     * of dependencies.
+     *
+     * @return the digest
+     */
+    public static MessageDigest createDigest() {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*
+    public static void main(String[] args) {
+        Dependency[] dependencies = values();
+        DependencyRepository[] repos = DependencyRepository.values();
+
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newCachedThreadPool();
+
+        for (Dependency dependency : dependencies) {
+            for (DependencyRepository repo : repos) {
+                pool.submit(() -> {
+                    try {
+                        byte[] hash = createDigest().digest(repo.downloadRaw(dependency));
+                        if (!dependency.checksumMatches(hash)) {
+                            System.out.println("NO MATCH - " + repo.name() + " - " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
+                        } else {
+                            System.out.println("OK - " + repo.name() + " - " + dependency.name());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        }
+
+        pool.shutdown();
+        try {
+            pool.awaitTermination(1, java.util.concurrent.TimeUnit.HOURS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    */
+
 }
