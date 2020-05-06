@@ -33,13 +33,13 @@ import net.luckperms.api.query.QueryOptions;
 /**
  * Provides {@link InheritanceGraph}s.
  */
-public class InheritanceHandler {
+public class InheritanceGraphFactory {
     private final LuckPermsPlugin plugin;
 
     private final InheritanceGraph nonContextualGraph;
     private final InheritanceGraph defaultContextualGraph;
 
-    public InheritanceHandler(LuckPermsPlugin plugin) {
+    public InheritanceGraphFactory(LuckPermsPlugin plugin) {
         this.plugin = plugin;
         this.nonContextualGraph = new InheritanceGraph(plugin, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
         this.defaultContextualGraph = new InheritanceGraph(plugin, QueryOptionsImpl.DEFAULT_CONTEXTUAL);
@@ -54,7 +54,5 @@ public class InheritanceHandler {
             return new InheritanceGraph(this.plugin, queryOptions);
         }
     }
-
-
 
 }

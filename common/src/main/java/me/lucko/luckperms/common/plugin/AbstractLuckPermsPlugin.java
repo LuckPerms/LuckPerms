@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
-import me.lucko.luckperms.common.inheritance.InheritanceHandler;
+import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
@@ -82,7 +82,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private Storage storage;
     private InternalMessagingService messagingService = null;
     private SyncTask.Buffer syncTaskBuffer;
-    private InheritanceHandler inheritanceHandler;
+    private InheritanceGraphFactory inheritanceGraphFactory;
     private CalculatorFactory calculatorFactory;
     private LuckPermsApiProvider apiProvider;
     private EventDispatcher eventDispatcher;
@@ -153,7 +153,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load internal managers
         getLogger().info("Loading internal permission managers...");
-        this.inheritanceHandler = new InheritanceHandler(this);
+        this.inheritanceGraphFactory = new InheritanceGraphFactory(this);
 
         // setup user/group/track manager
         setupManagers();
@@ -339,8 +339,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public InheritanceHandler getInheritanceHandler() {
-        return this.inheritanceHandler;
+    public InheritanceGraphFactory getInheritanceGraphFactory() {
+        return this.inheritanceGraphFactory;
     }
 
     @Override

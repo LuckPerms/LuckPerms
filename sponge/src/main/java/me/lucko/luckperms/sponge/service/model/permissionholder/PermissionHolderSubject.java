@@ -129,7 +129,7 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
 
     @Override
     public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
-        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(this.plugin.getContextManager().formQueryOptions(contexts));
+        InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(this.plugin.getContextManager().formQueryOptions(contexts));
         Iterable<PermissionHolder> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this.parent);
 
         ImmutableList.Builder<LPSubjectReference> subjects = ImmutableList.builder();

@@ -293,7 +293,7 @@ public abstract class PermissionHolder {
 
     private void accumulateInheritedNodesTo(Collection<Node> accumulator, QueryOptions queryOptions) {
         if (queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
-            InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(queryOptions);
+            InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
             Iterable<PermissionHolder> traversal = graph.traverse(this);
             for (PermissionHolder holder : traversal) {
                 List<? extends Node> nodes = holder.getOwnNodes(queryOptions);
@@ -352,7 +352,7 @@ public abstract class PermissionHolder {
     }
 
     public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, QueryOptions queryOptions) {
-        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(queryOptions);
+        InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
         Iterable<PermissionHolder> traversal = graph.traverse(this);
         for (PermissionHolder holder : traversal) {
             List<? extends Node> nodes = holder.getOwnNodes(queryOptions);
