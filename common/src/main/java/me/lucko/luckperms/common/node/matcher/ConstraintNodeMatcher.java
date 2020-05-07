@@ -23,28 +23,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.comparator;
+package me.lucko.luckperms.common.node.matcher;
 
-import net.luckperms.api.node.HeldNode;
+import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 
-import java.util.Comparator;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.matcher.NodeMatcher;
 
-public class HeldNodeComparator<T extends Comparable<T>> implements Comparator<HeldNode<T>> {
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-    public static <T extends Comparable<T>> Comparator<? super HeldNode<T>> normal() {
-        return new HeldNodeComparator<>();
+/**
+ * Abstract implementation of {@link NodeMatcher} backed by a {@link Constraint}.
+ */
+public abstract class ConstraintNodeMatcher<T extends Node> implements NodeMatcher<T> {
+    private final Constraint constraint;
+
+    protected ConstraintNodeMatcher(Constraint constraint) {
+        this.constraint = constraint;
     }
 
-    public static <T extends Comparable<T>> Comparator<? super HeldNode<T>> reverse() {
-        return HeldNodeComparator.<T>normal().reversed();
+    public Constraint getConstraint() {
+        return this.constraint;
+    }
+
+    public abstract @Nullable T filterConstraintMatch(@NonNull Node node);
+
+    public @Nullable T match(Node node) {
+        return getConstraint().eval(node.getKey()) ? filterConstraintMatch(node) : null;
     }
 
     @Override
-    public int compare(HeldNode<T> o1, HeldNode<T> o2) {
-        int i = NodeWithContextComparator.normal().compare(o1.getNode(), o2.getNode());
-        if (i != 0) {
-            return i;
-        }
-        return o1.getHolder().compareTo(o2.getHolder());
+    public boolean test(@NonNull Node node) {
+        return match(node) != null;
     }
 }

@@ -23,32 +23,22 @@
  *  SOFTWARE.
  */
 
-package net.luckperms.api.node;
+package me.lucko.luckperms.common.model;
 
 import net.luckperms.api.model.PermissionHolder;
+import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-/**
- * A relationship between a {@link PermissionHolder} and a {@link Node}.
- *
- * @param <T> the identifier type of the holder
- */
-@Deprecated
-public interface HeldNode<T> {
+public class InheritanceOrigin implements InheritanceOriginMetadata {
+    private final PermissionHolder.Identifier location;
 
-    /**
-     * Gets the holder of the node
-     *
-     * @return the holder
-     */
-    @NonNull T getHolder();
+    public InheritanceOrigin(PermissionHolder.Identifier location) {
+        this.location = location;
+    }
 
-    /**
-     * Gets the node
-     *
-     * @return the node
-     */
-    @NonNull Node getNode();
-
+    @Override
+    public PermissionHolder.@NonNull Identifier getOrigin() {
+        return this.location;
+    }
 }

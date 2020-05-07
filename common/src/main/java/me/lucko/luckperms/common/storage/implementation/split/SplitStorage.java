@@ -29,17 +29,18 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
-import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -153,7 +154,7 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<UUID, N>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
         return implFor(SplitStorageType.USER).getUsersWithPermission(constraint);
     }
 
@@ -183,7 +184,7 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<String, N>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
         return implFor(SplitStorageType.GROUP).getGroupsWithPermission(constraint);
     }
 

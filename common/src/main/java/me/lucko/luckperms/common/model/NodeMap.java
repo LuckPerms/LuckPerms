@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.context.ContextSetComparator;
 import me.lucko.luckperms.common.node.comparator.NodeComparator;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
-import me.lucko.luckperms.common.node.model.InheritanceOrigin;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
 import net.luckperms.api.context.ContextSet;

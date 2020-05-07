@@ -39,6 +39,7 @@ import net.luckperms.api.model.group.GroupManager;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.NodeBuilderRegistry;
+import net.luckperms.api.node.matcher.NodeMatcherFactory;
 import net.luckperms.api.platform.Platform;
 import net.luckperms.api.platform.PluginMetadata;
 import net.luckperms.api.query.QueryOptionsRegistry;
@@ -191,6 +192,14 @@ public interface LuckPerms {
      * @return the meta stack factory
      */
     @NonNull MetaStackFactory getMetaStackFactory();
+
+    /**
+     * Gets the {@link NodeMatcherFactory}.
+     *
+     * @return the node matcher factory
+     * @since 5.1
+     */
+    @NonNull NodeMatcherFactory getNodeMatcherFactory();
 
     /**
      * Schedules the execution of an update task, and returns an encapsulation

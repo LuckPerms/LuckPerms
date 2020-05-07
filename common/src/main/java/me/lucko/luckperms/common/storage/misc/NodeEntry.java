@@ -23,22 +23,51 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.model;
+package me.lucko.luckperms.common.storage.misc;
 
-import net.luckperms.api.model.PermissionHolder;
-import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
+import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class InheritanceOrigin implements InheritanceOriginMetadata {
-    private final PermissionHolder.Identifier location;
+public final class NodeEntry<H extends Comparable<H>, N extends Node> implements HeldNode<H> {
 
-    public InheritanceOrigin(PermissionHolder.Identifier location) {
-        this.location = location;
+    public static <H extends Comparable<H>, N extends Node> NodeEntry<H, N> of(H holder, N node) {
+        return new NodeEntry<>(holder, node);
+    }
+
+    private final H holder;
+    private final N node;
+
+    private NodeEntry(H holder, N node) {
+        this.holder = holder;
+        this.node = node;
     }
 
     @Override
-    public PermissionHolder.@NonNull Identifier getOrigin() {
-        return this.location;
+    public @NonNull H getHolder() {
+        return this.holder;
+    }
+
+    @Override
+    public @NonNull N getNode() {
+        return this.node;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof NodeEntry)) return false;
+        final NodeEntry<?, ?> other = (NodeEntry<?, ?>) o;
+        return this.getHolder().equals(other.getHolder()) && this.getNode().equals(other.getNode());
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        result = result * PRIME + this.getHolder().hashCode();
+        result = result * PRIME + this.getNode().hashCode();
+        return result;
     }
 }
