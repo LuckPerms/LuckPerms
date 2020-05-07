@@ -40,16 +40,16 @@ import com.mongodb.client.model.ReplaceOptions;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
-import me.lucko.luckperms.common.node.model.HeldNodeImpl;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.Iterators;
@@ -61,7 +61,6 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.model.data.DataType;
-import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 
@@ -361,8 +360,8 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) {
-        List<HeldNode<UUID>> held = new ArrayList<>();
+    public <N extends Node> List<NodeEntry<UUID, N>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
+        List<NodeEntry<UUID, N>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
@@ -371,10 +370,10 @@ public class MongoStorage implements StorageImplementation {
 
                 Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
                 for (Node e : nodes) {
-                    if (!constraint.eval(e.getKey())) {
-                        continue;
+                    N match = constraint.match(e);
+                    if (match != null) {
+                        held.add(NodeEntry.of(holder, match));
                     }
-                    held.add(HeldNodeImpl.of(holder, e));
                 }
             }
         }
@@ -471,8 +470,8 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) {
-        List<HeldNode<String>> held = new ArrayList<>();
+    public <N extends Node> List<NodeEntry<String, N>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
+        List<NodeEntry<String, N>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
@@ -481,10 +480,10 @@ public class MongoStorage implements StorageImplementation {
 
                 Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
                 for (Node e : nodes) {
-                    if (!constraint.eval(e.getKey())) {
-                        continue;
+                    N match = constraint.match(e);
+                    if (match != null) {
+                        held.add(NodeEntry.of(holder, match));
                     }
-                    held.add(HeldNodeImpl.of(holder, e));
                 }
             }
         }

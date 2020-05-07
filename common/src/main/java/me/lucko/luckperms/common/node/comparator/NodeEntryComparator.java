@@ -23,51 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.model;
+package me.lucko.luckperms.common.node.comparator;
 
-import net.luckperms.api.node.HeldNode;
-import net.luckperms.api.node.Node;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import java.util.Comparator;
 
-public final class HeldNodeImpl<T extends Comparable<T>> implements HeldNode<T> {
+public class NodeEntryComparator<T extends Comparable<T>> implements Comparator<NodeEntry<T, ?>> {
 
-    public static <T extends Comparable<T>> HeldNodeImpl<T> of(T holder, Node node) {
-        return new HeldNodeImpl<>(holder, node);
+    public static <T extends Comparable<T>> Comparator<? super NodeEntry<T, ?>> normal() {
+        return new NodeEntryComparator<>();
     }
 
-    private final T holder;
-    private final Node node;
-
-    private HeldNodeImpl(T holder, Node node) {
-        this.holder = holder;
-        this.node = node;
+    public static <T extends Comparable<T>> Comparator<? super NodeEntry<T, ?>> reverse() {
+        return NodeEntryComparator.<T>normal().reversed();
     }
 
     @Override
-    public @NonNull Node getNode() {
-        return this.node;
-    }
-
-    @Override
-    public @NonNull T getHolder() {
-        return this.holder;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof HeldNodeImpl)) return false;
-        final HeldNodeImpl<?> other = (HeldNodeImpl<?>) o;
-        return this.getHolder().equals(other.getHolder()) && this.getNode().equals(other.getNode());
-    }
-
-    @Override
-    public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        result = result * PRIME + this.getHolder().hashCode();
-        result = result * PRIME + this.getNode().hashCode();
-        return result;
+    public int compare(NodeEntry<T, ?> o1, NodeEntry<T, ?> o2) {
+        int i = NodeWithContextComparator.normal().compare(o1.getNode(), o2.getNode());
+        if (i != 0) {
+            return i;
+        }
+        return o1.getHolder().compareTo(o2.getHolder());
     }
 }

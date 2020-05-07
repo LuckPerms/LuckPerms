@@ -27,8 +27,6 @@ package me.lucko.luckperms.common.commands.group;
 
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
@@ -42,11 +40,14 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
-import me.lucko.luckperms.common.node.comparator.HeldNodeComparator;
+import me.lucko.luckperms.common.node.comparator.NodeEntryComparator;
 import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
+import me.lucko.luckperms.common.node.matcher.StandardMatchers;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
@@ -56,7 +57,6 @@ import net.kyori.text.ComponentBuilder;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 
@@ -80,16 +80,16 @@ public class GroupListMembers extends ChildCommand<Group> {
             return CommandResult.NO_PERMISSION;
         }
 
-        Constraint constraint = Constraint.of(StandardComparison.EQUAL, Inheritance.key(group.getName()));
+        ConstraintNodeMatcher<InheritanceNode> matcher = StandardMatchers.key(Inheritance.builder(group.getName()).build());
         int page = ArgumentParser.parseIntOrElse(0, args, 1);
 
         Message.SEARCH_SEARCHING_MEMBERS.send(sender, group.getName());
 
-        List<HeldNode<UUID>> matchedUsers = plugin.getStorage().getUsersWithPermission(constraint).join().stream()
+        List<NodeEntry<UUID, InheritanceNode>> matchedUsers = plugin.getStorage().getUsersWithPermission(matcher).join().stream()
                 .filter(n -> n.getNode().getValue())
                 .collect(Collectors.toList());
 
-        List<HeldNode<String>> matchedGroups = plugin.getStorage().getGroupsWithPermission(constraint).join().stream()
+        List<NodeEntry<String, InheritanceNode>> matchedGroups = plugin.getStorage().getGroupsWithPermission(matcher).join().stream()
                 .filter(n -> n.getNode().getValue())
                 .collect(Collectors.toList());
 
@@ -124,28 +124,28 @@ public class GroupListMembers extends ChildCommand<Group> {
         return CommandResult.SUCCESS;
     }
 
-    private static <T extends Comparable<T>> void sendResult(Sender sender, List<HeldNode<T>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page) {
+    private static <T extends Comparable<T>> void sendResult(Sender sender, List<NodeEntry<T, InheritanceNode>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page) {
         results = new ArrayList<>(results);
-        results.sort(HeldNodeComparator.normal());
+        results.sort(NodeEntryComparator.normal());
 
         int pageIndex = page - 1;
-        List<List<HeldNode<T>>> pages = Iterators.divideIterable(results, 15);
+        List<List<NodeEntry<T, InheritanceNode>>> pages = Iterators.divideIterable(results, 15);
 
         if (pageIndex < 0 || pageIndex >= pages.size()) {
             page = 1;
             pageIndex = 0;
         }
 
-        List<HeldNode<T>> content = pages.get(pageIndex);
+        List<NodeEntry<T, InheritanceNode>> content = pages.get(pageIndex);
 
-        List<Map.Entry<String, HeldNode<T>>> mappedContent = content.stream()
+        List<Map.Entry<String, NodeEntry<T, InheritanceNode>>> mappedContent = content.stream()
                 .map(hp -> Maps.immutableEntry(lookupFunction.apply(hp.getHolder()), hp))
                 .collect(Collectors.toList());
 
         // send header
         headerMessage.send(sender, page, pages.size(), results.size());
 
-        for (Map.Entry<String, HeldNode<T>> ent : mappedContent) {
+        for (Map.Entry<String, NodeEntry<T, InheritanceNode>> ent : mappedContent) {
             String s = "&3> &b" + ent.getKey() + " " + getNodeExpiryString(ent.getValue().getNode()) + MessageUtils.getAppendableNodeContextString(sender.getPlugin().getLocaleManager(), ent.getValue().getNode());
             TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
             sender.sendMessage(message);
@@ -160,7 +160,7 @@ public class GroupListMembers extends ChildCommand<Group> {
         return " &8(&7expires in " + DurationFormatter.LONG.format(node.getExpiryDuration()) + "&8)";
     }
 
-    private static Consumer<ComponentBuilder<? ,?>> makeFancy(String holderName, HolderType holderType, String label, HeldNode<?> perm, LuckPermsPlugin plugin) {
+    private static Consumer<ComponentBuilder<? ,?>> makeFancy(String holderName, HolderType holderType, String label, NodeEntry<?, ?> perm, LuckPermsPlugin plugin) {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
                 "&3> &b" + ((InheritanceNode) perm.getNode()).getGroupName(),
                 " ",

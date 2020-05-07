@@ -27,11 +27,15 @@ package net.luckperms.api.model.user;
 
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.matcher.NodeMatcher;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -132,12 +136,24 @@ public interface UserManager {
     @NonNull CompletableFuture<Set<UUID>> getUniqueUsers();
 
     /**
+     * Searches the {@link User#data() normal node maps} of all known {@link User}s for {@link Node}
+     * entries matching the given {@link NodeMatcher matcher}.
+     *
+     * @param matcher the matcher
+     * @return the entries which matched
+     * @since 5.1
+     */
+    @NonNull <T extends Node> CompletableFuture<Map<UUID, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher);
+
+    /**
      * Searches for a list of users with a given permission.
      *
      * @param permission the permission to search for
      * @return a list of held permissions
      * @throws NullPointerException if the permission is null
+     * @deprecated use {@link #searchAll(NodeMatcher)}
      */
+    @Deprecated
     @NonNull CompletableFuture<List<HeldNode<UUID>>> getWithPermission(@NonNull String permission);
 
     /**

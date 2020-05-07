@@ -32,16 +32,16 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
-import me.lucko.luckperms.common.node.model.HeldNodeImpl;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
@@ -49,7 +49,6 @@ import me.lucko.luckperms.common.util.gson.GsonProvider;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.model.data.DataType;
-import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 
 import java.io.IOException;
@@ -363,18 +362,22 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws SQLException {
+    public <N extends Node> List<NodeEntry<UUID, N>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) throws SQLException {
         PreparedStatementBuilder builder = new PreparedStatementBuilder().append(USER_PERMISSIONS_SELECT_PERMISSION);
-        constraint.appendSql(builder, "permission");
+        constraint.getConstraint().appendSql(builder, "permission");
 
-        List<HeldNode<UUID>> held = new ArrayList<>();
+        List<NodeEntry<UUID, N>> held = new ArrayList<>();
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = builder.build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         UUID holder = UUID.fromString(rs.getString("uuid"));
                         Node node = readNode(rs).toNode();
-                        held.add(HeldNodeImpl.of(holder, node));
+
+                        N match = constraint.filterConstraintMatch(node);
+                        if (match != null) {
+                            held.add(NodeEntry.of(holder, match));
+                        }
                     }
                 }
             }
@@ -490,18 +493,22 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws SQLException {
+    public <N extends Node> List<NodeEntry<String, N>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) throws SQLException {
         PreparedStatementBuilder builder = new PreparedStatementBuilder().append(GROUP_PERMISSIONS_SELECT_PERMISSION);
-        constraint.appendSql(builder, "permission");
+        constraint.getConstraint().appendSql(builder, "permission");
 
-        List<HeldNode<String>> held = new ArrayList<>();
+        List<NodeEntry<String, N>> held = new ArrayList<>();
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = builder.build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String holder = rs.getString("name");
                         Node node = readNode(rs).toNode();
-                        held.add(HeldNodeImpl.of(holder, node));
+
+                        N match = constraint.filterConstraintMatch(node);
+                        if (match != null) {
+                            held.add(NodeEntry.of(holder, match));
+                        }
                     }
                 }
             }

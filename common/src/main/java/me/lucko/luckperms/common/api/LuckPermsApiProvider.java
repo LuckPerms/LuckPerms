@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.api.implementation.ApiGroupManager;
 import me.lucko.luckperms.common.api.implementation.ApiMessagingService;
 import me.lucko.luckperms.common.api.implementation.ApiMetaStackFactory;
 import me.lucko.luckperms.common.api.implementation.ApiNodeBuilderRegistry;
+import me.lucko.luckperms.common.api.implementation.ApiNodeMatcherFactory;
 import me.lucko.luckperms.common.api.implementation.ApiPlatform;
 import me.lucko.luckperms.common.api.implementation.ApiQueryOptionsRegistry;
 import me.lucko.luckperms.common.api.implementation.ApiTrackManager;
@@ -49,6 +50,7 @@ import net.luckperms.api.metastacking.MetaStackFactory;
 import net.luckperms.api.model.group.GroupManager;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.NodeBuilderRegistry;
+import net.luckperms.api.node.matcher.NodeMatcherFactory;
 import net.luckperms.api.platform.Platform;
 import net.luckperms.api.platform.PluginMetadata;
 import net.luckperms.api.query.QueryOptionsRegistry;
@@ -161,6 +163,11 @@ public class LuckPermsApiProvider implements LuckPerms {
     @Override
     public @NonNull MetaStackFactory getMetaStackFactory() {
         return this.metaStackFactory;
+    }
+
+    @Override
+    public @NonNull NodeMatcherFactory getNodeMatcherFactory() {
+        return ApiNodeMatcherFactory.INSTANCE;
     }
 
 }

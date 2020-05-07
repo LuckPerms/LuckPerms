@@ -64,6 +64,9 @@ public enum StandardComparison implements Comparison {
         }
     };
 
+    public static final String WILDCARD = "%";
+    public static final String WILDCARD_ONE = "_";
+
     private final String symbol;
     private final String asSql;
 
@@ -101,8 +104,8 @@ public enum StandardComparison implements Comparison {
         expression = expression.replace(".", "\\.");
 
         // convert from SQL LIKE syntax to regex
-        expression = expression.replace("_", ".");
-        expression = expression.replace("%", ".*");
+        expression = expression.replace(WILDCARD_ONE, ".");
+        expression = expression.replace(WILDCARD, ".*");
 
         return Pattern.compile(expression);
     }
