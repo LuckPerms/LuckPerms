@@ -292,6 +292,10 @@ public class CommandManager {
                     args.remove(2);
                     args.add(2, "permission");
                     break;
+                case "g":
+                case "group":
+                    args.remove(2);
+                    args.add(2, "parent");
                 case "m":
                     args.remove(2);
                     args.add(2, "meta");
