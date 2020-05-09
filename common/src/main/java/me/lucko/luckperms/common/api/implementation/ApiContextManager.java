@@ -46,7 +46,7 @@ public class ApiContextManager implements net.luckperms.api.context.ContextManag
     private final LuckPermsPlugin plugin;
     private final ContextManager handle;
 
-    public ApiContextManager(LuckPermsPlugin plugin, ContextManager<?> handle) {
+    public ApiContextManager(LuckPermsPlugin plugin, ContextManager<?, ?> handle) {
         this.plugin = plugin;
         this.handle = handle;
     }

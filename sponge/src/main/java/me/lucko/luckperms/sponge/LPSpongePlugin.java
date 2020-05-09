@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
@@ -64,7 +63,6 @@ import net.luckperms.api.query.QueryOptions;
 
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,7 +88,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     private SpongeUserManager userManager;
     private SpongeGroupManager groupManager;
     private StandardTrackManager trackManager;
-    private ContextManager<Subject> contextManager;
+    private SpongeContextManager contextManager;
     private me.lucko.luckperms.sponge.service.LuckPermsService service;
     private UpdateEventHandler updateEventHandler;
 
@@ -311,7 +309,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public ContextManager<Subject> getContextManager() {
+    public SpongeContextManager getContextManager() {
         return this.contextManager;
     }
 

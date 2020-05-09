@@ -97,6 +97,16 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         return this.metaDataManager.get(queryOptions);
     }
 
+    @Override
+    public @NonNull PermissionCache getPermissionData() {
+        return getPermissionData(getQueryOptions());
+    }
+
+    @Override
+    public @NonNull MetaCache getMetaData() {
+        return getMetaData(getQueryOptions());
+    }
+
     /**
      * Returns a {@link CacheMetadata} instance for the given {@link QueryOptions}.
      * 
@@ -104,6 +114,13 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
      * @return the metadata instance
      */
     protected abstract CacheMetadata getMetadataForQueryOptions(QueryOptions queryOptions);
+
+    /**
+     * Gets the most appropriate active query options instance for the holder.
+     *
+     * @return the query options
+     */
+    protected abstract QueryOptions getQueryOptions();
 
     /**
      * Gets the {@link CalculatorFactory} used to build {@link PermissionCalculator}s.

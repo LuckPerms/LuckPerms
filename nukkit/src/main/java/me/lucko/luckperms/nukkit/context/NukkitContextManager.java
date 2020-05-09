@@ -40,9 +40,10 @@ import net.luckperms.api.query.QueryOptions;
 
 import cn.nukkit.Player;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class NukkitContextManager extends ContextManager<Player> {
+public class NukkitContextManager extends ContextManager<Player, Player> {
 
     public static final OptionKey<Boolean> OP_OPTION = OptionKey.of("op", Boolean.class);
 
@@ -61,11 +62,16 @@ public class NukkitContextManager extends ContextManager<Player> {
             });
 
     public NukkitContextManager(LPNukkitPlugin plugin) {
-        super(plugin, Player.class);
+        super(plugin, Player.class, Player.class);
     }
 
     public void onPlayerQuit(Player player) {
         this.onlineSubjectCaches.remove(player);
+    }
+
+    @Override
+    public UUID getUniqueId(Player player) {
+        return player.getUniqueId();
     }
 
     @Override

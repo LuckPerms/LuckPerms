@@ -31,6 +31,7 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
+import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.calculated.MonitoredSubjectData;
@@ -38,7 +39,6 @@ import me.lucko.luckperms.sponge.service.model.calculated.MonitoredSubjectData;
 import net.luckperms.api.model.data.DataType;
 
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.service.permission.Subject;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -64,7 +64,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
     private final PersistedSubjectData subjectData;
     private final CalculatedSubjectData transientSubjectData;
 
-    private Subject spongeSubject = null;
+    private ProxiedSubject spongeSubject = null;
 
     /**
      * The save buffer instance for saving changes to disk
@@ -147,7 +147,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
     }
 
     @Override
-    public Subject sponge() {
+    public ProxiedSubject sponge() {
         if (this.spongeSubject == null) {
             this.spongeSubject = ProxyFactory.toSponge(this);
         }

@@ -72,7 +72,7 @@ public interface Sender {
     default String getNameWithLocation() {
         String name = getName();
 
-        ContextManager<?> contextManager = getPlugin().getContextManager();
+        ContextManager<?, ?> contextManager = getPlugin().getContextManager();
         if (contextManager == null) {
             return name;
         }

@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.api.implementation.ApiMetaStackFactory;
 import me.lucko.luckperms.common.api.implementation.ApiNodeBuilderRegistry;
 import me.lucko.luckperms.common.api.implementation.ApiNodeMatcherFactory;
 import me.lucko.luckperms.common.api.implementation.ApiPlatform;
+import me.lucko.luckperms.common.api.implementation.ApiPlayerAdapter;
 import me.lucko.luckperms.common.api.implementation.ApiQueryOptionsRegistry;
 import me.lucko.luckperms.common.api.implementation.ApiTrackManager;
 import me.lucko.luckperms.common.api.implementation.ApiUserManager;
@@ -53,11 +54,13 @@ import net.luckperms.api.node.NodeBuilderRegistry;
 import net.luckperms.api.node.matcher.NodeMatcherFactory;
 import net.luckperms.api.platform.Platform;
 import net.luckperms.api.platform.PluginMetadata;
+import net.luckperms.api.player.PlayerAdapter;
 import net.luckperms.api.query.QueryOptionsRegistry;
 import net.luckperms.api.track.TrackManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -72,6 +75,7 @@ public class LuckPermsApiProvider implements LuckPerms {
     private final UserManager userManager;
     private final GroupManager groupManager;
     private final TrackManager trackManager;
+    private final PlayerAdapter<?> playerAdapter;
     private final ActionLogger actionLogger;
     private final ContextManager contextManager;
     private final MetaStackFactory metaStackFactory;
@@ -83,6 +87,7 @@ public class LuckPermsApiProvider implements LuckPerms {
         this.userManager = new ApiUserManager(plugin, plugin.getUserManager());
         this.groupManager = new ApiGroupManager(plugin, plugin.getGroupManager());
         this.trackManager = new ApiTrackManager(plugin, plugin.getTrackManager());
+        this.playerAdapter = new ApiPlayerAdapter<>(plugin.getUserManager(), plugin.getContextManager());
         this.actionLogger = new ApiActionLogger(plugin);
         this.contextManager = new ApiContextManager(plugin, plugin.getContextManager());
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
@@ -116,6 +121,17 @@ public class LuckPermsApiProvider implements LuckPerms {
     @Override
     public @NonNull TrackManager getTrackManager() {
         return this.trackManager;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public @NonNull <T> PlayerAdapter<T> getPlayerAdapter(Class<T> playerClass) {
+        Objects.requireNonNull(playerClass, "playerClass");
+        Class<?> expectedClass = this.plugin.getContextManager().getPlayerClass();
+        if (!expectedClass.equals(playerClass)) {
+            throw new IllegalArgumentException("Player class " + playerClass.getName() + " does not equal " + expectedClass.getName());
+        }
+        return (PlayerAdapter<T>) this.playerAdapter;
     }
 
     @Override

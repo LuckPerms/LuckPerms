@@ -34,7 +34,7 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
 
-import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandSource;
@@ -79,6 +79,11 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
     }
 
     @Override
+    public @NonNull QueryOptions getQueryOptions() {
+        return getContextsCache().getQueryOptions();
+    }
+
+    @Override
     public @NonNull Optional<CommandSource> getCommandSource() {
         return handle().thenApply(LPSubject::getCommandSource).join();
     }
@@ -105,7 +110,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
 
     @Override
     public boolean hasPermission(@NonNull String permission) {
-        return handle().thenApply(handle -> handle.getPermissionValue(getActiveContextSet(), permission).asBoolean()).join();
+        return handle().thenApply(handle -> handle.getPermissionValue(getContextsCache().getContextSet(), permission).asBoolean()).join();
     }
 
     @Override
@@ -116,7 +121,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
     @Override
     public boolean isChildOf(@NonNull Subject parent) {
         return handle().thenApply(handle -> handle.isChildOf(
-                getActiveContextSet(),
+                getContextsCache().getContextSet(),
                 this.service.getReferenceFactory().obtain(parent)
         )).join();
     }
@@ -132,7 +137,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
     @SuppressWarnings("rawtypes")
     @Override
     public @NonNull List<Subject> getParents() {
-        return (List) handle().thenApply(handle -> handle.getParents(getActiveContextSet()).stream()
+        return (List) handle().thenApply(handle -> handle.getParents(getContextsCache().getContextSet()).stream()
                 .map(s -> new SubjectProxy(this.service, s))
                 .collect(ImmutableCollectors.toList())).join();
     }
@@ -152,7 +157,7 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
 
     @Override
     public @NonNull Optional<String> getOption(@NonNull String key) {
-        return handle().thenApply(handle -> handle.getOption(getActiveContextSet(), key)).join();
+        return handle().thenApply(handle -> handle.getOption(getContextsCache().getContextSet(), key)).join();
     }
 
     @Override
@@ -163,11 +168,6 @@ public final class SubjectProxy implements Subject, ProxiedSubject, ProxiedServi
     @Override
     public @NonNull Set<Context> getActiveContexts() {
         return CompatibilityUtil.convertContexts(getContextsCache().getContextSet());
-    }
-
-    @Override
-    public ImmutableContextSet getActiveContextSet() {
-        return getContextsCache().getContextSet();
     }
 
     @Override

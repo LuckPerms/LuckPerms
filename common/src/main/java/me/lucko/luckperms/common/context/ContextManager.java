@@ -39,41 +39,50 @@ import net.luckperms.api.query.QueryOptions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Base implementation of {@link ContextManager} which caches content lookups.
  *
- * @param <T> the calculator type
+ * @param <S> the calculator type
  */
-public abstract class ContextManager<T> {
+public abstract class ContextManager<S, P extends S> {
 
     protected final LuckPermsPlugin plugin;
-    private final Class<T> subjectClass;
+    private final Class<S> subjectClass;
+    private final Class<P> playerClass;
 
-    private final List<ContextCalculator<? super T>> calculators = new CopyOnWriteArrayList<>();
+    private final List<ContextCalculator<? super S>> calculators = new CopyOnWriteArrayList<>();
     private final List<StaticContextCalculator> staticCalculators = new CopyOnWriteArrayList<>();
 
     // caches static context lookups
     private final StaticLookupCache staticLookupCache = new StaticLookupCache();
 
-    protected ContextManager(LuckPermsPlugin plugin, Class<T> subjectClass) {
+    protected ContextManager(LuckPermsPlugin plugin, Class<S> subjectClass, Class<P> playerClass) {
         this.plugin = plugin;
         this.subjectClass = subjectClass;
+        this.playerClass = playerClass;
     }
 
-    public Class<T> getSubjectClass() {
+    public Class<S> getSubjectClass() {
         return this.subjectClass;
     }
 
-    public abstract QueryOptionsSupplier getCacheFor(T subject);
+    public Class<P> getPlayerClass() {
+        return this.playerClass;
+    }
 
-    public QueryOptions getQueryOptions(T subject) {
+    public abstract UUID getUniqueId(P player);
+
+    public abstract QueryOptionsSupplier getCacheFor(S subject);
+
+    public QueryOptions getQueryOptions(S subject) {
         return getCacheFor(subject).getQueryOptions();
     }
 
-    public ImmutableContextSet getContext(T subject) {
+    public ImmutableContextSet getContext(S subject) {
         return getCacheFor(subject).getContextSet();
     }
 
@@ -89,11 +98,11 @@ public abstract class ContextManager<T> {
         return this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder().context(contextSet).build();
     }
 
-    public abstract QueryOptions formQueryOptions(T subject, ImmutableContextSet contextSet);
+    public abstract QueryOptions formQueryOptions(S subject, ImmutableContextSet contextSet);
 
-    public abstract void invalidateCache(T subject);
+    public abstract void invalidateCache(S subject);
 
-    public void registerCalculator(ContextCalculator<? super T> calculator) {
+    public void registerCalculator(ContextCalculator<? super S> calculator) {
         // calculators registered first should have priority (and be checked last.)
         this.calculators.add(0, calculator);
 
@@ -103,16 +112,16 @@ public abstract class ContextManager<T> {
         }
     }
 
-    public void unregisterCalculator(ContextCalculator<? super T> calculator) {
+    public void unregisterCalculator(ContextCalculator<? super S> calculator) {
         this.calculators.remove(calculator);
         if (calculator instanceof StaticContextCalculator) {
             this.staticCalculators.remove(calculator);
         }
     }
 
-    protected QueryOptions calculate(T subject) {
+    protected QueryOptions calculate(S subject) {
         ImmutableContextSet.Builder accumulator = new ImmutableContextSetImpl.BuilderImpl();
-        for (ContextCalculator<? super T> calculator : this.calculators) {
+        for (ContextCalculator<? super S> calculator : this.calculators) {
             try {
                 calculator.calculate(subject, accumulator::add);
             } catch (Throwable e) {
@@ -138,7 +147,7 @@ public abstract class ContextManager<T> {
 
     public ImmutableContextSet getPotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (ContextCalculator<? super T> calculator : this.calculators) {
+        for (ContextCalculator<? super S> calculator : this.calculators) {
             ContextSet potentialContexts;
             try {
                 potentialContexts = calculator.estimatePotentialContexts();

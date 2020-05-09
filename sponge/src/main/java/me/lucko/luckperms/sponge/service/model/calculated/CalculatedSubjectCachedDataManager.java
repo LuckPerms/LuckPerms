@@ -68,6 +68,11 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
     }
 
     @Override
+    protected QueryOptions getQueryOptions() {
+        return this.subject.sponge().getQueryOptions();
+    }
+
+    @Override
     protected CalculatorFactory getCalculatorFactory() {
         return this;
     }

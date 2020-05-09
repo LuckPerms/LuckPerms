@@ -41,9 +41,9 @@ import java.util.concurrent.TimeUnit;
  */
 public final class QueryOptionsCache<T> extends ExpiringCache<QueryOptions> implements QueryOptionsSupplier {
     private final T subject;
-    private final ContextManager<T> contextManager;
+    private final ContextManager<T, ?> contextManager;
 
-    public QueryOptionsCache(T subject, ContextManager<T> contextManager) {
+    public QueryOptionsCache(T subject, ContextManager<T, ?> contextManager) {
         super(50L, TimeUnit.MILLISECONDS); // expire roughly every tick
         this.subject = subject;
         this.contextManager = contextManager;

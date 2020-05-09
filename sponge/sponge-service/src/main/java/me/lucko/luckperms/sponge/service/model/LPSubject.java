@@ -41,7 +41,7 @@ import java.util.Optional;
  */
 public interface LPSubject {
 
-    Subject sponge();
+    ProxiedSubject sponge();
 
     LPPermissionService getService();
 

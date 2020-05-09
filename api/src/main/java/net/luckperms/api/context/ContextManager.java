@@ -37,11 +37,11 @@ import java.util.Optional;
  * Manages {@link ContextCalculator}s, and calculates applicable contexts for a
  * given type.
  *
- * This interface accepts {@link Object} types as a parameter to avoid having to depend
+ * <p>This interface accepts {@link Object} types as a parameter to avoid having to depend
  * on specific server implementations. In all cases, the "player" or "subject" type for
- * the platform must be used.
+ * the platform must be used.</p>
  *
- * Specifically:
+ * <p>Specifically:</p>
  *
  * <p></p>
  * <ul>

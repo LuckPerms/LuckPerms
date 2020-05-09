@@ -188,7 +188,7 @@ public interface LuckPermsPlugin {
      *
      * @return the context manager
      */
-    ContextManager<?> getContextManager();
+    ContextManager<?, ?> getContextManager();
 
     /**
      * Gets the inheritance handler

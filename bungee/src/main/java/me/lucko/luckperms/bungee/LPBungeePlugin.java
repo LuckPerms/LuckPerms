@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
@@ -52,7 +51,6 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,7 +73,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     private StandardUserManager userManager;
     private StandardGroupManager groupManager;
     private StandardTrackManager trackManager;
-    private ContextManager<ProxiedPlayer> contextManager;
+    private BungeeContextManager contextManager;
 
     public LPBungeePlugin(LPBungeeBootstrap bootstrap) {
         this.bootstrap = bootstrap;
@@ -236,7 +234,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public ContextManager<ProxiedPlayer> getContextManager() {
+    public BungeeContextManager getContextManager() {
         return this.contextManager;
     }
 
