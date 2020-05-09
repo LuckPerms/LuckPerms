@@ -50,10 +50,6 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
 
     @Override
     protected void appendProperties(HikariConfig config, Map<String, String> properties) {
-        if (properties.isEmpty()) {
-            return;
-        }
-
         String propertiesString = properties.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(";"));
 
         // kinda hacky. this will call #setProperties on the datasource, which will append these options

@@ -37,6 +37,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public abstract class HikariConnectionFactory implements ConnectionFactory {
 
@@ -77,7 +78,13 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         config.setPoolName("luckperms-hikari");
 
         appendConfigurationInfo(config);
-        appendProperties(config, new HashMap<>(this.configuration.getProperties()));
+
+        Map<String, String> properties = new HashMap<>(this.configuration.getProperties());
+
+        // https://github.com/brettwooldridge/HikariCP/wiki/Rapid-Recovery
+        properties.putIfAbsent("socketTimeout", String.valueOf(TimeUnit.SECONDS.toMillis(30)));
+
+        appendProperties(config, properties);
 
         config.setMaximumPoolSize(this.configuration.getMaxPoolSize());
         config.setMinimumIdle(this.configuration.getMinIdleConnections());
