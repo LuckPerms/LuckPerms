@@ -443,6 +443,14 @@ meta-value-selection:
 #   permissions matching the wildcard.
 apply-wildcards: true
 
+# If LuckPerms should resolve and apply permissions according to the Sponge style implicit wildcard
+# inheritance system.
+#
+# - That being: If a user has been granted "example", then the player should have also be
+#   automatically granted "example.function", "example.another", "example.deeper.nesting",
+#   and so on.
+apply-sponge-implicit-wildcards: false
+
 # If the plugin should parse regex permissions.
 #
 # - If set to true, LuckPerms will detect regex permissions, marked with "r=" at the start of the

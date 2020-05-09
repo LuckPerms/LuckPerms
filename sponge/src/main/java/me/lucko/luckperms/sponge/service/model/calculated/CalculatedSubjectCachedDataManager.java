@@ -34,12 +34,12 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.processor.MapProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.calculator.FixedDefaultsProcessor;
-import me.lucko.luckperms.sponge.calculator.SpongeWildcardProcessor;
 
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.metastacking.MetaStackDefinition;

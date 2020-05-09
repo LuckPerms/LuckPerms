@@ -23,10 +23,8 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.calculator;
+package me.lucko.luckperms.common.calculator.processor;
 
-import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
-import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.node.AbstractNode;
 

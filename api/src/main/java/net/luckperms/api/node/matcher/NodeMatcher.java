@@ -25,7 +25,6 @@
 
 package net.luckperms.api.node.matcher;
 
-import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;

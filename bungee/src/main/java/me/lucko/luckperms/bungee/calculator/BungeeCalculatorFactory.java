@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.processor.MapProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.RegexProcessor;
+import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 
@@ -58,6 +59,10 @@ public class BungeeCalculatorFactory implements CalculatorFactory {
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
             processors.add(new WildcardProcessor());
+        }
+
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS_SPONGE)) {
+            processors.add(new SpongeWildcardProcessor());
         }
 
         return new PermissionCalculator(this.plugin, metadata, processors.build());

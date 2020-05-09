@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.util.ImmutableCollectors;
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
+import net.luckperms.api.platform.Platform;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
@@ -200,6 +201,14 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> APPLYING_WILDCARDS = enduringKey(booleanKey("apply-wildcards", true));
 
     /**
+     * If Sponge's implicit permission inheritance system should be applied
+     */
+    public static final ConfigKey<Boolean> APPLYING_WILDCARDS_SPONGE = enduringKey(customKey(c -> {
+        boolean def = c.getPlugin().getBootstrap().getType() == Platform.Type.SPONGE;
+        return c.getBoolean("apply-sponge-implicit-wildcards", def);
+    }));
+
+    /**
      * If regex permissions are being applied
      */
     public static final ConfigKey<Boolean> APPLYING_REGEX = enduringKey(booleanKey("apply-regex", true));
@@ -243,11 +252,6 @@ public final class ConfigKeys {
      * If BungeeCord configured permissions are being applied. This setting is ignored on other platforms.
      */
     public static final ConfigKey<Boolean> APPLY_BUNGEE_CONFIG_PERMISSIONS = enduringKey(booleanKey("apply-bungee-config-permissions", false));
-
-    /**
-     * If Sponge's implicit permission inheritance system should be applied
-     */
-    public static final ConfigKey<Boolean> APPLY_SPONGE_IMPLICIT_WILDCARDS = enduringKey(booleanKey("apply-sponge-implicit-wildcards", true));
 
     /**
      * If Sponge default subjects should be applied
