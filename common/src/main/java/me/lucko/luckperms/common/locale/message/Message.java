@@ -147,6 +147,7 @@ public enum Message {
 
     SEARCH_SEARCHING("&aSearching for users and groups with &bpermissions {}&a...", true),
     SEARCH_SEARCHING_MEMBERS("&aSearching for users and groups who inherit from &b{}&a...", true),
+    SEARCH_RESULT_GROUP_DEFAULT("&7Note: when searching for members of the default group, offline players with no other permissions will not be shown!", true),
     SEARCH_RESULT("&aFound &b{}&a entries from &b{}&a users and &b{}&a groups.", true),
 
     SEARCH_SHOWING_USERS("&bShowing user entries:    &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),

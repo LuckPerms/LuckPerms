@@ -40,6 +40,8 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.comparator.NodeEntryComparator;
 import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
@@ -80,7 +82,8 @@ public class GroupListMembers extends ChildCommand<Group> {
             return CommandResult.NO_PERMISSION;
         }
 
-        ConstraintNodeMatcher<InheritanceNode> matcher = StandardNodeMatchers.key(Inheritance.builder(group.getName()).build());
+        InheritanceNode node = Inheritance.builder(group.getName()).build();
+        ConstraintNodeMatcher<InheritanceNode> matcher = StandardNodeMatchers.key(node);
         int page = ArgumentParser.parseIntOrElse(0, args, 1);
 
         Message.SEARCH_SEARCHING_MEMBERS.send(sender, group.getName());
@@ -88,6 +91,19 @@ public class GroupListMembers extends ChildCommand<Group> {
         List<NodeEntry<UUID, InheritanceNode>> matchedUsers = plugin.getStorage().getUsersWithPermission(matcher).join().stream()
                 .filter(n -> n.getNode().getValue())
                 .collect(Collectors.toList());
+
+        // special handling for default group
+        if (group.getName().equals(GroupManager.DEFAULT_GROUP_NAME)) {
+            // include all non-saved online players in the results
+            for (User user : plugin.getUserManager().getAll().values()) {
+                if (!plugin.getUserManager().shouldSave(user)) {
+                    matchedUsers.add(NodeEntry.of(user.getUniqueId(), node));
+                }
+            }
+
+            // send a warning message about this behaviour
+            Message.SEARCH_RESULT_GROUP_DEFAULT.send(sender);
+        }
 
         List<NodeEntry<String, InheritanceNode>> matchedGroups = plugin.getStorage().getGroupsWithPermission(matcher).join().stream()
                 .filter(n -> n.getNode().getValue())

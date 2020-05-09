@@ -303,7 +303,6 @@ public class CommandManager {
                         replaceArgs(args, 3, arg -> arg.equals("i") ? "info" : null);
                     }
                 }
-
             }
         }
     }
