@@ -154,7 +154,7 @@ public class CommandManager {
     }
 
     private CommandResult execute(Sender sender, String label, List<String> arguments) {
-        handleRewrites(arguments, true);
+        applyConvenienceAliases(arguments, true);
 
         // Handle no arguments
         if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
@@ -211,8 +211,7 @@ public class CommandManager {
     }
 
     public List<String> tabCompleteCommand(Sender sender, List<String> arguments) {
-        // we rewrite tab completions too!
-        handleRewrites(arguments, false);
+        applyConvenienceAliases(arguments, false);
 
         final List<Command<?>> mains = this.mainCommands.values().stream()
                 .filter(Command::shouldDisplay)
@@ -255,74 +254,66 @@ public class CommandManager {
     }
 
     /**
-     * Handles aliases
+     * Applies "convenience" aliases to the given cmd line arguments.
      *
      * @param args the current args list
-     * @param rewriteLastArgument if the last argument should be rewritten - this is false when the method is called on tab completions
+     * @param rewriteLastArgument if the last argument should be rewritten - 
+     *                            this is false when the method is called on tab completions
      */
-    private static void handleRewrites(List<String> args, boolean rewriteLastArgument) {
-        // Provide aliases
+    private static void applyConvenienceAliases(List<String> args, boolean rewriteLastArgument) {
+        // '/lp u' --> '/lp user' etc
+        //      ^           ^^^^
         if (args.size() >= 1 && (rewriteLastArgument || args.size() >= 2)) {
-            String arg0 = args.get(0);
-            if (arg0.equalsIgnoreCase("u")) {
-                args.remove(0);
-                args.add(0, "user");
-            } else if (arg0.equalsIgnoreCase("g")) {
-                args.remove(0);
-                args.add(0, "group");
-            } else if (arg0.equalsIgnoreCase("t")) {
-                args.remove(0);
-                args.add(0, "track");
-            } else if (arg0.equalsIgnoreCase("i")) {
-                args.remove(0);
-                args.add(0, "info");
-            }
+            replaceArgs(args, 0, arg -> {
+                switch (arg) {
+                    case "u": return "user";
+                    case "g": return "group";
+                    case "t": return "track";
+                    case "i": return "info";
+                    default: return null;
+                }
+            });
         }
 
+        // '/lp user Luck p set --> /lp user Luck permission set' etc
+        //                ^                       ^^^^^^^^^^
         if (args.size() >= 3 && (rewriteLastArgument || args.size() >= 4)) {
-            if (!args.get(0).equalsIgnoreCase("user") && !args.get(0).equalsIgnoreCase("group")) {
-                return;
-            }
+            String arg0 = args.get(0).toLowerCase();
+            if (arg0.equals("user") || arg0.equals("group")) {
+                replaceArgs(args, 2, arg -> {
+                    switch (arg) {
+                        case "p":
+                        case "perm":
+                            return "permission";
+                        case "g":
+                        case "group":
+                            return "parent";
+                        case "m": return "meta";
+                        case "i": return "info";
+                        case "e": return "editor";
+                        default: return null;
+                    }
+                });
 
-            String s = args.get(2).toLowerCase();
-            switch (s) {
-                // Provide aliases
-                case "p":
-                case "perm":
-                    args.remove(2);
-                    args.add(2, "permission");
-                    break;
-                case "g":
-                case "group":
-                    args.remove(2);
-                    args.add(2, "parent");
-                case "m":
-                    args.remove(2);
-                    args.add(2, "meta");
-                    break;
-                case "i":
-                    args.remove(2);
-                    args.add(2, "info");
-                    break;
-                case "e":
-                    args.remove(2);
-                    args.add(2, "editor");
-                    break;
-                default:
-                    break;
-            }
+                // '/lp user Luck permission i' --> '/lp user Luck permission info' etc
+                //                           ^                                ^^^^
+                if (args.size() >= 4 && (rewriteLastArgument || args.size() >= 5)) {
+                    String arg2 = args.get(2).toLowerCase();
+                    if (arg2.equals("permission") || arg2.equals("parent") || arg2.equals("meta")) {
+                        replaceArgs(args, 3, arg -> arg.equals("i") ? "info" : null);
+                    }
+                }
 
-            // /lp user Luck permission i ==> /lp user Luck permission info
-            boolean lazyInfo = (
-                    args.size() >= 4 && (rewriteLastArgument || args.size() >= 5) &&
-                    (args.get(2).equalsIgnoreCase("permission") || args.get(2).equalsIgnoreCase("parent") || args.get(2).equalsIgnoreCase("meta")) &&
-                    (args.get(3).equalsIgnoreCase("i"))
-            );
-
-            if (lazyInfo) {
-                args.remove(3);
-                args.add(3, "info");
             }
+        }
+    }
+
+    private static void replaceArgs(List<String> args, int i, Function<String, String> rewrites) {
+        String arg = args.get(i).toLowerCase();
+        String rewrite = rewrites.apply(arg);
+        if (rewrite != null) {
+            args.remove(i);
+            args.add(0, rewrite);
         }
     }
 
