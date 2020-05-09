@@ -80,9 +80,8 @@ public final class StandardNodeMatchers {
             super(constraint);
         }
 
-        @Nullable
         @Override
-        public Node filterConstraintMatch(@NonNull Node node) {
+        public @Nullable Node filterConstraintMatch(@NonNull Node node) {
             return node;
         }
     }
@@ -112,9 +111,8 @@ public final class StandardNodeMatchers {
             super(Constraint.of(StandardComparison.SIMILAR, Meta.key(metaKey, StandardComparison.WILDCARD)));
         }
 
-        @Nullable
         @Override
-        public MetaNode filterConstraintMatch(@NonNull Node node) {
+        public @Nullable MetaNode filterConstraintMatch(@NonNull Node node) {
             return NodeType.META.tryCast(node).orElse(null);
         }
     }
@@ -127,9 +125,8 @@ public final class StandardNodeMatchers {
             this.type = type;
         }
 
-        @Nullable
         @Override
-        public T filterConstraintMatch(@NonNull Node node) {
+        public @Nullable T filterConstraintMatch(@NonNull Node node) {
             return this.type.tryCast(node).orElse(null);
         }
 
