@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package net.luckperms.api.player;
+package net.luckperms.api.platform;
 
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.cacheddata.CachedMetaData;

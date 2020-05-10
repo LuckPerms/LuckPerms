@@ -53,8 +53,8 @@ import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.NodeBuilderRegistry;
 import net.luckperms.api.node.matcher.NodeMatcherFactory;
 import net.luckperms.api.platform.Platform;
+import net.luckperms.api.platform.PlayerAdapter;
 import net.luckperms.api.platform.PluginMetadata;
-import net.luckperms.api.player.PlayerAdapter;
 import net.luckperms.api.query.QueryOptionsRegistry;
 import net.luckperms.api.track.TrackManager;
 
