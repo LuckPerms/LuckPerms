@@ -215,6 +215,13 @@ public abstract class PermissionHolder {
     public abstract String getPlainDisplayName();
 
     /**
+     * Gets the most appropriate query options available at the time for the holder.
+     *
+     * @return query options
+     */
+    public abstract QueryOptions getQueryOptions();
+
+    /**
      * Gets the holders cached data
      *
      * @return the holders cached data

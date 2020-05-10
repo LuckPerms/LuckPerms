@@ -52,6 +52,11 @@ public abstract class HolderCachedDataManager<T extends PermissionHolder> extend
     }
 
     @Override
+    protected QueryOptions getQueryOptions() {
+        return this.holder.getQueryOptions();
+    }
+
+    @Override
     protected CalculatorFactory getCalculatorFactory() {
         return getPlugin().getCalculatorFactory();
     }

@@ -30,6 +30,8 @@ import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.luckperms.api.query.QueryOptions;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -87,6 +89,16 @@ public class User extends PermissionHolder {
     @Override
     public String getPlainDisplayName() {
         return getFormattedDisplayName();
+    }
+
+    @Override
+    public QueryOptions getQueryOptions() {
+        QueryOptions queryOptions = getPlugin().getQueryOptionsForUser(this).orElse(null);
+        if (queryOptions != null) {
+            return queryOptions;
+        }
+
+        return getPlugin().getContextManager().getStaticQueryOptions();
     }
 
     public ApiUser getApiProxy() {

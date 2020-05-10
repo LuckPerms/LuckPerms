@@ -86,6 +86,11 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     }
 
     @Override
+    public @NonNull QueryOptions getQueryOptions() {
+        return this.handle.getQueryOptions();
+    }
+
+    @Override
     public @NonNull CachedDataManager getCachedData() {
         return this.handle.getCachedData();
     }

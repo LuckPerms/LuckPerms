@@ -141,7 +141,7 @@ public interface LuckPerms {
      * @throws IllegalArgumentException if the player class is not correct
      * @since 5.1
      */
-    <T> @NonNull PlayerAdapter<T> getPlayerAdapter(Class<T> playerClass);
+    <T> @NonNull PlayerAdapter<T> getPlayerAdapter(@NonNull Class<T> playerClass);
 
     /**
      * Gets the {@link Platform}, which represents the server platform the

@@ -107,6 +107,7 @@ public interface CachedDataManager {
      *
      * @return a meta data instance
      * @since 5.1
+     * @see PermissionHolder#getQueryOptions()
      */
     @NonNull CachedMetaData getMetaData();
 

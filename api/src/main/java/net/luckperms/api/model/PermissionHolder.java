@@ -26,6 +26,7 @@
 package net.luckperms.api.model;
 
 import net.luckperms.api.cacheddata.CachedDataManager;
+import net.luckperms.api.context.ContextManager;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.NodeMap;
 import net.luckperms.api.model.group.Group;
@@ -111,6 +112,24 @@ public interface PermissionHolder {
      * @return a friendly identifier for this holder
      */
     @NonNull String getFriendlyName();
+
+    /**
+     * Gets the most appropriate query options available at the time for the
+     * {@link PermissionHolder}.
+     *
+     * <p>For {@link User}s, the most appropriate query options will be their
+     * {@link ContextManager#getQueryOptions(User) current active query options} if the
+     * corresponding player is online, and otherwise, will fallback to
+     * {@link ContextManager#getStaticQueryOptions() the current static query options}
+     * if they are offline.</p>
+     *
+     * <p>For {@link Group}s, the most appropriate query options will always be
+     * {@link ContextManager#getStaticQueryOptions()} the current static query options.</p>
+     *
+     * @return query options
+     * @since 5.1
+     */
+    @NonNull QueryOptions getQueryOptions();
 
     /**
      * Gets the holders {@link CachedDataManager} cache.

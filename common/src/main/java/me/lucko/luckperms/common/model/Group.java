@@ -95,14 +95,18 @@ public class Group extends PermissionHolder {
     }
 
     @Override
+    public QueryOptions getQueryOptions() {
+        return getPlugin().getContextManager().getStaticQueryOptions();
+    }
+
+    @Override
     public GroupCachedDataManager getCachedData() {
         return this.cachedData;
     }
 
     @Override
     public String getFormattedDisplayName() {
-        Optional<String> dn = getDisplayName();
-        return dn.map(s -> this.name + " &r(" + s + "&r)").orElse(this.name);
+        return getDisplayName().map(s -> this.name + " &r(" + s + "&r)").orElse(this.name);
     }
 
     @Override
