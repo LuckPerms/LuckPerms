@@ -103,6 +103,27 @@ public interface GroupManager {
     @NonNull CompletableFuture<Void> deleteGroup(@NonNull Group group);
 
     /**
+     * Loads (or creates) a group from the plugin's storage provider, applies the given
+     * {@code action}, then saves the group's data back to storage.
+     *
+     * <p>This method effectively calls {@link #createAndLoadGroup(String)}, followed by the
+     * {@code action}, then {@link #saveGroup(Group)}, and returns an encapsulation of the whole
+     * process as a {@link CompletableFuture}. </p>
+     *
+     * @param name the name of the group
+     * @param action the action to apply to the group
+     * @return a future to encapsulate the operation
+     * @since 5.1
+     */
+    default @NonNull CompletableFuture<Void> modifyGroup(@NonNull String name, @NonNull Consumer<? super Group> action) {
+        /* This default method is overridden in the implementation, and is just here
+           to demonstrate what this method does in the API sources. */
+        return createAndLoadGroup(name)
+                .thenApplyAsync(group -> { action.accept(group); return group; })
+                .thenCompose(this::saveGroup);
+    }
+
+    /**
      * Loads all groups into memory.
      *
      * @return a future to encapsulate the operation.

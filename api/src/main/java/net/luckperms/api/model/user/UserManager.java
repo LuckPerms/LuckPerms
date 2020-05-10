@@ -63,7 +63,7 @@ public interface UserManager {
     /**
      * Loads a user from the plugin's storage provider into memory.
      *
-     * @param uniqueId     the uuid of the user
+     * @param uniqueId the uuid of the user
      * @param username the username, if known
      * @return the resultant user
      * @throws NullPointerException if the uuid is null
@@ -114,6 +114,27 @@ public interface UserManager {
      * @throws IllegalStateException if the user instance was not obtained from LuckPerms.
      */
     @NonNull CompletableFuture<Void> saveUser(@NonNull User user);
+
+    /**
+     * Loads a user from the plugin's storage provider, applies the given {@code action},
+     * then saves the user's data back to storage.
+     *
+     * <p>This method effectively calls {@link #loadUser(UUID)}, followed by the {@code action},
+     * then {@link #saveUser(User)}, and returns an encapsulation of the whole process as a
+     * {@link CompletableFuture}. </p>
+     *
+     * @param uniqueId the uuid of the user
+     * @param action the action to apply to the user
+     * @return a future to encapsulate the operation
+     * @since 5.1
+     */
+    default @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super User> action) {
+        /* This default method is overridden in the implementation, and is just here
+           to demonstrate what this method does in the API sources. */
+        return loadUser(uniqueId)
+                .thenApplyAsync(user -> { action.accept(user); return user; })
+                .thenCompose(this::saveUser);
+    }
 
     /**
      * Saves data about a player to the uuid caching system.

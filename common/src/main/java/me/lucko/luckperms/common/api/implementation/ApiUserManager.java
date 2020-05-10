@@ -51,6 +51,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.model.user.User, UserManager<?>> implements net.luckperms.api.model.user.UserManager {
     public ApiUserManager(LuckPermsPlugin plugin, UserManager<?> handle) {
@@ -91,6 +92,19 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     public @NonNull CompletableFuture<Void> saveUser(net.luckperms.api.model.user.@NonNull User user) {
         Objects.requireNonNull(user, "user");
         return this.plugin.getStorage().saveUser(ApiUser.cast(user));
+    }
+
+    @Override
+    public @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super net.luckperms.api.model.user.User> action) {
+        Objects.requireNonNull(uniqueId, "uniqueId");
+        Objects.requireNonNull(action, "action");
+
+        return this.plugin.getStorage().loadUser(uniqueId, null)
+                .thenApplyAsync(user -> {
+                    action.accept(user.getApiProxy());
+                    return user;
+                }, this.plugin.getBootstrap().getScheduler().async())
+                .thenCompose(user -> this.plugin.getStorage().saveUser(user));
     }
 
     @Override

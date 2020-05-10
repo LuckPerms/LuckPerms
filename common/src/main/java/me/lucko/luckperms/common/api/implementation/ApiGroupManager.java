@@ -51,6 +51,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api.model.group.Group, GroupManager<?>> implements net.luckperms.api.model.group.GroupManager {
     public ApiGroupManager(LuckPermsPlugin plugin, GroupManager<?> handle) {
@@ -89,6 +90,19 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
         }
 
         return this.plugin.getStorage().deleteGroup(ApiGroup.cast(group), DeletionCause.API);
+    }
+
+    @Override
+    public @NonNull CompletableFuture<Void> modifyGroup(@NonNull String name, @NonNull Consumer<? super net.luckperms.api.model.group.Group> action) {
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(action, "action");
+
+        return this.plugin.getStorage().createAndLoadGroup(name, CreationCause.API)
+                .thenApplyAsync(group -> {
+                    action.accept(group.getApiProxy());
+                    return group;
+                }, this.plugin.getBootstrap().getScheduler().async())
+                .thenCompose(group -> this.plugin.getStorage().saveGroup(group));
     }
 
     @Override
