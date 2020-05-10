@@ -63,6 +63,7 @@ public class SimpleMetaCache implements CachedMetaData {
     protected Map<String, String> flattenedMeta = ImmutableMap.of();
     protected SortedMap<Integer, String> prefixes = ImmutableSortedMap.of();
     protected SortedMap<Integer, String> suffixes = ImmutableSortedMap.of();
+    protected int weight = 0;
     protected String primaryGroup = null;
     protected MetaStack prefixStack = null;
     protected MetaStack suffixStack = null;
@@ -95,6 +96,7 @@ public class SimpleMetaCache implements CachedMetaData {
 
         this.prefixes = ImmutableSortedMap.copyOfSorted(meta.getPrefixes());
         this.suffixes = ImmutableSortedMap.copyOfSorted(meta.getSuffixes());
+        this.weight = meta.getWeight();
         this.primaryGroup = meta.getPrimaryGroup();
         this.prefixStack = meta.getPrefixStack();
         this.suffixStack = meta.getSuffixStack();
@@ -149,13 +151,22 @@ public class SimpleMetaCache implements CachedMetaData {
         return this.suffixes;
     }
 
+    public int getWeight(MetaCheckEvent.Origin origin) {
+        return this.weight;
+    }
+
+    //@Override
+    public final int getWeight() {
+        return getWeight(MetaCheckEvent.Origin.LUCKPERMS_API);
+    }
+
     public @Nullable String getPrimaryGroup(MetaCheckEvent.Origin origin) {
         return this.primaryGroup;
     }
 
     @Override
     public final @Nullable String getPrimaryGroup() {
-        return this.primaryGroup;
+        return getPrimaryGroup(MetaCheckEvent.Origin.LUCKPERMS_API);
     }
 
     @Override

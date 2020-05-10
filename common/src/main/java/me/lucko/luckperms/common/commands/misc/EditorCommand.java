@@ -35,22 +35,26 @@ import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.web.WebEditor;
 
+import net.luckperms.api.query.QueryOptions;
+
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 public class EditorCommand extends SingleCommand {
-    private static final int MAX_USERS = 500;
+    private static final int MAX_USERS = 1000;
 
     public EditorCommand(LocaleManager locale) {
         super(CommandSpec.EDITOR.localize(locale), "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 1));
@@ -70,45 +74,46 @@ public class EditorCommand extends SingleCommand {
             }
         }
 
+        // run a sync task
+        plugin.getSyncTaskBuffer().requestDirectly();
+
         // collect holders
         List<PermissionHolder> holders = new ArrayList<>();
         List<Track> tracks = new ArrayList<>();
         if (type.includingGroups) {
-            // run a sync task
-            plugin.getSyncTaskBuffer().requestDirectly();
-
             plugin.getGroupManager().getAll().values().stream()
-                    .sorted((o1, o2) -> {
-                        int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
-                        return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
-                    })
+                    .sorted(Comparator
+                            .<Group>comparingInt(g -> g.getWeight().orElse(0)).reversed()
+                            .thenComparing(Group::getName, String.CASE_INSENSITIVE_ORDER)
+                    )
                     .forEach(holders::add);
-            tracks = new ArrayList<>(plugin.getTrackManager().getAll().values());
+
+            tracks.addAll(plugin.getTrackManager().getAll().values());
         }
         if (type.includingUsers) {
-            Set<UUID> users = new LinkedHashSet<>();
-
-            // online players first
-            plugin.getUserManager().getAll().values().stream()
-                    .sorted((o1, o2) -> o1.getFormattedDisplayName().compareToIgnoreCase(o2.getFormattedDisplayName()))
-                    .map(User::getUniqueId)
-                    .forEach(users::add);
+            // include all online players
+            Set<User> users = new LinkedHashSet<>(plugin.getUserManager().getAll().values());
 
             // then fill up with other users
-            users.addAll(plugin.getStorage().getUniqueUsers().join());
+            if (type.includingOffline && users.size() < MAX_USERS) {
+                plugin.getStorage().getUniqueUsers().join().stream()
+                        .sorted()
+                        .limit(MAX_USERS - users.size())
+                        .forEach(uuid -> {
+                            User user = plugin.getStorage().loadUser(uuid, null).join();
+                            if (user != null) {
+                                holders.add(user);
+                            }
+                            plugin.getUserManager().getHouseKeeper().cleanup(uuid);
+                        });
+            }
 
-            users.stream().limit(MAX_USERS).forEach(uuid -> {
-                User user = plugin.getUserManager().getIfLoaded(uuid);
-                if (user != null) {
-                    holders.add(user);
-                } else {
-                    user = plugin.getStorage().loadUser(uuid, null).join();
-                    if (user != null) {
-                        holders.add(user);
-                    }
-                    plugin.getUserManager().getHouseKeeper().cleanup(uuid);
-                }
-            });
+            users.stream()
+                    .sorted(Comparator
+                            .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL))
+                            .thenComparing(User::getFormattedDisplayName, String.CASE_INSENSITIVE_ORDER)
+                    )
+                    .forEach(holders::add);
         }
 
         if (holders.isEmpty()) {
@@ -133,16 +138,19 @@ public class EditorCommand extends SingleCommand {
     }
 
     private enum Type {
-        ALL(true, true),
-        USERS(true, false),
-        GROUPS(false, true);
+        ALL(true, true, true),
+        ONLINE(true, true, false),
+        USERS(true, false, true),
+        GROUPS(false, true, true);
 
         private final boolean includingUsers;
         private final boolean includingGroups;
+        private final boolean includingOffline;
 
-        Type(boolean includingUsers, boolean includingGroups) {
+        Type(boolean includingUsers, boolean includingGroups, boolean includingOffline) {
             this.includingUsers = includingUsers;
             this.includingGroups = includingGroups;
+            this.includingOffline = includingOffline;
         }
     }
 }
