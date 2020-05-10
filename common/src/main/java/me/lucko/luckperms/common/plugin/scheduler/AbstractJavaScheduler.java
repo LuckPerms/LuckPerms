@@ -35,25 +35,31 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract implementation of {@link SchedulerAdapter} using a {@link ScheduledExecutorService}.
  */
 public abstract class AbstractJavaScheduler implements SchedulerAdapter {
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-            .setDaemon(true)
-            .setNameFormat("luckperms-scheduler")
-            .build()
-    );
+    private final ScheduledThreadPoolExecutor scheduler;
+    private final ErrorReportingExecutor schedulerWorkerPool;
+    private final ForkJoinPool worker;
 
-    private final ErrorReportingExecutor schedulerWorkerPool = new ErrorReportingExecutor(Executors.newCachedThreadPool(new ThreadFactoryBuilder()
-            .setDaemon(true)
-            .setNameFormat("luckperms-scheduler-worker-%d")
-            .build()
-    ));
-
-    private final ForkJoinPool worker = new ForkJoinPool(32, ForkJoinPool.defaultForkJoinWorkerThreadFactory, (t, e) -> e.printStackTrace(), false);
+    public AbstractJavaScheduler() {
+        this.scheduler = new ScheduledThreadPoolExecutor(1, new ThreadFactoryBuilder()
+                .setDaemon(true)
+                .setNameFormat("luckperms-scheduler")
+                .build()
+        );
+        this.scheduler.setRemoveOnCancelPolicy(true);
+        this.schedulerWorkerPool = new ErrorReportingExecutor(Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+                .setDaemon(true)
+                .setNameFormat("luckperms-scheduler-worker-%d")
+                .build()
+        ));
+        this.worker = new ForkJoinPool(32, ForkJoinPool.defaultForkJoinWorkerThreadFactory, (t, e) -> e.printStackTrace(), false);
+    }
 
     @Override
     public Executor async() {

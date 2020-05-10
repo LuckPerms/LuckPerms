@@ -90,6 +90,13 @@ public class MetaCache extends SimpleMetaCache implements CachedMetaData {
         return new MonitoredMetaMap(super.getMeta(origin), origin);
     }
 
+    @Override
+    public int getWeight(MetaCheckEvent.Origin origin) {
+        int value = super.getWeight(origin);
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), "weight", String.valueOf(value));
+        return value;
+    }
+
     public @Nullable String getPrimaryGroup(MetaCheckEvent.Origin origin) {
         String value = super.getPrimaryGroup(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), "primarygroup", String.valueOf(value));

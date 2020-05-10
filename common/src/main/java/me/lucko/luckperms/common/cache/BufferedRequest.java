@@ -75,7 +75,7 @@ public abstract class BufferedRequest<T> {
             if (this.processor != null) {
                 try {
                     return this.processor.extendAndGetFuture();
-                } catch (IllegalStateException e) {
+                } catch (ProcessorAlreadyRanException e) {
                     // ignore
                 }
             }
@@ -101,8 +101,8 @@ public abstract class BufferedRequest<T> {
      */
     protected abstract T perform();
 
-    private static class Processor<R> {
-        private Supplier<R> supplier;
+    private static final class Processor<R> {
+        private final Supplier<R> supplier;
 
         private final long delay;
         private final TimeUnit unit;
@@ -110,11 +110,11 @@ public abstract class BufferedRequest<T> {
         private final SchedulerAdapter schedulerAdapter;
 
         private final Object[] mutex = new Object[0];
-        private CompletableFuture<R> future = new CompletableFuture<>();
+        private final CompletableFuture<R> future = new CompletableFuture<>();
         private boolean usable = true;
 
         private SchedulerTask scheduledTask;
-        private BoundTask boundTask = null;
+        private CompletionTask boundTask = null;
 
         Processor(Supplier<R> supplier, long delay, TimeUnit unit, SchedulerAdapter schedulerAdapter) {
             this.supplier = supplier;
@@ -122,32 +122,36 @@ public abstract class BufferedRequest<T> {
             this.unit = unit;
             this.schedulerAdapter = schedulerAdapter;
 
-            rescheduleTask();
+            scheduleTask();
         }
 
-        private void rescheduleTask() {
+        private void rescheduleTask() throws ProcessorAlreadyRanException {
             synchronized (this.mutex) {
                 if (!this.usable) {
-                    throw new IllegalStateException("Processor not usable");
+                    throw new ProcessorAlreadyRanException();
                 }
                 if (this.scheduledTask != null) {
                     this.scheduledTask.cancel();
                 }
-                this.boundTask = new BoundTask();
-                this.scheduledTask = this.schedulerAdapter.asyncLater(this.boundTask, this.delay, this.unit);
+                scheduleTask();
             }
+        }
+
+        private void scheduleTask() {
+            this.boundTask = new CompletionTask();
+            this.scheduledTask = this.schedulerAdapter.asyncLater(this.boundTask, this.delay, this.unit);
         }
 
         CompletableFuture<R> getFuture() {
             return this.future;
         }
 
-        CompletableFuture<R> extendAndGetFuture() {
+        CompletableFuture<R> extendAndGetFuture() throws ProcessorAlreadyRanException {
             rescheduleTask();
             return this.future;
         }
 
-        private final class BoundTask implements Runnable {
+        private final class CompletionTask implements Runnable {
             @Override
             public void run() {
                 synchronized (Processor.this.mutex) {
@@ -172,14 +176,11 @@ public abstract class BufferedRequest<T> {
                     new RuntimeException("Processor " + Processor.this.supplier + " threw an exception whilst computing a result", e).printStackTrace();
                     Processor.this.future.completeExceptionally(e);
                 }
-
-                // allow supplier and future to be GCed
-                Processor.this.supplier = null;
-                Processor.this.future = null;
-                Processor.this.scheduledTask = null;
-                Processor.this.boundTask = null;
             }
         }
+    }
+
+    private static final class ProcessorAlreadyRanException extends Exception {
 
     }
 

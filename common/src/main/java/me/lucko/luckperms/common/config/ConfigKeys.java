@@ -135,6 +135,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> CANCEL_FAILED_LOGINS = booleanKey("cancel-failed-logins", false);
 
     /**
+     * If LuckPerms should update the list of commands sent to the client when permissions are changed.
+     */
+    public static final ConfigKey<Boolean> UPDATE_CLIENT_COMMAND_LIST = enduringKey(booleanKey("update-client-command-list", true));
+
+    /**
      * If LuckPerms should attempt to resolve Vanilla command target selectors for LP commands.
      */
     public static final ConfigKey<Boolean> RESOLVE_COMMAND_SELECTORS = booleanKey("resolve-command-selectors", false);

@@ -38,6 +38,7 @@ import me.lucko.luckperms.bukkit.inject.server.InjectorSubscriptionMap;
 import me.lucko.luckperms.bukkit.inject.server.LuckPermsDefaultsMap;
 import me.lucko.luckperms.bukkit.inject.server.LuckPermsPermissionMap;
 import me.lucko.luckperms.bukkit.inject.server.LuckPermsSubscriptionMap;
+import me.lucko.luckperms.bukkit.listeners.BukkitCommandListUpdater;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
@@ -271,6 +272,12 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
                 Optional<Player> player = getBootstrap().getPlayer(user.getUniqueId());
                 player.ifPresent(p -> refreshAutoOp(p, false));
             });
+        }
+
+        // register bukkit command list updater
+        if (getConfiguration().get(ConfigKeys.UPDATE_CLIENT_COMMAND_LIST) && BukkitCommandListUpdater.isSupported()) {
+            BukkitCommandListUpdater commandListUpdater = new BukkitCommandListUpdater(this);
+            getApiProvider().getEventBus().subscribe(UserDataRecalculateEvent.class, commandListUpdater::onUserDataRecalculate);
         }
 
         // Load any online users (in the case of a reload)
