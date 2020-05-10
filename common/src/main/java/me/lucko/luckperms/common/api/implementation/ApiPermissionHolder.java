@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.context.ContextSet;
@@ -35,8 +36,10 @@ import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.NodeMap;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
+import net.luckperms.api.model.group.Group;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.node.NodeType;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
@@ -88,7 +91,7 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     }
 
     @Override
-    public NodeMap getData(@NonNull DataType dataType) {
+    public @NonNull NodeMap getData(@NonNull DataType dataType) {
         switch (dataType) {
             case NORMAL:
                 return this.normalData;
@@ -115,18 +118,41 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     }
 
     @Override
+    public @NonNull <T extends Node> Collection<T> getNodes(@NonNull NodeType<T> type) {
+        Objects.requireNonNull(type, "type");
+        return this.handle.getOwnNodes(type, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
+    }
+
+    @Override
     public @NonNull SortedSet<Node> getDistinctNodes() {
         return this.handle.getOwnNodesSorted(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
     }
 
     @Override
     public @NonNull List<Node> resolveInheritedNodes(@NonNull QueryOptions queryOptions) {
+        Objects.requireNonNull(queryOptions, "queryOptions");
         return this.handle.resolveInheritedNodes(queryOptions);
     }
 
     @Override
+    public @NonNull <T extends Node> Collection<T> resolveInheritedNodes(@NonNull NodeType<T> type, @NonNull QueryOptions queryOptions) {
+        Objects.requireNonNull(type, "type");
+        Objects.requireNonNull(queryOptions, "queryOptions");
+        return this.handle.resolveInheritedNodes(type, queryOptions);
+    }
+
+    @Override
     public @NonNull SortedSet<Node> resolveDistinctInheritedNodes(@NonNull QueryOptions queryOptions) {
+        Objects.requireNonNull(queryOptions, "queryOptions");
         return this.handle.resolveInheritedNodesSorted(queryOptions);
+    }
+
+    @Override
+    public @NonNull Collection<Group> getInheritedGroups(@NonNull QueryOptions queryOptions) {
+        Objects.requireNonNull(queryOptions, "queryOptions");
+        return this.handle.resolveInheritanceTree(queryOptions).stream()
+                .map(me.lucko.luckperms.common.model.Group::getApiProxy)
+                .collect(ImmutableCollectors.toList());
     }
 
     @Override
@@ -153,11 +179,14 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
         @Override
         public @NonNull Tristate contains(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate) {
+            Objects.requireNonNull(node, "node");
+            Objects.requireNonNull(equalityPredicate, "equalityPredicate");
             return ApiPermissionHolder.this.handle.hasNode(this.dataType, node, equalityPredicate);
         }
 
         @Override
         public @NonNull DataMutateResult add(@NonNull Node node) {
+            Objects.requireNonNull(node, "node");
             DataMutateResult result = ApiPermissionHolder.this.handle.setNode(this.dataType, node, true);
             if (result.wasSuccessful()) {
                 onNodeChange();
@@ -167,6 +196,8 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
         @Override
         public DataMutateResult.@NonNull WithMergedNode add(@NonNull Node node, @NonNull TemporaryNodeMergeStrategy temporaryNodeMergeStrategy) {
+            Objects.requireNonNull(node, "node");
+            Objects.requireNonNull(temporaryNodeMergeStrategy, "temporaryNodeMergeStrategy");
             DataMutateResult.WithMergedNode result = ApiPermissionHolder.this.handle.setNode(this.dataType, node, temporaryNodeMergeStrategy);
             if (result.getResult().wasSuccessful()) {
                 onNodeChange();
@@ -176,6 +207,7 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
         @Override
         public @NonNull DataMutateResult remove(@NonNull Node node) {
+            Objects.requireNonNull(node, "node");
             DataMutateResult result = ApiPermissionHolder.this.handle.unsetNode(this.dataType, node);
             if (result.wasSuccessful()) {
                 onNodeChange();
@@ -192,6 +224,7 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
         @Override
         public void clear(@NonNull Predicate<? super Node> test) {
+            Objects.requireNonNull(test, "test");
             if (ApiPermissionHolder.this.handle.removeIf(this.dataType, null, test, true)) {
                 onNodeChange();
             }
@@ -200,6 +233,7 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
         @Override
         public void clear(@NonNull ContextSet contextSet) {
+            Objects.requireNonNull(contextSet, "contextSet");
             if (ApiPermissionHolder.this.handle.clearNodes(this.dataType, contextSet, true)) {
                 onNodeChange();
             }
@@ -207,6 +241,8 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
         @Override
         public void clear(@NonNull ContextSet contextSet, @NonNull Predicate<? super Node> test) {
+            Objects.requireNonNull(contextSet, "contextSet");
+            Objects.requireNonNull(test, "test");
             if (ApiPermissionHolder.this.handle.removeIf(this.dataType, contextSet, test, true)) {
                 onNodeChange();
             }

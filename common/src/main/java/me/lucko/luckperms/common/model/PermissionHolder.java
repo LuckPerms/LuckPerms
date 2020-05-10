@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;
@@ -59,6 +60,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -249,71 +251,122 @@ public abstract class PermissionHolder {
         invalidateCache();
     }
 
-    public List<Node> getOwnNodes(QueryOptions queryOptions) {
-        List<Node> nodes = new ArrayList<>();
-
+    private List<DataType> queryOrder(QueryOptions queryOptions) {
         Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
                 .map(func -> func.getOrderComparator(getIdentifier()))
                 .orElse(DataQueryOrder.TRANSIENT_FIRST);
 
-        for (DataType dataType : DataQueryOrder.order(comparator)) {
+        return DataQueryOrder.order(comparator);
+    }
+
+    public List<Node> getOwnNodes(QueryOptions queryOptions) {
+        List<Node> nodes = new ArrayList<>();
+        for (DataType dataType : queryOrder(queryOptions)) {
             getData(dataType).copyTo(nodes, queryOptions);
         }
-
         return nodes;
     }
 
     public SortedSet<Node> getOwnNodesSorted(QueryOptions queryOptions) {
         SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.reverse());
-
-        Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
-                .map(func -> func.getOrderComparator(getIdentifier()))
-                .orElse(DataQueryOrder.TRANSIENT_FIRST);
-
-        for (DataType dataType : DataQueryOrder.order(comparator)) {
+        for (DataType dataType : queryOrder(queryOptions)) {
             getData(dataType).copyTo(nodes, queryOptions);
         }
-
         return nodes;
     }
 
     public List<InheritanceNode> getOwnInheritanceNodes(QueryOptions queryOptions) {
         List<InheritanceNode> nodes = new ArrayList<>();
-
-        Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
-                .map(func -> func.getOrderComparator(getIdentifier()))
-                .orElse(DataQueryOrder.TRANSIENT_FIRST);
-
-        for (DataType dataType : DataQueryOrder.order(comparator)) {
+        for (DataType dataType : queryOrder(queryOptions)) {
             getData(dataType).copyInheritanceNodesTo(nodes, queryOptions);
         }
-
         return nodes;
     }
 
-    private void accumulateInheritedNodesTo(Collection<Node> accumulator, QueryOptions queryOptions) {
-        if (queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
-            InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
-            Iterable<PermissionHolder> traversal = graph.traverse(this);
-            for (PermissionHolder holder : traversal) {
-                List<? extends Node> nodes = holder.getOwnNodes(queryOptions);
-                accumulator.addAll(nodes);
-            }
-        } else {
-            accumulator.addAll(getOwnNodes(queryOptions));
+    public <T extends Node> List<T> getOwnNodes(NodeType<T> type, QueryOptions queryOptions) {
+        List<T> nodes = new ArrayList<>();
+        for (DataType dataType : queryOrder(queryOptions)) {
+            getData(dataType).copyTo(nodes, type, queryOptions);
         }
+        return nodes;
     }
 
     public List<Node> resolveInheritedNodes(QueryOptions queryOptions) {
+        if (!queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
+            return getOwnNodes(queryOptions);
+        }
+
         List<Node> nodes = new ArrayList<>();
-        accumulateInheritedNodesTo(nodes, queryOptions);
+        InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
+        for (PermissionHolder holder : graph.traverse(this)) {
+            for (DataType dataType : holder.queryOrder(queryOptions)) {
+                holder.getData(dataType).copyTo(nodes, queryOptions);
+            }
+        }
         return nodes;
+
     }
 
     public SortedSet<Node> resolveInheritedNodesSorted(QueryOptions queryOptions) {
+        if (!queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
+            return getOwnNodesSorted(queryOptions);
+        }
+
         SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.reverse());
-        accumulateInheritedNodesTo(nodes, queryOptions);
+        InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
+        for (PermissionHolder holder : graph.traverse(this)) {
+            for (DataType dataType : holder.queryOrder(queryOptions)) {
+                holder.getData(dataType).copyTo(nodes, queryOptions);
+            }
+        }
         return nodes;
+    }
+
+    public <T extends Node> List<T> resolveInheritedNodes(NodeType<T> type, QueryOptions queryOptions) {
+        if (!queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
+            return getOwnNodes(type, queryOptions);
+        }
+
+        List<T> nodes = new ArrayList<>();
+        InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
+        for (PermissionHolder holder : graph.traverse(this)) {
+            for (DataType dataType : holder.queryOrder(queryOptions)) {
+                holder.getData(dataType).copyTo(nodes, type, queryOptions);
+            }
+        }
+        return nodes;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public List<Group> resolveInheritanceTree(QueryOptions queryOptions) {
+        if (!queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
+            return Collections.emptyList();
+        }
+
+        InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
+
+        // perform a full traversal of the inheritance tree
+        List<PermissionHolder> traversal = new ArrayList<>();
+        Iterables.addAll(traversal, graph.traverse(this));
+
+        // remove 'this' (the start node) - will usually be at traversal[0],
+        // but not always due to the possibility of post-traversal sorts!
+        if (traversal.get(0) == this) {
+            traversal.remove(0);
+        } else {
+            traversal.remove(this);
+        }
+
+        // ensure our traversal now only consists of groups
+        for (PermissionHolder permissionHolder : traversal) {
+            if (!(permissionHolder instanceof Group)) {
+                throw new IllegalStateException("Non-group object in inheritance tree: " + permissionHolder);
+            }
+        }
+
+        // cast List<PermissionHolder> to List<Group>
+        // this feels a bit dirty but it works & avoids needless copying!
+        return (List) traversal;
     }
 
     public Map<String, Boolean> exportPermissions(QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
@@ -353,22 +406,24 @@ public abstract class PermissionHolder {
 
     public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, QueryOptions queryOptions) {
         InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
-        Iterable<PermissionHolder> traversal = graph.traverse(this);
-        for (PermissionHolder holder : traversal) {
-            List<? extends Node> nodes = holder.getOwnNodes(queryOptions);
-            for (Node node : nodes) {
-                if (!node.getValue()) continue;
-                if (!NodeType.META_OR_CHAT_META.matches(node)) continue;
-
-                accumulator.accumulateNode(node);
+        for (PermissionHolder holder : graph.traverse(this)) {
+            // accumulate nodes
+            for (DataType dataType : holder.queryOrder(queryOptions)) {
+                holder.getData(dataType).forEach(queryOptions, node -> {
+                    if (node.getValue() && NodeType.META_OR_CHAT_META.matches(node)) {
+                        accumulator.accumulateNode(node);
+                    }
+                });
             }
 
+            // accumulate weight
             OptionalInt w = holder.getWeight();
             if (w.isPresent()) {
                 accumulator.accumulateWeight(w.getAsInt());
             }
         }
 
+        // accumulate primary group
         if (this instanceof User) {
             String primaryGroup = ((User) this).getPrimaryGroup().calculateValue(queryOptions);
             accumulator.setPrimaryGroup(primaryGroup);

@@ -41,6 +41,7 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.Flag;
@@ -63,6 +64,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -152,19 +154,69 @@ public final class NodeMap {
                 !flagExcludeTest(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT, DefaultContextKeys.WORLD_KEY, filter, contextSet);
     }
 
+    public void forEach(QueryOptions filter, Consumer<? super Node> consumer) {
+        for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
+            if (!filter.satisfies(e.getKey())) {
+                continue;
+            }
+
+            if (normalNodesExcludeTest(filter, e.getKey())) {
+                if (inheritanceNodesIncludeTest(filter, e.getKey())) {
+                    // only copy inheritance nodes.
+                    SortedSet<InheritanceNode> inheritanceNodes = this.inheritanceMap.get(e.getKey());
+                    if (inheritanceNodes != null) {
+                        inheritanceNodes.forEach(consumer);
+                    }
+                }
+            } else {
+                e.getValue().forEach(consumer);
+            }
+        }
+    }
+
     public void copyTo(Collection<? super Node> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
-            if (filter.satisfies(e.getKey())) {
-                if (normalNodesExcludeTest(filter, e.getKey())) {
-                    if (inheritanceNodesIncludeTest(filter, e.getKey())) {
-                        // only copy inheritance nodes.
+            if (!filter.satisfies(e.getKey())) {
+                continue;
+            }
+
+            if (normalNodesExcludeTest(filter, e.getKey())) {
+                if (inheritanceNodesIncludeTest(filter, e.getKey())) {
+                    // only copy inheritance nodes.
+                    SortedSet<InheritanceNode> inheritanceNodes = this.inheritanceMap.get(e.getKey());
+                    if (inheritanceNodes != null) {
+                        collection.addAll(inheritanceNodes);
+                    }
+                }
+            } else {
+                collection.addAll(e.getValue());
+            }
+        }
+    }
+
+    public <T extends Node> void copyTo(Collection<? super T> collection, NodeType<T> type, QueryOptions filter) {
+        for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
+            if (!filter.satisfies(e.getKey())) {
+                continue;
+            }
+
+            if (normalNodesExcludeTest(filter, e.getKey())) {
+                if (inheritanceNodesIncludeTest(filter, e.getKey())) {
+                    // only copy inheritance nodes.
+                    if (type == NodeType.INHERITANCE) {
                         SortedSet<InheritanceNode> inheritanceNodes = this.inheritanceMap.get(e.getKey());
                         if (inheritanceNodes != null) {
-                            collection.addAll(inheritanceNodes);
+                            for (InheritanceNode node : inheritanceNodes) {
+                                collection.add(type.cast(node));
+                            }
                         }
                     }
-                } else {
-                    collection.addAll(e.getValue());
+                }
+            } else {
+                for (Node node : e.getValue()) {
+                    if (type.matches(node)) {
+                        collection.add(type.cast(node));
+                    }
                 }
             }
         }
@@ -172,10 +224,12 @@ public final class NodeMap {
 
     public void copyInheritanceNodesTo(Collection<? super InheritanceNode> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<InheritanceNode>> e : this.inheritanceMap.entrySet()) {
-            if (filter.satisfies(e.getKey())) {
-                if (inheritanceNodesIncludeTest(filter, e.getKey())) {
-                    collection.addAll(e.getValue());
-                }
+            if (!filter.satisfies(e.getKey())) {
+                continue;
+            }
+
+            if (inheritanceNodesIncludeTest(filter, e.getKey())) {
+                collection.addAll(e.getValue());
             }
         }
     }
