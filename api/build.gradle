@@ -1,5 +1,5 @@
 group = 'net.luckperms'
-project.version = '5.0'
+project.version = '5.1'
 
 dependencies {
     compileOnly 'org.checkerframework:checker-qual:2.5.5'
@@ -68,9 +68,10 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
 
                         developers {
                             developer {
+                                id 'lucko'
                                 name 'Luck'
+                                url 'https://lucko.me'
                                 email 'git@lucko.me'
-                                url 'https://github.com/lucko'
                             }
                         }
 
