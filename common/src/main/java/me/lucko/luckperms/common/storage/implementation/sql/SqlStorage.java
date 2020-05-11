@@ -63,6 +63,7 @@ import java.sql.Statement;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +94,7 @@ public class SqlStorage implements StorageImplementation {
     private static final String PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID = "UPDATE '{prefix}players' SET primary_group=? WHERE uuid=?";
 
     private static final String GROUP_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM '{prefix}group_permissions' WHERE name=?";
+    private static final String GROUP_PERMISSIONS_SELECT_ALL = "SELECT name, id, permission, value, server, world, expiry, contexts FROM '{prefix}group_permissions'";
     private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM '{prefix}group_permissions' WHERE id=?";
     private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM '{prefix}group_permissions' WHERE name=?";
     private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO '{prefix}group_permissions' (name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
@@ -431,16 +433,28 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public void loadAllGroups() throws SQLException {
-        Set<String> groups;
+        Map<String, Collection<SqlNode>> groups = new HashMap<>();
         try (Connection c = this.connectionFactory.getConnection()) {
-            groups = selectGroups(c);
+            selectGroups(c).forEach(name -> groups.put(name, new ArrayList<>()));
+            selectAllGroupPermissions(groups, c);
         }
 
-        if (!Iterators.tryIterate(groups, this::loadGroup)) {
-            throw new RuntimeException("Exception occurred whilst loading a group");
+        for (Map.Entry<String, Collection<SqlNode>> entry : groups.entrySet()) {
+            Group group = this.plugin.getGroupManager().getOrMake(entry.getKey());
+            group.getIoLock().lock();
+            try {
+                Collection<SqlNode> nodes = entry.getValue();
+                if (!nodes.isEmpty()) {
+                    group.setNodes(DataType.NORMAL, nodes.stream().map(SqlNode::toNode));
+                } else {
+                    group.clearNodes(DataType.NORMAL, null, false);
+                }
+            } finally {
+                group.getIoLock().unlock();
+            }
         }
 
-        this.plugin.getGroupManager().retainAll(groups);
+        this.plugin.getGroupManager().retainAll(groups.keySet());
     }
 
     @Override
@@ -861,6 +875,20 @@ public class SqlStorage implements StorageImplementation {
             }
         }
         return nodes;
+    }
+
+    private void selectAllGroupPermissions(Map<String, Collection<SqlNode>> nodes, Connection c) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT_ALL))) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String holder = rs.getString("name");
+                    Collection<SqlNode> list = nodes.get(holder);
+                    if (nodes != null) {
+                        list.add(readNode(rs));
+                    }
+                }
+            }
+        }
     }
 
     private void deleteGroupPermissions(Connection c, String group) throws SQLException {
