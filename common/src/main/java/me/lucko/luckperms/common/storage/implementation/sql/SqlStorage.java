@@ -883,7 +883,7 @@ public class SqlStorage implements StorageImplementation {
                 while (rs.next()) {
                     String holder = rs.getString("name");
                     Collection<SqlNode> list = nodes.get(holder);
-                    if (nodes != null) {
+                    if (list != null) {
                         list.add(readNode(rs));
                     }
                 }
