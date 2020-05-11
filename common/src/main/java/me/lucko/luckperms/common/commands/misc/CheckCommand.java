@@ -78,7 +78,7 @@ public class CheckCommand extends SingleCommand {
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return TabCompleter.create()
-                .at(0, CompletionSupplier.startsWith(() -> plugin.getBootstrap().getPlayerList()))
+                .at(0, CompletionSupplier.startsWith(() -> plugin.getBootstrap().getPlayerList().stream()))
                 .at(1, TabCompletions.permissions(plugin))
                 .complete(args);
     }

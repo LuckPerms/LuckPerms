@@ -44,10 +44,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Stream;
 
 /**
  * Bootstrap plugin for LuckPerms running on Bukkit.
@@ -254,13 +256,23 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public Stream<String> getPlayerList() {
-        return getServer().getOnlinePlayers().stream().map(Player::getName);
+    public Collection<String> getPlayerList() {
+        Collection<? extends Player> players = getServer().getOnlinePlayers();
+        List<String> list = new ArrayList<>(players.size());
+        for (Player player : players) {
+            list.add(player.getName());
+        }
+        return list;
     }
 
     @Override
-    public Stream<UUID> getOnlinePlayers() {
-        return getServer().getOnlinePlayers().stream().map(Player::getUniqueId);
+    public Collection<UUID> getOnlinePlayers() {
+        Collection<? extends Player> players = getServer().getOnlinePlayers();
+        List<UUID> list = new ArrayList<>(players.size());
+        for (Player player : players) {
+            list.add(player.getUniqueId());
+        }
+        return list;
     }
 
     @Override

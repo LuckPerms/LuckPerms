@@ -59,10 +59,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Stream;
 
 /**
  * Bootstrap plugin for LuckPerms running on Sponge.
@@ -297,13 +300,27 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public Stream<String> getPlayerList() {
-        return getServer().map(server -> server.getOnlinePlayers().stream().map(Player::getName)).orElseGet(Stream::empty);
+    public Collection<String> getPlayerList() {
+        return getServer().map(server -> {
+            Collection<Player> players = server.getOnlinePlayers();
+            List<String> list = new ArrayList<>(players.size());
+            for (Player player : players) {
+                list.add(player.getName());
+            }
+            return list;
+        }).orElse(Collections.emptyList());
     }
 
     @Override
-    public Stream<UUID> getOnlinePlayers() {
-        return getServer().map(server -> server.getOnlinePlayers().stream().map(Player::getUniqueId)).orElseGet(Stream::empty);
+    public Collection<UUID> getOnlinePlayers() {
+        return getServer().map(server -> {
+            Collection<Player> players = server.getOnlinePlayers();
+            List<UUID> list = new ArrayList<>(players.size());
+            for (Player player : players) {
+                list.add(player.getUniqueId());
+            }
+            return list;
+        }).orElse(Collections.emptyList());
     }
 
     @Override

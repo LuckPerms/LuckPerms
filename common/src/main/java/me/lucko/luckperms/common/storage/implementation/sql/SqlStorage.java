@@ -43,7 +43,6 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
-import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.luckperms.api.actionlog.Action;
@@ -584,10 +583,17 @@ public class SqlStorage implements StorageImplementation {
         Set<String> tracks;
         try (Connection c = this.connectionFactory.getConnection()) {
             tracks = selectTracks(c);
-        }
 
-        if (!Iterators.tryIterate(tracks, this::loadTrack)) {
-            throw new RuntimeException("Exception occurred whilst loading a track");
+            for (String trackName : tracks) {
+                Track track = this.plugin.getTrackManager().getOrMake(trackName);
+                track.getIoLock().lock();
+                try {
+                    List<String> groups = selectTrack(c, trackName);
+                    track.setGroups(groups);
+                } finally {
+                    track.getIoLock().unlock();
+                }
+            }
         }
 
         this.plugin.getTrackManager().retainAll(tracks);

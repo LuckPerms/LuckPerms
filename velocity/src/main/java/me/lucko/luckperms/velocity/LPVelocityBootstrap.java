@@ -48,10 +48,12 @@ import org.slf4j.Logger;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Stream;
 
 /**
  * Bootstrap plugin for LuckPerms running on Velocity.
@@ -226,13 +228,23 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public Stream<String> getPlayerList() {
-        return this.proxy.getAllPlayers().stream().map(Player::getUsername);
+    public Collection<String> getPlayerList() {
+        Collection<Player> players = this.proxy.getAllPlayers();
+        List<String> list = new ArrayList<>(players.size());
+        for (Player player : players) {
+            list.add(player.getUsername());
+        }
+        return list;
     }
 
     @Override
-    public Stream<UUID> getOnlinePlayers() {
-        return this.proxy.getAllPlayers().stream().map(Player::getUniqueId);
+    public Collection<UUID> getOnlinePlayers() {
+        Collection<Player> players = this.proxy.getAllPlayers();
+        List<UUID> list = new ArrayList<>(players.size());
+        for (Player player : players) {
+            list.add(player.getUniqueId());
+        }
+        return list;
     }
 
     @Override

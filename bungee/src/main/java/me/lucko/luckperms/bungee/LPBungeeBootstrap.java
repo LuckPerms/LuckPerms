@@ -43,10 +43,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Stream;
 
 /**
  * Bootstrap plugin for LuckPerms running on BungeeCord.
@@ -249,13 +251,23 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     }
 
     @Override
-    public Stream<String> getPlayerList() {
-        return getProxy().getPlayers().stream().map(ProxiedPlayer::getName);
+    public Collection<String> getPlayerList() {
+        Collection<ProxiedPlayer> players = getProxy().getPlayers();
+        List<String> list = new ArrayList<>(players.size());
+        for (ProxiedPlayer player : players) {
+            list.add(player.getName());
+        }
+        return list;
     }
 
     @Override
-    public Stream<UUID> getOnlinePlayers() {
-        return getProxy().getPlayers().stream().map(ProxiedPlayer::getUniqueId);
+    public Collection<UUID> getOnlinePlayers() {
+        Collection<ProxiedPlayer> players = getProxy().getPlayers();
+        List<UUID> list = new ArrayList<>(players.size());
+        for (ProxiedPlayer player : players) {
+            list.add(player.getUniqueId());
+        }
+        return list;
     }
 
     @Override
