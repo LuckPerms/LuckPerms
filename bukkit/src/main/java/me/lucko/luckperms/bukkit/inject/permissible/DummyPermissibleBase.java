@@ -23,7 +23,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.inject.dummy;
+package me.lucko.luckperms.bukkit.inject.permissible;
+
+import me.lucko.luckperms.common.util.EmptyCollections;
 
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.Permission;
@@ -33,14 +35,8 @@ import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class DummyPermissibleBase extends PermissibleBase {
     private static final Field ATTACHMENTS_FIELD;
@@ -61,13 +57,9 @@ public class DummyPermissibleBase extends PermissibleBase {
     public static void copyFields(PermissibleBase from, PermissibleBase to) {
         try {
             ATTACHMENTS_FIELD.set(to, ATTACHMENTS_FIELD.get(from));
-        } catch (Exception e) {
-            // ignore
-        }
-        try {
             PERMISSIONS_FIELD.set(to, PERMISSIONS_FIELD.get(from));
-        } catch (Exception e) {
-            // ignore
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -76,29 +68,11 @@ public class DummyPermissibleBase extends PermissibleBase {
     private DummyPermissibleBase() {
         super(null);
 
-        // we want the singleton dummy attachment to be stateless
-        // the behaviour of this class is to fail silently, so we can't use Collections.emptyX
         try {
-            ATTACHMENTS_FIELD.set(this, new ArrayList<PermissionAttachment>(){
-                @Override public boolean add(PermissionAttachment permissionAttachment) { return true; }
-                @Override public void add(int index, PermissionAttachment element) { }
-                @Override public boolean addAll(Collection<? extends PermissionAttachment> c) { return true; }
-                @Override public boolean addAll(int index, Collection<? extends PermissionAttachment> c) { return true; }
-            });
-        } catch (Exception e) {
-            // ignore
-        }
-        try {
-            PERMISSIONS_FIELD.set(this, new HashMap<String, PermissionAttachmentInfo>() {
-                @Override public PermissionAttachmentInfo put(String key, PermissionAttachmentInfo value) { return null; }
-                @Override public void putAll(Map<? extends String, ? extends PermissionAttachmentInfo> m) { }
-                @Override public PermissionAttachmentInfo putIfAbsent(String key, PermissionAttachmentInfo value) { return null; }
-                @Override public PermissionAttachmentInfo compute(String key, BiFunction<? super String, ? super PermissionAttachmentInfo, ? extends PermissionAttachmentInfo> remappingFunction) { return null; }
-                @Override public PermissionAttachmentInfo computeIfPresent(String key, BiFunction<? super String, ? super PermissionAttachmentInfo, ? extends PermissionAttachmentInfo> remappingFunction) { return null; }
-                @Override public PermissionAttachmentInfo computeIfAbsent(String key, Function<? super String, ? extends PermissionAttachmentInfo> mappingFunction) { return null; }
-            });
-        } catch (Exception e) {
-            // ignore
+            ATTACHMENTS_FIELD.set(this, EmptyCollections.list());
+            PERMISSIONS_FIELD.set(this, EmptyCollections.map());
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
         }
     }
 

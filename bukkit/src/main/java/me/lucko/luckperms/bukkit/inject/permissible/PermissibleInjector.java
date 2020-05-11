@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bukkit.inject.permissible;
 
-import me.lucko.luckperms.bukkit.inject.dummy.DummyPermissibleBase;
 import me.lucko.luckperms.bukkit.util.CraftBukkitImplementation;
 
 import org.bukkit.entity.Player;

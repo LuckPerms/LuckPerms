@@ -27,7 +27,6 @@ package me.lucko.luckperms.bukkit.inject.permissible;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.bukkit.inject.dummy.DummyPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
@@ -106,7 +105,7 @@ public class LuckPermsPermissionAttachment extends PermissionAttachment {
     private PermissionAttachment source;
 
     public LuckPermsPermissionAttachment(LuckPermsPermissible permissible, Plugin owner) {
-        super(DummyPlugin.INSTANCE, null);
+        super(owner, null);
         this.permissible = permissible;
         this.owner = owner;
 
@@ -114,7 +113,7 @@ public class LuckPermsPermissionAttachment extends PermissionAttachment {
     }
 
     public LuckPermsPermissionAttachment(LuckPermsPermissible permissible, PermissionAttachment source) {
-        super(DummyPlugin.INSTANCE, null);
+        super(source.getPlugin(), null);
         this.permissible = permissible;
         this.owner = source.getPlugin();
 

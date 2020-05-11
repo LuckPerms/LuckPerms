@@ -224,9 +224,7 @@ public class LuckPermsPermissible extends PermissibleBase {
 
     @Override
     public LuckPermsPermissionAttachment addAttachment(Plugin plugin) {
-        if (plugin == null) {
-            throw new NullPointerException("plugin");
-        }
+        Objects.requireNonNull(plugin, "plugin");
 
         LuckPermsPermissionAttachment attachment = new LuckPermsPermissionAttachment(this, plugin);
         attachment.hook();
@@ -235,12 +233,8 @@ public class LuckPermsPermissible extends PermissibleBase {
 
     @Override
     public PermissionAttachment addAttachment(Plugin plugin, String permission) {
-        if (plugin == null) {
-            throw new NullPointerException("plugin");
-        }
-        if (permission == null) {
-            return addAttachment(plugin);
-        }
+        Objects.requireNonNull(plugin, "plugin");
+        Objects.requireNonNull(permission, "permission");
 
         PermissionAttachment attachment = addAttachment(plugin);
         attachment.setPermission(permission, true);
@@ -249,15 +243,9 @@ public class LuckPermsPermissible extends PermissibleBase {
 
     @Override
     public PermissionAttachment addAttachment(Plugin plugin, String permission, Boolean value) {
-        if (plugin == null) {
-            throw new NullPointerException("plugin");
-        }
-        if (permission == null) {
-            return addAttachment(plugin);
-        }
-        if (value == null) {
-            return addAttachment(plugin, permission);   
-        }
+        Objects.requireNonNull(plugin, "plugin");
+        Objects.requireNonNull(permission, "permission");
+        Objects.requireNonNull(value, "value");
 
         PermissionAttachment attachment = addAttachment(plugin);
         attachment.setPermission(permission, value);
@@ -266,9 +254,7 @@ public class LuckPermsPermissible extends PermissibleBase {
 
     @Override
     public void removeAttachment(PermissionAttachment attachment) {
-        if (attachment == null) {
-            throw new NullPointerException("attachment");
-        }
+        Objects.requireNonNull(attachment, "attachment");
 
         LuckPermsPermissionAttachment luckPermsAttachment;
 

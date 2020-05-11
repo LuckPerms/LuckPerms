@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.bukkit.inject.permissible;
 
-import me.lucko.luckperms.bukkit.inject.dummy.DummyPermissibleBase;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;

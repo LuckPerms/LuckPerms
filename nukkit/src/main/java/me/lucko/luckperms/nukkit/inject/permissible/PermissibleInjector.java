@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.nukkit.inject.permissible;
 
-import me.lucko.luckperms.nukkit.inject.dummy.DummyPermissibleBase;
-
 import cn.nukkit.Player;
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.PermissionAttachment;
