@@ -45,7 +45,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -57,15 +56,6 @@ import java.util.UUID;
  * LuckPerms classes.
  */
 public class LoggedAction implements Action {
-
-    private static final Comparator<Action> COMPARATOR = Comparator
-            .<Action>comparingLong(a -> a.getTimestamp().getEpochSecond())
-            .thenComparing(a -> a.getSource().getUniqueId())
-            .thenComparing(a -> a.getSource().getName(), String.CASE_INSENSITIVE_ORDER)
-            .thenComparing(a -> a.getTarget().getType())
-            .thenComparing(e -> e.getTarget().getUniqueId().map(UUID::toString).orElse(""))
-            .thenComparing(a -> a.getTarget().getName(), String.CASE_INSENSITIVE_ORDER)
-            .thenComparing(Action::getDescription);
 
     /**
      * Creates a new log entry builder
@@ -131,7 +121,7 @@ public class LoggedAction implements Action {
     @Override
     public int compareTo(@NonNull Action other) {
         Objects.requireNonNull(other, "other");
-        return COMPARATOR.compare(this, other);
+        return ActionComparator.INSTANCE.compare(this, other);
     }
 
     public boolean matchesSearch(String query) {
@@ -171,13 +161,7 @@ public class LoggedAction implements Action {
 
     @Override
     public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        result = result * PRIME + getTimestamp().hashCode();
-        result = result * PRIME + getSource().hashCode();
-        result = result * PRIME + getTarget().hashCode();
-        result = result * PRIME + getDescription().hashCode();
-        return result;
+        return Objects.hash(getTimestamp(), getSource(), getTarget(), getDescription());
     }
 
     private static final class SourceImpl implements Source {

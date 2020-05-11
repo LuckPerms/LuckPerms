@@ -40,11 +40,7 @@ import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
-import net.luckperms.api.actionlog.Action;
-
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
 import java.util.UUID;
 
 public class LogUserHistory extends ChildCommand<Log> {
@@ -83,18 +79,18 @@ public class LogUserHistory extends ChildCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, LoggedAction> entries = log.getPage(page, ENTRIES_PER_PAGE);
-        String name = ((Action) entries.values().stream().findAny().get()).getTarget().getName();
+        List<Paginated.Entry<LoggedAction>> entries = log.getPage(page, ENTRIES_PER_PAGE);
+        String name = entries.stream().findAny().get().value().getTarget().getName();
         Message.LOG_HISTORY_USER_HEADER.send(sender, name, page, maxPage);
 
-        for (Map.Entry<Integer, LoggedAction> e : entries.entrySet()) {
+        for (Paginated.Entry<LoggedAction> e : entries) {
             Message.LOG_ENTRY.send(sender,
-                    e.getKey(),
-                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.getValue().getDurationSince()),
-                    e.getValue().getSourceFriendlyString(),
-                    Character.toString(LoggedAction.getTypeCharacter(((Action) e.getValue()).getTarget().getType())),
-                    e.getValue().getTargetFriendlyString(),
-                    e.getValue().getDescription()
+                    e.position(),
+                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.value().getDurationSince()),
+                    e.value().getSourceFriendlyString(),
+                    Character.toString(LoggedAction.getTypeCharacter(e.value().getTarget().getType())),
+                    e.value().getTargetFriendlyString(),
+                    e.value().getDescription()
             );
         }
 

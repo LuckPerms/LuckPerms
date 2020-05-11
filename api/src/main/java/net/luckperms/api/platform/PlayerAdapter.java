@@ -100,6 +100,7 @@ public interface PlayerAdapter<T> {
     default @NonNull CachedPermissionData getPermissionData(@NonNull T player) {
         return getUser(player).getCachedData().getPermissionData(getQueryOptions(player));
     }
+
     /**
      * Gets the current {@link CachedMetaData} for the {@code player},
      * using their {@link #getQueryOptions(Object) active query options}.

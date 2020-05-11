@@ -25,36 +25,33 @@
 
 package me.lucko.luckperms.common.actionlog;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import net.luckperms.api.actionlog.Action;
 
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class Log {
-    private static Log empty = null;
+    private static final Log EMPTY = new Log(ImmutableList.of());
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static synchronized Log empty() {
-        if (empty == null) {
-            empty = builder().build();
-        }
-        return empty;
+    public static Log empty() {
+        return EMPTY;
     }
 
     private final SortedSet<LoggedAction> content;
 
-    public Log(SortedSet<LoggedAction> content) {
-        this.content = ImmutableSortedSet.copyOfSorted(content);
+    Log(List<LoggedAction> content) {
+        this.content = ImmutableSortedSet.copyOf(content);
     }
 
     public SortedSet<LoggedAction> getContent() {
@@ -64,38 +61,38 @@ public class Log {
     public SortedSet<LoggedAction> getContent(UUID actor) {
         return this.content.stream()
                 .filter(e -> e.getSource().getUniqueId().equals(actor))
-                .collect(Collectors.toCollection(TreeSet::new));
+                .collect(ImmutableCollectors.toSortedSet());
     }
 
     public SortedSet<LoggedAction> getUserHistory(UUID uniqueId) {
         return this.content.stream()
                 .filter(e -> e.getTarget().getType() == Action.Target.Type.USER)
                 .filter(e -> e.getTarget().getUniqueId().isPresent() && e.getTarget().getUniqueId().get().equals(uniqueId))
-                .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
+                .collect(ImmutableCollectors.toSortedSet());
     }
 
     public SortedSet<LoggedAction> getGroupHistory(String name) {
         return this.content.stream()
                 .filter(e -> e.getTarget().getType() == Action.Target.Type.GROUP)
                 .filter(e -> e.getTarget().getName().equals(name))
-                .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
+                .collect(ImmutableCollectors.toSortedSet());
     }
 
     public SortedSet<LoggedAction> getTrackHistory(String name) {
         return this.content.stream()
                 .filter(e -> e.getTarget().getType() == Action.Target.Type.TRACK)
                 .filter(e -> e.getTarget().getName().equals(name))
-                .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
+                .collect(ImmutableCollectors.toSortedSet());
     }
 
     public SortedSet<LoggedAction> getSearch(String query) {
         return this.content.stream()
                 .filter(e -> e.matchesSearch(query))
-                .collect(ImmutableCollectors.toSortedSet(Comparator.naturalOrder()));
+                .collect(ImmutableCollectors.toSortedSet());
     }
 
     public static class Builder {
-        private final SortedSet<LoggedAction> content = new TreeSet<>();
+        private final List<LoggedAction> content = new ArrayList<>();
 
         public Builder add(LoggedAction e) {
             this.content.add(e);
@@ -103,6 +100,9 @@ public class Log {
         }
 
         public Log build() {
+            if (this.content.isEmpty()) {
+                return EMPTY;
+            }
             return new Log(this.content);
         }
     }
