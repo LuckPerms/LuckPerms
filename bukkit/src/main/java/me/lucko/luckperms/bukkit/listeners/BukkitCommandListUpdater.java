@@ -63,6 +63,10 @@ public class BukkitCommandListUpdater {
 
     // Called when a user's data is recalculated.
     public void onUserDataRecalculate(UserDataRecalculateEvent e) {
+        if (this.plugin.getBootstrap().isServerStopping()) {
+            return;
+        }
+
         UUID uniqueId = e.getUser().getUniqueId();
         if (!this.plugin.getBootstrap().isPlayerOnline(uniqueId)) {
             return;

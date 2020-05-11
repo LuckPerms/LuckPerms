@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -139,7 +140,12 @@ public abstract class BufferedRequest<T> {
 
         private void scheduleTask() {
             this.boundTask = new CompletionTask();
-            this.scheduledTask = this.schedulerAdapter.asyncLater(this.boundTask, this.delay, this.unit);
+            try {
+                this.scheduledTask = this.schedulerAdapter.asyncLater(this.boundTask, this.delay, this.unit);
+            } catch (RejectedExecutionException e) {
+                // If we can't schedule the completion in the future, just do it now.
+                this.boundTask.run();
+            }
         }
 
         CompletableFuture<R> getFuture() {
