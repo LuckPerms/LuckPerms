@@ -39,6 +39,7 @@ import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -266,6 +267,14 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     public boolean isPlayerOnline(UUID uniqueId) {
         Player player = getServer().getPlayer(uniqueId);
         return player != null && player.isOnline();
+    }
+
+    @Override
+    public @Nullable String identifyClassLoader(ClassLoader classLoader) {
+        if (classLoader instanceof org.bukkit.plugin.java.PluginClassLoader) {
+            return ((org.bukkit.plugin.java.PluginClassLoader) classLoader).getPlugin().getName();
+        }
+        return null;
     }
 
     private static boolean checkIncompatibleVersion() {

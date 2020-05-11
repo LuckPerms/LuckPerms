@@ -36,6 +36,9 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import net.luckperms.api.platform.Platform;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.plugin.PluginDescription;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -258,6 +261,16 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     @Override
     public boolean isPlayerOnline(UUID uniqueId) {
         return getProxy().getPlayer(uniqueId) != null;
+    }
+
+    @Override
+    public @Nullable String identifyClassLoader(ClassLoader classLoader) throws Exception {
+        Class<?> pluginClassLoader = Class.forName("net.md_5.bungee.api.plugin.PluginClassloader");
+        if (pluginClassLoader.isInstance(classLoader)) {
+            PluginDescription desc = (PluginDescription) pluginClassLoader.getDeclaredField("desc").get(classLoader);
+            return desc.getName();
+        }
+        return null;
     }
 
     private static boolean checkIncompatibleVersion() {

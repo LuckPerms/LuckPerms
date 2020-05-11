@@ -25,9 +25,12 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
+import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
@@ -36,6 +39,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -73,8 +77,17 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public void init() {
-        HikariConfig config = new HikariConfig();
+    public void init(LuckPermsPlugin plugin) {
+        HikariConfig config;
+        try {
+            config = new HikariConfig();
+        } catch (LinkageError e) {
+            // dumb plugins seem to keep doing stupid stuff with shading of SLF4J and Log4J.
+            // detect this and print a more useful error message.
+            handleLinkageError(e, plugin);
+            throw e;
+        }
+
         config.setPoolName("luckperms-hikari");
 
         appendConfigurationInfo(config);
@@ -140,5 +153,39 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
             throw new SQLException("Unable to get a connection from the pool. (getConnection returned null)");
         }
         return connection;
+    }
+
+    private static void handleLinkageError(LinkageError linkageError, LuckPermsPlugin plugin) {
+        List<String> noteworthyClasses = ImmutableList.of(
+                "org.slf4j.LoggerFactory",
+                "org.slf4j.ILoggerFactory",
+                "org.apache.logging.slf4j.Log4jLoggerFactory",
+                "org.apache.logging.log4j.spi.LoggerContext",
+                "org.apache.logging.log4j.spi.AbstractLoggerAdapter",
+                "org.slf4j.impl.StaticLoggerBinder"
+        );
+
+        PluginLogger logger = plugin.getLogger();
+        logger.warn("A " + linkageError.getClass().getSimpleName() + " has occurred whilst initialising Hikari. This is likely due to classloading conflicts between other plugins.");
+        logger.warn("Please check for other plugins below (and try loading LuckPerms without them installed) before reporting the issue.");
+
+        for (String className : noteworthyClasses) {
+            Class<?> clazz;
+            try {
+                clazz = Class.forName(className);
+            } catch (Exception ex) {
+                continue;
+            }
+
+            ClassLoader loader = clazz.getClassLoader();
+            String loaderName;
+            try {
+                loaderName = plugin.getBootstrap().identifyClassLoader(loader) + " (" + loader.toString() + ")";
+            } catch (Exception e) {
+                loaderName = loader.toString();
+            }
+
+            logger.warn("Class " + className + " has been loaded by: " + loaderName);
+        }
     }
 }

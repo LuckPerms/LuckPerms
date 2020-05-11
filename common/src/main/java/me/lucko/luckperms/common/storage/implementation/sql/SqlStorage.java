@@ -147,7 +147,7 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public void init() throws Exception {
-        this.connectionFactory.init();
+        this.connectionFactory.init(this.plugin);
 
         boolean tableExists;
         try (Connection c = this.connectionFactory.getConnection()) {
