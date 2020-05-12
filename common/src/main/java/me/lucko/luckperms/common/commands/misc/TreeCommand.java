@@ -92,7 +92,7 @@ public class TreeCommand extends SingleCommand {
         }
 
         Message.TREE_UPLOAD_START.send(sender);
-        PermissionCache permissionData = user == null ? null : user.getCachedData().getPermissionData(plugin.getQueryOptionsForUser(user).orElse(plugin.getContextManager().getStaticQueryOptions()));
+        PermissionCache permissionData = user == null ? null : user.getCachedData().getPermissionData(user.getQueryOptions());
 
         String id;
         try {

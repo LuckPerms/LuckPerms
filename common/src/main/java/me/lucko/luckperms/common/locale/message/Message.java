@@ -211,28 +211,28 @@ public enum Message {
             "{PREFIX}&f-  &3Platform: &f{}" + "\n" +
             "{PREFIX}&f-  &3Server Brand: &f{}" + "\n" +
             "{PREFIX}&f-  &3Server Version:" + "\n" +
-            "{PREFIX}&f-  {}",
+            "{PREFIX}     &f{}",
             false
     ),
 
     INFO_STORAGE(
             "{PREFIX}&f-  &bStorage:" + "\n" +
-            "{PREFIX}&f-     &3Type: &f{}",
+            "{PREFIX}     &3Type: &f{}",
             false
     ),
 
-    INFO_STORAGE_META("&f-     &3{}: {}", true),
+    INFO_STORAGE_META("     &3{}: {}", true),
 
     INFO_EXTENSIONS("{PREFIX}&f-  &bExtensions:", true),
-    INFO_EXTENSION_ENTRY("&f-     &3{}", true),
+    INFO_EXTENSION_ENTRY("     &3{}", true),
 
     INFO_MIDDLE(
             "{PREFIX}&f-  &bMessaging: &f{}" + "\n" +
             "{PREFIX}&f-  &bInstance:" + "\n" +
-            "{PREFIX}&f-     &3Static contexts: &f{}" + "\n" +
-            "{PREFIX}&f-     &3Online Players: &a{} &7(&a{}&7 unique)" + "\n" +
-            "{PREFIX}&f-     &3Uptime: &7{}" + "\n" +
-            "{PREFIX}&f-     &3Local Data: &a{} &7users, &a{} &7groups, &a{} &7tracks",
+            "{PREFIX}     &3Static contexts: &f{}" + "\n" +
+            "{PREFIX}     &3Online Players: &a{} &7(&a{}&7 unique)" + "\n" +
+            "{PREFIX}     &3Uptime: &7{}" + "\n" +
+            "{PREFIX}     &3Local Data: &a{} &7users, &a{} &7groups, &a{} &7tracks",
             false
     ),
 
@@ -355,26 +355,27 @@ public enum Message {
 
     USER_INFO_GENERAL(
             "{PREFIX}&b&l> &bUser Info: &f{}" + "\n" +
-            "{PREFIX}&f- &3UUID: &f{} &7(type: {}&7)" + "\n" +
-            "{PREFIX}&f- &3Status: {}" + "\n" +
-            "{PREFIX}&f- &3Primary Group: &f{}",
+            "{PREFIX}&f- &3UUID: &f{}" + "\n" +
+            "{PREFIX}&f    &7(type: {}&7)" + "\n" +
+            "{PREFIX}&f- &3Status: {}",
             false
     ),
 
     USER_INFO_DATA(
             "{PREFIX}&f- &aContextual Data:" + "\n" +
-            "{PREFIX}&f-    &3Has contextual data: {}" + "\n" +
-            "{PREFIX}&f-    &3Applicable contexts: {}" + "\n" +
-            "{PREFIX}&f-    &3Prefix: {}" + "\n" +
-            "{PREFIX}&f-    &3Suffix: {}" + "\n" +
-            "{PREFIX}&f-    &3Meta: {}",
+            "{PREFIX}    &3Type: {}" + "\n" +
+            "{PREFIX}    &3Contexts: {}" + "\n" +
+            "{PREFIX}    &3Prefix: {}" + "\n" +
+            "{PREFIX}    &3Suffix: {}" + "\n" +
+            "{PREFIX}    &3Primary Group: &f{}" + "\n" +
+            "{PREFIX}    &3Meta: {}",
             false
     ),
 
     INFO_PARENT_HEADER("&f- &aParent Groups:", true),
     INFO_TEMP_PARENT_HEADER("&f- &aTemporary Parent Groups:", true),
-    INFO_PARENT_ENTRY("&f-    &3> &f{}{}", true),
-    INFO_PARENT_ENTRY_EXPIRY("&f-    &2-    expires in {}", true),
+    INFO_PARENT_ENTRY("    &3> &f{}{}", true),
+    INFO_PARENT_ENTRY_EXPIRY("    &2-    expires in {}", true),
     USER_REMOVEGROUP_ERROR_PRIMARY("&aYou cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b{}&a's primary group was set to &b{}&a.", true),
     USER_PRIMARYGROUP_WARN_OPTION("&aWarning: The primary group calculation method being used by this server &7({}) &amay not reflect this change.", true),

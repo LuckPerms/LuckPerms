@@ -50,7 +50,6 @@ import net.luckperms.api.query.QueryOptions;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class UserInfo extends ChildCommand<User> {
@@ -65,19 +64,12 @@ public class UserInfo extends ChildCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        Optional<QueryOptions> queryOptions = plugin.getQueryOptionsForUser(user);
-
         Message status = plugin.getBootstrap().isPlayerOnline(user.getUniqueId()) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
-
-        String primaryGroup = user.getCachedData().getMetaData(queryOptions.orElseGet(() -> plugin.getContextManager().getStaticQueryOptions()))
-                .getPrimaryGroup(MetaCheckEvent.Origin.INTERNAL);
-
         Message.USER_INFO_GENERAL.send(sender,
                 user.getUsername().orElse("Unknown"),
                 user.getUniqueId(),
                 user.getUniqueId().version() == 4 ? "&2mojang" : "&8offline",
-                status.asString(plugin.getLocaleManager()),
-                primaryGroup
+                status.asString(plugin.getLocaleManager())
         );
 
         List<InheritanceNode> parents = user.normalData().inheritanceAsSortedSet().stream()
@@ -105,39 +97,46 @@ public class UserInfo extends ChildCommand<User> {
             }
         }
 
+        QueryOptions queryOptions = plugin.getQueryOptionsForUser(user).orElse(null);
+        boolean active = true;
+
+        if (queryOptions == null) {
+            active = false;
+            queryOptions = plugin.getContextManager().getStaticQueryOptions();
+        }
+
         String context = "&bNone";
         String prefix = "&bNone";
         String suffix = "&bNone";
         String meta = "&bNone";
 
-        if (queryOptions.isPresent()) {
-            ContextSet contextSet = queryOptions.get().context();
-            if (!contextSet.isEmpty()) {
-                context = contextSet.toSet().stream()
-                        .map(e -> MessageUtils.contextToString(plugin.getLocaleManager(), e.getKey(), e.getValue()))
-                        .collect(Collectors.joining(" "));
-            }
-
-            MetaCache data = user.getCachedData().getMetaData(queryOptions.get());
-            String prefixValue = data.getPrefix(MetaCheckEvent.Origin.INTERNAL);
-            if (prefixValue != null) {
-                prefix = "&f\"" + prefixValue + "&f\"";
-            }
-            String sussexValue = data.getSuffix(MetaCheckEvent.Origin.INTERNAL);
-            if (sussexValue != null) {
-                suffix = "&f\"" + sussexValue + "&f\"";
-            }
-
-            Map<String, List<String>> metaMap = data.getMeta(MetaCheckEvent.Origin.INTERNAL);
-            if (!metaMap.isEmpty()) {
-                meta = metaMap.entrySet().stream()
-                        .flatMap(entry -> entry.getValue().stream().map(value -> Maps.immutableEntry(entry.getKey(), value)))
-                        .map(e -> MessageUtils.contextToString(plugin.getLocaleManager(), e.getKey(), e.getValue()))
-                        .collect(Collectors.joining(" "));
-            }
+        ContextSet contextSet = queryOptions.context();
+        if (!contextSet.isEmpty()) {
+            context = contextSet.toSet().stream()
+                    .map(e -> MessageUtils.contextToString(plugin.getLocaleManager(), e.getKey(), e.getValue()))
+                    .collect(Collectors.joining(" "));
         }
 
-        Message.USER_INFO_DATA.send(sender, MessageUtils.formatBoolean(queryOptions != null), context, prefix, suffix, meta);
+        MetaCache data = user.getCachedData().getMetaData(queryOptions);
+        String prefixValue = data.getPrefix(MetaCheckEvent.Origin.INTERNAL);
+        if (prefixValue != null) {
+            prefix = "&f\"" + prefixValue + "&f\"";
+        }
+        String sussexValue = data.getSuffix(MetaCheckEvent.Origin.INTERNAL);
+        if (sussexValue != null) {
+            suffix = "&f\"" + sussexValue + "&f\"";
+        }
+        String primaryGroup = user.getCachedData().getMetaData(queryOptions).getPrimaryGroup(MetaCheckEvent.Origin.INTERNAL);
+
+        Map<String, List<String>> metaMap = data.getMeta(MetaCheckEvent.Origin.INTERNAL);
+        if (!metaMap.isEmpty()) {
+            meta = metaMap.entrySet().stream()
+                    .flatMap(entry -> entry.getValue().stream().map(value -> Maps.immutableEntry(entry.getKey(), value)))
+                    .map(e -> MessageUtils.contextToString(plugin.getLocaleManager(), e.getKey(), e.getValue()))
+                    .collect(Collectors.joining(" "));
+        }
+
+        Message.USER_INFO_DATA.send(sender, active ? "&2active player" : "&8server", context, prefix, suffix, primaryGroup, meta);
         return CommandResult.SUCCESS;
     }
 }
