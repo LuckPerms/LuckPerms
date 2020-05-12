@@ -136,7 +136,7 @@ public class UserInfo extends ChildCommand<User> {
                     .collect(Collectors.joining(" "));
         }
 
-        Message.USER_INFO_DATA.send(sender, active ? "&2active player" : "&8server", context, prefix, suffix, primaryGroup, meta);
+        Message.USER_INFO_CONTEXTUAL_DATA.send(sender, active ? "&2active player" : "&8server", context, prefix, suffix, primaryGroup, meta);
         return CommandResult.SUCCESS;
     }
 }

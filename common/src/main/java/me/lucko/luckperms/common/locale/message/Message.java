@@ -360,10 +360,8 @@ public enum Message {
             "{PREFIX}&f- &3Status: {}",
             false
     ),
-
-    USER_INFO_DATA(
-            "{PREFIX}&f- &aContextual Data:" + "\n" +
-            "{PREFIX}    &3Type: {}" + "\n" +
+    USER_INFO_CONTEXTUAL_DATA(
+            "{PREFIX}&f- &aContextual Data: &7(mode: {}&7)" + "\n" +
             "{PREFIX}    &3Contexts: {}" + "\n" +
             "{PREFIX}    &3Prefix: {}" + "\n" +
             "{PREFIX}    &3Suffix: {}" + "\n" +
@@ -408,6 +406,14 @@ public enum Message {
             "{PREFIX}&f- &3Weight: &f{}",
             false
     ),
+    GROUP_INFO_CONTEXTUAL_DATA(
+            "{PREFIX}&f- &aContextual Data: &7(mode: &8server&7)" + "\n" +
+                    "{PREFIX}    &3Prefix: {}" + "\n" +
+                    "{PREFIX}    &3Suffix: {}" + "\n" +
+                    "{PREFIX}    &3Meta: {}",
+            false
+    ),
+
     GROUP_SET_WEIGHT("&aSet weight to &b{}&a for group &b{}&a.", true),
 
     GROUP_SET_DISPLAY_NAME_DOESNT_HAVE("&b{}&a doesn't have a display name set.", true),
