@@ -85,9 +85,6 @@ task remappedShadowJar(type: RemapJarTask) {
     input = tasks.shadowJar.archivePath
     addNestedDependencies = true
     archiveName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
-    //input = shadowJar.archivePath
-    //addNestedDependencies = true
-    //output = shadowJar.archivePath
 }
 
 tasks.assemble.dependsOn tasks.remappedShadowJar

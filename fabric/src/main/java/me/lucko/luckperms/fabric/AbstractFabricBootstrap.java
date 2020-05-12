@@ -59,7 +59,6 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 
     public AbstractFabricBootstrap() {
         this.classLoader = new FabricClassLoader();
-        // fixme: Load deps first
         this.plugin = new LPFabricPlugin(this);
     }
 

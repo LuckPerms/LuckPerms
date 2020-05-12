@@ -51,7 +51,6 @@ import me.lucko.luckperms.fabric.event.PlayerWorldChangeCallback;
 import me.lucko.luckperms.fabric.event.RespawnPlayerCallback;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.FabricEventListeners;
-import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.luckperms.api.LuckPerms;
@@ -159,7 +158,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected MessagingFactory<LPFabricPlugin> provideMessagingFactory() {
-        return new FabricMessagingFactory(this);
+        return new MessagingFactory<>(this);
     }
 
     @Override
