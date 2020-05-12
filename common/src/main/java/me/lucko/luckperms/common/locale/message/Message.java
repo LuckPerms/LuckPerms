@@ -45,7 +45,7 @@ public enum Message {
     /*
      * General & Commands
      */
-    PREFIX("&7&l[&b&lL&3&lP&7&l] ", false),
+    PREFIX("&7[&b&lL&3&lP&7] ", false),
 
     VIEW_AVAILABLE_COMMANDS_PROMPT("&3Use &a/{} help &3to view available commands.", true),
     NO_PERMISSION_FOR_SUBCOMMANDS("&3You do not have permission to use any sub commands.", true),
@@ -206,8 +206,8 @@ public enum Message {
     UPDATE_TASK_PUSH_FAILURE("&cError whilst pushing changes to other servers.", true),
     UPDATE_TASK_PUSH_FAILURE_NOT_SETUP("&cError whilst pushing changes to other servers. &7(a messaging service has not been configured)", true),
     RELOAD_CONFIG_SUCCESS("&aThe configuration file was reloaded. &7(some options will only apply after the server has restarted)", true),
-    INFO_TOP(
-            "{PREFIX}&2Running &bLuckPerms v{}&2 by &bLuck&2." + "\n" +
+    INFO_HEADER(
+            "{PREFIX}&2Running &b{} v{}&2 by &bLuck&2." + "\n" +
             "{PREFIX}&f-  &3Platform: &f{}" + "\n" +
             "{PREFIX}&f-  &3Server Brand: &f{}" + "\n" +
             "{PREFIX}&f-  &3Server Version:" + "\n" +

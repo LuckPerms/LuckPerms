@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
@@ -56,7 +57,8 @@ public class InfoCommand extends SingleCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Map<String, String> storageMeta = plugin.getStorage().getMeta();
 
-        Message.INFO_TOP.send(sender,
+        Message.INFO_HEADER.send(sender,
+                AbstractLuckPermsPlugin.getPluginName(),
                 plugin.getBootstrap().getVersion(),
                 plugin.getBootstrap().getType().getFriendlyName(),
                 plugin.getBootstrap().getServerBrand(),

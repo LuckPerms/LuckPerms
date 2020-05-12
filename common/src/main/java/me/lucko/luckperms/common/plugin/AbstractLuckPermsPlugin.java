@@ -61,6 +61,8 @@ import okhttp3.OkHttpClient;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
@@ -365,8 +367,16 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
     private void displayBanner(Sender sender) {
         sender.sendMessage(Message.colorize("&b       &3 __    "));
-        sender.sendMessage(Message.colorize("&b  |    &3|__)   " + "&2LuckPerms &bv" + getBootstrap().getVersion()));
+        sender.sendMessage(Message.colorize("&b  |    &3|__)   " + "&2" + getPluginName() + " &bv" + getBootstrap().getVersion()));
         sender.sendMessage(Message.colorize("&b  |___ &3|      " + "&8Running on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
         sender.sendMessage("");
+    }
+
+    public static String getPluginName() {
+        LocalDate date = LocalDate.now();
+        if (date.getMonth() == Month.APRIL && date.getDayOfMonth() == 1) {
+            return "LuckyPerms";
+        }
+        return "LuckPerms";
     }
 }
