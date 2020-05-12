@@ -312,7 +312,7 @@ public class CommandManager {
         String rewrite = rewrites.apply(arg);
         if (rewrite != null) {
             args.remove(i);
-            args.add(0, rewrite);
+            args.add(i, rewrite);
         }
     }
 
