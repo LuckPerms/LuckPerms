@@ -49,9 +49,10 @@ import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.UUID;
 
 public class EditorCommand extends SingleCommand {
     private static final int MAX_USERS = 1000;
@@ -92,23 +93,24 @@ public class EditorCommand extends SingleCommand {
         }
         if (type.includingUsers) {
             // include all online players
-            Set<User> users = new LinkedHashSet<>(plugin.getUserManager().getAll().values());
+            Map<UUID, User> users = new LinkedHashMap<>(plugin.getUserManager().getAll());
 
             // then fill up with other users
             if (type.includingOffline && users.size() < MAX_USERS) {
                 plugin.getStorage().getUniqueUsers().join().stream()
+                        .filter(uuid -> !users.containsKey(uuid))
                         .sorted()
                         .limit(MAX_USERS - users.size())
                         .forEach(uuid -> {
                             User user = plugin.getStorage().loadUser(uuid, null).join();
                             if (user != null) {
-                                holders.add(user);
+                                users.put(uuid, user);
                             }
                             plugin.getUserManager().getHouseKeeper().cleanup(uuid);
                         });
             }
 
-            users.stream()
+            users.values().stream()
                     .sorted(Comparator
                             .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL))
                             .thenComparing(User::getFormattedDisplayName, String.CASE_INSENSITIVE_ORDER)
