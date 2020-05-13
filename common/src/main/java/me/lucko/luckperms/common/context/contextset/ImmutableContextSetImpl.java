@@ -40,6 +40,7 @@ import net.luckperms.api.context.MutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -145,14 +146,11 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
         } else if (other.isEmpty()) {
             // this set isn't empty, but the other one is
             return false;
-        } else if (this.size() > other.size()) {
-            // this set has more unique entries than the other set, so there's no way this can be satisfied.
-            return false;
         } else {
             // neither are empty, we need to compare the individual entries
-            Set<Map.Entry<String, String>> entries = this.map.entries();
-            for (Map.Entry<String, String> e : entries) {
-                if (!other.contains(e.getKey(), e.getValue())) {
+            Set<Map.Entry<String, Collection<String>>> entries = this.map.asMap().entrySet();
+            for (Map.Entry<String, Collection<String>> e : entries) {
+                if (!other.containsAny(e.getKey(), e.getValue())) {
                     return false;
                 }
             }

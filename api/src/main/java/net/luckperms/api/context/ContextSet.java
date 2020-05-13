@@ -197,12 +197,28 @@ public interface ContextSet extends Iterable<Context> {
     }
 
     /**
+     * Returns if the {@link ContextSet} contains any of the given context pairings.
+     *
+     * @param key the key to look for
+     * @param values the values to look for
+     * @return true if the set contains any of the pairs
+     * @since 5.1
+     */
+    default boolean containsAny(@NonNull String key, @NonNull Iterable<String> values) {
+        for (String value : values) {
+            if (contains(key, value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns if this {@link ContextSet} is fully "satisfied" by another set.
      *
      * <p>For a context set to "satisfy" another, it must itself contain all of
-     * the context pairings in the other set.</p>
-     *
-     * <p>Mathematically, this method returns true if this set is a <b>subset</b> of the other.</p>
+     * the context keys with values in the other set, with at least one of the values
+     * matching.</p>
      *
      * @param other the other set to check
      * @return true if all entries in this set are also in the other set
