@@ -78,6 +78,10 @@ public class BukkitCommandListUpdater {
 
     // Called when the buffer times out.
     private void sendUpdate(UUID uniqueId) {
+        if (this.plugin.getBootstrap().isServerStopping()) {
+            return;
+        }
+        
         this.plugin.getBootstrap().getScheduler().sync().execute(() -> {
             Player player = this.plugin.getBootstrap().getPlayer(uniqueId).orElse(null);
             if (player != null) {

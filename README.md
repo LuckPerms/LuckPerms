@@ -20,7 +20,6 @@ For more information, see the wiki article on [Why LuckPerms?](https://github.co
 
 ## Useful Links
 The latest downloads & other useful links can be found on the project homepage at [luckperms.net](https://luckperms.net/).
-The latest **downloads** can be found on the [project's homepage](https://luckperms.net/).
 
 ## Building
 LuckPerms uses Gradle to handle dependencies & building.
