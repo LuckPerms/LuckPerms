@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 
+import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.Flag;
@@ -116,7 +117,7 @@ public class QueryOptionsImpl implements QueryOptions {
     public boolean satisfies(@NonNull ContextSet contextSet) {
         switch (this.mode) {
             case CONTEXTUAL:
-                return contextSet.isSatisfiedBy(this.context);
+                return contextSet.isSatisfiedBy(this.context, option(ContextSatisfyMode.KEY).orElse(ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY));
             case NON_CONTEXTUAL:
                 return true;
             default:

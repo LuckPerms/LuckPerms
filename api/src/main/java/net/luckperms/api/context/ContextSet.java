@@ -202,9 +202,12 @@ public interface ContextSet extends Iterable<Context> {
      * @param key the key to look for
      * @param values the values to look for
      * @return true if the set contains any of the pairs
-     * @since 5.1
+     * @since 5.2
      */
     default boolean containsAny(@NonNull String key, @NonNull Iterable<String> values) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(values, "values");
+
         for (String value : values) {
             if (contains(key, value)) {
                 return true;
@@ -214,16 +217,27 @@ public interface ContextSet extends Iterable<Context> {
     }
 
     /**
-     * Returns if this {@link ContextSet} is fully "satisfied" by another set.
+     * Returns if this {@link ContextSet} is "satisfied" by another set.
      *
-     * <p>For a context set to "satisfy" another, it must itself contain all of
-     * the context keys with values in the other set, with at least one of the values
-     * matching.</p>
+     * <p>{@link ContextSatisfyMode#AT_LEAST_ONE_VALUE_PER_KEY} is the mode used by this method.</p>
      *
-     * @param other the other set to check
-     * @return true if all entries in this set are also in the other set
+     * @param other the other set
+     * @return true if this context set is satisfied by the other
      */
-    boolean isSatisfiedBy(@NonNull ContextSet other);
+    default boolean isSatisfiedBy(@NonNull ContextSet other) {
+        return isSatisfiedBy(other, ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY);
+    }
+
+    /**
+     * Returns if this {@link ContextSet} is "satisfied" by another set, according to the given
+     * {@code mode}.
+     *
+     * @param other the other set
+     * @param mode the mode to use
+     * @return true if this context set is satisfied by the other
+     * @since 5.2
+     */
+    boolean isSatisfiedBy(@NonNull ContextSet other, @NonNull ContextSatisfyMode mode);
 
     /**
      * Returns if the {@link ContextSet} is empty.
