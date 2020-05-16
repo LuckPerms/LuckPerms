@@ -71,7 +71,7 @@ public class DummyPermissibleBase extends PermissibleBase {
         try {
             ATTACHMENTS_FIELD.set(this, EmptyCollections.list());
             PERMISSIONS_FIELD.set(this, EmptyCollections.map());
-        } catch (ReflectiveOperationException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
