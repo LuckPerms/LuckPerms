@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
-import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 
@@ -408,8 +407,8 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
     
     private MetaAccumulator newAccumulator(QueryOptions queryOptions) {
         return new MetaAccumulator(
-                new SimpleMetaStack(getMetaStackDefinition(queryOptions, ChatMetaType.PREFIX), ChatMetaType.PREFIX),
-                new SimpleMetaStack(getMetaStackDefinition(queryOptions, ChatMetaType.SUFFIX), ChatMetaType.SUFFIX)
+                getMetaStackDefinition(queryOptions, ChatMetaType.PREFIX),
+                getMetaStackDefinition(queryOptions, ChatMetaType.SUFFIX)
         );
     }
 

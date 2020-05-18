@@ -29,11 +29,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.metastacking.MetaStack;
-import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.node.types.Weight;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.MetaNode;
@@ -55,8 +54,8 @@ public class MetaAccumulator {
 
     public static MetaAccumulator makeFromConfig(LuckPermsPlugin plugin) {
         return new MetaAccumulator(
-                new SimpleMetaStack(plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS), ChatMetaType.PREFIX),
-                new SimpleMetaStack(plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS), ChatMetaType.SUFFIX)
+                plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS),
+                plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS)
         );
     }
 
@@ -80,17 +79,21 @@ public class MetaAccumulator {
     private int weight = 0;
     private String primaryGroup;
 
-    private final MetaStack prefixStack;
-    private final MetaStack suffixStack;
+    private final MetaStackDefinition prefixDefinition;
+    private final MetaStackDefinition suffixDefinition;
+    private final MetaStackAccumulator prefixAccumulator;
+    private final MetaStackAccumulator suffixAccumulator;
 
-    public MetaAccumulator(MetaStack prefixStack, MetaStack suffixStack) {
-        Objects.requireNonNull(prefixStack, "prefixStack");
-        Objects.requireNonNull(suffixStack, "suffixStack");
+    public MetaAccumulator(MetaStackDefinition prefixDefinition, MetaStackDefinition suffixDefinition) {
+        Objects.requireNonNull(prefixDefinition, "prefixDefinition");
+        Objects.requireNonNull(suffixDefinition, "suffixDefinition");
         this.meta = ArrayListMultimap.create();
         this.prefixes = new TreeMap<>(Comparator.reverseOrder());
         this.suffixes = new TreeMap<>(Comparator.reverseOrder());
-        this.prefixStack = prefixStack;
-        this.suffixStack = suffixStack;
+        this.prefixDefinition = prefixDefinition;
+        this.suffixDefinition = suffixDefinition;
+        this.prefixAccumulator = new MetaStackAccumulator(this.prefixDefinition, ChatMetaType.PREFIX);
+        this.suffixAccumulator = new MetaStackAccumulator(this.suffixDefinition, ChatMetaType.SUFFIX);
     }
 
     private void ensureState(State state) {
@@ -125,7 +128,7 @@ public class MetaAccumulator {
 
     public void accumulateNode(Node n) {
         ensureState(State.ACCUMULATING);
-        
+
         if (n instanceof MetaNode) {
             MetaNode mn = (MetaNode) n;
             this.meta.put(mn.getMetaKey(), mn.getMetaValue());
@@ -134,13 +137,13 @@ public class MetaAccumulator {
         if (n instanceof PrefixNode) {
             PrefixNode pn = (PrefixNode) n;
             this.prefixes.putIfAbsent(pn.getPriority(), pn.getMetaValue());
-            this.prefixStack.accumulateToAll(pn);
+            this.prefixAccumulator.offer(pn);
         }
-        
+
         if (n instanceof SuffixNode) {
             SuffixNode pn = (SuffixNode) n;
             this.suffixes.putIfAbsent(pn.getPriority(), pn.getMetaValue());
-            this.suffixStack.accumulateToAll(pn);
+            this.suffixAccumulator.offer(pn);
         }
     }
 
@@ -191,14 +194,24 @@ public class MetaAccumulator {
         return this.primaryGroup;
     }
 
-    public MetaStack getPrefixStack() {
+    public MetaStackDefinition getPrefixDefinition() {
         ensureState(State.COMPLETE);
-        return this.prefixStack;
+        return this.prefixDefinition;
     }
 
-    public MetaStack getSuffixStack() {
+    public MetaStackDefinition getSuffixDefinition() {
         ensureState(State.COMPLETE);
-        return this.suffixStack;
+        return this.suffixDefinition;
+    }
+
+    public String getPrefix() {
+        ensureState(State.COMPLETE);
+        return this.prefixAccumulator.toFormattedString();
+    }
+
+    public String getSuffix() {
+        ensureState(State.COMPLETE);
+        return this.suffixAccumulator.toFormattedString();
     }
 
     @Override
@@ -209,7 +222,7 @@ public class MetaAccumulator {
                 "suffixes=" + this.suffixes + ", " +
                 "weight=" + this.weight + ", " +
                 "primaryGroup=" + this.primaryGroup + ", " +
-                "prefixStack=" + this.prefixStack + ", " +
-                "suffixStack=" + this.suffixStack + ")";
+                "prefixStack=" + this.prefixAccumulator + ", " +
+                "suffixStack=" + this.suffixAccumulator + ")";
     }
 }

@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Multimaps;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.metastacking.MetaStack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
@@ -65,8 +64,10 @@ public class SimpleMetaCache implements CachedMetaData {
     protected SortedMap<Integer, String> suffixes = ImmutableSortedMap.of();
     protected int weight = 0;
     protected String primaryGroup = null;
-    protected MetaStack prefixStack = null;
-    protected MetaStack suffixStack = null;
+    private MetaStackDefinition prefixDefinition = null;
+    private MetaStackDefinition suffixDefinition = null;
+    private String prefix = null;
+    private String suffix = null;
 
     public SimpleMetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions) {
         this.plugin = plugin;
@@ -98,8 +99,10 @@ public class SimpleMetaCache implements CachedMetaData {
         this.suffixes = ImmutableSortedMap.copyOfSorted(meta.getSuffixes());
         this.weight = meta.getWeight();
         this.primaryGroup = meta.getPrimaryGroup();
-        this.prefixStack = meta.getPrefixStack();
-        this.suffixStack = meta.getSuffixStack();
+        this.prefixDefinition = meta.getPrefixDefinition();
+        this.suffixDefinition = meta.getSuffixDefinition();
+        this.prefix = meta.getPrefix();
+        this.suffix = meta.getSuffix();
     }
 
     public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
@@ -113,8 +116,7 @@ public class SimpleMetaCache implements CachedMetaData {
     }
 
     public String getPrefix(MetaCheckEvent.Origin origin) {
-        MetaStack prefixStack = this.prefixStack;
-        return prefixStack == null ? null : prefixStack.toFormattedString();
+        return this.prefix;
     }
 
     @Override
@@ -123,8 +125,7 @@ public class SimpleMetaCache implements CachedMetaData {
     }
 
     public String getSuffix(MetaCheckEvent.Origin origin) {
-        MetaStack suffixStack = this.suffixStack;
-        return suffixStack == null ? null : suffixStack.toFormattedString();
+        return this.suffix;
     }
 
     @Override
@@ -155,7 +156,7 @@ public class SimpleMetaCache implements CachedMetaData {
         return this.weight;
     }
 
-    //@Override
+    //@Override - not actually exposed in the API atm
     public final int getWeight() {
         return getWeight(MetaCheckEvent.Origin.LUCKPERMS_API);
     }
@@ -171,12 +172,12 @@ public class SimpleMetaCache implements CachedMetaData {
 
     @Override
     public @NonNull MetaStackDefinition getPrefixStackDefinition() {
-        return this.prefixStack.getDefinition();
+        return this.prefixDefinition;
     }
 
     @Override
     public @NonNull MetaStackDefinition getSuffixStackDefinition() {
-        return this.suffixStack.getDefinition();
+        return this.suffixDefinition;
     }
 
     @Override
