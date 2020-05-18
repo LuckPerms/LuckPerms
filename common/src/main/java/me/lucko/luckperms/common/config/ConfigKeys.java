@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
+import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
@@ -112,6 +113,17 @@ public final class ConfigKeys {
         }
 
         return new QueryOptionsBuilderImpl(QueryMode.CONTEXTUAL).flags(flags).build();
+    });
+
+    /**
+     * The default contexts satisfy mode
+     */
+    public static final ConfigKey<ContextSatisfyMode> CONTEXT_SATISFY_MODE = customKey(c -> {
+        String value = c.getString("context-satisfy-mode", "at-least-one-value-per-key");
+        if (value.toLowerCase().equals("all-values-per-key")) {
+            return ContextSatisfyMode.ALL_VALUES_PER_KEY;
+        }
+        return ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY;
     });
 
     /**

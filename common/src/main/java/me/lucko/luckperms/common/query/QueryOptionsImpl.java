@@ -50,20 +50,25 @@ public class QueryOptionsImpl implements QueryOptions {
     public static final QueryOptions DEFAULT_CONTEXTUAL = new QueryOptionsImpl(QueryMode.CONTEXTUAL, ImmutableContextSetImpl.EMPTY, FlagUtils.DEFAULT_FLAGS, null);
     public static final QueryOptions DEFAULT_NON_CONTEXTUAL = new QueryOptionsImpl(QueryMode.NON_CONTEXTUAL, null, FlagUtils.DEFAULT_FLAGS, null);
 
+    // state
     private final QueryMode mode;
     private final ImmutableContextSet context;
     private final byte flags;
     private final ImmutableMap<OptionKey<?>, Object> options;
-    private final int hashCode;
 
+    // computed based on state above
+    private final int hashCode;
     private Set<Flag> flagsSet = null;
+    private final ContextSatisfyMode contextSatisfyMode;
 
     QueryOptionsImpl(QueryMode mode, @Nullable ImmutableContextSet context, byte flags, @Nullable Map<OptionKey<?>, Object> options) {
         this.mode = mode;
         this.context = context;
         this.flags = flags;
         this.options = options == null ? null : ImmutableMap.copyOf(options);
+
         this.hashCode = calculateHashCode();
+        this.contextSatisfyMode = options == null ? null : (ContextSatisfyMode) options.get(ContextSatisfyMode.KEY);
     }
 
     @Override
@@ -114,10 +119,10 @@ public class QueryOptionsImpl implements QueryOptions {
     }
 
     @Override
-    public boolean satisfies(@NonNull ContextSet contextSet) {
+    public boolean satisfies(@NonNull ContextSet contextSet, @NonNull ContextSatisfyMode defaultContextSatisfyMode) {
         switch (this.mode) {
             case CONTEXTUAL:
-                return contextSet.isSatisfiedBy(this.context, option(ContextSatisfyMode.KEY).orElse(ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY));
+                return contextSet.isSatisfiedBy(this.context, this.contextSatisfyMode == null ? defaultContextSatisfyMode : this.contextSatisfyMode);
             case NON_CONTEXTUAL:
                 return true;
             default:
