@@ -223,7 +223,7 @@ public enum Message {
 
     INFO_STORAGE_META("     &3{}: {}", true),
 
-    INFO_EXTENSIONS("{PREFIX}&f-  &bExtensions:", true),
+    INFO_EXTENSIONS("&f-  &bExtensions:", true),
     INFO_EXTENSION_ENTRY("     &3{}", true),
 
     INFO_MIDDLE(
