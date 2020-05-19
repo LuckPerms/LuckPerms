@@ -43,7 +43,6 @@ import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
-import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryOptions;
@@ -97,17 +96,9 @@ public class GroupInfo extends ChildCommand<Group> {
 
         QueryOptions queryOptions = plugin.getContextManager().getStaticQueryOptions();
 
-        String context = "&bNone";
         String prefix = "&bNone";
         String suffix = "&bNone";
         String meta = "&bNone";
-
-        ContextSet contextSet = queryOptions.context();
-        if (!contextSet.isEmpty()) {
-            context = contextSet.toSet().stream()
-                    .map(e -> MessageUtils.contextToString(plugin.getLocaleManager(), e.getKey(), e.getValue()))
-                    .collect(Collectors.joining(" "));
-        }
 
         MetaCache data = group.getCachedData().getMetaData(queryOptions);
         String prefixValue = data.getPrefix(MetaCheckEvent.Origin.INTERNAL);
@@ -127,7 +118,7 @@ public class GroupInfo extends ChildCommand<Group> {
                     .collect(Collectors.joining(" "));
         }
 
-        Message.GROUP_INFO_CONTEXTUAL_DATA.send(sender, context, prefix, suffix, meta);
+        Message.GROUP_INFO_CONTEXTUAL_DATA.send(sender, prefix, suffix, meta);
         return CommandResult.SUCCESS;
     }
 }
