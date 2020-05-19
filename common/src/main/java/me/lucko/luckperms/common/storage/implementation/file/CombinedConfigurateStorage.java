@@ -261,7 +261,7 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<UUID, N>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<UUID, N>> held = new ArrayList<>();
         this.usersLoader.apply(false, true, root -> {
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
@@ -301,7 +301,7 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<String, N>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<String, N>> held = new ArrayList<>();
         this.groupsLoader.apply(false, true, root -> {
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {

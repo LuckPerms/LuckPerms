@@ -115,7 +115,7 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
     @Deprecated
     public @NonNull CompletableFuture<List<HeldNode<String>>> getWithPermission(@NonNull String permission) {
         Objects.requireNonNull(permission, "permission");
-        return (CompletableFuture) this.plugin.getStorage().getGroupsWithPermission(StandardNodeMatchers.key(permission));
+        return (CompletableFuture) this.plugin.getStorage().searchGroupNodes(StandardNodeMatchers.key(permission));
     }
 
     @SuppressWarnings("unchecked")
@@ -123,7 +123,7 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
     public @NonNull <T extends Node> CompletableFuture<Map<String, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher) {
         Objects.requireNonNull(matcher, "matcher");
         ConstraintNodeMatcher<? extends T> constraint = (ConstraintNodeMatcher<? extends T>) matcher;
-        return this.plugin.getStorage().getGroupsWithPermission(constraint).thenApply(list -> {
+        return this.plugin.getStorage().searchGroupNodes(constraint).thenApply(list -> {
             ImmutableListMultimap.Builder<String, T> builder = ImmutableListMultimap.builder();
             for (NodeEntry<String, ? extends T> row : list) {
                 builder.put(row.getHolder(), row.getNode());

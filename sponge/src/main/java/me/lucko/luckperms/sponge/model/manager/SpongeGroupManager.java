@@ -193,7 +193,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> builder = ImmutableMap.builder();
 
-            List<NodeEntry<String, Node>> lookup = this.plugin.getStorage().getGroupsWithPermission(StandardNodeMatchers.key(permission)).join();
+            List<NodeEntry<String, Node>> lookup = this.plugin.getStorage().searchGroupNodes(StandardNodeMatchers.key(permission)).join();
             for (NodeEntry<String, Node> holder : lookup) {
                 if (holder.getNode().getContexts().equals(ImmutableContextSetImpl.EMPTY)) {
                     builder.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder()), holder.getNode().getValue());
@@ -209,7 +209,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> builder = ImmutableMap.builder();
 
-            List<NodeEntry<String, Node>> lookup = this.plugin.getStorage().getGroupsWithPermission(StandardNodeMatchers.key(permission)).join();
+            List<NodeEntry<String, Node>> lookup = this.plugin.getStorage().searchGroupNodes(StandardNodeMatchers.key(permission)).join();
             for (NodeEntry<String, Node> holder : lookup) {
                 if (holder.getNode().getContexts().equals(contexts)) {
                     builder.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder()), holder.getNode().getValue());

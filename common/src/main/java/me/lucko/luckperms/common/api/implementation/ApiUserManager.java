@@ -124,7 +124,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     @Deprecated
     public @NonNull CompletableFuture<List<HeldNode<UUID>>> getWithPermission(@NonNull String permission) {
         Objects.requireNonNull(permission, "permission");
-        return (CompletableFuture) this.plugin.getStorage().getUsersWithPermission(StandardNodeMatchers.key(permission));
+        return (CompletableFuture) this.plugin.getStorage().searchUserNodes(StandardNodeMatchers.key(permission));
     }
 
     @SuppressWarnings("unchecked")
@@ -132,7 +132,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     public <T extends Node> @NonNull CompletableFuture<Map<UUID, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher) {
         Objects.requireNonNull(matcher, "matcher");
         ConstraintNodeMatcher<? extends T> constraint = (ConstraintNodeMatcher<? extends T>) matcher;
-        return this.plugin.getStorage().getUsersWithPermission(constraint).thenApply(list -> {
+        return this.plugin.getStorage().searchUserNodes(constraint).thenApply(list -> {
             ImmutableListMultimap.Builder<UUID, T> builder = ImmutableListMultimap.builder();
             for (NodeEntry<UUID, ? extends T> row : list) {
                 builder.put(row.getHolder(), row.getNode());

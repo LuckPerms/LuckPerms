@@ -154,8 +154,8 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<UUID, N>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
-        return implFor(SplitStorageType.USER).getUsersWithPermission(constraint);
+    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
+        return implFor(SplitStorageType.USER).searchUserNodes(constraint);
     }
 
     @Override
@@ -184,8 +184,8 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<String, N>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
-        return implFor(SplitStorageType.GROUP).getGroupsWithPermission(constraint);
+    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
+        return implFor(SplitStorageType.GROUP).searchGroupNodes(constraint);
     }
 
     @Override

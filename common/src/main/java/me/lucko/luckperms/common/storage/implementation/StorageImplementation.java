@@ -72,7 +72,7 @@ public interface StorageImplementation {
 
     Set<UUID> getUniqueUsers() throws Exception;
 
-    <N extends Node> List<NodeEntry<UUID, N>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception;
+    <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception;
 
     Group createAndLoadGroup(String name) throws Exception;
 
@@ -84,7 +84,7 @@ public interface StorageImplementation {
 
     void deleteGroup(Group group) throws Exception;
 
-    <N extends Node> List<NodeEntry<String, N>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception;
+    <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception;
 
     Track createAndLoadTrack(String name) throws Exception;
 

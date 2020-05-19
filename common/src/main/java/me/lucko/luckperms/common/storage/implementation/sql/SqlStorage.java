@@ -363,7 +363,7 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<UUID, N>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) throws SQLException {
+    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws SQLException {
         PreparedStatementBuilder builder = new PreparedStatementBuilder().append(USER_PERMISSIONS_SELECT_PERMISSION);
         constraint.getConstraint().appendSql(builder, "permission");
 
@@ -506,7 +506,7 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<String, N>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) throws SQLException {
+    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws SQLException {
         PreparedStatementBuilder builder = new PreparedStatementBuilder().append(GROUP_PERMISSIONS_SELECT_PERMISSION);
         constraint.getConstraint().appendSql(builder, "permission");
 

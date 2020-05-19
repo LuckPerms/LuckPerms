@@ -162,9 +162,9 @@ public class Storage {
         return makeFuture(this.implementation::getUniqueUsers);
     }
 
-    public <N extends Node> CompletableFuture<List<NodeEntry<UUID, N>>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) {
+    public <N extends Node> CompletableFuture<List<NodeEntry<UUID, N>>> searchUserNodes(ConstraintNodeMatcher<N> constraint) {
         return makeFuture(() -> {
-            List<NodeEntry<UUID, N>> result = this.implementation.getUsersWithPermission(constraint);
+            List<NodeEntry<UUID, N>> result = this.implementation.searchUserNodes(constraint);
             result.removeIf(entry -> entry.getNode().hasExpired());
             return ImmutableList.copyOf(result);
         });
@@ -208,9 +208,9 @@ public class Storage {
         });
     }
 
-    public <N extends Node> CompletableFuture<List<NodeEntry<String, N>>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) {
+    public <N extends Node> CompletableFuture<List<NodeEntry<String, N>>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) {
         return makeFuture(() -> {
-            List<NodeEntry<String, N>> result = this.implementation.getGroupsWithPermission(constraint);
+            List<NodeEntry<String, N>> result = this.implementation.searchGroupNodes(constraint);
             result.removeIf(entry -> entry.getNode().hasExpired());
             return ImmutableList.copyOf(result);
         });

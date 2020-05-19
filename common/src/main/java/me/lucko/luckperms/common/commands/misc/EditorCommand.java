@@ -95,7 +95,7 @@ public class EditorCommand extends SingleCommand {
             // include all online players
             Map<UUID, User> users = new LinkedHashMap<>(plugin.getUserManager().getAll());
 
-            // then fill up with other users
+            // then fill up with other users with permissions
             if (type.includingOffline && users.size() < MAX_USERS) {
                 plugin.getStorage().getUniqueUsers().join().stream()
                         .filter(uuid -> !users.containsKey(uuid))

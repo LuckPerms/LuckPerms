@@ -88,7 +88,7 @@ public class GroupListMembers extends ChildCommand<Group> {
 
         Message.SEARCH_SEARCHING_MEMBERS.send(sender, group.getName());
 
-        List<NodeEntry<UUID, InheritanceNode>> matchedUsers = plugin.getStorage().getUsersWithPermission(matcher).join().stream()
+        List<NodeEntry<UUID, InheritanceNode>> matchedUsers = plugin.getStorage().searchUserNodes(matcher).join().stream()
                 .filter(n -> n.getNode().getValue())
                 .collect(Collectors.toList());
 
@@ -105,7 +105,7 @@ public class GroupListMembers extends ChildCommand<Group> {
             Message.SEARCH_RESULT_GROUP_DEFAULT.send(sender);
         }
 
-        List<NodeEntry<String, InheritanceNode>> matchedGroups = plugin.getStorage().getGroupsWithPermission(matcher).join().stream()
+        List<NodeEntry<String, InheritanceNode>> matchedGroups = plugin.getStorage().searchGroupNodes(matcher).join().stream()
                 .filter(n -> n.getNode().getValue())
                 .collect(Collectors.toList());
 

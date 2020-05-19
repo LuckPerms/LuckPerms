@@ -87,8 +87,8 @@ public class SearchCommand extends SingleCommand {
 
         Message.SEARCH_SEARCHING.send(sender, matcher);
 
-        List<NodeEntry<UUID, Node>> matchedUsers = plugin.getStorage().getUsersWithPermission(matcher).join();
-        List<NodeEntry<String, Node>> matchedGroups = plugin.getStorage().getGroupsWithPermission(matcher).join();
+        List<NodeEntry<UUID, Node>> matchedUsers = plugin.getStorage().searchUserNodes(matcher).join();
+        List<NodeEntry<String, Node>> matchedGroups = plugin.getStorage().searchGroupNodes(matcher).join();
 
         int users = matchedUsers.size();
         int groups = matchedGroups.size();

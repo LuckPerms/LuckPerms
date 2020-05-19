@@ -254,7 +254,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<UUID, N>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<UUID, N>> held = new ArrayList<>();
         try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.USER))) {
             stream.filter(getFileTypeFilter())
@@ -297,7 +297,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<String, N>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<String, N>> held = new ArrayList<>();
         try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.GROUP))) {
             stream.filter(getFileTypeFilter())

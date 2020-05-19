@@ -360,7 +360,7 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<UUID, N>> getUsersWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<UUID, N>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -470,7 +470,7 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<String, N>> getGroupsWithPermission(ConstraintNodeMatcher<N> constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<String, N>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
