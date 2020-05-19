@@ -115,7 +115,7 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
     @Deprecated
     public @NonNull CompletableFuture<List<HeldNode<String>>> getWithPermission(@NonNull String permission) {
         Objects.requireNonNull(permission, "permission");
-        return (CompletableFuture) this.plugin.getStorage().getUsersWithPermission(StandardNodeMatchers.key(permission));
+        return (CompletableFuture) this.plugin.getStorage().getGroupsWithPermission(StandardNodeMatchers.key(permission));
     }
 
     @SuppressWarnings("unchecked")
