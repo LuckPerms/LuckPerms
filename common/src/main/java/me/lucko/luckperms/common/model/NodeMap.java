@@ -31,11 +31,13 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 
 import me.lucko.luckperms.common.cache.Cache;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextSetComparator;
 import me.lucko.luckperms.common.node.comparator.NodeComparator;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
+import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -154,9 +156,13 @@ public final class NodeMap {
                 !flagExcludeTest(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT, DefaultContextKeys.WORLD_KEY, filter, contextSet);
     }
 
+    private ContextSatisfyMode defaultSatisfyMode() {
+        return this.holder.getPlugin().getConfiguration().get(ConfigKeys.CONTEXT_SATISFY_MODE);
+    }
+
     public void forEach(QueryOptions filter, Consumer<? super Node> consumer) {
         for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
-            if (!filter.satisfies(e.getKey())) {
+            if (!filter.satisfies(e.getKey(), defaultSatisfyMode())) {
                 continue;
             }
 
@@ -176,7 +182,7 @@ public final class NodeMap {
 
     public void copyTo(Collection<? super Node> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
-            if (!filter.satisfies(e.getKey())) {
+            if (!filter.satisfies(e.getKey(), defaultSatisfyMode())) {
                 continue;
             }
 
@@ -196,7 +202,7 @@ public final class NodeMap {
 
     public <T extends Node> void copyTo(Collection<? super T> collection, NodeType<T> type, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
-            if (!filter.satisfies(e.getKey())) {
+            if (!filter.satisfies(e.getKey(), defaultSatisfyMode())) {
                 continue;
             }
 
@@ -224,7 +230,7 @@ public final class NodeMap {
 
     public void copyInheritanceNodesTo(Collection<? super InheritanceNode> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<InheritanceNode>> e : this.inheritanceMap.entrySet()) {
-            if (!filter.satisfies(e.getKey())) {
+            if (!filter.satisfies(e.getKey(), defaultSatisfyMode())) {
                 continue;
             }
 

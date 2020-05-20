@@ -197,17 +197,47 @@ public interface ContextSet extends Iterable<Context> {
     }
 
     /**
-     * Returns if this {@link ContextSet} is fully "satisfied" by another set.
+     * Returns if the {@link ContextSet} contains any of the given context pairings.
      *
-     * <p>For a context set to "satisfy" another, it must itself contain all of
-     * the context pairings in the other set.</p>
-     *
-     * <p>Mathematically, this method returns true if this set is a <b>subset</b> of the other.</p>
-     *
-     * @param other the other set to check
-     * @return true if all entries in this set are also in the other set
+     * @param key the key to look for
+     * @param values the values to look for
+     * @return true if the set contains any of the pairs
+     * @since 5.2
      */
-    boolean isSatisfiedBy(@NonNull ContextSet other);
+    default boolean containsAny(@NonNull String key, @NonNull Iterable<String> values) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(values, "values");
+
+        for (String value : values) {
+            if (contains(key, value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns if this {@link ContextSet} is "satisfied" by another set.
+     *
+     * <p>{@link ContextSatisfyMode#AT_LEAST_ONE_VALUE_PER_KEY} is the mode used by this method.</p>
+     *
+     * @param other the other set
+     * @return true if this context set is satisfied by the other
+     */
+    default boolean isSatisfiedBy(@NonNull ContextSet other) {
+        return isSatisfiedBy(other, ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY);
+    }
+
+    /**
+     * Returns if this {@link ContextSet} is "satisfied" by another set, according to the given
+     * {@code mode}.
+     *
+     * @param other the other set
+     * @param mode the mode to use
+     * @return true if this context set is satisfied by the other
+     * @since 5.2
+     */
+    boolean isSatisfiedBy(@NonNull ContextSet other, @NonNull ContextSatisfyMode mode);
 
     /**
      * Returns if the {@link ContextSet} is empty.
