@@ -474,13 +474,11 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     }
 
     private static Node readMetaAttributes(ConfigurationNode attributes, Function<ConfigurationNode, NodeBuilder<?, ?>> permissionFunction) {
-        boolean value = attributes.getNode("value").getBoolean(true);
         long expiryVal = attributes.getNode("expiry").getLong(0L);
         Instant expiry = expiryVal == 0L ? null : Instant.ofEpochSecond(expiryVal);
         ImmutableContextSet context = readContexts(attributes);
 
         return permissionFunction.apply(attributes)
-                .value(value)
                 .expiry(expiry)
                 .context(context)
                 .build();
