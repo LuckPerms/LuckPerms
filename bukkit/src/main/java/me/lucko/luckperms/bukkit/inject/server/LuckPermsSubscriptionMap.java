@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -119,6 +120,21 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
             value = new LPSubscriptionValueMap(key, value);
         }
         return super.put(key, value);
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends Map<Permissible, Boolean>> m) {
+        m.forEach(this::put);
+    }
+
+    @Override
+    public Map<Permissible, Boolean> putIfAbsent(String key, Map<Permissible, Boolean> value) {
+        return get(key);
+    }
+
+    @Override
+    public Map<Permissible, Boolean> computeIfAbsent(String key, Function<? super String, ? extends Map<Permissible, Boolean>> mappingFunction) {
+        return get(key);
     }
 
     // if the key isn't null and is a string, #get will always return a value for it
