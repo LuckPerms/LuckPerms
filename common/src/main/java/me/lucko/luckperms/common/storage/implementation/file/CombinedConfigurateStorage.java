@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateL
 import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Iterators;
+import me.lucko.luckperms.common.util.Uuids;
 
 import net.luckperms.api.node.Node;
 
@@ -43,6 +44,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
@@ -256,7 +258,8 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     public Set<UUID> getUniqueUsers() throws IOException {
         return this.usersLoader.getNode().getChildrenMap().keySet().stream()
                 .map(Object::toString)
-                .map(UUID::fromString)
+                .map(Uuids::fromString)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 

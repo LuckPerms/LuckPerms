@@ -43,6 +43,7 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
+import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.luckperms.api.actionlog.Action;
@@ -353,8 +354,10 @@ public class SqlStorage implements StorageImplementation {
             try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT_DISTINCT))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        String uuid = rs.getString("uuid");
-                        uuids.add(UUID.fromString(uuid));
+                        UUID uuid = Uuids.fromString(rs.getString("uuid"));
+                        if (uuid != null) {
+                            uuids.add(uuid);
+                        }
                     }
                 }
             }

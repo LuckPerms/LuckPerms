@@ -353,7 +353,11 @@ public class MongoStorage implements StorageImplementation {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         try (MongoCursor<Document> cursor = c.find().iterator()) {
             while (cursor.hasNext()) {
-                uuids.add(getDocumentId(cursor.next()));
+                try {
+                    uuids.add(getDocumentId(cursor.next()));
+                } catch (IllegalArgumentException e) {
+                    // ignore
+                }
             }
         }
         return uuids;

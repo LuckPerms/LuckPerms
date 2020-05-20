@@ -45,6 +45,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -248,7 +249,8 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
             return stream.filter(getFileTypeFilter())
                     .map(p -> p.getFileName().toString())
                     .map(s -> s.substring(0, s.length() - this.fileExtension.length()))
-                    .map(UUID::fromString)
+                    .map(Uuids::fromString)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
         }
     }
