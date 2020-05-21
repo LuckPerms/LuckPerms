@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import me.lucko.luckperms.common.context.contextset.AbstractContextSet;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 
 import net.luckperms.api.context.ContextSet;
@@ -118,10 +117,6 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
 
     @Override
     public @NonNull B withContext(@NonNull String key, @NonNull String value) {
-        // TODO reconsider a better place to insert / avoid this special case
-        if (AbstractContextSet.isGlobalServerWorldEntry(key, value)) {
-            return (B) this;
-        }
         this.context.add(key, value);
         return (B) this;
     }

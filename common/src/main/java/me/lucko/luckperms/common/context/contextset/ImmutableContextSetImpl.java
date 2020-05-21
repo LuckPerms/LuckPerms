@@ -52,7 +52,15 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
     public static final ImmutableContextSetImpl EMPTY = new ImmutableContextSetImpl(ImmutableSetMultimap.of());
 
     public static ImmutableContextSet of(String key, String value) {
-        return new ImmutableContextSetImpl(ImmutableSetMultimap.of(sanitizeKey(key), sanitizeValue(value)));
+        key = sanitizeKey(key);
+        value = sanitizeValue(value);
+
+        // special case for 'server=global' and 'world=global'
+        if (isGlobalServerWorldEntry(key, value)) {
+            return EMPTY;
+        }
+
+        return new ImmutableContextSetImpl(ImmutableSetMultimap.of(key, sanitizeValue(value)));
     }
 
     private final ImmutableSetMultimap<String, String> map;
@@ -215,6 +223,10 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
         }
 
         private void put(String key, String value) {
+            // special case for server=global and world=global
+            if (isGlobalServerWorldEntry(key, value)) {
+                return;
+            }
             builder().put(key, value);
         }
 

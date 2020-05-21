@@ -123,7 +123,7 @@ public abstract class AbstractContextSet implements ContextSet {
     }
 
     public static boolean isGlobalServerWorldEntry(String key, String value) {
-        return (key.equalsIgnoreCase(DefaultContextKeys.SERVER_KEY) || key.equalsIgnoreCase(DefaultContextKeys.WORLD_KEY)) && value.equalsIgnoreCase("global");
+        return (key.equals(DefaultContextKeys.SERVER_KEY) || key.equals(DefaultContextKeys.WORLD_KEY)) && value.equals("global");
     }
 
 }

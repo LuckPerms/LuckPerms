@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.commands.user.UserParentCommand;
-import me.lucko.luckperms.common.context.contextset.AbstractContextSet;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -193,8 +192,7 @@ public class ArgumentParser {
                 value = entry;
             }
 
-            // TODO reconsider a better place to insert / avoid this special case
-            if (!Context.isValidKey(key) || !Context.isValidValue(value) || AbstractContextSet.isGlobalServerWorldEntry(key, value)) {
+            if (!Context.isValidKey(key) || !Context.isValidValue(value)) {
                 continue;
             }
 

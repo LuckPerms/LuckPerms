@@ -157,7 +157,15 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
 
     @Override
     public void add(@NonNull String key, @NonNull String value) {
-        this.map.put(sanitizeKey(key), sanitizeValue(value));
+        key = sanitizeKey(key);
+        value = sanitizeValue(value);
+
+        // special case for server=global and world=global
+        if (isGlobalServerWorldEntry(key, value)) {
+            return;
+        }
+
+        this.map.put(key, value);
     }
 
     @Override
