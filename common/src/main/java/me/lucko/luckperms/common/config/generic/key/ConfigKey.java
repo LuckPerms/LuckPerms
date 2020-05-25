@@ -23,25 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge;
+package me.lucko.luckperms.common.config.generic.key;
 
-import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+/**
+ * Represents a key in the configuration.
+ *
+ * @param <T> the value type
+ */
+public interface ConfigKey<T> {
 
-import java.nio.file.Path;
+    /**
+     * Gets the position of this key within the keys enum.
+     *
+     * @return the position
+     */
+    int ordinal();
 
-public class SpongeConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
-    public SpongeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
-    }
+    /**
+     * Gets if the config key can be reloaded.
+     *
+     * @return the if the key can be reloaded
+     */
+    boolean reloadable();
 
-    @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
-    }
+    /**
+     * Resolves and returns the value mapped to this key using the given config instance.
+     *
+     * @param adapter the config adapter instance
+     * @return the value mapped to this key
+     */
+    T get(ConfigurationAdapter adapter);
+
 }

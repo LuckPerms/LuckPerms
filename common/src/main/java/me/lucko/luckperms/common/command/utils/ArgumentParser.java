@@ -221,7 +221,7 @@ public class ArgumentParser {
 
     public static class DetailedUsageException extends ArgumentException {
         @Override
-        public CommandResult handle(Sender sender) {
+        protected CommandResult handle(Sender sender) {
             throw new UnsupportedOperationException();
         }
 
@@ -240,7 +240,7 @@ public class ArgumentParser {
 
     public static class PastDateException extends ArgumentException {
         @Override
-        public CommandResult handle(Sender sender) {
+        protected CommandResult handle(Sender sender) {
             Message.PAST_DATE_ERROR.send(sender);
             return CommandResult.INVALID_ARGS;
         }
@@ -254,7 +254,7 @@ public class ArgumentParser {
         }
 
         @Override
-        public CommandResult handle(Sender sender) {
+        protected CommandResult handle(Sender sender) {
             Message.ILLEGAL_DATE_ERROR.send(sender, this.invalidDate);
             return CommandResult.INVALID_ARGS;
         }

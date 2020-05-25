@@ -29,10 +29,9 @@ import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
-import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.context.LPStaticContextsCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
@@ -113,7 +112,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load configuration
         getLogger().info("Loading configuration...");
-        this.configuration = new AbstractConfiguration(this, provideConfigurationAdapter());
+        this.configuration = new LuckPermsConfiguration(this, provideConfigurationAdapter());
 
         // load locale
         this.localeManager = new LocaleManager();

@@ -23,36 +23,47 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config;
+package me.lucko.luckperms.common.config.generic.key;
 
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
+
+import java.util.function.Function;
 
 /**
- * Represents a key in the configuration.
+ * Basic {@link ConfigKey} implementation.
  *
  * @param <T> the value type
  */
-public interface ConfigKey<T> {
+public class SimpleConfigKey<T> implements ConfigKey<T> {
+    private final Function<? super ConfigurationAdapter, ? extends T> function;
 
-    /**
-     * Gets the position of this key within the {@link ConfigKeys} enum.
-     *
-     * <p>This is set shortly after the key is created, during the initialisation
-     * of {@link ConfigKeys}.</p>
-     *
-     * @return the position
-     */
-    int ordinal();
+    private int ordinal = -1;
+    private boolean reloadable = true;
 
-    /**
-     * Resolves and returns the value mapped to this key using the given config instance.
-     *
-     * <p>The {@link LuckPermsConfiguration#get(ConfigKey)} method should be used to
-     * retrieve the value, as opposed to calling this directly.</p>
-     *
-     * @param adapter the config adapter instance
-     * @return the value mapped to this key
-     */
-    T get(ConfigurationAdapter adapter);
+    SimpleConfigKey(Function<? super ConfigurationAdapter, ? extends T> function) {
+        this.function = function;
+    }
 
+    @Override
+    public T get(ConfigurationAdapter adapter) {
+        return this.function.apply(adapter);
+    }
+
+    @Override
+    public int ordinal() {
+        return this.ordinal;
+    }
+
+    @Override
+    public boolean reloadable() {
+        return this.reloadable;
+    }
+
+    public void setOrdinal(int ordinal) {
+        this.ordinal = ordinal;
+    }
+
+    public void setReloadable(boolean reloadable) {
+        this.reloadable = reloadable;
+    }
 }

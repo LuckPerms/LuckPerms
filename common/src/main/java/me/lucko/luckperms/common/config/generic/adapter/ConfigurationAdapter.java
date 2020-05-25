@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config.adapter;
+package me.lucko.luckperms.common.config.generic.adapter;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
