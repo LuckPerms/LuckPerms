@@ -67,11 +67,7 @@ public class SpongeContextManager extends ContextManager<Subject, Player> {
     }
 
     @Override
-    public void invalidateCache(Subject subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
+    protected void invalidateCache(Subject subject) {
         QueryOptionsCache<Subject> cache = this.subjectCaches.getIfPresent(subject);
         if (cache != null) {
             cache.invalidate();

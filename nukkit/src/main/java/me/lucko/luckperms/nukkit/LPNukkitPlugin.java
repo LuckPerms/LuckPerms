@@ -26,7 +26,6 @@
 package me.lucko.luckperms.nukkit;
 
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
-import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -55,11 +54,11 @@ import me.lucko.luckperms.nukkit.inject.server.InjectorSubscriptionMap;
 import me.lucko.luckperms.nukkit.inject.server.LuckPermsDefaultsMap;
 import me.lucko.luckperms.nukkit.inject.server.LuckPermsPermissionMap;
 import me.lucko.luckperms.nukkit.inject.server.LuckPermsSubscriptionMap;
+import me.lucko.luckperms.nukkit.listeners.NukkitAutoOpListener;
 import me.lucko.luckperms.nukkit.listeners.NukkitConnectionListener;
 import me.lucko.luckperms.nukkit.listeners.NukkitPlatformListener;
 
 import net.luckperms.api.LuckPerms;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.query.QueryOptions;
 
 import cn.nukkit.Player;
@@ -145,7 +144,10 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupContextManager() {
         this.contextManager = new NukkitContextManager(this);
-        this.contextManager.registerCalculator(new WorldCalculator(this));
+
+        WorldCalculator worldCalculator = new WorldCalculator(this);
+        this.bootstrap.getServer().getPluginManager().registerEvents(worldCalculator, this.bootstrap);
+        this.contextManager.registerCalculator(worldCalculator);
     }
 
     @Override
@@ -205,11 +207,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
 
         // register autoop listener
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            getApiProvider().getEventBus().subscribe(UserDataRecalculateEvent.class, event -> {
-                User user = ApiUser.cast(event.getUser());
-                Optional<Player> player = getBootstrap().getPlayer(user.getUniqueId());
-                player.ifPresent(this::refreshAutoOp);
-            });
+            getApiProvider().getEventBus().subscribe(new NukkitAutoOpListener(this));
         }
 
         // Load any online users (in the case of a reload)

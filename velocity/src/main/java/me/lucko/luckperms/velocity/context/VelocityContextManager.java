@@ -65,11 +65,7 @@ public class VelocityContextManager extends ContextManager<Player, Player> {
     }
 
     @Override
-    public void invalidateCache(Player subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
+    protected void invalidateCache(Player subject) {
         QueryOptionsCache<Player> cache = this.subjectCaches.getIfPresent(subject);
         if (cache != null) {
             cache.invalidate();

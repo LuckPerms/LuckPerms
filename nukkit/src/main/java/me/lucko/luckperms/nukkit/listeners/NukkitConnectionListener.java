@@ -166,7 +166,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             return;
         }
 
-        this.plugin.refreshAutoOp(player);
+        this.plugin.getContextManager().signalContextUpdate(player);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

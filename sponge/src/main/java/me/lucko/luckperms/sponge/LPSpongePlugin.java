@@ -156,7 +156,10 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupContextManager() {
         this.contextManager = new SpongeContextManager(this);
-        this.contextManager.registerCalculator(new WorldCalculator(this));
+
+        WorldCalculator worldCalculator = new WorldCalculator(this);
+        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, worldCalculator);
+        this.contextManager.registerCalculator(worldCalculator);
     }
 
     @Override

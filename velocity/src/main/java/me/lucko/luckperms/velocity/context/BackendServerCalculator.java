@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.velocity.context;
 
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
@@ -74,5 +76,10 @@ public class BackendServerCalculator implements ContextCalculator<Player> {
             builder.add(DefaultContextKeys.WORLD_KEY, server.getServerInfo().getName().toLowerCase());
         }
         return builder.build();
+    }
+
+    @Subscribe
+    public void onServerConnect(ServerConnectedEvent e) {
+        this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
     }
 }

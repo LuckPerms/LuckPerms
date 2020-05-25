@@ -46,6 +46,7 @@ import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
+import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.extension.ExtensionLoadEvent;
 import net.luckperms.api.event.group.GroupCacheLoadEvent;
 import net.luckperms.api.event.group.GroupCreateEvent;
@@ -136,6 +137,14 @@ public final class EventDispatcher {
         } catch (Throwable e) {
             throw new RuntimeException("Exception occurred whilst generating event instance", e);
         }
+    }
+
+    public void dispatchContextUpdate(Object subject) {
+        if (!shouldPost(ContextUpdateEvent.class)) {
+            return;
+        }
+
+        post(generate(ContextUpdateEvent.class, subject));
     }
 
     public void dispatchExtensionLoad(Extension extension) {

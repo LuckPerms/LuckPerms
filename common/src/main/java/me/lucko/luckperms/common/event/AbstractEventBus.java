@@ -88,6 +88,10 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
         return this.bus.hasSubscribers(eventClass);
     }
 
+    public void subscribe(LuckPermsEventListener listener) {
+        listener.bind(this);
+    }
+
     @Override
     public @NonNull <T extends LuckPermsEvent> EventSubscription<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler) {
         Objects.requireNonNull(eventClass, "eventClass");

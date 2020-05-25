@@ -38,13 +38,13 @@ import me.lucko.luckperms.common.api.implementation.ApiQueryOptionsRegistry;
 import me.lucko.luckperms.common.api.implementation.ApiTrackManager;
 import me.lucko.luckperms.common.api.implementation.ApiUserManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.actionlog.ActionLogger;
 import net.luckperms.api.context.ContextManager;
-import net.luckperms.api.event.EventBus;
 import net.luckperms.api.messaging.MessagingService;
 import net.luckperms.api.messenger.MessengerProvider;
 import net.luckperms.api.metastacking.MetaStackFactory;
@@ -140,7 +140,7 @@ public class LuckPermsApiProvider implements LuckPerms {
     }
 
     @Override
-    public @NonNull EventBus getEventBus() {
+    public @NonNull AbstractEventBus<?> getEventBus() {
         return this.plugin.getEventDispatcher().getEventBus();
     }
 

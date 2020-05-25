@@ -38,13 +38,17 @@ import net.luckperms.api.context.ImmutableContextSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import cn.nukkit.Player;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.entity.EntityLevelChangeEvent;
 import cn.nukkit.level.Level;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class WorldCalculator implements ContextCalculator<Player> {
+public class WorldCalculator implements ContextCalculator<Player>, Listener {
     private final LPNukkitPlugin plugin;
 
     public WorldCalculator(LPNukkitPlugin plugin) {
@@ -69,5 +73,13 @@ public class WorldCalculator implements ContextCalculator<Player> {
             builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
         }
         return builder.build();
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onWorldChange(EntityLevelChangeEvent e) {
+        if (e.getEntity() instanceof Player) {
+            Player player = (Player) e.getEntity();
+            this.plugin.getContextManager().signalContextUpdate(player);
+        }
     }
 }

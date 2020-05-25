@@ -36,6 +36,9 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.ServerSwitchEvent;
+import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.event.EventHandler;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -43,7 +46,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer> {
+public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>, Listener {
 
     private static String getServer(ProxiedPlayer player) {
         return player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName().toLowerCase());
@@ -73,5 +76,10 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
             builder.add(DefaultContextKeys.WORLD_KEY, server.getName().toLowerCase());
         }
         return builder.build();
+    }
+
+    @EventHandler
+    public void onServerSwitch(ServerSwitchEvent e) {
+        this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
     }
 }

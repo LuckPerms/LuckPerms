@@ -38,13 +38,13 @@ import me.lucko.luckperms.bukkit.inject.server.InjectorSubscriptionMap;
 import me.lucko.luckperms.bukkit.inject.server.LuckPermsDefaultsMap;
 import me.lucko.luckperms.bukkit.inject.server.LuckPermsPermissionMap;
 import me.lucko.luckperms.bukkit.inject.server.LuckPermsSubscriptionMap;
+import me.lucko.luckperms.bukkit.listeners.BukkitAutoOpListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitCommandListUpdater;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
-import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -63,7 +63,6 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 
 import net.luckperms.api.LuckPerms;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.query.QueryOptions;
 
 import org.bukkit.OfflinePlayer;
@@ -75,7 +74,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 
 import java.io.File;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -183,7 +181,10 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupContextManager() {
         this.contextManager = new BukkitContextManager(this);
-        this.contextManager.registerCalculator(new WorldCalculator(this));
+
+        WorldCalculator worldCalculator = new WorldCalculator(this);
+        this.bootstrap.getServer().getPluginManager().registerEvents(worldCalculator, this.bootstrap);
+        this.contextManager.registerCalculator(worldCalculator);
     }
 
     @Override
@@ -267,17 +268,12 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
         // register autoop listener
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            getApiProvider().getEventBus().subscribe(UserDataRecalculateEvent.class, event -> {
-                User user = ApiUser.cast(event.getUser());
-                Optional<Player> player = getBootstrap().getPlayer(user.getUniqueId());
-                player.ifPresent(p -> refreshAutoOp(p, false));
-            });
+            getApiProvider().getEventBus().subscribe(new BukkitAutoOpListener(this));
         }
 
         // register bukkit command list updater
         if (getConfiguration().get(ConfigKeys.UPDATE_CLIENT_COMMAND_LIST) && BukkitCommandListUpdater.isSupported()) {
-            BukkitCommandListUpdater commandListUpdater = new BukkitCommandListUpdater(this);
-            getApiProvider().getEventBus().subscribe(UserDataRecalculateEvent.class, commandListUpdater::onUserDataRecalculate);
+            getApiProvider().getEventBus().subscribe(new BukkitCommandListUpdater(this));
         }
 
         // Load any online users (in the case of a reload)
@@ -332,32 +328,6 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         // unhook vault
         if (this.vaultHookManager != null) {
             this.vaultHookManager.unhook();
-        }
-    }
-
-    public void refreshAutoOp(Player player, boolean callerIsSync) {
-        if (!getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            return;
-        }
-
-        if (!callerIsSync && this.bootstrap.isServerStopping()) {
-            return;
-        }
-
-        User user = getUserManager().getIfLoaded(player.getUniqueId());
-        boolean value;
-
-        if (user != null) {
-            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getQueryOptions(player)).getPermissionMap();
-            value = permData.getOrDefault("luckperms.autoop", false);
-        } else {
-            value = false;
-        }
-
-        if (callerIsSync) {
-            player.setOp(value);
-        } else {
-            this.bootstrap.getScheduler().executeSync(() -> player.setOp(value));
         }
     }
 

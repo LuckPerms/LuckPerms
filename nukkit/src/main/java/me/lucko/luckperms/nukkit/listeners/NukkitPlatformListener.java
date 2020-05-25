@@ -29,13 +29,10 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
-import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.EventHandler;
-import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
-import cn.nukkit.event.entity.EntityLevelChangeEvent;
 import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
 import cn.nukkit.event.server.RemoteServerCommandEvent;
 import cn.nukkit.event.server.ServerCommandEvent;
@@ -82,15 +79,6 @@ public class NukkitPlatformListener implements Listener {
         if (s.equals("op") || s.startsWith("op ") || s.equals("deop") || s.startsWith("deop ")) {
             event.setCancelled(true);
             sender.sendMessage(Message.OP_DISABLED.asString(this.plugin.getLocaleManager()));
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onWorldChange(EntityLevelChangeEvent e) {
-        if (e.getEntity() instanceof Player) {
-            Player player = (Player) e.getEntity();
-            this.plugin.getContextManager().invalidateCache(player);
-            this.plugin.refreshAutoOp(player);
         }
     }
 

@@ -74,7 +74,7 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer, ProxiedP
     }
 
     @Override
-    public void invalidateCache(ProxiedPlayer subject) {
+    protected void invalidateCache(ProxiedPlayer subject) {
         this.contextsCache.invalidate(subject);
     }
 

@@ -100,7 +100,19 @@ public abstract class ContextManager<S, P extends S> {
 
     public abstract QueryOptions formQueryOptions(S subject, ImmutableContextSet contextSet);
 
-    public abstract void invalidateCache(S subject);
+    public void signalContextUpdate(S subject) {
+        if (subject == null) {
+            throw new NullPointerException("subject");
+        }
+
+        // invalidate their cache
+        invalidateCache(subject);
+
+        // call event
+        this.plugin.getEventDispatcher().dispatchContextUpdate(subject);
+    }
+
+    protected abstract void invalidateCache(S subject);
 
     public void registerCalculator(ContextCalculator<? super S> calculator) {
         // calculators registered first should have priority (and be checked last.)

@@ -138,7 +138,10 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupContextManager() {
         this.contextManager = new BungeeContextManager(this);
-        this.contextManager.registerCalculator(new BackendServerCalculator(this));
+
+        BackendServerCalculator backendServerCalculator = new BackendServerCalculator(this);
+        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap, backendServerCalculator);
+        this.contextManager.registerCalculator(backendServerCalculator);
 
         if (this.bootstrap.getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
             this.contextManager.registerCalculator(new RedisBungeeCalculator());

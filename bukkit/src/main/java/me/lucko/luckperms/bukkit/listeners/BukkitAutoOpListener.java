@@ -25,42 +25,29 @@
 
 package me.lucko.luckperms.bukkit.listeners;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.cache.BufferedRequest;
+import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.event.LuckPermsEventListener;
-import me.lucko.luckperms.common.util.CaffeineFactory;
+import me.lucko.luckperms.common.model.User;
 
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
+import net.luckperms.api.query.QueryOptions;
 
 import org.bukkit.entity.Player;
 
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 /**
- * Calls {@link Player#updateCommands()} when a players permissions change.
+ * Implements the LuckPerms auto op feature.
  */
-public class BukkitCommandListUpdater implements LuckPermsEventListener {
-
-    public static boolean isSupported() {
-        try {
-            Player.class.getMethod("updateCommands");
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
-    }
+public class BukkitAutoOpListener implements LuckPermsEventListener {
+    private static final String NODE = "luckperms.autoop";
 
     private final LPBukkitPlugin plugin;
-    private final LoadingCache<UUID, SendBuffer> sendingBuffers = CaffeineFactory.newBuilder()
-            .expireAfterAccess(10, TimeUnit.SECONDS)
-            .build(SendBuffer::new);
 
-    public BukkitCommandListUpdater(LPBukkitPlugin plugin) {
+    public BukkitAutoOpListener(LPBukkitPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -71,48 +58,35 @@ public class BukkitCommandListUpdater implements LuckPermsEventListener {
     }
 
     private void onUserDataRecalculate(UserDataRecalculateEvent e) {
-        requestUpdate(e.getUser().getUniqueId());
+        User user = ApiUser.cast(e.getUser());
+        this.plugin.getBootstrap().getPlayer(user.getUniqueId()).ifPresent(p -> refreshAutoOp(p, false));
     }
 
     private void onContextUpdate(ContextUpdateEvent e) {
-        e.getSubject(Player.class).ifPresent(p -> requestUpdate(p.getUniqueId()));
+        e.getSubject(Player.class).ifPresent(p -> refreshAutoOp(p, true));
     }
 
-    private void requestUpdate(UUID uniqueId) {
-        if (this.plugin.getBootstrap().isServerStopping()) {
+    private void refreshAutoOp(Player player, boolean callerIsSync) {
+        if (!callerIsSync && this.plugin.getBootstrap().isServerStopping()) {
             return;
         }
 
-        if (!this.plugin.getBootstrap().isPlayerOnline(uniqueId)) {
-            return;
+        User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
+
+        boolean value;
+        if (user != null) {
+            QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
+            Map<String, Boolean> permData = user.getCachedData().getPermissionData(queryOptions).getPermissionMap();
+            value = permData.getOrDefault(NODE, false);
+        } else {
+            value = false;
         }
 
-        // Buffer the request to send a commands update.
-        this.sendingBuffers.get(uniqueId).request();
-    }
-
-    // Called when the buffer times out.
-    private void sendUpdate(UUID uniqueId) {
-        if (this.plugin.getBootstrap().isServerStopping()) {
-            return;
-        }
-        
-        this.plugin.getBootstrap().getScheduler().sync()
-                .execute(() -> this.plugin.getBootstrap().getPlayer(uniqueId).ifPresent(Player::updateCommands));
-    }
-
-    private final class SendBuffer extends BufferedRequest<Void> {
-        private final UUID uniqueId;
-
-        SendBuffer(UUID uniqueId) {
-            super(500, TimeUnit.MILLISECONDS, BukkitCommandListUpdater.this.plugin.getBootstrap().getScheduler());
-            this.uniqueId = uniqueId;
-        }
-
-        @Override
-        protected Void perform() {
-            sendUpdate(this.uniqueId);
-            return null;
+        if (callerIsSync) {
+            player.setOp(value);
+        } else {
+            this.plugin.getBootstrap().getScheduler().executeSync(() -> player.setOp(value));
         }
     }
+
 }

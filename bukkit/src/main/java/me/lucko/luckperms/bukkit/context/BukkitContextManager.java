@@ -88,11 +88,7 @@ public class BukkitContextManager extends ContextManager<Player, Player> {
     }
 
     @Override
-    public void invalidateCache(Player subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
+    protected void invalidateCache(Player subject) {
         QueryOptionsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(subject);
         if (cache != null) {
             cache.invalidate();

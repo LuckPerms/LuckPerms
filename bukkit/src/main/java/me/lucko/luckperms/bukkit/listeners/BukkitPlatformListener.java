@@ -32,9 +32,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.RemoteServerCommandEvent;
@@ -90,12 +88,6 @@ public class BukkitPlatformListener implements Listener {
         if (e.getPlugin().getName().equalsIgnoreCase("Vault")) {
             this.plugin.tryVaultHook(true);
         }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onWorldChange(PlayerChangedWorldEvent e) {
-        this.plugin.getContextManager().invalidateCache(e.getPlayer());
-        this.plugin.refreshAutoOp(e.getPlayer(), true);
     }
 
 }
