@@ -40,18 +40,32 @@ import java.util.Set;
  * something will apply.</p>
  *
  * <p>A single "context" consists of a key and a value, both strings. The key
- * represents the type of context, and the value represents the setting of the
- * context key.</p>
+ * describes the type of the context, and the value represents what the key is
+ * set to.</p>
+ *
+ * <p>For example, a context with {@code key=world} and {@code value=world_nether}
+ * describes that a subject is in the "world_nether" world.</p>
+ *
+ * <p>Contexts are exposed to end users and manipulated when managing permissions.
+ * For this reason, context keys should strike a balance between being descriptive
+ * and succinct.</p>
+ *
+ * <p>Context keys and values are case-insensitive, and will be automatically
+ * converted to {@link String#toLowerCase() lowercase} when added to a
+ * context set. Keys and values cannot be null or empty (len=0 or consisting of
+ * only whitespace).</p>
+ *
+ * <p>If a context key is formed of more than one word, the parts should be
+ * separated by the '{@code -}' character. (e.g. "{@code server-type}")</p>
+ *
+ * <p>If a context key is likely to conflict with another plugin, it should be
+ * appropriately namespaced using the name of the plugin providing the context.
+ * The namespace should be at the start of the context key, and separated using
+ * the '{@code :}' character. (e.g. "{@code worldguard:region}" for WorldGuard
+ * regions)</p>
  *
  * <p>Contexts can be combined with each other to form so called
  * "context sets" - simply a collection of context pairs.</p>
- *
- * <p>Context keys and values are case-insensitive, and will be converted to
- * {@link String#toLowerCase() lowercase} by all implementations.</p>
- *
- * <p>Context keys and values may not be null or empty. A key/value will be
- * deemed empty if it's length is zero, or if it consists of only space
- * characters.</p>
  *
  * <p>Two default ContextSet implementations are provided.
  * {@link MutableContextSet} allows the addition and removal of context keys
