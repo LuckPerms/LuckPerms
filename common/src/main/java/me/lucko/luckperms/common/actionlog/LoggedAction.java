@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.DurationFormatter;
 
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.Context;
@@ -330,6 +331,8 @@ public class LoggedAction implements Action {
                         }
                         parts.add(context.getKey() + "=" + context.getValue());
                     }
+                } else if (o instanceof Duration) {
+                    parts.add(DurationFormatter.CONCISE.format((Duration) o));
                 } else {
                     parts.add(String.valueOf(o));
                 }
