@@ -107,4 +107,13 @@ public class TabCompleter {
         };
     }
 
+    static Predicate<String> containsIgnoreCase(String substring) {
+        return string -> {
+            if (string.length() < substring.length()) {
+                return false;
+            }
+            return string.toLowerCase().contains(substring.toLowerCase());
+        };
+    }
+
 }

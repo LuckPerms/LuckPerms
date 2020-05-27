@@ -49,6 +49,18 @@ public interface CompletionSupplier {
         return partial -> stringsSupplier.get().filter(TabCompleter.startsWithIgnoreCase(partial)).collect(Collectors.toList());
     }
 
+    static CompletionSupplier contains(String... strings) {
+        return contains(() -> Arrays.stream(strings));
+    }
+
+    static CompletionSupplier contains(Collection<String> strings) {
+        return contains(strings::stream);
+    }
+
+    static CompletionSupplier contains(Supplier<Stream<String>> stringsSupplier) {
+        return partial -> stringsSupplier.get().filter(TabCompleter.containsIgnoreCase(partial)).collect(Collectors.toList());
+    }
+
     List<String> supplyCompletions(String partial);
 
 }
