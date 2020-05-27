@@ -96,7 +96,7 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
 
         @Override
         public @NonNull Builder group(@NonNull String group) {
-            this.groupName = Objects.requireNonNull(group, "group");
+            this.groupName = Objects.requireNonNull(group, "group").toLowerCase();
             return this;
         }
 
