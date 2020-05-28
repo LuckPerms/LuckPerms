@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.model;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Multimap;
 
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -336,19 +335,23 @@ public final class NodeMap {
     void setContent(Iterable<? extends Node> set) {
         this.map.clear();
         this.inheritanceMap.clear();
-        for (Node n : set) {
-            add(n);
-        }
+        mergeContent(set);
     }
 
     void setContent(Stream<? extends Node> stream) {
         this.map.clear();
         this.inheritanceMap.clear();
-        stream.forEach(this::add);
+        mergeContent(stream);
     }
 
-    void setContent(Multimap<ImmutableContextSet, ? extends Node> multimap) {
-        setContent(multimap.values());
+    void mergeContent(Iterable<? extends Node> set) {
+        for (Node n : set) {
+            add(n);
+        }
+    }
+
+    void mergeContent(Stream<? extends Node> stream) {
+        stream.forEach(this::add);
     }
 
     boolean removeIf(Predicate<? super Node> predicate) {

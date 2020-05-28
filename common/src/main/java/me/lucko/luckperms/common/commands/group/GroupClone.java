@@ -74,7 +74,7 @@ public class GroupClone extends ChildCommand<Group> {
             return CommandResult.NO_PERMISSION;
         }
 
-        newGroup.replaceNodes(DataType.NORMAL, group.normalData().immutable());
+        newGroup.setNodes(DataType.NORMAL, group.normalData().immutable());
 
         Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
 

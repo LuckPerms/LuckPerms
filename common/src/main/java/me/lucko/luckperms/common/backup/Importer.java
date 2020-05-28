@@ -66,8 +66,9 @@ public class Importer implements Runnable {
     private final LuckPermsPlugin plugin;
     private final Set<Sender> notify;
     private final JsonObject data;
+    private final boolean merge;
 
-    public Importer(LuckPermsPlugin plugin, Sender executor, JsonObject data) {
+    public Importer(LuckPermsPlugin plugin, Sender executor, JsonObject data, boolean merge) {
         this.plugin = plugin;
 
         if (executor.isConsole()) {
@@ -76,6 +77,7 @@ public class Importer implements Runnable {
             this.notify = ImmutableSet.of(executor, plugin.getConsoleSender());
         }
         this.data = data;
+        this.merge = merge;
     }
 
     private static final class UserData {
@@ -92,7 +94,11 @@ public class Importer implements Runnable {
 
     private void processGroup(String groupName, Set<Node> nodes) {
         Group group = this.plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-        group.setNodes(DataType.NORMAL, nodes);
+        if (this.merge) {
+            group.mergeNodes(DataType.NORMAL, nodes);
+        } else {
+            group.setNodes(DataType.NORMAL, nodes);
+        }
         this.plugin.getStorage().saveGroup(group);
     }
 
@@ -107,7 +113,11 @@ public class Importer implements Runnable {
         if (userData.primaryGroup != null) {
             user.getPrimaryGroup().setStoredValue(userData.primaryGroup);
         }
-        user.setNodes(DataType.NORMAL, userData.nodes);
+        if (this.merge) {
+            user.mergeNodes(DataType.NORMAL, userData.nodes);
+        } else {
+            user.setNodes(DataType.NORMAL, userData.nodes);
+        }
         this.plugin.getStorage().saveUser(user).join();
         this.plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
     }

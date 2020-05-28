@@ -73,7 +73,7 @@ public class UserClone extends ChildCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        otherUser.replaceNodes(DataType.NORMAL, user.normalData().immutable());
+        otherUser.setNodes(DataType.NORMAL, user.normalData().immutable());
 
         Message.CLONE_SUCCESS.send(sender, user.getFormattedDisplayName(), otherUser.getFormattedDisplayName());
 

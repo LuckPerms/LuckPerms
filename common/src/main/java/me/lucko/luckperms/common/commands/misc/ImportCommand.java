@@ -53,7 +53,7 @@ public class ImportCommand extends SingleCommand {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public ImportCommand(LocaleManager locale) {
-        super(CommandSpec.IMPORT.localize(locale), "Import", CommandPermission.IMPORT, Predicates.not(1));
+        super(CommandSpec.IMPORT.localize(locale), "Import", CommandPermission.IMPORT, Predicates.notInRange(1, 2));
     }
 
     @Override
@@ -105,7 +105,7 @@ public class ImportCommand extends SingleCommand {
             return CommandResult.FAILURE;
         }
 
-        Importer importer = new Importer(plugin, sender, data);
+        Importer importer = new Importer(plugin, sender, data, args.contains("--merge"));
 
         // Run the importer in its own thread.
         plugin.getBootstrap().getScheduler().executeAsync(() -> {

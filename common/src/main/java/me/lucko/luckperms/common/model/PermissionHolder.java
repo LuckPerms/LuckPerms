@@ -253,8 +253,13 @@ public abstract class PermissionHolder {
         invalidateCache();
     }
 
-    public void replaceNodes(DataType type, Multimap<ImmutableContextSet, ? extends Node> multimap) {
-        getData(type).setContent(multimap);
+    public void setNodes(DataType type, Multimap<ImmutableContextSet, ? extends Node> multimap) {
+        getData(type).setContent(multimap.values());
+        invalidateCache();
+    }
+
+    public void mergeNodes(DataType type, Iterable<? extends Node> set) {
+        getData(type).mergeContent(set);
         invalidateCache();
     }
 

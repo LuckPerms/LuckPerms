@@ -89,12 +89,14 @@ public enum CommandSpec {
     NETWORK_SYNC("Sync changes with the storage and request that all other servers on the network do the same", "/%s networksync"),
     IMPORT("Imports data from a (previously created) export file", "/%s import <file>",
             Argument.list(
-                    Argument.create("file", true, "the file to import from")
+                    Argument.create("file", true, "the file to import from"),
+                    Argument.create("--merge", false, "merge import into existing data")
             )
     ),
     EXPORT("Exports all permissions data to an 'export' file. Can be re-imported at a later time.", "/%s export <file>",
             Argument.list(
-                    Argument.create("file", true, "the file to export to")
+                    Argument.create("file", true, "the file to export to"),
+                    Argument.create("--without-users", false, "exclude users from the export")
             )
     ),
     RELOAD_CONFIG("Reload some of the config options", "/%s reloadconfig"),
