@@ -144,7 +144,7 @@ public class PermissionInfo extends GenericChildCommand {
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
-        String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
+        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, id, holder.getType(), explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {

@@ -178,7 +178,7 @@ public class SearchCommand extends SingleCommand {
         ), TextUtils.AMPERSAND_CHAR));
 
         boolean explicitGlobalContext = !plugin.getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
-        String command = "/" + label + " " + NodeCommandFactory.generateCommand(perm.getNode(), holderName, holderType, false, explicitGlobalContext);
+        String command = "/" + label + " " + NodeCommandFactory.undoCommand(perm.getNode(), holderName, holderType, explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {
