@@ -60,7 +60,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class EditorCommand extends SingleCommand {
-    private static final int MAX_USERS = 1000;
+    public static final int MAX_USERS = 1000;
 
     public EditorCommand(LocaleManager locale) {
         super(CommandSpec.EDITOR.localize(locale), "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 2));
@@ -99,29 +99,34 @@ public class EditorCommand extends SingleCommand {
             tracks.addAll(plugin.getTrackManager().getAll().values());
         }
         if (type.includingUsers) {
-            Map<UUID, User> users;
+            // include all online players
+            Map<UUID, User> users = new LinkedHashMap<>(plugin.getUserManager().getAll());
 
             if (filter != null) {
-                // return users matching the filter
-                users = new LinkedHashMap<>();
                 ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.keyStartsWith(filter);
-                plugin.getStorage().searchUserNodes(matcher).join().stream()
-                        .map(NodeEntry::getHolder)
-                        .distinct()
-                        .sorted()
-                        .limit(MAX_USERS)
-                        .forEach(uuid -> {
-                            User user = plugin.getStorage().loadUser(uuid, null).join();
-                            if (user != null) {
-                                users.put(uuid, user);
-                            }
-                            plugin.getUserManager().getHouseKeeper().cleanup(uuid);
-                        });
-            } else {
-                // include all online players
-                users = new LinkedHashMap<>(plugin.getUserManager().getAll());
 
-                // then fill up with other users with permissions
+                // only include online players matching the permission
+                users.values().removeIf(user -> user.normalData().immutable().values().stream().noneMatch(matcher));
+
+                // fill up with other matching users
+                if (type.includingOffline && users.size() < MAX_USERS) {
+                    plugin.getStorage().searchUserNodes(matcher).join().stream()
+                            .map(NodeEntry::getHolder)
+                            .distinct()
+                            .filter(uuid -> !users.containsKey(uuid))
+                            .sorted()
+                            .limit(MAX_USERS - users.size())
+                            .forEach(uuid -> {
+                                User user = plugin.getStorage().loadUser(uuid, null).join();
+                                if (user != null) {
+                                    users.put(uuid, user);
+                                }
+                                plugin.getUserManager().getHouseKeeper().cleanup(uuid);
+                            });
+                }
+            } else {
+
+                // fill up with other users
                 if (type.includingOffline && users.size() < MAX_USERS) {
                     plugin.getStorage().getUniqueUsers().join().stream()
                             .filter(uuid -> !users.containsKey(uuid))
