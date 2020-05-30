@@ -39,12 +39,16 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
+import me.lucko.luckperms.common.node.matcher.StandardNodeMatchers;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.web.WebEditor;
 
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
@@ -58,7 +62,7 @@ public class EditorCommand extends SingleCommand {
     private static final int MAX_USERS = 1000;
 
     public EditorCommand(LocaleManager locale) {
-        super(CommandSpec.EDITOR.localize(locale), "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 1));
+        super(CommandSpec.EDITOR.localize(locale), "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 2));
     }
 
     @Override
@@ -74,6 +78,8 @@ public class EditorCommand extends SingleCommand {
                 // ignored
             }
         }
+
+        String filter = ArgumentParser.parseStringOrElse(1, args, null);
 
         // run a sync task
         plugin.getSyncTaskBuffer().requestDirectly();
@@ -92,15 +98,17 @@ public class EditorCommand extends SingleCommand {
             tracks.addAll(plugin.getTrackManager().getAll().values());
         }
         if (type.includingUsers) {
-            // include all online players
-            Map<UUID, User> users = new LinkedHashMap<>(plugin.getUserManager().getAll());
+            Map<UUID, User> users;
 
-            // then fill up with other users with permissions
-            if (type.includingOffline && users.size() < MAX_USERS) {
-                plugin.getStorage().getUniqueUsers().join().stream()
-                        .filter(uuid -> !users.containsKey(uuid))
+            if (filter != null) {
+                // return users matching the filter
+                users = new LinkedHashMap<>();
+                ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.keyStartsWith(filter);
+                plugin.getStorage().searchUserNodes(matcher).join().stream()
+                        .map(NodeEntry::getHolder)
+                        .distinct()
                         .sorted()
-                        .limit(MAX_USERS - users.size())
+                        .limit(MAX_USERS)
                         .forEach(uuid -> {
                             User user = plugin.getStorage().loadUser(uuid, null).join();
                             if (user != null) {
@@ -108,12 +116,29 @@ public class EditorCommand extends SingleCommand {
                             }
                             plugin.getUserManager().getHouseKeeper().cleanup(uuid);
                         });
+            } else {
+                // include all online players
+                users = new LinkedHashMap<>(plugin.getUserManager().getAll());
+
+                // then fill up with other users with permissions
+                if (type.includingOffline && users.size() < MAX_USERS) {
+                    plugin.getStorage().getUniqueUsers().join().stream()
+                            .filter(uuid -> !users.containsKey(uuid))
+                            .sorted()
+                            .limit(MAX_USERS - users.size())
+                            .forEach(uuid -> {
+                                User user = plugin.getStorage().loadUser(uuid, null).join();
+                                if (user != null) {
+                                    users.put(uuid, user);
+                                }
+                                plugin.getUserManager().getHouseKeeper().cleanup(uuid);
+                            });
+                }
             }
 
             users.values().stream()
                     .sorted(Comparator
-                            .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL))
-                            .reversed()
+                            .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL)).reversed()
                             .thenComparing(User::getFormattedDisplayName, String.CASE_INSENSITIVE_ORDER)
                     )
                     .forEach(holders::add);

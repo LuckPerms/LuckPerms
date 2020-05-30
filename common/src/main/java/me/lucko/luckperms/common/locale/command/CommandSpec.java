@@ -58,7 +58,8 @@ public enum CommandSpec {
     INFO("Prints general information about the active plugin instance.", "/%s info"),
     EDITOR("Creates a new web editor session", "/%s editor [type]",
             Argument.list(
-                    Argument.create("type", false, "the types to load into the editor. ('all', 'users' or 'groups')")
+                    Argument.create("type", false, "the types to load into the editor. ('all', 'users' or 'groups')"),
+                    Argument.create("filter", false, "permission to filter user entries by")
             )
     ),
     DEBUG("Produces a set of internal debugging output", "/%s debug"),
