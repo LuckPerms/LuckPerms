@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -169,7 +170,7 @@ public class ApplyEditsCommand extends SingleCommand {
             }
         }
 
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), holder)) {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), holder) || ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSetImpl.EMPTY)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return false;
         }
@@ -221,6 +222,11 @@ public class ApplyEditsCommand extends SingleCommand {
         Track track = plugin.getStorage().loadTrack(id).join().orElse(null);
         if (track == null) {
             track = plugin.getStorage().createAndLoadTrack(id, CreationCause.WEB_EDITOR).join();
+        }
+
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), track)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return false;
         }
 
         List<String> before = track.getGroups();
@@ -279,6 +285,11 @@ public class ApplyEditsCommand extends SingleCommand {
             return false;
         }
 
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), group) || ArgumentPermissions.checkGroup(plugin, sender, group, ImmutableContextSetImpl.EMPTY)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return false;
+        }
+
         try {
             plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
         } catch (Exception e) {
@@ -301,6 +312,11 @@ public class ApplyEditsCommand extends SingleCommand {
 
         Track track = plugin.getStorage().loadTrack(trackName).join().orElse(null);
         if (track == null) {
+            return false;
+        }
+
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), track)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
             return false;
         }
 
