@@ -69,18 +69,22 @@ public class EditorCommand extends SingleCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Type type = Type.ALL;
+        String filter = null;
 
-        // parse type
-        String typeString = ArgumentParser.parseStringOrElse(0, args, null);
-        if (typeString != null) {
+        // attempt to parse type
+        String arg0 = ArgumentParser.parseStringOrElse(0, args, null);
+        if (arg0 != null) {
             try {
-                type = Type.valueOf(typeString.toUpperCase());
+                type = Type.valueOf(arg0.toUpperCase());
             } catch (IllegalArgumentException e) {
-                // ignored
+                // assume they meant it as a filter
+                filter = arg0;
+            }
+
+            if (filter == null) {
+                filter = ArgumentParser.parseStringOrElse(1, args, null);
             }
         }
-
-        String filter = ArgumentParser.parseStringOrElse(1, args, null);
 
         // run a sync task
         plugin.getSyncTaskBuffer().requestDirectly();
