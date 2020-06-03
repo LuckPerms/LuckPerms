@@ -35,6 +35,7 @@ import org.spongepowered.api.service.permission.Subject;
  */
 public interface ProxiedSubject extends Subject, ProxiedServiceObject {
 
+    @Override
     @NonNull LPSubjectReference asSubjectReference();
 
     @NonNull QueryOptions getQueryOptions();

@@ -287,7 +287,7 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     private static boolean checkIncompatibleVersion() {
         try {
-            Class<?> aClass = Class.forName("com.google.gson.internal.bind.TreeTypeAdapter");
+            Class.forName("com.google.gson.internal.bind.TreeTypeAdapter");
             return false;
         } catch (ClassNotFoundException e) {
             return true;

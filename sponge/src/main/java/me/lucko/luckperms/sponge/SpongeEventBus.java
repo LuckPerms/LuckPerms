@@ -29,9 +29,6 @@ import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 
 public class SpongeEventBus extends AbstractEventBus<PluginContainer> {
@@ -55,17 +52,6 @@ public class SpongeEventBus extends AbstractEventBus<PluginContainer> {
         }
 
         throw new IllegalArgumentException("Object " + plugin + " (" + plugin.getClass().getName() + ") is not a plugin.");
-    }
-
-    @Listener
-    public void onReload(GameReloadEvent e) {
-        // sponge doesn't really support unloading of plugins at runtime.
-        // this probably won't ever work/be useful, but I suppose it's worth a try.
-        PluginContainer pluginContainer = e.getContext().get(EventContextKeys.PLUGIN).orElse(null);
-        if (pluginContainer == null) {
-            return;
-        }
-        unregisterHandlers(pluginContainer);
     }
 
 }

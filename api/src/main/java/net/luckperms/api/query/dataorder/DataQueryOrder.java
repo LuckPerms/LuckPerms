@@ -60,10 +60,7 @@ public enum DataQueryOrder implements Comparator<DataType> {
             if (o1 == o2) {
                 return 0;
             }
-            return Boolean.compare(
-                    o1 == DataType.TRANSIENT,
-                    o2 == DataType.TRANSIENT
-            );
+            return o1 == DataType.TRANSIENT ? 1 : -1;
         }
     },
 
@@ -76,10 +73,7 @@ public enum DataQueryOrder implements Comparator<DataType> {
             if (o1 == o2) {
                 return 0;
             }
-            return -Boolean.compare(
-                    o1 == DataType.TRANSIENT,
-                    o2 == DataType.TRANSIENT
-            );
+            return o1 == DataType.TRANSIENT ? -1 : 1;
         }
     };
 

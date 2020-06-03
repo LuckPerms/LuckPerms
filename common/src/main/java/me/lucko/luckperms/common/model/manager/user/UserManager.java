@@ -45,14 +45,6 @@ public interface UserManager<T extends User> extends Manager<UUID, User, T> {
     T getByUsername(String name);
 
     /**
-     * Get a user object by uuid
-     *
-     * @param uuid The uuid to search by
-     * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
-     */
-    T getIfLoaded(UUID uuid);
-
-    /**
      * Gives the user the default group if necessary.
      *
      * @param user the user to give to

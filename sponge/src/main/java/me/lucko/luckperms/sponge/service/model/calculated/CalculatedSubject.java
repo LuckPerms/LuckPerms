@@ -61,7 +61,10 @@ public abstract class CalculatedSubject implements LPSubject {
         return this.plugin.getService().getDefaultSubjects().getTypeDefaults(getParentCollection().getIdentifier());
     }
 
+    @Override
     public abstract CalculatedSubjectData getSubjectData();
+
+    @Override
     public abstract CalculatedSubjectData getTransientSubjectData();
 
     public Map<String, Boolean> getCombinedPermissions(QueryOptions filter) {

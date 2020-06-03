@@ -68,24 +68,28 @@ public class MetaCache extends SimpleMetaCache implements CachedMetaData {
         }
     }
 
+    @Override
     public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
         String value = super.getMetaValue(key, origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), key, String.valueOf(value));
         return value;
     }
 
+    @Override
     public String getPrefix(MetaCheckEvent.Origin origin) {
         String value = super.getPrefix(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), Prefix.NODE_KEY, String.valueOf(value));
         return value;
     }
 
+    @Override
     public String getSuffix(MetaCheckEvent.Origin origin) {
         String value = super.getSuffix(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), Suffix.NODE_KEY, String.valueOf(value));
         return value;
     }
 
+    @Override
     public Map<String, List<String>> getMeta(MetaCheckEvent.Origin origin) {
         return new MonitoredMetaMap(super.getMeta(origin), origin);
     }
@@ -97,6 +101,7 @@ public class MetaCache extends SimpleMetaCache implements CachedMetaData {
         return value;
     }
 
+    @Override
     public @Nullable String getPrimaryGroup(MetaCheckEvent.Origin origin) {
         String value = super.getPrimaryGroup(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), "primarygroup", String.valueOf(value));

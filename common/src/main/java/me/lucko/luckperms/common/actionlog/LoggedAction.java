@@ -250,36 +250,43 @@ public class LoggedAction implements Action {
         private Target.Type targetType = null;
         private String description = null;
 
+        @Override
         public @NonNull Builder timestamp(@NonNull Instant timestamp) {
             this.timestamp = timestamp.getEpochSecond();
             return this;
         }
 
+        @Override
         public @NonNull Builder source(@NonNull UUID source) {
             this.sourceUniqueId = Objects.requireNonNull(source, "source");
             return this;
         }
 
+        @Override
         public @NonNull Builder sourceName(@NonNull String sourceName) {
             this.sourceName = Objects.requireNonNull(sourceName, "sourceName");
             return this;
         }
 
+        @Override
         public @NonNull Builder targetType(Action.Target.Type type) {
             this.targetType = Objects.requireNonNull(type, "type");
             return this;
         }
 
+        @Override
         public @NonNull Builder target(UUID target) {
             this.targetUniqueId = target; // nullable
             return this;
         }
 
+        @Override
         public @NonNull Builder targetName(@NonNull String targetName) {
             this.targetName = Objects.requireNonNull(targetName, "targetName");
             return this;
         }
 
+        @Override
         public @NonNull Builder description(@NonNull String description) {
             this.description = Objects.requireNonNull(description, "description");
             return this;
