@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.InvalidFilterException;
 import me.lucko.luckperms.common.verbose.VerboseFilter;
+import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.VerboseListener;
 import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
@@ -50,10 +51,8 @@ import net.kyori.text.format.TextColor;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.concurrent.Executor;
 
 public class VerboseCommand extends SingleCommand {
     public VerboseCommand(LocaleManager locale) {
@@ -67,7 +66,31 @@ public class VerboseCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
+        VerboseHandler verboseHandler = plugin.getVerboseHandler();
         String mode = args.get(0).toLowerCase();
+
+        if (mode.equals("command") || mode.equals("cmd")) {
+            if (args.size() == 1) {
+                sendDetailedUsage(sender, label);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            String commandWithSlash = String.join(" ", args.subList(1, args.size()));
+            String command = commandWithSlash.charAt(0) == '/' ? commandWithSlash.substring(1) : commandWithSlash;
+
+            Executor syncExecutor = plugin.getBootstrap().getScheduler().sync();
+            syncExecutor.execute(() -> {
+                Message.VERBOSE_ON_COMMAND.send(sender, sender.getName(), command);
+
+                verboseHandler.registerListener(sender, VerboseFilter.acceptAll(), true);
+                sender.performCommand(command);
+                verboseHandler.unregisterListener(sender);
+
+                Message.VERBOSE_OFF_COMMAND.send(sender);
+            });
+
+            return CommandResult.SUCCESS;
+        }
 
         if (mode.equals("on") || mode.equals("true") || mode.equals("record")) {
             List<String> filters = new ArrayList<>();
@@ -79,7 +102,7 @@ public class VerboseCommand extends SingleCommand {
 
             VerboseFilter compiledFilter;
             try {
-                compiledFilter = new VerboseFilter(filter);
+                compiledFilter = VerboseFilter.compile(filter);
             } catch (InvalidFilterException e) {
                 Message.VERBOSE_INVALID_FILTER.send(sender, filter, e.getCause().getMessage());
                 return CommandResult.FAILURE;
@@ -87,7 +110,7 @@ public class VerboseCommand extends SingleCommand {
 
             boolean notify = !mode.equals("record");
 
-            plugin.getVerboseHandler().registerListener(sender, compiledFilter, notify);
+            verboseHandler.registerListener(sender, compiledFilter, notify);
 
             if (notify) {
                 if (!filter.equals("")) {
@@ -107,7 +130,7 @@ public class VerboseCommand extends SingleCommand {
         }
 
         if (mode.equals("off") || mode.equals("false") || mode.equals("paste") || mode.equals("upload")) {
-            VerboseListener listener = plugin.getVerboseHandler().unregisterListener(sender.getUniqueId());
+            VerboseListener listener = verboseHandler.unregisterListener(sender);
 
             if (mode.equals("paste") || mode.equals("upload")) {
                 if (listener == null) {
@@ -152,14 +175,8 @@ public class VerboseCommand extends SingleCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        if (args.isEmpty()) {
-            return ImmutableList.of("on", "record", "off", "upload");
-        }
-
-        if (args.size() == 1) {
-            return Stream.of("on", "record", "off", "upload").filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
-        }
-
-        return Collections.emptyList();
+        return TabCompleter.create()
+                .at(0, CompletionSupplier.startsWith("on", "record", "off", "upload", "command"))
+                .complete(args);
     }
 }

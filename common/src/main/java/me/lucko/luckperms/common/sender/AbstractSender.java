@@ -45,13 +45,13 @@ public final class AbstractSender<T> implements Sender {
     private static final Splitter NEW_LINE_SPLITTER = Splitter.on("\n");
 
     private final LuckPermsPlugin platform;
-    private final SenderFactory<T> factory;
+    private final SenderFactory<?, T> factory;
     private final WeakReference<T> sender;
 
     private final UUID uniqueId;
     private final String name;
 
-    AbstractSender(LuckPermsPlugin platform, SenderFactory<T> factory, T t) {
+    AbstractSender(LuckPermsPlugin platform, SenderFactory<?, T> factory, T t) {
         this.platform = platform;
         this.factory = factory;
         this.sender = new WeakReference<>(t);
@@ -123,6 +123,14 @@ public final class AbstractSender<T> implements Sender {
         }
 
         return isConsole();
+    }
+
+    @Override
+    public void performCommand(String commandLine) {
+        T sender = this.sender.get();
+        if (sender != null) {
+            this.factory.performCommand(sender, commandLine);
+        }
     }
 
     @Override

@@ -16,6 +16,9 @@ luckperms {
     record {
       filter brigadier:string greedy_phrase;
     }
+    command {
+      command brigadier:string greedy_phrase;
+    }
   }
   tree {
     scope brigadier:string single_word {

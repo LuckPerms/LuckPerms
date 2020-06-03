@@ -97,6 +97,18 @@ public interface Sender {
     }
 
     /**
+     * Gets the name used to identify this sender in verbose events.
+     *
+     * @return the verbose check target name
+     */
+    default String getVerboseCheckTarget() {
+        if (isConsole()) {
+            return "internal/console";
+        }
+        return getName();
+    }
+
+    /**
      * Gets the sender's unique id.
      *
      * <p>See {@link #CONSOLE_UUID} for the console's UUID representation.</p>
@@ -146,6 +158,13 @@ public interface Sender {
     default boolean hasPermission(CommandPermission permission) {
         return hasPermission(permission.getPermission());
     }
+
+    /**
+     * Makes the sender perform a command.
+     *
+     * @param commandLine the command
+     */
+    void performCommand(String commandLine);
 
     /**
      * Gets whether this sender is the console

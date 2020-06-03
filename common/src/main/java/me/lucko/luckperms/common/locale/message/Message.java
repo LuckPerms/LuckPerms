@@ -131,7 +131,9 @@ public enum Message {
     VERBOSE_INVALID_FILTER("&4{}&c is not a valid verbose filter. &7({})", true),
     VERBOSE_ON("&bVerbose logging &aenabled &bfor checks matching &aANY&b.", true),
     VERBOSE_ON_QUERY("&bVerbose logging &aenabled &bfor checks matching &a{}&b.", true),
+    VERBOSE_ON_COMMAND("&bForcing &a{}&b to execute command &a/{}&b and reporting all checks made...", true),
     VERBOSE_OFF("&bVerbose logging &cdisabled&b.", true),
+    VERBOSE_OFF_COMMAND("&bCommand execution complete.", true),
 
     VERBOSE_RECORDING_ON("&bVerbose recording &aenabled &bfor checks matching &aANY&b.", true),
     VERBOSE_RECORDING_ON_QUERY("&bVerbose recording &aenabled &bfor checks matching &a{}&b.", true),

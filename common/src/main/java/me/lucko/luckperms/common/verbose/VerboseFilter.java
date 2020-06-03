@@ -41,7 +41,15 @@ public final class VerboseFilter {
     private final String expression;
     private final AST ast;
 
-    public VerboseFilter(String expression) throws InvalidFilterException {
+    public static VerboseFilter acceptAll() {
+        return new VerboseFilter();
+    }
+
+    public static VerboseFilter compile(String expression) throws InvalidFilterException {
+        return new VerboseFilter(expression);
+    }
+
+    private VerboseFilter(String expression) throws InvalidFilterException {
         this.expression = expression;
         if (expression.isEmpty()) {
             this.ast = AST.ALWAYS_TRUE;
@@ -52,6 +60,11 @@ public final class VerboseFilter {
                 throw new InvalidFilterException("Exception occurred whilst generating an expression for '" + expression + "'", e);
             }
         }
+    }
+
+    private VerboseFilter() {
+        this.expression = "";
+        this.ast = AST.ALWAYS_TRUE;
     }
 
     /**

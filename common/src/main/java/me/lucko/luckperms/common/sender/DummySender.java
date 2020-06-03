@@ -68,6 +68,11 @@ public abstract class DummySender implements Sender {
     }
 
     @Override
+    public void performCommand(String commandLine) {
+
+    }
+
+    @Override
     public LuckPermsPlugin getPlugin() {
         return this.platform;
     }
