@@ -42,29 +42,24 @@ public final class VerboseFilter {
     private final AST ast;
 
     public static VerboseFilter acceptAll() {
-        return new VerboseFilter();
+        return new VerboseFilter("", AST.ALWAYS_TRUE);
     }
 
     public static VerboseFilter compile(String expression) throws InvalidFilterException {
-        return new VerboseFilter(expression);
-    }
-
-    private VerboseFilter(String expression) throws InvalidFilterException {
-        this.expression = expression;
         if (expression.isEmpty()) {
-            this.ast = AST.ALWAYS_TRUE;
-        } else {
-            try {
-                this.ast = BooleanExpressionCompiler.compile(expression);
-            } catch (LexerException | ParserException e) {
-                throw new InvalidFilterException("Exception occurred whilst generating an expression for '" + expression + "'", e);
-            }
+            return acceptAll();
+        }
+
+        try {
+            return new VerboseFilter(expression, BooleanExpressionCompiler.compile(expression));
+        } catch (LexerException | ParserException e) {
+            throw new InvalidFilterException("Exception occurred whilst generating an expression for '" + expression + "'", e);
         }
     }
 
-    private VerboseFilter() {
-        this.expression = "";
-        this.ast = AST.ALWAYS_TRUE;
+    private VerboseFilter(String expression, AST ast) {
+        this.expression = expression;
+        this.ast = ast;
     }
 
     /**

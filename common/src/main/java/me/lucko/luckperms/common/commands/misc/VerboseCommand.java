@@ -74,24 +74,25 @@ public class VerboseCommand extends SingleCommand {
                 return CommandResult.INVALID_ARGS;
             }
 
-            String executorName = args.get(1);
+            String name = args.get(1);
             Sender executor;
 
-            if (executorName.equalsIgnoreCase("me") || executorName.equalsIgnoreCase(sender.getName())) {
+            if (name.equals("me") || name.equals("self") || name.equalsIgnoreCase(sender.getName())) {
                 executor = sender;
             } else {
-                if (!CommandPermission.VERBOSE_COMMAND_OTHER.isAuthorized(sender)) {
+                if (!CommandPermission.VERBOSE_COMMAND_OTHERS.isAuthorized(sender)) {
                     Message.COMMAND_NO_PERMISSION.send(sender);
                     return CommandResult.NO_PERMISSION;
                 }
 
                 executor = plugin.getOnlineSenders()
-                        .filter(s -> s.getName().equalsIgnoreCase(executorName))
+                        .filter(s -> !s.isConsole())
+                        .filter(s -> s.getName().equalsIgnoreCase(name))
                         .findAny()
                         .orElse(null);
 
                 if (executor == null) {
-                    Message.USER_NOT_ONLINE.send(sender, executorName);
+                    Message.USER_NOT_ONLINE.send(sender, name);
                     return CommandResult.STATE_ERROR;
                 }
             }
