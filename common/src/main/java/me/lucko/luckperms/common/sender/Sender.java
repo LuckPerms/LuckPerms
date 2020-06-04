@@ -97,18 +97,6 @@ public interface Sender {
     }
 
     /**
-     * Gets the name used to identify this sender in verbose events.
-     *
-     * @return the verbose check target name
-     */
-    default String getVerboseCheckTarget() {
-        if (isConsole()) {
-            return "internal/console";
-        }
-        return getName();
-    }
-
-    /**
      * Gets the sender's unique id.
      *
      * <p>See {@link #CONSOLE_UUID} for the console's UUID representation.</p>

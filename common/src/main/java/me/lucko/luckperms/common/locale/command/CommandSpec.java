@@ -66,7 +66,8 @@ public enum CommandSpec {
     VERBOSE("Controls the plugins verbose permission check monitoring system.", "/%s verbose <on|record|off|upload> [filter]",
             Argument.list(
                     Argument.create("on|record|off|upload|command", true, "whether to enable/disable logging, or to upload the logged output"),
-                    Argument.create("filter", false, "the filter to match entries against")
+                    Argument.create("filter", false, "the filter to match entries against"),
+                    Argument.create("<me|player> <command>", false, "the player/command to run")
             )
     ),
     TREE("Generates a tree view (ordered list hierarchy) of all permissions known to LuckPerms.", "/%s tree [scope] [player]",

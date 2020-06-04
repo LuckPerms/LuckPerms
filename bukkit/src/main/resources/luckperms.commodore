@@ -17,7 +17,9 @@ luckperms {
       filter brigadier:string greedy_phrase;
     }
     command {
-      command brigadier:string greedy_phrase;
+      player brigadier:string single_word {
+        command brigadier:string greedy_phrase;
+      }
     }
   }
   tree {

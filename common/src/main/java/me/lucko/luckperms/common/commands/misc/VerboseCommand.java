@@ -52,7 +52,6 @@ import net.kyori.text.format.TextColor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 public class VerboseCommand extends SingleCommand {
     public VerboseCommand(LocaleManager locale) {
@@ -70,20 +69,41 @@ public class VerboseCommand extends SingleCommand {
         String mode = args.get(0).toLowerCase();
 
         if (mode.equals("command") || mode.equals("cmd")) {
-            if (args.size() == 1) {
+            if (args.size() < 3) {
                 sendDetailedUsage(sender, label);
                 return CommandResult.INVALID_ARGS;
             }
 
-            String commandWithSlash = String.join(" ", args.subList(1, args.size()));
+            String executorName = args.get(1);
+            Sender executor;
+
+            if (executorName.equalsIgnoreCase("me") || executorName.equalsIgnoreCase(sender.getName())) {
+                executor = sender;
+            } else {
+                if (!CommandPermission.VERBOSE_COMMAND_OTHER.isAuthorized(sender)) {
+                    Message.COMMAND_NO_PERMISSION.send(sender);
+                    return CommandResult.NO_PERMISSION;
+                }
+
+                executor = plugin.getOnlineSenders()
+                        .filter(s -> s.getName().equalsIgnoreCase(executorName))
+                        .findAny()
+                        .orElse(null);
+
+                if (executor == null) {
+                    Message.USER_NOT_ONLINE.send(sender, executorName);
+                    return CommandResult.STATE_ERROR;
+                }
+            }
+
+            String commandWithSlash = String.join(" ", args.subList(2, args.size()));
             String command = commandWithSlash.charAt(0) == '/' ? commandWithSlash.substring(1) : commandWithSlash;
 
-            Executor syncExecutor = plugin.getBootstrap().getScheduler().sync();
-            syncExecutor.execute(() -> {
-                Message.VERBOSE_ON_COMMAND.send(sender, sender.getName(), command);
+            plugin.getBootstrap().getScheduler().sync().execute(() -> {
+                Message.VERBOSE_ON_COMMAND.send(sender, executor.getName(), command);
 
                 verboseHandler.registerListener(sender, VerboseFilter.acceptAll(), true);
-                sender.performCommand(command);
+                executor.performCommand(command);
                 verboseHandler.unregisterListener(sender);
 
                 Message.VERBOSE_OFF_COMMAND.send(sender);
