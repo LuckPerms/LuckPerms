@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -55,16 +56,31 @@ import net.luckperms.api.node.ChatMetaType;
 import java.util.List;
 
 public class MetaAddChatMeta extends GenericChildCommand {
+
+    public static MetaAddChatMeta forPrefix(LocaleManager locale) {
+        return new MetaAddChatMeta(
+                ChatMetaType.PREFIX,
+                CommandSpec.META_ADDPREFIX.localize(locale),
+                "addprefix",
+                CommandPermission.USER_META_ADD_PREFIX,
+                CommandPermission.GROUP_META_ADD_PREFIX
+        );
+    }
+
+    public static MetaAddChatMeta forSuffix(LocaleManager locale) {
+        return new MetaAddChatMeta(
+                ChatMetaType.SUFFIX,
+                CommandSpec.META_ADDSUFFIX.localize(locale),
+                "addsuffix",
+                CommandPermission.USER_META_ADD_SUFFIX,
+                CommandPermission.GROUP_META_ADD_SUFFIX
+        );
+    }
+
     private final ChatMetaType type;
 
-    public MetaAddChatMeta(LocaleManager locale, ChatMetaType type) {
-        super(
-                type == ChatMetaType.PREFIX ? CommandSpec.META_ADDPREFIX.localize(locale) : CommandSpec.META_ADDSUFFIX.localize(locale),
-                "add" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADD_PREFIX : CommandPermission.USER_META_ADD_SUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADD_PREFIX : CommandPermission.GROUP_META_ADD_SUFFIX,
-                Predicates.inRange(0, 1)
-        );
+    private MetaAddChatMeta(ChatMetaType type, LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
+        super(spec, name, userPermission, groupPermission, Predicates.inRange(0, 1));
         this.type = type;
     }
 

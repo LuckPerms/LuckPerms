@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -59,16 +60,31 @@ import java.util.List;
 import java.util.OptionalInt;
 
 public class MetaSetChatMeta extends GenericChildCommand {
+
+    public static MetaSetChatMeta forPrefix(LocaleManager locale) {
+        return new MetaSetChatMeta(
+                ChatMetaType.PREFIX,
+                CommandSpec.META_SETPREFIX.localize(locale),
+                "setprefix",
+                CommandPermission.USER_META_SET_PREFIX,
+                CommandPermission.GROUP_META_SET_PREFIX
+        );
+    }
+
+    public static MetaSetChatMeta forSuffix(LocaleManager locale) {
+        return new MetaSetChatMeta(
+                ChatMetaType.SUFFIX,
+                CommandSpec.META_SETSUFFIX.localize(locale),
+                "setsuffix",
+                CommandPermission.USER_META_SET_SUFFIX,
+                CommandPermission.GROUP_META_SET_SUFFIX
+        );
+    }
+
     private final ChatMetaType type;
 
-    public MetaSetChatMeta(LocaleManager locale, ChatMetaType type) {
-        super(
-                type == ChatMetaType.PREFIX ? CommandSpec.META_SETPREFIX.localize(locale) : CommandSpec.META_SETSUFFIX.localize(locale),
-                "set" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_SET_PREFIX : CommandPermission.USER_META_SET_SUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_SET_PREFIX : CommandPermission.GROUP_META_SET_SUFFIX,
-                Predicates.is(0)
-        );
+    private MetaSetChatMeta(ChatMetaType type, LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
+        super(spec, name, userPermission, groupPermission, Predicates.is(0));
         this.type = type;
     }
 

@@ -34,8 +34,6 @@ import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 
-import net.luckperms.api.node.ChatMetaType;
-
 public class CommandMeta<T extends PermissionHolder> extends GenericParentCommand<T> {
     public CommandMeta(LocaleManager locale, HolderType type) {
         super(CommandSpec.META.localize(locale), "Meta", type, ImmutableList.<GenericChildCommand>builder()
@@ -44,18 +42,18 @@ public class CommandMeta<T extends PermissionHolder> extends GenericParentComman
                 .add(new MetaUnset(locale))
                 .add(new MetaSetTemp(locale))
                 .add(new MetaUnsetTemp(locale))
-                .add(new MetaAddChatMeta(locale, ChatMetaType.PREFIX))
-                .add(new MetaAddChatMeta(locale, ChatMetaType.SUFFIX))
-                .add(new MetaSetChatMeta(locale, ChatMetaType.PREFIX))
-                .add(new MetaSetChatMeta(locale, ChatMetaType.SUFFIX))
-                .add(new MetaRemoveChatMeta(locale, ChatMetaType.PREFIX))
-                .add(new MetaRemoveChatMeta(locale, ChatMetaType.SUFFIX))
-                .add(new MetaAddTempChatMeta(locale, ChatMetaType.PREFIX))
-                .add(new MetaAddTempChatMeta(locale, ChatMetaType.SUFFIX))
-                .add(new MetaSetTempChatMeta(locale, ChatMetaType.PREFIX))
-                .add(new MetaSetTempChatMeta(locale, ChatMetaType.SUFFIX))
-                .add(new MetaRemoveTempChatMeta(locale, ChatMetaType.PREFIX))
-                .add(new MetaRemoveTempChatMeta(locale, ChatMetaType.SUFFIX))
+                .add(MetaAddChatMeta.forPrefix(locale))
+                .add(MetaAddChatMeta.forSuffix(locale))
+                .add(MetaSetChatMeta.forPrefix(locale))
+                .add(MetaSetChatMeta.forSuffix(locale))
+                .add(MetaRemoveChatMeta.forPrefix(locale))
+                .add(MetaRemoveChatMeta.forSuffix(locale))
+                .add(MetaAddTempChatMeta.forPrefix(locale))
+                .add(MetaAddTempChatMeta.forSuffix(locale))
+                .add(MetaSetTempChatMeta.forPrefix(locale))
+                .add(MetaSetTempChatMeta.forSuffix(locale))
+                .add(MetaRemoveTempChatMeta.forPrefix(locale))
+                .add(MetaRemoveTempChatMeta.forSuffix(locale))
                 .add(new MetaClear(locale))
                 .build());
     }

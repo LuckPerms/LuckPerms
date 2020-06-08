@@ -68,11 +68,6 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public class MetaInfo extends GenericChildCommand {
-    private static String processLocation(Node node, PermissionHolder holder) {
-        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName();
-        return location.equalsIgnoreCase(holder.getObjectName()) ? "self" : location;
-    }
-
     public MetaInfo(LocaleManager locale) {
         super(CommandSpec.META_INFO.localize(locale), "info", CommandPermission.USER_META_INFO, CommandPermission.GROUP_META_INFO, Predicates.alwaysFalse());
     }
@@ -127,6 +122,11 @@ public class MetaInfo extends GenericChildCommand {
         }
 
         return CommandResult.SUCCESS;
+    }
+
+    private static String processLocation(Node node, PermissionHolder holder) {
+        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName();
+        return location.equalsIgnoreCase(holder.getObjectName()) ? "self" : location;
     }
 
     private static void sendMetaMessage(Set<MetaNode> meta, Sender sender, PermissionHolder holder, String label) {

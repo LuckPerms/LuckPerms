@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -55,16 +56,31 @@ import net.luckperms.api.node.ChatMetaType;
 import java.util.List;
 
 public class MetaRemoveChatMeta extends GenericChildCommand {
+
+    public static MetaRemoveChatMeta forPrefix(LocaleManager locale) {
+        return new MetaRemoveChatMeta(
+                ChatMetaType.PREFIX,
+                CommandSpec.META_REMOVEPREFIX.localize(locale),
+                "removeprefix",
+                CommandPermission.USER_META_REMOVE_PREFIX,
+                CommandPermission.GROUP_META_REMOVE_PREFIX
+        );
+    }
+
+    public static MetaRemoveChatMeta forSuffix(LocaleManager locale) {
+        return new MetaRemoveChatMeta(
+                ChatMetaType.SUFFIX,
+                CommandSpec.META_REMOVESUFFIX.localize(locale),
+                "removesuffix",
+                CommandPermission.USER_META_REMOVE_SUFFIX,
+                CommandPermission.GROUP_META_REMOVE_SUFFIX
+        );
+    }
+
     private final ChatMetaType type;
 
-    public MetaRemoveChatMeta(LocaleManager locale, ChatMetaType type) {
-        super(
-                type == ChatMetaType.PREFIX ? CommandSpec.META_REMOVEPREFIX.localize(locale) : CommandSpec.META_REMOVESUFFIX.localize(locale),
-                "remove" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_REMOVE_PREFIX : CommandPermission.USER_META_REMOVE_SUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_REMOVE_PREFIX : CommandPermission.GROUP_META_REMOVE_SUFFIX,
-                Predicates.is(0)
-        );
+    private MetaRemoveChatMeta(ChatMetaType type, LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
+        super(spec, name, userPermission, groupPermission, Predicates.is(0));
         this.type = type;
     }
 

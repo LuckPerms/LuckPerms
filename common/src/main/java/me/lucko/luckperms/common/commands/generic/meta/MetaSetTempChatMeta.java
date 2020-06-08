@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -63,16 +64,31 @@ import java.util.List;
 import java.util.OptionalInt;
 
 public class MetaSetTempChatMeta extends GenericChildCommand {
+
+    public static MetaSetTempChatMeta forPrefix(LocaleManager locale) {
+        return new MetaSetTempChatMeta(
+                ChatMetaType.PREFIX,
+                CommandSpec.META_SETTEMP_PREFIX.localize(locale),
+                "settempprefix",
+                CommandPermission.USER_META_SET_TEMP_PREFIX,
+                CommandPermission.GROUP_META_SET_TEMP_PREFIX
+        );
+    }
+
+    public static MetaSetTempChatMeta forSuffix(LocaleManager locale) {
+        return new MetaSetTempChatMeta(
+                ChatMetaType.SUFFIX,
+                CommandSpec.META_SETTEMP_SUFFIX.localize(locale),
+                "settempsuffix",
+                CommandPermission.USER_META_SET_TEMP_SUFFIX,
+                CommandPermission.GROUP_META_SET_TEMP_SUFFIX
+        );
+    }
+
     private final ChatMetaType type;
 
-    public MetaSetTempChatMeta(LocaleManager locale, ChatMetaType type) {
-        super(
-                type == ChatMetaType.PREFIX ? CommandSpec.META_SETTEMP_PREFIX.localize(locale) : CommandSpec.META_SETTEMP_SUFFIX.localize(locale),
-                "settemp" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_SET_TEMP_PREFIX : CommandPermission.USER_META_SET_TEMP_SUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_SET_TEMP_PREFIX : CommandPermission.GROUP_META_SET_TEMP_SUFFIX,
-                Predicates.inRange(0, 1)
-        );
+    private MetaSetTempChatMeta(ChatMetaType type, LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
+        super(spec, name, userPermission, groupPermission, Predicates.inRange(0, 1));
         this.type = type;
     }
 

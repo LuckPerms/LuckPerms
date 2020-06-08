@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -55,16 +56,31 @@ import net.luckperms.api.node.ChatMetaType;
 import java.util.List;
 
 public class MetaRemoveTempChatMeta extends GenericChildCommand {
+
+    public static MetaRemoveTempChatMeta forPrefix(LocaleManager locale) {
+        return new MetaRemoveTempChatMeta(
+                ChatMetaType.PREFIX,
+                CommandSpec.META_REMOVETEMP_PREFIX.localize(locale),
+                "removetempprefix",
+                CommandPermission.USER_META_REMOVE_TEMP_PREFIX,
+                CommandPermission.GROUP_META_REMOVE_TEMP_PREFIX
+        );
+    }
+
+    public static MetaRemoveTempChatMeta forSuffix(LocaleManager locale) {
+        return new MetaRemoveTempChatMeta(
+                ChatMetaType.SUFFIX,
+                CommandSpec.META_REMOVETEMP_SUFFIX.localize(locale),
+                "removetempsuffix",
+                CommandPermission.USER_META_REMOVE_TEMP_SUFFIX,
+                CommandPermission.GROUP_META_REMOVE_TEMP_SUFFIX
+        );
+    }
+
     private final ChatMetaType type;
 
-    public MetaRemoveTempChatMeta(LocaleManager locale, ChatMetaType type) {
-        super(
-                type == ChatMetaType.PREFIX ? CommandSpec.META_REMOVETEMP_PREFIX.localize(locale) : CommandSpec.META_REMOVETEMP_SUFFIX.localize(locale),
-                "removetemp" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_REMOVE_TEMP_PREFIX : CommandPermission.USER_META_REMOVE_TEMP_SUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_REMOVE_TEMP_PREFIX : CommandPermission.GROUP_META_REMOVE_TEMP_SUFFIX,
-                Predicates.is(0)
-        );
+    private MetaRemoveTempChatMeta(ChatMetaType type, LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
+        super(spec, name, userPermission, groupPermission, Predicates.is(0));
         this.type = type;
     }
 
