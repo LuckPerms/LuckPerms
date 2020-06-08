@@ -91,8 +91,8 @@ public class MetaSet extends GenericChildCommand {
 
         TextComponent.Builder builder = Message.SET_META_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
         HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
-                '¥'
+                TextUtils.joinNewline("§3Raw key: §r" + key, "§3Raw value: §r" + value),
+                '§'
         ));
         builder.applyDeep(c -> c.hoverEvent(event));
         sender.sendMessage(builder.build());

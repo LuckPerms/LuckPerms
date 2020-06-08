@@ -105,8 +105,8 @@ public class MetaAddChatMeta extends GenericChildCommand {
         if (result.wasSuccessful()) {
             TextComponent.Builder builder = Message.ADD_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                    "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
-                    '¥'
+                    "§3Raw " + this.type.name().toLowerCase() + ": §r" + meta,
+                    '§'
             ));
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());

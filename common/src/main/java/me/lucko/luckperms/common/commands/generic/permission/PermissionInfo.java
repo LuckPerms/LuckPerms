@@ -137,10 +137,10 @@ public class PermissionInfo extends GenericChildCommand {
 
     private static Consumer<ComponentBuilder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getKey(),
+                "§3> " + (node.getValue() ? "§a" : "§c") + node.getKey(),
                 " ",
-                "¥7Click to remove this node from " + holder.getPlainDisplayName()
-        ), '¥'));
+                "§7Click to remove this node from " + holder.getPlainDisplayName()
+        ), '§'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();

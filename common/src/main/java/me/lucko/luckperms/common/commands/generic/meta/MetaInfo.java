@@ -172,10 +172,10 @@ public class MetaInfo extends GenericChildCommand {
         }
 
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "¥3> ¥a" + node.getPriority() + " ¥7- ¥r" + node.getMetaValue(),
+                "§3> §a" + node.getPriority() + " §7- §r" + node.getMetaValue(),
                 " ",
-                "¥7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getPlainDisplayName()
-        ), '¥'));
+                "§7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getPlainDisplayName()
+        ), '§'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
@@ -199,10 +199,10 @@ public class MetaInfo extends GenericChildCommand {
         }
 
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "¥3> ¥r" + node.getMetaKey() + " ¥7- ¥r" + node.getMetaValue(),
+                "§3> §r" + node.getMetaKey() + " §7- §r" + node.getMetaValue(),
                 " ",
-                "¥7Click to remove this meta pair from " + holder.getPlainDisplayName()
-        ), '¥'));
+                "§7Click to remove this meta pair from " + holder.getPlainDisplayName()
+        ), '§'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();

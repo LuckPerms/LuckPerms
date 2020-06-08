@@ -114,8 +114,8 @@ public class MetaAddTempChatMeta extends GenericChildCommand {
 
             TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.format(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                    "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
-                    '¥'
+                    "§3Raw " + this.type.name().toLowerCase() + ": §r" + meta,
+                    '§'
             ));
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
