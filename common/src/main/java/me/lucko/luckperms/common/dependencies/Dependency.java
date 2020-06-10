@@ -63,43 +63,43 @@ public enum Dependency {
     TEXT(
             "net{}kyori",
             "text-api",
-            "3.0.3",
-            "/EP/woKCSL0wKQ59zrGx6xPrByI9tY9BPHklf5NNHws=",
+            "3.0.4",
+            "qJCoD0fTnRhI0EpqdiLAT9QH5gIyY8aNw4Exe/gTWm0=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_SERIALIZER_GSON(
             "net{}kyori",
             "text-serializer-gson",
-            "3.0.3",
-            "WmOA7vIcGR679MQxIe6Bw7gbWxUEpGabwKsAumzHApw=",
+            "3.0.4",
+            "pes03k1/XKS9OpiK+xqVmk+lXSJIsCEkkg3g36PV65A=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_SERIALIZER_LEGACY(
             "net{}kyori",
             "text-serializer-legacy",
-            "3.0.3",
-            "Ug2Ji/0FWxKLUssfOgkIZ2UWcAptdTm8KxM8ObAoNIU=",
+            "3.0.4",
+            "1ZYqzZ7zhnN2AyU/n/NeRQv0A9R01j/gX1Uq/nE02SI=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUKKIT(
             "net{}kyori",
             "text-adapter-bukkit",
-            "3.0.3",
-            "K1ib03ajCNm7CkVjX42o+Mg6M+eUaAfo29CBvfu+++o=",
+            "3.0.5",
+            "cXA/7PDtnWpd8l7H4AEhP/3Z/WRNiFhDSqKbqO/1+ig=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUNGEECORD(
             "net{}kyori",
             "text-adapter-bungeecord",
-            "3.0.3",
-            "klLpz+PWAoZzR+nyxUu6ohFKtrGya8tq/lWU6GfSVGY=",
+            "3.0.5",
+            "+yU9AB1mG5wTAFeZc6zArs67loFz00w8VqE34QCjCdw=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_SPONGEAPI(
             "net{}kyori",
             "text-adapter-spongeapi",
-            "3.0.3",
-            "tRHQOThbp3ECZB0WbrgPZdKmvNA28K9bBwoshGWpTFQ=",
+            "3.0.5",
+            "/plXxpvDwqYECq+0saN13Y/Qf6F7GthJPc/hjR7SL5s=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     EVENT(
@@ -112,8 +112,8 @@ public enum Dependency {
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
-            "2.8.1",
-            "H2fbGQaw2xx+DXnAv+NH+wTwSWCYgymUZUsS73nfoak=",
+            "2.8.4",
+            "KV9YN5gQj6b507VJApJpPF5PkCon0DZqAi0T7Ln0lag=",
             Relocation.of("caffeine", "com{}github{}benmanes{}caffeine")
     ),
     OKIO(
@@ -187,8 +187,8 @@ public enum Dependency {
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "3.4.2",
-            "rnp2e/N8l5JSPtPtcitG6M8jYPVG9iUOuYyDNVrWl/k=",
+            "3.4.5",
+            "i3MvlHBXDUqEHcHvbIJrWGl4sluoMHEv8fpZ3idd+mE=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
