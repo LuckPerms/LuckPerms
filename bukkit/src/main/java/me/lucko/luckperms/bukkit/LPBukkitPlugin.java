@@ -43,6 +43,7 @@ import me.lucko.luckperms.bukkit.listeners.BukkitCommandListUpdater;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
+import me.lucko.luckperms.bukkit.util.PluginManagerUtil;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
@@ -204,6 +205,20 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             // the entire pluginmanager instance is replaced by some plugins :(
             this.bootstrap.getServer().getScheduler().runTaskLaterAsynchronously(this.bootstrap, injector, 1);
         }
+
+        /*
+         * This is an unfortunate solution to a problem which shouldn't even exist. As of Spigot 1.15,
+         * the way LP establishes it's load order relative to Vault triggers a dependency warning.
+         * This is a workaround to prevent that from showing, since at the moment, there is nothing I
+         * can reasonably do to improve this handling in LP without breaking plugins which use/obtain
+         * Vault in their onEnable without depending on us.
+         *
+         * Noteworthy discussion here:
+         * - https://github.com/lucko/LuckPerms/issues/1959
+         * - https://hub.spigotmc.org/jira/browse/SPIGOT-5546
+         * - https://github.com/PaperMC/Paper/pull/3509
+         */
+        PluginManagerUtil.injectDependency(this.bootstrap.getServer().getPluginManager(), this.bootstrap.getName(), "Vault");
 
         // Provide vault support
         tryVaultHook(false);
