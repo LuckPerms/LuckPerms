@@ -56,7 +56,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                 pom {
                     project {
                         name 'LuckPerms API'
-                        description 'An advanced permissions plugin for Bukkit/Spigot, BungeeCord, Sponge, Nukkit and Velocity.'
+                        description 'A permissions plugin for Minecraft servers.'
                         url 'https://luckperms.net'
 
                         licenses {
