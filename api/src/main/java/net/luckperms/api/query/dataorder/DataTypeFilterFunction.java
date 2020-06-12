@@ -31,38 +31,39 @@ import net.luckperms.api.query.OptionKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Comparator;
+import java.util.function.Predicate;
 
 /**
- * A function that generates a {@link DataQueryOrder} comparator for
+ * A function that generates a {@link DataTypeFilter} predicate for
  * {@link PermissionHolder}s as required during inheritance.
+ *
+ * @since 5.2
  */
-public interface DataQueryOrderFunction {
+public interface DataTypeFilterFunction {
 
     /**
-     * The {@link OptionKey} for {@link DataQueryOrderFunction}.
+     * The {@link OptionKey} for {@link DataTypeFilterFunction}.
      */
-    OptionKey<DataQueryOrderFunction> KEY = OptionKey.of("dataqueryorderfunction", DataQueryOrderFunction.class);
+    OptionKey<DataTypeFilterFunction> KEY = OptionKey.of("datatypefilterfunction", DataTypeFilterFunction.class);
 
     /**
-     * Creates a {@link DataQueryOrderFunction} that always returns the given
-     * {@code comparator}.
+     * Creates a {@link DataTypeFilterFunction} that always returns the given
+     * {@code predicate}.
      *
-     * @param comparator the comparator
-     * @return the data query order function
-     * @since 5.2
+     * @param predicate the predicate
+     * @return the data type filter function
      */
-    static DataQueryOrderFunction always(Comparator<DataType> comparator) {
-        return id -> comparator;
+    static DataTypeFilterFunction always(Predicate<DataType> predicate) {
+        return id -> predicate;
     }
 
     /**
-     * Gets the {@link DataQueryOrder} comparator for the given
+     * Gets the {@link DataTypeFilter} predicate for the given
      * {@link PermissionHolder.Identifier holder identifier}.
      *
      * @param holderIdentifier the holder identifier
-     * @return the comparator to use
+     * @return the predicate to use
      */
-    @NonNull Comparator<DataType> getOrderComparator(PermissionHolder.@NonNull Identifier holderIdentifier);
+    @NonNull Predicate<DataType> getTypeFilter(PermissionHolder.@NonNull Identifier holderIdentifier);
 
 }

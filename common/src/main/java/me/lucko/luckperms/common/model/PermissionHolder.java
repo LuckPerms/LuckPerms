@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.inheritance.InheritanceComparator;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.DataSelector;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -48,8 +49,6 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
-import net.luckperms.api.query.dataorder.DataQueryOrder;
-import net.luckperms.api.query.dataorder.DataQueryOrderFunction;
 import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -262,12 +261,8 @@ public abstract class PermissionHolder {
         invalidateCache();
     }
 
-    private List<DataType> queryOrder(QueryOptions queryOptions) {
-        Comparator<DataType> comparator = queryOptions.option(DataQueryOrderFunction.KEY)
-                .map(func -> func.getOrderComparator(getIdentifier()))
-                .orElse(DataQueryOrder.TRANSIENT_FIRST);
-
-        return DataQueryOrder.order(comparator);
+    private DataType[] queryOrder(QueryOptions queryOptions) {
+        return DataSelector.select(queryOptions, getIdentifier());
     }
 
     public List<Node> getOwnNodes(QueryOptions queryOptions) {

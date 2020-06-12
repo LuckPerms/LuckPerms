@@ -48,6 +48,8 @@ import java.util.function.Consumer;
  * it is possible that more {@link DataType}s may be added in the future.
  * Ideally the {@link Comparator} implementations should be able to handle these
  * smoothly.</p>
+ *
+ * @see DataQueryOrderFunction
  */
 public enum DataQueryOrder implements Comparator<DataType> {
 
