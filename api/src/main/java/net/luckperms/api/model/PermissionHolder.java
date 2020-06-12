@@ -33,6 +33,7 @@ import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
+import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -277,10 +278,14 @@ public interface PermissionHolder {
     @NonNull SortedSet<Node> resolveDistinctInheritedNodes(@NonNull QueryOptions queryOptions);
 
     /**
-     * Gets a collection of the {@link Group}s this holder inherits nodes from, both directly
-     * and indirectly (through directly inherited groups).
+     * Gets a collection of the {@link Group}s this holder inherits nodes from.
      *
-     * <p>It effectively resolves the whole "inheritance tree".</p>
+     * <p>If {@link Flag#RESOLVE_INHERITANCE} is set, this will include holders inherited from both
+     * directly and indirectly (through directly inherited groups). It will effectively resolve the
+     * whole "inheritance tree".</p>
+     *
+     * <p>If {@link Flag#RESOLVE_INHERITANCE} is not set, then the traversal will only go one
+     * level up the inheritance tree, and return only directly inherited groups.</p>
      *
      * <p>The collection will be ordered according to the platforms inheritance rules. The groups
      * which are inherited from first will appear earlier in the list.</p>

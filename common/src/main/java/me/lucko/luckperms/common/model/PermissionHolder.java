@@ -60,7 +60,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -351,26 +350,20 @@ public abstract class PermissionHolder {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public List<Group> resolveInheritanceTree(QueryOptions queryOptions) {
-        if (!queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
-            return Collections.emptyList();
-        }
-
         InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
 
-        // perform a full traversal of the inheritance tree
-        List<PermissionHolder> traversal = new ArrayList<>();
-        Iterables.addAll(traversal, graph.traverse(this));
+        List<PermissionHolder> inheritanceTree = new ArrayList<>();
 
-        // remove 'this' (the start node) - will usually be at traversal[0],
-        // but not always due to the possibility of post-traversal sorts!
-        if (traversal.get(0) == this) {
-            traversal.remove(0);
+        if (queryOptions.flag(Flag.RESOLVE_INHERITANCE)) {
+            Iterables.addAll(inheritanceTree, graph.traverse(this));
+            inheritanceTree.remove(this);
         } else {
-            traversal.remove(this);
+            // if RESOLVE_INHERITANCE is not set, only go up by one level
+            Iterables.addAll(inheritanceTree, graph.successors(this));
         }
 
-        // ensure our traversal now only consists of groups
-        for (PermissionHolder permissionHolder : traversal) {
+        // ensure our tree now only consists of groups
+        for (PermissionHolder permissionHolder : inheritanceTree) {
             if (!(permissionHolder instanceof Group)) {
                 throw new IllegalStateException("Non-group object in inheritance tree: " + permissionHolder);
             }
@@ -378,7 +371,7 @@ public abstract class PermissionHolder {
 
         // cast List<PermissionHolder> to List<Group>
         // this feels a bit dirty but it works & avoids needless copying!
-        return (List) traversal;
+        return (List) inheritanceTree;
     }
 
     public Map<String, Boolean> exportPermissions(QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
