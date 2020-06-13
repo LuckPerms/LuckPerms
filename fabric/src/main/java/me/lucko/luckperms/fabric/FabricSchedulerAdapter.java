@@ -34,7 +34,7 @@ public class FabricSchedulerAdapter extends AbstractJavaScheduler {
     private final Executor serverExecutor;
 
     public FabricSchedulerAdapter(AbstractFabricBootstrap bootstrap) {
-        this.serverExecutor = r -> bootstrap.getServer().executeSync(r);
+        this.serverExecutor = r -> bootstrap.getServer().submitAndJoin(r);
     }
 
     @Override

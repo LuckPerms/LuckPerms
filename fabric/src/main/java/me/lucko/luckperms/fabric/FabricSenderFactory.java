@@ -43,7 +43,7 @@ import net.minecraft.text.LiteralText;
 
 import java.util.UUID;
 
-public class FabricSenderFactory extends SenderFactory<ServerCommandSource> {
+public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSource> {
     private LPFabricPlugin plugin;
 
     public FabricSenderFactory(LPFabricPlugin plugin) {
@@ -85,6 +85,11 @@ public class FabricSenderFactory extends SenderFactory<ServerCommandSource> {
     protected boolean hasPermission(ServerCommandSource commandSource, String node) {
         Tristate value = this.getPermissionValue(commandSource, node);
         return value.asBoolean();
+    }
+
+    @Override
+    protected void performCommand(ServerCommandSource sender, String command) {
+        sender.getMinecraftServer().getCommandManager().execute(sender, command);
     }
 
     @Override

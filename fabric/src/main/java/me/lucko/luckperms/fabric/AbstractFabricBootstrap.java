@@ -43,9 +43,11 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -184,13 +186,13 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public Stream<String> getPlayerList() {
-        return this.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getEntityName);
+    public Collection<String> getPlayerList() {
+        return this.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getEntityName).collect(Collectors.toList());
     }
 
     @Override
-    public Stream<UUID> getOnlinePlayers() {
-        return this.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getUuid);
+    public Collection<UUID> getOnlinePlayers() {
+        return this.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getUuid).collect(Collectors.toList());
     }
 
     @Override
@@ -203,6 +205,7 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
      */
     protected final void onInitialize() {
         this.plugin = new LPFabricPlugin(this);
+        this.schedulerAdapter = new FabricSchedulerAdapter(this);
         try {
             this.plugin.load();
         } finally {

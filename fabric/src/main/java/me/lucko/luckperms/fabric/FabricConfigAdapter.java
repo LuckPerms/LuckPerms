@@ -27,8 +27,7 @@ package me.lucko.luckperms.fabric;
 
 import java.nio.file.Path;
 
-import me.lucko.luckperms.common.config.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -37,7 +36,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 /**
  * Fabric doesn't have any real config API for say, so we will use HOCON due to it's json-like syntax which most fabric mods use and support for comments.
  */
-public class FabricConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
+public class FabricConfigAdapter extends ConfigurateConfigAdapter {
     public FabricConfigAdapter(LuckPermsPlugin plugin, Path path) {
         super(plugin, path);
     }

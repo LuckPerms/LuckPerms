@@ -29,7 +29,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
@@ -51,7 +51,7 @@ import me.lucko.luckperms.fabric.event.PlayerWorldChangeCallback;
 import me.lucko.luckperms.fabric.event.RespawnPlayerCallback;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.FabricEventListeners;
-import net.fabricmc.fabric.api.registry.CommandRegistry;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
@@ -98,7 +98,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
         // Command registration also need to occur early, and will persist across game states as well.
         this.commandManager = new FabricCommandExecutor(this);
-        CommandRegistry.INSTANCE.register(false, dispatcher -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             for (String alias : COMMAND_ALIASES) {
                 LiteralCommandNode<ServerCommandSource> lp = literal(alias)
                         .executes(this.getCommandManager())
