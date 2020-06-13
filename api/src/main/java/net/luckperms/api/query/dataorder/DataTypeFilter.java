@@ -63,6 +63,16 @@ public enum DataTypeFilter implements Predicate<DataType> {
     },
 
     /**
+     * A data type filter indicating that no {@link DataType}s should be used.
+     */
+    NONE {
+        @Override
+        public boolean test(DataType dataType) {
+            return false;
+        }
+    },
+
+    /**
      * A data type filter indicating that only {@link DataType#NORMAL} should be used.
      */
     NORMAL_ONLY {
