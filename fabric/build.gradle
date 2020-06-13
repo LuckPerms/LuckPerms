@@ -2,7 +2,7 @@ import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.1'
-    id 'fabric-loom' version '0.2.7-SNAPSHOT'
+    id 'fabric-loom' version '0.4-SNAPSHOT'
 }
 
 repositories {
@@ -14,26 +14,22 @@ configurations {
     compile.extendsFrom shade
 }
 
-def minecraftVersion = "1.14.4"
-def yarnBuild = "build.15"
-def loaderVersion = "0.8.2+build.194"
+def minecraftVersion = "1.16-pre5"
+def yarnBuild = "1"
+def loaderVersion = "0.8.7+build.201"
+def fabricApiVersion = "0.12.1+build.361-1.16"
 
 dependencies {
     // Fabric Stuff, We don't specifically target only a single version but yarn mappings require a version to be specified.
     minecraft "com.mojang:minecraft:${minecraftVersion}"
-    mappings "net.fabricmc:yarn:${minecraftVersion}+${yarnBuild}:v2"
-    modCompile "net.fabricmc:fabric-loader:${loaderVersion}"
+    mappings "net.fabricmc:yarn:${minecraftVersion}+build.${yarnBuild}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${loaderVersion}"
 
     // We only include the bare minimum of what we use within the Fabric API.
-    modImplementation "net.fabricmc.fabric-api:fabric-api-base:0.1.2+b7f9825de8"
-    modImplementation "net.fabricmc.fabric-api:fabric-commands-v0:0.1.2+b7f9825de8"
-    modImplementation "net.fabricmc.fabric-api:fabric-events-lifecycle-v0:0.1.2+b7f9825de8"
-    modImplementation "net.fabricmc.fabric-api:fabric-networking-v0:0.1.7+12515ed9e8"
-
-    include "net.fabricmc.fabric-api:fabric-api-base:0.1.2+b7f9825de8"
-    include "net.fabricmc.fabric-api:fabric-commands-v0:0.1.2+b7f9825de8"
-    include "net.fabricmc.fabric-api:fabric-events-lifecycle-v0:0.1.2+b7f9825de8"
-    include "net.fabricmc.fabric-api:fabric-networking-v0:0.1.7+12515ed9e8"
+    modImplementation(include(fabricApi.module("fabric-api-base", fabricApiVersion)))
+    modImplementation(include(fabricApi.module("fabric-command-api-v1", fabricApiVersion)))
+    modImplementation(include(fabricApi.module("fabric-events-lifecycle-v0", fabricApiVersion)))
+    modImplementation(include(fabricApi.module("fabric-networking-v0", fabricApiVersion)))
 
     shade project(':common')
 }
