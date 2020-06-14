@@ -30,7 +30,7 @@ import net.kyori.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.text.Text;
 
 /**
- * There is no implementation of Kyori's text to convert to Fabric's types. So we take it to our own hands.
+ * Used to convert Fabric's Text to Kyori's Component.
  */
 public class FabricTextAdapter {
     /**

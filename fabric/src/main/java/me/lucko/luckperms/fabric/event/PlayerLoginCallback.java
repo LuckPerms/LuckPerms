@@ -29,6 +29,10 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+/**
+ * TODO: Use Fabric API alternative when merged
+ * https://github.com/FabricMC/fabric/pull/605
+ */
 public interface PlayerLoginCallback {
     Event<PlayerLoginCallback> EVENT = EventFactory.createArrayBacked(PlayerLoginCallback.class, (callbacks) -> (player) -> {
         for (PlayerLoginCallback callback : callbacks) {

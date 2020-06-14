@@ -50,6 +50,7 @@ public class FabricConnectionListener extends AbstractConnectionListener {
     }
 
     public void onEarlyLogin(GameProfile gameProfile) {
+        // TODO: Use Networking v1 when merged to delay login till database returns the user
         User user = this.loadUser(gameProfile.getId(), gameProfile.getName());
         this.recordConnection(gameProfile.getId());
         this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(gameProfile.getId(), gameProfile.getName(), user);

@@ -38,14 +38,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerManager.class)
-public abstract class PlayerManagerMixin {
+abstract class PlayerManagerMixin {
     @Inject(at = @At("HEAD"), method = "onPlayerConnect")
     private void luckperms_onLogin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         PlayerLoginCallback.EVENT.invoker().onLogin(player);
     }
 
     @Inject(at = @At("TAIL"), method = "respawnPlayer")
-    private void luckperms_onRespawnPlayer(ServerPlayerEntity oldPlayer, DimensionType targetDimension, boolean alive, CallbackInfoReturnable<ServerPlayerEntity> ci) {
-        RespawnPlayerCallback.EVENT.invoker().onRespawn(oldPlayer, ci.getReturnValue(), targetDimension, alive); // Transfer the old caches to the new player.
+    private void luckperms_onRespawnPlayer(ServerPlayerEntity player, boolean bl, CallbackInfoReturnable<ServerPlayerEntity> cir) {
+        //RespawnPlayerCallback.EVENT.invoker().onRespawn(oldPlayer, ci.getReturnValue(), targetDimension, alive); // Transfer the old caches to the new player.
     }
 }

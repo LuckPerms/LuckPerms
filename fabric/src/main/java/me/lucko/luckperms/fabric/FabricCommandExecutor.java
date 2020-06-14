@@ -42,8 +42,9 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Fabric uses brigadier.
+ * All parsing has been designed in a way where "/execute ... ... ... run lp ..." works fine.
  */
-public class FabricCommandExecutor extends CommandManager implements Command<ServerCommandSource>, SuggestionProvider<ServerCommandSource> {
+class FabricCommandExecutor extends CommandManager implements Command<ServerCommandSource>, SuggestionProvider<ServerCommandSource> {
     private LPFabricPlugin plugin;
 
     public FabricCommandExecutor(LPFabricPlugin plugin) {
@@ -59,6 +60,7 @@ public class FabricCommandExecutor extends CommandManager implements Command<Ser
         String lpArguments = rawInput.substring(start);
 
         List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(lpArguments);
+        // Pop the literal LP uses off the arguments
         String label = arguments.remove(0);
 
         if (label.startsWith("/")) {
@@ -88,6 +90,7 @@ public class FabricCommandExecutor extends CommandManager implements Command<Ser
 
         List<String> completions = this.tabCompleteCommand(lpSender, arguments);
 
+        // Offset the builder from the current string range so suggestions are placed in the right spot
         builder = builder.createOffset(start);
 
         for (String completion : completions) {

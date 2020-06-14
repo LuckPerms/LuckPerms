@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.fabric;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
-import me.lucko.luckperms.common.context.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
@@ -43,7 +41,7 @@ import net.minecraft.text.LiteralText;
 
 import java.util.UUID;
 
-public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSource> {
+class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSource> {
     private LPFabricPlugin plugin;
 
     public FabricSenderFactory(LPFabricPlugin plugin) {
@@ -72,7 +70,7 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     @Override
     protected void sendMessage(ServerCommandSource commandSource, String s) {
-        // Sending to a ServerCommandSource async is always since it will refer to the CommandSource's CommandOutput
+        // Sending to a ServerCommandSource async is always safe
         commandSource.sendFeedback(new LiteralText(s), false);
     }
 
@@ -94,7 +92,7 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     @Override
     protected Tristate getPermissionValue(ServerCommandSource commandSource, String node) {
-        // TODO: Route through Fabric API's PermissionProviders
+        // TODO: Route through Fabric API's Permission API
         Entity entity = commandSource.getEntity();
 
         if (entity instanceof ServerPlayerEntity) {
@@ -106,7 +104,6 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
             }
 
             QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
-
             PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
 
             return permissionData.checkPermission(node, PermissionCheckEvent.Origin.INTERNAL).result();

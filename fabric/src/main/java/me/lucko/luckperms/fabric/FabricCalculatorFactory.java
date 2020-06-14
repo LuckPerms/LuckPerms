@@ -38,7 +38,7 @@ import me.lucko.luckperms.fabric.calculator.IntegratedServerProcessor;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 import net.luckperms.api.query.QueryOptions;
 
-public class FabricCalculatorFactory implements CalculatorFactory {
+class FabricCalculatorFactory implements CalculatorFactory {
     private final LPFabricPlugin plugin;
 
     public FabricCalculatorFactory(LPFabricPlugin plugin) {

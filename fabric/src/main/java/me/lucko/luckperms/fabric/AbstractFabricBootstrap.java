@@ -43,12 +43,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Since fabric can run on both an integrated server (which belongs to a client) and a dedicated server, we have to leave some details to each platform's environment.
@@ -187,7 +184,7 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 
     @Override
     public Collection<String> getPlayerList() {
-        return this.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getEntityName).collect(Collectors.toList());
+        return Collections.unmodifiableList(Arrays.asList(this.getServer().getPlayerManager().getPlayerNames()));
     }
 
     @Override
@@ -227,6 +224,7 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 
     private void onStopServer(MinecraftServer server) {
         this.plugin.disable();
+        this.schedulerAdapter = null; // We need to kill the scheduler in case an integrated server starts in the future.
     }
 
     /**

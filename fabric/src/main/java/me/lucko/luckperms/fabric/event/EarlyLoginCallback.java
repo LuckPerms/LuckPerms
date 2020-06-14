@@ -29,6 +29,10 @@ import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
+/**
+ * TODO: Use Fabric API alternative when merged
+ * https://github.com/FabricMC/fabric/pull/605
+ */
 public interface EarlyLoginCallback {
     Event<EarlyLoginCallback> EVENT = EventFactory.createArrayBacked(EarlyLoginCallback.class, (callbacks) -> (profile) -> {
         for (EarlyLoginCallback callback : callbacks) {

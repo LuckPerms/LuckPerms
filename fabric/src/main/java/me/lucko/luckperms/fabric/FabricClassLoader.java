@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import net.fabricmc.loader.launch.common.FabricLauncherBase;
 
-public class FabricClassLoader implements PluginClassLoader {
+class FabricClassLoader implements PluginClassLoader {
     @Override
     public void addJarToClasspath(Path file) {
         try {

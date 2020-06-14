@@ -52,7 +52,7 @@ public class FabricWorldCalculator implements ContextCalculator<ServerPlayerEnti
     @Override
     public void calculate(@NonNull ServerPlayerEntity target, @NonNull ContextConsumer consumer) {
         Set<String> seen = new HashSet<>();
-        Identifier worldId = DimensionType.getId(target.getServerWorld().getDimension().getType());
+        Identifier worldId = target.getServerWorld().getRegistryKey().getValue();
         String world = worldId.toString();
         while (seen.add(world)) {
             consumer.accept(DefaultContextKeys.WORLD_KEY, world);
@@ -65,7 +65,7 @@ public class FabricWorldCalculator implements ContextCalculator<ServerPlayerEnti
         Iterable<ServerWorld> worlds = this.plugin.getBootstrap().getServer().getWorlds();
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (ServerWorld world : worlds) {
-            Identifier worldId = DimensionType.getId(world.getDimension().getType());
+            Identifier worldId = world.getRegistryKey().getValue();
             String name = worldId.toString();
             if (!name.trim().isEmpty()) {
                 builder.add(DefaultContextKeys.WORLD_KEY, name);

@@ -47,12 +47,13 @@ import me.lucko.luckperms.fabric.context.FabricWorldCalculator;
 import me.lucko.luckperms.fabric.event.EarlyLoginCallback;
 import me.lucko.luckperms.fabric.event.PlayerLoginCallback;
 import me.lucko.luckperms.fabric.event.PlayerQuitCallback;
-import me.lucko.luckperms.fabric.event.PlayerWorldChangeCallback;
+import me.lucko.luckperms.fabric.event.EntityChangeWorldCallback;
 import me.lucko.luckperms.fabric.event.RespawnPlayerCallback;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.FabricEventListeners;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.command.ServerCommandSource;
@@ -93,7 +94,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
         PlayerLoginCallback.EVENT.register(this.getConnectionListener()::onLogin);
         PlayerQuitCallback.EVENT.register(this.getConnectionListener()::onDisconnect);
         FabricEventListeners listeners = new FabricEventListeners(this);
-        PlayerWorldChangeCallback.EVENT.register(listeners::onWorldChange);
+        EntityChangeWorldCallback.EVENT.register(listeners::onWorldChange);
         RespawnPlayerCallback.EVENT.register(listeners::onPlayerRespawn);
 
         // Command registration also need to occur early, and will persist across game states as well.
@@ -135,6 +136,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     private Path resolveConfig() {
         // NOTE: 'LuckPerms' MUST be capitalized in while resolving the path because linux takes file paths literally.
+        // TODO: Use NIO getter when https://github.com/FabricMC/fabric-loader/pull/162 is merged
         Path path = FabricLoader.getInstance().getGameDirectory().getAbsoluteFile().toPath().resolve("mods").resolve("LuckPerms").resolve("luckperms.conf");
 
         if (!Files.exists(path)) {
@@ -153,7 +155,8 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerPlatformListeners() {
-    	// Registers too late for fabric. Also we cannot invoke this more than once since the event listeners persist across game states
+    	// Too late for fabric.
+        // We cannot invoke this more than once since event listeners persist across game states.
     }
 
     @Override
@@ -163,7 +166,8 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerCommands() {
-        // Registers too late for fabric. Also we cannot invoke this more than once since the event listeners persist across game states
+        // Too late for fabric.
+        // We cannot invoke this more than once since the event listeners persist across game states
     }
 
     @Override
@@ -189,7 +193,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected AbstractEventBus provideEventBus(LuckPermsApiProvider provider) {
+    protected AbstractEventBus<ModContainer> provideEventBus(LuckPermsApiProvider provider) {
         return new FabricEventBus(this, provider);
     }
 

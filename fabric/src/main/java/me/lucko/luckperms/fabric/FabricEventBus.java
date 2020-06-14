@@ -37,14 +37,14 @@ import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 
 import java.util.List;
 
-public class FabricEventBus extends AbstractEventBus<ModContainer> {
+class FabricEventBus extends AbstractEventBus<ModContainer> {
     protected FabricEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
         super(plugin, apiProvider);
     }
 
     /**
-     * Fabric doesn't have a "Mod" class you extend for say.
-     * For simplicity, passing the ModContainer is allowed as other systems get quite exhaustive in their checks.
+     * Fabric doesn't have a "Mod" class you extend.
+     * For simplicity, passing the ModContainer is allowed as other systems to detect the entrypoint get quite exhaustive.
      */
     @Override
     protected ModContainer checkPlugin(Object mod) throws IllegalArgumentException {

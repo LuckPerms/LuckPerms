@@ -29,10 +29,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
-import net.luckperms.api.platform.Platform;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.MinecraftServer;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Environment(EnvType.CLIENT)
 public class LPFabricClientBootstrap extends AbstractFabricBootstrap implements ClientModInitializer {
@@ -44,7 +42,6 @@ public class LPFabricClientBootstrap extends AbstractFabricBootstrap implements 
         this.onInitialize();
     }
 
-    @Nullable
     @Override
     public MinecraftServer getServer() {
         // A Server might not always be available on the client

@@ -36,9 +36,10 @@ import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class FabricContextManager extends ContextManager<ServerPlayerEntity> {
+public class FabricContextManager extends ContextManager<ServerPlayerEntity, ServerPlayerEntity> {
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
     private final LoadingCache<ServerPlayerEntity, QueryOptionsCache<ServerPlayerEntity>> subjectCaches = CaffeineFactory.newBuilder()
@@ -46,7 +47,13 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity> {
             .build(key -> new QueryOptionsCache<>(key, this));
 
     public FabricContextManager(LuckPermsPlugin plugin) {
-        super(plugin, ServerPlayerEntity.class);
+        // TODO: Pass Fabric's Actor as the subject
+        super(plugin, ServerPlayerEntity.class, ServerPlayerEntity.class);
+    }
+
+    @Override
+    public UUID getUniqueId(ServerPlayerEntity player) {
+        return player.getUuid();
     }
 
     @Override
@@ -61,7 +68,7 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity> {
     @Override
     public QueryOptions formQueryOptions(ServerPlayerEntity subject, ImmutableContextSet contextSet) {
         QueryOptions.Builder queryOptions = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
-        if (subject.getServer().isOwner(subject.getGameProfile())) {
+        if (subject.getServer().isHost(subject.getGameProfile())) {
             queryOptions.option(INTEGRATED_SERVER_OWNER, true);
         }
 

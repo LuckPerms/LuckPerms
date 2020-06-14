@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerLoginNetworkHandler.class)
-public abstract class ServerLoginNetworkHandlerMixin {
+abstract class ServerLoginNetworkHandlerMixin {
     @Shadow
     private GameProfile profile;
 

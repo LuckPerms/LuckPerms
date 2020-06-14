@@ -30,9 +30,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 
-/**
- * As much I would hate to admit it, Fabric doesn't have as many events as Bukkit or Sponge. So we implemented our own events in a few spots.
- */
 public class FabricEventListeners {
     private final LPFabricPlugin plugin;
 

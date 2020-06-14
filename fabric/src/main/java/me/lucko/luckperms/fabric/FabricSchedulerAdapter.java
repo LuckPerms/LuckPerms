@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.util.Throwing;
 
 import java.util.concurrent.Executor;
 
-public class FabricSchedulerAdapter extends AbstractJavaScheduler {
+class FabricSchedulerAdapter extends AbstractJavaScheduler {
     private final Executor serverExecutor;
 
     public FabricSchedulerAdapter(AbstractFabricBootstrap bootstrap) {

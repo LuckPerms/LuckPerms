@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FabricPluginLogger implements PluginLogger {
+class FabricPluginLogger implements PluginLogger {
     private final Logger logger = LogManager.getLogger(LPFabricPlugin.class);
 
     @Override
