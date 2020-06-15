@@ -25,35 +25,26 @@
 
 package me.lucko.luckperms.fabric.mixin;
 
-import me.lucko.luckperms.fabric.event.EntityChangeWorldCallback;
-import net.minecraft.entity.Entity;
+import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(ServerPlayerEntity.class)
 abstract class ServerPlayerEntityMixin {
+    @Shadow public abstract ServerWorld getServerWorld();
+
     @Inject(
-            at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/server/network/ServerPlayerEntity;syncedFoodLevel:I",
-                    opcode = Opcodes.PUTFIELD,
-                    shift = At.Shift.AFTER
-            ),
-            method = "changeDimension",
-            locals = LocalCapture.PRINT
+            at = @At("TAIL"),
+            method = "dimensionChanged",
+            locals = LocalCapture.CAPTURE_FAILEXCEPTION
     )
-    private void luckperms_onChangeDimension(ServerWorld destination, CallbackInfoReturnable<Entity> cir, ServerWorld originalWorld) {
-        final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
-        EntityChangeWorldCallback.EVENT.invoker().onChangeWorld(originalWorld, player.getServerWorld(), player);
+    private void luckperms_onChangeDimension(ServerWorld targetWorld, CallbackInfo ci) {
+        PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getServerWorld(), targetWorld, (ServerPlayerEntity) (Object) this);
     }
 }

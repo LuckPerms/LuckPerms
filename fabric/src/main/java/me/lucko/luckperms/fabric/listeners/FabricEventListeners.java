@@ -27,6 +27,7 @@ package me.lucko.luckperms.fabric.listeners;
 
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 
@@ -37,11 +38,19 @@ public class FabricEventListeners {
         this.plugin = plugin;
     }
 
-    public void onWorldChange(World world, ServerPlayerEntity playerEntity) {
-        this.plugin.getContextManager().invalidateCache(playerEntity);
+    /**
+     * TODO: Use Fabric API alternative when merged
+     */
+    @Deprecated
+    public void onWorldChange(ServerWorld origin, ServerWorld destination, ServerPlayerEntity player) {
+        this.plugin.getContextManager().invalidateCache(player);
     }
 
-    public void onPlayerRespawn(ServerPlayerEntity newPlayer, ServerPlayerEntity oldPlayer, DimensionType dimension, boolean alive) {
+    /**
+     * TODO: Use Fabric API alternative when merged
+     */
+    @Deprecated
+    public void onPlayerRespawn(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer, ServerWorld respawnWorld, boolean alive) {
         this.plugin.getContextManager().invalidateCacheOnRespawn(oldPlayer, newPlayer);
     }
 }

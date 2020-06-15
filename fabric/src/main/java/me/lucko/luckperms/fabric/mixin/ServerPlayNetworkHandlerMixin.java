@@ -41,7 +41,7 @@ abstract class ServerPlayNetworkHandlerMixin {
     public ServerPlayerEntity player;
 
     @Inject(at = @At("HEAD"), method = "onDisconnected")
-    private void luckperms_remove(Text text, CallbackInfo ci) {
+    private void luckperms_playerDisconnected(Text text, CallbackInfo ci) {
         PlayerQuitCallback.EVENT.invoker().onDisconnect(this.player);
     }
 }

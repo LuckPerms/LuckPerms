@@ -47,7 +47,7 @@ import me.lucko.luckperms.fabric.context.FabricWorldCalculator;
 import me.lucko.luckperms.fabric.event.EarlyLoginCallback;
 import me.lucko.luckperms.fabric.event.PlayerLoginCallback;
 import me.lucko.luckperms.fabric.event.PlayerQuitCallback;
-import me.lucko.luckperms.fabric.event.EntityChangeWorldCallback;
+import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
 import me.lucko.luckperms.fabric.event.RespawnPlayerCallback;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.FabricEventListeners;
@@ -56,7 +56,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,7 +75,9 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     private static final String[] COMMAND_ALIASES = new String[] { "luckperms", "lp", "perm", "perms", "permission", "permissions" } ;
-    private AbstractFabricBootstrap bootstrap;
+    @Nullable
+    private MinecraftServer server;
+    private LPFabricBootstrap bootstrap;
     private FabricContextManager contextManager;
     private FabricSenderFactory senderFactory;
 
@@ -84,7 +88,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     private FabricCommandExecutor commandManager;
     private FabricConnectionListener connectionListener = new FabricConnectionListener(this);
 
-    public LPFabricPlugin(AbstractFabricBootstrap bootstrap) {
+    public LPFabricPlugin(LPFabricBootstrap bootstrap) {
         this.bootstrap = bootstrap;
     }
 
@@ -94,7 +98,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
         PlayerLoginCallback.EVENT.register(this.getConnectionListener()::onLogin);
         PlayerQuitCallback.EVENT.register(this.getConnectionListener()::onDisconnect);
         FabricEventListeners listeners = new FabricEventListeners(this);
-        EntityChangeWorldCallback.EVENT.register(listeners::onWorldChange);
+        PlayerChangeWorldCallback.EVENT.register(listeners::onWorldChange);
         RespawnPlayerCallback.EVENT.register(listeners::onPlayerRespawn);
 
         // Command registration also need to occur early, and will persist across game states as well.
@@ -212,7 +216,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public AbstractFabricBootstrap getBootstrap() {
+    public LPFabricBootstrap getBootstrap() {
         return this.bootstrap;
     }
 
@@ -255,16 +259,25 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     public Stream<Sender> getOnlineSenders() {
         return Stream.concat(
                 Stream.of(getConsoleSender()),
-                this.bootstrap.getServer().getPlayerManager().getPlayerList().stream().map(serverPlayerEntity -> getSenderFactory().wrap(serverPlayerEntity.getCommandSource()))
+                this.server.getPlayerManager().getPlayerList().stream().map(serverPlayerEntity -> getSenderFactory().wrap(serverPlayerEntity.getCommandSource()))
         );
     }
 
     @Override
     public Sender getConsoleSender() {
-        return this.getSenderFactory().wrap(this.bootstrap.getServer().getCommandSource());
+        return this.getSenderFactory().wrap(this.server.getCommandSource());
     }
 
     public FabricSenderFactory getSenderFactory() {
         return this.senderFactory;
+    }
+
+    @Nullable
+    public MinecraftServer getServer() {
+        return this.server;
+    }
+
+    public void setServer(MinecraftServer server) {
+        this.server = server;
     }
 }

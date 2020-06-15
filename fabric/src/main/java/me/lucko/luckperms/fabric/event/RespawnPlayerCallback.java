@@ -28,6 +28,7 @@ package me.lucko.luckperms.fabric.event;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.dimension.DimensionType;
 
 /**
@@ -41,5 +42,5 @@ public interface RespawnPlayerCallback {
         }
     });
 
-    void onRespawn(ServerPlayerEntity newPlayer, ServerPlayerEntity oldPlayer, DimensionType dimension, boolean alive);
+    void onRespawn(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer, ServerWorld respawnWorld, boolean alive);
 }

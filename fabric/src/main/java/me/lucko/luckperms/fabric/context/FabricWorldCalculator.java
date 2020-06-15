@@ -62,7 +62,7 @@ public class FabricWorldCalculator implements ContextCalculator<ServerPlayerEnti
 
     @Override
     public ContextSet estimatePotentialContexts() {
-        Iterable<ServerWorld> worlds = this.plugin.getBootstrap().getServer().getWorlds();
+        Iterable<ServerWorld> worlds = this.plugin.getServer().getWorlds();
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (ServerWorld world : worlds) {
             Identifier worldId = world.getRegistryKey().getValue();

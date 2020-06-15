@@ -26,14 +26,13 @@
 package me.lucko.luckperms.fabric;
 
 import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
-import me.lucko.luckperms.common.util.Throwing;
 
 import java.util.concurrent.Executor;
 
 class FabricSchedulerAdapter extends AbstractJavaScheduler {
     private final Executor serverExecutor;
 
-    public FabricSchedulerAdapter(AbstractFabricBootstrap bootstrap) {
+    public FabricSchedulerAdapter(LPFabricBootstrap bootstrap) {
         this.serverExecutor = r -> bootstrap.getServer().submitAndJoin(r);
     }
 

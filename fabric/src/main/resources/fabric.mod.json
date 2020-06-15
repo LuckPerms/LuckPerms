@@ -15,11 +15,8 @@
     "issues": "https://github.com/lucko/LuckPerms/issues"
   },
   "entrypoints": {
-    "server": [
-      "me.lucko.luckperms.fabric.LPFabricServerBootstrap"
-    ],
-    "client": [
-      "me.lucko.luckperms.fabric.LPFabricClientBootstrap"
+    "main": [
+      "me.lucko.luckperms.fabric.LPFabricBootstrap"
     ]
   },
   "mixins": [

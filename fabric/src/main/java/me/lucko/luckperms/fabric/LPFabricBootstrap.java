@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.server.ServerStartCallback;
 import net.fabricmc.fabric.api.event.server.ServerStopCallback;
 import net.fabricmc.loader.api.FabricLoader;
@@ -39,6 +40,7 @@ import net.luckperms.api.platform.Platform;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -47,16 +49,13 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
-/**
- * Since fabric can run on both an integrated server (which belongs to a client) and a dedicated server, we have to leave some details to each platform's environment.
- */
-public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
+public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializer {
 
     private static final String MODID = "luckperms";
     private static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MODID)
             .orElseThrow(() -> new RuntimeException("Could not get the LuckPerms mod container. This a bug with fabric loader and should be reported."));
 
-    public AbstractFabricBootstrap() {
+    public LPFabricBootstrap() {
         this.classLoader = new FabricClassLoader();
         this.plugin = new LPFabricPlugin(this);
     }
@@ -132,12 +131,12 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 
     @Override
     public String getServerBrand() {
-        return this.getServer().getServerModName();
+        return plugin.getServer().getServerModName();
     }
 
     @Override
     public String getServerVersion() {
-        return this.getServer().getVersion();
+        return plugin.getServer().getVersion();
     }
 
     @Override
@@ -152,12 +151,12 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 
     @Override
     public Optional<ServerPlayerEntity> getPlayer(UUID uniqueId) {
-        return Optional.ofNullable(this.getServer().getPlayerManager().getPlayer(uniqueId));
+        return Optional.ofNullable(this.plugin.getServer().getPlayerManager().getPlayer(uniqueId));
     }
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        GameProfile profile = this.getServer().getUserCache().findByName(username);
+        GameProfile profile = this.plugin.getServer().getUserCache().findByName(username);
 
         if (profile != null && profile.getId() != null) {
             return Optional.of(profile.getId());
@@ -168,7 +167,7 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        GameProfile profile = this.getServer().getUserCache().getByUuid(uniqueId);
+        GameProfile profile = this.plugin.getServer().getUserCache().getByUuid(uniqueId);
 
         if (profile != null && profile.getId() != null) {
             return Optional.of(profile.getName());
@@ -179,28 +178,29 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
 
     @Override
     public int getPlayerCount() {
-        return this.getServer().getCurrentPlayerCount();
+        return this.plugin.getServer().getCurrentPlayerCount();
     }
 
     @Override
     public Collection<String> getPlayerList() {
-        return Collections.unmodifiableList(Arrays.asList(this.getServer().getPlayerManager().getPlayerNames()));
+        return Collections.unmodifiableList(Arrays.asList(this.plugin.getServer().getPlayerManager().getPlayerNames()));
     }
 
     @Override
     public Collection<UUID> getOnlinePlayers() {
-        return this.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getUuid).collect(Collectors.toList());
+        return this.plugin.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getUuid).collect(Collectors.toList());
     }
 
     @Override
     public boolean isPlayerOnline(UUID uniqueId) {
-        return this.getServer().getPlayerManager().getPlayer(uniqueId) != null;
+        return this.plugin.getServer().getPlayerManager().getPlayer(uniqueId) != null;
     }
 
     /**
      * Starts LuckPerms
      */
-    protected final void onInitialize() {
+    @Override
+    public final void onInitialize() {
         this.plugin = new LPFabricPlugin(this);
         this.schedulerAdapter = new FabricSchedulerAdapter(this);
         try {
@@ -219,23 +219,21 @@ public abstract class AbstractFabricBootstrap implements LuckPermsBootstrap {
         // We need to create a new scheduler adapter every time we start the server.
         // This is because an integrated server will shutdown the executor services, which cannot be started back up.
         this.schedulerAdapter = new FabricSchedulerAdapter(this);
+        this.plugin.setServer(server);
         this.plugin.enable();
     }
 
     private void onStopServer(MinecraftServer server) {
         this.plugin.disable();
+        this.plugin.setServer(null); // Clear the server
         this.schedulerAdapter = null; // We need to kill the scheduler in case an integrated server starts in the future.
     }
 
     /**
-     * Depending on the environment, the server might not always be present on fabric.
-     *
-     * <p>On the Client, the server is only present when the integrated server (single player) is running.</p>
-     *
-     * <p>On a dedicated server, the server instance is always available.</p>
-     *
-     * @return The current server instance.
-     * @throws IllegalStateException If the server is not available.
+     * Due to Luckperms having the capability of running on an integrated server, the logical server may not always be available in cases such as at the title screen.
      */
-    public abstract MinecraftServer getServer();
+    @Nullable
+    public MinecraftServer getServer() {
+        return this.plugin.getServer();
+    }
 }

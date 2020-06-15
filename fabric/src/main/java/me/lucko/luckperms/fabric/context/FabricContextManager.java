@@ -93,6 +93,6 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity, Ser
         }
 
         this.subjectCaches.invalidate(oldPlayer); // Invalidate the old player completely as it will be regenerated soon.
-        this.subjectCaches.get(newPlayer);
+        this.subjectCaches.refresh(newPlayer);
     }
 }

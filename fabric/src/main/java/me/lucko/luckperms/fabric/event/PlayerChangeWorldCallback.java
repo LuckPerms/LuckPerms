@@ -23,32 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric;
+package me.lucko.luckperms.fabric.event;
 
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.MinecraftServer;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 
-@Environment(EnvType.CLIENT)
-public class LPFabricClientBootstrap extends AbstractFabricBootstrap implements ClientModInitializer {
-    private MinecraftClient client;
-
-    @Override
-    public void onInitializeClient() {
-        this.client = (MinecraftClient) FabricLoader.getInstance().getGameInstance();
-        this.onInitialize();
-    }
-
-    @Override
-    public MinecraftServer getServer() {
-        // A Server might not always be available on the client
-        if (this.client.getServer() != null) {
-            return this.client.getServer();
+/**
+ * TODO: Use Fabric API alternative when merged.
+ */
+public interface PlayerChangeWorldCallback {
+    Event<PlayerChangeWorldCallback> EVENT = EventFactory.createArrayBacked(PlayerChangeWorldCallback.class, (callbacks) -> (originalWorld, destination, player) -> {
+        for (PlayerChangeWorldCallback callback : callbacks) {
+            callback.onChangeWorld(originalWorld, destination, player);
         }
+    });
 
-        throw new IllegalStateException("Server is not available currently on the client.");
-    }
+    void onChangeWorld(ServerWorld originalWorld, ServerWorld destination, ServerPlayerEntity player);
 }
