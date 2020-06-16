@@ -1,5 +1,4 @@
 import net.fabricmc.loom.task.RemapJarTask
-import net.fabricmc.loom.util.FabricApiExtension
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.1'
