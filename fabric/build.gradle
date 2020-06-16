@@ -14,10 +14,10 @@ configurations {
     compile.extendsFrom shade
 }
 
-def minecraftVersion = "1.16-pre6"
+def minecraftVersion = "1.16-pre7"
 def yarnBuild = "1"
 def loaderVersion = "0.8.7+build.201"
-def fabricApiVersion = "0.12.3+build.363-1.16"
+def fabricApiVersion = "0.12.4+build.365-1.16"
 
 dependencies {
     // Fabric Stuff, We don't specifically target only a single version but yarn mappings require a version to be specified.

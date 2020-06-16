@@ -141,7 +141,14 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
 
     @Override
     public Path getDataDirectory() {
+        // TODO: Use NIO getter when https://github.com/FabricMC/fabric-loader/pull/162 is merged
         return FabricLoader.getInstance().getGameDirectory().toPath().resolve("mods").resolve("LuckPerms");
+    }
+
+    @Override
+    public Path getConfigDirectory() {
+        // TODO: Use NIO getter when https://github.com/FabricMC/fabric-loader/pull/162 is merged
+        return FabricLoader.getInstance().getConfigDirectory().toPath().resolve("LuckPerms");
     }
 
     @Override

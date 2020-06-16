@@ -34,7 +34,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 /**
- * Fabric doesn't have a de facto onfig API.
+ * Fabric doesn't have a de facto config API.
  * We use HOCON due to it's json-like syntax which most fabric mods use and it supports comments.
  */
 class FabricConfigAdapter extends ConfigurateConfigAdapter {

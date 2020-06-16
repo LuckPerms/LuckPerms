@@ -3,7 +3,11 @@
   "id": "luckperms",
   "version": "${version}",
   "name": "LuckPerms",
-  "icon": "icon.png",
+  "icon": {
+    "512": "assets/luckperms/logo/logo512.png",
+    "128": "assets/luckperms/logo/logo128.png",
+    "64": "assets/luckperms/logo/logo64.png"
+  },
   "description": "An advanced permissions mod (plugin)",
   "authors": [
     "Luck"

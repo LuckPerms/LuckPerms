@@ -140,8 +140,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     private Path resolveConfig() {
         // NOTE: 'LuckPerms' MUST be capitalized in while resolving the path because linux takes file paths literally.
-        // TODO: Use NIO getter when https://github.com/FabricMC/fabric-loader/pull/162 is merged
-        Path path = FabricLoader.getInstance().getGameDirectory().getAbsoluteFile().toPath().resolve("mods").resolve("LuckPerms").resolve("luckperms.conf");
+        Path path = this.getBootstrap().getConfigDirectory().resolve("luckperms.conf");
 
         if (!Files.exists(path)) {
             try {
