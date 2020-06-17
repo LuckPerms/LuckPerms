@@ -14,7 +14,7 @@ configurations {
     compile.extendsFrom shade
 }
 
-def minecraftVersion = "1.16-pre7"
+def minecraftVersion = "1.16-pre8"
 def yarnBuild = "1"
 def loaderVersion = "0.8.7+build.201"
 def fabricApiVersion = "0.12.4+build.365-1.16"
@@ -33,8 +33,8 @@ dependencies {
             "fabric-networking-v0" // TODO: Use networking v1 when released
     ]
 
-    apiModules.forEach { moduleName ->
-        modImplementation(include(fabricApi.module(moduleName, fabricApiVersion)))
+    apiModules.forEach {
+        modImplementation(include(fabricApi.module(it, fabricApiVersion)))
     }
 
     shade project(':common')
