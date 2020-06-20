@@ -312,6 +312,12 @@ require-sender-group-membership-to-modify: false
 #   '/lp log notify <on|off>'
 log-notify: true
 
+# Defines a list of log entries which should not be sent as notifications to users.
+#
+# - Each entry in the list is a RegEx expression which is matched against the log entry description.
+log-notify-filtered-descriptions:
+#  - "parent add example"
+
 # Defines the options for prefix and suffix stacking.
 #
 # - The feature allows you to display multiple prefixes or suffixes alongside a players username in

@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.config;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
@@ -62,6 +63,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.booleanKey;
 import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.key;
@@ -387,6 +390,23 @@ public final class ConfigKeys {
      * If log notifications are enabled
      */
     public static final ConfigKey<Boolean> LOG_NOTIFY = booleanKey("log-notify", true);
+
+    /**
+     * Defines a list of log entries which should not be sent as notifications to users.
+     */
+    public static final ConfigKey<List<Pattern>> LOG_NOTIFY_FILTERED_DESCRIPTIONS = key(c -> {
+        return c.getStringList("log-notify-filtered-descriptions", ImmutableList.of()).stream()
+                .map(entry -> {
+                    try {
+                        return Pattern.compile(entry, Pattern.CASE_INSENSITIVE);
+                    } catch (PatternSyntaxException e) {
+                        new IllegalArgumentException("Invalid pattern: " + entry, e).printStackTrace();
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(ImmutableCollectors.toList());
+    });
 
     /**
      * If auto op is enabled. Only used by the Bukkit platform.
