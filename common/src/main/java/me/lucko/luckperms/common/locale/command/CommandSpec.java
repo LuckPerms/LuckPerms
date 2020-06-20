@@ -151,14 +151,14 @@ public enum CommandSpec {
     ),
     USER_PROMOTE("Promotes the user up a track",
             Argument.list(
-                    Argument.create("track", true, "the track to promote the user up"),
+                    Argument.create("track", false, "the track to promote the user up"),
                     Argument.create("context...", false, "the contexts to promote the user in"),
                     Argument.create("--dont-add-to-first", false, "only promote the user if they're already on the track")
             )
     ),
     USER_DEMOTE("Demotes the user down a track",
             Argument.list(
-                    Argument.create("track", true, "the track to demote the user down"),
+                    Argument.create("track", false, "the track to demote the user down"),
                     Argument.create("context...", false, "the contexts to demote the user in"),
                     Argument.create("--dont-remove-from-first", false, "prevent the user from being removed from the first group")
             )

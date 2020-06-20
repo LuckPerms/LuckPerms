@@ -382,17 +382,18 @@ public enum Message {
     USER_PRIMARYGROUP_ERROR_ALREADYHAS("&b{}&a already has &b{}&a set as their primary group.", true),
     USER_PRIMARYGROUP_ERROR_NOTMEMBER("&b{}&a was not already a member of &b{}&a, adding them now.", true),
     USER_TRACK_ERROR_NOT_CONTAIN_GROUP("&b{}&a isn't already in any groups on &b{}&a.", true),
+    USER_TRACK_ERROR_AMBIGUOUS_TRACK_SELECTION("&cUnsure which track to use. Please specify it as an argument.", true),
 
     USER_TRACK_ADDED_TO_FIRST("&b{}&a isn't in any groups on this track, so they were added to the first group, &b{}&a in context {}&a.", true),
     USER_PROMOTE_NOT_ON_TRACK("&b{}&a isn't in any groups on this track, so was not promoted.", true),
     USER_PROMOTE_SUCCESS("&aPromoting &b{}&a along track &b{}&a from &b{}&a to &b{}&a in context {}&a.", true),
-
     USER_PROMOTE_ERROR_ENDOFTRACK("&aThe end of track &b{}&a was reached. Unable to promote &b{}&a.", true),
     USER_PROMOTE_ERROR_MALFORMED(
             "{PREFIX}&aThe next group on the track, &b{}&a, no longer exists. Unable to promote user." + "\n" +
             "{PREFIX}&aEither create the group, or remove it from the track and try again.",
             false
     ),
+
     USER_DEMOTE_SUCCESS("&aDemoting &b{}&a along track &b{}&a from &b{}&a to &b{}&a in context {}&a.", true),
     USER_DEMOTE_ENDOFTRACK("&aThe end of track &b{}&a was reached, so &b{}&a was removed from &b{}&a.", true),
     USER_DEMOTE_ENDOFTRACK_NOT_REMOVED("&aThe end of track &b{}&a was reached, but &b{}&a was not removed from the first group.", true),

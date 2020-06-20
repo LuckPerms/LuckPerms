@@ -50,11 +50,12 @@ import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.track.PromotionResult;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class UserPromote extends ChildCommand<User> {
     public UserPromote(LocaleManager locale) {
-        super(CommandSpec.USER_PROMOTE.localize(locale), "promote", CommandPermission.USER_PROMOTE, Predicates.is(0));
+        super(CommandSpec.USER_PROMOTE.localize(locale), "promote", CommandPermission.USER_PROMOTE, Predicates.alwaysFalse());
     }
 
     @Override
@@ -65,6 +66,19 @@ public class UserPromote extends ChildCommand<User> {
         }
 
         boolean addToFirst = !args.remove("--dont-add-to-first");
+
+        // if args is empty - use the only/default track
+        if (args.isEmpty()) {
+            Set<String> tracks = plugin.getTrackManager().getAll().keySet();
+            if (tracks.size() == 1) {
+                args.add(tracks.iterator().next());
+            } else if (tracks.contains("default")) {
+                args.add("default");
+            } else {
+                Message.USER_TRACK_ERROR_AMBIGUOUS_TRACK_SELECTION.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+        }
 
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
