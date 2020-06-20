@@ -108,6 +108,33 @@ public class ArgumentParser {
         return true;
     }
 
+    public static Duration parseDurationOrElse(int index, List<String> args, Duration other) throws ArgumentException {
+        if (index < 0 || index >= args.size()) {
+            return other;
+        }
+
+        String input = args.get(index);
+        Duration duration;
+
+        try {
+            long number = Long.parseLong(input);
+            Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+            duration = Duration.between(now, Instant.ofEpochSecond(number));
+        } catch (NumberFormatException e) {
+            try {
+                duration = DurationParser.parseDuration(input);
+            } catch (IllegalArgumentException e1) {
+                return other;
+            }
+        }
+
+        if (duration.isNegative()) {
+            throw new PastDateException();
+        }
+
+        return duration;
+    }
+
     public static Duration parseDuration(int index, List<String> args) throws ArgumentException {
         String input = args.get(index);
         Duration duration;

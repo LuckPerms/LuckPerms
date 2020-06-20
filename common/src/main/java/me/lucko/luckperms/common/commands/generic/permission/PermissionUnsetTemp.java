@@ -43,6 +43,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
@@ -51,6 +52,7 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 
+import java.time.Duration;
 import java.util.List;
 
 public class PermissionUnsetTemp extends GenericChildCommand {
@@ -66,7 +68,8 @@ public class PermissionUnsetTemp extends GenericChildCommand {
         }
 
         String node = ArgumentParser.parseString(0, args);
-        MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
+        Duration duration = ArgumentParser.parseDurationOrElse(1, args, null);
+        MutableContextSet context = ArgumentParser.parseContext(duration == null ? 1 : 2, args, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
@@ -84,14 +87,30 @@ public class PermissionUnsetTemp extends GenericChildCommand {
             }
         }
 
-        DataMutateResult result = holder.unsetNode(DataType.NORMAL, builtNode);
+        DataMutateResult.WithMergedNode result = holder.unsetNode(DataType.NORMAL, builtNode, duration);
+        if (result.getResult().wasSuccessful()) {
+            Node mergedNode = result.getMergedNode();
+            //noinspection ConstantConditions
+            if (mergedNode != null) {
+                Message.UNSET_TEMP_PERMISSION_SUBTRACT_SUCCESS.send(sender,
+                        mergedNode.getKey(),
+                        mergedNode.getValue(),
+                        holder.getFormattedDisplayName(),
+                        DurationFormatter.LONG.format(mergedNode.getExpiryDuration()),
+                        MessageUtils.contextSetToString(plugin.getLocaleManager(), context),
+                        DurationFormatter.LONG.format(duration)
+                );
 
-        if (result.wasSuccessful()) {
-            Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+                LoggedAction.build().source(sender).target(holder)
+                        .description("permission", "unsettemp", node, duration, context)
+                        .build().submit(plugin, sender);
+            } else {
+                Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            LoggedAction.build().source(sender).target(holder)
-                    .description("permission", "unsettemp", node, context)
-                    .build().submit(plugin, sender);
+                LoggedAction.build().source(sender).target(holder)
+                        .description("permission", "unsettemp", node, context)
+                        .build().submit(plugin, sender);
+            }
 
             StorageAssistant.save(holder, sender, plugin);
             return CommandResult.SUCCESS;

@@ -281,6 +281,7 @@ public enum Message {
     DOES_NOT_HAVE_PERMISSION("&b{}&a does not have &b{}&a set in context {}&a.", true),
 
     UNSET_TEMP_PERMISSION_SUCCESS("&aUnset temporary permission &b{}&a for &b{}&a in context {}&a.", true),
+    UNSET_TEMP_PERMISSION_SUBTRACT_SUCCESS("&aSet &b{}&a to &b{}&a for &b{}&a for a duration of &b{}&a in context {}&a, &b{}&a less than before.", true),
     DOES_NOT_HAVE_TEMP_PERMISSION("&b{}&a does not have &b{}&a set temporarily in context {}&a.", true),
 
     SET_INHERIT_SUCCESS("&b{}&a now inherits permissions from &b{}&a in context {}&a.", true),
@@ -289,6 +290,7 @@ public enum Message {
     SET_TRACK_PARENT_SUCCESS("&b{}&a had their existing parent groups on track &b{}&a cleared, and now only inherits &b{}&a in context {}&a.", true),
     UNSET_INHERIT_SUCCESS("&b{}&a no longer inherits permissions from &b{}&a in context {}&a.", true),
     UNSET_TEMP_INHERIT_SUCCESS("&b{}&a no longer temporarily inherits permissions from &b{}&a in context {}&a.", true),
+    UNSET_TEMP_INHERIT_SUBTRACT_SUCCESS("&b{}&a will inherit permissions from &b{}&a for a duration of &b{}&a in context {}&a, &b{}&a less than before.", true),
 
     CLEAR_SUCCESS("&b{}&a's nodes were cleared in context {}&a. (&b{}&a nodes were removed.)", true),
     CLEAR_SUCCESS_SINGULAR("&b{}&a's nodes were cleared in context {}&a. (&b{}&a node was removed.)", true),

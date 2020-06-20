@@ -555,6 +555,39 @@ public abstract class PermissionHolder {
         return DataMutateResult.SUCCESS;
     }
 
+    public DataMutateResult.WithMergedNode unsetNode(DataType dataType, Node node, @Nullable Duration duration) {
+        if (node.getExpiry() != null && duration != null) {
+            Node otherMatch = getData(dataType).immutable().values().stream()
+                    .filter(NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE.equalTo(node))
+                    .findFirst().orElse(null);
+
+            if (otherMatch != null && otherMatch.getExpiry() != null) {
+                NodeMap data = getData(dataType);
+
+                Instant newExpiry = otherMatch.getExpiry().minus(duration);
+
+                if (newExpiry.isAfter(Instant.now())) {
+                    Node newNode = node.toBuilder().expiry(newExpiry).build();
+
+                    // Remove the old Node & add the new one.
+                    ImmutableCollection<? extends Node> before = data.immutable().values();
+
+                    data.replace(newNode, otherMatch);
+                    invalidateCache();
+
+                    ImmutableCollection<? extends Node> after = data.immutable().values();
+                    this.plugin.getEventDispatcher().dispatchNodeRemove(otherMatch, this, dataType, before, after);
+                    this.plugin.getEventDispatcher().dispatchNodeAdd(newNode, this, dataType, before, after);
+
+                    return new MergedNodeResult(DataMutateResult.SUCCESS, newNode);
+                }
+            }
+        }
+
+        // Fallback to the normal handling.
+        return new MergedNodeResult(unsetNode(dataType, node), null);
+    }
+
     public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate, boolean giveDefault) {
         NodeMap data = getData(dataType);
         ImmutableCollection<? extends Node> before = data.immutable().values();

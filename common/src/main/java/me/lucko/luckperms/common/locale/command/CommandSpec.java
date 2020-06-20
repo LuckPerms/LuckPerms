@@ -240,6 +240,7 @@ public enum CommandSpec {
     PERMISSION_UNSETTEMP("Unsets a temporary permission for the object",
             Argument.list(
                     Argument.create("node", true, "the permission node to unset"),
+                    Argument.create("duration", false, "the duration to subtract"),
                     Argument.create("context...", false, "the contexts to remove the permission in")
             )
     ),
@@ -303,6 +304,7 @@ public enum CommandSpec {
     PARENT_REMOVE_TEMP("Removes a previously set temporary inheritance rule",
             Argument.list(
                     Argument.create("group", true, "the group to remove"),
+                    Argument.create("duration", false, "the duration to subtract"),
                     Argument.create("context...", false, "the contexts to remove the group in")
             )
     ),

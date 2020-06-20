@@ -105,6 +105,9 @@ luckperms {
         unsettemp {
           node brigadier:string quotable_phrase {
             context brigadier:string greedy_phrase;
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
           }
         }
         check {
@@ -156,6 +159,9 @@ luckperms {
         removetemp {
           group brigadier:string single_word {
             context brigadier:string greedy_phrase;
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
           }
         }
         clear {
@@ -347,6 +353,9 @@ luckperms {
         unsettemp {
           node brigadier:string quotable_phrase {
             context brigadier:string greedy_phrase;
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
           }
         }
         check {
@@ -398,6 +407,9 @@ luckperms {
         removetemp {
           group brigadier:string single_word {
             context brigadier:string greedy_phrase;
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
           }
         }
         clear {
