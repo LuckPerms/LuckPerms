@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -57,24 +58,24 @@ public class GroupInfo extends ChildCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), group)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
         Message.GROUP_INFO_GENERAL.send(sender,
-                group.getName(),
-                group.getPlainDisplayName(),
-                group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None"
+                target.getName(),
+                target.getPlainDisplayName(),
+                target.getWeight().isPresent() ? target.getWeight().getAsInt() : "None"
         );
 
-        List<InheritanceNode> parents = group.normalData().inheritanceAsSortedSet().stream()
+        List<InheritanceNode> parents = target.normalData().inheritanceAsSortedSet().stream()
                 .filter(Node::getValue)
                 .filter(n -> !n.hasExpiry())
                 .collect(Collectors.toList());
 
-        List<InheritanceNode> tempParents = group.normalData().inheritanceAsSortedSet().stream()
+        List<InheritanceNode> tempParents = target.normalData().inheritanceAsSortedSet().stream()
                 .filter(Node::getValue)
                 .filter(Node::hasExpiry)
                 .collect(Collectors.toList());
@@ -100,7 +101,7 @@ public class GroupInfo extends ChildCommand<Group> {
         String suffix = "&bNone";
         String meta = "&bNone";
 
-        MetaCache data = group.getCachedData().getMetaData(queryOptions);
+        MetaCache data = target.getCachedData().getMetaData(queryOptions);
         String prefixValue = data.getPrefix(MetaCheckEvent.Origin.INTERNAL);
         if (prefixValue != null) {
             prefix = "&f\"" + prefixValue + "&f\"";

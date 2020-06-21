@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.backup.Importer;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -45,7 +46,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPInputStream;
 
@@ -57,7 +57,7 @@ public class ImportCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         if (this.running.get()) {
             Message.IMPORT_ALREADY_RUNNING.send(sender);
             return CommandResult.STATE_ERROR;

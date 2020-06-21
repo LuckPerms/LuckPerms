@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -48,7 +49,6 @@ import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 public class TreeCommand extends SingleCommand {
@@ -57,7 +57,7 @@ public class TreeCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         String selection = ".";
         String player = null;
 

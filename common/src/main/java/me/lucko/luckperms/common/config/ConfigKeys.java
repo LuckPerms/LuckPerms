@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
 import me.lucko.luckperms.common.config.generic.key.SimpleConfigKey;
@@ -164,12 +163,15 @@ public final class ConfigKeys {
      * Controls how temporary add commands should behave
      */
     public static final ConfigKey<TemporaryNodeMergeStrategy> TEMPORARY_ADD_BEHAVIOUR = key(c -> {
-        String option = c.getString("temporary-add-behaviour", "deny").toLowerCase();
-        if (!option.equals("deny") && !option.equals("replace") && !option.equals("accumulate")) {
-            option = "deny";
+        String value = c.getString("temporary-add-behaviour", "deny");
+        switch (value.toLowerCase()) {
+            case "accumulate":
+                return TemporaryNodeMergeStrategy.ADD_NEW_DURATION_TO_EXISTING;
+            case "replace":
+                return TemporaryNodeMergeStrategy.REPLACE_EXISTING_IF_DURATION_LONGER;
+            default:
+                return TemporaryNodeMergeStrategy.NONE;
         }
-
-        return ArgumentParser.parseTemporaryModifier(option);
     });
 
     /**

@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.commands.misc;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -36,7 +37,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
-import java.util.List;
 import java.util.Optional;
 
 public class NetworkSyncCommand extends SingleCommand {
@@ -45,7 +45,7 @@ public class NetworkSyncCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Message.UPDATE_TASK_REQUEST.send(sender);
         plugin.getSyncTaskBuffer().request().join();
         Message.UPDATE_TASK_COMPLETE_NETWORK.send(sender);

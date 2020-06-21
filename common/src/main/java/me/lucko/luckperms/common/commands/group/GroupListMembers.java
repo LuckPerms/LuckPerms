@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -76,24 +76,24 @@ public class GroupListMembers extends ChildCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), group)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        InheritanceNode node = Inheritance.builder(group.getName()).build();
+        InheritanceNode node = Inheritance.builder(target.getName()).build();
         ConstraintNodeMatcher<InheritanceNode> matcher = StandardNodeMatchers.key(node);
-        int page = ArgumentParser.parseIntOrElse(0, args, 1);
+        int page = args.getIntOrDefault(0, 1);
 
-        Message.SEARCH_SEARCHING_MEMBERS.send(sender, group.getName());
+        Message.SEARCH_SEARCHING_MEMBERS.send(sender, target.getName());
 
         List<NodeEntry<UUID, InheritanceNode>> matchedUsers = plugin.getStorage().searchUserNodes(matcher).join().stream()
                 .filter(n -> n.getNode().getValue())
                 .collect(Collectors.toList());
 
         // special handling for default group
-        if (group.getName().equals(GroupManager.DEFAULT_GROUP_NAME)) {
+        if (target.getName().equals(GroupManager.DEFAULT_GROUP_NAME)) {
             // include all non-saved online players in the results
             for (User user : plugin.getUserManager().getAll().values()) {
                 if (!plugin.getUserManager().shouldSave(user)) {

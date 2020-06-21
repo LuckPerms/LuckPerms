@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -58,26 +59,26 @@ public class UserInfo extends ChildCommand<User> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), user)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User target, ArgumentList args, String label) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        Message status = plugin.getBootstrap().isPlayerOnline(user.getUniqueId()) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
+        Message status = plugin.getBootstrap().isPlayerOnline(target.getUniqueId()) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
         Message.USER_INFO_GENERAL.send(sender,
-                user.getUsername().orElse("Unknown"),
-                user.getUniqueId(),
-                user.getUniqueId().version() == 4 ? "&2mojang" : "&8offline",
+                target.getUsername().orElse("Unknown"),
+                target.getUniqueId(),
+                target.getUniqueId().version() == 4 ? "&2mojang" : "&8offline",
                 status.asString(plugin.getLocaleManager())
         );
 
-        List<InheritanceNode> parents = user.normalData().inheritanceAsSortedSet().stream()
+        List<InheritanceNode> parents = target.normalData().inheritanceAsSortedSet().stream()
                 .filter(Node::getValue)
                 .filter(n -> !n.hasExpiry())
                 .collect(Collectors.toList());
 
-        List<InheritanceNode> tempParents = user.normalData().inheritanceAsSortedSet().stream()
+        List<InheritanceNode> tempParents = target.normalData().inheritanceAsSortedSet().stream()
                 .filter(Node::getValue)
                 .filter(Node::hasExpiry)
                 .collect(Collectors.toList());
@@ -97,7 +98,7 @@ public class UserInfo extends ChildCommand<User> {
             }
         }
 
-        QueryOptions queryOptions = plugin.getQueryOptionsForUser(user).orElse(null);
+        QueryOptions queryOptions = plugin.getQueryOptionsForUser(target).orElse(null);
         boolean active = true;
 
         if (queryOptions == null) {
@@ -117,7 +118,7 @@ public class UserInfo extends ChildCommand<User> {
                     .collect(Collectors.joining(" "));
         }
 
-        MetaCache data = user.getCachedData().getMetaData(queryOptions);
+        MetaCache data = target.getCachedData().getMetaData(queryOptions);
         String prefixValue = data.getPrefix(MetaCheckEvent.Origin.INTERNAL);
         if (prefixValue != null) {
             prefix = "&f\"" + prefixValue + "&f\"";
@@ -126,7 +127,7 @@ public class UserInfo extends ChildCommand<User> {
         if (sussexValue != null) {
             suffix = "&f\"" + sussexValue + "&f\"";
         }
-        String primaryGroup = user.getCachedData().getMetaData(queryOptions).getPrimaryGroup(MetaCheckEvent.Origin.INTERNAL);
+        String primaryGroup = target.getCachedData().getMetaData(queryOptions).getPrimaryGroup(MetaCheckEvent.Origin.INTERNAL);
 
         Map<String, List<String>> metaMap = data.getMeta(MetaCheckEvent.Origin.INTERNAL);
         if (!metaMap.isEmpty()) {

@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -42,7 +43,6 @@ import me.lucko.luckperms.common.util.Predicates;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -86,7 +86,7 @@ public class LogNotify extends ChildCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
         if (sender.isConsole()) {
             Message.LOG_NOTIFY_CONSOLE.send(sender);
             return CommandResult.SUCCESS;

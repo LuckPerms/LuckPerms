@@ -27,13 +27,13 @@ package me.lucko.luckperms.common.command.abstraction;
 
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.command.Argument;
 import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -46,11 +46,11 @@ public abstract class SingleCommand extends Command<Void> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void ignored, ArgumentList args, String label) throws CommandException {
         return execute(plugin, sender, args, label);
     }
 
-    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) throws CommandException;
+    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) throws CommandException;
 
     @Override
     public void sendUsage(Sender sender, String label) {

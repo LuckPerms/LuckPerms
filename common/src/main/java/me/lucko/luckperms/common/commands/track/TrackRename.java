@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -42,15 +43,13 @@ import me.lucko.luckperms.common.util.Predicates;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 
-import java.util.List;
-
 public class TrackRename extends ChildCommand<Track> {
     public TrackRename(LocaleManager locale) {
         super(CommandSpec.TRACK_RENAME.localize(locale), "rename", CommandPermission.TRACK_RENAME, Predicates.not(1));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
         String newTrackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(newTrackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, newTrackName);
@@ -72,18 +71,18 @@ public class TrackRename extends ChildCommand<Track> {
         }
 
         try {
-            plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).get();
+            plugin.getStorage().deleteTrack(target, DeletionCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.DELETE_ERROR.send(sender, track.getName());
+            Message.DELETE_ERROR.send(sender, target.getName());
             return CommandResult.FAILURE;
         }
 
-        newTrack.setGroups(track.getGroups());
+        newTrack.setGroups(target.getGroups());
 
-        Message.RENAME_SUCCESS.send(sender, track.getName(), newTrack.getName());
+        Message.RENAME_SUCCESS.send(sender, target.getName(), newTrack.getName());
 
-        LoggedAction.build().source(sender).target(track)
+        LoggedAction.build().source(sender).target(target)
                 .description("rename", newTrack.getName())
                 .build().submit(plugin, sender);
 

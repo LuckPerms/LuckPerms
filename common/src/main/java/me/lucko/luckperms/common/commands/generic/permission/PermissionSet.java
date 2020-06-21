@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -59,18 +59,18 @@ public class PermissionSet extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        String node = ArgumentParser.parseString(0, args);
-        boolean value = ArgumentParser.parseBoolean(1, args);
-        MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
+        String node = args.get(0);
+        boolean value = args.getBooleanOrInsert(1, true);
+        MutableContextSet context = args.getContextOrDefault(2, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
-                ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, node)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
@@ -85,25 +85,25 @@ public class PermissionSet extends GenericChildCommand {
             }
         }
 
-        DataMutateResult result = holder.setNode(DataType.NORMAL, builtNode, true);
+        DataMutateResult result = target.setNode(DataType.NORMAL, builtNode, true);
 
         if (result.wasSuccessful()) {
-            Message.SETPERMISSION_SUCCESS.send(sender, node, value, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.SETPERMISSION_SUCCESS.send(sender, node, value, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            LoggedAction.build().source(sender).target(holder)
+            LoggedAction.build().source(sender).target(target)
                     .description("permission", "set", node, value, context)
                     .build().submit(plugin, sender);
 
-            StorageAssistant.save(holder, sender, plugin);
+            StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HASPERMISSION.send(sender, holder.getFormattedDisplayName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HASPERMISSION.send(sender, target.getFormattedDisplayName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.permissions(plugin))
                 .at(1, TabCompletions.booleans())

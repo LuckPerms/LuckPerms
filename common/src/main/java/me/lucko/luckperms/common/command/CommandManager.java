@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.commands.group.CreateGroup;
 import me.lucko.luckperms.common.commands.group.DeleteGroup;
 import me.lucko.luckperms.common.commands.group.GroupParentCommand;
@@ -200,7 +201,7 @@ public class CommandManager {
         // Try to execute the command.
         CommandResult result;
         try {
-            result = main.execute(this.plugin, sender, null, arguments, label);
+            result = main.execute(this.plugin, sender, null, new ArgumentList(arguments), label);
         } catch (CommandException e) {
             result = e.handle(sender, label, main);
         } catch (Throwable e) {
@@ -224,7 +225,7 @@ public class CommandManager {
                 .from(1, partial -> mains.stream()
                         .filter(m -> m.getName().equalsIgnoreCase(arguments.get(0)))
                         .findFirst()
-                        .map(cmd -> cmd.tabComplete(this.plugin, sender, arguments.subList(1, arguments.size())))
+                        .map(cmd -> cmd.tabComplete(this.plugin, sender, new ArgumentList(arguments.subList(1, arguments.size()))))
                         .orElse(Collections.emptyList())
                 )
                 .complete(arguments);

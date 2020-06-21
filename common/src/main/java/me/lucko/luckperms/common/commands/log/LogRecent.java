@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -51,27 +51,27 @@ public class LogRecent extends ChildCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
         if (args.isEmpty()) {
             // No page or user
             Paginated<LoggedAction> content = new Paginated<>(log.getContent());
             return showLog(content.getMaxPages(ENTRIES_PER_PAGE), false, sender, content);
         }
 
-        int page = ArgumentParser.parseIntOrElse(0, args, Integer.MIN_VALUE);
+        int page = args.getIntOrDefault(0, Integer.MIN_VALUE);
         if (page != Integer.MIN_VALUE) {
             Paginated<LoggedAction> content = new Paginated<>(log.getContent());
             return showLog(page, false, sender, content);
         }
 
         // User and possibly page
-        UUID uuid = ArgumentParser.parseUserTarget(0, args, plugin, sender);
+        UUID uuid = args.getUserTarget(0, plugin, sender);
         if (uuid == null) {
             return CommandResult.INVALID_ARGS;
         }
 
         Paginated<LoggedAction> content = new Paginated<>(log.getContent(uuid));
-        page = ArgumentParser.parseIntOrElse(1, args, Integer.MIN_VALUE);
+        page = args.getIntOrDefault(1, Integer.MIN_VALUE);
         if (page != Integer.MIN_VALUE) {
             return showLog(page, true, sender, content);
         } else {

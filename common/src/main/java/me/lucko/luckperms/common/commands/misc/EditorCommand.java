@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -67,12 +67,12 @@ public class EditorCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Type type = Type.ALL;
         String filter = null;
 
         // attempt to parse type
-        String arg0 = ArgumentParser.parseStringOrElse(0, args, null);
+        String arg0 = args.getOrDefault(0, null);
         if (arg0 != null) {
             try {
                 type = Type.valueOf(arg0.toUpperCase());
@@ -82,7 +82,7 @@ public class EditorCommand extends SingleCommand {
             }
 
             if (filter == null) {
-                filter = ArgumentParser.parseStringOrElse(1, args, null);
+                filter = args.getOrDefault(1, null);
             }
         }
 

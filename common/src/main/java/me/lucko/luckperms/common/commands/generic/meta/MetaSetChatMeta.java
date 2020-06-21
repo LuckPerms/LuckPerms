@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -89,20 +89,20 @@ public class MetaSetChatMeta extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        int priority = ArgumentParser.parseIntOrElse(0, args, Integer.MIN_VALUE);
+        int priority = args.getIntOrDefault(0, Integer.MIN_VALUE);
         String meta;
         MutableContextSet context;
 
         if (priority == Integer.MIN_VALUE) {
             // priority wasn't defined, meta is at index 0, contexts at index 1
-            meta = ArgumentParser.parseString(0, args);
-            context = ArgumentParser.parseContext(1, args, plugin);
+            meta = args.get(0);
+            context = args.getContextOrDefault(1, plugin);
         } else {
             // priority was defined, meta should be at index 1, contexts at index 2
             if (args.size() <= 1) {
@@ -110,35 +110,35 @@ public class MetaSetChatMeta extends GenericChildCommand {
                 return CommandResult.INVALID_ARGS;
             }
 
-            meta = ArgumentParser.parseString(1, args);
-            context = ArgumentParser.parseContext(2, args, plugin);
+            meta = args.get(1);
+            context = args.getContextOrDefault(2, plugin);
         }
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
-                ArgumentPermissions.checkGroup(plugin, sender, holder, context)) {
+                ArgumentPermissions.checkGroup(plugin, sender, target, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
         // remove all other prefixes/suffixes set in these contexts
-        holder.removeIf(DataType.NORMAL, context, this.type.nodeType()::matches, false);
+        target.removeIf(DataType.NORMAL, context, this.type.nodeType()::matches, false);
 
         // determine the priority to set at
         if (priority == Integer.MIN_VALUE) {
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(context).build());
+            MetaAccumulator metaAccumulator = target.accumulateMeta(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(context).build());
             priority = metaAccumulator.getChatMeta(this.type).keySet().stream().mapToInt(e -> e).max().orElse(0) + 1;
 
-            if (holder instanceof Group) {
-                OptionalInt weight = holder.getWeight();
+            if (target instanceof Group) {
+                OptionalInt weight = target.getWeight();
                 if (weight.isPresent() && weight.getAsInt() > priority) {
                     priority = weight.getAsInt();
                 }
             }
         }
 
-        DataMutateResult result = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).withContext(context).build(), true);
+        DataMutateResult result = target.setNode(DataType.NORMAL, this.type.builder(meta, priority).withContext(context).build(), true);
         if (result.wasSuccessful()) {
-            TextComponent.Builder builder = Message.ADD_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
+            TextComponent.Builder builder = Message.ADD_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
                     "§3Raw " + this.type.name().toLowerCase() + ": §r" + meta,
                     '§'
@@ -146,20 +146,20 @@ public class MetaSetChatMeta extends GenericChildCommand {
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
-            LoggedAction.build().source(sender).target(holder)
+            LoggedAction.build().source(sender).target(target)
                     .description("meta" , "set" + this.type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
-            StorageAssistant.save(holder, sender, plugin);
+            StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HAS_CHAT_META.send(sender, target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .from(1, TabCompletions.contexts(plugin))
                 .complete(args);

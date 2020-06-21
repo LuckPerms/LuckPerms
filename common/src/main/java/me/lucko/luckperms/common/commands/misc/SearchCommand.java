@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -75,7 +75,7 @@ public class SearchCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Comparison comparison = StandardComparison.parseComparison(args.get(0));
         if (comparison == null) {
             comparison = StandardComparison.EQUAL;
@@ -83,7 +83,7 @@ public class SearchCommand extends SingleCommand {
         }
 
         ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.of(Constraint.of(comparison, args.get(1)));
-        int page = ArgumentParser.parseIntOrElse(2, args, 1);
+        int page = args.getIntOrDefault(2, 1);
 
         Message.SEARCH_SEARCHING.send(sender, matcher);
 
@@ -122,7 +122,7 @@ public class SearchCommand extends SingleCommand {
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.permissions(plugin))
                 .complete(args);

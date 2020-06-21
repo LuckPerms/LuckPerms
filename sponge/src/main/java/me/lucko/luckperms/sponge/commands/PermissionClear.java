@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.commands;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -39,16 +39,14 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
 import net.luckperms.api.context.ImmutableContextSet;
 
-import java.util.List;
-
 public class PermissionClear extends ChildCommand<LPSubjectData> {
     public PermissionClear(LocaleManager locale) {
         super(CommandSpec.SPONGE_PERMISSION_CLEAR.localize(locale), "clear", CommandPermission.SPONGE_PERMISSION_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) {
-        ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(0, args);
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
+        ImmutableContextSet contextSet = args.getContextOrEmpty(0);
         if (contextSet.isEmpty()) {
             subjectData.clearPermissions();
             Message.BLANK.send(sender, "&aCleared permissions matching contexts &bANY&a.");

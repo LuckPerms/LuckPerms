@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.commands.misc.EditorCommand;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -67,8 +68,8 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder) || ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSetImpl.EMPTY)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T target, ArgumentList args, String label) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target) || ArgumentPermissions.checkGroup(plugin, sender, target, ImmutableContextSetImpl.EMPTY)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
@@ -76,8 +77,8 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
         List<PermissionHolder> holders = new ArrayList<>();
 
         // also include users who are a member of the group
-        if (holder instanceof Group) {
-            Group group = (Group) holder;
+        if (target instanceof Group) {
+            Group group = (Group) target;
             ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.key(Inheritance.key(group.getName()));
 
             Map<UUID, User> users = new LinkedHashMap<>(plugin.getUserManager().getAll());
@@ -114,7 +115,7 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
         }
 
         // include the original holder too
-        holders.add(holder);
+        holders.add(target);
 
         Message.EDITOR_START.send(sender);
 

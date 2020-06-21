@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.commands;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -39,18 +39,16 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
 import net.luckperms.api.context.ImmutableContextSet;
 
-import java.util.List;
-
 public class OptionSet extends ChildCommand<LPSubjectData> {
     public OptionSet(LocaleManager locale) {
         super(CommandSpec.SPONGE_OPTION_SET.localize(locale), "set", CommandPermission.SPONGE_OPTION_SET, Predicates.inRange(0, 1));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
         String key = args.get(0);
         String value = args.get(1);
-        ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(2, args);
+        ImmutableContextSet contextSet = args.getContextOrEmpty(2);
 
         if (subjectData.setOption(contextSet, key, value).join()) {
             Message.BLANK.send(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));

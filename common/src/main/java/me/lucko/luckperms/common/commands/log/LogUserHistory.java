@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -51,15 +51,15 @@ public class LogUserHistory extends ChildCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
-        UUID uuid = ArgumentParser.parseUserTarget(0, args, plugin, sender);
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
+        UUID uuid = args.getUserTarget(0, plugin, sender);
         if (uuid == null) {
             return CommandResult.INVALID_ARGS;
         }
 
         Paginated<LoggedAction> content = new Paginated<>(log.getUserHistory(uuid));
 
-        int page = ArgumentParser.parseIntOrElse(1, args, Integer.MIN_VALUE);
+        int page = args.getIntOrDefault(1, Integer.MIN_VALUE);
         if (page != Integer.MIN_VALUE) {
             return showLog(page, sender, content);
         } else {

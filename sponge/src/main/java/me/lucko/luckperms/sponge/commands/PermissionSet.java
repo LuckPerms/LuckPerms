@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -41,18 +41,16 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.util.Tristate;
 
-import java.util.List;
-
 public class PermissionSet extends ChildCommand<LPSubjectData> {
     public PermissionSet(LocaleManager locale) {
         super(CommandSpec.SPONGE_PERMISSION_SET.localize(locale), "set", CommandPermission.SPONGE_PERMISSION_SET, Predicates.inRange(0, 1));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) throws CommandException {
         String node = args.get(0);
         Tristate tristate = SpongeCommandUtils.parseTristate(1, args);
-        ImmutableContextSet contextSet = ArgumentParser.parseContextSponge(2, args);
+        ImmutableContextSet contextSet = args.getContextOrEmpty(2);
 
         if (subjectData.setPermission(contextSet, node, tristate).join()) {
             Message.BLANK.send(sender, "&aSet &b" + node + "&a to &b" + tristate.toString().toLowerCase() + "&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));

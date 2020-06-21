@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.backup.Exporter;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -39,7 +40,6 @@ import me.lucko.luckperms.common.util.Predicates;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ExportCommand extends SingleCommand {
@@ -50,7 +50,7 @@ public class ExportCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         if (this.running.get()) {
             Message.EXPORT_ALREADY_RUNNING.send(sender);
             return CommandResult.STATE_ERROR;

@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -52,35 +53,35 @@ public class TrackRemove extends ChildCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
         String groupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
             sendDetailedUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
-        DataMutateResult result = track.removeGroup(groupName);
+        DataMutateResult result = target.removeGroup(groupName);
 
         if (result.wasSuccessful()) {
-            Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
-            if (track.getGroups().size() > 1) {
-                Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups()));
+            Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, target.getName());
+            if (target.getGroups().size() > 1) {
+                Message.BLANK.send(sender, MessageUtils.listToArrowSep(target.getGroups()));
             }
 
-            LoggedAction.build().source(sender).target(track)
+            LoggedAction.build().source(sender).target(target)
                     .description("remove", groupName)
                     .build().submit(plugin, sender);
 
-            StorageAssistant.save(track, sender, plugin);
+            StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), groupName);
+            Message.TRACK_DOES_NOT_CONTAIN.send(sender, target.getName(), groupName);
             return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.groups(plugin))
                 .complete(args);

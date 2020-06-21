@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -53,7 +53,7 @@ public class LogTrackHistory extends ChildCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
         String track = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(track)) {
             Message.TRACK_INVALID_ENTRY.send(sender, track);
@@ -62,7 +62,7 @@ public class LogTrackHistory extends ChildCommand<Log> {
 
         Paginated<LoggedAction> content = new Paginated<>(log.getTrackHistory(track));
 
-        int page = ArgumentParser.parseIntOrElse(1, args, Integer.MIN_VALUE);
+        int page = args.getIntOrDefault(1, Integer.MIN_VALUE);
         if (page != Integer.MIN_VALUE) {
             return showLog(page, sender, content);
         } else {
@@ -105,7 +105,7 @@ public class LogTrackHistory extends ChildCommand<Log> {
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.tracks(plugin))
                 .complete(args);
