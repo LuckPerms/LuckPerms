@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.cacheddata;
 
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.common.cache.MRUCache;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 
+import net.luckperms.api.cacheddata.CachedData;
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.cacheddata.CachedPermissionData;
@@ -57,19 +58,14 @@ import java.util.concurrent.TimeUnit;
  * Abstract implementation of {@link CachedDataManager}.
  */
 public abstract class AbstractCachedDataManager implements CachedDataManager {
-
-    /**
-     * The plugin instance
-     */
     private final LuckPermsPlugin plugin;
-
-    private final Permission permissionDataManager;
-    private final Meta metaDataManager;
+    private final AbstractContainer<PermissionCache, CachedPermissionData> permission;
+    private final AbstractContainer<MetaCache, CachedMetaData> meta;
 
     protected AbstractCachedDataManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        this.permissionDataManager = new Permission();
-        this.metaDataManager = new Meta();
+        this.permission = new AbstractContainer<>(this::calculatePermissions);
+        this.meta = new AbstractContainer<>(this::calculateMeta);
     }
 
     public LuckPermsPlugin getPlugin() {
@@ -78,22 +74,22 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
 
     @Override
     public @NonNull Container<CachedPermissionData> permissionData() {
-        return this.permissionDataManager;
+        return this.permission;
     }
 
     @Override
     public @NonNull Container<CachedMetaData> metaData() {
-        return this.metaDataManager;
+        return this.meta;
     }
 
     @Override
     public @NonNull PermissionCache getPermissionData(@NonNull QueryOptions queryOptions) {
-        return this.permissionDataManager.get(queryOptions);
+        return this.permission.get(queryOptions);
     }
 
     @Override
     public @NonNull MetaCache getMetaData(@NonNull QueryOptions queryOptions) {
-        return this.metaDataManager.get(queryOptions);
+        return this.meta.get(queryOptions);
     }
 
     @Override
@@ -181,216 +177,123 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
 
     @Override
     public final void invalidate() {
-        this.permissionDataManager.invalidate();
-        this.metaDataManager.invalidate();
+        this.permission.invalidate();
+        this.meta.invalidate();
     }
 
     @Override
     public final void invalidatePermissionCalculators() {
-        this.permissionDataManager.cache.synchronous().asMap().values().forEach(PermissionCache::invalidateCache);
+        this.permission.cache.asMap().values().forEach(PermissionCache::invalidateCache);
     }
 
     public final void performCacheCleanup() {
-        this.permissionDataManager.cache.synchronous().cleanUp();
-        this.metaDataManager.cache.synchronous().cleanUp();
+        this.permission.cache.cleanUp();
+        this.meta.cache.cleanUp();
     }
 
-    private final class Permission extends MRUCache<RecentPermissionData> implements Container<CachedPermissionData> {
-        private final AsyncLoadingCache<QueryOptions, PermissionCache> cache = CaffeineFactory.newBuilder()
-                .expireAfterAccess(2, TimeUnit.MINUTES)
-                .buildAsync(new PermissionCacheLoader());
+    private static final class AbstractContainer<C extends I, I extends CachedData> extends MRUCache<RecentData<C>> implements Container<I> {
+        private final Loader<QueryOptions, C> cacheLoader;
+        private final LoadingCache<QueryOptions, C> cache;
+
+        public AbstractContainer(Loader<QueryOptions, C> cacheLoader) {
+            this.cacheLoader = cacheLoader;
+            this.cache = CaffeineFactory.newBuilder()
+                    .expireAfterAccess(2, TimeUnit.MINUTES)
+                    .build(this.cacheLoader);
+        }
 
         @Override
-        public @NonNull PermissionCache get(@NonNull QueryOptions queryOptions) {
+        public @NonNull C get(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
 
-            RecentPermissionData recent = getRecent();
+            RecentData<C> recent = getRecent();
             if (recent != null && queryOptions.equals(recent.queryOptions)) {
-                return recent.permissionData;
+                return recent.data;
             }
 
             int modCount = modCount();
-            PermissionCache data = this.cache.synchronous().get(queryOptions);
-            offerRecent(modCount, new RecentPermissionData(queryOptions, data));
+            C data = this.cache.get(queryOptions);
+            offerRecent(modCount, new RecentData<>(queryOptions, data));
 
             //noinspection ConstantConditions
             return data;
         }
 
         @Override
-        public @NonNull PermissionCache calculate(@NonNull QueryOptions queryOptions) {
+        public @NonNull C calculate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
-            return calculatePermissions(queryOptions, null);
+            return this.cacheLoader.load(queryOptions);
         }
 
         @Override
         public void recalculate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
-            this.cache.synchronous().refresh(queryOptions);
+            this.cache.refresh(queryOptions);
             clearRecent();
         }
 
         @Override
-        public @NonNull CompletableFuture<? extends PermissionCache> reload(@NonNull QueryOptions queryOptions) {
+        public @NonNull CompletableFuture<? extends C> reload(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
 
-            // get the previous value - to use when recalculating
-            CompletableFuture<PermissionCache> previous = this.cache.getIfPresent(queryOptions);
+            // get the previous value - we can reuse the same instance
+            C previous = this.cache.getIfPresent(queryOptions);
 
-            // invalidate any previous setting
-            this.cache.synchronous().invalidate(queryOptions);
+            // invalidate the previous value until we're done recalculating
+            this.cache.invalidate(queryOptions);
             clearRecent();
 
-            // if the previous value is already calculated, use it when recalculating.
-            PermissionCache value = getIfReady(previous);
-            if (value != null) {
-                return this.cache.get(queryOptions, c -> calculatePermissions(c, value));
+            // request recalculation from the cache
+            if (previous != null) {
+                return CompletableFuture.supplyAsync(
+                        () -> this.cache.get(queryOptions, c -> this.cacheLoader.reload(c, previous)),
+                        CaffeineFactory.executor()
+                );
+            } else {
+                return CompletableFuture.supplyAsync(
+                        () -> this.cache.get(queryOptions),
+                        CaffeineFactory.executor()
+                );
             }
-
-            // otherwise, just calculate a new value
-            return this.cache.get(queryOptions);
         }
 
         @Override
         public void recalculate() {
-            Set<QueryOptions> keys = this.cache.synchronous().asMap().keySet();
+            Set<QueryOptions> keys = this.cache.asMap().keySet();
             keys.forEach(this::recalculate);
         }
 
         @Override
         public @NonNull CompletableFuture<Void> reload() {
-            Set<QueryOptions> keys = this.cache.synchronous().asMap().keySet();
+            Set<QueryOptions> keys = this.cache.asMap().keySet();
             return CompletableFuture.allOf(keys.stream().map(this::reload).toArray(CompletableFuture[]::new));
         }
 
         @Override
         public void invalidate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
-            this.cache.synchronous().invalidate(queryOptions);
+            this.cache.invalidate(queryOptions);
             clearRecent();
         }
 
         @Override
         public void invalidate() {
-            this.cache.synchronous().invalidateAll();
+            this.cache.invalidateAll();
             clearRecent();
         }
     }
 
-    private final class Meta extends MRUCache<RecentMetaData> implements Container<CachedMetaData> {
-        private final AsyncLoadingCache<QueryOptions, MetaCache> cache = CaffeineFactory.newBuilder()
-                .expireAfterAccess(2, TimeUnit.MINUTES)
-                .buildAsync(new MetaCacheLoader());
+    private interface Loader<K, V> extends CacheLoader<K, V> {
+        @NonNull V load(@NonNull K key, @Nullable V oldValue);
 
         @Override
-        public @NonNull MetaCache get(@NonNull QueryOptions queryOptions) {
-            Objects.requireNonNull(queryOptions, "queryOptions");
-
-            RecentMetaData recent = getRecent();
-            if (recent != null && queryOptions.equals(recent.queryOptions)) {
-                return recent.metaData;
-            }
-
-            int modCount = modCount();
-            MetaCache data = this.cache.synchronous().get(queryOptions);
-            offerRecent(modCount, new RecentMetaData(queryOptions, data));
-
-            //noinspection ConstantConditions
-            return data;
+        default @NonNull V load(@NonNull K key) {
+            return load(key, null);
         }
 
         @Override
-        public @NonNull MetaCache calculate(@NonNull QueryOptions queryOptions) {
-            Objects.requireNonNull(queryOptions, "queryOptions");
-            return calculateMeta(queryOptions, null);
-        }
-
-        @Override
-        public void recalculate(@NonNull QueryOptions queryOptions) {
-            Objects.requireNonNull(queryOptions, "queryOptions");
-            this.cache.synchronous().refresh(queryOptions);
-            clearRecent();
-        }
-
-        @Override
-        public @NonNull CompletableFuture<? extends MetaCache> reload(@NonNull QueryOptions queryOptions) {
-            Objects.requireNonNull(queryOptions, "queryOptions");
-
-            // get the previous value - to use when recalculating
-            CompletableFuture<MetaCache> previous = this.cache.getIfPresent(queryOptions);
-
-            // invalidate any previous setting
-            this.cache.synchronous().invalidate(queryOptions);
-            clearRecent();
-
-            // if the previous value is already calculated, use it when recalculating.
-            MetaCache value = getIfReady(previous);
-            if (value != null) {
-                return this.cache.get(queryOptions, c -> calculateMeta(c, value));
-            }
-
-            // otherwise, just calculate a new value
-            return this.cache.get(queryOptions);
-        }
-
-        @Override
-        public void recalculate() {
-            Set<QueryOptions> keys = this.cache.synchronous().asMap().keySet();
-            keys.forEach(this::recalculate);
-        }
-
-        @Override
-        public @NonNull CompletableFuture<Void> reload() {
-            Set<QueryOptions> keys = this.cache.synchronous().asMap().keySet();
-            return CompletableFuture.allOf(keys.stream().map(this::reload).toArray(CompletableFuture[]::new));
-        }
-
-        @Override
-        public void invalidate(@NonNull QueryOptions queryOptions) {
-            Objects.requireNonNull(queryOptions, "queryOptions");
-            this.cache.synchronous().invalidate(queryOptions);
-            clearRecent();
-        }
-
-        @Override
-        public void invalidate() {
-            this.cache.synchronous().invalidateAll();
-            clearRecent();
-        }
-    }
-
-    private static boolean isReady(@Nullable CompletableFuture<?> future) {
-        return (future != null) && future.isDone()
-                && !future.isCompletedExceptionally()
-                && (future.join() != null);
-    }
-
-    /** Returns the current value or null if either not done or failed. */
-    private static <V> V getIfReady(@Nullable CompletableFuture<V> future) {
-        return isReady(future) ? future.join() : null;
-    }
-
-    private final class PermissionCacheLoader implements CacheLoader<QueryOptions, PermissionCache> {
-        @Override
-        public PermissionCache load(@NonNull QueryOptions queryOptions) {
-            return calculatePermissions(queryOptions, null);
-        }
-
-        @Override
-        public PermissionCache reload(@NonNull QueryOptions queryOptions, @NonNull PermissionCache oldData) {
-            return calculatePermissions(queryOptions, oldData);
-        }
-    }
-
-    private final class MetaCacheLoader implements CacheLoader<QueryOptions, MetaCache> {
-        @Override
-        public MetaCache load(@NonNull QueryOptions queryOptions) {
-            return calculateMeta(queryOptions, null);
-        }
-
-        @Override
-        public MetaCache reload(@NonNull QueryOptions queryOptions, @NonNull MetaCache oldData) {
-            return calculateMeta(queryOptions, oldData);
+        default @NonNull V reload(@NonNull K key, @NonNull V oldValue) {
+            return load(key, oldValue);
         }
     }
 
@@ -399,9 +302,11 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
                 MetaStackDefinition.PREFIX_STACK_KEY :
                 MetaStackDefinition.SUFFIX_STACK_KEY
         ).orElse(null);
+
         if (stack == null) {
             stack = getDefaultMetaStackDefinition(type);
         }
+
         return stack;
     }
     
@@ -412,23 +317,13 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         );
     }
 
-    private static final class RecentPermissionData {
+    private static final class RecentData<T> {
         final QueryOptions queryOptions;
-        final PermissionCache permissionData;
+        final T data;
 
-        RecentPermissionData(QueryOptions queryOptions, PermissionCache permissionData) {
+        RecentData(QueryOptions queryOptions, T data) {
             this.queryOptions = queryOptions;
-            this.permissionData = permissionData;
-        }
-    }
-
-    private static final class RecentMetaData {
-        final QueryOptions queryOptions;
-        final MetaCache metaData;
-
-        RecentMetaData(QueryOptions queryOptions, MetaCache metaData) {
-            this.queryOptions = queryOptions;
-            this.metaData = metaData;
+            this.data = data;
         }
     }
 
