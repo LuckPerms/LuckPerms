@@ -46,13 +46,21 @@ public abstract class MRUCache<T> {
     }
 
     protected void offerRecent(int validAt, T offer) {
-        if (validAt == this.modCount.get()) {
-            this.recent = offer;
+        synchronized (this) {
+            if (validAt == this.modCount.get()) {
+                this.recent = offer;
+            }
         }
     }
 
+    /**
+     * Calling clearRecent effectively resets the instance. any other threads going to call
+     * offerRecent in the future with the previous mod count will be ignored.
+     */
     protected void clearRecent() {
-        this.recent = null;
-        this.modCount.incrementAndGet();
+        synchronized (this) {
+            this.recent = null;
+            this.modCount.incrementAndGet();
+        }
     }
 }
