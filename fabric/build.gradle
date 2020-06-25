@@ -14,10 +14,10 @@ configurations {
     compile.extendsFrom shade
 }
 
-def minecraftVersion = "1.16-rc1"
-def yarnBuild = "1"
+def minecraftVersion = "1.16.1"
+def yarnBuild = 5
 def loaderVersion = "0.8.8+build.202"
-def fabricApiVersion = "0.12.5+build.367-1.16"
+def fabricApiVersion = "0.13.1+build.370-1.16"
 
 dependencies {
     // Fabric Stuff, We don't specifically target only a single version but yarn mappings require a version to be specified.
@@ -29,7 +29,7 @@ dependencies {
     Set<String> apiModules = [
             "fabric-api-base",
             "fabric-command-api-v1",
-            "fabric-events-lifecycle-v0",
+            "fabric-events-lifecycle-v0", // TODO: Update to v1 when merged
             "fabric-networking-v0" // TODO: Use networking v1 when released
     ]
 
