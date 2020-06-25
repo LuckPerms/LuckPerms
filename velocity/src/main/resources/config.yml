@@ -138,7 +138,7 @@ data:
       #verifyServerCertificate: false
 
   # The prefix for all LuckPerms SQL tables.
-  # - Change this is you want to use different tables for different servers.
+  # - Change this if you want to use different tables for different servers.
   table-prefix: 'luckperms_'
 
   # The prefix to use for all LuckPerms collections. Change this if you want to use different
