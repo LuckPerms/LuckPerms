@@ -75,6 +75,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -379,9 +381,10 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     public Stream<Sender> getOnlineSenders() {
+        List<Player> players = new ArrayList<>(this.bootstrap.getServer().getOnlinePlayers());
         return Stream.concat(
                 Stream.of(getConsoleSender()),
-                this.bootstrap.getServer().getOnlinePlayers().stream().map(p -> getSenderFactory().wrap(p))
+                players.stream().map(p -> getSenderFactory().wrap(p))
         );
     }
 

@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.bukkit.inject.server;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
@@ -40,12 +38,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A replacement map for the 'permSubs' instance in Bukkit's SimplePluginManager.
@@ -228,18 +226,20 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
 
         @Override
         public @NonNull Set<Permissible> keySet() {
-            // gather players (LPPermissibles)
-            Set<Permissible> players = LuckPermsSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().stream()
-                    .filter(player -> player.hasPermission(this.permission) || player.isPermissionSet(this.permission))
-                    .collect(Collectors.toSet());
-
-            ImmutableSet<Permissible> backing;
+            // start with the backing set
+            Set<Permissible> set;
             synchronized (this.backing) {
-                backing = ImmutableSet.copyOf(this.backing.keySet());
+                set = new HashSet<>(this.backing.keySet());
             }
 
-            // then combine the players with the backing map
-            return Sets.union(players, backing);
+            // add any online players who meet requirements
+            for (Player player : LuckPermsSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers()) {
+                if (player.hasPermission(this.permission) || player.isPermissionSet(this.permission)) {
+                    set.add(player);
+                }
+            }
+
+            return set;
         }
 
         @Override
