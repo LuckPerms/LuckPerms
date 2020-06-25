@@ -31,8 +31,7 @@ import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.server.ServerStartCallback;
-import net.fabricmc.fabric.api.event.server.ServerStopCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.launch.common.FabricLauncherBase;
@@ -216,12 +215,12 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
             this.loadLatch.countDown();
         }
         // Register the Server startup/shutdown events now
-        ServerStartCallback.EVENT.register(this::onStartServer);
-        ServerStopCallback.EVENT.register(this::onStopServer);
+        ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
+        ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStopping);
         this.plugin.setupFabricListeners();
     }
 
-    private void onStartServer(MinecraftServer server) {
+    private void onServerStarted(MinecraftServer server) {
         this.startTime = Instant.now();
         // We need to create a new scheduler adapter every time we start the server.
         // This is because an integrated server will shutdown the executor services, which cannot be started back up.
@@ -230,7 +229,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
         this.plugin.enable();
     }
 
-    private void onStopServer(MinecraftServer server) {
+    private void onServerStopping(MinecraftServer server) {
         this.plugin.disable();
         this.plugin.setServer(null); // Clear the server
         this.schedulerAdapter = null; // We need to kill the scheduler in case an integrated server starts in the future.
