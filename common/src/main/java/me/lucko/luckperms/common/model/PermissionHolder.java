@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
+import me.lucko.luckperms.common.node.NodeEquality;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.DataSelector;
@@ -458,10 +459,20 @@ public abstract class PermissionHolder {
             return Tristate.TRUE;
         }
 
-        return getData(type).asList().stream()
-                .filter(equalityPredicate.equalTo(node))
-                .findFirst()
-                .map(n -> Tristate.of(n.getValue())).orElse(Tristate.UNDEFINED);
+        Collection<Node> nodes;
+        if (NodeEquality.comparesContexts(equalityPredicate)) {
+            nodes = getData(type).nodesInContext(node.getContexts());
+        } else {
+            nodes = getData(type).asList();
+        }
+
+        for (Node other : nodes) {
+            if (equalityPredicate.areEqual(node, other)) {
+                return Tristate.of(node.getValue());
+            }
+        }
+
+        return Tristate.UNDEFINED;
     }
 
     public DataMutateResult setNode(DataType dataType, Node node, boolean callEvent) {
@@ -471,11 +482,10 @@ public abstract class PermissionHolder {
 
         NodeMap data = getData(dataType);
 
-        ImmutableSet<Node> before = getData(dataType).asImmutableSet();
-
+        ImmutableSet<Node> before = data.asImmutableSet();
         data.add(node);
+        ImmutableSet<Node> after = data.asImmutableSet();
 
-        ImmutableSet<Node> after = getData(dataType).asImmutableSet();
         if (callEvent) {
             this.plugin.getEventDispatcher().dispatchNodeAdd(node, this, dataType, before, after);
         }
@@ -487,7 +497,7 @@ public abstract class PermissionHolder {
 
     public DataMutateResult.WithMergedNode setNode(DataType dataType, Node node, TemporaryNodeMergeStrategy mergeStrategy) {
         if (node.getExpiry() != null && mergeStrategy != TemporaryNodeMergeStrategy.NONE) {
-            Node otherMatch = getData(dataType).asList().stream()
+            Node otherMatch = getData(dataType).nodesInContext(node.getContexts()).stream()
                     .filter(NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE.equalTo(node))
                     .findFirst().orElse(null);
 
@@ -513,11 +523,10 @@ public abstract class PermissionHolder {
 
                 if (newNode != null) {
                     // Remove the old Node & add the new one.
-                    ImmutableSet<Node> before = getData(dataType).asImmutableSet();
-
+                    ImmutableSet<Node> before = data.asImmutableSet();
                     data.replace(newNode, otherMatch);
+                    ImmutableSet<Node> after = data.asImmutableSet();
 
-                    ImmutableSet<Node> after = getData(dataType).asImmutableSet();
                     this.plugin.getEventDispatcher().dispatchNodeAdd(newNode, this, dataType, before, after);
 
                     invalidateCache();
@@ -536,11 +545,12 @@ public abstract class PermissionHolder {
             return DataMutateResult.FAIL_LACKS;
         }
 
-        ImmutableSet<Node> before = getData(dataType).asImmutableSet();
+        NodeMap data = getData(dataType);
 
-        getData(dataType).remove(node);
+        ImmutableSet<Node> before = data.asImmutableSet();
+        data.remove(node);
+        ImmutableSet<Node> after = data.asImmutableSet();
 
-        ImmutableSet<Node> after = getData(dataType).asImmutableSet();
         this.plugin.getEventDispatcher().dispatchNodeRemove(node, this, dataType, before, after);
 
         invalidateCache();
@@ -550,7 +560,7 @@ public abstract class PermissionHolder {
 
     public DataMutateResult.WithMergedNode unsetNode(DataType dataType, Node node, @Nullable Duration duration) {
         if (node.getExpiry() != null && duration != null) {
-            Node otherMatch = getData(dataType).asList().stream()
+            Node otherMatch = getData(dataType).nodesInContext(node.getContexts()).stream()
                     .filter(NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE.equalTo(node))
                     .findFirst().orElse(null);
 
@@ -563,11 +573,10 @@ public abstract class PermissionHolder {
                     Node newNode = node.toBuilder().expiry(newExpiry).build();
 
                     // Remove the old Node & add the new one.
-                    ImmutableSet<Node> before = getData(dataType).asImmutableSet();
-
+                    ImmutableSet<Node> before = data.asImmutableSet();
                     data.replace(newNode, otherMatch);
+                    ImmutableSet<Node> after = data.asImmutableSet();
 
-                    ImmutableSet<Node> after = getData(dataType).asImmutableSet();
                     this.plugin.getEventDispatcher().dispatchNodeRemove(otherMatch, this, dataType, before, after);
                     this.plugin.getEventDispatcher().dispatchNodeAdd(newNode, this, dataType, before, after);
 
@@ -584,7 +593,7 @@ public abstract class PermissionHolder {
 
     public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate, boolean giveDefault) {
         NodeMap data = getData(dataType);
-        ImmutableSet<Node> before = getData(dataType).asImmutableSet();
+        ImmutableSet<Node> before = data.asImmutableSet();
 
         if (contextSet == null) {
             if (!data.removeIf(predicate)) {
@@ -600,7 +609,7 @@ public abstract class PermissionHolder {
             getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
         }
 
-        ImmutableSet<Node> after = getData(dataType).asImmutableSet();
+        ImmutableSet<Node> after = data.asImmutableSet();
         this.plugin.getEventDispatcher().dispatchNodeClear(this, dataType, before, after);
 
         invalidateCache();
@@ -610,7 +619,7 @@ public abstract class PermissionHolder {
 
     public boolean clearNodes(DataType dataType, ContextSet contextSet, boolean giveDefault) {
         NodeMap data = getData(dataType);
-        ImmutableSet<Node> before = getData(dataType).asImmutableSet();
+        ImmutableSet<Node> before = data.asImmutableSet();
 
         if (contextSet == null) {
             data.clear();
@@ -622,7 +631,7 @@ public abstract class PermissionHolder {
             getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
         }
 
-        ImmutableSet<Node> after = getData(dataType).asImmutableSet();
+        ImmutableSet<Node> after = data.asImmutableSet();
         this.plugin.getEventDispatcher().dispatchNodeClear(this, dataType, before, after);
 
         invalidateCache();
