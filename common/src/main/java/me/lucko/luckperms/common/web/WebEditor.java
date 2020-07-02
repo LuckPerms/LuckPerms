@@ -73,7 +73,7 @@ public final class WebEditor {
                 .add("type", holder.getType().toString())
                 .add("id", holder.getObjectName())
                 .add("displayName", holder.getPlainDisplayName())
-                .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().immutable().values()));
+                .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().asList()));
     }
 
     private static JObject writeData(Track track) {

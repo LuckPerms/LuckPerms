@@ -650,7 +650,7 @@ public class MongoStorage implements StorageImplementation {
     }
 
     private static Document userToDoc(User user) {
-        List<Document> nodes = user.normalData().immutable().values().stream()
+        List<Document> nodes = user.normalData().asList().stream()
                 .map(MongoStorage::nodeToDoc)
                 .collect(Collectors.toList());
 
@@ -673,7 +673,7 @@ public class MongoStorage implements StorageImplementation {
     }
 
     private static Document groupToDoc(Group group) {
-        List<Document> nodes = group.normalData().immutable().values().stream()
+        List<Document> nodes = group.normalData().asList().stream()
                 .map(MongoStorage::nodeToDoc)
                 .collect(Collectors.toList());
 

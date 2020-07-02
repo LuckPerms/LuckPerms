@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.model.manager.user;
 
-import com.google.common.collect.ImmutableCollection;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.User;
@@ -40,7 +38,9 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -82,12 +82,14 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     public boolean giveDefaultIfNeeded(User user, boolean save) {
         boolean work = false;
 
+        Collection<InheritanceNode> globalGroups = user.normalData().inheritanceNodesSetInContext(ImmutableContextSetImpl.EMPTY);
+
         // check that they are actually a member of their primary group, otherwise remove it
         if (this.plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored")) {
             String primaryGroup = user.getCachedData().getMetaData(this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS)).getPrimaryGroup(MetaCheckEvent.Origin.INTERNAL);
             boolean memberOfPrimaryGroup = false;
 
-            for (InheritanceNode node : user.normalData().immutableInheritance().get(ImmutableContextSetImpl.EMPTY)) {
+            for (InheritanceNode node : globalGroups) {
                 if (node.getGroupName().equalsIgnoreCase(primaryGroup)) {
                     memberOfPrimaryGroup = true;
                     break;
@@ -96,7 +98,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
 
             // need to find a new primary group for the user.
             if (!memberOfPrimaryGroup) {
-                String group = user.normalData().immutableInheritance().get(ImmutableContextSetImpl.EMPTY).stream()
+                String group = globalGroups.stream()
                         .findFirst()
                         .map(InheritanceNode::getGroupName)
                         .orElse(null);
@@ -112,7 +114,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         // check that all users are member of at least one group
         boolean hasGroup = false;
         if (user.getPrimaryGroup().getStoredValue().isPresent()) {
-            hasGroup = !user.normalData().immutableInheritance().get(ImmutableContextSetImpl.EMPTY).isEmpty();
+            hasGroup = !globalGroups.isEmpty();
         }
 
         if (!hasGroup) {
@@ -163,7 +165,11 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
      */
     @Override
     public boolean shouldSave(User user) {
-        ImmutableCollection<Node> nodes = user.normalData().immutable().values();
+        if (user.normalData().size() != 1) {
+            return true;
+        }
+
+        List<Node> nodes = user.normalData().asList();
         if (nodes.size() != 1) {
             return true;
         }

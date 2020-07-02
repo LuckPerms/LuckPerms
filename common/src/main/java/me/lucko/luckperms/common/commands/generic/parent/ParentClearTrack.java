@@ -82,7 +82,7 @@ public class ParentClearTrack extends GenericChildCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        int before = target.normalData().immutable().size();
+        int before = target.normalData().size();
 
         ImmutableContextSet context = args.getContextOrDefault(1, plugin).immutableCopy();
 
@@ -99,7 +99,7 @@ public class ParentClearTrack extends GenericChildCommand {
             plugin.getUserManager().giveDefaultIfNeeded(((User) target), false);
         }
 
-        int changed = before - target.normalData().immutable().size();
+        int changed = before - target.normalData().size();
 
         if (changed == 1) {
             Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, target.getFormattedDisplayName(), track.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);

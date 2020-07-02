@@ -77,7 +77,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
 
         if (target.getType() == HolderType.USER) {
             // if the holder is a user, we want to query parent groups for tracks
-            Set<InheritanceNode> nodes = target.normalData().immutableInheritance().values().stream()
+            Set<InheritanceNode> nodes = target.normalData().inheritanceAsList().stream()
                     .filter(Node::getValue)
                     .filter(n -> !n.hasExpiry())
                     .collect(Collectors.toSet());

@@ -331,7 +331,7 @@ public class SqlStorage implements StorageImplementation {
                 remote = selectUserPermissions(new HashSet<>(), c, user.getUniqueId());
             }
 
-            Set<SqlNode> local = user.normalData().immutable().values().stream().map(SqlNode::fromNode).collect(Collectors.toSet());
+            Set<SqlNode> local = user.normalData().asList().stream().map(SqlNode::fromNode).collect(Collectors.toSet());
             Set<SqlNode> missingFromRemote = getMissingFromRemote(local, remote);
             Set<SqlNode> missingFromLocal = getMissingFromLocal(local, remote);
 
@@ -463,7 +463,7 @@ public class SqlStorage implements StorageImplementation {
     public void saveGroup(Group group) throws SQLException {
         group.getIoLock().lock();
         try {
-            if (group.normalData().immutable().isEmpty()) {
+            if (group.normalData().isEmpty()) {
                 try (Connection c = this.connectionFactory.getConnection()) {
                     deleteGroupPermissions(c, group.getName());
                 }
@@ -475,7 +475,7 @@ public class SqlStorage implements StorageImplementation {
                 remote = selectGroupPermissions(new HashSet<>(), c, group.getName());
             }
 
-            Set<SqlNode> local = group.normalData().immutable().values().stream().map(SqlNode::fromNode).collect(Collectors.toSet());
+            Set<SqlNode> local = group.normalData().asList().stream().map(SqlNode::fromNode).collect(Collectors.toSet());
             Set<SqlNode> missingFromRemote = getMissingFromRemote(local, remote);
             Set<SqlNode> missingFromLocal = getMissingFromLocal(local, remote);
 

@@ -90,7 +90,7 @@ public class MetaClear extends GenericChildCommand {
             type = NodeType.META_OR_CHAT_META;
         }
 
-        int before = target.normalData().immutable().size();
+        int before = target.normalData().size();
 
         MutableContextSet context = args.getContextOrDefault(0, plugin);
 
@@ -106,7 +106,7 @@ public class MetaClear extends GenericChildCommand {
             target.removeIf(DataType.NORMAL, context, type::matches, false);
         }
 
-        int changed = before - target.normalData().immutable().size();
+        int changed = before - target.normalData().size();
         if (changed == 1) {
             Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, target.getFormattedDisplayName(), type.name().toLowerCase(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {

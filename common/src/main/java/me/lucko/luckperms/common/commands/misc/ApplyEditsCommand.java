@@ -176,7 +176,7 @@ public class ApplyEditsCommand extends SingleCommand {
             return false;
         }
 
-        Set<Node> before = new HashSet<>(holder.normalData().immutable().values());
+        Set<Node> before = holder.normalData().asSet();
         Set<Node> after = new HashSet<>(NodeJsonSerializer.deserializeNodes(data.getAsJsonArray("nodes")));
 
         Set<Node> diffAdded = getAdded(before, after);

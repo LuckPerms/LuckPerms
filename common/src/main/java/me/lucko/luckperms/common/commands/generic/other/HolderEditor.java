@@ -84,7 +84,7 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
             Map<UUID, User> users = new LinkedHashMap<>(plugin.getUserManager().getAll());
 
             // only include online players who are in the group
-            users.values().removeIf(user -> user.normalData().immutable().values().stream().noneMatch(matcher));
+            users.values().removeIf(user -> user.normalData().asList().stream().noneMatch(matcher));
 
             // fill up with other matching users
             if (users.size() < EditorCommand.MAX_USERS) {

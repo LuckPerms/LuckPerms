@@ -110,7 +110,7 @@ public class EditorCommand extends SingleCommand {
                 ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.keyStartsWith(filter);
 
                 // only include online players matching the permission
-                users.values().removeIf(user -> user.normalData().immutable().values().stream().noneMatch(matcher));
+                users.values().removeIf(user -> user.normalData().asList().stream().noneMatch(matcher));
 
                 // fill up with other matching users
                 if (type.includingOffline && users.size() < MAX_USERS) {

@@ -245,7 +245,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 data.getNode("name").setValue(user.getUsername().orElse("null"));
                 data.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME));
 
-                writeNodes(data, user.normalData().immutable().values());
+                writeNodes(data, user.normalData().asList());
                 saveFile(StorageLocation.USER, user.getUniqueId().toString(), data);
             }
         } catch (Exception e) {
@@ -270,7 +270,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                     data.getNode("name").setValue(group.getName());
                 }
 
-                writeNodes(data, group.normalData().immutable().values());
+                writeNodes(data, group.normalData().asList());
                 saveFile(StorageLocation.GROUP, name, data);
             }
         } catch (Exception e) {
@@ -321,7 +321,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 data.getNode("name").setValue(group.getName());
             }
 
-            writeNodes(data, group.normalData().immutable().values());
+            writeNodes(data, group.normalData().asList());
             saveFile(StorageLocation.GROUP, group.getName(), data);
         } catch (Exception e) {
             throw reportException(group.getName(), e);

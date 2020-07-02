@@ -59,7 +59,7 @@ public class LogNotify extends ChildCommand<Log> {
             return false;
         }
 
-        Optional<? extends Node> node = user.normalData().immutable().get(ImmutableContextSetImpl.EMPTY).stream()
+        Optional<? extends Node> node = user.normalData().nodesSetInContext(ImmutableContextSetImpl.EMPTY).stream()
                 .filter(n -> n.getKey().equalsIgnoreCase(IGNORE_NODE))
                 .findFirst();
 

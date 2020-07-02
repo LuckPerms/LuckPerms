@@ -79,7 +79,7 @@ public class GroupRename extends ChildCommand<Group> {
             return CommandResult.FAILURE;
         }
 
-        newGroup.setNodes(DataType.NORMAL, target.normalData().immutable());
+        newGroup.setNodes(DataType.NORMAL, target.normalData().asList());
 
         Message.RENAME_SUCCESS.send(sender, target.getName(), newGroup.getName());
 

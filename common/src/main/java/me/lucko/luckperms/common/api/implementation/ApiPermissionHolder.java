@@ -174,7 +174,7 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
 
         @Override
         public @NonNull Map<ImmutableContextSet, Collection<Node>> toMap() {
-            return ApiPermissionHolder.this.handle.getData(this.dataType).immutable().asMap();
+            return ApiPermissionHolder.this.handle.getData(this.dataType).asMap();
         }
 
         @Override

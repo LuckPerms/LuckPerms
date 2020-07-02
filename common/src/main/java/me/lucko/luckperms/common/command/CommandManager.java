@@ -167,7 +167,7 @@ public class CommandManager {
             }
 
             Collection<? extends Group> groups = this.plugin.getGroupManager().getAll().values();
-            if (groups.size() <= 1 && groups.stream().allMatch(g -> g.normalData().immutable().isEmpty())) {
+            if (groups.size() <= 1 && groups.stream().allMatch(g -> g.normalData().isEmpty())) {
                 Message.FIRST_TIME_SETUP.send(sender, label, sender.getName());
             } else {
                 Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);

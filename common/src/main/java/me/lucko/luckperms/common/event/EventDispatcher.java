@@ -160,7 +160,7 @@ public final class EventDispatcher {
     }
 
     public void dispatchGroupDelete(Group group, DeletionCause cause) {
-        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.normalData().immutable().values()), cause));
+        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.normalData().asSet()), cause));
     }
 
     public void dispatchGroupLoadAll() {

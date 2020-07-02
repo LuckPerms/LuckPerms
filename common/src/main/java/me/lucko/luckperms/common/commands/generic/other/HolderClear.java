@@ -62,7 +62,7 @@ public class HolderClear<T extends PermissionHolder> extends ChildCommand<T> {
             return CommandResult.NO_PERMISSION;
         }
 
-        int before = target.normalData().immutable().size();
+        int before = target.normalData().size();
 
         MutableContextSet context = args.getContextOrDefault(0, plugin);
 
@@ -78,7 +78,7 @@ public class HolderClear<T extends PermissionHolder> extends ChildCommand<T> {
             target.clearNodes(DataType.NORMAL, context, true);
         }
 
-        int changed = before - target.normalData().immutable().size();
+        int changed = before - target.normalData().size();
         if (changed == 1) {
             Message.CLEAR_SUCCESS_SINGULAR.send(sender, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
