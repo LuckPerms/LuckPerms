@@ -275,7 +275,7 @@ public final class Track {
         }
 
         // find all groups that are inherited by the user in the exact contexts given and applicable to this track
-        List<InheritanceNode> nodes = user.normalData().inheritanceNodesSetInContext(context).stream()
+        List<InheritanceNode> nodes = user.normalData().inheritanceNodesInContext(context).stream()
                 .filter(Node::getValue)
                 .filter(node -> containsGroup(node.getGroupName()))
                 .distinct()
@@ -340,7 +340,7 @@ public final class Track {
         }
 
         // find all groups that are inherited by the user in the exact contexts given and applicable to this track
-        List<InheritanceNode> nodes = user.normalData().inheritanceNodesSetInContext(context).stream()
+        List<InheritanceNode> nodes = user.normalData().inheritanceNodesInContext(context).stream()
                 .filter(Node::getValue)
                 .filter(node -> containsGroup(node.getGroupName()))
                 .distinct()

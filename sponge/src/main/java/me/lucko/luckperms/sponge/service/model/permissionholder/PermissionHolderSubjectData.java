@@ -111,7 +111,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
     @Override
     public ImmutableMap<String, Boolean> getPermissions(ImmutableContextSet contexts) {
         ImmutableMap.Builder<String, Boolean> builder = ImmutableMap.builder();
-        for (Node n : this.holder.getData(this.type).nodesSetInContext(contexts)) {
+        for (Node n : this.holder.getData(this.type).nodesInContext(contexts)) {
             builder.put(n.getKey(), n.getValue());
         }
         return builder.build();
@@ -172,7 +172,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
     @Override
     public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
         ImmutableList.Builder<LPSubjectReference> builder = ImmutableList.builder();
-        for (InheritanceNode n : this.holder.getData(this.type).inheritanceNodesSetInContext(contexts)) {
+        for (InheritanceNode n : this.holder.getData(this.type).inheritanceNodesInContext(contexts)) {
             builder.add(this.service.getGroupSubjects().loadSubject(n.getGroupName()).join().toReference());
         }
         return builder.build();
@@ -249,7 +249,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
 
     @Override
     public ImmutableMap<String, String> getOptions(ImmutableContextSet contexts) {
-        return nodesToOptions(this.holder.getData(this.type).nodesSetInContext(contexts));
+        return nodesToOptions(this.holder.getData(this.type).nodesInContext(contexts));
     }
 
     private static ImmutableMap<String, String> nodesToOptions(Iterable<? extends Node> nodes) {

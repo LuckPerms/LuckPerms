@@ -82,7 +82,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     public boolean giveDefaultIfNeeded(User user, boolean save) {
         boolean work = false;
 
-        Collection<InheritanceNode> globalGroups = user.normalData().inheritanceNodesSetInContext(ImmutableContextSetImpl.EMPTY);
+        Collection<InheritanceNode> globalGroups = user.normalData().inheritanceNodesInContext(ImmutableContextSetImpl.EMPTY);
 
         // check that they are actually a member of their primary group, otherwise remove it
         if (this.plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored")) {

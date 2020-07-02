@@ -108,7 +108,11 @@ public final class NodeMap {
     }
 
     public int size() {
-        return this.map.size();
+        int size = 0;
+        for (SortedSet<Node> values : this.map.values()) {
+            size += values.size();
+        }
+        return size;
     }
 
     public List<Node> asList() {
@@ -290,7 +294,7 @@ public final class NodeMap {
         }
     }
 
-    public Collection<Node> nodesSetInContext(ContextSet context) {
+    public Collection<Node> nodesInContext(ContextSet context) {
         final SortedSet<Node> values = this.map.get(context.immutableCopy());
         if (values == null) {
             return ImmutableSet.of();
@@ -298,7 +302,7 @@ public final class NodeMap {
         return new ArrayList<>(values);
     }
 
-    public Collection<InheritanceNode> inheritanceNodesSetInContext(ContextSet context) {
+    public Collection<InheritanceNode> inheritanceNodesInContext(ContextSet context) {
         final SortedSet<InheritanceNode> values = this.inheritanceMap.get(context.immutableCopy());
         if (values == null) {
             return ImmutableSet.of();
