@@ -57,4 +57,9 @@ public abstract class ConstraintNodeMatcher<T extends Node> implements NodeMatch
     public boolean test(@NonNull Node node) {
         return match(node) != null;
     }
+
+    @Override
+    public String toString() {
+        return this.constraint.toString();
+    }
 }
