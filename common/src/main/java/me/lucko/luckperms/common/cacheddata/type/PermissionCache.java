@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.cacheddata.type;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
+import me.lucko.luckperms.common.cacheddata.UsageTracked;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
@@ -44,7 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Holds cached permissions data for a given context
  */
-public class PermissionCache implements CachedPermissionData {
+public class PermissionCache extends UsageTracked implements CachedPermissionData {
 
     /**
      * The query options this container is holding data for

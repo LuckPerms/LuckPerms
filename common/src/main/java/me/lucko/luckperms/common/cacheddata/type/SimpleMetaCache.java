@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Multimaps;
 
+import me.lucko.luckperms.common.cacheddata.UsageTracked;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
@@ -50,7 +51,7 @@ import java.util.SortedMap;
 /**
  * Holds cached meta for a given context
  */
-public class SimpleMetaCache implements CachedMetaData {
+public class SimpleMetaCache extends UsageTracked implements CachedMetaData {
 
     private final LuckPermsPlugin plugin;
 

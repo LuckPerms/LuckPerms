@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.common.cacheddata;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-
+import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.cache.MRUCache;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
@@ -53,6 +51,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * Abstract implementation of {@link CachedDataManager}.
@@ -176,23 +175,25 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
 
     @Override
     public final void invalidatePermissionCalculators() {
-        this.permission.cache.asMap().values().forEach(PermissionCache::invalidateCache);
+        this.permission.cache.values().forEach(PermissionCache::invalidateCache);
     }
 
     public final void performCacheCleanup() {
-        this.permission.cache.cleanUp();
-        this.meta.cache.cleanUp();
+        this.permission.cleanup();
+        this.meta.cleanup();
     }
 
     private static final class AbstractContainer<C extends I, I extends CachedData> extends MRUCache<RecentData<C>> implements Container<I> {
-        private final Loader<QueryOptions, C> cacheLoader;
-        private final LoadingCache<QueryOptions, C> cache;
+        private final Function<QueryOptions, C> cacheLoader;
+        private final LoadingMap<QueryOptions, C> cache;
 
-        public AbstractContainer(Loader<QueryOptions, C> cacheLoader) {
+        public AbstractContainer(Function<QueryOptions, C> cacheLoader) {
             this.cacheLoader = cacheLoader;
-            this.cache = CaffeineFactory.newBuilder()
-                    .expireAfterAccess(2, TimeUnit.MINUTES)
-                    .build(this.cacheLoader);
+            this.cache = LoadingMap.of(this.cacheLoader);
+        }
+
+        public void cleanup() {
+            this.cache.values().removeIf(value -> ((UsageTracked) value).usedSince(TimeUnit.MINUTES.toMillis(2)));
         }
 
         @Override
@@ -201,28 +202,31 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
 
             RecentData<C> recent = getRecent();
             if (recent != null && queryOptions.equals(recent.queryOptions)) {
+                ((UsageTracked) recent.data).recordUsage();
                 return recent.data;
             }
 
             int modCount = modCount();
             C data = this.cache.get(queryOptions);
+            ((UsageTracked) data).recordUsage();
             offerRecent(modCount, new RecentData<>(queryOptions, data));
-
-            //noinspection ConstantConditions
             return data;
         }
 
         @Override
         public @NonNull C calculate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
-            return this.cacheLoader.load(queryOptions);
+            return this.cacheLoader.apply(queryOptions);
         }
 
         @Override
         public void recalculate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
-            this.cache.refresh(queryOptions);
-            clearRecent();
+            CompletableFuture.runAsync(() -> {
+                final C value = this.cacheLoader.apply(queryOptions);
+                this.cache.put(queryOptions, value);
+                clearRecent();
+            }, CaffeineFactory.executor());
         }
 
         @Override
@@ -230,45 +234,41 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
             Objects.requireNonNull(queryOptions, "queryOptions");
 
             // invalidate the previous value until we're done recalculating
-            this.cache.invalidate(queryOptions);
+            this.cache.remove(queryOptions);
             clearRecent();
 
             // request recalculation from the cache
-            return CompletableFuture.supplyAsync(
-                    () -> this.cache.get(queryOptions),
-                    CaffeineFactory.executor()
-            );
+            return CompletableFuture.supplyAsync(() -> {
+                C value = this.cache.get(queryOptions);
+                clearRecent();
+                return value;
+            }, CaffeineFactory.executor());
         }
 
         @Override
         public void recalculate() {
-            Set<QueryOptions> keys = this.cache.asMap().keySet();
+            Set<QueryOptions> keys = this.cache.keySet();
             keys.forEach(this::recalculate);
         }
 
         @Override
         public @NonNull CompletableFuture<Void> reload() {
-            Set<QueryOptions> keys = this.cache.asMap().keySet();
+            Set<QueryOptions> keys = this.cache.keySet();
             return CompletableFuture.allOf(keys.stream().map(this::reload).toArray(CompletableFuture[]::new));
         }
 
         @Override
         public void invalidate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
-            this.cache.invalidate(queryOptions);
+            this.cache.remove(queryOptions);
             clearRecent();
         }
 
         @Override
         public void invalidate() {
-            this.cache.invalidateAll();
+            this.cache.clear();
             clearRecent();
         }
-    }
-
-    private interface Loader<K, V> extends CacheLoader<K, V> {
-        @Override
-        @NonNull V load(@NonNull K key);
     }
 
     private MetaStackDefinition getMetaStackDefinition(QueryOptions queryOptions, ChatMetaType type) {
