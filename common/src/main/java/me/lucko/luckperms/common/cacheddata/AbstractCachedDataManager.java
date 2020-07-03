@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.cacheddata;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.cache.MRUCache;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
@@ -183,7 +182,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         this.meta.cleanup();
     }
 
-    private static final class AbstractContainer<C extends I, I extends CachedData> extends MRUCache<RecentData<C>> implements Container<I> {
+    private static final class AbstractContainer<C extends I, I extends CachedData> implements Container<I> {
         private final Function<QueryOptions, C> cacheLoader;
         private final LoadingMap<QueryOptions, C> cache;
 
@@ -200,16 +199,8 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         public @NonNull C get(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
 
-            RecentData<C> recent = getRecent();
-            if (recent != null && queryOptions.equals(recent.queryOptions)) {
-                ((UsageTracked) recent.data).recordUsage();
-                return recent.data;
-            }
-
-            int modCount = modCount();
             C data = this.cache.get(queryOptions);
             ((UsageTracked) data).recordUsage();
-            offerRecent(modCount, new RecentData<>(queryOptions, data));
             return data;
         }
 
@@ -225,7 +216,6 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
             CompletableFuture.runAsync(() -> {
                 final C value = this.cacheLoader.apply(queryOptions);
                 this.cache.put(queryOptions, value);
-                clearRecent();
             }, CaffeineFactory.executor());
         }
 
@@ -235,14 +225,9 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
 
             // invalidate the previous value until we're done recalculating
             this.cache.remove(queryOptions);
-            clearRecent();
 
             // request recalculation from the cache
-            return CompletableFuture.supplyAsync(() -> {
-                C value = this.cache.get(queryOptions);
-                clearRecent();
-                return value;
-            }, CaffeineFactory.executor());
+            return CompletableFuture.supplyAsync(() -> this.cache.get(queryOptions), CaffeineFactory.executor());
         }
 
         @Override
@@ -261,13 +246,11 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         public void invalidate(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
             this.cache.remove(queryOptions);
-            clearRecent();
         }
 
         @Override
         public void invalidate() {
             this.cache.clear();
-            clearRecent();
         }
     }
 
@@ -289,16 +272,6 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
                 getMetaStackDefinition(queryOptions, ChatMetaType.PREFIX),
                 getMetaStackDefinition(queryOptions, ChatMetaType.SUFFIX)
         );
-    }
-
-    private static final class RecentData<T> {
-        final QueryOptions queryOptions;
-        final T data;
-
-        RecentData(QueryOptions queryOptions, T data) {
-            this.queryOptions = queryOptions;
-            this.data = data;
-        }
     }
 
 }
