@@ -74,8 +74,8 @@ public abstract class HolderCachedDataManager<T extends PermissionHolder> extend
     }
 
     @Override
-    protected Map<String, Boolean> resolvePermissions(QueryOptions queryOptions) {
-        return this.holder.exportPermissions(queryOptions, true, getPlugin().getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND));
+    protected void resolvePermissions(Map<String, Boolean> accumulator, QueryOptions queryOptions) {
+        this.holder.exportPermissions(accumulator, queryOptions, true, getPlugin().getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND));
     }
 
     @Override

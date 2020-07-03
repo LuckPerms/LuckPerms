@@ -89,18 +89,15 @@ public abstract class CalculatedSubject implements LPSubject {
         return permissions;
     }
 
-    public Map<String, Boolean> resolveAllPermissions(QueryOptions filter) {
+    public void resolveAllPermissions(Map<String, Boolean> accumulator, QueryOptions filter) {
         SubjectInheritanceGraph graph = new SubjectInheritanceGraph(filter);
-        Map<String, Boolean> result = new HashMap<>();
 
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
         for (CalculatedSubject subject : traversal) {
             for (Map.Entry<String, Boolean> entry : subject.getCombinedPermissions(filter).entrySet()) {
-                result.putIfAbsent(entry.getKey(), entry.getValue());
+                accumulator.putIfAbsent(entry.getKey(), entry.getValue());
             }
         }
-
-        return result;
     }
 
     public Set<LPSubjectReference> getCombinedParents(QueryOptions filter) {

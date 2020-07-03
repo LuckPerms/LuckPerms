@@ -56,8 +56,8 @@ public class MetaCache extends SimpleMetaCache implements CachedMetaData {
     /** The object name passed to the verbose handler when checks are made */
     private final String verboseCheckTarget;
 
-    public MetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions, CacheMetadata metadata) {
-        super(plugin, queryOptions);
+    public MetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions, CacheMetadata metadata, MetaAccumulator sourceMeta) {
+        super(plugin, queryOptions, sourceMeta);
         this.plugin = plugin;
         this.metadata = metadata;
 

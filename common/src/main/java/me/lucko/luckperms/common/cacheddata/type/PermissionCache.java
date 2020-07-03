@@ -68,31 +68,18 @@ public class PermissionCache implements CachedPermissionData {
      */
     private final PermissionCalculator calculator;
 
-    public PermissionCache(QueryOptions queryOptions, CacheMetadata metadata, CalculatorFactory calculatorFactory) {
+    public PermissionCache(QueryOptions queryOptions, CacheMetadata metadata, CalculatorFactory calculatorFactory, ConcurrentHashMap<String, Boolean> sourcePermissions) {
         this.queryOptions = queryOptions;
-        this.permissions = new ConcurrentHashMap<>();
+        this.permissions = sourcePermissions;
         this.permissionsUnmodifiable = Collections.unmodifiableMap(this.permissions);
 
         this.calculator = calculatorFactory.build(queryOptions, metadata);
-        this.calculator.setSourcePermissions(this.permissions); // Initial setup.
+        this.calculator.setSourcePermissions(this.permissions);
     }
 
     @Override
     public void invalidateCache() {
         this.calculator.invalidateCache();
-    }
-
-    private void setPermissionsInternal(Map<String, Boolean> permissions) {
-        this.permissions.clear();
-        this.permissions.putAll(permissions);
-        this.calculator.setSourcePermissions(this.permissions);
-        invalidateCache();
-    }
-
-    public void setPermissions(Map<String, Boolean> toApply) {
-        if (!this.permissions.equals(toApply)) {
-            setPermissionsInternal(toApply);
-        }
     }
 
     public PermissionCalculator getCalculator() {

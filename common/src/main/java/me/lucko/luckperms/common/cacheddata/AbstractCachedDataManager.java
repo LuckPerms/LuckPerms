@@ -46,12 +46,12 @@ import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -135,10 +135,10 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
     /**
      * Resolves the owners permissions data for the given {@link QueryOptions}.
      * 
+     * @param accumulator the accumulator to add resolved permissions to
      * @param queryOptions the query options
-     * @return a map of permissions to back the {@link PermissionCache}
      */
-    protected abstract Map<String, Boolean> resolvePermissions(QueryOptions queryOptions);
+    protected abstract void resolvePermissions(Map<String, Boolean> accumulator, QueryOptions queryOptions);
 
     /**
      * Resolves the owners meta data for the given {@link QueryOptions}.
@@ -148,31 +148,24 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
      */
     protected abstract void resolveMeta(MetaAccumulator accumulator, QueryOptions queryOptions);
     
-    private PermissionCache calculatePermissions(QueryOptions queryOptions, PermissionCache data) {
+    private PermissionCache calculatePermissions(QueryOptions queryOptions) {
         Objects.requireNonNull(queryOptions, "queryOptions");
+        CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
 
-        if (data == null) {
-            CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
-            data = new PermissionCache(queryOptions, metadata, getCalculatorFactory());
-        }
+        ConcurrentHashMap<String, Boolean> sourcePermissions = new ConcurrentHashMap<>();
+        resolvePermissions(sourcePermissions, queryOptions);
 
-        data.setPermissions(resolvePermissions(queryOptions));
-        return data;
+        return new PermissionCache(queryOptions, metadata, getCalculatorFactory(), sourcePermissions);
     }
     
-    private MetaCache calculateMeta(QueryOptions queryOptions, MetaCache data) {
+    private MetaCache calculateMeta(QueryOptions queryOptions) {
         Objects.requireNonNull(queryOptions, "queryOptions");
-
-        if (data == null) {
-            CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
-            data = new MetaCache(this.plugin, queryOptions, metadata);
-        }
+        CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
 
         MetaAccumulator accumulator = newAccumulator(queryOptions);
         resolveMeta(accumulator, queryOptions);
-        data.loadMeta(accumulator);
 
-        return data;
+        return new MetaCache(this.plugin, queryOptions, metadata, accumulator);
     }
 
     @Override
@@ -236,25 +229,15 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         public @NonNull CompletableFuture<? extends C> reload(@NonNull QueryOptions queryOptions) {
             Objects.requireNonNull(queryOptions, "queryOptions");
 
-            // get the previous value - we can reuse the same instance
-            C previous = this.cache.getIfPresent(queryOptions);
-
             // invalidate the previous value until we're done recalculating
             this.cache.invalidate(queryOptions);
             clearRecent();
 
             // request recalculation from the cache
-            if (previous != null) {
-                return CompletableFuture.supplyAsync(
-                        () -> this.cache.get(queryOptions, c -> this.cacheLoader.reload(c, previous)),
-                        CaffeineFactory.executor()
-                );
-            } else {
-                return CompletableFuture.supplyAsync(
-                        () -> this.cache.get(queryOptions),
-                        CaffeineFactory.executor()
-                );
-            }
+            return CompletableFuture.supplyAsync(
+                    () -> this.cache.get(queryOptions),
+                    CaffeineFactory.executor()
+            );
         }
 
         @Override
@@ -284,17 +267,8 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
     }
 
     private interface Loader<K, V> extends CacheLoader<K, V> {
-        @NonNull V load(@NonNull K key, @Nullable V oldValue);
-
         @Override
-        default @NonNull V load(@NonNull K key) {
-            return load(key, null);
-        }
-
-        @Override
-        default @NonNull V reload(@NonNull K key, @NonNull V oldValue) {
-            return load(key, oldValue);
-        }
+        @NonNull V load(@NonNull K key);
     }
 
     private MetaStackDefinition getMetaStackDefinition(QueryOptions queryOptions, ChatMetaType type) {

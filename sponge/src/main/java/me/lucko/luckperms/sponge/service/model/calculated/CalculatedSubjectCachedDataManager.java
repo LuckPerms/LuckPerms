@@ -83,8 +83,8 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
     }
 
     @Override
-    protected Map<String, Boolean> resolvePermissions(QueryOptions queryOptions) {
-        return this.subject.resolveAllPermissions(queryOptions);
+    protected void resolvePermissions(Map<String, Boolean> accumulator, QueryOptions queryOptions) {
+        this.subject.resolveAllPermissions(accumulator, queryOptions);
     }
 
     @Override

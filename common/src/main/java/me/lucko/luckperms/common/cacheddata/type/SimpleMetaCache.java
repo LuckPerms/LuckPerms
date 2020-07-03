@@ -58,24 +58,22 @@ public class SimpleMetaCache implements CachedMetaData {
     private final QueryOptions queryOptions;
 
     /* The data */
-    protected Map<String, List<String>> meta = ImmutableMap.of();
-    protected Map<String, String> flattenedMeta = ImmutableMap.of();
-    protected SortedMap<Integer, String> prefixes = ImmutableSortedMap.of();
-    protected SortedMap<Integer, String> suffixes = ImmutableSortedMap.of();
-    protected int weight = 0;
-    protected String primaryGroup = null;
-    private MetaStackDefinition prefixDefinition = null;
-    private MetaStackDefinition suffixDefinition = null;
-    private String prefix = null;
-    private String suffix = null;
+    protected final Map<String, List<String>> meta;
+    protected final Map<String, String> flattenedMeta;
+    protected final SortedMap<Integer, String> prefixes;
+    protected final SortedMap<Integer, String> suffixes;
+    protected final int weight;
+    protected final String primaryGroup;
+    private final MetaStackDefinition prefixDefinition;
+    private final MetaStackDefinition suffixDefinition;
+    private final String prefix;
+    private final String suffix;
 
-    public SimpleMetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions) {
+    public SimpleMetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions, MetaAccumulator sourceMeta) {
         this.plugin = plugin;
         this.queryOptions = queryOptions;
-    }
 
-    public void loadMeta(MetaAccumulator meta) {
-        this.meta = Multimaps.asMap(ImmutableListMultimap.copyOf(meta.getMeta()));
+        this.meta = Multimaps.asMap(ImmutableListMultimap.copyOf(sourceMeta.getMeta()));
 
         MetaValueSelector metaValueSelector = this.queryOptions.option(MetaValueSelector.KEY)
                 .orElseGet(() -> this.plugin.getConfiguration().get(ConfigKeys.META_VALUE_SELECTOR));
@@ -95,14 +93,14 @@ public class SimpleMetaCache implements CachedMetaData {
         }
         this.flattenedMeta = builder.build();
 
-        this.prefixes = ImmutableSortedMap.copyOfSorted(meta.getPrefixes());
-        this.suffixes = ImmutableSortedMap.copyOfSorted(meta.getSuffixes());
-        this.weight = meta.getWeight();
-        this.primaryGroup = meta.getPrimaryGroup();
-        this.prefixDefinition = meta.getPrefixDefinition();
-        this.suffixDefinition = meta.getSuffixDefinition();
-        this.prefix = meta.getPrefix();
-        this.suffix = meta.getSuffix();
+        this.prefixes = ImmutableSortedMap.copyOfSorted(sourceMeta.getPrefixes());
+        this.suffixes = ImmutableSortedMap.copyOfSorted(sourceMeta.getSuffixes());
+        this.weight = sourceMeta.getWeight();
+        this.primaryGroup = sourceMeta.getPrimaryGroup();
+        this.prefixDefinition = sourceMeta.getPrefixDefinition();
+        this.suffixDefinition = sourceMeta.getSuffixDefinition();
+        this.prefix = sourceMeta.getPrefix();
+        this.suffix = sourceMeta.getSuffix();
     }
 
     public String getMetaValue(String key, MetaCheckEvent.Origin origin) {

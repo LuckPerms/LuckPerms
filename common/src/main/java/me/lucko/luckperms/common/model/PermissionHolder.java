@@ -58,7 +58,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -358,18 +357,17 @@ public abstract class PermissionHolder {
         return (List) inheritanceTree;
     }
 
-    public Map<String, Boolean> exportPermissions(QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
+    public void exportPermissions(Map<String, Boolean> accumulator, QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
         List<Node> entries = resolveInheritedNodes(queryOptions);
-        return processExportedPermissions(entries, convertToLowercase, resolveShorthand);
+        processExportedPermissions(accumulator, entries, convertToLowercase, resolveShorthand);
     }
 
-    private static Map<String, Boolean> processExportedPermissions(List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
-        Map<String, Boolean> map = new HashMap<>(entries.size());
+    private static void processExportedPermissions(Map<String, Boolean> accumulator, List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
         for (Node node : entries) {
             if (convertToLowercase) {
-                map.putIfAbsent(node.getKey().toLowerCase(), node.getValue());
+                accumulator.putIfAbsent(node.getKey().toLowerCase(), node.getValue());
             } else {
-                map.putIfAbsent(node.getKey(), node.getValue());
+                accumulator.putIfAbsent(node.getKey(), node.getValue());
             }
         }
 
@@ -378,15 +376,13 @@ public abstract class PermissionHolder {
                 Collection<String> shorthand = node.resolveShorthand();
                 for (String s : shorthand) {
                     if (convertToLowercase) {
-                        map.putIfAbsent(s.toLowerCase(), node.getValue());
+                        accumulator.putIfAbsent(s.toLowerCase(), node.getValue());
                     } else {
-                        map.putIfAbsent(s, node.getValue());
+                        accumulator.putIfAbsent(s, node.getValue());
                     }
                 }
             }
         }
-
-        return map;
     }
 
     public MetaAccumulator accumulateMeta(QueryOptions queryOptions) {
