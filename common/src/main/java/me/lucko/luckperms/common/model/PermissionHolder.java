@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.model;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
@@ -272,18 +271,18 @@ public abstract class PermissionHolder {
         return nodes;
     }
 
-    public List<InheritanceNode> getOwnInheritanceNodes(QueryOptions queryOptions) {
-        List<InheritanceNode> nodes = new ArrayList<>();
-        for (DataType dataType : queryOrder(queryOptions)) {
-            getData(dataType).copyInheritanceNodesTo(nodes, queryOptions);
-        }
-        return nodes;
-    }
-
     public <T extends Node> List<T> getOwnNodes(NodeType<T> type, QueryOptions queryOptions) {
         List<T> nodes = new ArrayList<>();
         for (DataType dataType : queryOrder(queryOptions)) {
             getData(dataType).copyTo(nodes, type, queryOptions);
+        }
+        return nodes;
+    }
+
+    public List<InheritanceNode> getOwnInheritanceNodes(QueryOptions queryOptions) {
+        List<InheritanceNode> nodes = new ArrayList<>();
+        for (DataType dataType : queryOrder(queryOptions)) {
+            getData(dataType).copyInheritanceNodesTo(nodes, queryOptions);
         }
         return nodes;
     }
@@ -301,7 +300,6 @@ public abstract class PermissionHolder {
             }
         }
         return nodes;
-
     }
 
     public SortedSet<Node> resolveInheritedNodesSorted(QueryOptions queryOptions) {
@@ -365,7 +363,7 @@ public abstract class PermissionHolder {
         return processExportedPermissions(entries, convertToLowercase, resolveShorthand);
     }
 
-    private static ImmutableMap<String, Boolean> processExportedPermissions(List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
+    private static Map<String, Boolean> processExportedPermissions(List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
         Map<String, Boolean> map = new HashMap<>(entries.size());
         for (Node node : entries) {
             if (convertToLowercase) {
@@ -388,7 +386,7 @@ public abstract class PermissionHolder {
             }
         }
 
-        return ImmutableMap.copyOf(map);
+        return map;
     }
 
     public MetaAccumulator accumulateMeta(QueryOptions queryOptions) {
