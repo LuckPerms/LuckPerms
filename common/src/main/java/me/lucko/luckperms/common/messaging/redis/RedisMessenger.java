@@ -63,14 +63,8 @@ public class RedisMessenger implements Messenger {
 
         this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password, ssl);
 
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            this.sub = new Subscription(this);
-            try (Jedis jedis = this.jedisPool.getResource()) {
-                jedis.subscribe(this.sub, CHANNEL);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        this.sub = new Subscription(this);
+        this.plugin.getBootstrap().getScheduler().executeAsync(sub);
     }
 
     @Override
@@ -88,11 +82,40 @@ public class RedisMessenger implements Messenger {
         this.jedisPool.destroy();
     }
 
-    private static class Subscription extends JedisPubSub {
+    private static class Subscription extends JedisPubSub implements Runnable {
         private final RedisMessenger parent;
 
         private Subscription(RedisMessenger parent) {
             this.parent = parent;
+        }
+
+        @Override
+        public void run() {
+            boolean wasBroken = false;
+            while (!Thread.interrupted() && !this.parent.jedisPool.isClosed()) {
+                try (Jedis jedis = this.parent.jedisPool.getResource()) {
+                    if (wasBroken) {
+                        parent.plugin.getLogger().info("Redis pubsub connection re-established");
+                        wasBroken = false;
+                    }
+                    jedis.subscribe(this, CHANNEL);
+                } catch (Exception e) {
+                    wasBroken = true;
+                    parent.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection: " + e.getMessage());
+                    try {
+                        unsubscribe();
+                    } catch (Exception ignored) {
+
+                    }
+
+                    // Sleep for 2 seconds to prevent massive spam in console
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
         }
 
         @Override
