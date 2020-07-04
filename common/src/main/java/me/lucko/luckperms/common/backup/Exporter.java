@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.backup;
 
 import com.google.gson.JsonObject;
 
+import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -40,10 +41,14 @@ import me.lucko.luckperms.common.util.ProgressLogger;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
+import me.lucko.luckperms.common.web.AbstractHttpClient;
+import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -78,13 +83,30 @@ public class Exporter implements Runnable {
     private final Sender executor;
     private final Path filePath;
     private final boolean includeUsers;
+    private final boolean saveFile;
+    private final String label;
     private final ProgressLogger log;
 
-    public Exporter(LuckPermsPlugin plugin, Sender executor, Path filePath, boolean includeUsers) {
+    public Exporter(LuckPermsPlugin plugin, Sender executor, Path filePath, boolean includeUsers, boolean saveFile) {
         this.plugin = plugin;
         this.executor = executor;
         this.filePath = filePath;
         this.includeUsers = includeUsers;
+        this.saveFile = saveFile;
+        this.label = null;
+
+        this.log = new ProgressLogger(Message.EXPORT_LOG, Message.EXPORT_LOG_PROGRESS, null);
+        this.log.addListener(plugin.getConsoleSender());
+        this.log.addListener(executor);
+    }
+
+    public Exporter(LuckPermsPlugin plugin, Sender executor, boolean includeUsers, boolean saveFile, String label) {
+        this.plugin = plugin;
+        this.executor = executor;
+        this.filePath = null;
+        this.includeUsers = includeUsers;
+        this.saveFile = saveFile;
+        this.label = label;
 
         this.log = new ProgressLogger(Message.EXPORT_LOG, Message.EXPORT_LOG_PROGRESS, null);
         this.log.addListener(plugin.getConsoleSender());
@@ -93,32 +115,61 @@ public class Exporter implements Runnable {
 
     @Override
     public void run() {
-        JsonObject file = new JsonObject();
-        file.add("metadata", new JObject()
+        JsonObject json = new JsonObject();
+        json.add("metadata", new JObject()
                 .add("generatedBy", this.executor.getNameWithLocation())
                 .add("generatedAt", DATE_FORMAT.format(new Date(System.currentTimeMillis())))
                 .toJson());
 
         this.log.log("Gathering group data...");
-        file.add("groups", exportGroups());
+        json.add("groups", exportGroups());
 
         this.log.log("Gathering track data...");
-        file.add("tracks", exportTracks());
+        json.add("tracks", exportTracks());
 
         if (this.includeUsers) {
             this.log.log("Gathering user data...");
-            file.add("users", exportUsers());
+            json.add("users", exportUsers());
         }
 
-        this.log.log("Finished gathering data, writing file...");
+        if (this.saveFile) {
+            this.log.log("Finished gathering data, writing file...");
 
-        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(Files.newOutputStream(this.filePath)), StandardCharsets.UTF_8))) {
-            GsonProvider.prettyPrinting().toJson(file, out);
+            try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(Files.newOutputStream(this.filePath)), StandardCharsets.UTF_8))) {
+                GsonProvider.prettyPrinting().toJson(json, out);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            this.log.getListeners().forEach(l -> Message.LOG_EXPORT_SUCCESS.send(l, this.filePath.toFile().getAbsolutePath()));
+        } else {
+            post(json, this.executor, this.plugin, label);
+        }
+    }
+
+    public static CommandResult post(JsonObject payload, Sender sender, LuckPermsPlugin plugin, String label) {
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
+            GsonProvider.prettyPrinting().toJson(payload, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        this.log.getListeners().forEach(l -> Message.LOG_EXPORT_SUCCESS.send(l, this.filePath.toFile().getAbsolutePath()));
+        String pasteId;
+        try {
+            pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+        } catch (UnsuccessfulRequestException e) {
+            Message.EXPORT_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
+            return CommandResult.STATE_ERROR;
+        } catch (IOException e) {
+            new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
+            Message.EXPORT_HTTP_UNKNOWN_FAILURE.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
+        Message.EXPORT_CODE.send(sender, pasteId, label, pasteId);
+
+        return CommandResult.SUCCESS;
     }
 
     private JsonObject exportGroups() {

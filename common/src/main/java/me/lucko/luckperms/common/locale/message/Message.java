@@ -473,9 +473,25 @@ public enum Message {
     IMPORT_ALREADY_RUNNING("&cAnother import process is already running. Please wait for it to finish and try again.", true),
     EXPORT_ALREADY_RUNNING("&cAnother export process is already running. Please wait for it to finish and try again.", true),
     FILE_NOT_WITHIN_DIRECTORY("&cError: File &4{}&c must be a direct child of the data directory.", true),
+
+    EXPORT_CODE(
+            "&aExport code: &7{}" + "\n" +
+                    "&7Use the following command to import:" + "\n" +
+                    "&a/{} import {} --upload",
+            true
+    ),
+
+    EXPORT_HTTP_REQUEST_FAILURE("&cUnable to communicate with bytebin. (response code &4{}&c, message='{}')", true),
+    EXPORT_HTTP_UNKNOWN_FAILURE("&cUnable to communicate with bytebin. Check the console for errors.", true),
+
     IMPORT_FILE_DOESNT_EXIST("&cError: File &4{}&c does not exist.", true),
     IMPORT_FILE_NOT_READABLE("&cError: File &4{}&c is not readable.", true),
     IMPORT_FILE_READ_FAILURE("&cAn unexpected error occured whilst reading from the import file. (is it the correct format?)", true),
+
+    IMPORT_INVALID_CODE("&cInvalid code. &7({})", true),
+    IMPORT_HTTP_REQUEST_FAILURE("&cUnable to communicate with bytebin. (response code &4{}&c, message='{}')", true),
+    IMPORT_HTTP_UNKNOWN_FAILURE("&cUnable to communicate with bytebin. Check the console for errors.", true),
+    IMPORT_UNABLE_TO_READ("&cUnable to read data using the given code. &7({})", true),
 
     IMPORT_PROGRESS("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferrors.", true),
     IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferror.", true),
