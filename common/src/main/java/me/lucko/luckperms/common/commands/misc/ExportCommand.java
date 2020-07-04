@@ -56,40 +56,51 @@ public class ExportCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Path dataDirectory = plugin.getBootstrap().getDataDirectory();
-        Path path = dataDirectory.resolve(args.get(0) + ".json.gz");
-
-        if (!path.getParent().equals(dataDirectory)) {
-            Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
-            return CommandResult.INVALID_ARGS;
-        }
-
         boolean includeUsers = !args.remove("--without-users");
+        boolean saveFile = !args.remove("--upload");
 
-        if (Files.exists(path)) {
-            Message.LOG_EXPORT_ALREADY_EXISTS.send(sender, path.toString());
-            return CommandResult.INVALID_ARGS;
+        Exporter exporter;
+        if (saveFile) {
+            Path dataDirectory = plugin.getBootstrap().getDataDirectory();
+            Path path = dataDirectory.resolve(args.get(0) + ".json.gz");
+
+            if (!path.getParent().equals(dataDirectory)) {
+                Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (Files.exists(path)) {
+                Message.LOG_EXPORT_ALREADY_EXISTS.send(sender, path.toString());
+                return CommandResult.INVALID_ARGS;
+            }
+
+            try {
+                Files.createFile(path);
+            } catch (IOException e) {
+                Message.LOG_EXPORT_FAILURE.send(sender);
+                e.printStackTrace();
+                return CommandResult.FAILURE;
+            }
+
+            if (!Files.isWritable(path)) {
+                Message.LOG_EXPORT_NOT_WRITABLE.send(sender, path.toString());
+                return CommandResult.FAILURE;
+            }
+
+            if (!this.running.compareAndSet(false, true)) {
+                Message.EXPORT_ALREADY_RUNNING.send(sender);
+                return CommandResult.STATE_ERROR;
+            }
+
+            exporter = new Exporter(plugin, sender, path, includeUsers, saveFile);
+        } else {
+            if (!this.running.compareAndSet(false, true)) {
+                Message.EXPORT_ALREADY_RUNNING.send(sender);
+                return CommandResult.STATE_ERROR;
+            }
+
+            exporter = new Exporter(plugin, sender, includeUsers, saveFile, label);
         }
-
-        try {
-            Files.createFile(path);
-        } catch (IOException e) {
-            Message.LOG_EXPORT_FAILURE.send(sender);
-            e.printStackTrace();
-            return CommandResult.FAILURE;
-        }
-
-        if (!Files.isWritable(path)) {
-            Message.LOG_EXPORT_NOT_WRITABLE.send(sender, path.toString());
-            return CommandResult.FAILURE;
-        }
-
-        if (!this.running.compareAndSet(false, true)) {
-            Message.EXPORT_ALREADY_RUNNING.send(sender);
-            return CommandResult.STATE_ERROR;
-        }
-
-        Exporter exporter = new Exporter(plugin, sender, path, includeUsers);
 
         // Run the exporter in its own thread.
         plugin.getBootstrap().getScheduler().executeAsync(() -> {

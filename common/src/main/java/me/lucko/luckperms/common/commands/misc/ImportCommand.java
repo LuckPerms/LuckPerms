@@ -39,6 +39,8 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
+import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
+import me.lucko.luckperms.common.web.WebEditor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -63,46 +65,73 @@ public class ImportCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        String fileName = args.get(0);
-        Path dataDirectory = plugin.getBootstrap().getDataDirectory();
-        Path path = dataDirectory.resolve(fileName);
-
-        if (!path.getParent().equals(dataDirectory) || path.getFileName().toString().equals("config.yml")) {
-            Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
-            return CommandResult.INVALID_ARGS;
-        }
-
-        // try auto adding the '.json.gz' extension
-        if (!Files.exists(path) && !fileName.contains(".")) {
-            Path pathWithDefaultExtension = path.resolveSibling(fileName + ".json.gz");
-            if (Files.exists(pathWithDefaultExtension)) {
-                path = pathWithDefaultExtension;
-            }
-        }
-
-        if (!Files.exists(path)) {
-            Message.IMPORT_FILE_DOESNT_EXIST.send(sender, path.toString());
-            return CommandResult.INVALID_ARGS;
-        }
-
-        if (!Files.isReadable(path)) {
-            Message.IMPORT_FILE_NOT_READABLE.send(sender, path.toString());
-            return CommandResult.FAILURE;
-        }
-
-        if (!this.running.compareAndSet(false, true)) {
-            Message.IMPORT_ALREADY_RUNNING.send(sender);
-            return CommandResult.STATE_ERROR;
-        }
+        boolean fromFile = !args.remove("--upload");
 
         JsonObject data;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
-            data = GsonProvider.normal().fromJson(reader, JsonObject.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Message.IMPORT_FILE_READ_FAILURE.send(sender);
-            this.running.set(false);
-            return CommandResult.FAILURE;
+        if (fromFile) {
+            String fileName = args.get(0);
+            Path dataDirectory = plugin.getBootstrap().getDataDirectory();
+            Path path = dataDirectory.resolve(fileName);
+
+            if (!path.getParent().equals(dataDirectory) || path.getFileName().toString().equals("config.yml")) {
+                Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
+                return CommandResult.INVALID_ARGS;
+            }
+
+            // try auto adding the '.json.gz' extension
+            if (!Files.exists(path) && !fileName.contains(".")) {
+                Path pathWithDefaultExtension = path.resolveSibling(fileName + ".json.gz");
+                if (Files.exists(pathWithDefaultExtension)) {
+                    path = pathWithDefaultExtension;
+                }
+            }
+
+            if (!Files.exists(path)) {
+                Message.IMPORT_FILE_DOESNT_EXIST.send(sender, path.toString());
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (!Files.isReadable(path)) {
+                Message.IMPORT_FILE_NOT_READABLE.send(sender, path.toString());
+                return CommandResult.FAILURE;
+            }
+
+            if (!this.running.compareAndSet(false, true)) {
+                Message.IMPORT_ALREADY_RUNNING.send(sender);
+                return CommandResult.STATE_ERROR;
+            }
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
+                data = GsonProvider.normal().fromJson(reader, JsonObject.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Message.IMPORT_FILE_READ_FAILURE.send(sender);
+                this.running.set(false);
+                return CommandResult.FAILURE;
+            }
+        } else {
+            String code = args.get(0);
+
+            if (code.isEmpty()) {
+                Message.IMPORT_INVALID_CODE.send(sender, code);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            try {
+                data = WebEditor.readDataFromBytebin(plugin.getBytebin(), code);
+            } catch (UnsuccessfulRequestException e) {
+                Message.IMPORT_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
+                return CommandResult.STATE_ERROR;
+            } catch (IOException e) {
+                new RuntimeException("Error reading data to bytebin", e).printStackTrace();
+                Message.IMPORT_HTTP_UNKNOWN_FAILURE.send(sender);
+                return CommandResult.STATE_ERROR;
+            }
+
+            if (data == null) {
+                Message.IMPORT_UNABLE_TO_READ.send(sender, code);
+                return CommandResult.FAILURE;
+            }
         }
 
         Importer importer = new Importer(plugin, sender, data, args.contains("--merge"));
