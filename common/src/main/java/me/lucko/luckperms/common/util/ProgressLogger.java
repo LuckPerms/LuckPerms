@@ -25,25 +25,31 @@
 
 package me.lucko.luckperms.common.util;
 
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.sender.Sender;
+
+import net.kyori.adventure.text.Component;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 public class ProgressLogger {
     public static final int DEFAULT_NOTIFY_FREQUENCY = 500;
 
-    private final Message logMessage;
-    private final Message logProgressMessage;
-    private final String logPrefixParam;
+    private final Function<String, Component> logMessage;
+    private final Function<String, Component> logProgressMessage;
 
     private final Set<Sender> listeners = new HashSet<>();
 
-    public ProgressLogger(Message logMessage, Message logProgressMessage, String logPrefixParam) {
-        this.logMessage = logMessage;
-        this.logProgressMessage = logProgressMessage;
-        this.logPrefixParam = logPrefixParam;
+    public ProgressLogger(Message.Args1<String> logMessage, Message.Args1<String> logProgressMessage) {
+        this.logMessage = logMessage::build;
+        this.logProgressMessage = logProgressMessage::build;
+    }
+
+    public ProgressLogger(Message.Args2<String, String> logMessage, Message.Args2<String, String> logProgressMessage, String logPrefixParam) {
+        this.logMessage = message -> logMessage.build(logPrefixParam, message);
+        this.logProgressMessage = message -> logProgressMessage.build(logPrefixParam, message);
     }
 
     public void addListener(Sender sender) {
@@ -72,18 +78,10 @@ public class ProgressLogger {
         }
     }
 
-    private Object[] formParams(String content) {
-        if (this.logPrefixParam != null) {
-            return new Object[]{this.logPrefixParam, content};
-        } else {
-            return new Object[]{content};
-        }
-    }
-
-    private void dispatchMessage(Message messageType, String content) {
-        Object[] params = formParams(content);
+    private void dispatchMessage(Function<String, Component> messageType, String content) {
+        final Component message = messageType.apply(content);
         for (Sender s : this.listeners) {
-            messageType.send(s, params);
+            s.sendMessage(message);
         }
     }
 }

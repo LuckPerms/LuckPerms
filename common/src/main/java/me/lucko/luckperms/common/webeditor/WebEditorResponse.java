@@ -32,11 +32,9 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -45,7 +43,6 @@ import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Uuids;
 
 import net.luckperms.api.actionlog.Action;
@@ -205,16 +202,13 @@ public class WebEditorResponse {
                         .build().submit(this.plugin, this.sender);
             }
 
-            String additionsSummary = "addition" + (additions == 1 ? "" : "s");
-            String deletionsSummary = "deletion" + (deletions == 1 ? "" : "s");
-
             Message.APPLY_EDITS_SUCCESS.send(this.sender, type, holder.getFormattedDisplayName());
-            Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, additions, additionsSummary, deletions, deletionsSummary);
+            Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, additions, deletions);
             for (Node n : diffAdded) {
-                Message.APPLY_EDITS_DIFF_ADDED.send(this.sender, formatNode(this.plugin.getLocaleManager(), n));
+                Message.APPLY_EDITS_DIFF_ADDED.send(this.sender, n);
             }
             for (Node n : diffRemoved) {
-                Message.APPLY_EDITS_DIFF_REMOVED.send(this.sender, formatNode(this.plugin.getLocaleManager(), n));
+                Message.APPLY_EDITS_DIFF_REMOVED.send(this.sender, n);
             }
             StorageAssistant.save(holder, this.sender, this.plugin);
             return true;
@@ -265,13 +259,11 @@ public class WebEditorResponse {
                         .build().submit(this.plugin, this.sender);
             }
 
-            String additionsSummary = "addition" + (additions == 1 ? "" : "s");
-            String deletionsSummary = "deletion" + (deletions == 1 ? "" : "s");
-
             Message.APPLY_EDITS_SUCCESS.send(this.sender, "track", track.getName());
-            Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, additions, additionsSummary, deletions, deletionsSummary);
-            Message.APPLY_EDITS_DIFF_REMOVED.send(this.sender, before);
-            Message.APPLY_EDITS_DIFF_ADDED.send(this.sender, after);
+            Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, additions, deletions);
+            Message.APPLY_EDITS_TRACK_BEFORE.send(this.sender, before);
+            Message.APPLY_EDITS_TRACK_AFTER.send(this.sender, after);
+
             StorageAssistant.save(track, this.sender, this.plugin);
             return true;
         }
@@ -384,11 +376,6 @@ public class WebEditorResponse {
                     .build().submit(this.plugin, this.sender);
 
             return true;
-        }
-
-        private static String formatNode(LocaleManager localeManager, Node n) {
-            return n.getKey() + " &7(" + (n.getValue() ? "&a" : "&c") + n.getValue() + "&7)" + MessageUtils.getAppendableNodeContextString(localeManager, n) +
-                    (n.hasExpiry() ? " &7(" + DurationFormatter.CONCISE.format(n.getExpiryDuration()) + ")" : "");
         }
 
         private static <T> Set<T> getAdded(Collection<T> before, Collection<T> after) {

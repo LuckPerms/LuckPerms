@@ -31,23 +31,18 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
@@ -57,8 +52,8 @@ import net.luckperms.api.node.NodeType;
 import java.util.List;
 
 public class MetaSet extends GenericChildCommand {
-    public MetaSet(LocaleManager locale) {
-        super(CommandSpec.META_SET.localize(locale), "set", CommandPermission.USER_META_SET, CommandPermission.GROUP_META_SET, Predicates.inRange(0, 1));
+    public MetaSet() {
+        super(CommandSpec.META_SET, "set", CommandPermission.USER_META_SET, CommandPermission.GROUP_META_SET, Predicates.inRange(0, 1));
     }
 
     @Override
@@ -82,20 +77,14 @@ public class MetaSet extends GenericChildCommand {
         Node node = Meta.builder(key, value).withContext(context).build();
 
         if (target.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
-            Message.ALREADY_HAS_META.send(sender, target.getFormattedDisplayName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HAS_META.send(sender, target.getFormattedDisplayName(), key, value, context);
             return CommandResult.STATE_ERROR;
         }
 
         target.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> !n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key)), false);
         target.setNode(DataType.NORMAL, node, true);
 
-        TextComponent.Builder builder = Message.SET_META_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
-        HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                TextUtils.joinNewline("§3Raw key: §r" + key, "§3Raw value: §r" + value),
-                '§'
-        ));
-        builder.applyDeep(c -> c.hoverEvent(event));
-        sender.sendMessage(builder.build());
+        Message.SET_META_SUCCESS.send(sender, key, value, target.getFormattedDisplayName(), context);
 
         LoggedAction.build().source(sender).target(target)
                 .description("meta", "set", key, value, context)

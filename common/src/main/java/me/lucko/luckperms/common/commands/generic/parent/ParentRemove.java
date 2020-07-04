@@ -31,15 +31,13 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -57,8 +55,8 @@ import net.luckperms.api.model.data.DataType;
 import java.util.List;
 
 public class ParentRemove extends GenericChildCommand {
-    public ParentRemove(LocaleManager locale) {
-        super(CommandSpec.PARENT_REMOVE.localize(locale), "remove", CommandPermission.USER_PARENT_REMOVE, CommandPermission.GROUP_PARENT_REMOVE, Predicates.is(0));
+    public ParentRemove() {
+        super(CommandSpec.PARENT_REMOVE, "remove", CommandPermission.USER_PARENT_REMOVE, CommandPermission.GROUP_PARENT_REMOVE, Predicates.is(0));
     }
 
     @Override
@@ -95,7 +93,7 @@ public class ParentRemove extends GenericChildCommand {
 
         DataMutateResult result = target.unsetNode(DataType.NORMAL, Inheritance.builder(groupName).withContext(context).build());
         if (result.wasSuccessful()) {
-            Message.UNSET_INHERIT_SUCCESS.send(sender, target.getFormattedDisplayName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.UNSET_INHERIT_SUCCESS.send(sender, target.getFormattedDisplayName(), groupName, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("parent", "remove", groupName, context)
@@ -108,7 +106,7 @@ public class ParentRemove extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_INHERIT.send(sender, target.getFormattedDisplayName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOES_NOT_INHERIT.send(sender, target.getFormattedDisplayName(), groupName, context);
             return CommandResult.STATE_ERROR;
         }
     }

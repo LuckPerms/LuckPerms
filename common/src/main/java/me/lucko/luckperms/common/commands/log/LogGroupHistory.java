@@ -30,16 +30,14 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
@@ -48,8 +46,8 @@ import java.util.List;
 public class LogGroupHistory extends ChildCommand<Log> {
     private static final int ENTRIES_PER_PAGE = 10;
 
-    public LogGroupHistory(LocaleManager locale) {
-        super(CommandSpec.LOG_GROUP_HISTORY.localize(locale), "grouphistory", CommandPermission.LOG_GROUP_HISTORY, Predicates.notInRange(1, 2));
+    public LogGroupHistory() {
+        super(CommandSpec.LOG_GROUP_HISTORY, "grouphistory", CommandPermission.LOG_GROUP_HISTORY, Predicates.notInRange(1, 2));
     }
 
     @Override
@@ -91,14 +89,7 @@ public class LogGroupHistory extends ChildCommand<Log> {
         Message.LOG_HISTORY_GROUP_HEADER.send(sender, name, page, maxPage);
 
         for (Paginated.Entry<LoggedAction> e : entries) {
-            Message.LOG_ENTRY.send(sender,
-                    e.position(),
-                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.value().getDurationSince()),
-                    e.value().getSourceFriendlyString(),
-                    Character.toString(LoggedAction.getTypeCharacter(e.value().getTarget().getType())),
-                    e.value().getTargetFriendlyString(),
-                    e.value().getDescription()
-            );
+            Message.LOG_ENTRY.send(sender, e.position(), e.value());
         }
 
         return CommandResult.SUCCESS;

@@ -29,10 +29,8 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -42,8 +40,8 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.util.Tristate;
 
 public class PermissionSet extends ChildCommand<LPSubjectData> {
-    public PermissionSet(LocaleManager locale) {
-        super(CommandSpec.SPONGE_PERMISSION_SET.localize(locale), "set", CommandPermission.SPONGE_PERMISSION_SET, Predicates.inRange(0, 1));
+    public PermissionSet() {
+        super(CommandSpec.SPONGE_PERMISSION_SET, "set", CommandPermission.SPONGE_PERMISSION_SET, Predicates.inRange(0, 1));
     }
 
     @Override
@@ -53,9 +51,9 @@ public class PermissionSet extends ChildCommand<LPSubjectData> {
         ImmutableContextSet contextSet = args.getContextOrEmpty(2);
 
         if (subjectData.setPermission(contextSet, node, tristate).join()) {
-            Message.BLANK.send(sender, "&aSet &b" + node + "&a to &b" + tristate.toString().toLowerCase() + "&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
+            SpongeCommandUtils.sendPrefixed(sender, "&aSet &b" + node + "&a to &b" + tristate.toString().toLowerCase() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
         } else {
-            Message.BLANK.send(sender, "Unable to set permission. Does the Subject already have it set?");
+            SpongeCommandUtils.sendPrefixed(sender, "Unable to set permission. Does the Subject already have it set?");
         }
 
         return CommandResult.SUCCESS;

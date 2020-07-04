@@ -29,10 +29,9 @@ import me.lucko.luckperms.common.backup.Exporter;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -45,8 +44,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ExportCommand extends SingleCommand {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
-    public ExportCommand(LocaleManager locale) {
-        super(CommandSpec.EXPORT.localize(locale), "Export", CommandPermission.EXPORT, Predicates.notInRange(1, 2));
+    public ExportCommand() {
+        super(CommandSpec.EXPORT, "Export", CommandPermission.EXPORT, Predicates.notInRange(1, 2));
     }
 
     @Override
@@ -78,20 +77,20 @@ public class ExportCommand extends SingleCommand {
             }
 
             if (Files.exists(path)) {
-                Message.LOG_EXPORT_ALREADY_EXISTS.send(sender, path.toString());
+                Message.EXPORT_FILE_ALREADY_EXISTS.send(sender, path.toString());
                 return CommandResult.INVALID_ARGS;
             }
 
             try {
                 Files.createFile(path);
             } catch (IOException e) {
-                Message.LOG_EXPORT_FAILURE.send(sender);
+                Message.EXPORT_FILE_FAILURE.send(sender);
                 e.printStackTrace();
                 return CommandResult.FAILURE;
             }
 
             if (!Files.isWritable(path)) {
-                Message.LOG_EXPORT_NOT_WRITABLE.send(sender, path.toString());
+                Message.EXPORT_FILE_NOT_WRITABLE.send(sender, path.toString());
                 return CommandResult.FAILURE;
             }
 

@@ -30,11 +30,10 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -45,8 +44,8 @@ import net.luckperms.api.model.data.DataType;
 import java.util.UUID;
 
 public class UserClone extends ChildCommand<User> {
-    public UserClone(LocaleManager locale) {
-        super(CommandSpec.USER_CLONE.localize(locale), "clone", CommandPermission.USER_CLONE, Predicates.not(1));
+    public UserClone() {
+        super(CommandSpec.USER_CLONE, "clone", CommandPermission.USER_CLONE, Predicates.not(1));
     }
 
     @Override

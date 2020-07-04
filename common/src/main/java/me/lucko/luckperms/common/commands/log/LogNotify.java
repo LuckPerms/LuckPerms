@@ -29,11 +29,10 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -49,8 +48,8 @@ import java.util.UUID;
 public class LogNotify extends ChildCommand<Log> {
     private static final String IGNORE_NODE = "luckperms.log.notify.ignoring";
 
-    public LogNotify(LocaleManager locale) {
-        super(CommandSpec.LOG_NOTIFY.localize(locale), "notify", CommandPermission.LOG_NOTIFY, Predicates.notInRange(0, 1));
+    public LogNotify() {
+        super(CommandSpec.LOG_NOTIFY, "notify", CommandPermission.LOG_NOTIFY, Predicates.notInRange(0, 1));
     }
 
     public static boolean isIgnoring(LuckPermsPlugin plugin, UUID uuid) {
