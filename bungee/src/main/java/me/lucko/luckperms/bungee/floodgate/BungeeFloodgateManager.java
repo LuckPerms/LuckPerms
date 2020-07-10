@@ -34,20 +34,19 @@ import java.util.UUID;
 
 public class BungeeFloodgateManager extends FloodgateManager {
 
+    public BungeeFloodgateManager(String prefix) {
+        super(prefix);
+    }
+
     @Override
     public boolean isFloodgatePlayer(UUID uuid) {
         // Check for Floodgate UUID independently to allow for offline players to work
         return (FloodgateAPI.isBedrockPlayer(uuid) || FloodgateAPI.isFloodgateId(uuid));
     }
 
-    @Override
-    public String getPrefix() {
-        return BungeePlugin.getInstance().getConfig().getUsernamePrefix();
-    }
-
     public static FloodgateManager checkFloodgateIntegration() {
         if (ProxyServer.getInstance().getPluginManager().getPlugin("floodgate-bungee") != null) {
-            return new BungeeFloodgateManager();
+            return new BungeeFloodgateManager(BungeePlugin.getInstance().getConfig().getUsernamePrefix());
         }
         return null;
     }

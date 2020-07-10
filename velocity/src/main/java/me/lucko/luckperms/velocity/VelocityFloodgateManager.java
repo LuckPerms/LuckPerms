@@ -34,7 +34,9 @@ import java.util.UUID;
 
 public class VelocityFloodgateManager extends FloodgateManager {
 
-    public String prefix;
+    public VelocityFloodgateManager(String prefix) {
+        super(prefix);
+    }
 
     @Override
     public boolean isFloodgatePlayer(UUID uuid) {
@@ -42,16 +44,11 @@ public class VelocityFloodgateManager extends FloodgateManager {
         return (FloodgateAPI.isBedrockPlayer(uuid) || FloodgateAPI.isFloodgateId(uuid));
     }
 
-    @Override
-    public String getPrefix() {
-        return prefix;
-    }
-
     public static FloodgateManager checkFloodgateIntegration(ProxyServer proxy) {
         if (proxy.getPluginManager().getPlugin("floodgate-velocity").isPresent()) {
-            VelocityFloodgateManager manager = new VelocityFloodgateManager();
-            manager.prefix = ((VelocityPlugin) proxy.getPluginManager().getPlugin("floodgate-velocity").get()).getConfig().getUsernamePrefix();
-            return manager;
+            return new VelocityFloodgateManager(
+                    ((VelocityPlugin) proxy.getPluginManager().getPlugin("floodgate-velocity").get()).getConfig().getUsernamePrefix()
+            );
         }
         return null;
     }

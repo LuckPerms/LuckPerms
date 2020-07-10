@@ -34,20 +34,19 @@ import java.util.UUID;
 
 public class BukkitFloodgateManager extends FloodgateManager {
 
+    public BukkitFloodgateManager(String prefix) {
+        super(prefix);
+    }
+
     @Override
     public boolean isFloodgatePlayer(UUID uuid) {
         // Check for Floodgate UUID independently to allow for offline players to work
         return (FloodgateAPI.isBedrockPlayer(uuid) || FloodgateAPI.isFloodgateId(uuid));
     }
 
-    @Override
-    public String getPrefix() {
-        return BukkitPlugin.getInstance().getConfiguration().getUsernamePrefix();
-    }
-
     public static FloodgateManager checkFloodgateIntegration() {
         if (Bukkit.getPluginManager().getPlugin("floodgate-bukkit") != null) {
-            return new BukkitFloodgateManager();
+            return new BukkitFloodgateManager(BukkitPlugin.getInstance().getConfiguration().getUsernamePrefix());
         }
         return null;
     }

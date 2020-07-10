@@ -32,14 +32,26 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
- * Manages LuckPerms integration with the Bedrock authentication plugin Floodgate (https://github.com/GeyserMC/Floodgate).
+ * Manages LuckPerms integration with the Minecraft Bedrock authentication plugin Floodgate (https://github.com/GeyserMC/Floodgate).
  * Unless lenient username checking is on, LuckPerms will fail to parse the Floodgate username
  * without this code as the prefix will interfere.
  * This code is also used with the /lp user [username] info command to show if the user is a Floodgate player.
  */
 public abstract class FloodgateManager {
 
+    /**
+     * Test a username to ensure it complies with the Floodgate configuration.
+     */
     public Predicate<String> playerFloodgateUsernameTest = s -> !s.isEmpty() && s.length() <= DataConstraints.MAX_PLAYER_USERNAME_LENGTH && getPattern().matcher(s).matches();
+
+    /**
+     * The username prefix as defined in the Floodgate config. Used in Floodgate to prevent username conflicts.
+     */
+    public final String prefix;
+
+    public FloodgateManager(String prefix) {
+        this.prefix = prefix;
+    }
 
     /**
      * Determine if the user is a Floodgate player.
@@ -49,18 +61,15 @@ public abstract class FloodgateManager {
      */
     public abstract boolean isFloodgatePlayer(UUID uuid);
 
-    public abstract String getPrefix();
-
     /**
      * Gets the dynamic regex pattern used for Floodgate players - it changes depending on the prefix value in the Floodgate config.
      * @return the pattern to use for username validation.
      */
     private Pattern getPattern() {
-        String prefix = getPrefix();
-        if (prefix.equals("")) {
+        if (this.prefix.equals("")) {
             return Pattern.compile("[a-zA-Z0-9_]*"); // No need to worry about the prefix; just check for valid characters
         }
-        String pattern = String.format("\\%s?[a-zA-Z0-9_]*", prefix);
+        String pattern = String.format("\\%s?[a-zA-Z0-9_]*", this.prefix);
         return Pattern.compile(pattern);
     }
 
