@@ -33,6 +33,7 @@ dependencies {
         exclude(module: 'bukkit')
         exclude(module: 'metrics')
     }
+    implementation 'org.geysermc:floodgate-bukkit:1.0-SNAPSHOT'
 }
 
 processResources {

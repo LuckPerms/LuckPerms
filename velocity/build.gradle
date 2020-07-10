@@ -12,6 +12,8 @@ dependencies {
 
     compileOnly 'com.velocitypowered:velocity-api:1.0-SNAPSHOT'
     annotationProcessor 'com.velocitypowered:velocity-api:1.0-SNAPSHOT'
+
+    implementation 'org.geysermc:floodgate-velocity:1.0-SNAPSHOT'
 }
 
 blossom {

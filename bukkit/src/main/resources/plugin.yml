@@ -19,7 +19,8 @@ api-version: 1.13
 loadbefore: [Vault]
 
 # Soft depend on LilyPad for messaging service impl
-softdepend: [LilyPad-Connect]
+# Soft depend on Floodgate for integration with user checking
+softdepend: [floodgate-bukkit, LilyPad-Connect]
 
 commands:
   luckperms:

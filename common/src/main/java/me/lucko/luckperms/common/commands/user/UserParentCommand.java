@@ -86,8 +86,16 @@ public class UserParentCommand extends ParentCommand<User, UserIdentifier> {
         if (uniqueId == null) {
             if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
                 if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
-                    return null;
+                    if (plugin.getFloodgateManager().isPresent() && plugin.getUserManager().getByUsername(target) != null &&
+                            plugin.getFloodgateManager().get().isFloodgatePlayer(plugin.getUserManager().getByUsername(target).getUniqueId())) {
+                        if (!plugin.getFloodgateManager().get().playerFloodgateUsernameTest.test(target)) {
+                            Message.USER_INVALID_ENTRY.send(sender, target);
+                            return null;
+                        }
+                    } else {
+                        Message.USER_INVALID_ENTRY.send(sender, target);
+                        return null;
+                    }
                 }
             } else {
                 if (!DataConstraints.PLAYER_USERNAME_TEST_LENIENT.test(target)) {

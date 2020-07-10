@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
+import me.lucko.luckperms.common.floodgate.FloodgateManager;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.StandardGroupManager;
@@ -74,6 +75,7 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
     private StandardGroupManager groupManager;
     private StandardTrackManager trackManager;
     private VelocityContextManager contextManager;
+    private FloodgateManager floodgateManager;
 
     public LPVelocityPlugin(LPVelocityBootstrap bootstrap) {
         this.bootstrap = bootstrap;
@@ -147,7 +149,7 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void setupPlatformHooks() {
-
+        this.floodgateManager = VelocityFloodgateManager.checkFloodgateIntegration(getBootstrap().getProxy());
     }
 
     @Override
@@ -237,6 +239,11 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
     @Override
     public VelocityContextManager getContextManager() {
         return this.contextManager;
+    }
+
+    @Override
+    public Optional<FloodgateManager> getFloodgateManager() {
+        return Optional.ofNullable(this.floodgateManager);
     }
 
 }

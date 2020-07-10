@@ -19,6 +19,8 @@ dependencies {
         exclude(module: 'Essentials')
         exclude(module: 'EssentialsX')
     }
+
+    implementation 'org.geysermc:floodgate-bungee:1.0-SNAPSHOT'
 }
 
 processResources {

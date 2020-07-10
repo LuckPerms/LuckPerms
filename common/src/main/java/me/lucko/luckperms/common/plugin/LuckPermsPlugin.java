@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
+import me.lucko.luckperms.common.floodgate.FloodgateManager;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
@@ -278,5 +279,7 @@ public interface LuckPermsPlugin {
     default void performPlatformDataSync() {
 
     }
+
+    Optional<FloodgateManager> getFloodgateManager();
 
 }

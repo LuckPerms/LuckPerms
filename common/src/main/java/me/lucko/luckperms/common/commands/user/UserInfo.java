@@ -65,11 +65,14 @@ public class UserInfo extends ChildCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
+        String authType = (plugin.getFloodgateManager().isPresent() && plugin.getFloodgateManager().get().isFloodgatePlayer(target.getUniqueId()))
+                ? "&aFloodgate" : target.getUniqueId().version() == 4 ? "&2mojang" : "&8offline";
+
         Message status = plugin.getBootstrap().isPlayerOnline(target.getUniqueId()) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
         Message.USER_INFO_GENERAL.send(sender,
                 target.getUsername().orElse("Unknown"),
                 target.getUniqueId(),
-                target.getUniqueId().version() == 4 ? "&2mojang" : "&8offline",
+                authType,
                 status.asString(plugin.getLocaleManager())
         );
 

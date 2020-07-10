@@ -29,6 +29,7 @@ import me.lucko.luckperms.bukkit.brigadier.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.calculator.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
 import me.lucko.luckperms.bukkit.context.WorldCalculator;
+import me.lucko.luckperms.bukkit.floodgate.BukkitFloodgateManager;
 import me.lucko.luckperms.bukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleInjector;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleMonitoringInjector;
@@ -52,6 +53,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
+import me.lucko.luckperms.common.floodgate.FloodgateManager;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.StandardGroupManager;
@@ -99,6 +101,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     private LuckPermsPermissionMap permissionMap;
     private LuckPermsDefaultsMap defaultPermissionMap;
     private VaultHookManager vaultHookManager = null;
+    private FloodgateManager floodgateManager = null;
     
     public LPBukkitPlugin(LPBukkitBootstrap bootstrap) {
         this.bootstrap = bootstrap;
@@ -224,6 +227,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
         // Provide vault support
         tryVaultHook(false);
+
+        this.floodgateManager = BukkitFloodgateManager.checkFloodgateIntegration();
     }
 
     @Override
@@ -425,6 +430,11 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     public BukkitContextManager getContextManager() {
         return this.contextManager;
+    }
+
+    @Override
+    public Optional<FloodgateManager> getFloodgateManager() {
+        return Optional.ofNullable(floodgateManager);
     }
 
     public LuckPermsSubscriptionMap getSubscriptionMap() {
