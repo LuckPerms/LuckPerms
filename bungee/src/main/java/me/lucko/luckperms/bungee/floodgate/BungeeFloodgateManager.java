@@ -40,8 +40,7 @@ public class BungeeFloodgateManager extends FloodgateManager {
 
     @Override
     public boolean isFloodgatePlayer(UUID uuid) {
-        // Check for Floodgate UUID independently to allow for offline players to work
-        return (FloodgateAPI.isBedrockPlayer(uuid) || FloodgateAPI.isFloodgateId(uuid));
+        return FloodgateAPI.isBedrockPlayer(uuid);
     }
 
     public static FloodgateManager checkFloodgateIntegration() {
