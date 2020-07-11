@@ -66,7 +66,7 @@ public abstract class FloodgateManager {
      * @return the pattern to use for username validation.
      */
     private Pattern getPattern() {
-        if (this.prefix.equals("")) {
+        if (this.prefix == null || this.prefix.equals("")) {
             return Pattern.compile("[a-zA-Z0-9_]*"); // No need to worry about the prefix; just check for valid characters
         }
         String pattern = String.format("\\%s?[a-zA-Z0-9_]*", this.prefix);
