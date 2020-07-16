@@ -173,7 +173,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
             Class<?> clazz;
             try {
                 clazz = Class.forName(className);
-            } catch (Exception ex) {
+            } catch (Exception e) {
                 continue;
             }
 
@@ -181,7 +181,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
             String loaderName;
             try {
                 loaderName = plugin.getBootstrap().identifyClassLoader(loader) + " (" + loader.toString() + ")";
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 loaderName = loader.toString();
             }
 
