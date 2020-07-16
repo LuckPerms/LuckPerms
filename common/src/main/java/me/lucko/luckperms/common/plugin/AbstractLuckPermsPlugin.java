@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventDispatcher;
+import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -176,6 +177,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // register with the LP API
         this.apiProvider = new LuckPermsApiProvider(this);
         this.eventDispatcher = new EventDispatcher(provideEventBus(this.apiProvider));
+        getBootstrap().getScheduler().executeAsync(GeneratedEventClass::preGenerate);
         ApiRegistrationUtil.registerProvider(this.apiProvider);
         registerApiOnPlatform(this.apiProvider);
 

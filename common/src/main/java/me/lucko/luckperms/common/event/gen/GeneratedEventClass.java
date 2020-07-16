@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.event.gen;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
+import me.lucko.luckperms.common.event.EventDispatcher;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.ClassFileVersion;
@@ -78,6 +79,15 @@ public class GeneratedEventClass {
      */
     public static GeneratedEventClass generate(Class<? extends LuckPermsEvent> event) {
         return CACHE.get(event);
+    }
+
+    /**
+     * Pre-generates {@link GeneratedEventClass}es for known event types.
+     */
+    public static void preGenerate() {
+        for (Class<? extends LuckPermsEvent> eventType : EventDispatcher.getKnownEventTypes()) {
+            generate(eventType);
+        }
     }
 
     /**
