@@ -119,7 +119,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.localeManager.tryLoad(this, getBootstrap().getConfigDirectory().resolve("lang.yml"));
 
         // setup a bytebin instance
-        this.bytebin = new BytebinClient(new OkHttpClient(), getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+        OkHttpClient httpClient = new OkHttpClient.Builder()
+                .callTimeout(15, TimeUnit.SECONDS)
+                .build();
+
+        this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
