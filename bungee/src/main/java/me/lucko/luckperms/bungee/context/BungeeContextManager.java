@@ -64,6 +64,11 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer, ProxiedP
     }
 
     @Override
+    public QueryOptionsSupplier getCacheForPlayer(ProxiedPlayer player) {
+        return getCacheFor(player);
+    }
+
+    @Override
     public ImmutableContextSet getContext(ProxiedPlayer subject) {
         return getQueryOptions(subject).context();
     }
@@ -71,6 +76,11 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer, ProxiedP
     @Override
     public QueryOptions getQueryOptions(ProxiedPlayer subject) {
         return this.contextsCache.get(subject);
+    }
+
+    @Override
+    public QueryOptions getPlayerQueryOptions(ProxiedPlayer player) {
+        return this.contextsCache.get(player);
     }
 
     @Override

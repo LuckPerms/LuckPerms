@@ -65,6 +65,11 @@ public class VelocityContextManager extends ContextManager<Player, Player> {
     }
 
     @Override
+    public QueryOptionsSupplier getCacheForPlayer(Player player) {
+        return getCacheFor(player);
+    }
+
+    @Override
     protected void invalidateCache(Player subject) {
         QueryOptionsCache<Player> cache = this.subjectCaches.getIfPresent(subject);
         if (cache != null) {

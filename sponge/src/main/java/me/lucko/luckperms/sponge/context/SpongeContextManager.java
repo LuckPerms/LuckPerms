@@ -67,6 +67,11 @@ public class SpongeContextManager extends ContextManager<Subject, Player> {
     }
 
     @Override
+    public QueryOptionsSupplier getCacheForPlayer(Player player) {
+        return getCacheFor(player);
+    }
+
+    @Override
     protected void invalidateCache(Subject subject) {
         QueryOptionsCache<Subject> cache = this.subjectCaches.getIfPresent(subject);
         if (cache != null) {

@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <S> the calculator type
  */
-public abstract class ContextManager<S, P extends S> {
+public abstract class ContextManager<S, P> {
 
     protected final LuckPermsPlugin plugin;
     private final Class<S> subjectClass;
@@ -78,12 +78,22 @@ public abstract class ContextManager<S, P extends S> {
 
     public abstract QueryOptionsSupplier getCacheFor(S subject);
 
+    public abstract QueryOptionsSupplier getCacheForPlayer(P player);
+
     public QueryOptions getQueryOptions(S subject) {
         return getCacheFor(subject).getQueryOptions();
     }
 
+    public QueryOptions getPlayerQueryOptions(P player) {
+        return getCacheForPlayer(player).getQueryOptions();
+    }
+
     public ImmutableContextSet getContext(S subject) {
         return getCacheFor(subject).getContextSet();
+    }
+
+    public ImmutableContextSet getPlayerContext(P player) {
+        return getCacheForPlayer(player).getContextSet();
     }
 
     public QueryOptions getStaticQueryOptions() {

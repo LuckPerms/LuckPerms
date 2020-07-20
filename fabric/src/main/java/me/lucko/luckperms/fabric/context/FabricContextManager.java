@@ -29,6 +29,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -58,11 +59,17 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity, Ser
 
     @Override
     public QueryOptionsCache<ServerPlayerEntity> getCacheFor(ServerPlayerEntity subject) {
+        // TODO: Pass Fabric's Actor as the subject
         if (subject == null) {
             throw new NullPointerException("subject");
         }
 
         return this.subjectCaches.get(subject);
+    }
+
+    @Override
+    public QueryOptionsSupplier getCacheForPlayer(ServerPlayerEntity player) {
+        return getCacheFor(player);
     }
 
     @Override
