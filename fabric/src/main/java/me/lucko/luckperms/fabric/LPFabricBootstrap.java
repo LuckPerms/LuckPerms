@@ -34,14 +34,15 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.launch.common.FabricLauncherBase;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
@@ -152,7 +153,11 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
 
     @Override
     public InputStream getResourceStream(String path) {
-        return FabricLauncherBase.getLauncher().getResourceAsStream(path);
+        try {
+            return Files.newInputStream(LPFabricBootstrap.MOD_CONTAINER.getPath(path));
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     @Override
