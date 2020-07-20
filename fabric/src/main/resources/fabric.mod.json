@@ -10,7 +10,13 @@
   },
   "description": "An advanced permissions mod (plugin)",
   "authors": [
-    "Luck"
+    {
+      "name": "Luck",
+      "contact": {
+        "sources": "https://github.com/lucko",
+        "homepage": "https://lucko.me/"
+      }
+    }
   ],
   "licence": "MIT",
   "contact": {
@@ -27,6 +33,7 @@
     "mixins.luckperms.json"
   ],
   "depends": {
+    "fabricloader": ">=0.9.0",
     "fabric-api-base": "*",
     "fabric-command-api-v1": "*",
     "fabric-lifecycle-events-v1": "*",

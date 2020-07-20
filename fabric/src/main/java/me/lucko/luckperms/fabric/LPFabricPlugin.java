@@ -52,7 +52,6 @@ import me.lucko.luckperms.fabric.event.RespawnPlayerCallback;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.FabricEventListeners;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
@@ -135,31 +134,24 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new FabricConfigAdapter(this, resolveConfig());
-    }
+        Path configPath = this.getBootstrap().getConfigDirectory().resolve("luckperms.conf");
 
-    private Path resolveConfig() {
-        // NOTE: 'LuckPerms' MUST be capitalized in while resolving the path because linux takes file paths literally.
-        Path path = this.getBootstrap().getConfigDirectory().resolve("luckperms.conf");
-
-        if (!Files.exists(path)) {
+        if (!Files.exists(configPath)) {
             try {
                 MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigDirectory());
-                try (InputStream is = getClass().getClassLoader().getResourceAsStream("luckperms.conf")) {
-                    Files.copy(is, path);
+                try (InputStream is = this.getBootstrap().getResourceStream("luckperms.conf")) {
+                    Files.copy(is, configPath);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        return path;
+        return new FabricConfigAdapter(this, configPath);
     }
 
     @Override
     protected void registerPlatformListeners() {
-    	// Too late for fabric.
-        // We cannot invoke this more than once since event listeners persist across game states.
     }
 
     @Override
@@ -170,7 +162,6 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerCommands() {
         // Too late for fabric.
-        // We cannot invoke this more than once since the event listeners persist across game states
     }
 
     @Override
@@ -258,21 +249,24 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     public Stream<Sender> getOnlineSenders() {
         return Stream.concat(
                 Stream.of(getConsoleSender()),
-                this.server.getPlayerManager().getPlayerList().stream().map(serverPlayerEntity -> getSenderFactory().wrap(serverPlayerEntity.getCommandSource()))
+                this.getServer().getPlayerManager().getPlayerList().stream().map(serverPlayerEntity -> getSenderFactory().wrap(serverPlayerEntity.getCommandSource()))
         );
     }
 
     @Override
     public Sender getConsoleSender() {
-        return this.getSenderFactory().wrap(this.server.getCommandSource());
+        return this.getSenderFactory().wrap(this.getServer().getCommandSource());
     }
 
     public FabricSenderFactory getSenderFactory() {
         return this.senderFactory;
     }
 
-    @Nullable
     public MinecraftServer getServer() {
+        if (this.server == null) {
+            throw new UnsupportedOperationException("Minecraft's server is not availible right now");
+        }
+
         return this.server;
     }
 
