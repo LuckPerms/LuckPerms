@@ -37,10 +37,10 @@ import net.luckperms.api.context.StaticContextCalculator;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class LPStaticContextsCalculator implements StaticContextCalculator {
+public class ConfigurationContextCalculator implements StaticContextCalculator {
     private final LuckPermsConfiguration config;
 
-    public LPStaticContextsCalculator(LuckPermsConfiguration config) {
+    public ConfigurationContextCalculator(LuckPermsConfiguration config) {
         this.config = config;
     }
 
