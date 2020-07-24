@@ -43,13 +43,7 @@ import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -145,60 +139,62 @@ public class Importer implements Runnable {
             trackGroups.forEach(g -> trackGroupsList.add(g.getAsString()));
             tracks.put(track.getKey(), trackGroupsList);
         }
-        for (Map.Entry<String, JsonElement> user : this.data.get("users").getAsJsonObject().entrySet()) {
-            JsonObject jsonData = user.getValue().getAsJsonObject();
+        if (!(this.data.get("users") == null)) {
+            for (Map.Entry<String, JsonElement> user : this.data.get("users").getAsJsonObject().entrySet()) {
+                JsonObject jsonData = user.getValue().getAsJsonObject();
+                UUID uuid = UUID.fromString(user.getKey());
+                String username = null;
+                String primaryGroup = null;
+                Set<Node> nodes = NodeJsonSerializer.deserializeNodes(jsonData.get("nodes").getAsJsonArray());
 
-            UUID uuid = UUID.fromString(user.getKey());
-            String username = null;
-            String primaryGroup = null;
-            Set<Node> nodes = NodeJsonSerializer.deserializeNodes(jsonData.get("nodes").getAsJsonArray());
+                if (jsonData.has("username")) {
+                    username = jsonData.get("username").getAsString();
+                }
+                if (jsonData.has("primaryGroup")) {
+                    primaryGroup = jsonData.get("primaryGroup").getAsString();
+                }
 
-            if (jsonData.has("username")) {
-                username = jsonData.get("username").getAsString();
+                users.put(uuid, new UserData(username, primaryGroup, nodes));
             }
-            if (jsonData.has("primaryGroup")) {
-                primaryGroup = jsonData.get("primaryGroup").getAsString();
+        }
+            this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Waiting for initial update task to complete..."));
+
+            // join the update task future before scheduling command executions
+            updateTask.join();
+
+            this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Setting up data processor..."));
+
+            // create a threadpool for the processing
+            ExecutorService executor = Executors.newFixedThreadPool(16, new ThreadFactoryBuilder().setNameFormat("luckperms-importer-%d").build());
+
+            // A set of futures, which are really just the processes we need to wait for.
+            Set<CompletableFuture<Void>> futures = new HashSet<>();
+
+            int total = 0;
+            AtomicInteger processedCount = new AtomicInteger(0);
+
+            for (Map.Entry<String, Set<Node>> group : groups.entrySet()) {
+                futures.add(CompletableFuture.completedFuture(group).thenAcceptAsync(ent -> {
+                    processGroup(ent.getKey(), ent.getValue());
+                    processedCount.incrementAndGet();
+                }, executor));
+                total++;
             }
-
-            users.put(uuid, new UserData(username, primaryGroup, nodes));
-        }
-
-        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Waiting for initial update task to complete..."));
-
-        // join the update task future before scheduling command executions
-        updateTask.join();
-
-        this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "Setting up data processor..."));
-
-        // create a threadpool for the processing
-        ExecutorService executor = Executors.newFixedThreadPool(16, new ThreadFactoryBuilder().setNameFormat("luckperms-importer-%d").build());
-
-        // A set of futures, which are really just the processes we need to wait for.
-        Set<CompletableFuture<Void>> futures = new HashSet<>();
-
-        int total = 0;
-        AtomicInteger processedCount = new AtomicInteger(0);
-
-        for (Map.Entry<String, Set<Node>> group : groups.entrySet()) {
-            futures.add(CompletableFuture.completedFuture(group).thenAcceptAsync(ent -> {
-                processGroup(ent.getKey(), ent.getValue());
-                processedCount.incrementAndGet();
-            }, executor));
-            total++;
-        }
-        for (Map.Entry<String, List<String>> track : tracks.entrySet()) {
-            futures.add(CompletableFuture.completedFuture(track).thenAcceptAsync(ent -> {
-                processTrack(ent.getKey(), ent.getValue());
-                processedCount.incrementAndGet();
-            }, executor));
-            total++;
-        }
-        for (Map.Entry<UUID, UserData> user : users.entrySet()) {
-            futures.add(CompletableFuture.completedFuture(user).thenAcceptAsync(ent -> {
-                processUser(ent.getKey(), ent.getValue());
-                processedCount.incrementAndGet();
-            }, executor));
-            total++;
+            for (Map.Entry<String, List<String>> track : tracks.entrySet()) {
+                futures.add(CompletableFuture.completedFuture(track).thenAcceptAsync(ent -> {
+                    processTrack(ent.getKey(), ent.getValue());
+                    processedCount.incrementAndGet();
+                }, executor));
+                total++;
+            }
+        if (!(this.data.get("users") == null)) {
+            for (Map.Entry<UUID, UserData> user : users.entrySet())  {
+                futures.add(CompletableFuture.completedFuture(user).thenAcceptAsync(ent -> {
+                    processUser(ent.getKey(), ent.getValue());
+                    processedCount.incrementAndGet();
+                }, executor));
+                total++;
+            }
         }
 
         // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
