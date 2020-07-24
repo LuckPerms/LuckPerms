@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -43,15 +44,13 @@ import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.data.DataType;
 
-import java.util.List;
-
 public class GroupRename extends ChildCommand<Group> {
     public GroupRename(LocaleManager locale) {
         super(CommandSpec.GROUP_RENAME.localize(locale), "rename", CommandPermission.GROUP_RENAME, Predicates.not(1));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) {
         String newGroupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender, newGroupName);
@@ -73,18 +72,18 @@ public class GroupRename extends ChildCommand<Group> {
         }
 
         try {
-            plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
+            plugin.getStorage().deleteGroup(target, DeletionCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.DELETE_ERROR.send(sender, group.getFormattedDisplayName());
+            Message.DELETE_ERROR.send(sender, target.getFormattedDisplayName());
             return CommandResult.FAILURE;
         }
 
-        newGroup.replaceNodes(DataType.NORMAL, group.normalData().immutable());
+        newGroup.setNodes(DataType.NORMAL, target.normalData().asList());
 
-        Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
+        Message.RENAME_SUCCESS.send(sender, target.getName(), newGroup.getName());
 
-        LoggedAction.build().source(sender).target(group)
+        LoggedAction.build().source(sender).target(target)
                 .description("rename", newGroup.getName())
                 .build().submit(plugin, sender);
 

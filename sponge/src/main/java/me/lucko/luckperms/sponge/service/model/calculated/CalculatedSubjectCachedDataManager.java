@@ -34,12 +34,12 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.processor.MapProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.calculator.FixedDefaultsProcessor;
-import me.lucko.luckperms.sponge.calculator.SpongeWildcardProcessor;
 
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.metastacking.MetaStackDefinition;
@@ -68,6 +68,11 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
     }
 
     @Override
+    protected QueryOptions getQueryOptions() {
+        return this.subject.sponge().getQueryOptions();
+    }
+
+    @Override
     protected CalculatorFactory getCalculatorFactory() {
         return this;
     }
@@ -78,8 +83,8 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
     }
 
     @Override
-    protected Map<String, Boolean> resolvePermissions(QueryOptions queryOptions) {
-        return this.subject.resolveAllPermissions(queryOptions);
+    protected void resolvePermissions(Map<String, Boolean> accumulator, QueryOptions queryOptions) {
+        this.subject.resolveAllPermissions(accumulator, queryOptions);
     }
 
     @Override

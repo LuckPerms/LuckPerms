@@ -30,6 +30,7 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
+import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
 
 import net.luckperms.api.model.data.DataType;
 
@@ -67,7 +68,7 @@ public final class ProxyFactory {
                 new me.lucko.luckperms.sponge.service.proxy.api6.SubjectCollectionProxy(luckPerms.getService(), luckPerms);
     }
 
-    public static Subject toSponge(LPSubject luckPerms) {
+    public static ProxiedSubject toSponge(LPSubject luckPerms) {
         return IS_API_7 ?
                 new me.lucko.luckperms.sponge.service.proxy.api7.SubjectProxy(luckPerms.getService(), luckPerms.toReference()) :
                 new me.lucko.luckperms.sponge.service.proxy.api6.SubjectProxy(luckPerms.getService(), luckPerms.toReference());

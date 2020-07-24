@@ -45,19 +45,15 @@ public final class StorageAssistant {
     private StorageAssistant() {}
 
     public static Group loadGroup(String target, Sender sender, LuckPermsPlugin plugin, boolean auditTemporary) {
-        Group group = plugin.getStorage().loadGroup(target).join().orElse(null);
+        Group group = plugin.getGroupManager().getByDisplayName(target);
+        if (group != null) {
+            target = group.getName();
+        }
+
+        group = plugin.getStorage().loadGroup(target).join().orElse(null);
         if (group == null) {
-            // failed to load, but it might be a display name.
-            group = plugin.getGroupManager().getByDisplayName(target);
-
-            // nope, not a display name
-            if (group == null) {
-                Message.GROUP_NOT_FOUND.send(sender, target);
-                return null;
-            }
-
-            // it was a display name, we need to reload
-            plugin.getStorage().loadGroup(group.getName()).join();
+            Message.GROUP_NOT_FOUND.send(sender, target);
+            return null;
         }
 
         if (auditTemporary) {

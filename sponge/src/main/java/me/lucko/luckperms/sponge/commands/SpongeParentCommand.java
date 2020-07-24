@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -87,7 +88,7 @@ public class SpongeParentCommand extends Command<Void> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, ArgumentList args, String label) {
         LuckPermsService service = this.plugin.getService();
 
         if (args.size() < 1) {

@@ -31,31 +31,36 @@ import me.lucko.luckperms.common.api.implementation.ApiGroupManager;
 import me.lucko.luckperms.common.api.implementation.ApiMessagingService;
 import me.lucko.luckperms.common.api.implementation.ApiMetaStackFactory;
 import me.lucko.luckperms.common.api.implementation.ApiNodeBuilderRegistry;
+import me.lucko.luckperms.common.api.implementation.ApiNodeMatcherFactory;
 import me.lucko.luckperms.common.api.implementation.ApiPlatform;
+import me.lucko.luckperms.common.api.implementation.ApiPlayerAdapter;
 import me.lucko.luckperms.common.api.implementation.ApiQueryOptionsRegistry;
 import me.lucko.luckperms.common.api.implementation.ApiTrackManager;
 import me.lucko.luckperms.common.api.implementation.ApiUserManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.actionlog.ActionLogger;
 import net.luckperms.api.context.ContextManager;
-import net.luckperms.api.event.EventBus;
 import net.luckperms.api.messaging.MessagingService;
 import net.luckperms.api.messenger.MessengerProvider;
 import net.luckperms.api.metastacking.MetaStackFactory;
 import net.luckperms.api.model.group.GroupManager;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.NodeBuilderRegistry;
+import net.luckperms.api.node.matcher.NodeMatcherFactory;
 import net.luckperms.api.platform.Platform;
+import net.luckperms.api.platform.PlayerAdapter;
 import net.luckperms.api.platform.PluginMetadata;
 import net.luckperms.api.query.QueryOptionsRegistry;
 import net.luckperms.api.track.TrackManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -70,6 +75,7 @@ public class LuckPermsApiProvider implements LuckPerms {
     private final UserManager userManager;
     private final GroupManager groupManager;
     private final TrackManager trackManager;
+    private final PlayerAdapter<?> playerAdapter;
     private final ActionLogger actionLogger;
     private final ContextManager contextManager;
     private final MetaStackFactory metaStackFactory;
@@ -81,6 +87,7 @@ public class LuckPermsApiProvider implements LuckPerms {
         this.userManager = new ApiUserManager(plugin, plugin.getUserManager());
         this.groupManager = new ApiGroupManager(plugin, plugin.getGroupManager());
         this.trackManager = new ApiTrackManager(plugin, plugin.getTrackManager());
+        this.playerAdapter = new ApiPlayerAdapter<>(plugin.getUserManager(), plugin.getContextManager());
         this.actionLogger = new ApiActionLogger(plugin);
         this.contextManager = new ApiContextManager(plugin, plugin.getContextManager());
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
@@ -116,13 +123,24 @@ public class LuckPermsApiProvider implements LuckPerms {
         return this.trackManager;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public @NonNull <T> PlayerAdapter<T> getPlayerAdapter(@NonNull Class<T> playerClass) {
+        Objects.requireNonNull(playerClass, "playerClass");
+        Class<?> expectedClass = this.plugin.getContextManager().getPlayerClass();
+        if (!expectedClass.equals(playerClass)) {
+            throw new IllegalArgumentException("Player class " + playerClass.getName() + " does not equal " + expectedClass.getName());
+        }
+        return (PlayerAdapter<T>) this.playerAdapter;
+    }
+
     @Override
     public @NonNull CompletableFuture<Void> runUpdateTask() {
         return this.plugin.getSyncTaskBuffer().request();
     }
 
     @Override
-    public @NonNull EventBus getEventBus() {
+    public @NonNull AbstractEventBus<?> getEventBus() {
         return this.plugin.getEventDispatcher().getEventBus();
     }
 
@@ -161,6 +179,11 @@ public class LuckPermsApiProvider implements LuckPerms {
     @Override
     public @NonNull MetaStackFactory getMetaStackFactory() {
         return this.metaStackFactory;
+    }
+
+    @Override
+    public @NonNull NodeMatcherFactory getNodeMatcherFactory() {
+        return ApiNodeMatcherFactory.INSTANCE;
     }
 
 }

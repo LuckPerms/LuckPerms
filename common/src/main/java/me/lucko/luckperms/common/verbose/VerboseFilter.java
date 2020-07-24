@@ -41,17 +41,25 @@ public final class VerboseFilter {
     private final String expression;
     private final AST ast;
 
-    public VerboseFilter(String expression) throws InvalidFilterException {
-        this.expression = expression;
+    public static VerboseFilter acceptAll() {
+        return new VerboseFilter("", AST.ALWAYS_TRUE);
+    }
+
+    public static VerboseFilter compile(String expression) throws InvalidFilterException {
         if (expression.isEmpty()) {
-            this.ast = AST.ALWAYS_TRUE;
-        } else {
-            try {
-                this.ast = BooleanExpressionCompiler.compile(expression);
-            } catch (LexerException | ParserException e) {
-                throw new InvalidFilterException("Exception occurred whilst generating an expression for '" + expression + "'", e);
-            }
+            return acceptAll();
         }
+
+        try {
+            return new VerboseFilter(expression, BooleanExpressionCompiler.compile(expression));
+        } catch (LexerException | ParserException e) {
+            throw new InvalidFilterException("Exception occurred whilst generating an expression for '" + expression + "'", e);
+        }
+    }
+
+    private VerboseFilter(String expression, AST ast) {
+        this.expression = expression;
+        this.ast = ast;
     }
 
     /**

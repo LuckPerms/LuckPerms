@@ -25,44 +25,39 @@
 
 package me.lucko.luckperms.common.config;
 
+import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-/**
- * The master configuration used by LuckPerms.
- */
-public interface LuckPermsConfiguration {
+public class LuckPermsConfiguration extends KeyedConfiguration {
+    private final LuckPermsPlugin plugin;
+    private final ContextsFile contextsFile;
 
-    /**
-     * Gets the main plugin instance.
-     *
-     * @return the plugin instance
-     */
-    LuckPermsPlugin getPlugin();
+    public LuckPermsConfiguration(LuckPermsPlugin plugin, ConfigurationAdapter adapter) {
+        super(adapter, ConfigKeys.getKeys());
+        this.plugin = plugin;
+        this.contextsFile = new ContextsFile(this);
 
-    /**
-     * Gets the object which wraps the 'contexts.json' file.
-     *
-     * @return the contexts file wrapper object
-     */
-    ContextsFile getContextsFile();
+        init();
+    }
 
-    /**
-     * Reloads the configuration.
-     */
-    void reload();
+    @Override
+    protected void load(boolean initial) {
+        super.load(initial);
+        this.contextsFile.load();
+    }
 
-    /**
-     * Loads all configuration values.
-     */
-    void load();
+    @Override
+    public void reload() {
+        super.reload();
+        getPlugin().getEventDispatcher().dispatchConfigReload();
+    }
 
-    /**
-     * Gets the value of a given context key.
-     *
-     * @param key the key
-     * @param <T> the key return type
-     * @return the value mapped to the given key. May be null.
-     */
-    <T> T get(ConfigKey<T> key);
+    public ContextsFile getContextsFile() {
+        return this.contextsFile;
+    }
 
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
 }

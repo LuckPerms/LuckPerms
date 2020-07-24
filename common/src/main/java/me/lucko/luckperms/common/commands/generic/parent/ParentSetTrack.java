@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -60,8 +60,8 @@ public class ParentSetTrack extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
@@ -82,7 +82,7 @@ public class ParentSetTrack extends GenericChildCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        int index = ArgumentParser.parseIntOrElse(1, args, -1);
+        int index = args.getIntOrDefault(1, -1);
         String groupName;
         if (index > 0) {
             List<String> trackGroups = track.getGroups();
@@ -92,14 +92,14 @@ public class ParentSetTrack extends GenericChildCommand {
             }
             groupName = track.getGroups().get(index - 1);
         } else {
-            groupName = ArgumentParser.parseName(1, args);
+            groupName = args.getLowercase(1, DataConstraints.GROUP_NAME_TEST);
             if (!track.containsGroup(groupName)) {
                 Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), groupName);
                 return CommandResult.INVALID_ARGS;
             }
         }
 
-        ImmutableContextSet context = ArgumentParser.parseContext(2, args, plugin).immutableCopy();
+        ImmutableContextSet context = args.getContextOrDefault(2, plugin).immutableCopy();
 
         Group group = StorageAssistant.loadGroup(groupName, sender, plugin, false);
         if (group == null) {
@@ -107,28 +107,28 @@ public class ParentSetTrack extends GenericChildCommand {
         }
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
-                ArgumentPermissions.checkGroup(plugin, sender, holder, context) ||
+                ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, group, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, track.getName(), group.getName())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        holder.removeIf(DataType.NORMAL, context, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), false);
-        holder.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
+        target.removeIf(DataType.NORMAL, context, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), false);
+        target.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
 
-        Message.SET_TRACK_PARENT_SUCCESS.send(sender, holder.getFormattedDisplayName(), track.getName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+        Message.SET_TRACK_PARENT_SUCCESS.send(sender, target.getFormattedDisplayName(), track.getName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-        LoggedAction.build().source(sender).target(holder)
+        LoggedAction.build().source(sender).target(target)
                 .description("parent", "settrack", track.getName(), groupName, context)
                 .build().submit(plugin, sender);
 
-        StorageAssistant.save(holder, sender, plugin);
+        StorageAssistant.save(target, sender, plugin);
         return CommandResult.SUCCESS;
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.tracks(plugin))
                 .at(1, TabCompletions.groups(plugin))

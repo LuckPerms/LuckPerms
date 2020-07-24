@@ -40,18 +40,32 @@ import java.util.Set;
  * something will apply.</p>
  *
  * <p>A single "context" consists of a key and a value, both strings. The key
- * represents the type of context, and the value represents the setting of the
- * context key.</p>
+ * describes the type of the context, and the value represents what the key is
+ * set to.</p>
+ *
+ * <p>For example, a context with {@code key=world} and {@code value=world_nether}
+ * describes that a subject is in the "world_nether" world.</p>
+ *
+ * <p>Contexts are exposed to end users and manipulated when managing permissions.
+ * For this reason, context keys should strike a balance between being descriptive
+ * and succinct.</p>
+ *
+ * <p>Context keys and values are case-insensitive, and will be automatically
+ * converted to {@link String#toLowerCase() lowercase} when added to a
+ * context set. Keys and values cannot be null or empty (len=0 or consisting of
+ * only whitespace).</p>
+ *
+ * <p>If a context key is formed of more than one word, the parts should be
+ * separated by the '{@code -}' character. (e.g. "{@code server-type}")</p>
+ *
+ * <p>If a context key is likely to conflict with another plugin, it should be
+ * appropriately namespaced using the name of the plugin providing the context.
+ * The namespace should be at the start of the context key, and separated using
+ * the '{@code :}' character. (e.g. "{@code worldguard:region}" for WorldGuard
+ * regions)</p>
  *
  * <p>Contexts can be combined with each other to form so called
  * "context sets" - simply a collection of context pairs.</p>
- *
- * <p>Context keys and values are case-insensitive, and will be converted to
- * {@link String#toLowerCase() lowercase} by all implementations.</p>
- *
- * <p>Context keys and values may not be null or empty. A key/value will be
- * deemed empty if it's length is zero, or if it consists of only space
- * characters.</p>
  *
  * <p>Two default ContextSet implementations are provided.
  * {@link MutableContextSet} allows the addition and removal of context keys
@@ -197,17 +211,47 @@ public interface ContextSet extends Iterable<Context> {
     }
 
     /**
-     * Returns if this {@link ContextSet} is fully "satisfied" by another set.
+     * Returns if the {@link ContextSet} contains any of the given context pairings.
      *
-     * <p>For a context set to "satisfy" another, it must itself contain all of
-     * the context pairings in the other set.</p>
-     *
-     * <p>Mathematically, this method returns true if this set is a <b>subset</b> of the other.</p>
-     *
-     * @param other the other set to check
-     * @return true if all entries in this set are also in the other set
+     * @param key the key to look for
+     * @param values the values to look for
+     * @return true if the set contains any of the pairs
+     * @since 5.2
      */
-    boolean isSatisfiedBy(@NonNull ContextSet other);
+    default boolean containsAny(@NonNull String key, @NonNull Iterable<String> values) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(values, "values");
+
+        for (String value : values) {
+            if (contains(key, value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns if this {@link ContextSet} is "satisfied" by another set.
+     *
+     * <p>{@link ContextSatisfyMode#AT_LEAST_ONE_VALUE_PER_KEY} is the mode used by this method.</p>
+     *
+     * @param other the other set
+     * @return true if this context set is satisfied by the other
+     */
+    default boolean isSatisfiedBy(@NonNull ContextSet other) {
+        return isSatisfiedBy(other, ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY);
+    }
+
+    /**
+     * Returns if this {@link ContextSet} is "satisfied" by another set, according to the given
+     * {@code mode}.
+     *
+     * @param other the other set
+     * @param mode the mode to use
+     * @return true if this context set is satisfied by the other
+     * @since 5.2
+     */
+    boolean isSatisfiedBy(@NonNull ContextSet other, @NonNull ContextSatisfyMode mode);
 
     /**
      * Returns if the {@link ContextSet} is empty.

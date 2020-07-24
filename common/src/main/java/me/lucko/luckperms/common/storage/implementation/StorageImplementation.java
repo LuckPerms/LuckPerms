@@ -27,15 +27,16 @@ package me.lucko.luckperms.common.storage.implementation;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
-import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -71,7 +72,7 @@ public interface StorageImplementation {
 
     Set<UUID> getUniqueUsers() throws Exception;
 
-    List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws Exception;
+    <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception;
 
     Group createAndLoadGroup(String name) throws Exception;
 
@@ -83,7 +84,7 @@ public interface StorageImplementation {
 
     void deleteGroup(Group group) throws Exception;
 
-    List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws Exception;
+    <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception;
 
     Track createAndLoadTrack(String name) throws Exception;
 

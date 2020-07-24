@@ -33,11 +33,12 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -55,74 +56,89 @@ import net.luckperms.api.node.ChatMetaType;
 import java.util.List;
 
 public class MetaRemoveChatMeta extends GenericChildCommand {
+
+    public static MetaRemoveChatMeta forPrefix(LocaleManager locale) {
+        return new MetaRemoveChatMeta(
+                ChatMetaType.PREFIX,
+                CommandSpec.META_REMOVEPREFIX.localize(locale),
+                "removeprefix",
+                CommandPermission.USER_META_REMOVE_PREFIX,
+                CommandPermission.GROUP_META_REMOVE_PREFIX
+        );
+    }
+
+    public static MetaRemoveChatMeta forSuffix(LocaleManager locale) {
+        return new MetaRemoveChatMeta(
+                ChatMetaType.SUFFIX,
+                CommandSpec.META_REMOVESUFFIX.localize(locale),
+                "removesuffix",
+                CommandPermission.USER_META_REMOVE_SUFFIX,
+                CommandPermission.GROUP_META_REMOVE_SUFFIX
+        );
+    }
+
     private final ChatMetaType type;
 
-    public MetaRemoveChatMeta(LocaleManager locale, ChatMetaType type) {
-        super(
-                type == ChatMetaType.PREFIX ? CommandSpec.META_REMOVEPREFIX.localize(locale) : CommandSpec.META_REMOVESUFFIX.localize(locale),
-                "remove" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_REMOVE_PREFIX : CommandPermission.USER_META_REMOVE_SUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_REMOVE_PREFIX : CommandPermission.GROUP_META_REMOVE_SUFFIX,
-                Predicates.is(0)
-        );
+    private MetaRemoveChatMeta(ChatMetaType type, LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
+        super(spec, name, userPermission, groupPermission, Predicates.is(0));
         this.type = type;
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        int priority = ArgumentParser.parsePriority(0, args);
-        String meta = ArgumentParser.parseStringOrElse(1, args, "null");
-        ImmutableContextSet context = ArgumentParser.parseContext(2, args, plugin).immutableCopy();
+        int priority = args.getPriority(0);
+        String meta = args.getOrDefault(1, "null");
+        ImmutableContextSet context = args.getContextOrDefault(2, plugin).immutableCopy();
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
-                ArgumentPermissions.checkGroup(plugin, sender, holder, context)) {
+                ArgumentPermissions.checkGroup(plugin, sender, target, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
         // Handle bulk removal
         if (meta.equalsIgnoreCase("null") || meta.equals("*")) {
-            holder.removeIf(DataType.NORMAL, context, this.type.nodeType().predicate(n -> n.getPriority() == priority && !n.hasExpiry()), false);
-            Message.BULK_REMOVE_CHATMETA_SUCCESS.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            target.removeIf(DataType.NORMAL, context, this.type.nodeType().predicate(n -> n.getPriority() == priority && !n.hasExpiry()), false);
+            Message.BULK_REMOVE_CHATMETA_SUCCESS.send(sender, target.getFormattedDisplayName(), this.type.name().toLowerCase(), priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            LoggedAction.build().source(sender).target(holder)
+            LoggedAction.build().source(sender).target(target)
                     .description("meta" , "remove" + this.type.name().toLowerCase(), priority, "*", context)
                     .build().submit(plugin, sender);
 
-            StorageAssistant.save(holder, sender, plugin);
+            StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         }
 
-        DataMutateResult result = holder.unsetNode(DataType.NORMAL, this.type.builder(meta, priority).withContext(context).build());
+        DataMutateResult result = target.unsetNode(DataType.NORMAL, this.type.builder(meta, priority).withContext(context).build());
 
         if (result.wasSuccessful()) {
-            TextComponent.Builder builder = Message.REMOVE_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
+            TextComponent.Builder builder = Message.REMOVE_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                    "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
-                    '¥'
+                    "§3Raw " + this.type.name().toLowerCase() + ": §r" + meta,
+                    '§'
             ));
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
-            LoggedAction.build().source(sender).target(holder)
+            LoggedAction.build().source(sender).target(target)
                     .description("meta" , "remove" + this.type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
-            StorageAssistant.save(holder, sender, plugin);
+            StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_CHAT_META.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOES_NOT_HAVE_CHAT_META.send(sender, target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .from(2, TabCompletions.contexts(plugin))
                 .complete(args);

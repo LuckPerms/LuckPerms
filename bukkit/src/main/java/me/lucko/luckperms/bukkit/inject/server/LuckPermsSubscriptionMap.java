@@ -26,7 +26,6 @@
 package me.lucko.luckperms.bukkit.inject.server;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
@@ -37,12 +36,14 @@ import org.bukkit.plugin.PluginManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 /**
  * A replacement map for the 'permSubs' instance in Bukkit's SimplePluginManager.
@@ -72,8 +73,10 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
     final LPBukkitPlugin plugin;
 
     public LuckPermsSubscriptionMap(LPBukkitPlugin plugin, Map<String, Map<Permissible, Boolean>> existingData) {
-        super(existingData);
         this.plugin = plugin;
+        for (Entry<String, Map<Permissible, Boolean>> entry : existingData.entrySet()) {
+            super.put(entry.getKey(), new LPSubscriptionValueMap(entry.getKey(), entry.getValue()));
+        }
     }
 
     /*
@@ -94,17 +97,13 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
 
         String permission = ((String) key);
 
-        Map<Permissible, Boolean> result = super.get(key);
-
+        LPSubscriptionValueMap result = (LPSubscriptionValueMap) super.get(key);
         if (result == null) {
             // calculate a new map - always!
             result = new LPSubscriptionValueMap(permission);
             super.put(permission, result);
-        } else if (!(result instanceof LPSubscriptionValueMap)) {
-            // ensure return type is a LPSubscriptionMap
-            result = new LPSubscriptionValueMap(permission, result);
-            super.put(permission, result);
         }
+
         return result;
     }
 
@@ -121,6 +120,21 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
         return super.put(key, value);
     }
 
+    @Override
+    public void putAll(Map<? extends String, ? extends Map<Permissible, Boolean>> m) {
+        m.forEach(this::put);
+    }
+
+    @Override
+    public Map<Permissible, Boolean> putIfAbsent(String key, Map<Permissible, Boolean> value) {
+        return get(key);
+    }
+
+    @Override
+    public Map<Permissible, Boolean> computeIfAbsent(String key, Function<? super String, ? extends Map<Permissible, Boolean>> mappingFunction) {
+        return get(key);
+    }
+
     // if the key isn't null and is a string, #get will always return a value for it
     @Override
     public boolean containsKey(Object key) {
@@ -134,15 +148,9 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
      */
     public Map<String, Map<Permissible, Boolean>> detach() {
         Map<String, Map<Permissible, Boolean>> map = new HashMap<>();
-
         for (Map.Entry<String, Map<Permissible, Boolean>> ent : entrySet()) {
-            if (ent.getValue() instanceof LPSubscriptionValueMap) {
-                map.put(ent.getKey(), ((LPSubscriptionValueMap) ent.getValue()).backing);
-            } else {
-                map.put(ent.getKey(), ent.getValue());
-            }
+            map.put(ent.getKey(), new WeakHashMap<>(((LPSubscriptionValueMap) ent.getValue()).backing));
         }
-
         return map;
     }
 
@@ -159,7 +167,7 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
 
         private LPSubscriptionValueMap(String permission, Map<Permissible, Boolean> backing) {
             this.permission = permission;
-            this.backing = new WeakHashMap<>(backing);
+            this.backing = Collections.synchronizedMap(new WeakHashMap<>(backing));
 
             // remove all players from the map
             this.backing.keySet().removeIf(p -> p instanceof Player);
@@ -167,7 +175,7 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
 
         public LPSubscriptionValueMap(String permission) {
             this.permission = permission;
-            this.backing = new WeakHashMap<>();
+            this.backing = Collections.synchronizedMap(new WeakHashMap<>());
         }
 
         @Override
@@ -218,13 +226,20 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
 
         @Override
         public @NonNull Set<Permissible> keySet() {
-            // gather players (LPPermissibles)
-            Set<Permissible> players = LuckPermsSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().stream()
-                    .filter(player -> player.hasPermission(this.permission) || player.isPermissionSet(this.permission))
-                    .collect(Collectors.toSet());
+            // start with the backing set
+            Set<Permissible> set;
+            synchronized (this.backing) {
+                set = new HashSet<>(this.backing.keySet());
+            }
 
-            // then combine the players with the backing map
-            return Sets.union(players, this.backing.keySet());
+            // add any online players who meet requirements
+            for (Player player : LuckPermsSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers()) {
+                if (player.hasPermission(this.permission) || player.isPermissionSet(this.permission)) {
+                    set.add(player);
+                }
+            }
+
+            return set;
         }
 
         @Override

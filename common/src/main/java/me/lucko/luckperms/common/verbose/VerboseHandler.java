@@ -80,11 +80,12 @@ public class VerboseHandler implements AutoCloseable {
             return;
         }
 
-        StackTraceElement[] trace = new Exception().getStackTrace();
+        long time = System.currentTimeMillis();
+        Throwable trace = new Throwable();
         String thread = Thread.currentThread().getName();
 
         // add the check data to a queue to be processed later.
-        this.queue.offer(new PermissionCheckEvent(origin, checkTarget, checkQueryOptions, trace, thread, permission, result));
+        this.queue.offer(new PermissionCheckEvent(origin, checkTarget, checkQueryOptions, time, trace, thread, permission, result));
     }
 
     /**
@@ -105,11 +106,12 @@ public class VerboseHandler implements AutoCloseable {
             return;
         }
 
-        StackTraceElement[] trace = new Exception().getStackTrace();
+        long time = System.currentTimeMillis();
+        Throwable trace = new Throwable();
         String thread = Thread.currentThread().getName();
 
         // add the check data to a queue to be processed later.
-        this.queue.offer(new MetaCheckEvent(origin, checkTarget, checkQueryOptions, trace, thread, key, result));
+        this.queue.offer(new MetaCheckEvent(origin, checkTarget, checkQueryOptions, time, trace, thread, key, result));
     }
 
     /**
@@ -120,6 +122,9 @@ public class VerboseHandler implements AutoCloseable {
      * @param notify if the sender should be notified in chat on each check
      */
     public void registerListener(Sender sender, VerboseFilter filter, boolean notify) {
+        // flush out anything before this listener was added
+        flush();
+
         this.listeners.put(sender.getUniqueId(), new VerboseListener(sender, filter, notify));
         this.listening = true;
     }
@@ -127,14 +132,14 @@ public class VerboseHandler implements AutoCloseable {
     /**
      * Removes a listener for a given player
      *
-     * @param uuid the players uuid
+     * @param sender the sender
      * @return the existing listener, if one was actually registered
      */
-    public VerboseListener unregisterListener(UUID uuid) {
+    public VerboseListener unregisterListener(Sender sender) {
         // immediately flush, so the listener gets all current data
         flush();
 
-        return this.listeners.remove(uuid);
+        return this.listeners.remove(sender.getUniqueId());
     }
 
     private void tick() {

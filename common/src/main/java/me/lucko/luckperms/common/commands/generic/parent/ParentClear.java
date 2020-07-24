@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -56,44 +56,44 @@ public class ParentClear extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        int before = holder.normalData().immutable().size();
+        int before = target.normalData().size();
 
-        MutableContextSet context = ArgumentParser.parseContext(0, args, plugin);
+        MutableContextSet context = args.getContextOrDefault(0, plugin);
 
-        if (ArgumentPermissions.checkContext(plugin, sender, permission, context) || ArgumentPermissions.checkGroup(plugin, sender, holder, context)) {
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context) || ArgumentPermissions.checkGroup(plugin, sender, target, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
         if (context.isEmpty()) {
-            holder.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE::matches, true);
+            target.removeIf(DataType.NORMAL, null, NodeType.INHERITANCE::matches, true);
         } else {
-            holder.removeIf(DataType.NORMAL, context, NodeType.INHERITANCE::matches, true);
+            target.removeIf(DataType.NORMAL, context, NodeType.INHERITANCE::matches, true);
         }
 
-        int changed = before - holder.normalData().immutable().size();
+        int changed = before - target.normalData().size();
         if (changed == 1) {
-            Message.PARENT_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
+            Message.PARENT_CLEAR_SUCCESS_SINGULAR.send(sender, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         } else {
-            Message.PARENT_CLEAR_SUCCESS.send(sender, holder.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
+            Message.PARENT_CLEAR_SUCCESS.send(sender, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
         }
 
-        LoggedAction.build().source(sender).target(holder)
+        LoggedAction.build().source(sender).target(target)
                 .description("parent", "clear", context)
                 .build().submit(plugin, sender);
 
-        StorageAssistant.save(holder, sender, plugin);
+        StorageAssistant.save(target, sender, plugin);
         return CommandResult.SUCCESS;
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .from(0, TabCompletions.contexts(plugin))
                 .complete(args);

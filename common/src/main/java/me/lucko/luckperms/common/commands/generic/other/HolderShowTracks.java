@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -58,8 +59,8 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T target, ArgumentList args, String label) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
@@ -74,9 +75,9 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
 
         List<Map.Entry<Track, String>> lines = new ArrayList<>();
 
-        if (holder.getType() == HolderType.USER) {
+        if (target.getType() == HolderType.USER) {
             // if the holder is a user, we want to query parent groups for tracks
-            Set<InheritanceNode> nodes = holder.normalData().immutableInheritance().values().stream()
+            Set<InheritanceNode> nodes = target.normalData().inheritanceAsList().stream()
                     .filter(Node::getValue)
                     .filter(n -> !n.hasExpiry())
                     .collect(Collectors.toSet());
@@ -93,7 +94,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
             }
         } else {
             // otherwise, just lookup for the actual group
-            String groupName = ((Group) holder).getName();
+            String groupName = ((Group) target).getName();
             List<Track> tracks = plugin.getTrackManager().getAll().values().stream()
                     .filter(t -> t.containsGroup(groupName))
                     .collect(Collectors.toList());
@@ -104,11 +105,11 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
         }
 
         if (lines.isEmpty()) {
-            Message.LIST_TRACKS_EMPTY.send(sender, holder.getFormattedDisplayName());
+            Message.LIST_TRACKS_EMPTY.send(sender, target.getFormattedDisplayName());
             return CommandResult.SUCCESS;
         }
 
-        Message.LIST_TRACKS.send(sender, holder.getFormattedDisplayName());
+        Message.LIST_TRACKS.send(sender, target.getFormattedDisplayName());
         for (Map.Entry<Track, String> line : lines) {
             Message.LIST_TRACKS_ENTRY.send(sender, line.getKey().getName(), line.getValue());
         }

@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.util.TextUtils;
@@ -39,8 +38,8 @@ import cn.nukkit.command.ConsoleCommandSender;
 
 import java.util.UUID;
 
-public class NukkitSenderFactory extends SenderFactory<CommandSender> {
-    public NukkitSenderFactory(LuckPermsPlugin plugin) {
+public class NukkitSenderFactory extends SenderFactory<LPNukkitPlugin, CommandSender> {
+    public NukkitSenderFactory(LPNukkitPlugin plugin) {
         super(plugin);
     }
 
@@ -92,6 +91,11 @@ public class NukkitSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected boolean hasPermission(CommandSender sender, String node) {
         return sender.hasPermission(node);
+    }
+
+    @Override
+    protected void performCommand(CommandSender sender, String command) {
+        getPlugin().getBootstrap().getServer().dispatchCommand(sender, command);
     }
 
     private static final class SyncMessengerAgent implements Runnable {

@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -48,7 +49,7 @@ public interface LPPermissionService {
 
     LuckPermsPlugin getPlugin();
 
-    ContextManager<Subject> getContextManager();
+    ContextManager<Subject, Player> getContextManager();
 
     SubjectReferenceFactory getReferenceFactory();
 

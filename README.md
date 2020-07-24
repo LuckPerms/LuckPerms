@@ -5,17 +5,21 @@
 [![Maven Central](https://img.shields.io/maven-metadata/v/https/repo1.maven.org/maven2/net/luckperms/api/maven-metadata.xml.svg?label=maven%20central&colorB=brightgreen)](https://search.maven.org/artifact/net.luckperms/api)
 [![Discord](https://img.shields.io/discord/241667244927483904.svg?logo=discord&label=)](https://discord.gg/luckperms)
 
-LuckPerms is an advanced permissions implementation aiming to be a fast, reliable and flexible alternative to existing permission plugins. The project's main goals are centered around high performance and a wide feature set, filling the gaps of functionality and building upon existing features found in other plugins.
+LuckPerms is a permissions plugin for Minecraft servers. It allows server admins to control what features players can use by creating groups and assigning permissions.
 
-LuckPerms also includes an extensive API for developers, and support for a variety of Minecraft server software & data storage options.
+It is:
 
-Still not convinced? More information can be found on the wiki, under: [Why LuckPerms?](https://github.com/lucko/LuckPerms/wiki/Why-LuckPerms)
+* **fast** - written with performance and scalability in mind.
+* **reliable** - trusted by thousands of server admins, and the largest of server networks.
+* **easy to use** - setup permissions using commands, directly in config files, or using the web editor.
+* **flexible** - supports a variety of data storage options, and works on lots of different server types.
+* **extensive** - a plethora of customization options and settings which can be changed to suit your server.
+* **free** - available for download and usage at no cost, and permissively licensed so it can remain free forever.
+
+For more information, see the wiki article on [Why LuckPerms?](https://github.com/lucko/LuckPerms/wiki/Why-LuckPerms)
 
 ## Useful Links
-
-The latest **downloads** can be found on the [project's homepage](https://luckperms.net/).
-
-More information about the project & how to use the plugin can be found in the [wiki](https://github.com/lucko/LuckPerms/wiki).
+The latest downloads & other useful links can be found on the project homepage at [luckperms.net](https://luckperms.net/).
 
 ## Building
 LuckPerms uses Gradle to handle dependencies & building.

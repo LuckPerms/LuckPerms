@@ -49,11 +49,11 @@ import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.Uuids;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 public class UserParentCommand extends ParentCommand<User, UserIdentifier> {
 
@@ -144,6 +144,6 @@ public class UserParentCommand extends ParentCommand<User, UserIdentifier> {
 
     @Override
     protected List<String> getTargets(LuckPermsPlugin plugin) {
-        return plugin.getBootstrap().getPlayerList().collect(Collectors.toList());
+        return new ArrayList<>(plugin.getBootstrap().getPlayerList());
     }
 }

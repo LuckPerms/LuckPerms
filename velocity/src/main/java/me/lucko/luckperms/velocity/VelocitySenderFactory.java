@@ -28,7 +28,6 @@ package me.lucko.luckperms.velocity;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.util.TextUtils;
@@ -39,8 +38,8 @@ import net.luckperms.api.util.Tristate;
 
 import java.util.UUID;
 
-public class VelocitySenderFactory extends SenderFactory<CommandSource> {
-    public VelocitySenderFactory(LuckPermsPlugin plugin) {
+public class VelocitySenderFactory extends SenderFactory<LPVelocityPlugin, CommandSource> {
+    public VelocitySenderFactory(LPVelocityPlugin plugin) {
         super(plugin);
     }
 
@@ -78,5 +77,10 @@ public class VelocitySenderFactory extends SenderFactory<CommandSource> {
     @Override
     protected boolean hasPermission(CommandSource source, String node) {
         return source.hasPermission(node);
+    }
+
+    @Override
+    protected void performCommand(CommandSource source, String command) {
+        getPlugin().getBootstrap().getProxy().getCommandManager().execute(source, command);
     }
 }

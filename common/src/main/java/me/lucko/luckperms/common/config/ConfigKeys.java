@@ -25,9 +25,14 @@
 
 package me.lucko.luckperms.common.config;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
+import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
+import me.lucko.luckperms.common.config.generic.key.ConfigKey;
+import me.lucko.luckperms.common.config.generic.key.SimpleConfigKey;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
@@ -39,30 +44,33 @@ import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
+import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
+import net.luckperms.api.platform.Platform;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.query.meta.MetaValueSelector;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
-import static me.lucko.luckperms.common.config.ConfigKeyTypes.booleanKey;
-import static me.lucko.luckperms.common.config.ConfigKeyTypes.customKey;
-import static me.lucko.luckperms.common.config.ConfigKeyTypes.enduringKey;
-import static me.lucko.luckperms.common.config.ConfigKeyTypes.lowercaseStringKey;
-import static me.lucko.luckperms.common.config.ConfigKeyTypes.mapKey;
-import static me.lucko.luckperms.common.config.ConfigKeyTypes.stringKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.booleanKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.key;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.lowercaseStringKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.mapKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.notReloadable;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.stringKey;
 
 /**
  * All of the {@link ConfigKey}s used by LuckPerms.
@@ -81,7 +89,7 @@ public final class ConfigKeys {
     /**
      * How many minutes to wait between syncs. A value <= 0 will disable syncing.
      */
-    public static final ConfigKey<Integer> SYNC_TIME = enduringKey(customKey(c -> {
+    public static final ConfigKey<Integer> SYNC_TIME = notReloadable(key(c -> {
         int val = c.getInteger("sync-minutes", -1);
         if (val == -1) {
             val = c.getInteger("data.sync-minutes", -1);
@@ -92,7 +100,7 @@ public final class ConfigKeys {
     /**
      * The default global contexts instance
      */
-    public static final ConfigKey<QueryOptions> GLOBAL_QUERY_OPTIONS = customKey(c -> {
+    public static final ConfigKey<QueryOptions> GLOBAL_QUERY_OPTIONS = key(c -> {
         Set<Flag> flags = EnumSet.of(Flag.RESOLVE_INHERITANCE);
         if (c.getBoolean("include-global", true)) {
             flags.add(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT);
@@ -108,6 +116,17 @@ public final class ConfigKeys {
         }
 
         return new QueryOptionsBuilderImpl(QueryMode.CONTEXTUAL).flags(flags).build();
+    });
+
+    /**
+     * The default contexts satisfy mode
+     */
+    public static final ConfigKey<ContextSatisfyMode> CONTEXT_SATISFY_MODE = key(c -> {
+        String value = c.getString("context-satisfy-mode", "at-least-one-value-per-key");
+        if (value.toLowerCase().equals("all-values-per-key")) {
+            return ContextSatisfyMode.ALL_VALUES_PER_KEY;
+        }
+        return ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY;
     });
 
     /**
@@ -131,6 +150,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> CANCEL_FAILED_LOGINS = booleanKey("cancel-failed-logins", false);
 
     /**
+     * If LuckPerms should update the list of commands sent to the client when permissions are changed.
+     */
+    public static final ConfigKey<Boolean> UPDATE_CLIENT_COMMAND_LIST = notReloadable(booleanKey("update-client-command-list", true));
+
+    /**
      * If LuckPerms should attempt to resolve Vanilla command target selectors for LP commands.
      */
     public static final ConfigKey<Boolean> RESOLVE_COMMAND_SELECTORS = booleanKey("resolve-command-selectors", false);
@@ -138,19 +162,22 @@ public final class ConfigKeys {
     /**
      * Controls how temporary add commands should behave
      */
-    public static final ConfigKey<TemporaryNodeMergeStrategy> TEMPORARY_ADD_BEHAVIOUR = customKey(c -> {
-        String option = c.getString("temporary-add-behaviour", "deny").toLowerCase();
-        if (!option.equals("deny") && !option.equals("replace") && !option.equals("accumulate")) {
-            option = "deny";
+    public static final ConfigKey<TemporaryNodeMergeStrategy> TEMPORARY_ADD_BEHAVIOUR = key(c -> {
+        String value = c.getString("temporary-add-behaviour", "deny");
+        switch (value.toLowerCase()) {
+            case "accumulate":
+                return TemporaryNodeMergeStrategy.ADD_NEW_DURATION_TO_EXISTING;
+            case "replace":
+                return TemporaryNodeMergeStrategy.REPLACE_EXISTING_IF_DURATION_LONGER;
+            default:
+                return TemporaryNodeMergeStrategy.NONE;
         }
-
-        return ArgumentParser.parseTemporaryModifier(option);
     });
 
     /**
      * How primary groups should be calculated.
      */
-    public static final ConfigKey<String> PRIMARY_GROUP_CALCULATION_METHOD = enduringKey(customKey(c -> {
+    public static final ConfigKey<String> PRIMARY_GROUP_CALCULATION_METHOD = notReloadable(key(c -> {
         String option = c.getString("primary-group-calculation", "stored").toLowerCase();
         if (!option.equals("stored") && !option.equals("parents-by-weight") && !option.equals("all-parents-by-weight")) {
             option = "stored";
@@ -162,7 +189,7 @@ public final class ConfigKeys {
     /**
      * A function to create primary group holder instances based upon the {@link #PRIMARY_GROUP_CALCULATION_METHOD} setting.
      */
-    public static final ConfigKey<Function<User, PrimaryGroupHolder>> PRIMARY_GROUP_CALCULATION = enduringKey(customKey(c -> {
+    public static final ConfigKey<Function<User, PrimaryGroupHolder>> PRIMARY_GROUP_CALCULATION = notReloadable(key(c -> {
         String option = PRIMARY_GROUP_CALCULATION_METHOD.get(c);
         switch (option) {
             case "stored":
@@ -194,67 +221,70 @@ public final class ConfigKeys {
     /**
      * If wildcards are being applied
      */
-    public static final ConfigKey<Boolean> APPLYING_WILDCARDS = enduringKey(booleanKey("apply-wildcards", true));
-
-    /**
-     * If regex permissions are being applied
-     */
-    public static final ConfigKey<Boolean> APPLYING_REGEX = enduringKey(booleanKey("apply-regex", true));
-
-    /**
-     * If shorthand permissions are being applied
-     */
-    public static final ConfigKey<Boolean> APPLYING_SHORTHAND = enduringKey(booleanKey("apply-shorthand", true));
-
-    /**
-     * If Bukkit child permissions are being applied. This setting is ignored on other platforms.
-     */
-    public static final ConfigKey<Boolean> APPLY_BUKKIT_CHILD_PERMISSIONS = enduringKey(booleanKey("apply-bukkit-child-permissions", true));
-
-    /**
-     * If Bukkit default permissions are being applied. This setting is ignored on other platforms.
-     */
-    public static final ConfigKey<Boolean> APPLY_BUKKIT_DEFAULT_PERMISSIONS = enduringKey(booleanKey("apply-bukkit-default-permissions", true));
-
-    /**
-     * If Bukkit attachment permissions are being applied. This setting is ignored on other platforms.
-     */
-    public static final ConfigKey<Boolean> APPLY_BUKKIT_ATTACHMENT_PERMISSIONS = enduringKey(booleanKey("apply-bukkit-attachment-permissions", true));
-
-    /**
-     * If Nukkit child permissions are being applied. This setting is ignored on other platforms.
-     */
-    public static final ConfigKey<Boolean> APPLY_NUKKIT_CHILD_PERMISSIONS = enduringKey(booleanKey("apply-nukkit-child-permissions", true));
-
-    /**
-     * If Nukkit default permissions are being applied. This setting is ignored on other platforms.
-     */
-    public static final ConfigKey<Boolean> APPLY_NUKKIT_DEFAULT_PERMISSIONS = enduringKey(booleanKey("apply-nukkit-default-permissions", true));
-
-    /**
-     * If Nukkit attachment permissions are being applied. This setting is ignored on other platforms.
-     */
-    public static final ConfigKey<Boolean> APPLY_NUKKIT_ATTACHMENT_PERMISSIONS = enduringKey(booleanKey("apply-nukkit-attachment-permissions", true));
-
-    /**
-     * If BungeeCord configured permissions are being applied. This setting is ignored on other platforms.
-     */
-    public static final ConfigKey<Boolean> APPLY_BUNGEE_CONFIG_PERMISSIONS = enduringKey(booleanKey("apply-bungee-config-permissions", false));
+    public static final ConfigKey<Boolean> APPLYING_WILDCARDS = notReloadable(booleanKey("apply-wildcards", true));
 
     /**
      * If Sponge's implicit permission inheritance system should be applied
      */
-    public static final ConfigKey<Boolean> APPLY_SPONGE_IMPLICIT_WILDCARDS = enduringKey(booleanKey("apply-sponge-implicit-wildcards", true));
+    public static final ConfigKey<Boolean> APPLYING_WILDCARDS_SPONGE = notReloadable(key(c -> {
+        boolean def = c.getPlugin().getBootstrap().getType() == Platform.Type.SPONGE;
+        return c.getBoolean("apply-sponge-implicit-wildcards", def);
+    }));
+
+    /**
+     * If regex permissions are being applied
+     */
+    public static final ConfigKey<Boolean> APPLYING_REGEX = notReloadable(booleanKey("apply-regex", true));
+
+    /**
+     * If shorthand permissions are being applied
+     */
+    public static final ConfigKey<Boolean> APPLYING_SHORTHAND = notReloadable(booleanKey("apply-shorthand", true));
+
+    /**
+     * If Bukkit child permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_BUKKIT_CHILD_PERMISSIONS = notReloadable(booleanKey("apply-bukkit-child-permissions", true));
+
+    /**
+     * If Bukkit default permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_BUKKIT_DEFAULT_PERMISSIONS = notReloadable(booleanKey("apply-bukkit-default-permissions", true));
+
+    /**
+     * If Bukkit attachment permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_BUKKIT_ATTACHMENT_PERMISSIONS = notReloadable(booleanKey("apply-bukkit-attachment-permissions", true));
+
+    /**
+     * If Nukkit child permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_NUKKIT_CHILD_PERMISSIONS = notReloadable(booleanKey("apply-nukkit-child-permissions", true));
+
+    /**
+     * If Nukkit default permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_NUKKIT_DEFAULT_PERMISSIONS = notReloadable(booleanKey("apply-nukkit-default-permissions", true));
+
+    /**
+     * If Nukkit attachment permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_NUKKIT_ATTACHMENT_PERMISSIONS = notReloadable(booleanKey("apply-nukkit-attachment-permissions", true));
+
+    /**
+     * If BungeeCord configured permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_BUNGEE_CONFIG_PERMISSIONS = notReloadable(booleanKey("apply-bungee-config-permissions", false));
 
     /**
      * If Sponge default subjects should be applied
      */
-    public static final ConfigKey<Boolean> APPLY_SPONGE_DEFAULT_SUBJECTS = enduringKey(booleanKey("apply-sponge-default-subjects", true));
+    public static final ConfigKey<Boolean> APPLY_SPONGE_DEFAULT_SUBJECTS = notReloadable(booleanKey("apply-sponge-default-subjects", true));
 
     /**
      * The algorithm LuckPerms should use when traversing the "inheritance tree"
      */
-    public static final ConfigKey<TraversalAlgorithm> INHERITANCE_TRAVERSAL_ALGORITHM = customKey(c -> {
+    public static final ConfigKey<TraversalAlgorithm> INHERITANCE_TRAVERSAL_ALGORITHM = key(c -> {
         String value = c.getString("inheritance-traversal-algorithm", "depth-first-pre-order");
         switch (value.toLowerCase()) {
             case "breadth-first":
@@ -273,9 +303,25 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> POST_TRAVERSAL_INHERITANCE_SORT = booleanKey("post-traversal-inheritance-sort", false);
 
     /**
+     * The meta value selector
+     */
+    public static final ConfigKey<MetaValueSelector> META_VALUE_SELECTOR = key(c -> {
+        SimpleMetaValueSelector.Strategy defaultStrategy = SimpleMetaValueSelector.Strategy.parse(c.getString("meta-value-selection-default", "inheritance"));
+        Map<String, SimpleMetaValueSelector.Strategy> strategies = c.getStringMap("meta-value-selection", ImmutableMap.of()).entrySet().stream()
+                .map(e -> {
+                    SimpleMetaValueSelector.Strategy parse = SimpleMetaValueSelector.Strategy.parse(e.getValue());
+                    return parse == null ? null : Maps.immutableEntry(e.getKey(), parse);
+                })
+                .filter(Objects::nonNull)
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return new SimpleMetaValueSelector(strategies, defaultStrategy);
+    });
+
+    /**
      * The configured group weightings
      */
-    public static final ConfigKey<Map<String, Integer>> GROUP_WEIGHTS = customKey(c -> {
+    public static final ConfigKey<Map<String, Integer>> GROUP_WEIGHTS = key(c -> {
         return c.getStringMap("group-weight", ImmutableMap.of()).entrySet().stream().collect(ImmutableCollectors.toMap(
                 e -> e.getKey().toLowerCase(),
                 e -> {
@@ -291,7 +337,7 @@ public final class ConfigKeys {
     /**
      * Creates a new prefix MetaStack element based upon the configured values.
      */
-    public static final ConfigKey<MetaStackDefinition> PREFIX_FORMATTING_OPTIONS = customKey(l -> {
+    public static final ConfigKey<MetaStackDefinition> PREFIX_FORMATTING_OPTIONS = key(l -> {
         List<String> format = l.getStringList("meta-formatting.prefix.format", new ArrayList<>());
         if (format.isEmpty()) {
             format.add("highest");
@@ -318,7 +364,7 @@ public final class ConfigKeys {
     /**
      * Creates a new suffix MetaStack element based upon the configured values.
      */
-    public static final ConfigKey<MetaStackDefinition> SUFFIX_FORMATTING_OPTIONS = customKey(l -> {
+    public static final ConfigKey<MetaStackDefinition> SUFFIX_FORMATTING_OPTIONS = key(l -> {
         List<String> format = l.getStringList("meta-formatting.suffix.format", new ArrayList<>());
         if (format.isEmpty()) {
             format.add("highest");
@@ -348,19 +394,36 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> LOG_NOTIFY = booleanKey("log-notify", true);
 
     /**
+     * Defines a list of log entries which should not be sent as notifications to users.
+     */
+    public static final ConfigKey<List<Pattern>> LOG_NOTIFY_FILTERED_DESCRIPTIONS = key(c -> {
+        return c.getStringList("log-notify-filtered-descriptions", ImmutableList.of()).stream()
+                .map(entry -> {
+                    try {
+                        return Pattern.compile(entry, Pattern.CASE_INSENSITIVE);
+                    } catch (PatternSyntaxException e) {
+                        new IllegalArgumentException("Invalid pattern: " + entry, e).printStackTrace();
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(ImmutableCollectors.toList());
+    });
+
+    /**
      * If auto op is enabled. Only used by the Bukkit platform.
      */
-    public static final ConfigKey<Boolean> AUTO_OP = enduringKey(booleanKey("auto-op", false));
+    public static final ConfigKey<Boolean> AUTO_OP = notReloadable(booleanKey("auto-op", false));
 
     /**
      * If server operators should be enabled. Only used by the Bukkit platform.
      */
-    public static final ConfigKey<Boolean> OPS_ENABLED = enduringKey(customKey(c -> !AUTO_OP.get(c) && c.getBoolean("enable-ops", true)));
+    public static final ConfigKey<Boolean> OPS_ENABLED = notReloadable(key(c -> !AUTO_OP.get(c) && c.getBoolean("enable-ops", true)));
 
     /**
      * If server operators should be able to use LuckPerms commands by default. Only used by the Bukkit platform.
      */
-    public static final ConfigKey<Boolean> COMMANDS_ALLOW_OP = enduringKey(booleanKey("commands-allow-op", true));
+    public static final ConfigKey<Boolean> COMMANDS_ALLOW_OP = notReloadable(booleanKey("commands-allow-op", true));
 
     /**
      * If Vault lookups for offline players on the main server thread should be enabled
@@ -385,7 +448,7 @@ public final class ConfigKeys {
     /**
      * The name of the server to use for Vault.
      */
-    public static final ConfigKey<String> VAULT_SERVER = customKey(c -> {
+    public static final ConfigKey<String> VAULT_SERVER = key(c -> {
         // default to true for backwards compatibility
         if (USE_VAULT_SERVER.get(c)) {
             return c.getString("vault-server", "global").toLowerCase();
@@ -407,7 +470,7 @@ public final class ConfigKeys {
     /**
      * The world rewrites map
      */
-    public static final ConfigKey<Map<String, String>> WORLD_REWRITES = customKey(c -> {
+    public static final ConfigKey<Map<String, String>> WORLD_REWRITES = key(c -> {
         return c.getStringMap("world-rewrite", ImmutableMap.of()).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> e.getKey().toLowerCase(),
@@ -423,7 +486,7 @@ public final class ConfigKeys {
     /**
      * The database settings, username, password, etc for use by any database
      */
-    public static final ConfigKey<StorageCredentials> DATABASE_VALUES = enduringKey(customKey(c -> {
+    public static final ConfigKey<StorageCredentials> DATABASE_VALUES = notReloadable(key(c -> {
         int maxPoolSize = c.getInteger("data.pool-settings.maximum-pool-size", c.getInteger("data.pool-size", 10));
         int minIdle = c.getInteger("data.pool-settings.minimum-idle", maxPoolSize);
         int maxLifetime = c.getInteger("data.pool-settings.maximum-lifetime", 1800000);
@@ -442,22 +505,28 @@ public final class ConfigKeys {
     /**
      * The prefix for any SQL tables
      */
-    public static final ConfigKey<String> SQL_TABLE_PREFIX = enduringKey(stringKey("data.table_prefix", "luckperms_"));
+    public static final ConfigKey<String> SQL_TABLE_PREFIX = notReloadable(key(c -> {
+        return c.getString("data.table-prefix", c.getString("data.table_prefix", "luckperms_"));
+    }));
 
     /**
      * The prefix for any MongoDB collections
      */
-    public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = enduringKey(stringKey("data.mongodb_collection_prefix", ""));
+    public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = notReloadable(key(c -> {
+        return c.getString("data.mongodb-collection-prefix", c.getString("data.mongodb_collection_prefix", ""));
+    }));
 
     /**
      * MongoDB ClientConnectionURI to override default connection options
      */
-    public static final ConfigKey<String> MONGODB_CONNECTION_URI = enduringKey(stringKey("data.mongodb_connection_URI", ""));
+    public static final ConfigKey<String> MONGODB_CONNECTION_URI = notReloadable(key(c -> {
+        return c.getString("data.mongodb-connection-uri", c.getString("data.mongodb_connection_URI", ""));
+    }));
 
     /**
      * The name of the storage method being used
      */
-    public static final ConfigKey<StorageType> STORAGE_METHOD = enduringKey(customKey(c -> {
+    public static final ConfigKey<StorageType> STORAGE_METHOD = notReloadable(key(c -> {
         return StorageType.parse(c.getString("storage-method", "h2"), StorageType.H2);
     }));
 
@@ -469,12 +538,12 @@ public final class ConfigKeys {
     /**
      * If split storage is being used
      */
-    public static final ConfigKey<Boolean> SPLIT_STORAGE = enduringKey(booleanKey("split-storage.enabled", false));
+    public static final ConfigKey<Boolean> SPLIT_STORAGE = notReloadable(booleanKey("split-storage.enabled", false));
 
     /**
      * The options for split storage
      */
-    public static final ConfigKey<Map<SplitStorageType, StorageType>> SPLIT_STORAGE_OPTIONS = enduringKey(customKey(c -> {
+    public static final ConfigKey<Map<SplitStorageType, StorageType>> SPLIT_STORAGE_OPTIONS = notReloadable(key(c -> {
         EnumMap<SplitStorageType, StorageType> map = new EnumMap<>(SplitStorageType.class);
         map.put(SplitStorageType.USER, StorageType.parse(c.getString("split-storage.methods.user", "h2"), StorageType.H2));
         map.put(SplitStorageType.GROUP, StorageType.parse(c.getString("split-storage.methods.group", "h2"), StorageType.H2));
@@ -487,37 +556,42 @@ public final class ConfigKeys {
     /**
      * The name of the messaging service in use, or "none" if not enabled
      */
-    public static final ConfigKey<String> MESSAGING_SERVICE = enduringKey(lowercaseStringKey("messaging-service", "auto"));
+    public static final ConfigKey<String> MESSAGING_SERVICE = notReloadable(lowercaseStringKey("messaging-service", "auto"));
 
     /**
      * If updates should be automatically pushed by the messaging service
      */
-    public static final ConfigKey<Boolean> AUTO_PUSH_UPDATES = enduringKey(booleanKey("auto-push-updates", true));
+    public static final ConfigKey<Boolean> AUTO_PUSH_UPDATES = notReloadable(booleanKey("auto-push-updates", true));
 
     /**
      * If LuckPerms should push logging entries to connected servers via the messaging service
      */
-    public static final ConfigKey<Boolean> PUSH_LOG_ENTRIES = enduringKey(booleanKey("push-log-entries", true));
+    public static final ConfigKey<Boolean> PUSH_LOG_ENTRIES = notReloadable(booleanKey("push-log-entries", true));
 
     /**
      * If LuckPerms should broadcast received logging entries to players on this platform
      */
-    public static final ConfigKey<Boolean> BROADCAST_RECEIVED_LOG_ENTRIES = enduringKey(booleanKey("broadcast-received-log-entries", false));
+    public static final ConfigKey<Boolean> BROADCAST_RECEIVED_LOG_ENTRIES = notReloadable(booleanKey("broadcast-received-log-entries", false));
 
     /**
      * If redis messaging is enabled
      */
-    public static final ConfigKey<Boolean> REDIS_ENABLED = enduringKey(booleanKey("redis.enabled", false));
+    public static final ConfigKey<Boolean> REDIS_ENABLED = notReloadable(booleanKey("redis.enabled", false));
 
     /**
      * The address of the redis server
      */
-    public static final ConfigKey<String> REDIS_ADDRESS = enduringKey(stringKey("redis.address", null));
+    public static final ConfigKey<String> REDIS_ADDRESS = notReloadable(stringKey("redis.address", null));
 
     /**
-     * The password in use by the redis server, or an empty string if there is no passworld
+     * The password in use by the redis server, or an empty string if there is no password
      */
-    public static final ConfigKey<String> REDIS_PASSWORD = enduringKey(stringKey("redis.password", ""));
+    public static final ConfigKey<String> REDIS_PASSWORD = notReloadable(stringKey("redis.password", ""));
+
+    /**
+     * If the redis connection should use SSL
+     */
+    public static final ConfigKey<Boolean> REDIS_SSL = notReloadable(booleanKey("redis.ssl", false));
 
     /**
      * The URL of the bytebin instance used to upload data
@@ -527,72 +601,26 @@ public final class ConfigKeys {
     /**
      * The URL of the web editor
      */
-    public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = stringKey("web-editor-url", "https://editor.luckperms.net/");
+    public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = stringKey("web-editor-url", "https://luckperms.net/editor/");
 
     /**
      * The URL of the verbose viewer
      */
-    public static final ConfigKey<String> VERBOSE_VIEWER_URL_PATTERN = stringKey("verbose-viewer-url", "https://luckperms.net/verbose/#");
+    public static final ConfigKey<String> VERBOSE_VIEWER_URL_PATTERN = stringKey("verbose-viewer-url", "https://luckperms.net/verbose/");
 
     /**
      * The URL of the tree viewer
      */
-    public static final ConfigKey<String> TREE_VIEWER_URL_PATTERN = stringKey("tree-viewer-url", "https://luckperms.net/treeview/#");
+    public static final ConfigKey<String> TREE_VIEWER_URL_PATTERN = stringKey("tree-viewer-url", "https://luckperms.net/treeview/");
 
-    private static final Map<String, ConfigKey<?>> KEYS;
-    private static final int SIZE;
-
-    static {
-        Map<String, ConfigKey<?>> keys = new LinkedHashMap<>();
-        Field[] values = ConfigKeys.class.getFields();
-        int i = 0;
-
-        for (Field f : values) {
-            // ignore non-static fields
-            if (!Modifier.isStatic(f.getModifiers())) {
-                continue;
-            }
-
-            // ignore fields that aren't configkeys
-            if (!ConfigKey.class.equals(f.getType())) {
-                continue;
-            }
-
-            try {
-                // get the key instance
-                ConfigKeyTypes.BaseConfigKey<?> key = (ConfigKeyTypes.BaseConfigKey<?>) f.get(null);
-                // set the ordinal value of the key.
-                key.ordinal = i++;
-                // add the key to the return map
-                keys.put(f.getName(), key);
-            } catch (Exception e) {
-                throw new RuntimeException("Exception processing field: " + f, e);
-            }
-        }
-
-        KEYS = ImmutableMap.copyOf(keys);
-        SIZE = i;
-    }
 
     /**
-     * Gets a map of the keys defined in this class.
-     *
-     * <p>The string key in the map is the {@link Field#getName() field name}
-     * corresponding to each key.</p>
-     *
-     * @return the defined keys
+     * A list of the keys defined in this class.
      */
-    public static Map<String, ConfigKey<?>> getKeys() {
+    private static final List<SimpleConfigKey<?>> KEYS = KeyedConfiguration.initialise(ConfigKeys.class);
+
+    public static List<? extends ConfigKey<?>> getKeys() {
         return KEYS;
-    }
-
-    /**
-     * Gets the number of defined keys.
-     *
-     * @return how many keys are defined in this class
-     */
-    public static int size() {
-        return SIZE;
     }
 
 }

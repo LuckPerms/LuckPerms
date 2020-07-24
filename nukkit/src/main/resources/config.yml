@@ -57,7 +57,7 @@ use-server-uuid-cache: false
 # How the plugin should store data
 #
 # - The various options are explained in more detail on the wiki:
-#   https://github.com/lucko/LuckPerms/wiki/Choosing-a-Storage-type
+#   https://github.com/lucko/LuckPerms/wiki/Storage-types
 #
 # - Possible options:
 #
@@ -139,24 +139,25 @@ data:
     #   useUnicode: true
     #   characterEncoding: utf8
     #
-    # You can also use this section to disable SSL connections, by setting:
-    #   useSSL: false
-    #   verifyServerCertificate: false
+    # You can also use this section to disable SSL connections, by uncommenting the 'useSSL' and
+    # 'verifyServerCertificate' options below.
     properties:
       useUnicode: true
       characterEncoding: utf8
+      #useSSL: false
+      #verifyServerCertificate: false
 
   # The prefix for all LuckPerms SQL tables.
-  # - Change this is you want to use different tables for different servers.
-  table_prefix: 'luckperms_'
+  # - Change this if you want to use different tables for different servers.
+  table-prefix: 'luckperms_'
 
   # The prefix to use for all LuckPerms collections. Change this if you want to use different
   # collections for different servers. The default is no prefix.
-  mongodb_collection_prefix: ''
+  mongodb-collection-prefix: ''
 
   # MongoDB ClientConnectionURI for use with replica sets and custom connection options
   # - See https://docs.mongodb.com/manual/reference/connection-string/
-  mongodb_connection_URI: ''
+  mongodb-connection-uri: ''
 
 # Define settings for a "split" storage setup.
 #
@@ -214,7 +215,7 @@ watch-files: true
 # - Possible options:
 #   => sql       Uses the SQL database to form a queue system for communication. Will only work when
 #                'storage-method' is set to MySQL or MariaDB. This is chosen by default if the
-#                option is set to 'none' and SQL storage is in use. Set to 'notsql' to disable this.
+#                option is set to 'auto' and SQL storage is in use. Set to 'notsql' to disable this.
 #   => redis     Uses Redis pub-sub to push changes. Your server connection info must be configured
 #                below.
 #   => auto      Attempts to automatically setup a messaging service using redis or sql.
@@ -298,6 +299,12 @@ require-sender-group-membership-to-modify: false
 #   '/lp log notify <on|off>'
 log-notify: true
 
+# Defines a list of log entries which should not be sent as notifications to users.
+#
+# - Each entry in the list is a RegEx expression which is matched against the log entry description.
+log-notify-filtered-descriptions:
+#  - "parent add example"
+
 # Defines the options for prefix and suffix stacking.
 #
 # - The feature allows you to display multiple prefixes or suffixes alongside a players username in
@@ -336,6 +343,16 @@ log-notify: true
 #                                     value was inherited from a group not on the given track.
 #
 #   => lowest_not_on_track_<track>    Same as above, except takes the value with the lowest weight.
+#
+#   => highest_from_group_<group>     Selects the value with the highest weight, but only if the
+#                                     value was inherited from the given group.
+#
+#   => lowest_from_group_<group>      Same as above, except takes the value with the lowest weight.
+#
+#   => highest_not_from_group_<group> Selects the value with the highest weight, but only if the
+#                                     value was not inherited from the given group.
+#
+#   => lowest_not_from_group_<group>  Same as above, except takes the value with the lowest weight.
 meta-formatting:
   prefix:
     format:
@@ -384,6 +401,15 @@ inheritance-traversal-algorithm: depth-first-pre-order
 # and when this setting is 'false':, the rules are just applied during each step of the traversal.
 post-traversal-inheritance-sort: false
 
+# Defines the mode used to determine whether a set of contexts are satisfied.
+#
+# - Possible options:
+#   => at-least-one-value-per-key   Set A will be satisfied by another set B, if at least one of the
+#                                   key-value entries per key in A are also in B.
+#   => all-values-per-key           Set A will be satisfied by another set B, if all key-value
+#                                   entries in A are also in B.
+context-satisfy-mode: at-least-one-value-per-key
+
 # +----------------------------------------------------------------------------------------------+ #
 # | Permission resolution settings                                                               | #
 # +----------------------------------------------------------------------------------------------+ #
@@ -403,6 +429,22 @@ apply-global-groups: true
 apply-global-world-groups: true
 
 # +----------------------------------------------------------------------------------------------+ #
+# | Meta lookup settings                                                                         | #
+# +----------------------------------------------------------------------------------------------+ #
+
+# Defines how meta values should be selected.
+#
+# - Possible options:
+#   => inheritance      Selects the meta value that was inherited first
+#   => highest-number   Selects the highest numerical meta value
+#   => lowest-number    Selects the lowest numerical meta value
+meta-value-selection-default: inheritance
+
+# Defines how meta values should be selected per key.
+meta-value-selection:
+#  max-homes: highest-number
+
+# +----------------------------------------------------------------------------------------------+ #
 # | Inheritance settings                                                                         | #
 # +----------------------------------------------------------------------------------------------+ #
 
@@ -411,6 +453,14 @@ apply-global-world-groups: true
 # - If set to true, LuckPerms will detect wildcard permissions, and resolve & apply all registered
 #   permissions matching the wildcard.
 apply-wildcards: true
+
+# If LuckPerms should resolve and apply permissions according to the Sponge style implicit wildcard
+# inheritance system.
+#
+# - That being: If a user has been granted "example", then the player should have also be
+#   automatically granted "example.function", "example.another", "example.deeper.nesting",
+#   and so on.
+apply-sponge-implicit-wildcards: false
 
 # If the plugin should parse regex permissions.
 #

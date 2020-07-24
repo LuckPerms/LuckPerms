@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
-import me.lucko.luckperms.common.inheritance.InheritanceHandler;
+import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.Group;
@@ -188,14 +188,14 @@ public interface LuckPermsPlugin {
      *
      * @return the context manager
      */
-    ContextManager<?> getContextManager();
+    ContextManager<?, ?> getContextManager();
 
     /**
      * Gets the inheritance handler
      *
      * @return the inheritance handler
      */
-    InheritanceHandler getInheritanceHandler();
+    InheritanceGraphFactory getInheritanceGraphFactory();
 
     /**
      * Gets the class responsible for constructing PermissionCalculators on this platform.

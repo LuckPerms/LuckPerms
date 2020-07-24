@@ -45,6 +45,18 @@ public interface DataQueryOrderFunction {
     OptionKey<DataQueryOrderFunction> KEY = OptionKey.of("dataqueryorderfunction", DataQueryOrderFunction.class);
 
     /**
+     * Creates a {@link DataQueryOrderFunction} that always returns the given
+     * {@code comparator}.
+     *
+     * @param comparator the comparator
+     * @return the data query order function
+     * @since 5.2
+     */
+    static DataQueryOrderFunction always(Comparator<DataType> comparator) {
+        return id -> comparator;
+    }
+
+    /**
      * Gets the {@link DataQueryOrder} comparator for the given
      * {@link PermissionHolder.Identifier holder identifier}.
      *

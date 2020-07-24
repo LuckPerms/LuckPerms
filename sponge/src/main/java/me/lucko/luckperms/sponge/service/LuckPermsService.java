@@ -46,6 +46,7 @@ import me.lucko.luckperms.sponge.service.model.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.model.persisted.SubjectStorage;
 import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -143,7 +144,7 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public ContextManager<Subject> getContextManager() {
+    public ContextManager<Subject, Player> getContextManager() {
         return this.plugin.getContextManager();
     }
 

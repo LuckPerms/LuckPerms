@@ -34,12 +34,14 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
 import net.luckperms.api.context.Context;
+import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -50,7 +52,15 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
     public static final ImmutableContextSetImpl EMPTY = new ImmutableContextSetImpl(ImmutableSetMultimap.of());
 
     public static ImmutableContextSet of(String key, String value) {
-        return new ImmutableContextSetImpl(ImmutableSetMultimap.of(sanitizeKey(key), sanitizeValue(value)));
+        key = sanitizeKey(key);
+        value = sanitizeValue(value);
+
+        // special case for 'server=global' and 'world=global'
+        if (isGlobalServerWorldEntry(key, value)) {
+            return EMPTY;
+        }
+
+        return new ImmutableContextSetImpl(ImmutableSetMultimap.of(key, sanitizeValue(value)));
     }
 
     private final ImmutableSetMultimap<String, String> map;
@@ -133,30 +143,31 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
     }
 
     @Override
-    public boolean isSatisfiedBy(@NonNull ContextSet other) {
-        if (this == other) {
-            return true;
-        }
-
-        Objects.requireNonNull(other, "other");
-        if (this.isEmpty()) {
-            // this is empty, so is therefore always satisfied.
-            return true;
-        } else if (other.isEmpty()) {
-            // this set isn't empty, but the other one is
-            return false;
-        } else if (this.size() > other.size()) {
-            // this set has more unique entries than the other set, so there's no way this can be satisfied.
-            return false;
-        } else {
-            // neither are empty, we need to compare the individual entries
-            Set<Map.Entry<String, String>> entries = this.map.entries();
-            for (Map.Entry<String, String> e : entries) {
-                if (!other.contains(e.getKey(), e.getValue())) {
-                    return false;
+    protected boolean otherContainsAll(ContextSet other, ContextSatisfyMode mode) {
+        switch (mode) {
+            // Use other.contains
+            case ALL_VALUES_PER_KEY: {
+                Set<Map.Entry<String, String>> entries = this.map.entries();
+                for (Map.Entry<String, String> e : entries) {
+                    if (!other.contains(e.getKey(), e.getValue())) {
+                        return false;
+                    }
                 }
+                return true;
             }
-            return true;
+
+            // Use other.containsAny
+            case AT_LEAST_ONE_VALUE_PER_KEY: {
+                Set<Map.Entry<String, Collection<String>>> entries = this.map.asMap().entrySet();
+                for (Map.Entry<String, Collection<String>> e : entries) {
+                    if (!other.containsAny(e.getKey(), e.getValue())) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            default:
+                throw new IllegalArgumentException("Unknown mode: " + mode);
         }
     }
 
@@ -212,6 +223,10 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
         }
 
         private void put(String key, String value) {
+            // special case for server=global and world=global
+            if (isGlobalServerWorldEntry(key, value)) {
+                return;
+            }
             builder().put(key, value);
         }
 

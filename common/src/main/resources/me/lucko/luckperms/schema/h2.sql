@@ -6,8 +6,8 @@ CREATE TABLE `{prefix}user_permissions` (
   `permission` VARCHAR(200)       NOT NULL,
   `value`      BOOL               NOT NULL,
   `server`     VARCHAR(36)        NOT NULL,
-  `world`      VARCHAR(36)        NOT NULL,
-  `expiry`     INT(11)            NOT NULL,
+  `world`      VARCHAR(64)        NOT NULL,
+  `expiry`     BIGINT             NOT NULL,
   `contexts`   VARCHAR(200)       NOT NULL,
   PRIMARY KEY (`id`)
 );
@@ -19,8 +19,8 @@ CREATE TABLE `{prefix}group_permissions` (
   `permission` VARCHAR(200)       NOT NULL,
   `value`      BOOL               NOT NULL,
   `server`     VARCHAR(36)        NOT NULL,
-  `world`      VARCHAR(36)        NOT NULL,
-  `expiry`     INT(11)            NOT NULL,
+  `world`      VARCHAR(64)        NOT NULL,
+  `expiry`     BIGINT             NOT NULL,
   `contexts`   VARCHAR(200)       NOT NULL,
   PRIMARY KEY (`id`)
 );

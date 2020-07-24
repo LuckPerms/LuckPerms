@@ -25,25 +25,33 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
+import com.google.common.collect.ImmutableListMultimap;
+
 import me.lucko.luckperms.common.api.ApiUtils;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
+import me.lucko.luckperms.common.node.matcher.StandardNodeMatchers;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.matcher.NodeMatcher;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api.model.group.Group, GroupManager<?>> implements net.luckperms.api.model.group.GroupManager {
     public ApiGroupManager(LuckPermsPlugin plugin, GroupManager<?> handle) {
@@ -85,14 +93,43 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
     }
 
     @Override
+    public @NonNull CompletableFuture<Void> modifyGroup(@NonNull String name, @NonNull Consumer<? super net.luckperms.api.model.group.Group> action) {
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(action, "action");
+
+        return this.plugin.getStorage().createAndLoadGroup(name, CreationCause.API)
+                .thenApplyAsync(group -> {
+                    action.accept(group.getApiProxy());
+                    return group;
+                }, this.plugin.getBootstrap().getScheduler().async())
+                .thenCompose(group -> this.plugin.getStorage().saveGroup(group));
+    }
+
+    @Override
     public @NonNull CompletableFuture<Void> loadAllGroups() {
         return this.plugin.getStorage().loadAllGroups();
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
+    @Deprecated
     public @NonNull CompletableFuture<List<HeldNode<String>>> getWithPermission(@NonNull String permission) {
         Objects.requireNonNull(permission, "permission");
-        return this.plugin.getStorage().getGroupsWithPermission(Constraint.of(StandardComparison.EQUAL, permission));
+        return (CompletableFuture) this.plugin.getStorage().searchGroupNodes(StandardNodeMatchers.key(permission));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public @NonNull <T extends Node> CompletableFuture<Map<String, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher) {
+        Objects.requireNonNull(matcher, "matcher");
+        ConstraintNodeMatcher<? extends T> constraint = (ConstraintNodeMatcher<? extends T>) matcher;
+        return this.plugin.getStorage().searchGroupNodes(constraint).thenApply(list -> {
+            ImmutableListMultimap.Builder<String, T> builder = ImmutableListMultimap.builder();
+            for (NodeEntry<String, ? extends T> row : list) {
+                builder.put(row.getHolder(), row.getNode());
+            }
+            return builder.build().asMap();
+        });
     }
 
     @Override

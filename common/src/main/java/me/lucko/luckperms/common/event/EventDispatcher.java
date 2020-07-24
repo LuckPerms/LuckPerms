@@ -46,6 +46,7 @@ import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
+import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.extension.ExtensionLoadEvent;
 import net.luckperms.api.event.group.GroupCacheLoadEvent;
 import net.luckperms.api.event.group.GroupCreateEvent;
@@ -138,6 +139,14 @@ public final class EventDispatcher {
         }
     }
 
+    public void dispatchContextUpdate(Object subject) {
+        if (!shouldPost(ContextUpdateEvent.class)) {
+            return;
+        }
+
+        post(generate(ContextUpdateEvent.class, subject));
+    }
+
     public void dispatchExtensionLoad(Extension extension) {
         post(ExtensionLoadEvent.class, () -> generate(ExtensionLoadEvent.class, extension));
     }
@@ -151,7 +160,7 @@ public final class EventDispatcher {
     }
 
     public void dispatchGroupDelete(Group group, DeletionCause cause) {
-        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.normalData().immutable().values()), cause));
+        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.normalData().asSet()), cause));
     }
 
     public void dispatchGroupLoadAll() {
@@ -330,6 +339,46 @@ public final class EventDispatcher {
         } else {
             throw new AssertionError();
         }
+    }
+
+    public static List<Class<? extends LuckPermsEvent>> getKnownEventTypes() {
+        return ImmutableList.of(
+                ContextUpdateEvent.class,
+                ExtensionLoadEvent.class,
+                GroupCacheLoadEvent.class,
+                GroupCreateEvent.class,
+                GroupDataRecalculateEvent.class,
+                GroupDeleteEvent.class,
+                GroupLoadAllEvent.class,
+                GroupLoadEvent.class,
+                LogBroadcastEvent.class,
+                LogNetworkPublishEvent.class,
+                LogNotifyEvent.class,
+                LogPublishEvent.class,
+                LogReceiveEvent.class,
+                NodeAddEvent.class,
+                NodeClearEvent.class,
+                NodeRemoveEvent.class,
+                PlayerDataSaveEvent.class,
+                PlayerLoginProcessEvent.class,
+                ConfigReloadEvent.class,
+                PostSyncEvent.class,
+                PreNetworkSyncEvent.class,
+                PreSyncEvent.class,
+                TrackCreateEvent.class,
+                TrackDeleteEvent.class,
+                TrackLoadAllEvent.class,
+                TrackLoadEvent.class,
+                TrackAddGroupEvent.class,
+                TrackClearEvent.class,
+                TrackRemoveGroupEvent.class,
+                UserCacheLoadEvent.class,
+                UserDataRecalculateEvent.class,
+                UserFirstLoginEvent.class,
+                UserLoadEvent.class,
+                UserDemoteEvent.class,
+                UserPromoteEvent.class
+        );
     }
 
 }

@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -39,11 +40,7 @@ import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
-import net.luckperms.api.actionlog.Action;
-
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
 
 public class LogSearch extends ChildCommand<Log> {
     private static final int ENTRIES_PER_PAGE = 10;
@@ -53,7 +50,7 @@ public class LogSearch extends ChildCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
         int page = Integer.MIN_VALUE;
         if (args.size() > 1) {
             try {
@@ -90,17 +87,17 @@ public class LogSearch extends ChildCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, LoggedAction> entries = log.getPage(page, ENTRIES_PER_PAGE);
+        List<Paginated.Entry<LoggedAction>> entries = log.getPage(page, ENTRIES_PER_PAGE);
         Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
-        for (Map.Entry<Integer, LoggedAction> e : entries.entrySet()) {
+        for (Paginated.Entry<LoggedAction> e : entries) {
             Message.LOG_ENTRY.send(sender,
-                    e.getKey(),
-                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.getValue().getDurationSince()),
-                    e.getValue().getSourceFriendlyString(),
-                    Character.toString(LoggedAction.getTypeCharacter(((Action) e.getValue()).getTarget().getType())),
-                    e.getValue().getTargetFriendlyString(),
-                    e.getValue().getDescription()
+                    e.position(),
+                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.value().getDurationSince()),
+                    e.value().getSourceFriendlyString(),
+                    Character.toString(LoggedAction.getTypeCharacter(e.value().getTarget().getType())),
+                    e.value().getTargetFriendlyString(),
+                    e.value().getDescription()
             );
         }
 

@@ -33,11 +33,12 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -55,60 +56,75 @@ import net.luckperms.api.node.ChatMetaType;
 import java.util.List;
 
 public class MetaAddChatMeta extends GenericChildCommand {
+
+    public static MetaAddChatMeta forPrefix(LocaleManager locale) {
+        return new MetaAddChatMeta(
+                ChatMetaType.PREFIX,
+                CommandSpec.META_ADDPREFIX.localize(locale),
+                "addprefix",
+                CommandPermission.USER_META_ADD_PREFIX,
+                CommandPermission.GROUP_META_ADD_PREFIX
+        );
+    }
+
+    public static MetaAddChatMeta forSuffix(LocaleManager locale) {
+        return new MetaAddChatMeta(
+                ChatMetaType.SUFFIX,
+                CommandSpec.META_ADDSUFFIX.localize(locale),
+                "addsuffix",
+                CommandPermission.USER_META_ADD_SUFFIX,
+                CommandPermission.GROUP_META_ADD_SUFFIX
+        );
+    }
+
     private final ChatMetaType type;
 
-    public MetaAddChatMeta(LocaleManager locale, ChatMetaType type) {
-        super(
-                type == ChatMetaType.PREFIX ? CommandSpec.META_ADDPREFIX.localize(locale) : CommandSpec.META_ADDSUFFIX.localize(locale),
-                "add" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADD_PREFIX : CommandPermission.USER_META_ADD_SUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADD_PREFIX : CommandPermission.GROUP_META_ADD_SUFFIX,
-                Predicates.inRange(0, 1)
-        );
+    private MetaAddChatMeta(ChatMetaType type, LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
+        super(spec, name, userPermission, groupPermission, Predicates.inRange(0, 1));
         this.type = type;
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        int priority = ArgumentParser.parsePriority(0, args);
-        String meta = ArgumentParser.parseString(1, args);
-        MutableContextSet context = ArgumentParser.parseContext(2, args, plugin);
+        int priority = args.getPriority(0);
+        String meta = args.get(1);
+        MutableContextSet context = args.getContextOrDefault(2, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
-                ArgumentPermissions.checkGroup(plugin, sender, holder, context)) {
+                ArgumentPermissions.checkGroup(plugin, sender, target, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult result = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).withContext(context).build(), true);
+        DataMutateResult result = target.setNode(DataType.NORMAL, this.type.builder(meta, priority).withContext(context).build(), true);
         if (result.wasSuccessful()) {
-            TextComponent.Builder builder = Message.ADD_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
+            TextComponent.Builder builder = Message.ADD_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                    "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
-                    '¥'
+                    "§3Raw " + this.type.name().toLowerCase() + ": §r" + meta,
+                    '§'
             ));
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
-            LoggedAction.build().source(sender).target(holder)
+            LoggedAction.build().source(sender).target(target)
                     .description("meta" , "add" + this.type.name().toLowerCase(), priority, meta, context)
                     .build().submit(plugin, sender);
 
-            StorageAssistant.save(holder, sender, plugin);
+            StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HAS_CHAT_META.send(sender, target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .from(2, TabCompletions.contexts(plugin))
                 .complete(args);

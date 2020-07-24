@@ -33,12 +33,13 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -59,65 +60,80 @@ import java.time.Duration;
 import java.util.List;
 
 public class MetaAddTempChatMeta extends GenericChildCommand {
+
+    public static MetaAddTempChatMeta forPrefix(LocaleManager locale) {
+        return new MetaAddTempChatMeta(
+                ChatMetaType.PREFIX,
+                CommandSpec.META_ADDTEMP_PREFIX.localize(locale),
+                "addtempprefix",
+                CommandPermission.USER_META_ADD_TEMP_PREFIX,
+                CommandPermission.GROUP_META_ADD_TEMP_PREFIX
+        );
+    }
+
+    public static MetaAddTempChatMeta forSuffix(LocaleManager locale) {
+        return new MetaAddTempChatMeta(
+                ChatMetaType.SUFFIX,
+                CommandSpec.META_ADDTEMP_SUFFIX.localize(locale),
+                "addtempsuffix",
+                CommandPermission.USER_META_ADD_TEMP_SUFFIX,
+                CommandPermission.GROUP_META_ADD_TEMP_SUFFIX
+        );
+    }
+
     private final ChatMetaType type;
 
-    public MetaAddTempChatMeta(LocaleManager locale, ChatMetaType type) {
-        super(
-                type == ChatMetaType.PREFIX ? CommandSpec.META_ADDTEMP_PREFIX.localize(locale) : CommandSpec.META_ADDTEMP_SUFFIX.localize(locale),
-                "addtemp" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADD_TEMP_PREFIX : CommandPermission.USER_META_ADD_TEMP_SUFFIX,
-                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADD_TEMP_PREFIX : CommandPermission.GROUP_META_ADD_TEMP_SUFFIX,
-                Predicates.inRange(0, 2)
-        );
+    private MetaAddTempChatMeta(ChatMetaType type, LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
+        super(spec, name, userPermission, groupPermission, Predicates.inRange(0, 2));
         this.type = type;
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        int priority = ArgumentParser.parsePriority(0, args);
-        String meta = ArgumentParser.parseString(1, args);
-        Duration duration = ArgumentParser.parseDuration(2, args);
-        TemporaryNodeMergeStrategy modifier = ArgumentParser.parseTemporaryModifier(3, args).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
-        MutableContextSet context = ArgumentParser.parseContext(3, args, plugin);
+        int priority = args.getPriority(0);
+        String meta = args.get(1);
+        Duration duration = args.getDuration(2);
+        TemporaryNodeMergeStrategy modifier = args.getTemporaryModifierAndRemove(3).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
+        MutableContextSet context = args.getContextOrDefault(3, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
-                ArgumentPermissions.checkGroup(plugin, sender, holder, context)) {
+                ArgumentPermissions.checkGroup(plugin, sender, target, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        DataMutateResult.WithMergedNode result = holder.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
+        DataMutateResult.WithMergedNode result = target.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
 
         if (result.getResult().wasSuccessful()) {
             duration = result.getMergedNode().getExpiryDuration();
 
-            TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.format(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
+            TextComponent.Builder builder = Message.ADD_TEMP_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, DurationFormatter.LONG.format(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
             HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                    "¥3Raw " + this.type.name().toLowerCase() + ": ¥r" + meta,
-                    '¥'
+                    "§3Raw " + this.type.name().toLowerCase() + ": §r" + meta,
+                    '§'
             ));
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
-            LoggedAction.build().source(sender).target(holder)
+            LoggedAction.build().source(sender).target(target)
                     .description("meta" , "addtemp" + this.type.name().toLowerCase(), priority, meta, duration, context)
                     .build().submit(plugin, sender);
 
-            StorageAssistant.save(holder, sender, plugin);
+            StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, holder.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
             return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .from(3, TabCompletions.contexts(plugin))
                 .complete(args);

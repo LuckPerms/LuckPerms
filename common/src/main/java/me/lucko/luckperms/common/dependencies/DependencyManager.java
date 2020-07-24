@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.dependencies;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.ByteStreams;
 
 import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
@@ -35,62 +34,45 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.util.MoreFiles;
 
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
 
 /**
- * Responsible for loading runtime dependencies.
+ * Loads and manages runtime dependencies for the plugin.
  */
 public class DependencyManager {
-    private final LuckPermsPlugin plugin;
-    private final MessageDigest digest;
-    private final DependencyRegistry registry;
-    private final Path libsDirectory;
 
+    /** The plugin instance */
+    private final LuckPermsPlugin plugin;
+    /** A registry containing plugin specific behaviour for dependencies. */
+    private final DependencyRegistry registry;
+    /** The path where library jars are cached. */
+    private final Path cacheDirectory;
+
+    /** A map of dependencies which have already been loaded. */
     private final EnumMap<Dependency, Path> loaded = new EnumMap<>(Dependency.class);
+    /** A map of isolated classloaders which have been created. */
     private final Map<ImmutableSet<Dependency>, IsolatedClassLoader> loaders = new HashMap<>();
-    private RelocationHandler relocationHandler = null;
+    /** Cached relocation handler instance. */
+    private @MonotonicNonNull RelocationHandler relocationHandler = null;
 
     public DependencyManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        try {
-            this.digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
         this.registry = new DependencyRegistry(plugin);
-
-        this.libsDirectory = this.plugin.getBootstrap().getDataDirectory().resolve("libs");
-        try {
-            MoreFiles.createDirectoriesIfNotExists(this.libsDirectory);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to create libs directory", e);
-        }
-
-        Path oldLibsDirectory = this.plugin.getBootstrap().getDataDirectory().resolve("lib");
-        if (Files.exists(oldLibsDirectory)) {
-            try {
-                MoreFiles.deleteDirectory(oldLibsDirectory);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        this.cacheDirectory = setupCacheDirectory(plugin);
     }
 
     private synchronized RelocationHandler getRelocationHandler() {
@@ -137,157 +119,102 @@ public class DependencyManager {
     }
 
     public void loadDependencies(Set<Dependency> dependencies) {
-        // create a list of file sources
-        List<Source> sources = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(dependencies.size());
 
-        // obtain a file for each of the dependencies
         for (Dependency dependency : dependencies) {
-            if (this.loaded.containsKey(dependency)) {
-                continue;
-            }
-
-            try {
-                Path file = downloadDependency(dependency);
-                sources.add(new Source(dependency, file));
-            } catch (Throwable e) {
-                this.plugin.getLogger().severe("Exception whilst downloading dependency " + dependency.name());
-                e.printStackTrace();
-            }
+            this.plugin.getBootstrap().getScheduler().async().execute(() -> {
+                try {
+                    loadDependency(dependency);
+                } catch (Throwable e) {
+                    this.plugin.getLogger().severe("Unable to load dependency " + dependency.name() + ".");
+                    e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                }
+            });
         }
 
-        // apply any remapping rules to the files
-        List<Source> remappedJars = new ArrayList<>(sources.size());
-        for (Source source : sources) {
-            try {
-                // apply remap rules
-                List<Relocation> relocations = new ArrayList<>(source.dependency.getRelocations());
-                this.registry.applyRelocationSettings(source.dependency, relocations);
-
-                if (relocations.isEmpty()) {
-                    remappedJars.add(source);
-                    continue;
-                }
-
-                Path input = source.file;
-                Path output = this.libsDirectory.resolve(source.dependency.getFileName() + "-remapped.jar");
-
-                // if the remapped file exists already, just use that.
-                if (Files.exists(output)) {
-                    remappedJars.add(new Source(source.dependency, output));
-                    continue;
-                }
-
-                // init the relocation handler
-                RelocationHandler relocationHandler = getRelocationHandler();
-
-                // attempt to remap the jar.
-                relocationHandler.remap(input, output, relocations);
-
-                remappedJars.add(new Source(source.dependency, output));
-            } catch (Throwable e) {
-                this.plugin.getLogger().severe("Unable to remap the source file '" + source.dependency.name() + "'.");
-                e.printStackTrace();
-            }
-        }
-
-        // load each of the jars
-        for (Source source : remappedJars) {
-            if (!DependencyRegistry.shouldAutoLoad(source.dependency)) {
-                this.loaded.put(source.dependency, source.file);
-                continue;
-            }
-
-            try {
-                this.plugin.getBootstrap().getPluginClassLoader().addJarToClasspath(source.file);
-                this.loaded.put(source.dependency, source.file);
-            } catch (Throwable e) {
-                this.plugin.getLogger().severe("Failed to load dependency jar '" + source.file.getFileName().toString() + "'.");
-                e.printStackTrace();
-            }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
-    private Path downloadDependency(Dependency dependency) throws Exception {
-        Path file = this.libsDirectory.resolve(dependency.getFileName() + ".jar");
+    private void loadDependency(Dependency dependency) throws Exception {
+        if (this.loaded.containsKey(dependency)) {
+            return;
+        }
+
+        Path file = remapDependency(dependency, downloadDependency(dependency));
+
+        this.loaded.put(dependency, file);
+
+        if (this.registry.shouldAutoLoad(dependency)) {
+            this.plugin.getBootstrap().getPluginClassLoader().addJarToClasspath(file);
+        }
+    }
+
+    private Path downloadDependency(Dependency dependency) throws DependencyDownloadException {
+        Path file = this.cacheDirectory.resolve(dependency.getFileName() + ".jar");
 
         // if the file already exists, don't attempt to re-download it.
         if (Files.exists(file)) {
             return file;
         }
 
-        boolean success = false;
-        Exception lastError = null;
+        DependencyDownloadException lastError = null;
 
-        // getUrls returns two possible sources of the dependency.
-        // [0] is a mirror of Maven Central, used to reduce load on central. apparently they don't like being used as a CDN
-        // [1] is Maven Central itself
-
-        // side note: the relative "security" of the mirror is less than central, but it actually doesn't matter.
-        // we compare the downloaded file against a checksum here, so even if the mirror became compromised, RCE wouldn't be possible.
-        // if the mirror download doesn't match the checksum, we just try maven central instead.
-
-        List<URL> urls = dependency.getUrls();
-        for (int i = 0; i < urls.size() && !success; i++) {
-            URL url = urls.get(i);
-
+        // attempt to download the dependency from each repo in order.
+        for (DependencyRepository repo : DependencyRepository.values()) {
             try {
-                URLConnection connection = url.openConnection();
-
-                // i == 0 when we're trying to use the mirror repo.
-                // set some timeout properties so when/if this repository goes offline, we quickly fallback to central.
-                if (i == 0) {
-                    connection.setRequestProperty("User-Agent", "luckperms");
-                    connection.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(5));
-                    connection.setReadTimeout((int) TimeUnit.SECONDS.toMillis(10));
-                }
-
-                try (InputStream in = connection.getInputStream()) {
-                    // download the jar content
-                    byte[] bytes = ByteStreams.toByteArray(in);
-                    if (bytes.length == 0) {
-                        throw new RuntimeException("Empty stream");
-                    }
-
-
-                    // compute a hash for the downloaded file
-                    byte[] hash = this.digest.digest(bytes);
-
-                    // ensure the hash matches the expected checksum
-                    if (!Arrays.equals(hash, dependency.getChecksum())) {
-                        throw new RuntimeException("Downloaded file had an invalid hash. " +
-                                "Expected: " + Base64.getEncoder().encodeToString(dependency.getChecksum()) + " " +
-                                "Actual: " + Base64.getEncoder().encodeToString(hash));
-                    }
-
-                    // if the checksum matches, save the content to disk
-                    Files.write(file, bytes);
-                    success = true;
-                }
-            } catch (Exception e) {
+                repo.download(dependency, file);
+                return file;
+            } catch (DependencyDownloadException e) {
                 lastError = e;
             }
         }
 
-        if (!success) {
-            throw new RuntimeException("Unable to download", lastError);
-        }
-
-        // ensure the file saved correctly
-        if (!Files.exists(file)) {
-            throw new IllegalStateException("File not present: " + file.toString());
-        } else {
-            return file;
-        }
+        throw Objects.requireNonNull(lastError);
     }
 
-    private static final class Source {
-        private final Dependency dependency;
-        private final Path file;
+    private Path remapDependency(Dependency dependency, Path normalFile) throws Exception {
+        List<Relocation> rules = new ArrayList<>(dependency.getRelocations());
+        this.registry.applyRelocationSettings(dependency, rules);
 
-        private Source(Dependency dependency, Path file) {
-            this.dependency = dependency;
-            this.file = file;
+        if (rules.isEmpty()) {
+            return normalFile;
         }
+
+        Path remappedFile = this.cacheDirectory.resolve(dependency.getFileName() + "-remapped.jar");
+
+        // if the remapped source exists already, just use that.
+        if (Files.exists(remappedFile)) {
+            return remappedFile;
+        }
+
+        getRelocationHandler().remap(normalFile, remappedFile, rules);
+        return remappedFile;
+    }
+
+    private static Path setupCacheDirectory(LuckPermsPlugin plugin) {
+        Path cacheDirectory = plugin.getBootstrap().getDataDirectory().resolve("libs");
+        try {
+            MoreFiles.createDirectoriesIfNotExists(cacheDirectory);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to create libs directory", e);
+        }
+
+        Path oldCacheDirectory = plugin.getBootstrap().getDataDirectory().resolve("lib");
+        if (Files.exists(oldCacheDirectory)) {
+            try {
+                MoreFiles.deleteDirectory(oldCacheDirectory);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return cacheDirectory;
     }
 
 }

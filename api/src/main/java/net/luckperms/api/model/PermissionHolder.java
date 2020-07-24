@@ -26,18 +26,24 @@
 package net.luckperms.api.model;
 
 import net.luckperms.api.cacheddata.CachedDataManager;
+import net.luckperms.api.context.ContextManager;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.NodeMap;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Generic superinterface for an object which holds permissions.
@@ -109,6 +115,24 @@ public interface PermissionHolder {
     @NonNull String getFriendlyName();
 
     /**
+     * Gets the most appropriate query options available at the time for the
+     * {@link PermissionHolder}.
+     *
+     * <p>For {@link User}s, the most appropriate query options will be their
+     * {@link ContextManager#getQueryOptions(User) current active query options} if the
+     * corresponding player is online, and otherwise, will fallback to
+     * {@link ContextManager#getStaticQueryOptions() the current static query options}
+     * if they are offline.</p>
+     *
+     * <p>For {@link Group}s, the most appropriate query options will always be
+     * {@link ContextManager#getStaticQueryOptions()} the current static query options.</p>
+     *
+     * @return query options
+     * @since 5.1
+     */
+    @NonNull QueryOptions getQueryOptions();
+
+    /**
      * Gets the holders {@link CachedDataManager} cache.
      *
      * @return the holders cached data.
@@ -121,7 +145,7 @@ public interface PermissionHolder {
      * @param dataType the data type
      * @return the data
      */
-    NodeMap getData(@NonNull DataType dataType);
+    @NonNull NodeMap getData(@NonNull DataType dataType);
 
     /**
      * Gets the holders {@link DataType#NORMAL} data.
@@ -149,35 +173,60 @@ public interface PermissionHolder {
     @NonNull NodeMap transientData();
 
     /**
-     * Gets a flattened/squashed view of the holders permissions.
+     * Gets a flattened view of the holders own {@link Node}s.
      *
-     * <p>This list is constructed using the values
-     * of both the transient and enduring backing multimaps.</p>
+     * <p>This list is constructed using the values of both the {@link #data() normal}
+     * and {@link #transientData() transient} backing node maps.</p>
      *
-     * <p>This means that it <b>may contain</b> duplicate entries.</p>
-     *
-     * <p>Use {@link #getDistinctNodes()} for a view without duplicates.</p>
+     * <p>It <b>may contain</b> duplicate entries if the same node is added to both the normal
+     * and transient node maps. You can use {@link #getDistinctNodes()} for a view without
+     * duplicates.</p>
      *
      * <p>This method <b>does not</b> resolve inheritance rules.</p>
      *
-     * @return a list of the holders own nodes.
+     * @return a collection of the holders own nodes.
      */
-    @NonNull Collection<Node> getNodes();
+    default @NonNull Collection<Node> getNodes() {
+        /* This default method is overridden in the implementation, and is just here
+           to demonstrate what this method does in the API sources. */
+        List<Node> nodes = new ArrayList<>();
+        nodes.addAll(data().toCollection());
+        nodes.addAll(transientData().toCollection());
+        return nodes;
+    }
 
     /**
-     * Gets a sorted set of all held nodes.
+     * Gets a flattened view of the holders own {@link Node}s of the given {@code type}.
+     *
+     * @param type the type of node to filter by
+     * @param <T> the node type
+     * @return a filtered collection of the holders own nodes
+     * @see #getNodes()
+     * @since 5.1
+     */
+    default <T extends Node> @NonNull Collection<T> getNodes(@NonNull NodeType<T> type) {
+        /* This default method is overridden in the implementation, and is just here
+           to demonstrate what this method does in the API sources. */
+        return getNodes().stream()
+                .filter(type::matches)
+                .map(type::cast)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets a flattened and sorted view of the holders own distinct {@link Node}s.
      *
      * <p>Effectively a sorted version of {@link #getNodes()}, without duplicates. Use the
      * aforementioned method if you don't require either of these attributes.</p>
      *
      * <p>This method <b>does not</b> resolve inheritance rules.</p>
      *
-     * @return an immutable set of permissions in priority order
+     * @return a sorted set of the holders own distinct nodes
      */
     @NonNull SortedSet<Node> getDistinctNodes();
 
     /**
-     * Recursively resolves this holders permissions.
+     * Gets a resolved view of the holders own and inherited {@link Node}s.
      *
      * <p>The returned list will contain every inherited
      * node the holder has, in the order that they were inherited in.</p>
@@ -189,21 +238,65 @@ public interface PermissionHolder {
      * with the entries from the end of the inheritance tree appearing last.</p>
      *
      * @param queryOptions the query options
-     * @return a list of nodes
+     * @return a list of the holders inherited nodes
      */
     @NonNull Collection<Node> resolveInheritedNodes(@NonNull QueryOptions queryOptions);
 
     /**
-     * Gets a mutable sorted set of the nodes that this object has and inherits, filtered by context
+     * Gets a resolved view of the holders own and inherited {@link Node}s of a given {@code type}.
      *
-     * <p>Nodes are sorted into priority order. The order of inheritance is only important during
-     * the process of flattening inherited entries.</p>
+     * @param type the type of node to filter by
+     * @param queryOptions the query options
+     * @param <T> the node type
+     * @return a filtered list of the holders inherited nodes
+     * @see #resolveInheritedNodes(QueryOptions)
+     * @since 5.1
+     */
+    default <T extends Node> @NonNull Collection<T> resolveInheritedNodes(@NonNull NodeType<T> type, @NonNull QueryOptions queryOptions) {
+        /* This default method is overridden in the implementation, and is just here
+           to demonstrate what this method does in the API sources. */
+        return resolveInheritedNodes(queryOptions).stream()
+                .filter(type::matches)
+                .map(type::cast)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets a resolved and sorted view of the holders own and inherited distinct {@link Node}s.
+     *
+     * <p>Effectively a sorted version of {@link #resolveInheritedNodes(QueryOptions)},
+     * without duplicates. Use the aforementioned method if you don't require either of these
+     * attributes.</p>
+     *
+     * <p>Inheritance is performed according to the platforms rules, and the order will vary
+     * depending on the accumulation order. By default, the holders own nodes are first in the list,
+     * with the entries from the end of the inheritance tree appearing last.</p>
      *
      * @param queryOptions the query options
-     * @return an immutable sorted set of permissions
-     * @throws NullPointerException if the context is null
+     * @return a sorted set of the holders distinct inherited nodes
      */
     @NonNull SortedSet<Node> resolveDistinctInheritedNodes(@NonNull QueryOptions queryOptions);
+
+    /**
+     * Gets a collection of the {@link Group}s this holder inherits nodes from.
+     *
+     * <p>If {@link Flag#RESOLVE_INHERITANCE} is set, this will include holders inherited from both
+     * directly and indirectly (through directly inherited groups). It will effectively resolve the
+     * whole "inheritance tree".</p>
+     *
+     * <p>If {@link Flag#RESOLVE_INHERITANCE} is not set, then the traversal will only go one
+     * level up the inheritance tree, and return only directly inherited groups.</p>
+     *
+     * <p>The collection will be ordered according to the platforms inheritance rules. The groups
+     * which are inherited from first will appear earlier in the list.</p>
+     *
+     * <p>The list will not contain the holder.</p>
+     *
+     * @param queryOptions the query options
+     * @return a collection of the groups the holder inherits from
+     * @since 5.1
+     */
+    @NonNull Collection<Group> getInheritedGroups(@NonNull QueryOptions queryOptions);
 
     /**
      * Removes any temporary permissions that have expired.

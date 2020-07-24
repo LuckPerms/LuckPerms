@@ -29,20 +29,21 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorage;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Throwing;
 
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.PlayerSaveResult;
-import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -161,9 +162,9 @@ public class Storage {
         return makeFuture(this.implementation::getUniqueUsers);
     }
 
-    public CompletableFuture<List<HeldNode<UUID>>> getUsersWithPermission(Constraint constraint) {
+    public <N extends Node> CompletableFuture<List<NodeEntry<UUID, N>>> searchUserNodes(ConstraintNodeMatcher<N> constraint) {
         return makeFuture(() -> {
-            List<HeldNode<UUID>> result = this.implementation.getUsersWithPermission(constraint);
+            List<NodeEntry<UUID, N>> result = this.implementation.searchUserNodes(constraint);
             result.removeIf(entry -> entry.getNode().hasExpired());
             return ImmutableList.copyOf(result);
         });
@@ -171,7 +172,7 @@ public class Storage {
 
     public CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause) {
         return makeFuture(() -> {
-            Group group = this.implementation.createAndLoadGroup(name);
+            Group group = this.implementation.createAndLoadGroup(name.toLowerCase());
             if (group != null) {
                 this.plugin.getEventDispatcher().dispatchGroupCreate(group, cause);
             }
@@ -181,7 +182,7 @@ public class Storage {
 
     public CompletableFuture<Optional<Group>> loadGroup(String name) {
         return makeFuture(() -> {
-            Optional<Group> group = this.implementation.loadGroup(name);
+            Optional<Group> group = this.implementation.loadGroup(name.toLowerCase());
             if (group.isPresent()) {
                 this.plugin.getEventDispatcher().dispatchGroupLoad(group.get());
             }
@@ -207,9 +208,9 @@ public class Storage {
         });
     }
 
-    public CompletableFuture<List<HeldNode<String>>> getGroupsWithPermission(Constraint constraint) {
+    public <N extends Node> CompletableFuture<List<NodeEntry<String, N>>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) {
         return makeFuture(() -> {
-            List<HeldNode<String>> result = this.implementation.getGroupsWithPermission(constraint);
+            List<NodeEntry<String, N>> result = this.implementation.searchGroupNodes(constraint);
             result.removeIf(entry -> entry.getNode().hasExpired());
             return ImmutableList.copyOf(result);
         });
@@ -217,7 +218,7 @@ public class Storage {
 
     public CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause) {
         return makeFuture(() -> {
-            Track track = this.implementation.createAndLoadTrack(name);
+            Track track = this.implementation.createAndLoadTrack(name.toLowerCase());
             if (track != null) {
                 this.plugin.getEventDispatcher().dispatchTrackCreate(track, cause);
             }
@@ -227,7 +228,7 @@ public class Storage {
 
     public CompletableFuture<Optional<Track>> loadTrack(String name) {
         return makeFuture(() -> {
-            Optional<Track> track = this.implementation.loadTrack(name);
+            Optional<Track> track = this.implementation.loadTrack(name.toLowerCase());
             if (track.isPresent()) {
                 this.plugin.getEventDispatcher().dispatchTrackLoad(track.get());
             }

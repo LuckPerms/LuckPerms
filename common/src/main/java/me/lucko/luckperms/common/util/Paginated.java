@@ -27,11 +27,9 @@ package me.lucko.luckperms.common.util;
 
 import com.google.common.collect.ImmutableList;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.stream.Stream;
 
 /**
  * A simple pagination utility
@@ -45,10 +43,6 @@ public class Paginated<T> {
         this.content = ImmutableList.copyOf(content);
     }
 
-    public Paginated(Stream<T> content) {
-        this.content = content.collect(ImmutableCollectors.toList());
-    }
-
     public List<T> getContent() {
         return this.content;
     }
@@ -57,32 +51,48 @@ public class Paginated<T> {
         return (int) Math.ceil((double) this.content.size() / (double) entriesPerPage);
     }
 
-    public SortedMap<Integer, T> getPage(int pageNo, int entries) {
+    public List<Entry<T>> getPage(int pageNo, int pageSize) {
         if (pageNo < 1) {
             throw new IllegalArgumentException("pageNo cannot be less than 1: " + pageNo);
         }
 
-        int minimumEntries = ((pageNo * entries) - entries) + 1;
-        if (this.content.size() < minimumEntries) {
-            throw new IllegalStateException("Content does not contain that many elements. " +
-                    "Requested: " + minimumEntries + ", Size: " + this.content.size());
+        int first = ((pageNo - 1) * pageSize);
+        if (this.content.size() <= first) {
+            throw new IllegalStateException("Content does not contain that many elements. (requested page: " + pageNo +
+                    ", page size: " + pageSize + ", page first index: " + first + ", content size: " + this.content.size() + ")");
         }
 
-        final SortedMap<Integer, T> out = new TreeMap<>();
+        int last = first + pageSize - 1;
+        List<Entry<T>> out = new ArrayList<>(pageSize);
 
-        final int max = minimumEntries + entries - 1;
-        int index = 0;
-        for (T e : this.content) {
-            index++;
-            if (index >= minimumEntries) {
-                out.put(index, e);
-            }
-            if (index == max) {
-                break;
-            }
+        for (int i = first; i <= last && i < this.content.size(); i++) {
+            out.add(new Entry<>(i + 1, this.content.get(i)));
         }
 
         return out;
+    }
+
+    public static final class Entry<T> {
+        private final int position;
+        private final T value;
+
+        public Entry(int position, T value) {
+            this.position = position;
+            this.value = value;
+        }
+
+        public int position() {
+            return this.position;
+        }
+
+        public T value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return this.position + ": " + this.value;
+        }
     }
 
 }

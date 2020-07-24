@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
-import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.permission.Subject;
@@ -33,11 +33,11 @@ import org.spongepowered.api.service.permission.Subject;
 /**
  * Marks that an object is a proxied representation of a {@link Subject}.
  */
-public interface ProxiedSubject extends ProxiedServiceObject {
+public interface ProxiedSubject extends Subject, ProxiedServiceObject {
 
-    @NonNull
-    LPSubjectReference asSubjectReference();
+    @Override
+    @NonNull LPSubjectReference asSubjectReference();
 
-    ImmutableContextSet getActiveContextSet();
+    @NonNull QueryOptions getQueryOptions();
 
 }

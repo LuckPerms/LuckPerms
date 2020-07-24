@@ -38,7 +38,7 @@ public interface QueryOptionsRegistry {
      * Gets the default {@link QueryMode#CONTEXTUAL contextual}
      * query options.
      *
-     * <p>Prefer using the {@link QueryOptions#defaultContextualOptions()} accessor.</p>>
+     * <p>Prefer using the {@link QueryOptions#defaultContextualOptions()} accessor.</p>
      *
      * @return the default contextual query options
      * @see QueryOptions#defaultContextualOptions()
@@ -49,7 +49,7 @@ public interface QueryOptionsRegistry {
      * Gets the default {@link QueryMode#NON_CONTEXTUAL non contextual}
      * query options.
      *
-     * <p>Prefer using the {@link QueryOptions#nonContextual()} accessor.</p>>
+     * <p>Prefer using the {@link QueryOptions#nonContextual()} accessor.</p>
      *
      * @return the default non contextual query options
      * @see QueryOptions#nonContextual()

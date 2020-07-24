@@ -31,84 +31,127 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
+import me.lucko.luckperms.common.node.matcher.StandardNodeMatchers;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.web.WebEditor;
 
+import net.luckperms.api.node.Node;
+import net.luckperms.api.query.QueryOptions;
+
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 
 public class EditorCommand extends SingleCommand {
-    private static final int MAX_USERS = 500;
+    public static final int MAX_USERS = 1000;
 
     public EditorCommand(LocaleManager locale) {
-        super(CommandSpec.EDITOR.localize(locale), "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 1));
+        super(CommandSpec.EDITOR.localize(locale), "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 2));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Type type = Type.ALL;
+        String filter = null;
 
-        // parse type
-        String typeString = ArgumentParser.parseStringOrElse(0, args, null);
-        if (typeString != null) {
+        // attempt to parse type
+        String arg0 = args.getOrDefault(0, null);
+        if (arg0 != null) {
             try {
-                type = Type.valueOf(typeString.toUpperCase());
+                type = Type.valueOf(arg0.toUpperCase());
             } catch (IllegalArgumentException e) {
-                // ignored
+                // assume they meant it as a filter
+                filter = arg0;
+            }
+
+            if (filter == null) {
+                filter = args.getOrDefault(1, null);
             }
         }
+
+        // run a sync task
+        plugin.getSyncTaskBuffer().requestDirectly();
 
         // collect holders
         List<PermissionHolder> holders = new ArrayList<>();
         List<Track> tracks = new ArrayList<>();
         if (type.includingGroups) {
-            // run a sync task
-            plugin.getSyncTaskBuffer().requestDirectly();
-
             plugin.getGroupManager().getAll().values().stream()
-                    .sorted((o1, o2) -> {
-                        int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
-                        return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
-                    })
+                    .sorted(Comparator
+                            .<Group>comparingInt(g -> g.getWeight().orElse(0)).reversed()
+                            .thenComparing(Group::getName, String.CASE_INSENSITIVE_ORDER)
+                    )
                     .forEach(holders::add);
-            tracks = new ArrayList<>(plugin.getTrackManager().getAll().values());
+
+            tracks.addAll(plugin.getTrackManager().getAll().values());
         }
         if (type.includingUsers) {
-            Set<UUID> users = new LinkedHashSet<>();
+            // include all online players
+            Map<UUID, User> users = new LinkedHashMap<>(plugin.getUserManager().getAll());
 
-            // online players first
-            plugin.getUserManager().getAll().values().stream()
-                    .sorted((o1, o2) -> o1.getFormattedDisplayName().compareToIgnoreCase(o2.getFormattedDisplayName()))
-                    .map(User::getUniqueId)
-                    .forEach(users::add);
+            if (filter != null) {
+                ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.keyStartsWith(filter);
 
-            // then fill up with other users
-            users.addAll(plugin.getStorage().getUniqueUsers().join());
+                // only include online players matching the permission
+                users.values().removeIf(user -> user.normalData().asList().stream().noneMatch(matcher));
 
-            users.stream().limit(MAX_USERS).forEach(uuid -> {
-                User user = plugin.getUserManager().getIfLoaded(uuid);
-                if (user != null) {
-                    holders.add(user);
-                } else {
-                    user = plugin.getStorage().loadUser(uuid, null).join();
-                    if (user != null) {
-                        holders.add(user);
-                    }
-                    plugin.getUserManager().getHouseKeeper().cleanup(uuid);
+                // fill up with other matching users
+                if (type.includingOffline && users.size() < MAX_USERS) {
+                    plugin.getStorage().searchUserNodes(matcher).join().stream()
+                            .map(NodeEntry::getHolder)
+                            .distinct()
+                            .filter(uuid -> !users.containsKey(uuid))
+                            .sorted()
+                            .limit(MAX_USERS - users.size())
+                            .forEach(uuid -> {
+                                User user = plugin.getStorage().loadUser(uuid, null).join();
+                                if (user != null) {
+                                    users.put(uuid, user);
+                                }
+                                plugin.getUserManager().getHouseKeeper().cleanup(uuid);
+                            });
                 }
-            });
+            } else {
+
+                // fill up with other users
+                if (type.includingOffline && users.size() < MAX_USERS) {
+                    plugin.getStorage().getUniqueUsers().join().stream()
+                            .filter(uuid -> !users.containsKey(uuid))
+                            .sorted()
+                            .limit(MAX_USERS - users.size())
+                            .forEach(uuid -> {
+                                User user = plugin.getStorage().loadUser(uuid, null).join();
+                                if (user != null) {
+                                    users.put(uuid, user);
+                                }
+                                plugin.getUserManager().getHouseKeeper().cleanup(uuid);
+                            });
+                }
+            }
+
+            users.values().stream()
+                    .sorted(Comparator
+                            .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL)).reversed()
+                            .thenComparing(User::getFormattedDisplayName, String.CASE_INSENSITIVE_ORDER)
+                    )
+                    .forEach(holders::add);
         }
 
         if (holders.isEmpty()) {
@@ -117,7 +160,7 @@ public class EditorCommand extends SingleCommand {
         }
 
         // remove holders which the sender doesn't have perms to view
-        holders.removeIf(holder -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder));
+        holders.removeIf(holder -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder) || ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSetImpl.EMPTY));
         tracks.removeIf(track -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), track));
 
         // they don't have perms to view any of them
@@ -133,16 +176,19 @@ public class EditorCommand extends SingleCommand {
     }
 
     private enum Type {
-        ALL(true, true),
-        USERS(true, false),
-        GROUPS(false, true);
+        ALL(true, true, true),
+        ONLINE(true, true, false),
+        USERS(true, false, true),
+        GROUPS(false, true, true);
 
         private final boolean includingUsers;
         private final boolean includingGroups;
+        private final boolean includingOffline;
 
-        Type(boolean includingUsers, boolean includingGroups) {
+        Type(boolean includingUsers, boolean includingGroups, boolean includingOffline) {
             this.includingUsers = includingUsers;
             this.includingGroups = includingGroups;
+            this.includingOffline = includingOffline;
         }
     }
 }

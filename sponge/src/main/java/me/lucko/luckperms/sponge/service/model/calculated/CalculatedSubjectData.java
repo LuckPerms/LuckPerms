@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextSetComparator;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -36,6 +37,7 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
+import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.query.QueryOptions;
@@ -87,6 +89,10 @@ public class CalculatedSubjectData implements LPSubjectData {
         return this.type;
     }
 
+    private ContextSatisfyMode defaultSatisfyMode() {
+        return this.service.getPlugin().getConfiguration().get(ConfigKeys.CONTEXT_SATISFY_MODE);
+    }
+
     public void replacePermissions(Map<ImmutableContextSet, Map<String, Boolean>> map) {
         this.permissions.clear();
         for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : map.entrySet()) {
@@ -131,7 +137,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         // get relevant entries
         SortedMap<ImmutableContextSet, Map<String, Boolean>> sorted = new TreeMap<>(ContextSetComparator.reverse());
         for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> entry : this.permissions.entrySet()) {
-            if (!filter.satisfies(entry.getKey())) {
+            if (!filter.satisfies(entry.getKey(), defaultSatisfyMode())) {
                 continue;
             }
 
@@ -209,7 +215,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         // get relevant entries
         SortedMap<ImmutableContextSet, Set<LPSubjectReference>> sorted = new TreeMap<>(ContextSetComparator.reverse());
         for (Map.Entry<ImmutableContextSet, Set<LPSubjectReference>> entry : this.parents.entrySet()) {
-            if (!filter.satisfies(entry.getKey())) {
+            if (!filter.satisfies(entry.getKey(), defaultSatisfyMode())) {
                 continue;
             }
 
@@ -285,7 +291,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         // get relevant entries
         SortedMap<ImmutableContextSet, Map<String, String>> sorted = new TreeMap<>(ContextSetComparator.reverse());
         for (Map.Entry<ImmutableContextSet, Map<String, String>> entry : this.options.entrySet()) {
-            if (!filter.satisfies(entry.getKey())) {
+            if (!filter.satisfies(entry.getKey(), defaultSatisfyMode())) {
                 continue;
             }
 

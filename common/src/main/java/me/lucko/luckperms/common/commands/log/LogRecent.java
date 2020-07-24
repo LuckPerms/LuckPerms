@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -40,11 +40,7 @@ import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
-import net.luckperms.api.actionlog.Action;
-
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
 import java.util.UUID;
 
 public class LogRecent extends ChildCommand<Log> {
@@ -55,27 +51,27 @@ public class LogRecent extends ChildCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
         if (args.isEmpty()) {
             // No page or user
             Paginated<LoggedAction> content = new Paginated<>(log.getContent());
             return showLog(content.getMaxPages(ENTRIES_PER_PAGE), false, sender, content);
         }
 
-        int page = ArgumentParser.parseIntOrElse(0, args, Integer.MIN_VALUE);
+        int page = args.getIntOrDefault(0, Integer.MIN_VALUE);
         if (page != Integer.MIN_VALUE) {
             Paginated<LoggedAction> content = new Paginated<>(log.getContent());
             return showLog(page, false, sender, content);
         }
 
         // User and possibly page
-        UUID uuid = ArgumentParser.parseUserTarget(0, args, plugin, sender);
+        UUID uuid = args.getUserTarget(0, plugin, sender);
         if (uuid == null) {
             return CommandResult.INVALID_ARGS;
         }
 
         Paginated<LoggedAction> content = new Paginated<>(log.getContent(uuid));
-        page = ArgumentParser.parseIntOrElse(1, args, Integer.MIN_VALUE);
+        page = args.getIntOrDefault(1, Integer.MIN_VALUE);
         if (page != Integer.MIN_VALUE) {
             return showLog(page, true, sender, content);
         } else {
@@ -95,9 +91,9 @@ public class LogRecent extends ChildCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, LoggedAction> entries = log.getPage(page, ENTRIES_PER_PAGE);
+        List<Paginated.Entry<LoggedAction>> entries = log.getPage(page, ENTRIES_PER_PAGE);
         if (specificUser) {
-            String name = ((Action) entries.values().stream().findAny().get()).getSource().getName();
+            String name = entries.stream().findAny().get().value().getSource().getName();
             if (name.contains("@")) {
                 name = name.split("@")[0];
             }
@@ -106,14 +102,14 @@ public class LogRecent extends ChildCommand<Log> {
             Message.LOG_RECENT_HEADER.send(sender, page, maxPage);
         }
 
-        for (Map.Entry<Integer, LoggedAction> e : entries.entrySet()) {
+        for (Paginated.Entry<LoggedAction> e : entries) {
             Message.LOG_ENTRY.send(sender,
-                    e.getKey(),
-                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.getValue().getDurationSince()),
-                    e.getValue().getSourceFriendlyString(),
-                    Character.toString(LoggedAction.getTypeCharacter(((Action) e.getValue()).getTarget().getType())),
-                    e.getValue().getTargetFriendlyString(),
-                    e.getValue().getDescription()
+                    e.position(),
+                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.value().getDurationSince()),
+                    e.value().getSourceFriendlyString(),
+                    Character.toString(LoggedAction.getTypeCharacter(e.value().getTarget().getType())),
+                    e.value().getTargetFriendlyString(),
+                    e.value().getDescription()
             );
         }
         return CommandResult.SUCCESS;

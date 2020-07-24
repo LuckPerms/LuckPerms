@@ -37,6 +37,7 @@ public enum CommandPermission {
     EDITOR("editor", Type.NONE),
     DEBUG("debug", Type.NONE),
     VERBOSE("verbose", Type.NONE),
+    VERBOSE_COMMAND_OTHERS("verbose.command.others", Type.NONE),
     TREE("tree", Type.NONE),
     SEARCH("search", Type.NONE),
     CHECK("check", Type.NONE),

@@ -38,10 +38,12 @@ import cn.nukkit.plugin.PluginBase;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Stream;
 
 /**
  * Bootstrap plugin for LuckPerms running on Nukkit.
@@ -201,13 +203,18 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public Stream<String> getPlayerList() {
-        return getServer().getOnlinePlayers().values().stream().map(Player::getName);
+    public Collection<String> getPlayerList() {
+        Collection<Player> players = getServer().getOnlinePlayers().values();
+        List<String> list = new ArrayList<>(players.size());
+        for (Player player : players) {
+            list.add(player.getName());
+        }
+        return list;
     }
 
     @Override
-    public Stream<UUID> getOnlinePlayers() {
-        return getServer().getOnlinePlayers().values().stream().map(Player::getUniqueId);
+    public Collection<UUID> getOnlinePlayers() {
+        return new ArrayList<>(getServer().getOnlinePlayers().keySet());
     }
 
     @Override

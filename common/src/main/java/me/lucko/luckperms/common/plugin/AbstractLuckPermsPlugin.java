@@ -29,17 +29,17 @@ import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
-import me.lucko.luckperms.common.config.AbstractConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.context.LPStaticContextsCalculator;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.context.ConfigurationContextCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventDispatcher;
+import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
-import me.lucko.luckperms.common.inheritance.InheritanceHandler;
+import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
@@ -61,6 +61,8 @@ import okhttp3.OkHttpClient;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
@@ -82,7 +84,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private Storage storage;
     private InternalMessagingService messagingService = null;
     private SyncTask.Buffer syncTaskBuffer;
-    private InheritanceHandler inheritanceHandler;
+    private InheritanceGraphFactory inheritanceGraphFactory;
     private CalculatorFactory calculatorFactory;
     private LuckPermsApiProvider apiProvider;
     private EventDispatcher eventDispatcher;
@@ -111,14 +113,18 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load configuration
         getLogger().info("Loading configuration...");
-        this.configuration = new AbstractConfiguration(this, provideConfigurationAdapter());
+        this.configuration = new LuckPermsConfiguration(this, provideConfigurationAdapter());
 
         // load locale
         this.localeManager = new LocaleManager();
         this.localeManager.tryLoad(this, getBootstrap().getConfigDirectory().resolve("lang.yml"));
 
         // setup a bytebin instance
-        this.bytebin = new BytebinClient(new OkHttpClient(), getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+        OkHttpClient httpClient = new OkHttpClient.Builder()
+                .callTimeout(15, TimeUnit.SECONDS)
+                .build();
+
+        this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
@@ -153,7 +159,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load internal managers
         getLogger().info("Loading internal permission managers...");
-        this.inheritanceHandler = new InheritanceHandler(this);
+        this.inheritanceGraphFactory = new InheritanceGraphFactory(this);
 
         // setup user/group/track manager
         setupManagers();
@@ -163,7 +169,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // setup contextmanager & register common calculators
         setupContextManager();
-        getContextManager().registerCalculator(new LPStaticContextsCalculator(getConfiguration()));
+        getContextManager().registerCalculator(new ConfigurationContextCalculator(getConfiguration()));
 
         // setup platform hooks
         setupPlatformHooks();
@@ -171,6 +177,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // register with the LP API
         this.apiProvider = new LuckPermsApiProvider(this);
         this.eventDispatcher = new EventDispatcher(provideEventBus(this.apiProvider));
+        getBootstrap().getScheduler().executeAsync(GeneratedEventClass::preGenerate);
         ApiRegistrationUtil.registerProvider(this.apiProvider);
         registerApiOnPlatform(this.apiProvider);
 
@@ -339,8 +346,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public InheritanceHandler getInheritanceHandler() {
-        return this.inheritanceHandler;
+    public InheritanceGraphFactory getInheritanceGraphFactory() {
+        return this.inheritanceGraphFactory;
     }
 
     @Override
@@ -365,8 +372,16 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
     private void displayBanner(Sender sender) {
         sender.sendMessage(Message.colorize("&b       &3 __    "));
-        sender.sendMessage(Message.colorize("&b  |    &3|__)   " + "&2LuckPerms &bv" + getBootstrap().getVersion()));
+        sender.sendMessage(Message.colorize("&b  |    &3|__)   " + "&2" + getPluginName() + " &bv" + getBootstrap().getVersion()));
         sender.sendMessage(Message.colorize("&b  |___ &3|      " + "&8Running on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
         sender.sendMessage("");
+    }
+
+    public static String getPluginName() {
+        LocalDate date = LocalDate.now();
+        if (date.getMonth() == Month.APRIL && date.getDayOfMonth() == 1) {
+            return "LuckyPerms";
+        }
+        return "LuckPerms";
     }
 }

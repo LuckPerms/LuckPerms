@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.DurationFormatter;
 
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.Context;
@@ -45,7 +46,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -57,15 +57,6 @@ import java.util.UUID;
  * LuckPerms classes.
  */
 public class LoggedAction implements Action {
-
-    private static final Comparator<Action> COMPARATOR = Comparator
-            .<Action>comparingLong(a -> a.getTimestamp().getEpochSecond())
-            .thenComparing(a -> a.getSource().getUniqueId())
-            .thenComparing(a -> a.getSource().getName(), String.CASE_INSENSITIVE_ORDER)
-            .thenComparing(a -> a.getTarget().getType())
-            .thenComparing(e -> e.getTarget().getUniqueId().map(UUID::toString).orElse(""))
-            .thenComparing(a -> a.getTarget().getName(), String.CASE_INSENSITIVE_ORDER)
-            .thenComparing(Action::getDescription);
 
     /**
      * Creates a new log entry builder
@@ -131,7 +122,7 @@ public class LoggedAction implements Action {
     @Override
     public int compareTo(@NonNull Action other) {
         Objects.requireNonNull(other, "other");
-        return COMPARATOR.compare(this, other);
+        return ActionComparator.INSTANCE.compare(this, other);
     }
 
     public boolean matchesSearch(String query) {
@@ -171,13 +162,7 @@ public class LoggedAction implements Action {
 
     @Override
     public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        result = result * PRIME + getTimestamp().hashCode();
-        result = result * PRIME + getSource().hashCode();
-        result = result * PRIME + getTarget().hashCode();
-        result = result * PRIME + getDescription().hashCode();
-        return result;
+        return Objects.hash(getTimestamp(), getSource(), getTarget(), getDescription());
     }
 
     private static final class SourceImpl implements Source {
@@ -265,36 +250,43 @@ public class LoggedAction implements Action {
         private Target.Type targetType = null;
         private String description = null;
 
+        @Override
         public @NonNull Builder timestamp(@NonNull Instant timestamp) {
             this.timestamp = timestamp.getEpochSecond();
             return this;
         }
 
+        @Override
         public @NonNull Builder source(@NonNull UUID source) {
             this.sourceUniqueId = Objects.requireNonNull(source, "source");
             return this;
         }
 
+        @Override
         public @NonNull Builder sourceName(@NonNull String sourceName) {
             this.sourceName = Objects.requireNonNull(sourceName, "sourceName");
             return this;
         }
 
+        @Override
         public @NonNull Builder targetType(Action.Target.Type type) {
             this.targetType = Objects.requireNonNull(type, "type");
             return this;
         }
 
+        @Override
         public @NonNull Builder target(UUID target) {
             this.targetUniqueId = target; // nullable
             return this;
         }
 
+        @Override
         public @NonNull Builder targetName(@NonNull String targetName) {
             this.targetName = Objects.requireNonNull(targetName, "targetName");
             return this;
         }
 
+        @Override
         public @NonNull Builder description(@NonNull String description) {
             this.description = Objects.requireNonNull(description, "description");
             return this;
@@ -346,6 +338,8 @@ public class LoggedAction implements Action {
                         }
                         parts.add(context.getKey() + "=" + context.getValue());
                     }
+                } else if (o instanceof Duration) {
+                    parts.add(DurationFormatter.CONCISE.format((Duration) o));
                 } else {
                     parts.add(String.valueOf(o));
                 }

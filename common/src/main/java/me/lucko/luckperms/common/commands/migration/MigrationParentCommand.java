@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.ParentCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -76,7 +77,7 @@ public class MigrationParentCommand extends ParentCommand<Object, Void> {
                 this.display = false;
                 this.commands.add(new ChildCommand<Object>(CommandSpec.MIGRATION_COMMAND.localize(getSpec().getLocaleManager()), "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
                     @Override
-                    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
+                    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, ArgumentList args, String label) {
                         return CommandResult.SUCCESS;
                     }
                 });

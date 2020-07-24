@@ -58,14 +58,16 @@ public enum CommandSpec {
     INFO("Prints general information about the active plugin instance.", "/%s info"),
     EDITOR("Creates a new web editor session", "/%s editor [type]",
             Argument.list(
-                    Argument.create("type", false, "the types to load into the editor. ('all', 'users' or 'groups')")
+                    Argument.create("type", false, "the types to load into the editor. ('all', 'users' or 'groups')"),
+                    Argument.create("filter", false, "permission to filter user entries by")
             )
     ),
     DEBUG("Produces a set of internal debugging output", "/%s debug"),
     VERBOSE("Controls the plugins verbose permission check monitoring system.", "/%s verbose <on|record|off|upload> [filter]",
             Argument.list(
-                    Argument.create("on|record|off|upload", true, "whether to enable/disable logging, or to upload the logged output"),
-                    Argument.create("filter", false, "the filter to match entries against")
+                    Argument.create("on|record|off|upload|command", true, "whether to enable/disable logging, or to upload the logged output"),
+                    Argument.create("filter", false, "the filter to match entries against"),
+                    Argument.create("<me|player> <command>", false, "the player/command to run")
             )
     ),
     TREE("Generates a tree view (ordered list hierarchy) of all permissions known to LuckPerms.", "/%s tree [scope] [player]",
@@ -89,12 +91,14 @@ public enum CommandSpec {
     NETWORK_SYNC("Sync changes with the storage and request that all other servers on the network do the same", "/%s networksync"),
     IMPORT("Imports data from a (previously created) export file", "/%s import <file>",
             Argument.list(
-                    Argument.create("file", true, "the file to import from")
+                    Argument.create("file", true, "the file to import from"),
+                    Argument.create("--merge", false, "merge import into existing data")
             )
     ),
     EXPORT("Exports all permissions data to an 'export' file. Can be re-imported at a later time.", "/%s export <file>",
             Argument.list(
-                    Argument.create("file", true, "the file to export to")
+                    Argument.create("file", true, "the file to export to"),
+                    Argument.create("--without-users", false, "exclude users from the export")
             )
     ),
     RELOAD_CONFIG("Reload some of the config options", "/%s reloadconfig"),
@@ -147,14 +151,14 @@ public enum CommandSpec {
     ),
     USER_PROMOTE("Promotes the user up a track",
             Argument.list(
-                    Argument.create("track", true, "the track to promote the user up"),
+                    Argument.create("track", false, "the track to promote the user up"),
                     Argument.create("context...", false, "the contexts to promote the user in"),
                     Argument.create("--dont-add-to-first", false, "only promote the user if they're already on the track")
             )
     ),
     USER_DEMOTE("Demotes the user down a track",
             Argument.list(
-                    Argument.create("track", true, "the track to demote the user down"),
+                    Argument.create("track", false, "the track to demote the user down"),
                     Argument.create("context...", false, "the contexts to demote the user in"),
                     Argument.create("--dont-remove-from-first", false, "prevent the user from being removed from the first group")
             )
@@ -236,6 +240,7 @@ public enum CommandSpec {
     PERMISSION_UNSETTEMP("Unsets a temporary permission for the object",
             Argument.list(
                     Argument.create("node", true, "the permission node to unset"),
+                    Argument.create("duration", false, "the duration to subtract"),
                     Argument.create("context...", false, "the contexts to remove the permission in")
             )
     ),
@@ -299,6 +304,7 @@ public enum CommandSpec {
     PARENT_REMOVE_TEMP("Removes a previously set temporary inheritance rule",
             Argument.list(
                     Argument.create("group", true, "the group to remove"),
+                    Argument.create("duration", false, "the duration to subtract"),
                     Argument.create("context...", false, "the contexts to remove the group in")
             )
     ),

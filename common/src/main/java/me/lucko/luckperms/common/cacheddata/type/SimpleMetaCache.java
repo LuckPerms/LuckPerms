@@ -30,12 +30,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Multimaps;
 
-import me.lucko.luckperms.common.metastacking.MetaStack;
+import me.lucko.luckperms.common.cacheddata.UsageTracked;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.query.meta.MetaValueSelector;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,26 +51,33 @@ import java.util.SortedMap;
 /**
  * Holds cached meta for a given context
  */
-public class SimpleMetaCache implements CachedMetaData {
+public class SimpleMetaCache extends UsageTracked implements CachedMetaData {
+
+    private final LuckPermsPlugin plugin;
 
     /** The query options this container is holding data for */
     private final QueryOptions queryOptions;
 
     /* The data */
-    protected Map<String, List<String>> meta = ImmutableMap.of();
-    protected Map<String, String> flattenedMeta = ImmutableMap.of();
-    protected SortedMap<Integer, String> prefixes = ImmutableSortedMap.of();
-    protected SortedMap<Integer, String> suffixes = ImmutableSortedMap.of();
-    protected String primaryGroup = null;
-    protected MetaStack prefixStack = null;
-    protected MetaStack suffixStack = null;
+    protected final Map<String, List<String>> meta;
+    protected final Map<String, String> flattenedMeta;
+    protected final SortedMap<Integer, String> prefixes;
+    protected final SortedMap<Integer, String> suffixes;
+    protected final int weight;
+    protected final String primaryGroup;
+    private final MetaStackDefinition prefixDefinition;
+    private final MetaStackDefinition suffixDefinition;
+    private final String prefix;
+    private final String suffix;
 
-    public SimpleMetaCache(QueryOptions queryOptions) {
+    public SimpleMetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions, MetaAccumulator sourceMeta) {
+        this.plugin = plugin;
         this.queryOptions = queryOptions;
-    }
 
-    public void loadMeta(MetaAccumulator meta) {
-        this.meta = Multimaps.asMap(ImmutableListMultimap.copyOf(meta.getMeta()));
+        this.meta = Multimaps.asMap(ImmutableListMultimap.copyOf(sourceMeta.getMeta()));
+
+        MetaValueSelector metaValueSelector = this.queryOptions.option(MetaValueSelector.KEY)
+                .orElseGet(() -> this.plugin.getConfiguration().get(ConfigKeys.META_VALUE_SELECTOR));
 
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         for (Map.Entry<String, List<String>> e : this.meta.entrySet()) {
@@ -75,16 +85,23 @@ public class SimpleMetaCache implements CachedMetaData {
                 continue;
             }
 
-            // take the value which was accumulated first
-            builder.put(e.getKey(), e.getValue().get(0));
+            String selected = metaValueSelector.selectValue(e.getKey(), e.getValue());
+            if (selected == null) {
+                throw new NullPointerException(metaValueSelector + " returned null");
+            }
+
+            builder.put(e.getKey(), selected);
         }
         this.flattenedMeta = builder.build();
 
-        this.prefixes = ImmutableSortedMap.copyOfSorted(meta.getPrefixes());
-        this.suffixes = ImmutableSortedMap.copyOfSorted(meta.getSuffixes());
-        this.primaryGroup = meta.getPrimaryGroup();
-        this.prefixStack = meta.getPrefixStack();
-        this.suffixStack = meta.getSuffixStack();
+        this.prefixes = ImmutableSortedMap.copyOfSorted(sourceMeta.getPrefixes());
+        this.suffixes = ImmutableSortedMap.copyOfSorted(sourceMeta.getSuffixes());
+        this.weight = sourceMeta.getWeight();
+        this.primaryGroup = sourceMeta.getPrimaryGroup();
+        this.prefixDefinition = sourceMeta.getPrefixDefinition();
+        this.suffixDefinition = sourceMeta.getSuffixDefinition();
+        this.prefix = sourceMeta.getPrefix();
+        this.suffix = sourceMeta.getSuffix();
     }
 
     public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
@@ -98,8 +115,7 @@ public class SimpleMetaCache implements CachedMetaData {
     }
 
     public String getPrefix(MetaCheckEvent.Origin origin) {
-        MetaStack prefixStack = this.prefixStack;
-        return prefixStack == null ? null : prefixStack.toFormattedString();
+        return this.prefix;
     }
 
     @Override
@@ -108,8 +124,7 @@ public class SimpleMetaCache implements CachedMetaData {
     }
 
     public String getSuffix(MetaCheckEvent.Origin origin) {
-        MetaStack suffixStack = this.suffixStack;
-        return suffixStack == null ? null : suffixStack.toFormattedString();
+        return this.suffix;
     }
 
     @Override
@@ -136,23 +151,32 @@ public class SimpleMetaCache implements CachedMetaData {
         return this.suffixes;
     }
 
+    public int getWeight(MetaCheckEvent.Origin origin) {
+        return this.weight;
+    }
+
+    //@Override - not actually exposed in the API atm
+    public final int getWeight() {
+        return getWeight(MetaCheckEvent.Origin.LUCKPERMS_API);
+    }
+
     public @Nullable String getPrimaryGroup(MetaCheckEvent.Origin origin) {
         return this.primaryGroup;
     }
 
     @Override
     public final @Nullable String getPrimaryGroup() {
-        return this.primaryGroup;
+        return getPrimaryGroup(MetaCheckEvent.Origin.LUCKPERMS_API);
     }
 
     @Override
     public @NonNull MetaStackDefinition getPrefixStackDefinition() {
-        return this.prefixStack.getDefinition();
+        return this.prefixDefinition;
     }
 
     @Override
     public @NonNull MetaStackDefinition getSuffixStackDefinition() {
-        return this.suffixStack.getDefinition();
+        return this.suffixDefinition;
     }
 
     @Override

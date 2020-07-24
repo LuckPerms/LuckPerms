@@ -56,8 +56,8 @@ public class MetaCache extends SimpleMetaCache implements CachedMetaData {
     /** The object name passed to the verbose handler when checks are made */
     private final String verboseCheckTarget;
 
-    public MetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions, CacheMetadata metadata) {
-        super(queryOptions);
+    public MetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions, CacheMetadata metadata, MetaAccumulator sourceMeta) {
+        super(plugin, queryOptions, sourceMeta);
         this.plugin = plugin;
         this.metadata = metadata;
 
@@ -68,28 +68,40 @@ public class MetaCache extends SimpleMetaCache implements CachedMetaData {
         }
     }
 
+    @Override
     public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
         String value = super.getMetaValue(key, origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), key, String.valueOf(value));
         return value;
     }
 
+    @Override
     public String getPrefix(MetaCheckEvent.Origin origin) {
         String value = super.getPrefix(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), Prefix.NODE_KEY, String.valueOf(value));
         return value;
     }
 
+    @Override
     public String getSuffix(MetaCheckEvent.Origin origin) {
         String value = super.getSuffix(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), Suffix.NODE_KEY, String.valueOf(value));
         return value;
     }
 
+    @Override
     public Map<String, List<String>> getMeta(MetaCheckEvent.Origin origin) {
         return new MonitoredMetaMap(super.getMeta(origin), origin);
     }
 
+    @Override
+    public int getWeight(MetaCheckEvent.Origin origin) {
+        int value = super.getWeight(origin);
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), "weight", String.valueOf(value));
+        return value;
+    }
+
+    @Override
     public @Nullable String getPrimaryGroup(MetaCheckEvent.Origin origin) {
         String value = super.getPrimaryGroup(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), "primarygroup", String.valueOf(value));

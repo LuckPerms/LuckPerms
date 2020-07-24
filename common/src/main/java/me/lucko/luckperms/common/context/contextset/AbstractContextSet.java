@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 
 import net.luckperms.api.context.Context;
+import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 
@@ -59,6 +60,36 @@ public abstract class AbstractContextSet implements ContextSet {
     public boolean contains(@NonNull String key, @NonNull String value) {
         return backing().containsEntry(sanitizeKey(key), sanitizeValue(value));
     }
+
+    @Override
+    public boolean isSatisfiedBy(@NonNull ContextSet other, @NonNull ContextSatisfyMode mode) {
+        if (this == other) {
+            return true;
+        }
+
+        Objects.requireNonNull(other, "other");
+        Objects.requireNonNull(mode, "mode");
+
+        // this is empty, it is always satisfied.
+        if (this.isEmpty()) {
+            return true;
+        }
+
+        // if this set isn't empty, but the other one is, then it can't be satisfied by it.
+        if (other.isEmpty()) {
+            return false;
+        }
+
+        // if mode is ALL_VALUES & this set has more entries than the other one, then it can't be satisfied by it.
+        if (mode == ContextSatisfyMode.ALL_VALUES_PER_KEY && this.size() > other.size()) {
+            return false;
+        }
+
+        // return true if 'other' contains all of 'this', according to the mode.
+        return otherContainsAll(other, mode);
+    }
+
+    protected abstract boolean otherContainsAll(ContextSet other, ContextSatisfyMode mode);
 
     @Override
     public boolean isEmpty() {
@@ -92,7 +123,7 @@ public abstract class AbstractContextSet implements ContextSet {
     }
 
     public static boolean isGlobalServerWorldEntry(String key, String value) {
-        return (key.equalsIgnoreCase(DefaultContextKeys.SERVER_KEY) || key.equalsIgnoreCase(DefaultContextKeys.WORLD_KEY)) && value.equalsIgnoreCase("global");
+        return (key.equals(DefaultContextKeys.SERVER_KEY) || key.equals(DefaultContextKeys.WORLD_KEY)) && value.equals("global");
     }
 
 }

@@ -32,11 +32,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.manager.user.AbstractUserManager;
 import me.lucko.luckperms.common.model.manager.user.UserHousekeeper;
+import me.lucko.luckperms.common.node.matcher.StandardNodeMatchers;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -48,7 +48,7 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.service.permission.PermissionService;
@@ -212,8 +212,8 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> builder = ImmutableMap.builder();
 
-            List<HeldNode<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
-            for (HeldNode<UUID> holder : lookup) {
+            List<NodeEntry<UUID, Node>> lookup = this.plugin.getStorage().searchUserNodes(StandardNodeMatchers.key(permission)).join();
+            for (NodeEntry<UUID, Node> holder : lookup) {
                 if (holder.getNode().getContexts().equals(ImmutableContextSetImpl.EMPTY)) {
                     builder.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getNode().getValue());
                 }
@@ -228,8 +228,8 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
         return CompletableFuture.supplyAsync(() -> {
             ImmutableMap.Builder<LPSubjectReference, Boolean> builder = ImmutableMap.builder();
 
-            List<HeldNode<UUID>> lookup = this.plugin.getStorage().getUsersWithPermission(Constraint.of(StandardComparison.EQUAL, permission)).join();
-            for (HeldNode<UUID> holder : lookup) {
+            List<NodeEntry<UUID, Node>> lookup = this.plugin.getStorage().searchUserNodes(StandardNodeMatchers.key(permission)).join();
+            for (NodeEntry<UUID, Node> holder : lookup) {
                 if (holder.getNode().getContexts().equals(contexts)) {
                     builder.put(getService().getReferenceFactory().obtain(getIdentifier(), holder.getHolder().toString()), holder.getNode().getValue());
                 }

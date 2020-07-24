@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -58,65 +58,65 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), group)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        String name = ArgumentParser.parseString(0, args);
-        ImmutableContextSet context = ArgumentParser.parseContext(1, args, plugin).immutableCopy();
+        String name = args.get(0);
+        ImmutableContextSet context = args.getContextOrDefault(1, plugin).immutableCopy();
 
-        String previousName = group.normalData().immutable().get(context).stream()
+        String previousName = target.normalData().nodesInContext(context).stream()
                 .filter(NodeType.DISPLAY_NAME::matches)
                 .map(NodeType.DISPLAY_NAME::cast)
                 .findFirst()
                 .map(DisplayNameNode::getDisplayName)
                 .orElse(null);
 
-        if (previousName == null && name.equals(group.getName())) {
-            Message.GROUP_SET_DISPLAY_NAME_DOESNT_HAVE.send(sender, group.getName());
+        if (previousName == null && name.equals(target.getName())) {
+            Message.GROUP_SET_DISPLAY_NAME_DOESNT_HAVE.send(sender, target.getName());
             return CommandResult.STATE_ERROR;
         }
 
         if (name.equals(previousName)) {
-            Message.GROUP_SET_DISPLAY_NAME_ALREADY_HAS.send(sender, group.getName(), name);
+            Message.GROUP_SET_DISPLAY_NAME_ALREADY_HAS.send(sender, target.getName(), name);
             return CommandResult.STATE_ERROR;
         }
 
         Group existing = plugin.getGroupManager().getByDisplayName(name);
-        if (existing != null && !group.equals(existing)) {
+        if (existing != null && !target.equals(existing)) {
             Message.GROUP_SET_DISPLAY_NAME_ALREADY_IN_USE.send(sender, name, existing.getName());
             return CommandResult.STATE_ERROR;
         }
 
-        group.removeIf(DataType.NORMAL, context, NodeType.DISPLAY_NAME::matches, false);
+        target.removeIf(DataType.NORMAL, context, NodeType.DISPLAY_NAME::matches, false);
 
-        if (name.equals(group.getName())) {
-            Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+        if (name.equals(target.getName())) {
+            Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, target.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-            LoggedAction.build().source(sender).target(group)
+            LoggedAction.build().source(sender).target(target)
                     .description("setdisplayname", name, context)
                     .build().submit(plugin, sender);
 
-            StorageAssistant.save(group, sender, plugin);
+            StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         }
 
-        group.setNode(DataType.NORMAL, DisplayName.builder(name).withContext(context).build(), true);
+        target.setNode(DataType.NORMAL, DisplayName.builder(name).withContext(context).build(), true);
 
-        Message.GROUP_SET_DISPLAY_NAME.send(sender, name, group.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+        Message.GROUP_SET_DISPLAY_NAME.send(sender, name, target.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-        LoggedAction.build().source(sender).target(group)
+        LoggedAction.build().source(sender).target(target)
                 .description("setdisplayname", name, context)
                 .build().submit(plugin, sender);
 
-        StorageAssistant.save(group, sender, plugin);
+        StorageAssistant.save(target, sender, plugin);
         return CommandResult.SUCCESS;
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .from(1, TabCompletions.contexts(plugin))
                 .complete(args);

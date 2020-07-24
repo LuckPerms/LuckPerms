@@ -45,7 +45,7 @@ public enum Message {
     /*
      * General & Commands
      */
-    PREFIX("&7&l[&b&lL&3&lP&7&l] ", false),
+    PREFIX("&7[&b&lL&3&lP&7] ", false),
 
     VIEW_AVAILABLE_COMMANDS_PROMPT("&3Use &a/{} help &3to view available commands.", true),
     NO_PERMISSION_FOR_SUBCOMMANDS("&3You do not have permission to use any sub commands.", true),
@@ -131,7 +131,9 @@ public enum Message {
     VERBOSE_INVALID_FILTER("&4{}&c is not a valid verbose filter. &7({})", true),
     VERBOSE_ON("&bVerbose logging &aenabled &bfor checks matching &aANY&b.", true),
     VERBOSE_ON_QUERY("&bVerbose logging &aenabled &bfor checks matching &a{}&b.", true),
+    VERBOSE_ON_COMMAND("&bForcing &a{}&b to execute command &a/{}&b and reporting all checks made...", true),
     VERBOSE_OFF("&bVerbose logging &cdisabled&b.", true),
+    VERBOSE_OFF_COMMAND("&bCommand execution complete.", true),
 
     VERBOSE_RECORDING_ON("&bVerbose recording &aenabled &bfor checks matching &aANY&b.", true),
     VERBOSE_RECORDING_ON_QUERY("&bVerbose recording &aenabled &bfor checks matching &a{}&b.", true),
@@ -142,8 +144,12 @@ public enum Message {
     TREE_EMPTY("&cUnable to generate tree. No results were found.", true),
     TREE_URL("&aPermission tree URL:", true),
 
+    GENERIC_HTTP_REQUEST_FAILURE("&cUnable to communicate with the web app. (response code &4{}&c, message='{}')", true),
+    GENERIC_HTTP_UNKNOWN_FAILURE("&cUnable to communicate with the web app. Check the console for errors.", true),
+
     SEARCH_SEARCHING("&aSearching for users and groups with &bpermissions {}&a...", true),
     SEARCH_SEARCHING_MEMBERS("&aSearching for users and groups who inherit from &b{}&a...", true),
+    SEARCH_RESULT_GROUP_DEFAULT("&7Note: when searching for members of the default group, offline players with no other permissions will not be shown!", true),
     SEARCH_RESULT("&aFound &b{}&a entries from &b{}&a users and &b{}&a groups.", true),
 
     SEARCH_SHOWING_USERS("&bShowing user entries:    &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)", true),
@@ -163,8 +169,10 @@ public enum Message {
 
     EDITOR_NO_MATCH("&cUnable to open editor. No objects matched the desired type.", true),
     EDITOR_START("&7Preparing a new editor session. Please wait...", true),
-    EDITOR_UPLOAD_FAILURE("&cUnable to upload permission data to the editor.", true),
     EDITOR_URL("&aClick the link below to open the editor:", true),
+
+    EDITOR_HTTP_REQUEST_FAILURE("&cUnable to communicate with the editor. (response code &4{}&c, message='{}')", true),
+    EDITOR_HTTP_UNKNOWN_FAILURE("&cUnable to communicate with the editor. Check the console for errors.", true),
 
     CHECK_RESULT("&aPermission check result on user &b{}&a for permission &b{}&a: &f{}", true),
 
@@ -200,33 +208,33 @@ public enum Message {
     UPDATE_TASK_PUSH_FAILURE("&cError whilst pushing changes to other servers.", true),
     UPDATE_TASK_PUSH_FAILURE_NOT_SETUP("&cError whilst pushing changes to other servers. &7(a messaging service has not been configured)", true),
     RELOAD_CONFIG_SUCCESS("&aThe configuration file was reloaded. &7(some options will only apply after the server has restarted)", true),
-    INFO_TOP(
-            "{PREFIX}&2Running &bLuckPerms v{}&2 by &bLuck&2." + "\n" +
+    INFO_HEADER(
+            "{PREFIX}&2Running &b{} v{}&2 by &bLuck&2." + "\n" +
             "{PREFIX}&f-  &3Platform: &f{}" + "\n" +
             "{PREFIX}&f-  &3Server Brand: &f{}" + "\n" +
             "{PREFIX}&f-  &3Server Version:" + "\n" +
-            "{PREFIX}&f-  {}",
+            "{PREFIX}     &f{}",
             false
     ),
 
     INFO_STORAGE(
             "{PREFIX}&f-  &bStorage:" + "\n" +
-            "{PREFIX}&f-     &3Type: &f{}",
+            "{PREFIX}     &3Type: &f{}",
             false
     ),
 
-    INFO_STORAGE_META("&f-     &3{}: {}", true),
+    INFO_STORAGE_META("     &3{}: {}", true),
 
-    INFO_EXTENSIONS("{PREFIX}&f-  &bExtensions:", true),
-    INFO_EXTENSION_ENTRY("&f-     &3{}", true),
+    INFO_EXTENSIONS("&f-  &bExtensions:", true),
+    INFO_EXTENSION_ENTRY("     &3{}", true),
 
     INFO_MIDDLE(
             "{PREFIX}&f-  &bMessaging: &f{}" + "\n" +
             "{PREFIX}&f-  &bInstance:" + "\n" +
-            "{PREFIX}&f-     &3Static contexts: &f{}" + "\n" +
-            "{PREFIX}&f-     &3Online Players: &a{} &7(&a{}&7 unique)" + "\n" +
-            "{PREFIX}&f-     &3Uptime: &7{}" + "\n" +
-            "{PREFIX}&f-     &3Local Data: &a{} &7users, &a{} &7groups, &a{} &7tracks",
+            "{PREFIX}     &3Static contexts: &f{}" + "\n" +
+            "{PREFIX}     &3Online Players: &a{} &7(&a{}&7 unique)" + "\n" +
+            "{PREFIX}     &3Uptime: &7{}" + "\n" +
+            "{PREFIX}     &3Local Data: &a{} &7users, &a{} &7groups, &a{} &7tracks",
             false
     ),
 
@@ -273,6 +281,7 @@ public enum Message {
     DOES_NOT_HAVE_PERMISSION("&b{}&a does not have &b{}&a set in context {}&a.", true),
 
     UNSET_TEMP_PERMISSION_SUCCESS("&aUnset temporary permission &b{}&a for &b{}&a in context {}&a.", true),
+    UNSET_TEMP_PERMISSION_SUBTRACT_SUCCESS("&aSet &b{}&a to &b{}&a for &b{}&a for a duration of &b{}&a in context {}&a, &b{}&a less than before.", true),
     DOES_NOT_HAVE_TEMP_PERMISSION("&b{}&a does not have &b{}&a set temporarily in context {}&a.", true),
 
     SET_INHERIT_SUCCESS("&b{}&a now inherits permissions from &b{}&a in context {}&a.", true),
@@ -281,6 +290,7 @@ public enum Message {
     SET_TRACK_PARENT_SUCCESS("&b{}&a had their existing parent groups on track &b{}&a cleared, and now only inherits &b{}&a in context {}&a.", true),
     UNSET_INHERIT_SUCCESS("&b{}&a no longer inherits permissions from &b{}&a in context {}&a.", true),
     UNSET_TEMP_INHERIT_SUCCESS("&b{}&a no longer temporarily inherits permissions from &b{}&a in context {}&a.", true),
+    UNSET_TEMP_INHERIT_SUBTRACT_SUCCESS("&b{}&a will inherit permissions from &b{}&a for a duration of &b{}&a in context {}&a, &b{}&a less than before.", true),
 
     CLEAR_SUCCESS("&b{}&a's nodes were cleared in context {}&a. (&b{}&a nodes were removed.)", true),
     CLEAR_SUCCESS_SINGULAR("&b{}&a's nodes were cleared in context {}&a. (&b{}&a node was removed.)", true),
@@ -349,43 +359,43 @@ public enum Message {
 
     USER_INFO_GENERAL(
             "{PREFIX}&b&l> &bUser Info: &f{}" + "\n" +
-            "{PREFIX}&f- &3UUID: &f{} &7(type: {}&7)" + "\n" +
-            "{PREFIX}&f- &3Status: {}" + "\n" +
-            "{PREFIX}&f- &3Primary Group: &f{}",
+            "{PREFIX}&f- &3UUID: &f{}" + "\n" +
+            "{PREFIX}&f    &7(type: {}&7)" + "\n" +
+            "{PREFIX}&f- &3Status: {}",
             false
     ),
-
-    USER_INFO_DATA(
-            "{PREFIX}&f- &aContextual Data:" + "\n" +
-            "{PREFIX}&f-    &3Has contextual data: {}" + "\n" +
-            "{PREFIX}&f-    &3Applicable contexts: {}" + "\n" +
-            "{PREFIX}&f-    &3Prefix: {}" + "\n" +
-            "{PREFIX}&f-    &3Suffix: {}" + "\n" +
-            "{PREFIX}&f-    &3Meta: {}",
+    USER_INFO_CONTEXTUAL_DATA(
+            "{PREFIX}&f- &aContextual Data: &7(mode: {}&7)" + "\n" +
+            "{PREFIX}    &3Contexts: {}" + "\n" +
+            "{PREFIX}    &3Prefix: {}" + "\n" +
+            "{PREFIX}    &3Suffix: {}" + "\n" +
+            "{PREFIX}    &3Primary Group: &f{}" + "\n" +
+            "{PREFIX}    &3Meta: {}",
             false
     ),
 
     INFO_PARENT_HEADER("&f- &aParent Groups:", true),
     INFO_TEMP_PARENT_HEADER("&f- &aTemporary Parent Groups:", true),
-    INFO_PARENT_ENTRY("&f-    &3> &f{}{}", true),
-    INFO_PARENT_ENTRY_EXPIRY("&f-    &2-    expires in {}", true),
+    INFO_PARENT_ENTRY("    &3> &f{}{}", true),
+    INFO_PARENT_ENTRY_EXPIRY("    &2-    expires in {}", true),
     USER_REMOVEGROUP_ERROR_PRIMARY("&aYou cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b{}&a's primary group was set to &b{}&a.", true),
     USER_PRIMARYGROUP_WARN_OPTION("&aWarning: The primary group calculation method being used by this server &7({}) &amay not reflect this change.", true),
     USER_PRIMARYGROUP_ERROR_ALREADYHAS("&b{}&a already has &b{}&a set as their primary group.", true),
     USER_PRIMARYGROUP_ERROR_NOTMEMBER("&b{}&a was not already a member of &b{}&a, adding them now.", true),
     USER_TRACK_ERROR_NOT_CONTAIN_GROUP("&b{}&a isn't already in any groups on &b{}&a.", true),
+    USER_TRACK_ERROR_AMBIGUOUS_TRACK_SELECTION("&cUnsure which track to use. Please specify it as an argument.", true),
 
     USER_TRACK_ADDED_TO_FIRST("&b{}&a isn't in any groups on this track, so they were added to the first group, &b{}&a in context {}&a.", true),
     USER_PROMOTE_NOT_ON_TRACK("&b{}&a isn't in any groups on this track, so was not promoted.", true),
     USER_PROMOTE_SUCCESS("&aPromoting &b{}&a along track &b{}&a from &b{}&a to &b{}&a in context {}&a.", true),
-
     USER_PROMOTE_ERROR_ENDOFTRACK("&aThe end of track &b{}&a was reached. Unable to promote &b{}&a.", true),
     USER_PROMOTE_ERROR_MALFORMED(
             "{PREFIX}&aThe next group on the track, &b{}&a, no longer exists. Unable to promote user." + "\n" +
             "{PREFIX}&aEither create the group, or remove it from the track and try again.",
             false
     ),
+
     USER_DEMOTE_SUCCESS("&aDemoting &b{}&a along track &b{}&a from &b{}&a to &b{}&a in context {}&a.", true),
     USER_DEMOTE_ENDOFTRACK("&aThe end of track &b{}&a was reached, so &b{}&a was removed from &b{}&a.", true),
     USER_DEMOTE_ENDOFTRACK_NOT_REMOVED("&aThe end of track &b{}&a was reached, but &b{}&a was not removed from the first group.", true),
@@ -401,6 +411,14 @@ public enum Message {
             "{PREFIX}&f- &3Weight: &f{}",
             false
     ),
+    GROUP_INFO_CONTEXTUAL_DATA(
+            "{PREFIX}&f- &aContextual Data: &7(mode: &8server&7)" + "\n" +
+                    "{PREFIX}    &3Prefix: {}" + "\n" +
+                    "{PREFIX}    &3Suffix: {}" + "\n" +
+                    "{PREFIX}    &3Meta: {}",
+            false
+    ),
+
     GROUP_SET_WEIGHT("&aSet weight to &b{}&a for group &b{}&a.", true),
 
     GROUP_SET_DISPLAY_NAME_DOESNT_HAVE("&b{}&a doesn't have a display name set.", true),
@@ -455,9 +473,25 @@ public enum Message {
     IMPORT_ALREADY_RUNNING("&cAnother import process is already running. Please wait for it to finish and try again.", true),
     EXPORT_ALREADY_RUNNING("&cAnother export process is already running. Please wait for it to finish and try again.", true),
     FILE_NOT_WITHIN_DIRECTORY("&cError: File &4{}&c must be a direct child of the data directory.", true),
+
+    EXPORT_CODE(
+            "&aExport code: &7{}" + "\n" +
+                    "&7Use the following command to import:" + "\n" +
+                    "&a/{} import {} --upload",
+            true
+    ),
+
+    EXPORT_HTTP_REQUEST_FAILURE("&cUnable to communicate with bytebin. (response code &4{}&c, message='{}')", true),
+    EXPORT_HTTP_UNKNOWN_FAILURE("&cUnable to communicate with bytebin. Check the console for errors.", true),
+
     IMPORT_FILE_DOESNT_EXIST("&cError: File &4{}&c does not exist.", true),
     IMPORT_FILE_NOT_READABLE("&cError: File &4{}&c is not readable.", true),
     IMPORT_FILE_READ_FAILURE("&cAn unexpected error occured whilst reading from the import file. (is it the correct format?)", true),
+
+    IMPORT_INVALID_CODE("&cInvalid code. &7({})", true),
+    IMPORT_HTTP_REQUEST_FAILURE("&cUnable to communicate with bytebin. (response code &4{}&c, message='{}')", true),
+    IMPORT_HTTP_UNKNOWN_FAILURE("&cUnable to communicate with bytebin. Check the console for errors.", true),
+    IMPORT_UNABLE_TO_READ("&cUnable to read data using the given code. &7({})", true),
 
     IMPORT_PROGRESS("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferrors.", true),
     IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{}&f% complete &7- &b{}&f/&b{} &foperations complete with &c{} &ferror.", true),

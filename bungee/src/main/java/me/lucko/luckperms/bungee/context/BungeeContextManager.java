@@ -36,16 +36,22 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryOptions;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class BungeeContextManager extends ContextManager<ProxiedPlayer> {
+public class BungeeContextManager extends ContextManager<ProxiedPlayer, ProxiedPlayer> {
 
     private final LoadingCache<ProxiedPlayer, QueryOptions> contextsCache = CaffeineFactory.newBuilder()
             .expireAfterWrite(50, TimeUnit.MILLISECONDS)
             .build(this::calculate);
 
     public BungeeContextManager(LPBungeePlugin plugin) {
-        super(plugin, ProxiedPlayer.class);
+        super(plugin, ProxiedPlayer.class, ProxiedPlayer.class);
+    }
+
+    @Override
+    public UUID getUniqueId(ProxiedPlayer player) {
+        return player.getUniqueId();
     }
 
     @Override
@@ -68,7 +74,7 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer> {
     }
 
     @Override
-    public void invalidateCache(ProxiedPlayer subject) {
+    protected void invalidateCache(ProxiedPlayer subject) {
         this.contextsCache.invalidate(subject);
     }
 

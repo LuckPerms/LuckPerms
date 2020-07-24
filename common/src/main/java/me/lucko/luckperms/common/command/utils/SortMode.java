@@ -25,11 +25,9 @@
 
 package me.lucko.luckperms.common.command.utils;
 
-import java.util.List;
-
 public class SortMode {
 
-    public static SortMode determine(List<String> args) {
+    public static SortMode determine(ArgumentList args) {
         SortType type = SortType.PRIORITY;
         boolean ascending = true;
         for (String arg : args) {

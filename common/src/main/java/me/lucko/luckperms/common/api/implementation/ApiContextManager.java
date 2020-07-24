@@ -46,7 +46,7 @@ public class ApiContextManager implements net.luckperms.api.context.ContextManag
     private final LuckPermsPlugin plugin;
     private final ContextManager handle;
 
-    public ApiContextManager(LuckPermsPlugin plugin, ContextManager<?> handle) {
+    public ApiContextManager(LuckPermsPlugin plugin, ContextManager<?, ?> handle) {
         this.plugin = plugin;
         this.handle = handle;
     }
@@ -116,8 +116,8 @@ public class ApiContextManager implements net.luckperms.api.context.ContextManag
     }
 
     @Override
-    public void invalidateCache(@NonNull Object subject) {
+    public void signalContextUpdate(@NonNull Object subject) {
         Objects.requireNonNull(subject, "subject");
-        this.handle.invalidateCache(checkType(subject));
+        this.handle.signalContextUpdate(checkType(subject));
     }
 }

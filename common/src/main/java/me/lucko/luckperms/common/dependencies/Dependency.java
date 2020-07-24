@@ -30,11 +30,15 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHelper;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * The dependencies used by LuckPerms.
+ */
 public enum Dependency {
 
     ASM(
@@ -59,43 +63,43 @@ public enum Dependency {
     TEXT(
             "net{}kyori",
             "text-api",
-            "3.0.2",
-            "seZnPElZhfba3XO8/LLUWQHE35kqVM02HpswEVcJqz0=",
+            "3.0.4",
+            "qJCoD0fTnRhI0EpqdiLAT9QH5gIyY8aNw4Exe/gTWm0=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_SERIALIZER_GSON(
             "net{}kyori",
             "text-serializer-gson",
-            "3.0.2",
-            "8gJFpnqSHp762TWXn3x5ICLiKg2KgEwEA1FFyOtJ92Y=",
+            "3.0.4",
+            "pes03k1/XKS9OpiK+xqVmk+lXSJIsCEkkg3g36PV65A=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_SERIALIZER_LEGACY(
             "net{}kyori",
             "text-serializer-legacy",
-            "3.0.2",
-            "ks8pZV6ZUHWtwD93Xynyg0KaAMs8CLa61Zb8CaLPsdM=",
+            "3.0.4",
+            "1ZYqzZ7zhnN2AyU/n/NeRQv0A9R01j/gX1Uq/nE02SI=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUKKIT(
             "net{}kyori",
             "text-adapter-bukkit",
-            "3.0.2",
-            "VnbfELmOHV6DVidHJql6gmsCjfhABEnF6q9LTezUrQg=",
+            "3.0.5",
+            "cXA/7PDtnWpd8l7H4AEhP/3Z/WRNiFhDSqKbqO/1+ig=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_BUNGEECORD(
             "net{}kyori",
             "text-adapter-bungeecord",
-            "3.0.2",
-            "ZmCmc67danKpZru8rJsDppJZ+f8joquULZI8y/YX4ks=",
+            "3.0.5",
+            "+yU9AB1mG5wTAFeZc6zArs67loFz00w8VqE34QCjCdw=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     TEXT_ADAPTER_SPONGEAPI(
             "net{}kyori",
             "text-adapter-spongeapi",
-            "3.0.2",
-            "WPWFw1g8niEGgymV9PdyLADMSL6+UQ7FKdtxnJb79JE=",
+            "3.0.5",
+            "/plXxpvDwqYECq+0saN13Y/Qf6F7GthJPc/hjR7SL5s=",
             Relocation.of("text", "net{}kyori{}text")
     ),
     EVENT(
@@ -108,22 +112,22 @@ public enum Dependency {
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
-            "2.8.0",
-            "sRB6QJe+RRWpI6Vbxj2gTkEeaWSqBFvs4bx6y4SHLtc=",
+            "2.8.4",
+            "KV9YN5gQj6b507VJApJpPF5PkCon0DZqAi0T7Ln0lag=",
             Relocation.of("caffeine", "com{}github{}benmanes{}caffeine")
     ),
     OKIO(
             "com{}squareup{}" + RelocationHelper.OKIO_STRING,
             RelocationHelper.OKIO_STRING,
-            "1.17.4",
-            "14+sWIRY/AmebILpH+XwN1xnQ0YmRRo6d3csZdnu6Fs=",
+            "1.17.5",
+            "Gaf/SNhtPPRJf38lD78pX0MME6Uo3Vt7ID+CGAK4hq0=",
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
     OKHTTP(
             "com{}squareup{}" + RelocationHelper.OKHTTP3_STRING,
             "okhttp",
-            "3.14.4",
-            "WMyzdU8VzELfjxaHs7qGMw7ZfH5S5cPoP+ETG4DOPg8=",
+            "3.14.7",
+            "Yg1PpDxcal72JXYCBKiHmeHkpl4ceh2NoC4GHEy7gAA=",
             Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
@@ -144,8 +148,8 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.5.1",
-            "/AxG0o0JnIme7hnDTO2WEUxgF1yXPiWPhMKermXAzZE=",
+            "2.6.0",
+            "fgiCp29Z7X38ULAJNsxZ1wFIVT2u3trSx/VCMxTlA6g=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
@@ -183,44 +187,43 @@ public enum Dependency {
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "3.4.1",
-            "uCbLTp8iz699ZJS3TxSAf4j9UfrikmgxvTHT0+N/Bck=",
+            "3.4.5",
+            "i3MvlHBXDUqEHcHvbIJrWGl4sluoMHEv8fpZ3idd+mE=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
             "org.slf4j",
             "slf4j-simple",
-            "1.7.28",
-            "YO863GwYR8RuGr16gGIlWqPizh2ywI37H9Q/GkYgdzY="
+            "1.7.30",
+            "i5J5y/9rn4hZTvrjzwIDm2mVAw7sAj7UOSh0jEFnD+4="
     ),
     SLF4J_API(
             "org.slf4j",
             "slf4j-api",
-            "1.7.28",
-            "+25PZ6KkaJ4+cTWE2xel0QkMHr5u7DDp4DSabuEYFB4="
+            "1.7.30",
+            "zboHlk0btAoHYUhcax6ML4/Z6x0ZxTkorA1/lRAQXFc="
     ),
     MONGODB_DRIVER(
             "org.mongodb",
             "mongo-java-driver",
-            "3.11.1",
-            "tIWEOrQegZK3TT7mNV4ZnjkpW4ViwPiFEpD6yYPyFmE=",
+            "3.12.2",
+            "eMxHcEtasb/ubFCv99kE5rVZMPGmBei674ZTdjYe58w=",
             Relocation.of("mongodb", "com{}mongodb"),
             Relocation.of("bson", "org{}bson")
     ),
     JEDIS(
             "redis.clients",
             "jedis",
-            "2.10.2",
-            "06PKnEnk08yYpdI2IUAZYxJjp0d6lDp0nGQkWw3CWsU=",
+            "3.3.0",
+            "HuTfz9xW/mi1fwVQ3xgPmd6qwTRMF/3fyMzw2LmOgy4=",
             Relocation.of("jedis", "redis{}clients{}jedis"),
-            Relocation.of("jedisutil", "redis{}clients{}util"),
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     COMMONS_POOL_2(
             "org.apache.commons",
             "commons-pool2",
-            "2.7.0",
-            "a1TGdcc4fhV9KMcJiHPy53LCI8ejW8mxNxc2fJdToeQ=",
+            "2.8.0",
+            "Xvqfu1SlixoSIFpfrFZfaYKr/rD/Rb28MYdI71/To/8=",
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     CONFIGURATE_CORE(
@@ -282,13 +285,11 @@ public enum Dependency {
             Relocation.of("toml4j", "com{}moandjiezana{}toml")
     );
 
-    private final List<URL> urls;
+    private final String mavenRepoPath;
     private final String version;
     private final byte[] checksum;
     private final List<Relocation> relocations;
 
-    private static final String MAVEN_CENTRAL_REPO = "https://repo1.maven.org/maven2/";
-    private static final String LUCK_MIRROR_REPO = "https://nexus.lucko.me/repository/maven-central/";
     private static final String MAVEN_FORMAT = "%s/%s/%s/%s-%s.jar";
 
     Dependency(String groupId, String artifactId, String version, String checksum) {
@@ -296,21 +297,13 @@ public enum Dependency {
     }
 
     Dependency(String groupId, String artifactId, String version, String checksum, Relocation... relocations) {
-        String path = String.format(MAVEN_FORMAT,
+        this.mavenRepoPath = String.format(MAVEN_FORMAT,
                 rewriteEscaping(groupId).replace(".", "/"),
                 rewriteEscaping(artifactId),
                 version,
                 rewriteEscaping(artifactId),
                 version
         );
-        try {
-            this.urls = ImmutableList.of(
-                    new URL(LUCK_MIRROR_REPO + path),
-                    new URL(MAVEN_CENTRAL_REPO + path)
-            );
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e); // propagate
-        }
         this.version = version;
         this.checksum = Base64.getDecoder().decode(checksum);
         this.relocations = ImmutableList.copyOf(relocations);
@@ -320,53 +313,71 @@ public enum Dependency {
         return s.replace("{}", ".");
     }
 
-    /*
-    public static void main(String[] args) throws Exception {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-        for (Dependency dependency : values()) {
-            List<byte[]> hashes = new ArrayList<>();
-            for (URL url : dependency.getUrls()) {
-                URLConnection connection = url.openConnection();
-                connection.setRequestProperty("User-Agent", "luckperms");
-
-                try (InputStream in = connection.getInputStream()) {
-                    byte[] bytes = ByteStreams.toByteArray(in);
-                    if (bytes.length == 0) {
-                        throw new RuntimeException("Empty stream");
-                    }
-
-                    hashes.add(digest.digest(bytes));
-                }
-            }
-
-            for (int i = 0; i < hashes.size(); i++) {
-                byte[] hash = hashes.get(i);
-                if (!Arrays.equals(hash, dependency.getChecksum())) {
-                    System.out.println("NO MATCH - REPO " + i + " - " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
-                }
-            }
-        }
-    }
-    */
-
     public String getFileName() {
         return name().toLowerCase().replace('_', '-') + "-" + this.version;
     }
 
-    public List<URL> getUrls() {
-        return this.urls;
-    }
-
-    public String getVersion() {
-        return this.version;
+    String getMavenRepoPath() {
+        return this.mavenRepoPath;
     }
 
     public byte[] getChecksum() {
         return this.checksum;
     }
 
+    public boolean checksumMatches(byte[] hash) {
+        return Arrays.equals(this.checksum, hash);
+    }
+
     public List<Relocation> getRelocations() {
         return this.relocations;
     }
+
+    /**
+     * Creates a {@link MessageDigest} suitable for computing the checksums
+     * of dependencies.
+     *
+     * @return the digest
+     */
+    public static MessageDigest createDigest() {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*
+    public static void main(String[] args) {
+        Dependency[] dependencies = values();
+        DependencyRepository[] repos = DependencyRepository.values();
+
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newCachedThreadPool();
+
+        for (Dependency dependency : dependencies) {
+            for (DependencyRepository repo : repos) {
+                pool.submit(() -> {
+                    try {
+                        byte[] hash = createDigest().digest(repo.downloadRaw(dependency));
+                        if (!dependency.checksumMatches(hash)) {
+                            System.out.println("NO MATCH - " + repo.name() + " - " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
+                        } else {
+                            System.out.println("OK - " + repo.name() + " - " + dependency.name());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        }
+
+        pool.shutdown();
+        try {
+            pool.awaitTermination(1, java.util.concurrent.TimeUnit.HOURS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    */
+
 }

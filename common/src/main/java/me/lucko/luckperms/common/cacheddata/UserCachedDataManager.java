@@ -44,4 +44,5 @@ public class UserCachedDataManager extends HolderCachedDataManager<User> impleme
     protected CacheMetadata getMetadataForQueryOptions(QueryOptions queryOptions) {
         return new CacheMetadata(HolderType.USER, this.holder.getPlainDisplayName(), queryOptions);
     }
+
 }

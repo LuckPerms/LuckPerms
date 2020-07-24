@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.cacheddata.type;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
+import me.lucko.luckperms.common.cacheddata.UsageTracked;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
@@ -44,7 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Holds cached permissions data for a given context
  */
-public class PermissionCache implements CachedPermissionData {
+public class PermissionCache extends UsageTracked implements CachedPermissionData {
 
     /**
      * The query options this container is holding data for
@@ -68,31 +69,18 @@ public class PermissionCache implements CachedPermissionData {
      */
     private final PermissionCalculator calculator;
 
-    public PermissionCache(QueryOptions queryOptions, CacheMetadata metadata, CalculatorFactory calculatorFactory) {
+    public PermissionCache(QueryOptions queryOptions, CacheMetadata metadata, CalculatorFactory calculatorFactory, ConcurrentHashMap<String, Boolean> sourcePermissions) {
         this.queryOptions = queryOptions;
-        this.permissions = new ConcurrentHashMap<>();
+        this.permissions = sourcePermissions;
         this.permissionsUnmodifiable = Collections.unmodifiableMap(this.permissions);
 
         this.calculator = calculatorFactory.build(queryOptions, metadata);
-        this.calculator.setSourcePermissions(this.permissions); // Initial setup.
+        this.calculator.setSourcePermissions(this.permissions);
     }
 
     @Override
     public void invalidateCache() {
         this.calculator.invalidateCache();
-    }
-
-    private void setPermissionsInternal(Map<String, Boolean> permissions) {
-        this.permissions.clear();
-        this.permissions.putAll(permissions);
-        this.calculator.setSourcePermissions(this.permissions);
-        invalidateCache();
-    }
-
-    public void setPermissions(Map<String, Boolean> toApply) {
-        if (!this.permissions.equals(toApply)) {
-            setPermissionsInternal(toApply);
-        }
     }
 
     public PermissionCalculator getCalculator() {

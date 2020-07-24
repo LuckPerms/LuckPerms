@@ -27,11 +27,15 @@ package net.luckperms.api.model.user;
 
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.HeldNode;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.matcher.NodeMatcher;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -59,7 +63,7 @@ public interface UserManager {
     /**
      * Loads a user from the plugin's storage provider into memory.
      *
-     * @param uniqueId     the uuid of the user
+     * @param uniqueId the uuid of the user
      * @param username the username, if known
      * @return the resultant user
      * @throws NullPointerException if the uuid is null
@@ -112,6 +116,27 @@ public interface UserManager {
     @NonNull CompletableFuture<Void> saveUser(@NonNull User user);
 
     /**
+     * Loads a user from the plugin's storage provider, applies the given {@code action},
+     * then saves the user's data back to storage.
+     *
+     * <p>This method effectively calls {@link #loadUser(UUID)}, followed by the {@code action},
+     * then {@link #saveUser(User)}, and returns an encapsulation of the whole process as a
+     * {@link CompletableFuture}. </p>
+     *
+     * @param uniqueId the uuid of the user
+     * @param action the action to apply to the user
+     * @return a future to encapsulate the operation
+     * @since 5.1
+     */
+    default @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super User> action) {
+        /* This default method is overridden in the implementation, and is just here
+           to demonstrate what this method does in the API sources. */
+        return loadUser(uniqueId)
+                .thenApplyAsync(user -> { action.accept(user); return user; })
+                .thenCompose(this::saveUser);
+    }
+
+    /**
      * Saves data about a player to the uuid caching system.
      *
      * @param uniqueId     the users mojang unique id
@@ -132,12 +157,24 @@ public interface UserManager {
     @NonNull CompletableFuture<Set<UUID>> getUniqueUsers();
 
     /**
+     * Searches the {@link User#data() normal node maps} of all known {@link User}s for {@link Node}
+     * entries matching the given {@link NodeMatcher matcher}.
+     *
+     * @param matcher the matcher
+     * @return the entries which matched
+     * @since 5.1
+     */
+    @NonNull <T extends Node> CompletableFuture<Map<UUID, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher);
+
+    /**
      * Searches for a list of users with a given permission.
      *
      * @param permission the permission to search for
      * @return a list of held permissions
      * @throws NullPointerException if the permission is null
+     * @deprecated use {@link #searchAll(NodeMatcher)}
      */
+    @Deprecated
     @NonNull CompletableFuture<List<HeldNode<UUID>>> getWithPermission(@NonNull String permission);
 
     /**

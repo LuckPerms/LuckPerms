@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 public interface Sender {
 
     /** The uuid used by the console sender. */
-    UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    UUID CONSOLE_UUID = new UUID(0, 0); // 00000000-0000-0000-0000-000000000000
     /** The name used by the console sender. */
     String CONSOLE_NAME = "Console";
 
@@ -72,7 +72,7 @@ public interface Sender {
     default String getNameWithLocation() {
         String name = getName();
 
-        ContextManager<?> contextManager = getPlugin().getContextManager();
+        ContextManager<?, ?> contextManager = getPlugin().getContextManager();
         if (contextManager == null) {
             return name;
         }
@@ -146,6 +146,13 @@ public interface Sender {
     default boolean hasPermission(CommandPermission permission) {
         return hasPermission(permission.getPermission());
     }
+
+    /**
+     * Makes the sender perform a command.
+     *
+     * @param commandLine the command
+     */
+    void performCommand(String commandLine);
 
     /**
      * Gets whether this sender is the console

@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -57,32 +57,32 @@ public class PermissionCheckInherits extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        String node = ArgumentParser.parseString(0, args);
-        MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
+        String node = args.get(0);
+        MutableContextSet context = args.getContextOrDefault(1, plugin);
 
-        Optional<Node> match = holder.resolveInheritedNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL).stream()
+        Optional<Node> match = target.resolveInheritedNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL).stream()
                 .filter(n -> n.getKey().equalsIgnoreCase(node) && n.getContexts().equals(context))
                 .findFirst();
 
         String location = match.map(n -> n.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName()).orElse(null);
 
-        if (location == null || location.equalsIgnoreCase(holder.getObjectName())) {
+        if (location == null || location.equalsIgnoreCase(target.getObjectName())) {
             location = "self";
         }
 
         String s = MessageUtils.formatTristate(match.map(n -> Tristate.of(n.getValue())).orElse(Tristate.UNDEFINED));
-        Message.CHECK_INHERITS_PERMISSION.send(sender, holder.getFormattedDisplayName(), node, s, MessageUtils.contextSetToString(plugin.getLocaleManager(), context), location);
+        Message.CHECK_INHERITS_PERMISSION.send(sender, target.getFormattedDisplayName(), node, s, MessageUtils.contextSetToString(plugin.getLocaleManager(), context), location);
         return CommandResult.SUCCESS;
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.permissions(plugin))
                 .from(1, TabCompletions.contexts(plugin))

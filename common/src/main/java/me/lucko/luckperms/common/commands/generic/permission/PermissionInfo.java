@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.SortMode;
 import me.lucko.luckperms.common.command.utils.SortType;
@@ -66,17 +66,17 @@ public class PermissionInfo extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        int page = ArgumentParser.parseIntOrElse(0, args, 1);
+        int page = args.getIntOrDefault(0, 1);
         SortMode sortMode = SortMode.determine(args);
 
         // get the holders nodes
-        List<Node> nodes = new ArrayList<>(holder.normalData().asSortedSet());
+        List<Node> nodes = new ArrayList<>(target.normalData().asSortedSet());
 
         // remove irrelevant types (these are displayed in the other info commands)
         nodes.removeIf(NodeType.INHERITANCE.predicate(n -> n.getValue() && plugin.getGroupManager().isLoaded(n.getGroupName()))
@@ -84,7 +84,7 @@ public class PermissionInfo extends GenericChildCommand {
 
         // handle empty
         if (nodes.isEmpty()) {
-            Message.PERMISSION_INFO_NO_DATA.send(sender, holder.getFormattedDisplayName());
+            Message.PERMISSION_INFO_NO_DATA.send(sender, target.getFormattedDisplayName());
             return CommandResult.SUCCESS;
         }
 
@@ -109,7 +109,7 @@ public class PermissionInfo extends GenericChildCommand {
         List<Node> content = pages.get(pageIndex);
 
         // send header
-        Message.PERMISSION_INFO.send(sender, holder.getFormattedDisplayName(), page, pages.size(), nodes.size());
+        Message.PERMISSION_INFO.send(sender, target.getFormattedDisplayName(), page, pages.size(), nodes.size());
 
         // send content
         for (Node node : content) {
@@ -118,7 +118,7 @@ public class PermissionInfo extends GenericChildCommand {
                 s += "\n&2-    expires in " + DurationFormatter.LONG.format(node.getExpiryDuration());
             }
 
-            TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
+            TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(target, label, node)).build();
             sender.sendMessage(message);
         }
 
@@ -137,14 +137,14 @@ public class PermissionInfo extends GenericChildCommand {
 
     private static Consumer<ComponentBuilder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getKey(),
+                "§3> " + (node.getValue() ? "§a" : "§c") + node.getKey(),
                 " ",
-                "¥7Click to remove this node from " + holder.getPlainDisplayName()
-        ), '¥'));
+                "§7Click to remove this node from " + holder.getPlainDisplayName()
+        ), '§'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
-        String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
+        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, id, holder.getType(), explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {

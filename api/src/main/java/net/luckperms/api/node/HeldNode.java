@@ -34,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  *
  * @param <T> the identifier type of the holder
  */
+@Deprecated
 public interface HeldNode<T> {
 
     /**

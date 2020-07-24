@@ -25,13 +25,10 @@
 
 package me.lucko.luckperms.velocity;
 
-import com.velocitypowered.api.proxy.Player;
-
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.context.ContextManager;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
@@ -76,7 +73,7 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
     private StandardUserManager userManager;
     private StandardGroupManager groupManager;
     private StandardTrackManager trackManager;
-    private ContextManager<Player> contextManager;
+    private VelocityContextManager contextManager;
 
     public LPVelocityPlugin(LPVelocityBootstrap bootstrap) {
         this.bootstrap = bootstrap;
@@ -127,7 +124,7 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerCommands() {
         this.commandManager = new VelocityCommandExecutor(this);
-        this.bootstrap.getProxy().getCommandManager().register(this.commandManager, "luckpermsvelocity", "lpv", "vperm", "vperms", "vpermission", "vpermissions");
+        this.commandManager.register();
     }
 
     @Override
@@ -238,7 +235,7 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public ContextManager<Player> getContextManager() {
+    public VelocityContextManager getContextManager() {
         return this.contextManager;
     }
 

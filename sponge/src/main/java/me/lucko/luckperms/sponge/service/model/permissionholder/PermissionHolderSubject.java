@@ -43,6 +43,7 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
+import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
@@ -50,7 +51,6 @@ import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Optional;
 
@@ -64,7 +64,7 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     private final PermissionHolderSubjectData subjectData;
     private final PermissionHolderSubjectData transientSubjectData;
 
-    private Subject spongeSubject = null;
+    private ProxiedSubject spongeSubject = null;
 
     PermissionHolderSubject(LPSpongePlugin plugin, T parent) {
         this.parent = parent;
@@ -83,7 +83,7 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     }
 
     @Override
-    public synchronized Subject sponge() {
+    public synchronized ProxiedSubject sponge() {
         if (this.spongeSubject == null) {
             this.spongeSubject = ProxyFactory.toSponge(this);
         }
@@ -129,7 +129,7 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
 
     @Override
     public ImmutableList<LPSubjectReference> getParents(ImmutableContextSet contexts) {
-        InheritanceGraph graph = this.plugin.getInheritanceHandler().getGraph(this.plugin.getContextManager().formQueryOptions(contexts));
+        InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(this.plugin.getContextManager().formQueryOptions(contexts));
         Iterable<PermissionHolder> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this.parent);
 
         ImmutableList.Builder<LPSubjectReference> subjects = ImmutableList.builder();

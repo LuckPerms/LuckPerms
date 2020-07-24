@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
@@ -40,8 +39,8 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.UUID;
 
-public class SpongeSenderFactory extends SenderFactory<CommandSource> {
-    public SpongeSenderFactory(LuckPermsPlugin plugin) {
+public class SpongeSenderFactory extends SenderFactory<LPSpongePlugin, CommandSource> {
+    public SpongeSenderFactory(LPSpongePlugin plugin) {
         super(plugin);
     }
 
@@ -87,5 +86,10 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
     @Override
     protected boolean hasPermission(CommandSource source, String node) {
         return source.hasPermission(node);
+    }
+
+    @Override
+    protected void performCommand(CommandSource source, String command) {
+        getPlugin().getBootstrap().getGame().getCommandManager().process(source, command);
     }
 }

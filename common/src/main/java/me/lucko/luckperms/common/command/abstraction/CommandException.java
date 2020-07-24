@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.sender.Sender;
  */
 public abstract class CommandException extends Exception {
 
-    public abstract CommandResult handle(Sender sender);
+    protected abstract CommandResult handle(Sender sender);
 
     public CommandResult handle(Sender sender, String label, Command<?> command) {
         return handle(sender);

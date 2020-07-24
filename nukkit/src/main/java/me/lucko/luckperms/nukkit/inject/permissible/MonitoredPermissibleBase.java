@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
-import me.lucko.luckperms.nukkit.inject.dummy.DummyPermissibleBase;
 
 import net.luckperms.api.util.Tristate;
 

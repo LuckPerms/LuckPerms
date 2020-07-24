@@ -1,5 +1,5 @@
 group = 'net.luckperms'
-project.version = '5.0'
+project.version = '5.1'
 
 dependencies {
     compileOnly 'org.checkerframework:checker-qual:2.5.5'
@@ -56,7 +56,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                 pom {
                     project {
                         name 'LuckPerms API'
-                        description 'An advanced permissions plugin for Bukkit/Spigot, BungeeCord, Sponge, Nukkit and Velocity.'
+                        description 'A permissions plugin for Minecraft servers.'
                         url 'https://luckperms.net'
 
                         licenses {
@@ -68,9 +68,10 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
 
                         developers {
                             developer {
+                                id 'lucko'
                                 name 'Luck'
+                                url 'https://lucko.me'
                                 email 'git@lucko.me'
-                                url 'https://github.com/lucko'
                             }
                         }
 

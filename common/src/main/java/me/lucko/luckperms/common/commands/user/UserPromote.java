@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -50,21 +50,35 @@ import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.track.PromotionResult;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class UserPromote extends ChildCommand<User> {
     public UserPromote(LocaleManager locale) {
-        super(CommandSpec.USER_PROMOTE.localize(locale), "promote", CommandPermission.USER_PROMOTE, Predicates.is(0));
+        super(CommandSpec.USER_PROMOTE.localize(locale), "promote", CommandPermission.USER_PROMOTE, Predicates.alwaysFalse());
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), user)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User target, ArgumentList args, String label) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
         boolean addToFirst = !args.remove("--dont-add-to-first");
+
+        // if args is empty - use the only/default track
+        if (args.isEmpty()) {
+            Set<String> tracks = plugin.getTrackManager().getAll().keySet();
+            if (tracks.size() == 1) {
+                args.add(tracks.iterator().next());
+            } else if (tracks.contains("default")) {
+                args.add("default");
+            } else {
+                Message.USER_TRACK_ERROR_AMBIGUOUS_TRACK_SELECTION.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+        }
 
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
@@ -83,7 +97,7 @@ public class UserPromote extends ChildCommand<User> {
         }
 
         boolean dontShowTrackProgress = args.remove("-s");
-        MutableContextSet context = ArgumentParser.parseContext(1, args, plugin);
+        MutableContextSet context = args.getContextOrDefault(1, plugin);
 
         if (ArgumentPermissions.checkContext(plugin, sender, getPermission().get(), context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
@@ -94,7 +108,7 @@ public class UserPromote extends ChildCommand<User> {
                 !ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), s) &&
                 !ArgumentPermissions.checkGroup(plugin, sender, s, context);
 
-        PromotionResult result = track.promote(user, context, nextGroupPermissionChecker, sender, addToFirst);
+        PromotionResult result = track.promote(target, context, nextGroupPermissionChecker, sender, addToFirst);
         switch (result.getStatus()) {
             case MALFORMED_TRACK:
                 Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, result.getGroupTo().get());
@@ -103,25 +117,25 @@ public class UserPromote extends ChildCommand<User> {
                 Message.COMMAND_NO_PERMISSION.send(sender);
                 return CommandResult.NO_PERMISSION;
             case AMBIGUOUS_CALL:
-                Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFormattedDisplayName());
+                Message.TRACK_AMBIGUOUS_CALL.send(sender, target.getFormattedDisplayName());
                 return CommandResult.FAILURE;
             case END_OF_TRACK:
-                Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), user.getFormattedDisplayName());
+                Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), target.getFormattedDisplayName());
                 return CommandResult.STATE_ERROR;
 
             case ADDED_TO_FIRST_GROUP: {
                 if (!addToFirst && !result.getGroupTo().isPresent()) {
-                    Message.USER_PROMOTE_NOT_ON_TRACK.send(sender, track.getName(), user.getFormattedDisplayName());
+                    Message.USER_PROMOTE_NOT_ON_TRACK.send(sender, track.getName(), target.getFormattedDisplayName());
                     return CommandResult.STATE_ERROR;
                 }
 
-                Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFormattedDisplayName(), result.getGroupTo().get(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+                Message.USER_TRACK_ADDED_TO_FIRST.send(sender, target.getFormattedDisplayName(), result.getGroupTo().get(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
 
-                LoggedAction.build().source(sender).target(user)
+                LoggedAction.build().source(sender).target(target)
                         .description("promote", track.getName(), context)
                         .build().submit(plugin, sender);
 
-                StorageAssistant.save(user, sender, plugin);
+                StorageAssistant.save(target, sender, plugin);
                 return CommandResult.SUCCESS;
             }
 
@@ -129,16 +143,16 @@ public class UserPromote extends ChildCommand<User> {
                 String groupFrom = result.getGroupFrom().get();
                 String groupTo = result.getGroupTo().get();
 
-                Message.USER_PROMOTE_SUCCESS.send(sender, user.getFormattedDisplayName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+                Message.USER_PROMOTE_SUCCESS.send(sender, target.getFormattedDisplayName(), track.getName(), groupFrom, groupTo, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
                 if (!dontShowTrackProgress) {
                     Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups(), groupFrom, groupTo, false));
                 }
 
-                LoggedAction.build().source(sender).target(user)
+                LoggedAction.build().source(sender).target(target)
                         .description("promote", track.getName(), context)
                         .build().submit(plugin, sender);
 
-                StorageAssistant.save(user, sender, plugin);
+                StorageAssistant.save(target, sender, plugin);
                 return CommandResult.SUCCESS;
             }
 
@@ -148,7 +162,7 @@ public class UserPromote extends ChildCommand<User> {
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.tracks(plugin))
                 .from(1, TabCompletions.contexts(plugin))

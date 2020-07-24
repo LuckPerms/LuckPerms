@@ -38,16 +38,18 @@ import me.lucko.luckperms.bukkit.inject.server.InjectorSubscriptionMap;
 import me.lucko.luckperms.bukkit.inject.server.LuckPermsDefaultsMap;
 import me.lucko.luckperms.bukkit.inject.server.LuckPermsPermissionMap;
 import me.lucko.luckperms.bukkit.inject.server.LuckPermsSubscriptionMap;
+import me.lucko.luckperms.bukkit.listeners.BukkitAutoOpListener;
+import me.lucko.luckperms.bukkit.listeners.BukkitCommandListUpdater;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
+import me.lucko.luckperms.bukkit.util.PluginManagerUtil;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
-import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
@@ -62,7 +64,6 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 
 import net.luckperms.api.LuckPerms;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.query.QueryOptions;
 
 import org.bukkit.OfflinePlayer;
@@ -74,7 +75,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 
 import java.io.File;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -182,16 +184,19 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupContextManager() {
         this.contextManager = new BukkitContextManager(this);
-        this.contextManager.registerCalculator(new WorldCalculator(this));
+
+        WorldCalculator worldCalculator = new WorldCalculator(this);
+        this.bootstrap.getServer().getPluginManager().registerEvents(worldCalculator, this.bootstrap);
+        this.contextManager.registerCalculator(worldCalculator);
     }
 
     @Override
     protected void setupPlatformHooks() {
         // inject our own custom permission maps
         Runnable[] injectors = new Runnable[]{
-                new InjectorSubscriptionMap(this),
-                new InjectorPermissionMap(this),
-                new InjectorDefaultsMap(this),
+                new InjectorSubscriptionMap(this)::inject,
+                new InjectorPermissionMap(this)::inject,
+                new InjectorDefaultsMap(this)::inject,
                 new PermissibleMonitoringInjector(this, PermissibleMonitoringInjector.Mode.INJECT)
         };
 
@@ -202,6 +207,20 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             // the entire pluginmanager instance is replaced by some plugins :(
             this.bootstrap.getServer().getScheduler().runTaskLaterAsynchronously(this.bootstrap, injector, 1);
         }
+
+        /*
+         * This is an unfortunate solution to a problem which shouldn't even exist. As of Spigot 1.15,
+         * the way LP establishes it's load order relative to Vault triggers a dependency warning.
+         * This is a workaround to prevent that from showing, since at the moment, there is nothing I
+         * can reasonably do to improve this handling in LP without breaking plugins which use/obtain
+         * Vault in their onEnable without depending on us.
+         *
+         * Noteworthy discussion here:
+         * - https://github.com/lucko/LuckPerms/issues/1959
+         * - https://hub.spigotmc.org/jira/browse/SPIGOT-5546
+         * - https://github.com/PaperMC/Paper/pull/3509
+         */
+        PluginManagerUtil.injectDependency(this.bootstrap.getServer().getPluginManager(), this.bootstrap.getName(), "Vault");
 
         // Provide vault support
         tryVaultHook(false);
@@ -266,11 +285,12 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
         // register autoop listener
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            getApiProvider().getEventBus().subscribe(UserDataRecalculateEvent.class, event -> {
-                User user = ApiUser.cast(event.getUser());
-                Optional<Player> player = getBootstrap().getPlayer(user.getUniqueId());
-                player.ifPresent(p -> refreshAutoOp(p, false));
-            });
+            getApiProvider().getEventBus().subscribe(new BukkitAutoOpListener(this));
+        }
+
+        // register bukkit command list updater
+        if (getConfiguration().get(ConfigKeys.UPDATE_CLIENT_COMMAND_LIST) && BukkitCommandListUpdater.isSupported()) {
+            getApiProvider().getEventBus().subscribe(new BukkitCommandListUpdater(this));
         }
 
         // Load any online users (in the case of a reload)
@@ -317,40 +337,14 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         }
 
         // uninject custom maps
-        InjectorSubscriptionMap.uninject();
-        InjectorPermissionMap.uninject();
-        InjectorDefaultsMap.uninject();
+        new InjectorSubscriptionMap(this).uninject();
+        new InjectorPermissionMap(this).uninject();
+        new InjectorDefaultsMap(this).uninject();
         new PermissibleMonitoringInjector(this, PermissibleMonitoringInjector.Mode.UNINJECT).run();
 
         // unhook vault
         if (this.vaultHookManager != null) {
             this.vaultHookManager.unhook();
-        }
-    }
-
-    public void refreshAutoOp(Player player, boolean callerIsSync) {
-        if (!getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            return;
-        }
-
-        if (!callerIsSync && this.bootstrap.isServerStopping()) {
-            return;
-        }
-
-        User user = getUserManager().getIfLoaded(player.getUniqueId());
-        boolean value;
-
-        if (user != null) {
-            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getQueryOptions(player)).getPermissionMap();
-            value = permData.getOrDefault("luckperms.autoop", false);
-        } else {
-            value = false;
-        }
-
-        if (callerIsSync) {
-            player.setOp(value);
-        } else {
-            this.bootstrap.getScheduler().executeSync(() -> player.setOp(value));
         }
     }
 
@@ -387,9 +381,10 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     public Stream<Sender> getOnlineSenders() {
+        List<Player> players = new ArrayList<>(this.bootstrap.getServer().getOnlinePlayers());
         return Stream.concat(
                 Stream.of(getConsoleSender()),
-                this.bootstrap.getServer().getOnlinePlayers().stream().map(p -> getSenderFactory().wrap(p))
+                players.stream().map(p -> getSenderFactory().wrap(p))
         );
     }
 

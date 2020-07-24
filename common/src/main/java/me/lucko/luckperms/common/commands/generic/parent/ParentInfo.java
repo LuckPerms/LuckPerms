@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.SortMode;
 import me.lucko.luckperms.common.command.utils.SortType;
@@ -66,25 +66,25 @@ public class ParentInfo extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        int page = ArgumentParser.parseIntOrElse(0, args, 1);
+        int page = args.getIntOrDefault(0, 1);
         SortMode sortMode = SortMode.determine(args);
 
         // get the holders nodes
         List<InheritanceNode> nodes = new LinkedList<>();
-        holder.normalData().copyInheritanceNodesTo(nodes, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
+        target.normalData().copyInheritanceNodesTo(nodes, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
 
         // remove irrelevant types (these are displayed in the other info commands)
         nodes.removeIf(node -> !node.getValue());
 
         // handle empty
         if (nodes.isEmpty()) {
-            Message.PARENT_INFO_NO_DATA.send(sender, holder.getFormattedDisplayName());
+            Message.PARENT_INFO_NO_DATA.send(sender, target.getFormattedDisplayName());
             return CommandResult.SUCCESS;
         }
 
@@ -109,7 +109,7 @@ public class ParentInfo extends GenericChildCommand {
         List<InheritanceNode> content = pages.get(pageIndex);
 
         // send header
-        Message.PARENT_INFO.send(sender, holder.getFormattedDisplayName(), page, pages.size(), nodes.size());
+        Message.PARENT_INFO.send(sender, target.getFormattedDisplayName(), page, pages.size(), nodes.size());
 
         // send content
         for (InheritanceNode node : content) {
@@ -118,7 +118,7 @@ public class ParentInfo extends GenericChildCommand {
                 s += "\n&2  expires in " + DurationFormatter.LONG.format(node.getExpiryDuration());
             }
 
-            TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build();
+            TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(target, label, node)).build();
             sender.sendMessage(message);
         }
 
@@ -144,7 +144,7 @@ public class ParentInfo extends GenericChildCommand {
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
-        String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
+        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, id, holder.getType(), explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {

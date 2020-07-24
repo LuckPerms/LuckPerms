@@ -166,7 +166,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             return;
         }
 
-        this.plugin.refreshAutoOp(player);
+        this.plugin.getContextManager().signalContextUpdate(player);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -188,6 +188,12 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
+
+        // https://github.com/lucko/LuckPerms/issues/2269
+        if (player.getUniqueId() == null) {
+            return;
+        }
+
         handleDisconnect(player.getUniqueId());
 
         // perform unhooking from nukkit objects 1 tick later.

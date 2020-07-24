@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -53,7 +54,7 @@ public class TrackInsert extends ChildCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
         String groupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
             sendDetailedUsage(sender, label);
@@ -74,22 +75,22 @@ public class TrackInsert extends ChildCommand<Track> {
         }
 
         try {
-            DataMutateResult result = track.insertGroup(group, pos - 1);
+            DataMutateResult result = target.insertGroup(group, pos - 1);
 
             if (result.wasSuccessful()) {
-                Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
-                if (track.getGroups().size() > 1) {
-                    Message.BLANK.send(sender, MessageUtils.listToArrowSep(track.getGroups(), group.getName()));
+                Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), target.getName(), pos);
+                if (target.getGroups().size() > 1) {
+                    Message.BLANK.send(sender, MessageUtils.listToArrowSep(target.getGroups(), group.getName()));
                 }
 
-                LoggedAction.build().source(sender).target(track)
+                LoggedAction.build().source(sender).target(target)
                         .description("insert", group.getName(), pos)
                         .build().submit(plugin, sender);
 
-                StorageAssistant.save(track, sender, plugin);
+                StorageAssistant.save(target, sender, plugin);
                 return CommandResult.SUCCESS;
             } else {
-                Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
+                Message.TRACK_ALREADY_CONTAINS.send(sender, target.getName(), group.getName());
                 return CommandResult.STATE_ERROR;
             }
 
@@ -100,7 +101,7 @@ public class TrackInsert extends ChildCommand<Track> {
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.groups(plugin))
                 .complete(args);

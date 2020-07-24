@@ -34,30 +34,15 @@ public final class CraftBukkitImplementation {
     private CraftBukkitImplementation() {}
 
     private static final String SERVER_PACKAGE_VERSION;
-    private static final boolean CHAT_COMPATIBLE;
 
     static {
         Class<?> server = Bukkit.getServer().getClass();
         Matcher matcher = Pattern.compile("^org\\.bukkit\\.craftbukkit\\.(\\w+)\\.CraftServer$").matcher(server.getName());
         if (matcher.matches()) {
             SERVER_PACKAGE_VERSION = '.' + matcher.group(1) + '.';
-            CHAT_COMPATIBLE = !SERVER_PACKAGE_VERSION.startsWith(".v1_7_");
         } else {
             SERVER_PACKAGE_VERSION = ".";
-            CHAT_COMPATIBLE = true;
         }
-    }
-
-    public static boolean isChatCompatible() {
-        return CHAT_COMPATIBLE;
-    }
-
-    public static String nms(String className) {
-        return "net.minecraft.server" + SERVER_PACKAGE_VERSION + className;
-    }
-
-    public static Class<?> nmsClass(String className) throws ClassNotFoundException {
-        return Class.forName(nms(className));
     }
 
     public static String obc(String className) {

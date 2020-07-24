@@ -37,16 +37,22 @@ import me.lucko.luckperms.velocity.LPVelocityPlugin;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryOptions;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class VelocityContextManager extends ContextManager<Player> {
+public class VelocityContextManager extends ContextManager<Player, Player> {
 
     private final LoadingCache<Player, QueryOptionsCache<Player>> subjectCaches = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
             .build(key -> new QueryOptionsCache<>(key, this));
 
     public VelocityContextManager(LPVelocityPlugin plugin) {
-        super(plugin, Player.class);
+        super(plugin, Player.class, Player.class);
+    }
+
+    @Override
+    public UUID getUniqueId(Player player) {
+        return player.getUniqueId();
     }
 
     @Override
@@ -59,11 +65,7 @@ public class VelocityContextManager extends ContextManager<Player> {
     }
 
     @Override
-    public void invalidateCache(Player subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
+    protected void invalidateCache(Player subject) {
         QueryOptionsCache<Player> cache = this.subjectCaches.getIfPresent(subject);
         if (cache != null) {
             cache.invalidate();

@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.nukkit.inject.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
@@ -70,8 +71,10 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Set<Permissi
     final LPNukkitPlugin plugin;
 
     public LuckPermsSubscriptionMap(LPNukkitPlugin plugin, Map<String, Set<Permissible>> existingData) {
-        super(existingData);
         this.plugin = plugin;
+        for (Entry<String, Set<Permissible>> entry : existingData.entrySet()) {
+            super.put(entry.getKey(), new LPSubscriptionValueSet(entry.getKey(), entry.getValue()));
+        }
     }
 
     /*
@@ -92,17 +95,13 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Set<Permissi
 
         String permission = ((String) key);
 
-        Set<Permissible> result = super.get(key);
-
+        LPSubscriptionValueSet result = (LPSubscriptionValueSet) super.get(key);
         if (result == null) {
             // calculate a new map - always!
             result = new LPSubscriptionValueSet(permission);
             super.put(permission, result);
-        } else if (!(result instanceof LPSubscriptionValueSet)) {
-            // ensure return type is a LPSubscriptionMap
-            result = new LPSubscriptionValueSet(permission, result);
-            super.put(permission, result);
         }
+
         return result;
     }
 
@@ -132,17 +131,12 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Set<Permissi
      */
     public Map<String, Set<Permissible>> detach() {
         Map<String, Set<Permissible>> map = new HashMap<>();
-
         for (Map.Entry<String, Set<Permissible>> ent : entrySet()) {
-            if (ent.getValue() instanceof LPSubscriptionValueSet) {
-                Set<Permissible> backing = ((LPSubscriptionValueSet) ent.getValue()).backing;
-                Set<Permissible> copy; (copy = Collections.newSetFromMap(new WeakHashMap<>(backing.size()))).addAll(backing);
-                map.put(ent.getKey(), copy);
-            } else {
-                map.put(ent.getKey(), ent.getValue());
-            }
+            Set<Permissible> backing = ((LPSubscriptionValueSet) ent.getValue()).backing;
+            Set<Permissible> copy = Collections.newSetFromMap(new WeakHashMap<>(backing.size()));
+            copy.addAll(backing);
+            map.put(ent.getKey(), copy);
         }
-
         return map;
     }
 
@@ -159,7 +153,7 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Set<Permissi
 
         private LPSubscriptionValueSet(String permission, Set<Permissible> content) {
             this.permission = permission;
-            this.backing = Collections.newSetFromMap(new WeakHashMap<>());
+            this.backing = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
             
             if (content != null) {
                 this.backing.addAll(content);
@@ -173,13 +167,18 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Set<Permissi
             this(permission, null);
         }
 
-        private Sets.SetView<Permissible> getContentView() {
+        private Set<Permissible> getContentView() {
             // gather players (LPPermissibles)
             Set<Permissible> players = LuckPermsSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers().values().stream()
                     .filter(player -> player.hasPermission(this.permission) || player.isPermissionSet(this.permission))
                     .collect(Collectors.toSet());
 
-            return Sets.union(players, this.backing);
+            ImmutableSet<Permissible> backing;
+            synchronized (this.backing) {
+                backing = ImmutableSet.copyOf(this.backing);
+            }
+
+            return Sets.union(players, backing);
         }
 
         @Override

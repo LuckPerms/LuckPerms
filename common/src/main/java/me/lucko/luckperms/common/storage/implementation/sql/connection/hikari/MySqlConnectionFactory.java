@@ -49,15 +49,18 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
 
     @Override
     protected void appendProperties(HikariConfig config, Map<String, String> properties) {
+        // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
         properties.putIfAbsent("cachePrepStmts", "true");
-        properties.putIfAbsent("alwaysSendSetIsolation", "false");
-        properties.putIfAbsent("cacheServerConfiguration", "true");
-        properties.putIfAbsent("elideSetAutoCommits", "true");
-        properties.putIfAbsent("useLocalSessionState", "true");
-
-        properties.putIfAbsent("useServerPrepStmts", "true");
         properties.putIfAbsent("prepStmtCacheSize", "250");
         properties.putIfAbsent("prepStmtCacheSqlLimit", "2048");
+        properties.putIfAbsent("useServerPrepStmts", "true");
+        properties.putIfAbsent("useLocalSessionState", "true");
+        properties.putIfAbsent("rewriteBatchedStatements", "true");
+        properties.putIfAbsent("cacheResultSetMetadata", "true");
+        properties.putIfAbsent("cacheServerConfiguration", "true");
+        properties.putIfAbsent("elideSetAutoCommits", "true");
+        properties.putIfAbsent("maintainTimeStats", "false");
+        properties.putIfAbsent("alwaysSendSetIsolation", "false");
         properties.putIfAbsent("cacheCallableStmts", "true");
 
         // append configurable properties

@@ -36,18 +36,25 @@ import me.lucko.luckperms.sponge.LPSpongePlugin;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryOptions;
 
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.Subject;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class SpongeContextManager extends ContextManager<Subject> {
+public class SpongeContextManager extends ContextManager<Subject, Player> {
 
     private final LoadingCache<Subject, QueryOptionsCache<Subject>> subjectCaches = CaffeineFactory.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES)
             .build(key -> new QueryOptionsCache<>(key, this));
 
     public SpongeContextManager(LPSpongePlugin plugin) {
-        super(plugin, Subject.class);
+        super(plugin, Subject.class, Player.class);
+    }
+
+    @Override
+    public UUID getUniqueId(Player player) {
+        return player.getUniqueId();
     }
 
     @Override
@@ -60,11 +67,7 @@ public class SpongeContextManager extends ContextManager<Subject> {
     }
 
     @Override
-    public void invalidateCache(Subject subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
+    protected void invalidateCache(Subject subject) {
         QueryOptionsCache<Subject> cache = this.subjectCaches.getIfPresent(subject);
         if (cache != null) {
             cache.invalidate();

@@ -36,152 +36,77 @@ import net.luckperms.api.node.types.MetaNode;
 public final class NodeCommandFactory {
     private NodeCommandFactory() {}
 
-    public static String generateCommand(Node node, String id, HolderType type, boolean set, boolean explicitGlobalContext) {
+    public static String undoCommand(Node node, String holder, HolderType holderType, boolean explicitGlobalContext) {
         StringBuilder sb = new StringBuilder(32);
-        sb.append(type.toString()).append(" ").append(id).append(" ");
+
+        sb.append(holderType.toString()).append(' ').append(holder).append(' ');
 
         if (node instanceof InheritanceNode) {
-            sb.append("parent ");
-
-            if (set) {
-                sb.append("add");
-            } else {
-                sb.append("remove");
-            }
-
+            // command
+            sb.append("parent remove");
             if (node.hasExpiry()) {
                 sb.append("temp");
             }
+            sb.append(' ');
+            
+            // value
+            sb.append(((InheritanceNode) node).getGroupName());
 
-            sb.append(" ").append(((InheritanceNode) node).getGroupName());
+        } else if (node.getValue() && (node instanceof ChatMetaNode<?, ?>)) {
+            ChatMetaNode<?, ?> chatNode = (ChatMetaNode<?, ?>) node;
 
-            if (node.hasExpiry() && set) {
-                sb.append(" ").append(node.getExpiry().getEpochSecond());
-            }
-
-            return appendContextToCommand(sb, node, explicitGlobalContext).toString();
-        }
-
-        if (node.getValue() && (node instanceof ChatMetaNode<?, ?>)) {
-            ChatMetaNode<?, ?> cmNode = (ChatMetaNode<?, ?>) node;
-
-            sb.append("meta ");
-
-            if (set) {
-                sb.append("add");
-            } else {
-                sb.append("remove");
-            }
-
+            // command
+            sb.append("meta remove");
             if (node.hasExpiry()) {
                 sb.append("temp");
             }
+            sb.append(chatNode.getMetaType().toString());
+            
+            // values
+            sb.append(' ').append(chatNode.getPriority()).append(' ');
+            appendEscaped(sb, chatNode.getMetaValue());
 
-            sb.append(cmNode.getMetaType().toString())
-                    .append(" ")
-                    .append(cmNode.getPriority()) // weight
-                    .append(" ");
-
-            String value = cmNode.getMetaValue();
-            if (value.contains(" ")) {
-                // wrap value in quotes
-                sb.append("\"").append(value).append("\"");
-            } else {
-                sb.append(value);
-            }
-
-            if (set && node.hasExpiry()) {
-                sb.append(" ").append(node.getExpiry().getEpochSecond());
-            }
-
-            return appendContextToCommand(sb, node, explicitGlobalContext).toString();
-        }
-
-        if (node.getValue() && node instanceof MetaNode) {
-            sb.append("meta ");
-
-            if (set) {
-                sb.append("set");
-            } else {
-                sb.append("unset");
-            }
-
-            if (node.hasExpiry()) {
-                sb.append("temp");
-            }
-
-            sb.append(" ");
-
-
+        } else if (node.getValue() && node instanceof MetaNode) {
             MetaNode metaNode = (MetaNode) node;
-            String key = metaNode.getMetaKey();
-            if (key.contains(" ")) {
-                sb.append("\"").append(key).append("\"");
-            } else {
-                sb.append(key);
-            }
-
-            if (set) {
-                sb.append(" ");
-
-                String value = metaNode.getMetaValue();
-                if (value.contains(" ")) {
-                    sb.append("\"").append(value).append("\"");
-                } else {
-                    sb.append(value);
-                }
-
-                if (node.hasExpiry()) {
-                    sb.append(" ").append(node.getExpiry().getEpochSecond());
-                }
-            }
-
-            return appendContextToCommand(sb, node, explicitGlobalContext).toString();
-        }
-
-        sb.append("permission ");
-
-        if (set) {
-            sb.append("set");
-        } else {
-            sb.append("unset");
-        }
-
-        if (node.hasExpiry()) {
-            sb.append("temp");
-        }
-
-        sb.append(" ");
-
-        String perm = node.getKey();
-        if (perm.contains(" ")) {
-            sb.append("\"").append(perm).append("\"");
-        } else {
-            sb.append(perm);
-        }
-        if (set) {
-            sb.append(" ").append(node.getValue());
-
+            
+            // command
+            sb.append("meta unset");
             if (node.hasExpiry()) {
-                sb.append(" ").append(node.getExpiry().getEpochSecond());
+                sb.append("temp");
             }
+            sb.append(' ');
+
+            // value
+            appendEscaped(sb, metaNode.getMetaKey());
+
+        } else {
+            // command
+            sb.append("permission unset");
+            if (node.hasExpiry()) {
+                sb.append("temp");
+            }
+            sb.append(' ');
+
+            // value
+            appendEscaped(sb, node.getKey());
         }
 
-        return appendContextToCommand(sb, node, explicitGlobalContext).toString();
+        if (!node.getContexts().isEmpty()) {
+            for (Context context : node.getContexts()) {
+                sb.append(' ').append(context.getKey()).append("=").append(context.getValue());
+            }
+        } else if (explicitGlobalContext) {
+            sb.append(" global");
+        }
+
+        return sb.toString();
     }
-
-    private static StringBuilder appendContextToCommand(StringBuilder sb, Node node, boolean explicitGlobalContext) {
-        if (node.getContexts().isEmpty()) {
-            if (explicitGlobalContext) {
-                sb.append(" global");
-            }
-            return sb;
+    
+    private static void appendEscaped(StringBuilder sb, String value) {
+        if (value.indexOf(' ') != -1 || value.isEmpty()) {
+            sb.append("\"").append(value).append("\"");
+        } else {
+            sb.append(value);
         }
-
-        for (Context context : node.getContexts()) {
-            sb.append(" ").append(context.getKey()).append("=").append(context.getValue());
-        }
-
-        return sb;
     }
 }

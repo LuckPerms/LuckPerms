@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -60,7 +61,6 @@ import net.luckperms.api.node.types.SuffixNode;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -68,18 +68,13 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public class MetaInfo extends GenericChildCommand {
-    private static String processLocation(Node node, PermissionHolder holder) {
-        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName();
-        return location.equalsIgnoreCase(holder.getObjectName()) ? "self" : location;
-    }
-
     public MetaInfo(LocaleManager locale) {
         super(CommandSpec.META_INFO.localize(locale), "info", CommandPermission.USER_META_INFO, CommandPermission.GROUP_META_INFO, Predicates.alwaysFalse());
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, holder)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
@@ -89,7 +84,7 @@ public class MetaInfo extends GenericChildCommand {
         Set<MetaNode> meta = new LinkedHashSet<>();
 
         // Collect data
-        for (Node node : holder.resolveInheritedNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)) {
+        for (Node node : target.resolveInheritedNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)) {
             if (!NodeType.META_OR_CHAT_META.matches(node)) {
                 continue;
             }
@@ -106,27 +101,32 @@ public class MetaInfo extends GenericChildCommand {
         }
 
         if (prefixes.isEmpty()) {
-            Message.CHAT_META_PREFIX_NONE.send(sender, holder.getFormattedDisplayName());
+            Message.CHAT_META_PREFIX_NONE.send(sender, target.getFormattedDisplayName());
         } else {
-            Message.CHAT_META_PREFIX_HEADER.send(sender, holder.getFormattedDisplayName());
-            sendChatMetaMessage(prefixes, sender, holder, label);
+            Message.CHAT_META_PREFIX_HEADER.send(sender, target.getFormattedDisplayName());
+            sendChatMetaMessage(prefixes, sender, target, label);
         }
 
         if (suffixes.isEmpty()) {
-            Message.CHAT_META_SUFFIX_NONE.send(sender, holder.getFormattedDisplayName());
+            Message.CHAT_META_SUFFIX_NONE.send(sender, target.getFormattedDisplayName());
         } else {
-            Message.CHAT_META_SUFFIX_HEADER.send(sender, holder.getFormattedDisplayName());
-            sendChatMetaMessage(suffixes, sender, holder, label);
+            Message.CHAT_META_SUFFIX_HEADER.send(sender, target.getFormattedDisplayName());
+            sendChatMetaMessage(suffixes, sender, target, label);
         }
 
         if (meta.isEmpty()) {
-            Message.META_NONE.send(sender, holder.getFormattedDisplayName());
+            Message.META_NONE.send(sender, target.getFormattedDisplayName());
         } else {
-            Message.META_HEADER.send(sender, holder.getFormattedDisplayName());
-            sendMetaMessage(meta, sender, holder, label);
+            Message.META_HEADER.send(sender, target.getFormattedDisplayName());
+            sendMetaMessage(meta, sender, target, label);
         }
 
         return CommandResult.SUCCESS;
+    }
+
+    private static String processLocation(Node node, PermissionHolder holder) {
+        String location = node.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName();
+        return location.equalsIgnoreCase(holder.getObjectName()) ? "self" : location;
     }
 
     private static void sendMetaMessage(Set<MetaNode> meta, Sender sender, PermissionHolder holder, String label) {
@@ -172,14 +172,14 @@ public class MetaInfo extends GenericChildCommand {
         }
 
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "¥3> ¥a" + node.getPriority() + " ¥7- ¥r" + node.getMetaValue(),
+                "§3> §a" + node.getPriority() + " §7- §r" + node.getMetaValue(),
                 " ",
-                "¥7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getPlainDisplayName()
-        ), '¥'));
+                "§7Click to remove this " + node.getMetaType().name().toLowerCase() + " from " + holder.getPlainDisplayName()
+        ), '§'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getFormattedDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
-        String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
+        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, id, holder.getType(), explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {
@@ -199,14 +199,14 @@ public class MetaInfo extends GenericChildCommand {
         }
 
         HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "¥3> ¥r" + node.getMetaKey() + " ¥7- ¥r" + node.getMetaValue(),
+                "§3> §r" + node.getMetaKey() + " §7- §r" + node.getMetaValue(),
                 " ",
-                "¥7Click to remove this meta pair from " + holder.getPlainDisplayName()
-        ), '¥'));
+                "§7Click to remove this meta pair from " + holder.getPlainDisplayName()
+        ), '§'));
 
         String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
-        String command = "/" + label + " " + NodeCommandFactory.generateCommand(node, id, holder.getType(), false, explicitGlobalContext);
+        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, id, holder.getType(), explicitGlobalContext);
         ClickEvent clickEvent = ClickEvent.suggestCommand(command);
 
         return component -> {

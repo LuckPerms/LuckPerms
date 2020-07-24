@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -53,7 +54,7 @@ public class CheckCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         String target = args.get(0);
         String permission = args.get(1);
 
@@ -70,15 +71,15 @@ public class CheckCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Tristate tristate = user.getCachedData().getPermissionData(plugin.getQueryOptionsForUser(user).orElse(plugin.getContextManager().getStaticQueryOptions())).checkPermission(permission, PermissionCheckEvent.Origin.INTERNAL).result();
+        Tristate tristate = user.getCachedData().getPermissionData(user.getQueryOptions()).checkPermission(permission, PermissionCheckEvent.Origin.INTERNAL).result();
         Message.CHECK_RESULT.send(sender, user.getFormattedDisplayName(), permission, MessageUtils.formatTristate(tristate));
         return CommandResult.SUCCESS;
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
-                .at(0, CompletionSupplier.startsWith(() -> plugin.getBootstrap().getPlayerList()))
+                .at(0, CompletionSupplier.startsWith(() -> plugin.getBootstrap().getPlayerList().stream()))
                 .at(1, TabCompletions.permissions(plugin))
                 .complete(args);
     }

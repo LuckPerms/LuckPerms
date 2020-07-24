@@ -72,6 +72,15 @@ public final class ImmutableCollectors {
         );
     }
 
+    public static <E extends Comparable<? super E>> Collector<E, ?, ImmutableSortedSet<E>> toSortedSet() {
+        return Collector.of(
+                ImmutableSortedSet::<E>naturalOrder,
+                ImmutableSortedSet.Builder::add,
+                (l, r) -> l.addAll(r.build()),
+                ImmutableSortedSet.Builder::build
+        );
+    }
+
     public static <E> Collector<E, ?, ImmutableSortedSet<E>> toSortedSet(Comparator<? super E> comparator) {
         return Collector.of(
                 () -> new ImmutableSortedSet.Builder<E>(comparator),

@@ -26,14 +26,14 @@
 package me.lucko.luckperms.common.storage.implementation.file;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.node.model.HeldNodeImpl;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
 import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Iterators;
+import me.lucko.luckperms.common.util.Uuids;
 
-import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 
 import ninja.leaping.configurate.ConfigurationNode;
@@ -44,6 +44,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
@@ -257,13 +258,14 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     public Set<UUID> getUniqueUsers() throws IOException {
         return this.usersLoader.getNode().getChildrenMap().keySet().stream()
                 .map(Object::toString)
-                .map(UUID::fromString)
+                .map(Uuids::fromString)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public List<HeldNode<UUID>> getUsersWithPermission(Constraint constraint) throws Exception {
-        List<HeldNode<UUID>> held = new ArrayList<>();
+    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
+        List<NodeEntry<UUID, N>> held = new ArrayList<>();
         this.usersLoader.apply(false, true, root -> {
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
                 try {
@@ -272,10 +274,10 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
 
                     Set<Node> nodes = readNodes(object);
                     for (Node e : nodes) {
-                        if (!constraint.eval(e.getKey())) {
-                            continue;
+                        N match = constraint.match(e);
+                        if (match != null) {
+                            held.add(NodeEntry.of(holder, match));
                         }
-                        held.add(HeldNodeImpl.of(holder, e));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -302,8 +304,8 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     @Override
-    public List<HeldNode<String>> getGroupsWithPermission(Constraint constraint) throws Exception {
-        List<HeldNode<String>> held = new ArrayList<>();
+    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
+        List<NodeEntry<String, N>> held = new ArrayList<>();
         this.groupsLoader.apply(false, true, root -> {
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
                 try {
@@ -312,10 +314,10 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
 
                     Set<Node> nodes = readNodes(object);
                     for (Node e : nodes) {
-                        if (!constraint.eval(e.getKey())) {
-                            continue;
+                        N match = constraint.match(e);
+                        if (match != null) {
+                            held.add(NodeEntry.of(holder, match));
                         }
-                        held.add(HeldNodeImpl.of(holder, e));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

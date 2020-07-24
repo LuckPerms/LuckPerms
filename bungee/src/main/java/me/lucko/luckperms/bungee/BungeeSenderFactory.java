@@ -26,7 +26,6 @@
 package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.bungee.event.TristateCheckEvent;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.util.TextUtils;
@@ -39,8 +38,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
-public class BungeeSenderFactory extends SenderFactory<CommandSender> {
-    public BungeeSenderFactory(LuckPermsPlugin plugin) {
+public class BungeeSenderFactory extends SenderFactory<LPBungeePlugin, CommandSender> {
+    public BungeeSenderFactory(LPBungeePlugin plugin) {
         super(plugin);
     }
 
@@ -78,5 +77,10 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected boolean hasPermission(CommandSender sender, String node) {
         return sender.hasPermission(node);
+    }
+
+    @Override
+    protected void performCommand(CommandSender sender, String command) {
+        getPlugin().getBootstrap().getProxy().getPluginManager().dispatchCommand(sender, command);
     }
 }

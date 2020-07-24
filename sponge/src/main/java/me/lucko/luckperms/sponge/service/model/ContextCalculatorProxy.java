@@ -64,7 +64,8 @@ public class ContextCalculatorProxy implements ForwardingContextCalculator<Subje
 
         @Override
         public boolean add(Context context) {
-            if (context.getKey().isEmpty() || context.getValue().isEmpty()) {
+            if (!net.luckperms.api.context.Context.isValidKey(context.getKey()) ||
+                    !net.luckperms.api.context.Context.isValidValue(context.getValue())) {
                 return false;
             }
             this.consumer.accept(context.getKey(), context.getValue());

@@ -25,37 +25,33 @@
 
 package me.lucko.luckperms.common.model;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Multimap;
 
-import me.lucko.luckperms.common.cache.Cache;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextSetComparator;
 import me.lucko.luckperms.common.node.comparator.NodeComparator;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
-import me.lucko.luckperms.common.node.model.InheritanceOrigin;
-import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
+import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -64,6 +60,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -102,38 +99,80 @@ public final class NodeMap {
      */
     private final SortedMap<ImmutableContextSet, SortedSet<InheritanceNode>> inheritanceMap = new ConcurrentSkipListMap<>(ContextSetComparator.reverse());
 
-    /**
-     * A cache which holds an immutable copy of the backing map
-     */
-    private final ImmutableSetMultimapCache<ImmutableContextSet, Node> mapCache = new ImmutableSetMultimapCache<>(this.map);
-    private final ImmutableSetMultimapCache<ImmutableContextSet, InheritanceNode> inheritanceMapCache = new ImmutableSetMultimapCache<>(this.inheritanceMap);
-
     NodeMap(PermissionHolder holder) {
         this.holder = holder;
     }
 
+    public boolean isEmpty() {
+        return this.map.isEmpty();
+    }
+
+    public int size() {
+        int size = 0;
+        for (SortedSet<Node> values : this.map.values()) {
+            size += values.size();
+        }
+        return size;
+    }
+
+    public List<Node> asList() {
+        List<Node> list = new ArrayList<>();
+        copyTo(list);
+        return list;
+    }
+
     public LinkedHashSet<Node> asSet() {
         LinkedHashSet<Node> set = new LinkedHashSet<>();
-        copyTo(set, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
+        copyTo(set);
         return set;
     }
 
     public SortedSet<Node> asSortedSet() {
         SortedSet<Node> set = new TreeSet<>(NodeWithContextComparator.reverse());
-        copyTo(set, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
+        copyTo(set);
+        return set;
+    }
+
+    public ImmutableSet<Node> asImmutableSet() {
+        ImmutableSet.Builder<Node> builder = ImmutableSet.builder();
+        for (SortedSet<Node> values : this.map.values()) {
+            builder.addAll(values);
+        }
+        return builder.build();
+    }
+
+    public Map<ImmutableContextSet, Collection<Node>> asMap() {
+        Map<ImmutableContextSet, Collection<Node>> map = new HashMap<>();
+        for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
+            map.put(e.getKey(), new ArrayList<>(e.getValue()));
+        }
+        return map;
+    }
+
+    public List<InheritanceNode> inheritanceAsList() {
+        List<InheritanceNode> set = new ArrayList<>();
+        copyInheritanceNodesTo(set);
         return set;
     }
 
     public LinkedHashSet<InheritanceNode> inheritanceAsSet() {
         LinkedHashSet<InheritanceNode> set = new LinkedHashSet<>();
-        copyInheritanceNodesTo(set, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
+        copyInheritanceNodesTo(set);
         return set;
     }
 
     public SortedSet<InheritanceNode> inheritanceAsSortedSet() {
         SortedSet<InheritanceNode> set = new TreeSet<>(NodeWithContextComparator.reverse());
-        copyInheritanceNodesTo(set, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
+        copyInheritanceNodesTo(set);
         return set;
+    }
+
+    public Map<ImmutableContextSet, Collection<InheritanceNode>> inheritanceAsMap() {
+        Map<ImmutableContextSet, Collection<InheritanceNode>> map = new HashMap<>();
+        for (Map.Entry<ImmutableContextSet, SortedSet<InheritanceNode>> e : this.inheritanceMap.entrySet()) {
+            map.put(e.getKey(), new ArrayList<>(e.getValue()));
+        }
+        return map;
     }
 
     private static boolean flagExcludeTest(Flag flag, String contextKey, QueryOptions filter, ImmutableContextSet contextSet) {
@@ -153,53 +192,122 @@ public final class NodeMap {
                 !flagExcludeTest(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT, DefaultContextKeys.WORLD_KEY, filter, contextSet);
     }
 
+    private ContextSatisfyMode defaultSatisfyMode() {
+        return this.holder.getPlugin().getConfiguration().get(ConfigKeys.CONTEXT_SATISFY_MODE);
+    }
+
+    public void forEach(Consumer<? super Node> consumer) {
+        for (SortedSet<Node> values : this.map.values()) {
+            values.forEach(consumer);
+        }
+    }
+
+    public void forEach(QueryOptions filter, Consumer<? super Node> consumer) {
+        for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
+            if (!filter.satisfies(e.getKey(), defaultSatisfyMode())) {
+                continue;
+            }
+
+            if (normalNodesExcludeTest(filter, e.getKey())) {
+                if (inheritanceNodesIncludeTest(filter, e.getKey())) {
+                    // only copy inheritance nodes.
+                    SortedSet<InheritanceNode> inheritanceNodes = this.inheritanceMap.get(e.getKey());
+                    if (inheritanceNodes != null) {
+                        inheritanceNodes.forEach(consumer);
+                    }
+                }
+            } else {
+                e.getValue().forEach(consumer);
+            }
+        }
+    }
+
+    public void copyTo(Collection<? super Node> collection) {
+        for (SortedSet<Node> values : this.map.values()) {
+            collection.addAll(values);
+        }
+    }
+
     public void copyTo(Collection<? super Node> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
-            if (filter.satisfies(e.getKey())) {
-                if (normalNodesExcludeTest(filter, e.getKey())) {
-                    if (inheritanceNodesIncludeTest(filter, e.getKey())) {
-                        // only copy inheritance nodes.
+            if (!filter.satisfies(e.getKey(), defaultSatisfyMode())) {
+                continue;
+            }
+
+            if (normalNodesExcludeTest(filter, e.getKey())) {
+                if (inheritanceNodesIncludeTest(filter, e.getKey())) {
+                    // only copy inheritance nodes.
+                    SortedSet<InheritanceNode> inheritanceNodes = this.inheritanceMap.get(e.getKey());
+                    if (inheritanceNodes != null) {
+                        collection.addAll(inheritanceNodes);
+                    }
+                }
+            } else {
+                collection.addAll(e.getValue());
+            }
+        }
+    }
+
+    public <T extends Node> void copyTo(Collection<? super T> collection, NodeType<T> type, QueryOptions filter) {
+        for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : this.map.entrySet()) {
+            if (!filter.satisfies(e.getKey(), defaultSatisfyMode())) {
+                continue;
+            }
+
+            if (normalNodesExcludeTest(filter, e.getKey())) {
+                if (inheritanceNodesIncludeTest(filter, e.getKey())) {
+                    // only copy inheritance nodes.
+                    if (type == NodeType.INHERITANCE) {
                         SortedSet<InheritanceNode> inheritanceNodes = this.inheritanceMap.get(e.getKey());
                         if (inheritanceNodes != null) {
-                            collection.addAll(inheritanceNodes);
+                            for (InheritanceNode node : inheritanceNodes) {
+                                collection.add(type.cast(node));
+                            }
                         }
                     }
-                } else {
-                    collection.addAll(e.getValue());
+                }
+            } else {
+                for (Node node : e.getValue()) {
+                    if (type.matches(node)) {
+                        collection.add(type.cast(node));
+                    }
                 }
             }
+        }
+    }
+
+    public void copyInheritanceNodesTo(Collection<? super InheritanceNode> collection) {
+        for (SortedSet<InheritanceNode> values : this.inheritanceMap.values()) {
+            collection.addAll(values);
         }
     }
 
     public void copyInheritanceNodesTo(Collection<? super InheritanceNode> collection, QueryOptions filter) {
         for (Map.Entry<ImmutableContextSet, SortedSet<InheritanceNode>> e : this.inheritanceMap.entrySet()) {
-            if (filter.satisfies(e.getKey())) {
-                if (inheritanceNodesIncludeTest(filter, e.getKey())) {
-                    collection.addAll(e.getValue());
-                }
+            if (!filter.satisfies(e.getKey(), defaultSatisfyMode())) {
+                continue;
+            }
+
+            if (inheritanceNodesIncludeTest(filter, e.getKey())) {
+                collection.addAll(e.getValue());
             }
         }
     }
 
-    /**
-     * Returns an immutable representation of the maps current state.
-     *
-     * @return an immutable copy
-     */
-    public ImmutableSetMultimap<ImmutableContextSet, Node> immutable() {
-        return this.mapCache.get();
+    public Collection<Node> nodesInContext(ContextSet context) {
+        final SortedSet<Node> values = this.map.get(context.immutableCopy());
+        if (values == null) {
+            return ImmutableSet.of();
+        }
+        return new ArrayList<>(values);
     }
 
-    public ImmutableSetMultimap<ImmutableContextSet, InheritanceNode> immutableInheritance() {
-        return this.inheritanceMapCache.get();
-    }
-
-    /**
-     * Invalidates the cache
-     */
-    void invalidate() {
-        this.mapCache.invalidate();
-        this.inheritanceMapCache.invalidate();
+    public Collection<InheritanceNode> inheritanceNodesInContext(ContextSet context) {
+        final SortedSet<InheritanceNode> values = this.inheritanceMap.get(context.immutableCopy());
+        if (values == null) {
+            return ImmutableSet.of();
+        }
+        return new ArrayList<>(values);
     }
 
     private Node localise(Node node) {
@@ -277,19 +385,23 @@ public final class NodeMap {
     void setContent(Iterable<? extends Node> set) {
         this.map.clear();
         this.inheritanceMap.clear();
-        for (Node n : set) {
-            add(n);
-        }
+        mergeContent(set);
     }
 
     void setContent(Stream<? extends Node> stream) {
         this.map.clear();
         this.inheritanceMap.clear();
-        stream.forEach(this::add);
+        mergeContent(stream);
     }
 
-    void setContent(Multimap<ImmutableContextSet, ? extends Node> multimap) {
-        setContent(multimap.values());
+    void mergeContent(Iterable<? extends Node> set) {
+        for (Node n : set) {
+            add(n);
+        }
+    }
+
+    void mergeContent(Stream<? extends Node> stream) {
+        stream.forEach(this::add);
     }
 
     boolean removeIf(Predicate<? super Node> predicate) {
@@ -350,47 +462,6 @@ public final class NodeMap {
         }
 
         return work;
-    }
-
-    private static final class ImmutableSetMultimapCache<K, V> extends Cache<ImmutableSetMultimap<K, V>> {
-        @SuppressWarnings("rawtypes")
-        private static final Constructor<ImmutableSetMultimap> IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR;
-        static {
-            try {
-                IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR = ImmutableSetMultimap.class.getDeclaredConstructor(ImmutableMap.class, int.class, Comparator.class);
-                IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR.setAccessible(true);
-            } catch (NoSuchMethodException e) {
-                throw new ExceptionInInitializerError(e);
-            }
-        }
-
-        private final Map<K, ? extends Collection<V>> handle;
-
-        private ImmutableSetMultimapCache(Map<K, ? extends Collection<V>> handle) {
-            this.handle = handle;
-        }
-
-        @Override
-        protected @NonNull ImmutableSetMultimap<K, V> supply() {
-            ImmutableMap.Builder<K, ImmutableSet<V>> builder = ImmutableMap.builder();
-            int size = 0;
-
-            for (Map.Entry<K, ? extends Collection<V>> entry : this.handle.entrySet()) {
-                K key = entry.getKey();
-                ImmutableSet<V> values = ImmutableSet.copyOf(entry.getValue());
-                if (!values.isEmpty()) {
-                    builder.put(key, values);
-                    size += values.size();
-                }
-            }
-
-            try {
-                //noinspection unchecked
-                return IMMUTABLE_SET_MULTIMAP_CONSTRUCTOR.newInstance(builder.build(), size, null);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
 }

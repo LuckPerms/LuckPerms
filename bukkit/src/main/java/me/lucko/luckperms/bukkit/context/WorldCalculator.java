@@ -38,13 +38,17 @@ import net.luckperms.api.context.ImmutableContextSet;
 
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class WorldCalculator implements ContextCalculator<Player> {
+public class WorldCalculator implements ContextCalculator<Player>, Listener {
     private final LPBukkitPlugin plugin;
 
     public WorldCalculator(LPBukkitPlugin plugin) {
@@ -74,5 +78,10 @@ public class WorldCalculator implements ContextCalculator<Player> {
             }
         }
         return builder.build();
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onWorldChange(PlayerChangedWorldEvent e) {
+        this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
     }
 }

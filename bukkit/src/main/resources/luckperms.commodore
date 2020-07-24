@@ -16,6 +16,11 @@ luckperms {
     record {
       filter brigadier:string greedy_phrase;
     }
+    command {
+      player brigadier:string single_word {
+        command brigadier:string greedy_phrase;
+      }
+    }
   }
   tree {
     scope brigadier:string single_word {
@@ -100,6 +105,9 @@ luckperms {
         unsettemp {
           node brigadier:string quotable_phrase {
             context brigadier:string greedy_phrase;
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
           }
         }
         check {
@@ -151,6 +159,9 @@ luckperms {
         removetemp {
           group brigadier:string single_word {
             context brigadier:string greedy_phrase;
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
           }
         }
         clear {
@@ -342,6 +353,9 @@ luckperms {
         unsettemp {
           node brigadier:string quotable_phrase {
             context brigadier:string greedy_phrase;
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
           }
         }
         check {
@@ -393,6 +407,9 @@ luckperms {
         removetemp {
           group brigadier:string single_word {
             context brigadier:string greedy_phrase;
+            duration brigadier:string single_word {
+              context brigadier:string greedy_phrase;
+            }
           }
         }
         clear {

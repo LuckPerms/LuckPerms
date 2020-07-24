@@ -48,6 +48,8 @@ import java.util.function.Consumer;
  * it is possible that more {@link DataType}s may be added in the future.
  * Ideally the {@link Comparator} implementations should be able to handle these
  * smoothly.</p>
+ *
+ * @see DataQueryOrderFunction
  */
 public enum DataQueryOrder implements Comparator<DataType> {
 
@@ -60,10 +62,7 @@ public enum DataQueryOrder implements Comparator<DataType> {
             if (o1 == o2) {
                 return 0;
             }
-            return Boolean.compare(
-                    o1 == DataType.TRANSIENT,
-                    o2 == DataType.TRANSIENT
-            );
+            return o1 == DataType.TRANSIENT ? 1 : -1;
         }
     },
 
@@ -76,10 +75,7 @@ public enum DataQueryOrder implements Comparator<DataType> {
             if (o1 == o2) {
                 return 0;
             }
-            return -Boolean.compare(
-                    o1 == DataType.TRANSIENT,
-                    o2 == DataType.TRANSIENT
-            );
+            return o1 == DataType.TRANSIENT ? -1 : 1;
         }
     };
 

@@ -34,6 +34,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * <p>Context keys and values may not be null or empty. A key/value will be
  * deemed empty if it's length is zero, or if it consists of only space
  * characters.</p>
+ *
+ * @see ContextSet
  */
 public interface Context {
 

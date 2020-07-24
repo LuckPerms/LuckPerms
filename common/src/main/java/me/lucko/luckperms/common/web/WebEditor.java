@@ -31,6 +31,7 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -46,6 +47,7 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
+import net.luckperms.api.context.ImmutableContextSet;
 
 import okhttp3.Request;
 import okhttp3.Response;
@@ -73,7 +75,7 @@ public final class WebEditor {
                 .add("type", holder.getType().toString())
                 .add("id", holder.getObjectName())
                 .add("displayName", holder.getPlainDisplayName())
-                .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().immutable().values()));
+                .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().asList()));
     }
 
     private static JObject writeData(Track track) {
@@ -85,6 +87,12 @@ public final class WebEditor {
 
     public static JsonObject formPayload(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
         Preconditions.checkArgument(!holders.isEmpty(), "holders is empty");
+
+        ImmutableContextSet.Builder potentialContexts = new ImmutableContextSetImpl.BuilderImpl();
+        potentialContexts.addAll(plugin.getContextManager().getPotentialContexts());
+        for (PermissionHolder holder : holders) {
+            holder.normalData().forEach(node -> potentialContexts.addAll(node.getContexts()));
+        }
 
         // form the payload data
         return new JObject()
@@ -119,7 +127,7 @@ public final class WebEditor {
                         })
                 )
                 .consume(o -> {
-                    o.add("potentialContexts", ContextSetJsonSerializer.serializeContextSet(plugin.getContextManager().getPotentialContexts()));
+                    o.add("potentialContexts", ContextSetJsonSerializer.serializeContextSet(potentialContexts.build()));
                 })
                 .toJson();
     }
@@ -136,9 +144,12 @@ public final class WebEditor {
         String pasteId;
         try {
             pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+        } catch (UnsuccessfulRequestException e) {
+            Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
+            return CommandResult.STATE_ERROR;
         } catch (IOException e) {
             new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
-            Message.EDITOR_UPLOAD_FAILURE.send(sender);
+            Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }
 
@@ -156,7 +167,7 @@ public final class WebEditor {
         return CommandResult.SUCCESS;
     }
 
-    public static JsonObject readDataFromBytebin(BytebinClient bytebin, String id) {
+    public static JsonObject readDataFromBytebin(BytebinClient bytebin, String id) throws IOException, UnsuccessfulRequestException {
         Request request = new Request.Builder()
                 .header("User-Agent", bytebin.getUserAgent())
                 .url(bytebin.getUrl() + id)
@@ -174,8 +185,6 @@ public final class WebEditor {
                     }
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

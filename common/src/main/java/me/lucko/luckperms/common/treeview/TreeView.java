@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.web.AbstractHttpClient;
 import me.lucko.luckperms.common.web.BytebinClient;
+import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -130,7 +131,7 @@ public class TreeView {
      * @param checker the permission data instance to check against, or null
      * @return the id, or null
      */
-    public String uploadPasteData(BytebinClient bytebin, Sender sender, User user, PermissionCache checker) {
+    public String uploadPasteData(BytebinClient bytebin, Sender sender, User user, PermissionCache checker) throws IOException, UnsuccessfulRequestException {
         // only paste if there is actually data here
         if (!hasData()) {
             throw new IllegalStateException();
@@ -184,12 +185,7 @@ public class TreeView {
             e.printStackTrace();
         }
 
-        try {
-            return bytebin.postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return bytebin.postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
     }
 
 }

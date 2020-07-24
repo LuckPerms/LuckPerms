@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.common.config.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import cn.nukkit.utils.Config;

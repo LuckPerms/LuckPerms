@@ -27,7 +27,6 @@ package me.lucko.luckperms.bukkit.inject.server;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.SimplePluginManager;
@@ -40,7 +39,7 @@ import java.util.Objects;
 /**
  * Injects a {@link LuckPermsPermissionMap} into the {@link PluginManager}.
  */
-public class InjectorPermissionMap implements Runnable {
+public class InjectorPermissionMap {
     private static final Field PERMISSIONS_FIELD;
 
     static {
@@ -60,10 +59,9 @@ public class InjectorPermissionMap implements Runnable {
         this.plugin = plugin;
     }
 
-    @Override
-    public void run() {
+    public void inject() {
         try {
-            LuckPermsPermissionMap permissionMap = inject();
+            LuckPermsPermissionMap permissionMap = tryInject();
             if (permissionMap != null) {
                 this.plugin.setPermissionMap(permissionMap);
             }
@@ -73,7 +71,7 @@ public class InjectorPermissionMap implements Runnable {
         }
     }
 
-    private LuckPermsPermissionMap inject() throws Exception {
+    private LuckPermsPermissionMap tryInject() throws Exception {
         Objects.requireNonNull(PERMISSIONS_FIELD, "PERMISSIONS_FIELD");
         PluginManager pluginManager = this.plugin.getBootstrap().getServer().getPluginManager();
 
@@ -97,11 +95,11 @@ public class InjectorPermissionMap implements Runnable {
         return newMap;
     }
 
-    public static void uninject() {
+    public void uninject() {
         try {
             Objects.requireNonNull(PERMISSIONS_FIELD, "PERMISSIONS_FIELD");
 
-            PluginManager pluginManager = Bukkit.getServer().getPluginManager();
+            PluginManager pluginManager = this.plugin.getBootstrap().getServer().getPluginManager();
             if (!(pluginManager instanceof SimplePluginManager)) {
                 return;
             }

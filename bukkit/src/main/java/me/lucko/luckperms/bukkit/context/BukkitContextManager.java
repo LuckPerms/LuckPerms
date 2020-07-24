@@ -40,9 +40,10 @@ import net.luckperms.api.query.QueryOptions;
 
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class BukkitContextManager extends ContextManager<Player> {
+public class BukkitContextManager extends ContextManager<Player, Player> {
 
     public static final OptionKey<Boolean> OP_OPTION = OptionKey.of("op", Boolean.class);
 
@@ -61,11 +62,16 @@ public class BukkitContextManager extends ContextManager<Player> {
             });
 
     public BukkitContextManager(LPBukkitPlugin plugin) {
-        super(plugin, Player.class);
+        super(plugin, Player.class, Player.class);
     }
 
     public void onPlayerQuit(Player player) {
         this.onlineSubjectCaches.remove(player);
+    }
+
+    @Override
+    public UUID getUniqueId(Player player) {
+        return player.getUniqueId();
     }
 
     @Override
@@ -82,11 +88,7 @@ public class BukkitContextManager extends ContextManager<Player> {
     }
 
     @Override
-    public void invalidateCache(Player subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
+    protected void invalidateCache(Player subject) {
         QueryOptionsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(subject);
         if (cache != null) {
             cache.invalidate();

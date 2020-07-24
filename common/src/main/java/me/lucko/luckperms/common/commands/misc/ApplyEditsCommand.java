@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -35,8 +34,10 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -50,6 +51,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.Uuids;
+import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.web.WebEditor;
 
 import net.luckperms.api.actionlog.Action;
@@ -58,11 +60,12 @@ import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -72,7 +75,7 @@ public class ApplyEditsCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         String code = args.get(0);
 
         if (code.isEmpty()) {
@@ -80,7 +83,18 @@ public class ApplyEditsCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        JsonObject data = WebEditor.readDataFromBytebin(plugin.getBytebin(), code);
+        JsonObject data;
+        try {
+            data = WebEditor.readDataFromBytebin(plugin.getBytebin(), code);
+        } catch (UnsuccessfulRequestException e) {
+            Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
+            return CommandResult.STATE_ERROR;
+        } catch (IOException e) {
+            new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
+            Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
         if (data == null) {
             Message.APPLY_EDITS_UNABLE_TO_READ.send(sender, code);
             return CommandResult.FAILURE;
@@ -157,17 +171,16 @@ public class ApplyEditsCommand extends SingleCommand {
             }
         }
 
-        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), holder)) {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), holder) || ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSetImpl.EMPTY)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return false;
         }
 
-        Set<Node> before = new HashSet<>(holder.normalData().immutable().values());
+        Set<Node> before = holder.normalData().asSet();
         Set<Node> after = new HashSet<>(NodeJsonSerializer.deserializeNodes(data.getAsJsonArray("nodes")));
 
-        Map.Entry<Set<Node>, Set<Node>> diff = diff(before, after);
-        Set<Node> diffAdded = diff.getKey();
-        Set<Node> diffRemoved = diff.getValue();
+        Set<Node> diffAdded = getAdded(before, after);
+        Set<Node> diffRemoved = getRemoved(before, after);
 
         int additions = diffAdded.size();
         int deletions = diffRemoved.size();
@@ -212,23 +225,32 @@ public class ApplyEditsCommand extends SingleCommand {
             track = plugin.getStorage().createAndLoadTrack(id, CreationCause.WEB_EDITOR).join();
         }
 
-        Set<String> before = new LinkedHashSet<>(track.getGroups());
-        Set<String> after = new LinkedHashSet<>();
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), track)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return false;
+        }
+
+        List<String> before = track.getGroups();
+        List<String> after = new ArrayList<>();
         data.getAsJsonArray("groups").forEach(e -> after.add(e.getAsString()));
 
-        Map.Entry<Set<String>, Set<String>> diff = diff(before, after);
-        Set<String> diffAdded = diff.getKey();
-        Set<String> diffRemoved = diff.getValue();
+        if (before.equals(after)) {
+            return false;
+        }
+
+        Set<String> diffAdded = getAdded(before, after);
+        Set<String> diffRemoved = getRemoved(before, after);
 
         int additions = diffAdded.size();
         int deletions = diffRemoved.size();
 
-        if (additions == 0 && deletions == 0) {
-            return false;
+        track.setGroups(after);
+
+        if (hasBeenReordered(before, after, diffAdded, diffRemoved)) {
+            LoggedAction.build().source(sender).target(track)
+                    .description("webeditor", "reorder", after)
+                    .build().submit(plugin, sender);
         }
-
-        track.setGroups(new ArrayList<>(after));
-
         for (String n : diffAdded) {
             LoggedAction.build().source(sender).target(track)
                     .description("webeditor", "add", n)
@@ -245,12 +267,8 @@ public class ApplyEditsCommand extends SingleCommand {
 
         Message.APPLY_EDITS_SUCCESS.send(sender, "track", track.getName());
         Message.APPLY_EDITS_SUCCESS_SUMMARY.send(sender, additions, additionsSummary, deletions, deletionsSummary);
-        for (String n : diffAdded) {
-            Message.APPLY_EDITS_DIFF_ADDED.send(sender, n);
-        }
-        for (String n : diffRemoved) {
-            Message.APPLY_EDITS_DIFF_REMOVED.send(sender, n);
-        }
+        Message.APPLY_EDITS_DIFF_REMOVED.send(sender, before);
+        Message.APPLY_EDITS_DIFF_ADDED.send(sender, after);
         StorageAssistant.save(track, sender, plugin);
         return true;
     }
@@ -265,6 +283,11 @@ public class ApplyEditsCommand extends SingleCommand {
 
         Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
         if (group == null) {
+            return false;
+        }
+
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), group) || ArgumentPermissions.checkGroup(plugin, sender, group, ImmutableContextSetImpl.EMPTY)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
             return false;
         }
 
@@ -293,6 +316,11 @@ public class ApplyEditsCommand extends SingleCommand {
             return false;
         }
 
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), track)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return false;
+        }
+
         try {
             plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).get();
         } catch (Exception e) {
@@ -315,17 +343,26 @@ public class ApplyEditsCommand extends SingleCommand {
                 (n.hasExpiry() ? " &7(" + DurationFormatter.CONCISE.format(n.getExpiryDuration()) + ")" : "");
     }
 
-    private static <T> Map.Entry<Set<T>, Set<T>> diff(Set<T> before, Set<T> after) {
-        // entries in before but not after are being removed
-        // entries in after but not before are being added
-
+    private static <T> Set<T> getAdded(Collection<T> before, Collection<T> after) {
         Set<T> added = new LinkedHashSet<>(after);
         added.removeAll(before);
+        return added;
+    }
 
+    private static <T> Set<T> getRemoved(Collection<T> before, Collection<T> after) {
         Set<T> removed = new LinkedHashSet<>(before);
         removed.removeAll(after);
+        return removed;
+    }
 
-        return Maps.immutableEntry(added, removed);
+    private static <T> boolean hasBeenReordered(List<T> before, List<T> after, Collection<T> diffAdded, Collection<T> diffRemoved) {
+        after = new ArrayList<>(after);
+        before = new ArrayList<>(before);
+
+        after.removeAll(diffAdded);
+        before.removeAll(diffRemoved);
+
+        return !before.equals(after);
     }
 
     @Override

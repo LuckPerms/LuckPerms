@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.model.manager.user;
 
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ExpiringSet;
 
@@ -78,6 +79,9 @@ public class UserHousekeeper implements Runnable {
         }
 
         // unload them
+        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            this.plugin.getLogger().info("User Housekeeper: unloading user data for " + uuid);
+        }
         this.userManager.unload(uuid);
     }
 

@@ -37,11 +37,11 @@ import java.util.Optional;
  * Manages {@link ContextCalculator}s, and calculates applicable contexts for a
  * given type.
  *
- * This interface accepts {@link Object} types as a parameter to avoid having to depend
+ * <p>This interface accepts {@link Object} types as a parameter to avoid having to depend
  * on specific server implementations. In all cases, the "player" or "subject" type for
- * the platform must be used.
+ * the platform must be used.</p>
  *
- * Specifically:
+ * <p>Specifically:</p>
  *
  * <p></p>
  * <ul>
@@ -139,6 +139,18 @@ public interface ContextManager {
     void unregisterCalculator(@NonNull ContextCalculator<?> calculator);
 
     /**
+     * Signal to the {@link ContextManager} that a {@code subject}s
+     * current contexts have changed.
+     *
+     * <p>It is not strictly necessary to make a call to this method every time a context
+     * changes.</p>
+     *
+     * @param subject the subject
+     * @since 5.2
+     */
+    void signalContextUpdate(@NonNull Object subject);
+
+    /**
      * Gets the {@link ContextSetFactory}, responsible for creating
      * {@link ContextSet} instances.
      *
@@ -150,7 +162,11 @@ public interface ContextManager {
      * Invalidates the lookup cache for a given subject
      *
      * @param subject the subject
+     * @deprecated use {@link #signalContextUpdate(Object)}
      */
-    void invalidateCache(@NonNull Object subject);
+    @Deprecated
+    default void invalidateCache(@NonNull Object subject) {
+        signalContextUpdate(subject);
+    }
 
 }

@@ -139,24 +139,15 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof Node)) return false;
-        return Equality.KEY_VALUE_EXPIRY_CONTEXTS.equals(this, ((AbstractNode<?, ?>) o));
+        return NodeEquality.KEY_VALUE_EXPIRY_CONTEXTS.equals(this, ((AbstractNode<?, ?>) o));
     }
 
     @Override
     public boolean equals(@NonNull Node o, @NonNull NodeEqualityPredicate equalityPredicate) {
         AbstractNode<?, ?> other = (AbstractNode<?, ?>) o;
-        if (equalityPredicate == NodeEqualityPredicate.EXACT) {
-            return Equality.KEY_VALUE_EXPIRY_CONTEXTS.equals(this, other);
-        } else if (equalityPredicate == NodeEqualityPredicate.IGNORE_VALUE) {
-            return Equality.KEY_EXPIRY_CONTEXTS.equals(this, other);
-        } else if (equalityPredicate == NodeEqualityPredicate.IGNORE_EXPIRY_TIME) {
-            return Equality.KEY_VALUE_HASEXPIRY_CONTEXTS.equals(this, other);
-        } else if (equalityPredicate == NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE) {
-            return Equality.KEY_HASEXPIRY_CONTEXTS.equals(this, other);
-        } else if (equalityPredicate == NodeEqualityPredicate.IGNORE_VALUE_OR_IF_TEMPORARY) {
-            return Equality.KEY_CONTEXTS.equals(this, other);
-        } else if (equalityPredicate == NodeEqualityPredicate.ONLY_KEY) {
-            return Equality.KEY.equals(this, other);
+        NodeEquality nodeEquality = NodeEquality.of(equalityPredicate);
+        if (nodeEquality != null) {
+            return nodeEquality.equals(this, other);
         } else {
             return equalityPredicate.areEqual(this, o);
         }
@@ -175,64 +166,6 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
         result = result * PRIME + (int) (this.expireAt >>> 32 ^ this.expireAt);
         result = result * PRIME + this.contexts.hashCode();
         return result;
-    }
-
-    private enum Equality {
-        KEY_VALUE_EXPIRY_CONTEXTS {
-            @Override
-            public boolean equals(AbstractNode<?, ?> o1, AbstractNode<?, ?> o2) {
-                return o1 == o2 ||
-                        o1.key.equals(o2.key) &&
-                        o1.value == o2.value &&
-                        o1.expireAt == o2.expireAt &&
-                        o1.getContexts().equals(o2.getContexts());
-            }
-        },
-        KEY_EXPIRY_CONTEXTS {
-            @Override
-            public boolean equals(AbstractNode<?, ?> o1, AbstractNode<?, ?> o2) {
-                return o1 == o2 ||
-                        o1.key.equals(o2.key) &&
-                        o1.expireAt == o2.expireAt &&
-                        o1.getContexts().equals(o2.getContexts());
-            }
-        },
-        KEY_VALUE_HASEXPIRY_CONTEXTS {
-            @Override
-            public boolean equals(AbstractNode<?, ?> o1, AbstractNode<?, ?> o2) {
-                return o1 == o2 ||
-                        o1.key.equals(o2.key) &&
-                        o1.value == o2.value &&
-                        o1.hasExpiry() == o2.hasExpiry() &&
-                        o1.getContexts().equals(o2.getContexts());
-            }
-        },
-        KEY_HASEXPIRY_CONTEXTS {
-            @Override
-            public boolean equals(AbstractNode<?, ?> o1, AbstractNode<?, ?> o2) {
-                return o1 == o2 ||
-                        o1.key.equals(o2.key) &&
-                        o1.hasExpiry() == o2.hasExpiry() &&
-                        o1.getContexts().equals(o2.getContexts());
-            }
-        },
-        KEY_CONTEXTS {
-            @Override
-            public boolean equals(AbstractNode<?, ?> o1, AbstractNode<?, ?> o2) {
-                return o1 == o2 ||
-                        o1.key.equals(o2.key) &&
-                        o1.getContexts().equals(o2.getContexts());
-            }
-        },
-        KEY {
-            @Override
-            public boolean equals(AbstractNode<?, ?> o1, AbstractNode<?, ?> o2) {
-                return o1 == o2 ||
-                        o1.key.equals(o2.key);
-            }
-        };
-
-        public abstract boolean equals(AbstractNode<?, ?> o1, AbstractNode<?, ?> o2);
     }
 
     @Override

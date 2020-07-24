@@ -37,6 +37,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.Protocol;
 
 /**
  * An implementation of {@link Messenger} using Redis.
@@ -55,25 +56,15 @@ public class RedisMessenger implements Messenger {
         this.consumer = consumer;
     }
 
-    public void init(String address, String password) {
+    public void init(String address, String password, boolean ssl) {
         String[] addressSplit = address.split(":");
         String host = addressSplit[0];
-        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 6379;
+        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
 
-        if (password.equals("")) {
-            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port);
-        } else {
-            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, 0, password);
-        }
+        this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password, ssl);
 
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            this.sub = new Subscription(this);
-            try (Jedis jedis = this.jedisPool.getResource()) {
-                jedis.subscribe(this.sub, CHANNEL);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        this.sub = new Subscription(this);
+        this.plugin.getBootstrap().getScheduler().executeAsync(sub);
     }
 
     @Override
@@ -91,11 +82,40 @@ public class RedisMessenger implements Messenger {
         this.jedisPool.destroy();
     }
 
-    private static class Subscription extends JedisPubSub {
+    private static class Subscription extends JedisPubSub implements Runnable {
         private final RedisMessenger parent;
 
         private Subscription(RedisMessenger parent) {
             this.parent = parent;
+        }
+
+        @Override
+        public void run() {
+            boolean wasBroken = false;
+            while (!Thread.interrupted() && !this.parent.jedisPool.isClosed()) {
+                try (Jedis jedis = this.parent.jedisPool.getResource()) {
+                    if (wasBroken) {
+                        parent.plugin.getLogger().info("Redis pubsub connection re-established");
+                        wasBroken = false;
+                    }
+                    jedis.subscribe(this, CHANNEL);
+                } catch (Exception e) {
+                    wasBroken = true;
+                    parent.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection: " + e.getMessage());
+                    try {
+                        unsubscribe();
+                    } catch (Exception ignored) {
+
+                    }
+
+                    // Sleep for 2 seconds to prevent massive spam in console
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
         }
 
         @Override

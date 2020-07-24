@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.utils.ArgumentParser;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
@@ -42,7 +42,6 @@ import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.model.data.DataType;
 
-import java.util.List;
 import java.util.UUID;
 
 public class UserClone extends ChildCommand<User> {
@@ -51,13 +50,13 @@ public class UserClone extends ChildCommand<User> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), user)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User target, ArgumentList args, String label) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        UUID uuid = ArgumentParser.parseUserTarget(0, args, plugin, sender);
+        UUID uuid = args.getUserTarget(0, plugin, sender);
         if (uuid == null) {
             return CommandResult.INVALID_ARGS;
         }
@@ -73,12 +72,12 @@ public class UserClone extends ChildCommand<User> {
             return CommandResult.NO_PERMISSION;
         }
 
-        otherUser.replaceNodes(DataType.NORMAL, user.normalData().immutable());
+        otherUser.setNodes(DataType.NORMAL, target.normalData().asList());
 
-        Message.CLONE_SUCCESS.send(sender, user.getFormattedDisplayName(), otherUser.getFormattedDisplayName());
+        Message.CLONE_SUCCESS.send(sender, target.getFormattedDisplayName(), otherUser.getFormattedDisplayName());
 
         LoggedAction.build().source(sender).target(otherUser)
-                .description("clone", user.getUsername())
+                .description("clone", target.getUsername())
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(otherUser, sender, plugin);

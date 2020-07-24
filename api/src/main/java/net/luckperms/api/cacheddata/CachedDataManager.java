@@ -25,7 +25,10 @@
 
 package net.luckperms.api.cacheddata;
 
+import net.luckperms.api.context.ContextManager;
 import net.luckperms.api.model.PermissionHolder;
+import net.luckperms.api.model.group.Group;
+import net.luckperms.api.model.user.User;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -56,22 +59,57 @@ public interface CachedDataManager {
     @NonNull Container<CachedMetaData> metaData();
 
     /**
-     * Gets PermissionData from the cache, given a specified context.
+     * Gets PermissionData from the cache, using the given query options.
      *
      * @param queryOptions the query options
      * @return a permission data instance
-     * @throws NullPointerException if contexts is null
      */
     @NonNull CachedPermissionData getPermissionData(@NonNull QueryOptions queryOptions);
 
     /**
-     * Gets MetaData from the cache, given a specified context.
+     * Gets MetaData from the cache, using the given query options.
      *
      * @param queryOptions the query options
      * @return a meta data instance
-     * @throws NullPointerException if contexts is null
      */
     @NonNull CachedMetaData getMetaData(@NonNull QueryOptions queryOptions);
+
+    /**
+     * Gets PermissionData from the cache, using the most appropriate query options
+     * available at the time.
+     *
+     * <p>For {@link User}s, the most appropriate query options will be their
+     * {@link ContextManager#getQueryOptions(User) current active query options} if the
+     * corresponding player is online, and otherwise, will fallback to
+     * {@link ContextManager#getStaticQueryOptions() the current static query options}
+     * if they are offline.</p>
+     *
+     * <p>For {@link Group}s, the most appropriate query options will always be
+     * {@link ContextManager#getStaticQueryOptions()} the current static query options.</p>
+     *
+     * @return a permission data instance
+     * @since 5.1
+     */
+    @NonNull CachedPermissionData getPermissionData();
+
+    /**
+     * Gets MetaData from the cache, using the most appropriate query options
+     * available at the time.
+     *
+     * <p>For {@link User}s, the most appropriate query options will be their
+     * {@link ContextManager#getQueryOptions(User) current active query options} if the
+     * corresponding player is online, and otherwise, will fallback to
+     * {@link ContextManager#getStaticQueryOptions() the current static query options}
+     * if they are offline.</p>
+     *
+     * <p>For {@link Group}s, the most appropriate query options will always be
+     * {@link ContextManager#getStaticQueryOptions()} the current static query options.</p>
+     *
+     * @return a meta data instance
+     * @since 5.1
+     * @see PermissionHolder#getQueryOptions()
+     */
+    @NonNull CachedMetaData getMetaData();
 
     /**
      * Invalidates all cached {@link CachedPermissionData} and {@link CachedMetaData}

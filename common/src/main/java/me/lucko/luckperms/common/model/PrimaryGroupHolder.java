@@ -103,7 +103,7 @@ public interface PrimaryGroupHolder {
 
         @Override
         public String calculateValue(QueryOptions queryOptions) {
-            InheritanceGraph graph = this.user.getPlugin().getInheritanceHandler().getGraph(queryOptions);
+            InheritanceGraph graph = this.user.getPlugin().getInheritanceGraphFactory().getGraph(queryOptions);
 
             // fully traverse the graph, obtain a list of permission holders the user inherits from in weight order.
             Iterable<PermissionHolder> traversal = graph.traverse(this.user.getPlugin().getConfiguration().get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM), true, this.user);

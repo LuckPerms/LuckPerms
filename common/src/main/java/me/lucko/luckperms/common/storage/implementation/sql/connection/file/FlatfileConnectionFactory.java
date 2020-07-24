@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.connection.file;
 
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ abstract class FlatfileConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public void init() {
+    public void init(LuckPermsPlugin plugin) {
 
     }
 

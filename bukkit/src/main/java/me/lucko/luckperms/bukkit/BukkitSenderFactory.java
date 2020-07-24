@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.bukkit.util.CraftBukkitImplementation;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.util.TextUtils;
@@ -42,9 +40,8 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class BukkitSenderFactory extends SenderFactory<CommandSender> {
-
-    public BukkitSenderFactory(LuckPermsPlugin plugin) {
+public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSender> {
+    public BukkitSenderFactory(LPBukkitPlugin plugin) {
         super(plugin);
     }
 
@@ -78,12 +75,13 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
-        if (CraftBukkitImplementation.isChatCompatible() && sender instanceof Player) {
+        if (sender instanceof Player) {
             TextAdapter.sendComponent(sender, message);
-        } else {
-            // Fallback to legacy format
-            sendMessage(sender, TextUtils.toLegacy(message));
+            return;
         }
+
+        // Fallback to legacy format
+        sendMessage(sender, TextUtils.toLegacy(message));
     }
 
     @Override
@@ -100,6 +98,11 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected boolean hasPermission(CommandSender sender, String node) {
         return sender.hasPermission(node);
+    }
+
+    @Override
+    protected void performCommand(CommandSender sender, String command) {
+        getPlugin().getBootstrap().getServer().dispatchCommand(sender, command);
     }
 
     private static final class SyncMessengerAgent implements Runnable {

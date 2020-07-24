@@ -30,19 +30,53 @@ import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
 
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class BungeeCommandExecutor extends Command implements TabExecutor {
+    /** The main command name */
+    private static final String NAME = "luckpermsbungee";
+
+    /** The command aliases */
+    private static final String[] ALIASES = {"lpb", "bperm", "bperms", "bpermission", "bpermissions"};
+
+    /** The main command name + aliases, prefixed with '/' */
+    private static final String[] SLASH_ALIASES = Stream.concat(
+            Stream.of(NAME),
+            Arrays.stream(ALIASES)
+    ).map(s -> '/' + s).toArray(String[]::new);
+
+    /**
+     * The aliases to register, {@link #ALIASES} + {@link #SLASH_ALIASES}.
+     *
+     * <p>SLASH_ALIASES are registered too so the console can run '/lpb'
+     * in the same way as 'lpb'.</p>
+     */
+    private static final String[] ALIASES_TO_REGISTER = Stream.concat(
+            Arrays.stream(ALIASES),
+            Arrays.stream(SLASH_ALIASES)
+    ).toArray(String[]::new);
+
     private final LPBungeePlugin plugin;
     private final CommandManager manager;
 
     public BungeeCommandExecutor(LPBungeePlugin plugin, CommandManager manager) {
-        super("luckpermsbungee", null, "lpb", "bperm", "bperms", "bpermission", "bpermissions");
+        super(NAME, null, ALIASES_TO_REGISTER);
         this.plugin = plugin;
         this.manager = manager;
+    }
+
+    public void register() {
+        ProxyServer proxy = this.plugin.getBootstrap().getProxy();
+        proxy.getPluginManager().registerCommand(this.plugin.getBootstrap(), this);
+
+        // don't allow players to execute the slash aliases - these are just for the console.
+        proxy.getDisabledCommands().addAll(Arrays.asList(SLASH_ALIASES));
     }
 
     @Override
