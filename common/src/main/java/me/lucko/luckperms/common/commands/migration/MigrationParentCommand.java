@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.migration;
 
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
@@ -47,17 +47,17 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MigrationParentCommand extends ParentCommand<Object, Void> {
-    private static final Map<String, String> PLUGINS = ImmutableBiMap.<String, String>builder()
+    private static final Map<String, String> PLUGINS = ImmutableMap.<String, String>builder()
             // bukkit
-            .put("me.lucko.luckperms.bukkit.migration.MigrationGroupManager",       "org.anjocaido.groupmanager.GroupManager")
-            .put("me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx",      "ru.tehkode.permissions.bukkit.PermissionsEx")
-            .put("me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms",      "com.github.gustav9797.PowerfulPermsAPI.PowerfulPermsPlugin")
-            .put("me.lucko.luckperms.bukkit.migration.MigrationZPermissions",       "org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService")
-            .put("me.lucko.luckperms.bukkit.migration.MigrationBPermissions",       "de.bananaco.bpermissions.api.WorldManager")
-            .put("me.lucko.luckperms.bukkit.migration.MigrationPermissionsBukkit",  "com.platymuus.bukkit.permissions.PermissionsPlugin")
+            .put("org.anjocaido.groupmanager.GroupManager",                     "me.lucko.luckperms.bukkit.migration.MigrationGroupManager")
+            .put("ru.tehkode.permissions.bukkit.PermissionsEx",                 "me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx")
+            .put("com.github.gustav9797.PowerfulPermsAPI.PowerfulPermsPlugin",  "me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms")
+            .put("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService", "me.lucko.luckperms.bukkit.migration.MigrationZPermissions")
+            .put("de.bananaco.bpermissions.api.WorldManager",                   "me.lucko.luckperms.bukkit.migration.MigrationBPermissions")
+            .put("com.platymuus.bukkit.permissions.PermissionsPlugin",          "me.lucko.luckperms.bukkit.migration.MigrationPermissionsBukkit")
             // bungee
-            .put("me.lucko.luckperms.bungee.migration.MigrationBungeePerms",        "net.alpenblock.bungeeperms.BungeePerms")
-            .build().inverse();
+            .put("net.alpenblock.bungeeperms.BungeePerms",                      "me.lucko.luckperms.bungee.migration.MigrationBungeePerms")
+            .build();
 
     private final ReentrantLock lock = new ReentrantLock();
     private List<Command<Object>> commands = null;

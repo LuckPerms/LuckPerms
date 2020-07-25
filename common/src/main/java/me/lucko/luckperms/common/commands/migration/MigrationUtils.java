@@ -37,20 +37,14 @@ public final class MigrationUtils {
     private MigrationUtils() {}
 
     public static NodeBuilder<?, ?> parseNode(String permission, boolean value) {
-        if (permission.startsWith("-") || permission.startsWith("!")) {
-            if (permission.length() == 1) {
-                return NodeBuilders.determineMostApplicable(permission).value(value);
+        if (permission.length() > 1) {
+            if (permission.charAt(0) == '-' || permission.charAt(0) == '!') {
+                permission = permission.substring(1);
+                value = false;
+            } else if (permission.charAt(0) == '+') {
+                permission = permission.substring(1);
+                value = true;
             }
-
-            permission = permission.substring(1);
-            value = false;
-        } else if (permission.startsWith("+")) {
-            if (permission.length() == 1) {
-                return NodeBuilders.determineMostApplicable(permission).value(value);
-            }
-
-            permission = permission.substring(1);
-            value = true;
         }
 
         return NodeBuilders.determineMostApplicable(permission).value(value);
@@ -62,7 +56,11 @@ public final class MigrationUtils {
     }
 
     public static String standardizeName(String string) {
-        return string.trim().replace(':', '-').replace(' ', '-').replace('.', '-').toLowerCase();
+        return string.trim()
+                .replace(':', '-')
+                .replace(' ', '-')
+                .replace('.', '-')
+                .toLowerCase();
     }
 
 }
