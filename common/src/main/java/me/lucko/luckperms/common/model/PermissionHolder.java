@@ -462,7 +462,7 @@ public abstract class PermissionHolder {
 
         for (Node other : nodes) {
             if (equalityPredicate.areEqual(node, other)) {
-                return Tristate.of(node.getValue());
+                return Tristate.of(other.getValue());
             }
         }
 
