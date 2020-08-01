@@ -22,17 +22,22 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.14.7'
     compile 'com.squareup.okio:okio:1.17.5'
     compile 'net.bytebuddy:byte-buddy:1.10.9'
-    compile('me.lucko.configurate:configurate-core:3.5') {
+    compile('org.spongepowered:configurate-core:3.7') {
+        exclude(module: 'checker-qual')
         exclude(module: 'guava')
     }
-    compile('me.lucko.configurate:configurate-yaml:3.5') {
+    compile('org.spongepowered:configurate-yaml:3.7') {
+        exclude(module: 'checker-qual')
         exclude(module: 'snakeyaml')
     }
-    compile('me.lucko.configurate:configurate-gson:3.5') {
+    compile('org.spongepowered:configurate-gson:3.7') {
+        exclude(module: 'checker-qual')
         exclude(module: 'gson')
     }
-    compile 'me.lucko.configurate:configurate-hocon:3.5'
-    compile('me.lucko.configurate:configurate-toml:3.5') {
+    compile ('org.spongepowered:configurate-hocon:3.7') {
+        exclude(module: 'checker-qual')
+    }
+    compile('me.lucko.configurate:configurate-toml:3.7') {
         exclude(module: 'toml4j')
     }
     compile 'com.zaxxer:HikariCP:3.4.5'

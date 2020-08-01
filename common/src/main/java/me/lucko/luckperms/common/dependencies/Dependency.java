@@ -227,24 +227,24 @@ public enum Dependency {
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     CONFIGURATE_CORE(
-            "me{}lucko{}configurate",
+            "org{}spongepowered",
             "configurate-core",
-            "3.5",
-            "J+1WnX1g5gr4ne8qA7DuBadLDOsZnOZjwHbdRmVgF6c=",
+            "3.7",
+            "V+M3OFm+O0AHsao557kExxa27lYEX7UYE06G/zC/Kyc=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_GSON(
-            "me{}lucko{}configurate",
+            "org{}spongepowered",
             "configurate-gson",
-            "3.5",
-            "Q3wp3xpqy41bJW3yUhbHOzm+NUkT4bUUBI2/AQLaa3c=",
+            "3.7",
+            "0JhMGX6mjY8MDCGGc7lrfoHvWbpGiE5R6N3nqJch+SU=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_YAML(
-            "me{}lucko{}configurate",
+            "org{}spongepowered",
             "configurate-yaml",
-            "3.5",
-            "Dxr1o3EPbpOOmwraqu+cors8O/nKwJnhS5EiPkTb3fc=",
+            "3.7",
+            "14L0JiDuAfQovxkNySeaf9Kul3Nkl0OaW49Ow4ReV8E=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     SNAKEYAML(
@@ -255,25 +255,25 @@ public enum Dependency {
             Relocation.of("yaml", "org{}yaml{}snakeyaml")
     ),
     CONFIGURATE_HOCON(
-            "me{}lucko{}configurate",
+            "org{}spongepowered",
             "configurate-hocon",
-            "3.5",
-            "sOym1KPmQylGSfk90ZFqobuvoZfEWb7XMmMBwbHuxFw=",
+            "3.7",
+            "GYdqieCZVgPmoaIFjYN0YHuSVsHO7IsXZrwLAWqCgZM=",
             Relocation.of("configurate", "ninja{}leaping{}configurate"),
             Relocation.of("hocon", "com{}typesafe{}config")
     ),
     HOCON_CONFIG(
             "com{}typesafe",
             "config",
-            "1.3.3",
-            "tfHWBx8VSNBb6C9Z+QOcfTeheHvY48Z34x7ida9KRiE=",
+            "1.4.0",
+            "qtv9WlJFUb7vENP4kdMFuDuyfVRwPZpN56yioS2YR+I=",
             Relocation.of("hocon", "com{}typesafe{}config")
     ),
     CONFIGURATE_TOML(
             "me{}lucko{}configurate",
             "configurate-toml",
-            "3.5",
-            "U8p0XSTaNT/uebvLpO/vb6AhVGQDYiZsauSGB9zolPU=",
+            "3.7",
+            "EmyLOfsiR74QGhkktqhexMN8tC3kg1cM1UhM5MCmxuE=",
             Relocation.of("configurate", "ninja{}leaping{}configurate"),
             Relocation.of("toml4j", "com{}moandjiezana{}toml")
     ),
