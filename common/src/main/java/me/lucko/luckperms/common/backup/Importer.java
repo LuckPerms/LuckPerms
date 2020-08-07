@@ -44,6 +44,7 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -122,6 +123,14 @@ public class Importer implements Runnable {
         this.plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
     }
 
+    private Set<Map.Entry<String, JsonElement>> getDataSection(String id) {
+        if (this.data.has(id)) {
+            return this.data.get(id).getAsJsonObject().entrySet();
+        } else {
+            return Collections.emptySet();
+        }
+    }
+
     @Override
     public void run() {
         long startTime = System.currentTimeMillis();
@@ -136,16 +145,16 @@ public class Importer implements Runnable {
         Map<String, List<String>> tracks = new HashMap<>();
         Map<UUID, UserData> users = new HashMap<>();
 
-        for (Map.Entry<String, JsonElement> group : this.data.get("groups").getAsJsonObject().entrySet()) {
+        for (Map.Entry<String, JsonElement> group : getDataSection("groups")) {
             groups.put(group.getKey(), NodeJsonSerializer.deserializeNodes(group.getValue().getAsJsonObject().get("nodes").getAsJsonArray()));
         }
-        for (Map.Entry<String, JsonElement> track : this.data.get("tracks").getAsJsonObject().entrySet()) {
+        for (Map.Entry<String, JsonElement> track : getDataSection("tracks")) {
             JsonArray trackGroups = track.getValue().getAsJsonObject().get("groups").getAsJsonArray();
             List<String> trackGroupsList = new ArrayList<>();
             trackGroups.forEach(g -> trackGroupsList.add(g.getAsString()));
             tracks.put(track.getKey(), trackGroupsList);
         }
-        for (Map.Entry<String, JsonElement> user : this.data.get("users").getAsJsonObject().entrySet()) {
+        for (Map.Entry<String, JsonElement> user : getDataSection("users")) {
             JsonObject jsonData = user.getValue().getAsJsonObject();
 
             UUID uuid = UUID.fromString(user.getKey());

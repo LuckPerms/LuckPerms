@@ -341,4 +341,44 @@ public final class EventDispatcher {
         }
     }
 
+    public static List<Class<? extends LuckPermsEvent>> getKnownEventTypes() {
+        return ImmutableList.of(
+                ContextUpdateEvent.class,
+                ExtensionLoadEvent.class,
+                GroupCacheLoadEvent.class,
+                GroupCreateEvent.class,
+                GroupDataRecalculateEvent.class,
+                GroupDeleteEvent.class,
+                GroupLoadAllEvent.class,
+                GroupLoadEvent.class,
+                LogBroadcastEvent.class,
+                LogNetworkPublishEvent.class,
+                LogNotifyEvent.class,
+                LogPublishEvent.class,
+                LogReceiveEvent.class,
+                NodeAddEvent.class,
+                NodeClearEvent.class,
+                NodeRemoveEvent.class,
+                PlayerDataSaveEvent.class,
+                PlayerLoginProcessEvent.class,
+                ConfigReloadEvent.class,
+                PostSyncEvent.class,
+                PreNetworkSyncEvent.class,
+                PreSyncEvent.class,
+                TrackCreateEvent.class,
+                TrackDeleteEvent.class,
+                TrackLoadAllEvent.class,
+                TrackLoadEvent.class,
+                TrackAddGroupEvent.class,
+                TrackClearEvent.class,
+                TrackRemoveGroupEvent.class,
+                UserCacheLoadEvent.class,
+                UserDataRecalculateEvent.class,
+                UserFirstLoginEvent.class,
+                UserLoadEvent.class,
+                UserDemoteEvent.class,
+                UserPromoteEvent.class
+        );
+    }
+
 }

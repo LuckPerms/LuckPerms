@@ -172,7 +172,7 @@ public class Storage {
 
     public CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause) {
         return makeFuture(() -> {
-            Group group = this.implementation.createAndLoadGroup(name);
+            Group group = this.implementation.createAndLoadGroup(name.toLowerCase());
             if (group != null) {
                 this.plugin.getEventDispatcher().dispatchGroupCreate(group, cause);
             }
@@ -182,7 +182,7 @@ public class Storage {
 
     public CompletableFuture<Optional<Group>> loadGroup(String name) {
         return makeFuture(() -> {
-            Optional<Group> group = this.implementation.loadGroup(name);
+            Optional<Group> group = this.implementation.loadGroup(name.toLowerCase());
             if (group.isPresent()) {
                 this.plugin.getEventDispatcher().dispatchGroupLoad(group.get());
             }
@@ -218,7 +218,7 @@ public class Storage {
 
     public CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause) {
         return makeFuture(() -> {
-            Track track = this.implementation.createAndLoadTrack(name);
+            Track track = this.implementation.createAndLoadTrack(name.toLowerCase());
             if (track != null) {
                 this.plugin.getEventDispatcher().dispatchTrackCreate(track, cause);
             }
@@ -228,7 +228,7 @@ public class Storage {
 
     public CompletableFuture<Optional<Track>> loadTrack(String name) {
         return makeFuture(() -> {
-            Optional<Track> track = this.implementation.loadTrack(name);
+            Optional<Track> track = this.implementation.loadTrack(name.toLowerCase());
             if (track.isPresent()) {
                 this.plugin.getEventDispatcher().dispatchTrackLoad(track.get());
             }
