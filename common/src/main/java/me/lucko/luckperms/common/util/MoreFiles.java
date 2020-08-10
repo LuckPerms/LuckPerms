@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.util;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -45,7 +46,12 @@ public final class MoreFiles {
             return path;
         }
 
-        Files.createDirectory(path);
+        try {
+            Files.createDirectory(path);
+        } catch (FileAlreadyExistsException e) {
+            // ignore
+        }
+
         return path;
     }
 
@@ -54,7 +60,12 @@ public final class MoreFiles {
             return path;
         }
 
-        Files.createDirectories(path);
+        try {
+            Files.createDirectories(path);
+        } catch (FileAlreadyExistsException e) {
+            // ignore
+        }
+
         return path;
     }
 
