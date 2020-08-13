@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql;
 
+import com.google.common.base.Strings;
+
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
@@ -84,6 +86,13 @@ public final class SqlNode {
     }
 
     public static SqlNode fromSqlFields(long sqlId, String permission, boolean value, String server, String world, long expiry, String contexts) {
+        if (Strings.emptyToNull(server) == null) {
+            server = "global";
+        }
+        if (Strings.emptyToNull(world) == null) {
+            world = "global";
+        }
+
         return new SqlNode(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(GsonProvider.normal(), contexts).immutableCopy(), sqlId);
     }
 
