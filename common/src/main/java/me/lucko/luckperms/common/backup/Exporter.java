@@ -83,15 +83,17 @@ public class Exporter implements Runnable {
     private final Sender executor;
     private final Path filePath;
     private final boolean includeUsers;
+    private final boolean includeGroups;
     private final boolean saveFile;
     private final String label;
     private final ProgressLogger log;
 
-    public Exporter(LuckPermsPlugin plugin, Sender executor, Path filePath, boolean includeUsers, boolean saveFile) {
+    public Exporter(LuckPermsPlugin plugin, Sender executor, Path filePath, boolean includeUsers, boolean includeGroups, boolean saveFile) {
         this.plugin = plugin;
         this.executor = executor;
         this.filePath = filePath;
         this.includeUsers = includeUsers;
+        this.includeGroups = includeGroups;
         this.saveFile = saveFile;
         this.label = null;
 
@@ -100,11 +102,12 @@ public class Exporter implements Runnable {
         this.log.addListener(executor);
     }
 
-    public Exporter(LuckPermsPlugin plugin, Sender executor, boolean includeUsers, boolean saveFile, String label) {
+    public Exporter(LuckPermsPlugin plugin, Sender executor, boolean includeUsers, boolean includeGroups, boolean saveFile, String label) {
         this.plugin = plugin;
         this.executor = executor;
         this.filePath = null;
         this.includeUsers = includeUsers;
+        this.includeGroups = includeGroups;
         this.saveFile = saveFile;
         this.label = label;
 
@@ -121,11 +124,13 @@ public class Exporter implements Runnable {
                 .add("generatedAt", DATE_FORMAT.format(new Date(System.currentTimeMillis())))
                 .toJson());
 
-        this.log.log("Gathering group data...");
-        json.add("groups", exportGroups());
+        if (this.includeGroups) {
+            this.log.log("Gathering group data...");
+            json.add("groups", exportGroups());
 
-        this.log.log("Gathering track data...");
-        json.add("tracks", exportTracks());
+            this.log.log("Gathering track data...");
+            json.add("tracks", exportTracks());
+        }
 
         if (this.includeUsers) {
             this.log.log("Gathering user data...");
