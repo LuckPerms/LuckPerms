@@ -49,17 +49,17 @@ public class BukkitPlatformListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
         handleCommand(e.getPlayer(), e.getMessage().toLowerCase(), e);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onServerCommand(ServerCommandEvent e) {
         handleCommand(e.getSender(), e.getCommand().toLowerCase(), e);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onRemoteServerCommand(RemoteServerCommandEvent e) {
         handleCommand(e.getSender(), e.getCommand().toLowerCase(), e);
     }
