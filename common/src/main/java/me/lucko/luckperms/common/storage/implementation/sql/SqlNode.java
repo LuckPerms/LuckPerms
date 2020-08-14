@@ -93,7 +93,7 @@ public final class SqlNode {
             world = "global";
         }
 
-        return new SqlNode(permission, value, server, world, expiry, ContextSetJsonSerializer.deserializeContextSet(GsonProvider.normal(), contexts).immutableCopy(), sqlId);
+        return new SqlNode(permission, value, server, world, expiry, ContextSetJsonSerializer.deserialize(GsonProvider.normal(), contexts).immutableCopy(), sqlId);
     }
 
     private final String permission;

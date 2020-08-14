@@ -759,7 +759,7 @@ public class SqlStorage implements StorageImplementation {
         ps.setString(4, nd.getServer());
         ps.setString(5, nd.getWorld());
         ps.setLong(6, nd.getExpiry());
-        ps.setString(7, GsonProvider.normal().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+        ps.setString(7, GsonProvider.normal().toJson(ContextSetJsonSerializer.serialize(nd.getContexts())));
     }
 
     private static Set<SqlNode> getMissingFromRemote(Set<SqlNode> local, Set<SqlNode> remote) {

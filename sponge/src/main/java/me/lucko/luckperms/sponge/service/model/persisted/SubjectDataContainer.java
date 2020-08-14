@@ -122,7 +122,7 @@ public class SubjectDataContainer {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonObject data = section.get("data").getAsJsonObject();
 
-            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).immutableCopy();
+            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserialize(context).immutableCopy();
             ImmutableMap.Builder<String, Boolean> perms = ImmutableMap.builder();
             for (Map.Entry<String, JsonElement> perm : data.entrySet()) {
                 perms.put(perm.getKey(), perm.getValue().getAsBoolean());
@@ -145,7 +145,7 @@ public class SubjectDataContainer {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonObject data = section.get("data").getAsJsonObject();
 
-            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).immutableCopy();
+            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserialize(context).immutableCopy();
             ImmutableMap.Builder<String, String> opts = ImmutableMap.builder();
             for (Map.Entry<String, JsonElement> opt : data.entrySet()) {
                 opts.put(opt.getKey(), opt.getValue().getAsString());
@@ -168,7 +168,7 @@ public class SubjectDataContainer {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonArray data = section.get("data").getAsJsonArray();
 
-            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserializeContextSet(context).immutableCopy();
+            ImmutableContextSet contextSet = ContextSetJsonSerializer.deserialize(context).immutableCopy();
             ImmutableList.Builder<LPSubjectReference> pars = ImmutableList.builder();
             for (JsonElement p : data) {
                 if (!p.isJsonObject()) {
@@ -203,7 +203,7 @@ public class SubjectDataContainer {
             }
 
             JsonObject section = new JsonObject();
-            section.add("context", ContextSetJsonSerializer.serializeContextSet(e.getKey()));
+            section.add("context", ContextSetJsonSerializer.serialize(e.getKey()));
             
             JsonObject data = new JsonObject();
 
@@ -227,7 +227,7 @@ public class SubjectDataContainer {
             }
 
             JsonObject section = new JsonObject();
-            section.add("context", ContextSetJsonSerializer.serializeContextSet(e.getKey()));
+            section.add("context", ContextSetJsonSerializer.serialize(e.getKey()));
 
             JsonObject data = new JsonObject();
 
@@ -251,7 +251,7 @@ public class SubjectDataContainer {
             }
 
             JsonObject section = new JsonObject();
-            section.add("context", ContextSetJsonSerializer.serializeContextSet(e.getKey()));
+            section.add("context", ContextSetJsonSerializer.serialize(e.getKey()));
 
             JsonArray data = new JsonArray();
             for (LPSubjectReference ref : e.getValue()) {

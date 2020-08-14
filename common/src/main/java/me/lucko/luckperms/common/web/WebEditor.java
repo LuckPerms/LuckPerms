@@ -127,7 +127,7 @@ public final class WebEditor {
                         })
                 )
                 .consume(o -> {
-                    o.add("potentialContexts", ContextSetJsonSerializer.serializeContextSet(potentialContexts.build()));
+                    o.add("potentialContexts", ContextSetJsonSerializer.serialize(potentialContexts.build()));
                 })
                 .toJson();
     }
