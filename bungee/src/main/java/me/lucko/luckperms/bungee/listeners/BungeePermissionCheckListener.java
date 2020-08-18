@@ -66,11 +66,13 @@ public class BungeePermissionCheckListener implements Listener {
 
         User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
 
-        final AbstractSyncProxyManagement syncProxyManagement = CloudNetDriver.getInstance().getServicesRegistry().getFirstService(AbstractSyncProxyManagement.class);
-        SyncProxyProxyLoginConfiguration loginConfiguration = syncProxyManagement.getLoginConfiguration();
-        if(loginConfiguration.isMaintenance() && !loginConfiguration.getWhitelist().contains(player.getName())){
-            this.plugin.getLogger().info("CloudNet has cancelled the connection for " + player.getUniqueId() + " - " + player.getName() + ". No permissions data will be loaded.");
-            return;
+        if(this.plugin.getBootstrap().hasCloudNet()) {
+            final AbstractSyncProxyManagement syncProxyManagement = CloudNetDriver.getInstance().getServicesRegistry().getFirstService(AbstractSyncProxyManagement.class);
+            SyncProxyProxyLoginConfiguration loginConfiguration = syncProxyManagement.getLoginConfiguration();
+            if (loginConfiguration.isMaintenance() && !loginConfiguration.getWhitelist().contains(player.getName())) {
+                this.plugin.getLogger().info("CloudNet has cancelled the connection for " + player.getUniqueId() + " - " + player.getName() + ". No permissions data will be loaded.");
+                return;
+            }
         }
 
         if (user == null) {

@@ -3,4 +3,4 @@ version: ${pluginVersion}
 description: A permissions plugin
 author: Luck
 main: me.lucko.luckperms.bungee.LPBungeeBootstrap
-softDepends: ["RedisBungee"]
+softDepends: ["RedisBungee", "CloudNet-SyncProxy"]

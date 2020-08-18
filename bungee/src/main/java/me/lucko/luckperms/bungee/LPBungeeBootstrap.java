@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
 import net.luckperms.api.platform.Platform;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginDescription;
@@ -86,6 +87,9 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     // if the plugin has been loaded on an incompatible version
     private boolean incompatibleVersion = false;
+
+    // if cloudnet has been loaded
+    private boolean hascloudnet = false;
 
     public LPBungeeBootstrap() {
         this.schedulerAdapter = new BungeeSchedulerAdapter(this);
@@ -148,6 +152,10 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
             return;
         }
 
+        if (getProxy().getPluginManager().getPlugin("CloudNet-SyncProxy") != null) {
+            this.hascloudnet = true;
+        }
+
         this.startTime = Instant.now();
         try {
             this.plugin.enable();
@@ -204,6 +212,10 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
         return getProxy().getVersion();
     }
 
+    public Boolean hasCloudNet() {
+        return hascloudnet;
+    }
+
     @Override
     public Path getDataDirectory() {
         return getDataFolder().toPath().toAbsolutePath();
@@ -213,6 +225,7 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     public InputStream getResourceStream(String path) {
         return getResourceAsStream(path);
     }
+
 
     @Override
     public Optional<ProxiedPlayer> getPlayer(UUID uniqueId) {
