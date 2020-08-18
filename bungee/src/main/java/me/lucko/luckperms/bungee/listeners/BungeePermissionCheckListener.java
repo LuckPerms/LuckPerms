@@ -40,6 +40,10 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
+import de.dytanic.cloudnet.driver.CloudNetDriver;
+import de.dytanic.cloudnet.ext.syncproxy.AbstractSyncProxyManagement;
+import de.dytanic.cloudnet.ext.syncproxy.configuration.SyncProxyProxyLoginConfiguration;
+
 import java.util.Objects;
 
 public class BungeePermissionCheckListener implements Listener {
@@ -61,6 +65,14 @@ public class BungeePermissionCheckListener implements Listener {
         ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
         User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
+
+        final AbstractSyncProxyManagement syncProxyManagement = CloudNetDriver.getInstance().getServicesRegistry().getFirstService(AbstractSyncProxyManagement.class);
+        SyncProxyProxyLoginConfiguration loginConfiguration = syncProxyManagement.getLoginConfiguration();
+        if(loginConfiguration.isMaintenance() && !loginConfiguration.getWhitelist().contains(player.getName())){
+            this.plugin.getLogger().info("CloudNet has cancelled the connection for " + player.getUniqueId() + " - " + player.getName() + ". No permissions data will be loaded.");
+            return;
+        }
+
         if (user == null) {
             this.plugin.getLogger().warn("A permission check was made for player " + player.getName() + " - " + player.getUniqueId() + ", " +
                     "but LuckPerms does not have any permissions data loaded for them. Perhaps their UUID has been altered since login?");

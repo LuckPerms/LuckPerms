@@ -2,12 +2,19 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
+repositories {
+    mavenLocal()
+    maven { url 'https://repo.cloudnetservice.eu/repository/releases/' }
+}
+
 dependencies {
     compile project(':common')
 
     compileOnly 'net.md-5:bungeecord-api:1.15-SNAPSHOT'
     compileOnly 'net.kyori:text-adapter-bungeecord:3.0.4'
     compileOnly 'com.imaginarycode.minecraft:RedisBungee:0.4'
+    compileOnly 'de.dytanic.cloudnet:cloudnet-syncproxy:3.3.0-RELEASE'
+    compileOnly 'de.dytanic.cloudnet:cloudnet:3.3.0-RELEASE'
 
     // migration plugins
     compileOnly('net.alpenblock:BungeePerms:3.0') {
