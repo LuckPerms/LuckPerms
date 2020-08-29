@@ -2,7 +2,7 @@
 name: 🐛 ​ Bug report
 about: Report an issue or problem with the way LuckPerms is functioning.
 title: ''
-labels: bug
+labels: 'type: issue'
 assignees: ''
 
 ---
