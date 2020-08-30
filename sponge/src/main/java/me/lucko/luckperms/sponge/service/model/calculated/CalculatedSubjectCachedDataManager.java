@@ -47,6 +47,7 @@ import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.Map;
+import java.util.function.IntFunction;
 
 public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManager implements CalculatorFactory {
     private static final MetaStackDefinition DEFAULT_META_STACK = new SimpleMetaStackDefinition(
@@ -83,8 +84,10 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
     }
 
     @Override
-    protected void resolvePermissions(Map<String, Boolean> accumulator, QueryOptions queryOptions) {
-        this.subject.resolveAllPermissions(accumulator, queryOptions);
+    protected <M extends Map<String, Boolean>> M resolvePermissions(IntFunction<M> mapFactory, QueryOptions queryOptions) {
+        M map = mapFactory.apply(16);
+        this.subject.resolveAllPermissions(map, queryOptions);
+        return map;
     }
 
     @Override

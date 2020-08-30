@@ -67,6 +67,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -357,9 +358,11 @@ public abstract class PermissionHolder {
         return (List) inheritanceTree;
     }
 
-    public void exportPermissions(Map<String, Boolean> accumulator, QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
+    public <M extends Map<String, Boolean>> M exportPermissions(IntFunction<M> mapFactory, QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
         List<Node> entries = resolveInheritedNodes(queryOptions);
-        processExportedPermissions(accumulator, entries, convertToLowercase, resolveShorthand);
+        M map = mapFactory.apply(entries.size());
+        processExportedPermissions(map, entries, convertToLowercase, resolveShorthand);
+        return map;
     }
 
     private static void processExportedPermissions(Map<String, Boolean> accumulator, List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
