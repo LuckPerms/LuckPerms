@@ -158,7 +158,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         this.commandManager.register();
 
         // setup brigadier
-        if (isBrigadierSupported()) {
+        if (isBrigadierSupported() && getConfiguration().get(ConfigKeys.REGISTER_COMMAND_LIST_DATA)) {
             try {
                 LuckPermsBrigadier.register(this, command);
             } catch (Exception e) {

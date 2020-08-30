@@ -626,6 +626,9 @@ prevent-primary-group-removal: false
 # If LuckPerms should update the list of commands sent to the client when permissions are changed.
 update-client-command-list: true
 
+# If LuckPerms should attempt to register "Brigadier" command list data for its commands.
+register-command-list-data: true
+
 # If LuckPerms should attempt to resolve Vanilla command target selectors for LP commands.
 # See here for more info: https://minecraft.gamepedia.com/Commands#Target_selectors
 resolve-command-selectors: false
