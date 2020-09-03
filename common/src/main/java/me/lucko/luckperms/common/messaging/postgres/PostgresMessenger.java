@@ -56,6 +56,7 @@ public class PostgresMessenger implements Messenger {
 
     public void init() {
         this.listener = new NotificationListener(this);
+        this.plugin.getBootstrap().getScheduler().executeAsync(this.listener);
     }
 
     @Override
