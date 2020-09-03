@@ -26,21 +26,17 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
-
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.Driver;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.function.Function;
 
 public class PostgreConnectionFactory extends HikariConnectionFactory {
-    private final Class<?> dataSourceClass;
+    private final Class<?> dataSourceClass; // holds a strong reference
 
     public PostgreConnectionFactory(LuckPermsPlugin plugin, StorageCredentials configuration) {
         super(configuration);
@@ -88,7 +84,7 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
         String username = this.configuration.getUsername();
         String password = this.configuration.getPassword();
 
-        config.setDataSourceClassName("com.impossibl.postgres.jdbc.PGDataSource");
+        config.setDataSourceClassName(dataSourceClass.getName());
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("portNumber", port);
         config.addDataSourceProperty("databaseName", database);
