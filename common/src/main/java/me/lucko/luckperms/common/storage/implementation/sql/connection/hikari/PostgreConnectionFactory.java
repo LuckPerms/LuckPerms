@@ -27,14 +27,31 @@ package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
 
+import me.lucko.luckperms.common.dependencies.Dependency;
+import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.Driver;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.function.Function;
 
 public class PostgreConnectionFactory extends HikariConnectionFactory {
-    public PostgreConnectionFactory(StorageCredentials configuration) {
+    private final Class<?> dataSourceClass;
+
+    public PostgreConnectionFactory(LuckPermsPlugin plugin, StorageCredentials configuration) {
         super(configuration);
+
+        // setup the classloader
+        IsolatedClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.POSTGRESQL_DRIVER));
+        try {
+            this.dataSourceClass = classLoader.loadClass("com.impossibl.postgres.jdbc.PGDataSource");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -54,7 +71,7 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
             config.addDataSourceProperty("networkTimeout", Integer.parseInt(socketTimeout));
         }
 
-        // housekeeper and hikari do not work together
+        // housekeeper and hikari do not work together very well
         config.addDataSourceProperty("housekeeper", false);
 
         super.appendProperties(config, properties);

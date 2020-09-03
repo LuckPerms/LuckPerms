@@ -160,11 +160,12 @@ public enum Dependency {
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
-            "com{}impossibl{}pgjdbc-ng",
+            "com.impossibl.pgjdbc-ng",
             "pgjdbc-ng",
             "0.8.4",
-            "rzK9AlDQBEkmV9b/zCS5izDse5fZVr/N2t28ZZEiXHw=",
-            Relocation.of("pgjdbc", "com{}impossibl{}postgres")
+            "rzK9AlDQBEkmV9b/zCS5izDse5fZVr/N2t28ZZEiXHw="
+            // we don't apply relocations to pgjdbc-ng - it gets loaded via
+            // an isolated classloader
     ),
     H2_DRIVER(
             "com.h2database",
