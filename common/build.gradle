@@ -44,4 +44,5 @@ dependencies {
     compile 'redis.clients:jedis:3.3.0'
     compile 'org.mongodb:mongo-java-driver:3.12.2'
     compile 'org.yaml:snakeyaml:1.23'
+    compile 'com.impossibl.pgjdbc-ng:pgjdbc-ng:0.8.4'
 }

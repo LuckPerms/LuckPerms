@@ -219,6 +219,8 @@ watch-files: true
 #                    servers. Won't work if you have more than one BungeeCord proxy.
 #   => redis         Uses Redis pub-sub to push changes. Your server connection info must be
 #                    configured below.
+#   => postgres      Uses PostgreSQL LISTEN/NOTIFY to push changes. Requires your 'storage-method' to
+#                    be set to PostgreSQL.
 #   => redisbungee   Uses Redis pub-sub to push changes, using the RedisBungee API. You need to have
 #                    the RedisBungee plugin installed.
 #   => auto          Attempts to automatically setup a messaging service using redis or sql.

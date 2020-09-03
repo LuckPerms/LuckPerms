@@ -223,6 +223,8 @@ watch-files: true
 #                installed.
 #   => redis     Uses Redis pub-sub to push changes. Your server connection info must be configured
 #                below.
+#   => postgres  Uses PostgreSQL LISTEN/NOTIFY to push changes. Requires your 'storage-method' to
+#                be set to PostgreSQL.
 #   => auto      Attempts to automatically setup a messaging service using redis or sql.
 messaging-service: auto
 
