@@ -64,7 +64,7 @@ public class PostgresMessenger implements Messenger {
             try (PreparedStatement stmt = conn.prepareStatement("SELECT pg_notify(?, ?);")) {
                 stmt.setString(1, CHANNEL);
                 stmt.setString(2, outgoingMessage.asEncodedString());
-                stmt.executeUpdate();
+                stmt.execute();
             }
         } catch (Exception e) {
             e.printStackTrace();
