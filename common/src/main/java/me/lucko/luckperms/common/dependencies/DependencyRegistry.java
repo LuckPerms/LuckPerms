@@ -58,7 +58,7 @@ public class DependencyRegistry {
             .putAll(StorageType.MONGODB, Dependency.MONGODB_DRIVER)
             .putAll(StorageType.MARIADB, Dependency.MARIADB_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)
             .putAll(StorageType.MYSQL, Dependency.MYSQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)
-            .putAll(StorageType.POSTGRESQL, Dependency.POSTGRESQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)
+            .putAll(StorageType.POSTGRESQL, Dependency.POSTGRESQL_DRIVER, Dependency.PGJDBC_NG_SPY, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)
             .putAll(StorageType.SQLITE, Dependency.SQLITE_DRIVER)
             .putAll(StorageType.H2, Dependency.H2_DRIVER)
             .build();

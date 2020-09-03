@@ -42,7 +42,7 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
         super(configuration);
 
         // setup the classloader
-        IsolatedClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.POSTGRESQL_DRIVER));
+        IsolatedClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.POSTGRESQL_DRIVER, Dependency.PGJDBC_NG_SPY));
         try {
             this.dataSourceClass = classLoader.loadClass("com.impossibl.postgres.jdbc.PGDataSource");
         } catch (ClassNotFoundException e) {

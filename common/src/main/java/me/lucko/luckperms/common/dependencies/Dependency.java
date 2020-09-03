@@ -167,6 +167,13 @@ public enum Dependency {
             // we don't apply relocations to pgjdbc-ng - it gets loaded via
             // an isolated classloader
     ),
+    PGJDBC_NG_SPY(
+            "com.impossibl.pgjdbc-ng",
+            "spy",
+            "0.8.4",
+            "2xKNGXiJlAPNH76bOLrkAMhDxNmIVCtFut2CoEov6lk="
+            // same note as for pgjdbc-ng
+    ),
     H2_DRIVER(
             "com.h2database",
             "h2",
