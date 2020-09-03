@@ -61,7 +61,7 @@ public class PostgresMessenger implements Messenger {
     @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         try (PGConnection conn = this.storage.getConnectionFactory().getConnection().unwrap(PGConnection.class)) {
-            try (PreparedStatement stmt = conn.prepareCall("SELECT pg_notify(?, ?);")) {
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT pg_notify(?, ?);")) {
                 stmt.setString(1, CHANNEL);
                 stmt.setString(2, outgoingMessage.asEncodedString());
                 stmt.executeUpdate();
