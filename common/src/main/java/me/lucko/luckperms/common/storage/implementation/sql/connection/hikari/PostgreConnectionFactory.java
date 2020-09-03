@@ -48,6 +48,15 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
         properties.remove("useUnicode");
         properties.remove("characterEncoding");
 
+        // socket timeout is named differently, and expected to be as integer, not string
+        String socketTimeout = properties.remove("socketTimeout");
+        if (socketTimeout != null) {
+            config.addDataSourceProperty("networkTimeout", Integer.parseInt(socketTimeout));
+        }
+
+        // housekeeper and hikari do not work together
+        config.addDataSourceProperty("housekeeper", false);
+
         super.appendProperties(config, properties);
     }
 
@@ -56,13 +65,13 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
         String address = this.configuration.getAddress();
         String[] addressSplit = address.split(":");
         address = addressSplit[0];
-        String port = addressSplit.length > 1 ? addressSplit[1] : "5432";
+        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 5432;
 
         String database = this.configuration.getDatabase();
         String username = this.configuration.getUsername();
         String password = this.configuration.getPassword();
 
-        config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
+        config.setDataSourceClassName("com.impossibl.postgres.jdbc.PGDataSource");
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("portNumber", port);
         config.addDataSourceProperty("databaseName", database);

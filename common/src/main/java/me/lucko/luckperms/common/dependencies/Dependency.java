@@ -160,11 +160,11 @@ public enum Dependency {
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
-            "org{}postgresql",
-            "postgresql",
-            "9.4.1212",
-            "DLKhWL4xrPIY4KThjI89usaKO8NIBkaHc/xECUsMNl0=",
-            Relocation.of("postgresql", "org{}postgresql")
+            "com{}impossibl{}pgjdbc-ng",
+            "pgjdbc-ng",
+            "0.8.4",
+            "rzK9AlDQBEkmV9b/zCS5izDse5fZVr/N2t28ZZEiXHw=",
+            Relocation.of("pgjdbc", "com{}impossibl{}postgres")
     ),
     H2_DRIVER(
             "com.h2database",
@@ -347,7 +347,6 @@ public enum Dependency {
         }
     }
 
-    /*
     public static void main(String[] args) {
         Dependency[] dependencies = values();
         DependencyRepository[] repos = DependencyRepository.values();
@@ -378,6 +377,5 @@ public enum Dependency {
             e.printStackTrace();
         }
     }
-    */
 
 }
