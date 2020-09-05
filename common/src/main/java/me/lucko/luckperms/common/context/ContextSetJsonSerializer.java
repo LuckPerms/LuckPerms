@@ -101,12 +101,13 @@ public final class ContextSetJsonSerializer {
         Preconditions.checkArgument(element.isJsonObject());
         JsonObject jsonObject = element.getAsJsonObject();
 
-        if (jsonObject.size() == 0) {
+        Set<Map.Entry<String, JsonElement>> entries = jsonObject.entrySet();
+        if (entries.isEmpty()) {
             return ImmutableContextSetImpl.EMPTY;
         }
 
         MutableContextSet contextSet = new MutableContextSetImpl();
-        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+        for (Map.Entry<String, JsonElement> entry : entries) {
             String k = entry.getKey();
             JsonElement v = entry.getValue();
 
