@@ -148,6 +148,17 @@ public interface UserManager {
     @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uniqueId, @NonNull String username);
 
     /**
+     * Deletes any data about a given player from the uuid caching system.
+     *
+     * <p>Note that this method does not affect any saved user/permissions data.</p>
+     *
+     * @param uniqueId the users mojang unique id
+     * @return a future encapsulating the result of the operation
+     * @since 5.2
+     */
+    @NonNull CompletableFuture<Void> deletePlayerData(@NonNull UUID uniqueId);
+
+    /**
      * Gets a set all "unique" user UUIDs.
      *
      * <p>"Unique" meaning the user isn't just a member of the "default" group.</p>

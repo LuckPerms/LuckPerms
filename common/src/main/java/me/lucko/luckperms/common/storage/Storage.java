@@ -264,6 +264,10 @@ public class Storage {
         });
     }
 
+    public CompletableFuture<Void> deletePlayerData(UUID uniqueId) {
+        return makeFuture(() -> this.implementation.deletePlayerData(uniqueId));
+    }
+
     public CompletableFuture<UUID> getPlayerUniqueId(String username) {
         return makeFuture(() -> this.implementation.getPlayerUniqueId(username));
     }

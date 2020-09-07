@@ -619,6 +619,12 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
+    public void deletePlayerData(UUID uniqueId) {
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
+        c.deleteMany(Filters.eq("_id", uniqueId));
+    }
+
+    @Override
     public UUID getPlayerUniqueId(String username) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
         Document doc = c.find(new Document("name", username.toLowerCase())).first();

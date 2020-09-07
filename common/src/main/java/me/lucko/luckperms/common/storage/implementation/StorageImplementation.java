@@ -98,6 +98,8 @@ public interface StorageImplementation {
 
     PlayerSaveResult savePlayerData(UUID uniqueId, String username) throws Exception;
 
+    void deletePlayerData(UUID uniqueId) throws Exception;
+
     @Nullable UUID getPlayerUniqueId(String username) throws Exception;
 
     @Nullable String getPlayerName(UUID uniqueId) throws Exception;

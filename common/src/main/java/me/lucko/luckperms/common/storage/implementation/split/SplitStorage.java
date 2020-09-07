@@ -219,6 +219,11 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
+    public void deletePlayerData(UUID uniqueId) throws Exception {
+        implFor(SplitStorageType.UUID).deletePlayerData(uniqueId);
+    }
+
+    @Override
     public UUID getPlayerUniqueId(String username) throws Exception {
         return implFor(SplitStorageType.UUID).getPlayerUniqueId(username);
     }

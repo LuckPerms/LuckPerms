@@ -444,6 +444,11 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     }
 
     @Override
+    public void deletePlayerData(UUID uniqueId) {
+        this.uuidCache.removeMapping(uniqueId);
+    }
+
+    @Override
     public UUID getPlayerUniqueId(String username) {
         return this.uuidCache.lookupUuid(username);
     }
