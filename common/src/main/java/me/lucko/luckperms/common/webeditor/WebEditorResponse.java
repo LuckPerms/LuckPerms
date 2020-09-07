@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -89,6 +90,14 @@ public class WebEditorResponse {
             JsonArray changes = this.payload.get("changes").getAsJsonArray();
             for (JsonElement change : changes) {
                 if (session.applyChange(change.getAsJsonObject())) {
+                    work = true;
+                }
+            }
+        }
+        if (this.payload.has("userDeletions")) {
+            JsonArray userDeletions = this.payload.get("userDeletions").getAsJsonArray();
+            for (JsonElement userDeletion : userDeletions) {
+                if (session.applyUserDelete(userDeletion)) {
                     work = true;
                 }
             }
@@ -267,6 +276,45 @@ public class WebEditorResponse {
             return true;
         }
 
+        private boolean applyUserDelete(JsonElement changeInfo) {
+            String id = changeInfo.getAsString();
+
+            UUID uuid = Uuids.parse(id);
+            if (uuid == null) {
+                Message.APPLY_EDITS_TARGET_USER_NOT_UUID.send(this.sender, id);
+                return false;
+            }
+
+            User user = this.plugin.getStorage().loadUser(uuid, null).join();
+            if (user == null) {
+                return false;
+            }
+
+            if (ArgumentPermissions.checkModifyPerms(this.plugin, this.sender, CommandPermission.APPLY_EDITS, user)) {
+                Message.COMMAND_NO_PERMISSION.send(this.sender);
+                return false;
+            }
+
+            user.clearNodes(DataType.NORMAL, null, true);
+
+            try {
+                StorageAssistant.save(user, this.sender, this.plugin);
+                this.plugin.getStorage().deletePlayerData(user.getUniqueId()).get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Message.DELETE_ERROR.send(this.sender, user.getFormattedDisplayName());
+                return true;
+            }
+
+            Message.DELETE_SUCCESS.send(this.sender, user.getFormattedDisplayName());
+
+            LoggedAction.build().source(this.sender).target(user).targetType(Action.Target.Type.USER)
+                    .description("webeditor", "delete")
+                    .build().submit(this.plugin, this.sender);
+
+            return true;
+        }
+
         private boolean applyGroupDelete(JsonElement changeInfo) {
             String groupName = changeInfo.getAsString();
 
@@ -295,7 +343,7 @@ public class WebEditorResponse {
 
             Message.DELETE_SUCCESS.send(this.sender, group.getFormattedDisplayName());
 
-            LoggedAction.build().source(this.sender).targetName(groupName).targetType(Action.Target.Type.GROUP)
+            LoggedAction.build().source(this.sender).target(group)
                     .description("webeditor", "delete")
                     .build().submit(this.plugin, this.sender);
 
@@ -325,7 +373,7 @@ public class WebEditorResponse {
 
             Message.DELETE_SUCCESS.send(this.sender, trackName);
 
-            LoggedAction.build().source(this.sender).targetName(trackName).targetType(Action.Target.Type.TRACK)
+            LoggedAction.build().source(this.sender).target(track)
                     .description("webeditor", "delete")
                     .build().submit(this.plugin, this.sender);
 
