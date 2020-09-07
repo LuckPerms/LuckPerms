@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -42,7 +43,6 @@ import me.lucko.luckperms.common.verbose.InvalidFilterException;
 import me.lucko.luckperms.common.verbose.VerboseFilter;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.VerboseListener;
-import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;

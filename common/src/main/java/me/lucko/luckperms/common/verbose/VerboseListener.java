@@ -29,6 +29,9 @@ import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.command.utils.MessageUtils;
+import me.lucko.luckperms.common.http.AbstractHttpClient;
+import me.lucko.luckperms.common.http.BytebinClient;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
@@ -40,9 +43,6 @@ import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
-import me.lucko.luckperms.common.web.AbstractHttpClient;
-import me.lucko.luckperms.common.web.BytebinClient;
-import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;

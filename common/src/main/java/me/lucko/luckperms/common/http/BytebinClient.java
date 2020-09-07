@@ -23,15 +23,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.web;
+package me.lucko.luckperms.common.http;
+
+import com.google.gson.JsonElement;
+
+import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public class BytebinClient extends AbstractHttpClient {
 
@@ -132,6 +141,34 @@ public class BytebinClient extends AbstractHttpClient {
 
         Request request = requestBuilder.put(body).build();
         makeHttpRequest(request).close();
+    }
+
+    /**
+     * GETs json content from bytebin
+     *
+     * @param id the id of the content
+     * @return the data
+     * @throws IOException if an error occurs
+     */
+    public JsonElement getJsonContent(String id) throws IOException, UnsuccessfulRequestException {
+        Request request = new Request.Builder()
+                .header("User-Agent", this.userAgent)
+                .url(this.url + id)
+                .build();
+
+        try (Response response = makeHttpRequest(request)) {
+            try (ResponseBody responseBody = response.body()) {
+                if (responseBody == null) {
+                    throw new RuntimeException("No response");
+                }
+
+                try (InputStream inputStream = responseBody.byteStream()) {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                        return GsonProvider.normal().fromJson(reader, JsonElement.class);
+                    }
+                }
+            }
+        }
     }
 
     public static final class Content {

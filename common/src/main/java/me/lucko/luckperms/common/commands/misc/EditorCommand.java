@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -47,7 +45,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
-import me.lucko.luckperms.common.web.WebEditor;
+import me.lucko.luckperms.common.webeditor.WebEditorRequest;
 
 import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
@@ -171,8 +169,8 @@ public class EditorCommand extends SingleCommand {
 
         Message.EDITOR_START.send(sender);
 
-        JsonObject payload = WebEditor.formPayload(holders, tracks, sender, label, plugin);
-        return WebEditor.post(payload, sender, plugin);
+        return WebEditorRequest.generate(holders, tracks, sender, label, plugin)
+                .createSession(plugin, sender);
     }
 
     private enum Type {

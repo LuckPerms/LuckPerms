@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -39,8 +40,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
-import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
-import me.lucko.luckperms.common.web.WebEditor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -118,7 +117,7 @@ public class ImportCommand extends SingleCommand {
             }
 
             try {
-                data = WebEditor.readDataFromBytebin(plugin.getBytebin(), code);
+                data = plugin.getBytebin().getJsonContent(code).getAsJsonObject();
             } catch (UnsuccessfulRequestException e) {
                 Message.IMPORT_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
                 return CommandResult.STATE_ERROR;

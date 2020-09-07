@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.web;
+package me.lucko.luckperms.common.http;
 
 import okhttp3.Response;
 

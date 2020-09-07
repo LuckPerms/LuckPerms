@@ -27,6 +27,8 @@ package me.lucko.luckperms.common.backup;
 
 import com.google.gson.JsonObject;
 
+import me.lucko.luckperms.common.http.AbstractHttpClient;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -40,8 +42,6 @@ import me.lucko.luckperms.common.util.ProgressLogger;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
-import me.lucko.luckperms.common.web.AbstractHttpClient;
-import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;

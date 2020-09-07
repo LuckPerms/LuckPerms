@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.locale.message.Message;
@@ -40,7 +41,6 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.treeview.TreeView;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.Uuids;
-import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
