@@ -92,7 +92,7 @@ public enum CommandSpec {
     IMPORT("Imports data from a (previously created) export file", "/%s import <file>",
             Argument.list(
                     Argument.create("file", true, "the file to import from"),
-                    Argument.create("--merge", false, "merge import into existing data")
+                    Argument.create("--replace", false, "replace existing data instead of merging")
             )
     ),
     EXPORT("Exports all permissions data to an 'export' file. Can be re-imported at a later time.", "/%s export <file>",
