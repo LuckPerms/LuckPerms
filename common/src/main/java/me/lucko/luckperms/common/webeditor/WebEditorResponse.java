@@ -287,7 +287,13 @@ public class WebEditorResponse {
 
             User user = this.plugin.getStorage().loadUser(uuid, null).join();
             if (user == null) {
-                return false;
+                try {
+                    this.plugin.getStorage().deletePlayerData(uuid).get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Message.DELETE_ERROR.send(this.sender, uuid.toString());
+                }
+                return true;
             }
 
             if (ArgumentPermissions.checkModifyPerms(this.plugin, this.sender, CommandPermission.APPLY_EDITS, user)) {
