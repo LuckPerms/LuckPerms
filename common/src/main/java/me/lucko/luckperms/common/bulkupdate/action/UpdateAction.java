@@ -93,7 +93,7 @@ public class UpdateAction implements Action {
 
     @Override
     public void appendSql(PreparedStatementBuilder builder) {
-        builder.append("UPDATE {table} SET " + this.field.getSqlName() + "=?");
+        builder.append("UPDATE {table} SET " + this.field.getSqlName() + "=");
         builder.variable(this.value);
     }
 }

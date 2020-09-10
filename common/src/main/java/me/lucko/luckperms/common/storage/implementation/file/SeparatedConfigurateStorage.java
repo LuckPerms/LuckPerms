@@ -54,6 +54,7 @@ import java.util.stream.Stream;
 
 public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     private final String fileExtension;
+    private final Predicate<Path> fileExtensionFilter;
 
     private Path usersDirectory;
     private Path groupsDirectory;
@@ -74,6 +75,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     public SeparatedConfigurateStorage(LuckPermsPlugin plugin, String implementationName, ConfigurateLoader loader, String fileExtension, String dataFolderName) {
         super(plugin, implementationName, loader, dataFolderName);
         this.fileExtension = fileExtension;
+        this.fileExtensionFilter = path -> path.getFileName().toString().endsWith(this.fileExtension);
     }
 
     @Override
@@ -118,10 +120,6 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
             default:
                 throw new RuntimeException();
         }
-    }
-
-    private Predicate<Path> getFileTypeFilter() {
-        return path -> path.getFileName().toString().endsWith(this.fileExtension);
     }
 
     private void registerFileAction(StorageLocation type, Path file) {
@@ -210,7 +208,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
         if (bulkUpdate.getDataType().isIncludingUsers()) {
             try (Stream<Path> s = Files.list(getDirectory(StorageLocation.USER))) {
-                s.filter(getFileTypeFilter()).forEach(file -> {
+                s.filter(this.fileExtensionFilter).forEach(file -> {
                     try {
                         registerFileAction(StorageLocation.USER, file);
                         ConfigurationNode object = readFile(file);
@@ -227,7 +225,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
 
         if (bulkUpdate.getDataType().isIncludingGroups()) {
             try (Stream<Path> s = Files.list(getDirectory(StorageLocation.GROUP))) {
-                s.filter(getFileTypeFilter()).forEach(file -> {
+                s.filter(this.fileExtensionFilter).forEach(file -> {
                     try {
                         registerFileAction(StorageLocation.GROUP, file);
                         ConfigurationNode object = readFile(file);
@@ -246,7 +244,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     @Override
     public Set<UUID> getUniqueUsers() throws IOException {
         try (Stream<Path> stream = Files.list(this.usersDirectory)) {
-            return stream.filter(getFileTypeFilter())
+            return stream.filter(this.fileExtensionFilter)
                     .map(p -> p.getFileName().toString())
                     .map(s -> s.substring(0, s.length() - this.fileExtension.length()))
                     .map(Uuids::fromString)
@@ -259,7 +257,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<UUID, N>> held = new ArrayList<>();
         try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.USER))) {
-            stream.filter(getFileTypeFilter())
+            stream.filter(this.fileExtensionFilter)
                     .forEach(file -> {
                         String fileName = file.getFileName().toString();
                         try {
@@ -285,7 +283,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     public void loadAllGroups() throws IOException {
         List<String> groups;
         try (Stream<Path> stream = Files.list(this.groupsDirectory)) {
-            groups = stream.filter(getFileTypeFilter())
+            groups = stream.filter(this.fileExtensionFilter)
                     .map(p -> p.getFileName().toString())
                     .map(s -> s.substring(0, s.length() - this.fileExtension.length()))
                     .collect(Collectors.toList());
@@ -302,7 +300,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<String, N>> held = new ArrayList<>();
         try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.GROUP))) {
-            stream.filter(getFileTypeFilter())
+            stream.filter(this.fileExtensionFilter)
                     .forEach(file -> {
                         String fileName = file.getFileName().toString();
                         try {
@@ -328,7 +326,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     public void loadAllTracks() throws IOException {
         List<String> tracks;
         try (Stream<Path> stream = Files.list(this.tracksDirectory)) {
-            tracks = stream.filter(getFileTypeFilter())
+            tracks = stream.filter(this.fileExtensionFilter)
                     .map(p -> p.getFileName().toString())
                     .map(s -> s.substring(0, s.length() - this.fileExtension.length()))
                     .collect(Collectors.toList());
