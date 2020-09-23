@@ -46,7 +46,7 @@ public enum Message {
      * General & Commands
      */
     PREFIX("&7[&b&lL&3&lP&7] ", false),
-
+    NON_PLAYER_COMMAND_ERROR("You cannot run LuckPerms commands as you are not a player", true),
     VIEW_AVAILABLE_COMMANDS_PROMPT("&3Use &a/{} help &3to view available commands.", true),
     NO_PERMISSION_FOR_SUBCOMMANDS("&3You do not have permission to use any sub commands.", true),
     FIRST_TIME_SETUP(

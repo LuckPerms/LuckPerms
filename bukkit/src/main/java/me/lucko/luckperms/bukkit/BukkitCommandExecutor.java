@@ -79,6 +79,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
 
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+
         Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
         List<String> arguments = resolveSelectors(sender, ArgumentTokenizer.EXECUTE.tokenizeInput(args));
         executeCommand(wrapped, label, arguments);
@@ -98,7 +99,9 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
         if (!(e.getSender() instanceof ConsoleCommandSender)) {
             return;
         }
-
+        if(this.plugin.getConfiguration().get(ConfigKeys.BLOCK_NON_PLAYER_SOURCES)) {
+            return;
+        }
         String buffer = e.getCommand();
         if (buffer.isEmpty() || buffer.charAt(0) != '/') {
             return;

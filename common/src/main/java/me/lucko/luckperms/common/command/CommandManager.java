@@ -58,6 +58,7 @@ import me.lucko.luckperms.common.commands.track.DeleteTrack;
 import me.lucko.luckperms.common.commands.track.ListTracks;
 import me.lucko.luckperms.common.commands.track.TrackParentCommand;
 import me.lucko.luckperms.common.commands.user.UserParentCommand;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.model.Group;
@@ -157,7 +158,12 @@ public class CommandManager {
 
     private CommandResult execute(Sender sender, String label, List<String> arguments) {
         applyConvenienceAliases(arguments, true);
-
+        if(this.plugin.getConfiguration().get(ConfigKeys.BLOCK_NON_PLAYER_SOURCES)) {
+            if(sender.isConsole() || sender.isValid()) {
+                Message.NON_PLAYER_COMMAND_ERROR.send(sender);
+                return CommandResult.FAILURE;
+            }
+        }
         // Handle no arguments
         if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
             Message.BLANK.send(sender, "&2Running &b" + AbstractLuckPermsPlugin.getPluginName() + " v" + this.plugin.getBootstrap().getVersion() + "&2.");

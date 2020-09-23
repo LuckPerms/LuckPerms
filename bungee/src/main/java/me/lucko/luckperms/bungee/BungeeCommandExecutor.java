@@ -81,6 +81,7 @@ public class BungeeCommandExecutor extends Command implements TabExecutor {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+
         Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
         List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(args);
         this.manager.executeCommand(wrapped, "lpb", arguments);

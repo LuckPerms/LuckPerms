@@ -118,9 +118,16 @@ public final class ConfigKeys {
         return new QueryOptionsBuilderImpl(QueryMode.CONTEXTUAL).flags(flags).build();
     });
 
+
+    /**
+     * Stops Luckperms Commands from being run from non player sources.
+     */
+    public static final ConfigKey<Boolean> BLOCK_NON_PLAYER_SOURCES = booleanKey("block-non-player-sources", false);
+
     /**
      * The default contexts satisfy mode
      */
+
     public static final ConfigKey<ContextSatisfyMode> CONTEXT_SATISFY_MODE = key(c -> {
         String value = c.getString("context-satisfy-mode", "at-least-one-value-per-key");
         if (value.toLowerCase().equals("all-values-per-key")) {
@@ -617,6 +624,7 @@ public final class ConfigKeys {
      * The URL of the tree viewer
      */
     public static final ConfigKey<String> TREE_VIEWER_URL_PATTERN = stringKey("tree-viewer-url", "https://luckperms.net/treeview/");
+
 
 
     /**

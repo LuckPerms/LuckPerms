@@ -542,3 +542,7 @@ allow-invalid-usernames: false
 #
 # - When this happens, the plugin will set their primary group back to default.
 prevent-primary-group-removal: false
+
+#Stops Luckperms Commands from being run from non player sources. 
+#eg: Stops a mod from running /lp user Example permission set *
+block-non-player-sources: false

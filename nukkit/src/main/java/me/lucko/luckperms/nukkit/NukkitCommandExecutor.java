@@ -57,6 +57,7 @@ public class NukkitCommandExecutor extends CommandManager implements CommandExec
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
         Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
         List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(args);
         executeCommand(wrapped, label, arguments);
