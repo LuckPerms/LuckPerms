@@ -29,6 +29,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateBuilder;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.bulkupdate.DataType;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
@@ -82,6 +83,10 @@ public class BulkUpdateCommand extends SingleCommand {
                 if (ex == null) {
                     plugin.getSyncTaskBuffer().requestDirectly();
                     Message.BULK_UPDATE_SUCCESS.send(sender);
+                    if (operation.isTrackingStatistics()) {
+                        BulkUpdateStatistics stats = operation.getStatistics();
+                        Message.BULK_UPDATE_VERBOSE.send(sender, stats.getAffectedNodes(), stats.getAffectedUsers(), stats.getAffectedGroups());
+                    }
                 } else {
                     ex.printStackTrace();
                     Message.BULK_UPDATE_FAILURE.send(sender);
@@ -95,6 +100,8 @@ public class BulkUpdateCommand extends SingleCommand {
         }
 
         BulkUpdateBuilder bulkUpdateBuilder = BulkUpdateBuilder.create();
+
+        bulkUpdateBuilder.trackStatistics(!args.remove("--silent"));
 
         try {
             bulkUpdateBuilder.dataType(DataType.valueOf(args.remove(0).toUpperCase()));

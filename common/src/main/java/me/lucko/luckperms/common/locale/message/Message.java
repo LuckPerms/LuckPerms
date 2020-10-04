@@ -355,6 +355,12 @@ public enum Message {
 
     BULK_UPDATE_STARTING("&aRunning bulk update.", true),
     BULK_UPDATE_SUCCESS("&bBulk update completed successfully.", true),
+    BULK_UPDATE_VERBOSE(
+            "{PREFIX}&bTotal affected nodes: &a{}" + "\n" +
+            "{PREFIX}&bTotal affected users: &a{}" + "\n" +
+            "{PREFIX}&bTotal affected groups: &a{}",
+            false
+    ),
     BULK_UPDATE_FAILURE("&cBulk update failed. Check the console for errors.", true),
 
     USER_INFO_GENERAL(

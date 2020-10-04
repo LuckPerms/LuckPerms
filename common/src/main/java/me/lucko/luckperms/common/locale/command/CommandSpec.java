@@ -108,7 +108,8 @@ public enum CommandSpec {
                     Argument.create("action", true, "the action to perform on the data. ('update' or 'delete')"),
                     Argument.create("action field", false, "the field to act upon. only required for 'update'. ('permission', 'server' or 'world')"),
                     Argument.create("action value", false, "the value to replace with. only required for 'update'."),
-                    Argument.create("constraint...", false, "the constraints required for the update")
+                    Argument.create("constraint...", false, "the constraints required for the update"),
+                    Argument.create("--silent", false, "prevents extra logging when performing a bulk update operation")
             )
     ),
     MIGRATION("Migration commands", "/%s migration"),

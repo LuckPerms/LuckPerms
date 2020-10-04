@@ -31,6 +31,7 @@ import com.google.gson.reflect.TypeToken;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.Group;
@@ -249,18 +250,66 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws SQLException {
+        BulkUpdateStatistics stats = bulkUpdate.getStatistics();
+
         try (Connection c = this.connectionFactory.getConnection()) {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
                 String table = this.statementProcessor.apply("{prefix}user_permissions");
                 try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
-                    ps.execute();
+
+                    if (bulkUpdate.isTrackingStatistics()) {
+                        PreparedStatementBuilder builder = new PreparedStatementBuilder();
+                        builder.append(USER_PERMISSIONS_SELECT_DISTINCT);
+                        if (!bulkUpdate.getQueries().isEmpty()) {
+                            builder.append(" WHERE ");
+                            bulkUpdate.getQueries().forEach(query -> query.appendSql(builder));
+                        }
+
+                        try (PreparedStatement lookup = builder.build(c, this.statementProcessor)) {
+                            try (ResultSet rs = lookup.executeQuery()) {
+                                Set<UUID> uuids = new HashSet<>();
+
+                                while (rs.next()) {
+                                    uuids.add(Uuids.fromString(rs.getString("uuid")));
+                                }
+                                uuids.remove(null);
+                                stats.incrementAffectedUsersBy(uuids.size());
+                            }
+                        }
+                        stats.incrementAffectedNodesBy(ps.executeUpdate());
+                    } else {
+                        ps.execute();
+                    }
                 }
             }
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
                 String table = this.statementProcessor.apply("{prefix}group_permissions");
                 try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
-                    ps.execute();
+
+                    if (bulkUpdate.isTrackingStatistics()) {
+                        PreparedStatementBuilder builder = new PreparedStatementBuilder();
+                        builder.append(GROUP_PERMISSIONS_SELECT_ALL);
+                        if (!bulkUpdate.getQueries().isEmpty()) {
+                            builder.append(" WHERE ");
+                            bulkUpdate.getQueries().forEach(query -> query.appendSql(builder));
+                        }
+
+                        try (PreparedStatement lookup = builder.build(c, this.statementProcessor)) {
+                            try (ResultSet rs = lookup.executeQuery()) {
+                                Set<String> groups = new HashSet<>();
+
+                                while (rs.next()) {
+                                    groups.add(rs.getString("name"));
+                                }
+                                groups.remove(null);
+                                stats.incrementAffectedGroupsBy(groups.size());
+                            }
+                        }
+                        stats.incrementAffectedNodesBy(ps.executeUpdate());
+                    } else {
+                        ps.execute();
+                    }
                 }
             }
         }

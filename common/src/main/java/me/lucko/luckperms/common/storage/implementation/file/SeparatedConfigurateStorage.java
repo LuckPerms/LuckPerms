@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.storage.implementation.file;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -212,7 +213,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
                     try {
                         registerFileAction(StorageLocation.USER, file);
                         ConfigurationNode object = readFile(file);
-                        ConfigurationNode results = processBulkUpdate(bulkUpdate, object);
+                        ConfigurationNode results = processBulkUpdate(bulkUpdate, object, HolderType.USER);
                         if (results != null) {
                             saveFile(file, object);
                         }
@@ -229,7 +230,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
                     try {
                         registerFileAction(StorageLocation.GROUP, file);
                         ConfigurationNode object = readFile(file);
-                        ConfigurationNode results = processBulkUpdate(bulkUpdate, object);
+                        ConfigurationNode results = processBulkUpdate(bulkUpdate, object, HolderType.GROUP);
                         if (results != null) {
                             saveFile(file, object);
                         }
