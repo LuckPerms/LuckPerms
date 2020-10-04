@@ -100,7 +100,7 @@ public class BulkUpdateCommand extends SingleCommand {
 
         BulkUpdateBuilder bulkUpdateBuilder = BulkUpdateBuilder.create();
 
-        boolean dontShowOperationStatistics = args.remove("-s");
+        bulkUpdateBuilder.trackStatistics(!args.remove("--silent"));
 
         try {
             bulkUpdateBuilder.dataType(DataType.valueOf(args.remove(0).toUpperCase()));
@@ -154,8 +154,6 @@ public class BulkUpdateCommand extends SingleCommand {
             String expr = parts[2];
             bulkUpdateBuilder.query(Query.of(field, Constraint.of(comparison, expr)));
         }
-
-        bulkUpdateBuilder.trackStatistics(!dontShowOperationStatistics);
 
         String id = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
 
