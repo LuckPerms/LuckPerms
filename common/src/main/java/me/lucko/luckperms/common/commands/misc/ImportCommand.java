@@ -54,7 +54,7 @@ public class ImportCommand extends SingleCommand {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public ImportCommand(LocaleManager locale) {
-        super(CommandSpec.IMPORT.localize(locale), "Import", CommandPermission.IMPORT, Predicates.notInRange(1, 2));
+        super(CommandSpec.IMPORT.localize(locale), "Import", CommandPermission.IMPORT, Predicates.notInRange(1, 3));
     }
 
     @Override
