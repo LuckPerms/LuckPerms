@@ -84,7 +84,7 @@ public class BulkUpdateCommand extends SingleCommand {
                     Message.BULK_UPDATE_SUCCESS.send(sender);
                     if (operation.isTrackingStatistics()) {
                         BulkUpdateStatistics stats = operation.getStatistics();
-                        Message.BULK_UPDATE_VERBOSE.send(sender, stats.getAffectedNodes(), stats.getAffectedUsers(), stats.getAffectedGroups());
+                        Message.BULK_UPDATE_STATISTICS.send(sender, stats.getAffectedNodes(), stats.getAffectedUsers(), stats.getAffectedGroups());
                     }
                 } else {
                     ex.printStackTrace();
