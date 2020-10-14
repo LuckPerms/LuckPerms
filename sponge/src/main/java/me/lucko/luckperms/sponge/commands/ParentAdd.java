@@ -28,10 +28,8 @@ package me.lucko.luckperms.sponge.commands;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -45,8 +43,8 @@ import net.luckperms.api.context.ImmutableContextSet;
 import org.spongepowered.api.Sponge;
 
 public class ParentAdd extends ChildCommand<LPSubjectData> {
-    public ParentAdd(LocaleManager locale) {
-        super(CommandSpec.SPONGE_PARENT_ADD.localize(locale), "add", CommandPermission.SPONGE_PARENT_ADD, Predicates.inRange(0, 1));
+    public ParentAdd() {
+        super(CommandSpec.SPONGE_PARENT_ADD, "add", CommandPermission.SPONGE_PARENT_ADD, Predicates.inRange(0, 1));
     }
 
     @Override
@@ -57,21 +55,21 @@ public class ParentAdd extends ChildCommand<LPSubjectData> {
 
         LPPermissionService service = Sponge.getServiceManager().provideUnchecked(LPPermissionService.class);
         if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(collection))) {
-            Message.BLANK.send(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't already exist.");
+            SpongeCommandUtils.sendPrefixed(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't already exist.");
         }
 
         LPSubjectCollection c = service.getCollection(collection);
         if (!c.hasRegistered(name).join()) {
-            Message.BLANK.send(sender, "Warning: Subject '&4" + name + "&c' doesn't already exist.");
+            SpongeCommandUtils.sendPrefixed(sender, "Warning: Subject '&4" + name + "&c' doesn't already exist.");
         }
 
         LPSubject subject = c.loadSubject(name).join();
 
         if (subjectData.addParent(contextSet, subject.toReference()).join()) {
-            Message.BLANK.send(sender, "&aAdded parent &b" + subject.getParentCollection().getIdentifier() +
-                        "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
+            SpongeCommandUtils.sendPrefixed(sender, "&aAdded parent &b" + subject.getParentCollection().getIdentifier() +
+                        "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
         } else {
-            Message.BLANK.send(sender, "Unable to add parent. Does the Subject already have it added?");
+            SpongeCommandUtils.sendPrefixed(sender, "Unable to add parent. Does the Subject already have it added?");
         }
         return CommandResult.SUCCESS;
     }

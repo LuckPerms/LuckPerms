@@ -52,7 +52,7 @@ public class ApiPlatform implements Platform, PluginMetadata {
 
     @Override
     public @NonNull String getApiVersion() {
-        return "5.0";
+        return "5.2";
     }
 
     @Override

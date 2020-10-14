@@ -92,7 +92,8 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
-        dependencies.add(Dependency.TEXT_ADAPTER_BUNGEECORD);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM_BUNGEECORD);
         return dependencies;
     }
 

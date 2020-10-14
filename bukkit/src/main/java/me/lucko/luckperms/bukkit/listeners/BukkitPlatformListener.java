@@ -27,7 +27,7 @@ package me.lucko.luckperms.bukkit.listeners;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
@@ -75,7 +75,7 @@ public class BukkitPlatformListener implements Listener {
 
         if (OP_COMMAND_PATTERN.matcher(cmdLine).matches()) {
             event.setCancelled(true);
-            sender.sendMessage(Message.OP_DISABLED.asString(this.plugin.getLocaleManager()));
+            Message.OP_DISABLED.send(this.plugin.getSenderFactory().wrap(sender));
         }
     }
 

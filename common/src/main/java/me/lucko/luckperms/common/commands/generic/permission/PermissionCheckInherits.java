@@ -30,13 +30,11 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
@@ -52,8 +50,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class PermissionCheckInherits extends GenericChildCommand {
-    public PermissionCheckInherits(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_CHECK_INHERITS.localize(locale), "checkinherits", CommandPermission.USER_PERM_CHECK_INHERITS, CommandPermission.GROUP_PERM_CHECK_INHERITS, Predicates.is(0));
+    public PermissionCheckInherits() {
+        super(CommandSpec.PERMISSION_CHECK_INHERITS, "checkinherits", CommandPermission.USER_PERM_CHECK_INHERITS, CommandPermission.GROUP_PERM_CHECK_INHERITS, Predicates.is(0));
     }
 
     @Override
@@ -76,8 +74,8 @@ public class PermissionCheckInherits extends GenericChildCommand {
             location = "self";
         }
 
-        String s = MessageUtils.formatTristate(match.map(n -> Tristate.of(n.getValue())).orElse(Tristate.UNDEFINED));
-        Message.CHECK_INHERITS_PERMISSION.send(sender, target.getFormattedDisplayName(), node, s, MessageUtils.contextSetToString(plugin.getLocaleManager(), context), location);
+        Tristate result = match.map(n -> Tristate.of(n.getValue())).orElse(Tristate.UNDEFINED);
+        Message.CHECK_INHERITS_PERMISSION.send(sender, target.getFormattedDisplayName(), node, result, context, location);
         return CommandResult.SUCCESS;
     }
 

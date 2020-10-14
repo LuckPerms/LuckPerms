@@ -29,28 +29,18 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.SortMode;
 import me.lucko.luckperms.common.command.utils.SortType;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.model.HolderType;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
-import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.ComponentBuilder;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 
@@ -58,11 +48,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class PermissionInfo extends GenericChildCommand {
-    public PermissionInfo(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_INFO.localize(locale), "info", CommandPermission.USER_PERM_INFO, CommandPermission.GROUP_PERM_INFO, Predicates.notInRange(0, 2));
+    public PermissionInfo() {
+        super(CommandSpec.PERMISSION_INFO, "info", CommandPermission.USER_PERM_INFO, CommandPermission.GROUP_PERM_INFO, Predicates.notInRange(0, 2));
     }
 
     @Override
@@ -113,13 +102,11 @@ public class PermissionInfo extends GenericChildCommand {
 
         // send content
         for (Node node : content) {
-            String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getKey() + (sender.isConsole() ? " &7(" + node.getValue() + "&7)" : "") + MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node);
             if (node.hasExpiry()) {
-                s += "\n&2-    expires in " + DurationFormatter.LONG.format(node.getExpiryDuration());
+                Message.PERMISSION_INFO_TEMPORARY_NODE_ENTRY.send(sender, node, target, label);
+            } else {
+                Message.PERMISSION_INFO_NODE_ENTRY.send(sender, node, target, label);
             }
-
-            TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(target, label, node)).build();
-            sender.sendMessage(message);
         }
 
         return CommandResult.SUCCESS;
@@ -134,22 +121,4 @@ public class PermissionInfo extends GenericChildCommand {
         // fallback to priority
         return NodeWithContextComparator.reverse().compare(o1, o2);
     };
-
-    private static Consumer<ComponentBuilder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
-        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "§3> " + (node.getValue() ? "§a" : "§c") + node.getKey(),
-                " ",
-                "§7Click to remove this node from " + holder.getPlainDisplayName()
-        ), '§'));
-
-        String id = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
-        boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
-        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, id, holder.getType(), explicitGlobalContext);
-        ClickEvent clickEvent = ClickEvent.suggestCommand(command);
-
-        return component -> {
-            component.hoverEvent(hoverEvent);
-            component.clickEvent(clickEvent);
-        };
-    }
 }

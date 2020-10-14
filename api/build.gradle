@@ -1,5 +1,5 @@
 group = 'net.luckperms'
-project.version = '5.1'
+project.version = '5.2'
 
 dependencies {
     compileOnly 'org.checkerframework:checker-qual:2.5.5'

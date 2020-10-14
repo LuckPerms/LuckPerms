@@ -25,15 +25,20 @@
 
 package me.lucko.luckperms.common.sender;
 
-import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.util.Tristate;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -42,8 +47,6 @@ import java.util.UUID;
  * @param <T> the command sender type
  */
 public final class AbstractSender<T> implements Sender {
-    private static final Splitter NEW_LINE_SPLITTER = Splitter.on("\n");
-
     private final LuckPermsPlugin platform;
     private final SenderFactory<?, T> factory;
     private final WeakReference<T> sender;
@@ -75,31 +78,16 @@ public final class AbstractSender<T> implements Sender {
     }
 
     @Override
-    public void sendMessage(String message) {
+    public void sendMessage(Component message) {
         final T sender = this.sender.get();
         if (sender != null) {
-
-            // if it is console, split up the lines and send individually.
             if (isConsole()) {
-                for (String line : NEW_LINE_SPLITTER.split(message)) {
+                for (Component line : splitNewlines(message)) {
                     this.factory.sendMessage(sender, line);
                 }
             } else {
                 this.factory.sendMessage(sender, message);
             }
-        }
-    }
-
-    @Override
-    public void sendMessage(Component message) {
-        if (isConsole()) {
-            sendMessage(TextUtils.toLegacy(message));
-            return;
-        }
-
-        final T sender = this.sender.get();
-        if (sender != null) {
-            this.factory.sendMessage(sender, message);
         }
     }
 
@@ -149,5 +137,43 @@ public final class AbstractSender<T> implements Sender {
     @Override
     public int hashCode() {
         return this.uniqueId.hashCode();
+    }
+
+    // A small utility method which splits components built using
+    // > join(newLine(), components...)
+    // back into separate components.
+    private static Iterable<Component> splitNewlines(Component message) {
+        if (message instanceof TextComponent && message.style().isEmpty() && !message.children().isEmpty() && ((TextComponent) message).content().isEmpty()) {
+            LinkedList<List<Component>> split = new LinkedList<>();
+            split.add(new ArrayList<>());
+
+            for (Component child : message.children()) {
+                if (Component.newline().equals(child)) {
+                    split.add(new ArrayList<>());
+                } else {
+                    Iterator<Component> splitChildren = splitNewlines(child).iterator();
+                    if (splitChildren.hasNext()) {
+                        split.getLast().add(splitChildren.next());
+                    }
+                    while (splitChildren.hasNext()) {
+                        split.add(new ArrayList<>());
+                        split.getLast().add(splitChildren.next());
+                    }
+                }
+            }
+
+            return Iterables.transform(split, input -> {
+                switch (input.size()) {
+                    case 0:
+                        return Component.empty();
+                    case 1:
+                        return input.get(0);
+                    default:
+                        return Component.join(Component.empty(), input);
+                }
+            });
+        }
+
+        return Collections.singleton(message);
     }
 }

@@ -29,14 +29,12 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -49,8 +47,8 @@ import net.luckperms.api.model.data.DataMutateResult;
 import java.util.List;
 
 public class TrackAppend extends ChildCommand<Track> {
-    public TrackAppend(LocaleManager locale) {
-        super(CommandSpec.TRACK_APPEND.localize(locale), "append", CommandPermission.TRACK_APPEND, Predicates.not(1));
+    public TrackAppend() {
+        super(CommandSpec.TRACK_APPEND, "append", CommandPermission.TRACK_APPEND, Predicates.not(1));
     }
 
     @Override
@@ -71,7 +69,7 @@ public class TrackAppend extends ChildCommand<Track> {
         if (result.wasSuccessful()) {
             Message.TRACK_APPEND_SUCCESS.send(sender, group.getName(), target.getName());
             if (target.getGroups().size() > 1) {
-                Message.BLANK.send(sender, MessageUtils.listToArrowSep(target.getGroups(), group.getName()));
+                Message.TRACK_PATH_HIGHLIGHTED.send(sender, target.getGroups(), group.getName());
             }
 
             LoggedAction.build().source(sender).target(target)

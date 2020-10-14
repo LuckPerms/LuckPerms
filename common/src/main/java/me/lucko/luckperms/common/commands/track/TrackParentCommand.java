@@ -30,9 +30,8 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.ParentCommand;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -53,15 +52,15 @@ public class TrackParentCommand extends ParentCommand<Track, String> {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build(key -> new ReentrantLock());
 
-    public TrackParentCommand(LocaleManager locale) {
-        super(CommandSpec.TRACK.localize(locale), "Track", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<Track>>builder()
-                .add(new TrackInfo(locale))
-                .add(new TrackAppend(locale))
-                .add(new TrackInsert(locale))
-                .add(new TrackRemove(locale))
-                .add(new TrackClear(locale))
-                .add(new TrackRename(locale))
-                .add(new TrackClone(locale))
+    public TrackParentCommand() {
+        super(CommandSpec.TRACK, "Track", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<Track>>builder()
+                .add(new TrackInfo())
+                .add(new TrackAppend())
+                .add(new TrackInsert())
+                .add(new TrackRemove())
+                .add(new TrackClear())
+                .add(new TrackRename())
+                .add(new TrackClone())
                 .build()
         );
     }

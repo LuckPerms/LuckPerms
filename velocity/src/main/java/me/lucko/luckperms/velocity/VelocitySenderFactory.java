@@ -28,14 +28,16 @@ package me.lucko.luckperms.velocity;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.luckperms.api.util.Tristate;
 
+import java.util.Locale;
 import java.util.UUID;
 
 public class VelocitySenderFactory extends SenderFactory<LPVelocityPlugin, CommandSource> {
@@ -60,13 +62,13 @@ public class VelocitySenderFactory extends SenderFactory<LPVelocityPlugin, Comma
     }
 
     @Override
-    protected void sendMessage(CommandSource source, String s) {
-        sendMessage(source, TextUtils.fromLegacy(s));
-    }
-
-    @Override
     protected void sendMessage(CommandSource source, Component message) {
-        source.sendMessage(message);
+        Locale locale = TranslationManager.DEFAULT_LOCALE;
+        if (source instanceof Player) {
+            locale = ((Player) source).getPlayerSettings().getLocale();
+        }
+        Component rendered = GlobalTranslator.render(message, locale);
+        source.sendMessage(rendered);
     }
 
     @Override
@@ -81,6 +83,6 @@ public class VelocitySenderFactory extends SenderFactory<LPVelocityPlugin, Comma
 
     @Override
     protected void performCommand(CommandSource source, String command) {
-        getPlugin().getBootstrap().getProxy().getCommandManager().execute(source, command);
+        getPlugin().getBootstrap().getProxy().getCommandManager().executeAsync(source, command).join();
     }
 }

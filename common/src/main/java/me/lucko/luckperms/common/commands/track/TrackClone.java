@@ -29,11 +29,10 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -43,8 +42,8 @@ import me.lucko.luckperms.common.util.Predicates;
 import net.luckperms.api.event.cause.CreationCause;
 
 public class TrackClone extends ChildCommand<Track> {
-    public TrackClone(LocaleManager locale) {
-        super(CommandSpec.TRACK_CLONE.localize(locale), "clone", CommandPermission.TRACK_CLONE, Predicates.not(1));
+    public TrackClone() {
+        super(CommandSpec.TRACK_CLONE, "clone", CommandPermission.TRACK_CLONE, Predicates.not(1));
     }
 
     @Override

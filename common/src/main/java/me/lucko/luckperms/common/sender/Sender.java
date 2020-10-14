@@ -28,9 +28,8 @@ package me.lucko.luckperms.common.sender;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.util.Tristate;
@@ -104,15 +103,6 @@ public interface Sender {
      * @return the sender's uuid
      */
     UUID getUniqueId();
-
-    /**
-     * Send a message to the Sender.
-     *
-     * <p>Supports {@link TextUtils#SECTION_CHAR} for message formatting.</p>
-     *
-     * @param message the message to send.
-     */
-    void sendMessage(String message);
 
     /**
      * Send a json message to the Sender.

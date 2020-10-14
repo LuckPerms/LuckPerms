@@ -30,13 +30,11 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
@@ -46,8 +44,8 @@ import java.util.UUID;
 public class LogUserHistory extends ChildCommand<Log> {
     private static final int ENTRIES_PER_PAGE = 10;
 
-    public LogUserHistory(LocaleManager locale) {
-        super(CommandSpec.LOG_USER_HISTORY.localize(locale), "userhistory", CommandPermission.LOG_USER_HISTORY, Predicates.notInRange(1, 2));
+    public LogUserHistory() {
+        super(CommandSpec.LOG_USER_HISTORY, "userhistory", CommandPermission.LOG_USER_HISTORY, Predicates.notInRange(1, 2));
     }
 
     @Override
@@ -84,14 +82,7 @@ public class LogUserHistory extends ChildCommand<Log> {
         Message.LOG_HISTORY_USER_HEADER.send(sender, name, page, maxPage);
 
         for (Paginated.Entry<LoggedAction> e : entries) {
-            Message.LOG_ENTRY.send(sender,
-                    e.position(),
-                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.value().getDurationSince()),
-                    e.value().getSourceFriendlyString(),
-                    Character.toString(LoggedAction.getTypeCharacter(e.value().getTarget().getType())),
-                    e.value().getTargetFriendlyString(),
-                    e.value().getDescription()
-            );
+            Message.LOG_ENTRY.send(sender, e.position(), e.value());
         }
 
         return CommandResult.SUCCESS;

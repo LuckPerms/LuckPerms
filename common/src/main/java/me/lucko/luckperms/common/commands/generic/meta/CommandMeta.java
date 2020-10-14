@@ -29,32 +29,31 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.abstraction.GenericParentCommand;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 
 public class CommandMeta<T extends PermissionHolder> extends GenericParentCommand<T> {
-    public CommandMeta(LocaleManager locale, HolderType type) {
-        super(CommandSpec.META.localize(locale), "Meta", type, ImmutableList.<GenericChildCommand>builder()
-                .add(new MetaInfo(locale))
-                .add(new MetaSet(locale))
-                .add(new MetaUnset(locale))
-                .add(new MetaSetTemp(locale))
-                .add(new MetaUnsetTemp(locale))
-                .add(MetaAddChatMeta.forPrefix(locale))
-                .add(MetaAddChatMeta.forSuffix(locale))
-                .add(MetaSetChatMeta.forPrefix(locale))
-                .add(MetaSetChatMeta.forSuffix(locale))
-                .add(MetaRemoveChatMeta.forPrefix(locale))
-                .add(MetaRemoveChatMeta.forSuffix(locale))
-                .add(MetaAddTempChatMeta.forPrefix(locale))
-                .add(MetaAddTempChatMeta.forSuffix(locale))
-                .add(MetaSetTempChatMeta.forPrefix(locale))
-                .add(MetaSetTempChatMeta.forSuffix(locale))
-                .add(MetaRemoveTempChatMeta.forPrefix(locale))
-                .add(MetaRemoveTempChatMeta.forSuffix(locale))
-                .add(new MetaClear(locale))
+    public CommandMeta(HolderType type) {
+        super(CommandSpec.META, "Meta", type, ImmutableList.<GenericChildCommand>builder()
+                .add(new MetaInfo())
+                .add(new MetaSet())
+                .add(new MetaUnset())
+                .add(new MetaSetTemp())
+                .add(new MetaUnsetTemp())
+                .add(MetaAddChatMeta.forPrefix())
+                .add(MetaAddChatMeta.forSuffix())
+                .add(MetaSetChatMeta.forPrefix())
+                .add(MetaSetChatMeta.forSuffix())
+                .add(MetaRemoveChatMeta.forPrefix())
+                .add(MetaRemoveChatMeta.forSuffix())
+                .add(MetaAddTempChatMeta.forPrefix())
+                .add(MetaAddTempChatMeta.forSuffix())
+                .add(MetaSetTempChatMeta.forPrefix())
+                .add(MetaSetTempChatMeta.forSuffix())
+                .add(MetaRemoveTempChatMeta.forPrefix())
+                .add(MetaRemoveTempChatMeta.forSuffix())
+                .add(new MetaClear())
                 .build());
     }
 }

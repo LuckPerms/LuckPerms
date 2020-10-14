@@ -27,10 +27,9 @@ package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.Component;
-import net.kyori.text.adapter.bukkit.TextAdapter;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
 
 import org.bukkit.command.CommandSender;
@@ -41,8 +40,11 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSender> {
+    private final BukkitAudiences audiences;
+
     public BukkitSenderFactory(LPBukkitPlugin plugin) {
         super(plugin);
+        this.audiences = BukkitAudiences.create(plugin.getBootstrap());
     }
 
     @Override
@@ -62,26 +64,13 @@ public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSe
     }
 
     @Override
-    protected void sendMessage(CommandSender sender, String s) {
-        // we can safely send async for players and the console
-        if (sender instanceof Player || sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender) {
-            sender.sendMessage(s);
-            return;
-        }
-
-        // otherwise, send the message sync
-        getPlugin().getBootstrap().getScheduler().executeSync(new SyncMessengerAgent(sender, s));
-    }
-
-    @Override
     protected void sendMessage(CommandSender sender, Component message) {
-        if (sender instanceof Player) {
-            TextAdapter.sendComponent(sender, message);
-            return;
+        // we can safely send async for players and the console - otherwise, send it sync
+        if (sender instanceof Player || sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender) {
+            this.audiences.sender(sender).sendMessage(message);
+        } else {
+            getPlugin().getBootstrap().getScheduler().executeSync(() -> sendMessage(sender, message));
         }
-
-        // Fallback to legacy format
-        sendMessage(sender, TextUtils.toLegacy(message));
     }
 
     @Override
@@ -105,19 +94,9 @@ public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSe
         getPlugin().getBootstrap().getServer().dispatchCommand(sender, command);
     }
 
-    private static final class SyncMessengerAgent implements Runnable {
-        private final CommandSender sender;
-        private final String message;
-
-        private SyncMessengerAgent(CommandSender sender, String message) {
-            this.sender = sender;
-            this.message = message;
-        }
-
-        @Override
-        public void run() {
-            this.sender.sendMessage(this.message);
-        }
+    @Override
+    public void close() {
+        super.close();
+        this.audiences.close();
     }
-
 }

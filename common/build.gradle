@@ -2,15 +2,8 @@ dependencies {
     compile project(':api')
 
     compile 'org.checkerframework:checker-qual:2.5.5'
-    compile('net.kyori:text-api:3.0.4') {
+    compile('me.lucko:adventure-api:4.0.0') {
         exclude(module: 'checker-qual')
-    }
-    compile('net.kyori:text-serializer-legacy:3.0.4') {
-        exclude(module: 'text-api')
-    }
-    compile('net.kyori:text-serializer-gson:3.0.4') {
-        exclude(module: 'text-api')
-        exclude(module: 'gson')
     }
     compile('net.kyori:event-api:3.0.0') {
         exclude(module: 'checker-qual')

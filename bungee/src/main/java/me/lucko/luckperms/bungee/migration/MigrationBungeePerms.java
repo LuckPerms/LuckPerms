@@ -28,11 +28,10 @@ package me.lucko.luckperms.bungee.migration;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.node.types.Prefix;
@@ -57,8 +56,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationBungeePerms extends ChildCommand<Object> {
-    public MigrationBungeePerms(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_COMMAND.localize(locale), "bungeeperms", CommandPermission.MIGRATION, Predicates.alwaysFalse());
+    public MigrationBungeePerms() {
+        super(CommandSpec.MIGRATION_COMMAND, "bungeeperms", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override

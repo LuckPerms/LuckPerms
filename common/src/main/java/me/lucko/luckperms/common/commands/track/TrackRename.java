@@ -29,11 +29,10 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -44,8 +43,8 @@ import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 
 public class TrackRename extends ChildCommand<Track> {
-    public TrackRename(LocaleManager locale) {
-        super(CommandSpec.TRACK_RENAME.localize(locale), "rename", CommandPermission.TRACK_RENAME, Predicates.not(1));
+    public TrackRename() {
+        super(CommandSpec.TRACK_RENAME, "rename", CommandPermission.TRACK_RENAME, Predicates.not(1));
     }
 
     @Override

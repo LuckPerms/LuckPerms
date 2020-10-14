@@ -29,12 +29,11 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -46,8 +45,8 @@ import net.luckperms.api.event.cause.DeletionCause;
 import java.util.List;
 
 public class DeleteTrack extends SingleCommand {
-    public DeleteTrack(LocaleManager locale) {
-        super(CommandSpec.DELETE_TRACK.localize(locale), "DeleteTrack", CommandPermission.DELETE_TRACK, Predicates.not(1));
+    public DeleteTrack() {
+        super(CommandSpec.DELETE_TRACK, "DeleteTrack", CommandPermission.DELETE_TRACK, Predicates.not(1));
     }
 
     @Override
