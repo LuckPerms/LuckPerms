@@ -29,26 +29,25 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.abstraction.GenericParentCommand;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 
 import java.util.Collections;
 
 public class CommandParent<T extends PermissionHolder> extends GenericParentCommand<T> {
-    public CommandParent(LocaleManager locale, HolderType type) {
-        super(CommandSpec.PARENT.localize(locale), "Parent", type, ImmutableList.<GenericChildCommand>builder()
-                .add(new ParentInfo(locale))
-                .add(new ParentSet(locale))
-                .add(new ParentAdd(locale))
-                .add(new ParentRemove(locale))
-                .add(new ParentSetTrack(locale))
-                .add(new ParentAddTemp(locale))
-                .add(new ParentRemoveTemp(locale))
-                .add(new ParentClear(locale))
-                .add(new ParentClearTrack(locale))
-                .addAll(type == HolderType.USER ? Collections.singleton(new UserSwitchPrimaryGroup(locale)) : Collections.emptySet())
+    public CommandParent(HolderType type) {
+        super(CommandSpec.PARENT, "Parent", type, ImmutableList.<GenericChildCommand>builder()
+                .add(new ParentInfo())
+                .add(new ParentSet())
+                .add(new ParentAdd())
+                .add(new ParentRemove())
+                .add(new ParentSetTrack())
+                .add(new ParentAddTemp())
+                .add(new ParentRemoveTemp())
+                .add(new ParentClear())
+                .add(new ParentClearTrack())
+                .addAll(type == HolderType.USER ? Collections.singleton(new UserSwitchPrimaryGroup()) : Collections.emptySet())
                 .build());
     }
 }

@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.ParentCommand;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
 import me.lucko.luckperms.common.commands.generic.other.HolderClear;
 import me.lucko.luckperms.common.commands.generic.other.HolderEditor;
@@ -37,9 +38,7 @@ import me.lucko.luckperms.common.commands.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
@@ -65,18 +64,18 @@ public class UserParentCommand extends ParentCommand<User, UserIdentifier> {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build(key -> new ReentrantLock());
 
-    public UserParentCommand(LocaleManager locale) {
-        super(CommandSpec.USER.localize(locale), "User", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<User>>builder()
-                .add(new UserInfo(locale))
-                .add(new CommandPermission<>(locale, HolderType.USER))
-                .add(new CommandParent<>(locale, HolderType.USER))
-                .add(new CommandMeta<>(locale, HolderType.USER))
-                .add(new HolderEditor<>(locale, HolderType.USER))
-                .add(new UserPromote(locale))
-                .add(new UserDemote(locale))
-                .add(new HolderShowTracks<>(locale, HolderType.USER))
-                .add(new HolderClear<>(locale, HolderType.USER))
-                .add(new UserClone(locale))
+    public UserParentCommand() {
+        super(CommandSpec.USER, "User", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<User>>builder()
+                .add(new UserInfo())
+                .add(new CommandPermission<>(HolderType.USER))
+                .add(new CommandParent<>(HolderType.USER))
+                .add(new CommandMeta<>(HolderType.USER))
+                .add(new HolderEditor<>(HolderType.USER))
+                .add(new UserPromote())
+                .add(new UserDemote())
+                .add(new HolderShowTracks<>(HolderType.USER))
+                .add(new HolderClear<>(HolderType.USER))
+                .add(new UserClone())
                 .build()
         );
     }

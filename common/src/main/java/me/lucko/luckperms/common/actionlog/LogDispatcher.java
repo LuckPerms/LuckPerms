@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.actionlog;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.log.LogNotify;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
@@ -72,12 +72,7 @@ public class LogDispatcher {
                     boolean shouldCancel = LogNotify.isIgnoring(this.plugin, s.getUniqueId()) || (sender != null && s.getUniqueId().equals(sender.getUniqueId()));
                     return !this.plugin.getEventDispatcher().dispatchLogNotify(shouldCancel, entry, origin, s);
                 })
-                .forEach(s -> Message.LOG.send(s,
-                        entry.getSourceFriendlyString(),
-                        Character.toString(LoggedAction.getTypeCharacter(entry.getTarget().getType())),
-                        entry.getTargetFriendlyString(),
-                        entry.getDescription()
-                ));
+                .forEach(s -> Message.LOG.send(s, entry));
     }
 
     public void dispatch(LoggedAction entry, Sender sender) {

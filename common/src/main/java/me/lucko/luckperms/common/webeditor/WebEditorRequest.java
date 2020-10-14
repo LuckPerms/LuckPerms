@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.http.AbstractHttpClient;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
@@ -44,11 +44,6 @@ import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
 import net.luckperms.api.context.ImmutableContextSet;
 
 import java.io.ByteArrayOutputStream;
@@ -172,15 +167,7 @@ public class WebEditorRequest {
 
         // form a url for the editor
         String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + pasteId;
-
-        Message.EDITOR_URL.send(sender);
-
-        Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                .clickEvent(ClickEvent.openUrl(url))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("Click to open the editor.").color(TextColor.GRAY)))
-                .build();
-
-        sender.sendMessage(message);
+        Message.EDITOR_URL.send(sender, url);
         return CommandResult.SUCCESS;
     }
 

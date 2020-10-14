@@ -29,7 +29,7 @@ import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.http.AbstractHttpClient;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -90,7 +90,7 @@ public abstract class Exporter implements Runnable {
         this.includeUsers = includeUsers;
         this.includeGroups = includeGroups;
 
-        this.log = new ProgressLogger(Message.EXPORT_LOG, Message.EXPORT_LOG_PROGRESS, null);
+        this.log = new ProgressLogger(Message.EXPORT_LOG, Message.EXPORT_LOG_PROGRESS);
         this.log.addListener(plugin.getConsoleSender());
         this.log.addListener(executor);
     }
@@ -238,7 +238,7 @@ public abstract class Exporter implements Runnable {
                 e.printStackTrace();
             }
 
-            this.log.getListeners().forEach(l -> Message.LOG_EXPORT_SUCCESS.send(l, this.filePath.toFile().getAbsolutePath()));
+            this.log.getListeners().forEach(l -> Message.EXPORT_FILE_SUCCESS.send(l, this.filePath.toFile().getAbsolutePath()));
         }
     }
 
@@ -263,12 +263,12 @@ public abstract class Exporter implements Runnable {
 
             try {
                 String pasteId = this.plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
-                this.log.getListeners().forEach(l -> Message.EXPORT_CODE.send(l, pasteId, this.label, pasteId));
+                this.log.getListeners().forEach(l -> Message.EXPORT_WEB_SUCCESS.send(l, pasteId, this.label));
             } catch (UnsuccessfulRequestException e) {
-                this.log.getListeners().forEach(l -> Message.EXPORT_HTTP_REQUEST_FAILURE.send(l, e.getResponse().code(), e.getResponse().message()));
+                this.log.getListeners().forEach(l -> Message.HTTP_REQUEST_FAILURE.send(l, e.getResponse().code(), e.getResponse().message()));
             } catch (IOException e) {
                 new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
-                this.log.getListeners().forEach(Message.EXPORT_HTTP_UNKNOWN_FAILURE::send);
+                this.log.getListeners().forEach(Message.HTTP_UNKNOWN_FAILURE::send);
             }
         }
     }

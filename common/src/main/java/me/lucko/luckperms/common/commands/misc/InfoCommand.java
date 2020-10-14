@@ -28,81 +28,25 @@ package me.lucko.luckperms.common.commands.misc;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 
-import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.extension.Extension;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collection;
 import java.util.Map;
 
 public class InfoCommand extends SingleCommand {
-    public InfoCommand(LocaleManager locale) {
-        super(CommandSpec.INFO.localize(locale), "Info", CommandPermission.INFO, Predicates.alwaysFalse());
+    public InfoCommand() {
+        super(CommandSpec.INFO, "Info", CommandPermission.INFO, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Map<String, String> storageMeta = plugin.getStorage().getMeta();
-
-        Message.INFO_HEADER.send(sender,
-                AbstractLuckPermsPlugin.getPluginName(),
-                plugin.getBootstrap().getVersion(),
-                plugin.getBootstrap().getType().getFriendlyName(),
-                plugin.getBootstrap().getServerBrand(),
-                plugin.getBootstrap().getServerVersion()
-        );
-
-        Message.INFO_STORAGE.send(sender, plugin.getStorage().getName());
-        for (Map.Entry<String, String> e : storageMeta.entrySet()) {
-            Message.INFO_STORAGE_META.send(sender, e.getKey(), formatValue(e.getValue()));
-        }
-
-        Collection<Extension> loadedExtensions = plugin.getExtensionManager().getLoadedExtensions();
-        if (!loadedExtensions.isEmpty()) {
-            Message.INFO_EXTENSIONS.send(sender);
-            for (Extension extension : loadedExtensions) {
-                Message.INFO_EXTENSION_ENTRY.send(sender, extension.getClass().getName());
-            }
-        }
-
-        ImmutableContextSet staticContext = plugin.getContextManager().getStaticContext();
-        Message.INFO_MIDDLE.send(sender,
-                plugin.getMessagingService().map(InternalMessagingService::getName).orElse("None"),
-                staticContext.isEmpty() ? "None" : MessageUtils.contextSetToString(plugin.getLocaleManager(), staticContext),
-                plugin.getBootstrap().getPlayerCount(),
-                plugin.getConnectionListener().getUniqueConnections().size(),
-                DurationFormatter.CONCISE_LOW_ACCURACY.format(Duration.between(plugin.getBootstrap().getStartupTime(), Instant.now())),
-                plugin.getUserManager().getAll().size(),
-                plugin.getGroupManager().getAll().size(),
-                plugin.getTrackManager().getAll().size()
-        );
-
+        Message.INFO.send(sender, plugin, storageMeta);
         return CommandResult.SUCCESS;
     }
 
-    private static String formatValue(String value) {
-        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-            return MessageUtils.formatBoolean(Boolean.parseBoolean(value));
-        }
-
-        try {
-            int i = Integer.parseInt(value);
-            return "&a" + i;
-        } catch (NumberFormatException ignored) {}
-
-        return "&f" + value;
-    }
 }

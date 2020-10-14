@@ -60,47 +60,40 @@ public enum Dependency {
             "1RsiF3BiVztjlfTA+svDCuoDSGFuSpTZYHvUK8yBx8I="
     ),
 
-    TEXT(
-            "net{}kyori",
-            "text-api",
-            "3.0.4",
-            "qJCoD0fTnRhI0EpqdiLAT9QH5gIyY8aNw4Exe/gTWm0=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE(
+            "me{}lucko",
+            "adventure-api",
+            "4.0.1",
+            "6dKz0iM9MChLzU5MTLW5HSLFEmmNh/D9Bb6kzJvK/1E=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
-    TEXT_SERIALIZER_GSON(
-            "net{}kyori",
-            "text-serializer-gson",
-            "3.0.4",
-            "pes03k1/XKS9OpiK+xqVmk+lXSJIsCEkkg3g36PV65A=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE_PLATFORM(
+            "me{}lucko",
+            "adventure-platform-api",
+            "4.0.0",
+            "SgUP+9qpF0QogfbR7NOmXJ9zoi3gyMAAh4igc4SivO4=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
-    TEXT_SERIALIZER_LEGACY(
-            "net{}kyori",
-            "text-serializer-legacy",
-            "3.0.4",
-            "1ZYqzZ7zhnN2AyU/n/NeRQv0A9R01j/gX1Uq/nE02SI=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE_PLATFORM_BUKKIT(
+            "me{}lucko",
+            "adventure-platform-bukkit",
+            "4.0.0",
+            "St2dvhkBLX4Wr+yZeRbICh/hlw0uhA6cfN/0Ua6YGw4=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
-    TEXT_ADAPTER_BUKKIT(
-            "net{}kyori",
-            "text-adapter-bukkit",
-            "3.0.5",
-            "cXA/7PDtnWpd8l7H4AEhP/3Z/WRNiFhDSqKbqO/1+ig=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE_PLATFORM_BUNGEECORD(
+            "me{}lucko",
+            "adventure-platform-bungeecord",
+            "4.0.0",
+            "CNvYc3//7OqEz2615Omuq0rRpORvDiy1kEJuzi0lc4Q=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
-    TEXT_ADAPTER_BUNGEECORD(
-            "net{}kyori",
-            "text-adapter-bungeecord",
-            "3.0.5",
-            "+yU9AB1mG5wTAFeZc6zArs67loFz00w8VqE34QCjCdw=",
-            Relocation.of("text", "net{}kyori{}text")
-    ),
-    TEXT_ADAPTER_SPONGEAPI(
-            "net{}kyori",
-            "text-adapter-spongeapi",
-            "3.0.5",
-            "/plXxpvDwqYECq+0saN13Y/Qf6F7GthJPc/hjR7SL5s=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE_PLATFORM_SPONGEAPI(
+            "me{}lucko",
+            "adventure-platform-spongeapi",
+            "4.0.0",
+            "qVFz5oHdpiHI+KLMKSigpmu+T5nYZ25BmGYC6Imcx9A=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     EVENT(
             "net{}kyori",

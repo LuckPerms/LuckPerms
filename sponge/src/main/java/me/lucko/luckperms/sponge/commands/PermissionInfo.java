@@ -30,10 +30,8 @@ import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -44,34 +42,34 @@ import net.luckperms.api.context.ImmutableContextSet;
 import java.util.Map;
 
 public class PermissionInfo extends ChildCommand<LPSubjectData> {
-    public PermissionInfo(LocaleManager locale) {
-        super(CommandSpec.SPONGE_PERMISSION_INFO.localize(locale), "info", CommandPermission.SPONGE_PERMISSION_INFO, Predicates.alwaysFalse());
+    public PermissionInfo() {
+        super(CommandSpec.SPONGE_PERMISSION_INFO, "info", CommandPermission.SPONGE_PERMISSION_INFO, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
         ImmutableContextSet contextSet = args.getContextOrEmpty(0);
         if (contextSet.isEmpty()) {
-            Message.BLANK.send(sender, "&aShowing permissions matching contexts &bANY&a.");
+            SpongeCommandUtils.sendPrefixed(sender, "&aShowing permissions matching contexts &bANY&a.");
             Map<ImmutableContextSet, ImmutableMap<String, Boolean>> permissions = subjectData.getAllPermissions();
             if (permissions.isEmpty()) {
-                Message.BLANK.send(sender, "That subject does not have any permissions defined.");
+                SpongeCommandUtils.sendPrefixed(sender, "That subject does not have any permissions defined.");
                 return CommandResult.SUCCESS;
             }
 
             for (Map.Entry<ImmutableContextSet, ImmutableMap<String, Boolean>> e : permissions.entrySet()) {
-                Message.BLANK.send(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey(), plugin.getLocaleManager()) + "\n" + SpongeCommandUtils.nodesToString(e.getValue()));
+                SpongeCommandUtils.sendPrefixed(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey()) + "\n" + SpongeCommandUtils.nodesToString(e.getValue()));
             }
 
         } else {
             Map<String, Boolean> permissions = subjectData.getPermissions(contextSet);
             if (permissions.isEmpty()) {
-                Message.BLANK.send(sender, "That subject does not have any permissions defined in those contexts.");
+                SpongeCommandUtils.sendPrefixed(sender, "That subject does not have any permissions defined in those contexts.");
                 return CommandResult.SUCCESS;
             }
 
-            Message.BLANK.send(sender, "&aShowing permissions matching contexts &b" +
-                        SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()) + "&a.\n" + SpongeCommandUtils.nodesToString(permissions));
+            SpongeCommandUtils.sendPrefixed(sender, "&aShowing permissions matching contexts &b" +
+                        SpongeCommandUtils.contextToString(contextSet) + "&a.\n" + SpongeCommandUtils.nodesToString(permissions));
 
         }
         return CommandResult.SUCCESS;

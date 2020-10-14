@@ -31,11 +31,9 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -44,6 +42,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 
@@ -54,8 +53,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T> {
-    public HolderShowTracks(LocaleManager locale, HolderType type) {
-        super(CommandSpec.HOLDER_SHOWTRACKS.localize(locale), "showtracks", type == HolderType.USER ? CommandPermission.USER_SHOW_TRACKS : CommandPermission.GROUP_SHOW_TRACKS, Predicates.alwaysFalse());
+    public HolderShowTracks(HolderType type) {
+        super(CommandSpec.HOLDER_SHOWTRACKS, "showtracks", type == HolderType.USER ? CommandPermission.USER_SHOW_TRACKS : CommandPermission.GROUP_SHOW_TRACKS, Predicates.alwaysFalse());
     }
 
     @Override
@@ -73,7 +72,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
             return CommandResult.LOADING_ERROR;
         }
 
-        List<Map.Entry<Track, String>> lines = new ArrayList<>();
+        List<Map.Entry<Track, Component>> lines = new ArrayList<>();
 
         if (target.getType() == HolderType.USER) {
             // if the holder is a user, we want to query parent groups for tracks
@@ -88,8 +87,14 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
                         .filter(t -> t.containsGroup(groupName))
                         .collect(Collectors.toList());
 
-                for (Track t : tracks) {
-                    lines.add(Maps.immutableEntry(t, MessageUtils.getAppendableNodeContextString(plugin.getLocaleManager(), node) + "\n" + MessageUtils.listToArrowSep(t.getGroups(), groupName)));
+                for (Track track : tracks) {
+                    Component line = Component.text()
+                            .append(Message.formatContextSetBracketed(node.getContexts(), Component.empty()))
+                            .append(Component.newline())
+                            .append(Message.formatTrackPath(track.getGroups(), groupName))
+                            .build();
+
+                    lines.add(Maps.immutableEntry(track, line));
                 }
             }
         } else {
@@ -99,8 +104,8 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
                     .filter(t -> t.containsGroup(groupName))
                     .collect(Collectors.toList());
 
-            for (Track t : tracks) {
-                lines.add(Maps.immutableEntry(t, MessageUtils.listToArrowSep(t.getGroups(), groupName)));
+            for (Track track : tracks) {
+                lines.add(Maps.immutableEntry(track, Message.formatTrackPath(track.getGroups(), groupName)));
             }
         }
 
@@ -110,7 +115,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
         }
 
         Message.LIST_TRACKS.send(sender, target.getFormattedDisplayName());
-        for (Map.Entry<Track, String> line : lines) {
+        for (Map.Entry<Track, Component> line : lines) {
             Message.LIST_TRACKS_ENTRY.send(sender, line.getKey().getName(), line.getValue());
         }
         return CommandResult.SUCCESS;

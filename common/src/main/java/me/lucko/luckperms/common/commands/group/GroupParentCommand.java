@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.ParentCommand;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
 import me.lucko.luckperms.common.commands.generic.other.HolderClear;
@@ -37,8 +38,6 @@ import me.lucko.luckperms.common.commands.generic.other.HolderEditor;
 import me.lucko.luckperms.common.commands.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -60,20 +59,20 @@ public class GroupParentCommand extends ParentCommand<Group, String> {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build(key -> new ReentrantLock());
 
-    public GroupParentCommand(LocaleManager locale) {
-        super(CommandSpec.GROUP.localize(locale), "Group", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<Group>>builder()
-                .add(new GroupInfo(locale))
-                .add(new CommandPermission<>(locale, HolderType.GROUP))
-                .add(new CommandParent<>(locale, HolderType.GROUP))
-                .add(new CommandMeta<>(locale, HolderType.GROUP))
-                .add(new HolderEditor<>(locale, HolderType.GROUP))
-                .add(new GroupListMembers(locale))
-                .add(new GroupSetWeight(locale))
-                .add(new GroupSetDisplayName(locale))
-                .add(new HolderShowTracks<>(locale, HolderType.GROUP))
-                .add(new HolderClear<>(locale, HolderType.GROUP))
-                .add(new GroupRename(locale))
-                .add(new GroupClone(locale))
+    public GroupParentCommand() {
+        super(CommandSpec.GROUP, "Group", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<Group>>builder()
+                .add(new GroupInfo())
+                .add(new CommandPermission<>(HolderType.GROUP))
+                .add(new CommandParent<>(HolderType.GROUP))
+                .add(new CommandMeta<>(HolderType.GROUP))
+                .add(new HolderEditor<>(HolderType.GROUP))
+                .add(new GroupListMembers())
+                .add(new GroupSetWeight())
+                .add(new GroupSetDisplayName())
+                .add(new HolderShowTracks<>(HolderType.GROUP))
+                .add(new HolderClear<>(HolderType.GROUP))
+                .add(new GroupRename())
+                .add(new GroupClone())
                 .build()
         );
     }

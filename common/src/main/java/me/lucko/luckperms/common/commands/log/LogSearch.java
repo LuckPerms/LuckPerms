@@ -30,13 +30,11 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
@@ -45,8 +43,8 @@ import java.util.List;
 public class LogSearch extends ChildCommand<Log> {
     private static final int ENTRIES_PER_PAGE = 10;
 
-    public LogSearch(LocaleManager locale) {
-        super(CommandSpec.LOG_SEARCH.localize(locale), "search", CommandPermission.LOG_SEARCH, Predicates.is(0));
+    public LogSearch() {
+        super(CommandSpec.LOG_SEARCH, "search", CommandPermission.LOG_SEARCH, Predicates.is(0));
     }
 
     @Override
@@ -91,14 +89,7 @@ public class LogSearch extends ChildCommand<Log> {
         Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
         for (Paginated.Entry<LoggedAction> e : entries) {
-            Message.LOG_ENTRY.send(sender,
-                    e.position(),
-                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.value().getDurationSince()),
-                    e.value().getSourceFriendlyString(),
-                    Character.toString(LoggedAction.getTypeCharacter(e.value().getTarget().getType())),
-                    e.value().getTargetFriendlyString(),
-                    e.value().getDescription()
-            );
+            Message.LOG_ENTRY.send(sender, e.position(), e.value());
         }
 
         return CommandResult.SUCCESS;

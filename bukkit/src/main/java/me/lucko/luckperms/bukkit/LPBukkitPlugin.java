@@ -117,7 +117,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
-        dependencies.add(Dependency.TEXT_ADAPTER_BUKKIT);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM_BUKKIT);
         if (isBrigadierSupported()) {
             dependencies.add(Dependency.COMMODORE);
         }

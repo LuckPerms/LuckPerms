@@ -28,15 +28,13 @@ package me.lucko.luckperms.common.verbose;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.calculator.result.TristateResult;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.http.AbstractHttpClient;
 import me.lucko.luckperms.common.http.BytebinClient;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.StackTracePrinter;
-import me.lucko.luckperms.common.util.TextUtils;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
@@ -44,8 +42,10 @@ import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.HoverEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.util.Tristate;
 
@@ -158,8 +158,7 @@ public class VerboseListener {
                 Message.VERBOSE_LOG_PERMISSION.send(this.notifiedSender,
                         permissionEvent.getCheckTarget(),
                         permissionEvent.getPermission(),
-                        getTristateColor(permissionEvent.getResult().result()),
-                        permissionEvent.getResult().result().name().toLowerCase()
+                        permissionEvent.getResult().result()
                 );
             } else if (event instanceof MetaCheckEvent) {
                 MetaCheckEvent metaEvent = (MetaCheckEvent) event;
@@ -175,19 +174,17 @@ public class VerboseListener {
         }
 
         // form a text component from the check trace
-        TextComponent textComponent;
-
+        Component component;
         if (event instanceof PermissionCheckEvent) {
             PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
-            textComponent = Message.VERBOSE_LOG_PERMISSION.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
+            component = Message.VERBOSE_LOG_PERMISSION.build(
                     permissionEvent.getCheckTarget(),
                     permissionEvent.getPermission(),
-                    getTristateColor(permissionEvent.getResult().result()),
-                    permissionEvent.getResult().result().name().toLowerCase()
+                    permissionEvent.getResult().result()
             );
         } else if (event instanceof MetaCheckEvent) {
             MetaCheckEvent metaEvent = (MetaCheckEvent) event;
-            textComponent = Message.VERBOSE_LOG_META.asComponent(this.notifiedSender.getPlugin().getLocaleManager(),
+            component = Message.VERBOSE_LOG_META.build(
                     metaEvent.getCheckTarget(),
                     metaEvent.getKey(),
                     metaEvent.getResult()
@@ -197,34 +194,62 @@ public class VerboseListener {
         }
 
         // build the hover text
-        List<String> hover = new ArrayList<>();
+        List<ComponentLike> hover = new ArrayList<>();
 
         if (event instanceof PermissionCheckEvent) {
             PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
-            hover.add("&aType: &2permission");
-            hover.add("&bOrigin: &2" + permissionEvent.getOrigin().name());
+            hover.add(Component.text()
+                    .append(Component.text("Type: ", NamedTextColor.GREEN))
+                    .append(Component.text("permission", NamedTextColor.DARK_GREEN))
+            );
+            hover.add(Component.text()
+                    .append(Component.text("Origin: ", NamedTextColor.AQUA))
+                    .append(Component.text(permissionEvent.getOrigin().name(), NamedTextColor.DARK_GREEN))
+            );
 
             TristateResult result = permissionEvent.getResult();
             if (result.processorClass() != null) {
-                hover.add("&bProcessor: &2" + result.processorClass().getName());
+                hover.add(Component.text()
+                        .append(Component.text("Processor: ", NamedTextColor.AQUA))
+                        .append(Component.text(result.processorClass().getName(), NamedTextColor.DARK_GREEN))
+                );
             }
             if (result.cause() != null) {
-                hover.add("&bCause: &2" + result.cause());
+                hover.add(Component.text()
+                        .append(Component.text("Cause: ", NamedTextColor.AQUA))
+                        .append(Component.text(result.cause(), NamedTextColor.DARK_GREEN))
+                );
             }
         }
         if (event instanceof MetaCheckEvent) {
             MetaCheckEvent metaEvent = (MetaCheckEvent) event;
-            hover.add("&aType: &2meta");
-            hover.add("&bOrigin: &2" + metaEvent.getOrigin().name());
+            hover.add(Component.text()
+                    .append(Component.text("Type: ", NamedTextColor.GREEN))
+                    .append(Component.text("meta", NamedTextColor.DARK_GREEN))
+            );
+            hover.add(Component.text()
+                    .append(Component.text("Origin: ", NamedTextColor.AQUA))
+                    .append(Component.text(metaEvent.getOrigin().name(), NamedTextColor.DARK_GREEN))
+            );
         }
 
         if (event.getCheckQueryOptions().mode() == QueryMode.CONTEXTUAL) {
-            hover.add("&bContext: &r" + MessageUtils.contextSetToString(this.notifiedSender.getPlugin().getLocaleManager(), event.getCheckQueryOptions().context()));
+            hover.add(Component.text()
+                    .append(Component.text("Context: ", NamedTextColor.AQUA))
+                    .append(Message.formatContextSet(event.getCheckQueryOptions().context()))
+            );
         }
-        hover.add("&bThread: &r" + event.getCheckThread());
-        hover.add("&bTrace: &r");
 
-        Consumer<StackTraceElement> printer = StackTracePrinter.elementToString(str -> hover.add("&7" + str));
+        hover.add(Component.text()
+                .append(Component.text("Thread: ", NamedTextColor.AQUA))
+                .append(Component.text(event.getCheckThread(), NamedTextColor.WHITE))
+        );
+
+        hover.add(Component.text()
+                .append(Component.text("Trace: ", NamedTextColor.AQUA))
+        );
+
+        Consumer<StackTraceElement> printer = StackTracePrinter.elementToString(str -> hover.add(Component.text(str, NamedTextColor.GRAY)));
         int overflow;
         if (shouldFilterStackTrace(event)) {
             overflow = CHAT_FILTERED_PRINTER.process(event.getCheckTrace(), printer);
@@ -232,13 +257,12 @@ public class VerboseListener {
             overflow = CHAT_UNFILTERED_PRINTER.process(event.getCheckTrace(), printer);
         }
         if (overflow != 0) {
-            hover.add("&f... and " + overflow + " more");
+            hover.add(Component.text("... and " + overflow + " more", NamedTextColor.WHITE));
         }
 
         // send the message
-        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), TextUtils.AMPERSAND_CHAR));
-        TextComponent text = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(hoverEvent)).build();
-        this.notifiedSender.sendMessage(text);
+        HoverEvent<Component> hoverEvent = HoverEvent.showText(Component.join(Component.newline(), hover));
+        this.notifiedSender.sendMessage(component.hoverEvent(hoverEvent));
     }
 
     private static boolean shouldFilterStackTrace(VerboseEvent event) {

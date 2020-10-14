@@ -31,14 +31,12 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -51,8 +49,8 @@ import net.luckperms.api.node.NodeType;
 import java.util.List;
 
 public class MetaUnsetTemp extends GenericChildCommand {
-    public MetaUnsetTemp(LocaleManager locale) {
-        super(CommandSpec.META_UNSETTEMP.localize(locale), "unsettemp", CommandPermission.USER_META_UNSET_TEMP, CommandPermission.GROUP_META_UNSET_TEMP, Predicates.is(0));
+    public MetaUnsetTemp() {
+        super(CommandSpec.META_UNSETTEMP, "unsettemp", CommandPermission.USER_META_UNSET_TEMP, CommandPermission.GROUP_META_UNSET_TEMP, Predicates.is(0));
     }
 
     @Override
@@ -73,7 +71,7 @@ public class MetaUnsetTemp extends GenericChildCommand {
         }
 
         if (target.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key)), false)) {
-            Message.UNSET_META_TEMP_SUCCESS.send(sender, key, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.UNSET_META_TEMP_SUCCESS.send(sender, key, target.getFormattedDisplayName(), context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("meta", "unsettemp", key, context)
@@ -82,7 +80,7 @@ public class MetaUnsetTemp extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOESNT_HAVE_TEMP_META.send(sender, target.getFormattedDisplayName(), key, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOESNT_HAVE_TEMP_META.send(sender, target.getFormattedDisplayName(), key, context);
             return CommandResult.STATE_ERROR;
         }
     }

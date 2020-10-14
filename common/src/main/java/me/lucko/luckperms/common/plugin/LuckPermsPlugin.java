@@ -37,7 +37,7 @@ import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.http.BytebinClient;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
-import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -171,9 +171,9 @@ public interface LuckPermsPlugin {
     /**
      * Gets the instance providing locale translations for the plugin
      *
-     * @return the locale manager
+     * @return the translation manager
      */
-    LocaleManager getLocaleManager();
+    TranslationManager getTranslationManager();
 
     /**
      * Gets the dependency manager for the plugin

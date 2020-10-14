@@ -31,14 +31,12 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -51,8 +49,8 @@ import net.luckperms.api.node.NodeType;
 import java.util.List;
 
 public class MetaClear extends GenericChildCommand {
-    public MetaClear(LocaleManager locale) {
-        super(CommandSpec.META_CLEAR.localize(locale), "clear", CommandPermission.USER_META_CLEAR, CommandPermission.GROUP_META_CLEAR, Predicates.alwaysFalse());
+    public MetaClear() {
+        super(CommandSpec.META_CLEAR, "clear", CommandPermission.USER_META_CLEAR, CommandPermission.GROUP_META_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override
@@ -107,11 +105,7 @@ public class MetaClear extends GenericChildCommand {
         }
 
         int changed = before - target.normalData().size();
-        if (changed == 1) {
-            Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, target.getFormattedDisplayName(), type.name().toLowerCase(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
-        } else {
-            Message.META_CLEAR_SUCCESS.send(sender, target.getFormattedDisplayName(), type.name().toLowerCase(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
-        }
+        Message.META_CLEAR_SUCCESS.send(sender, target.getFormattedDisplayName(), type.name().toLowerCase(), context, changed);
 
         LoggedAction.build().source(sender).target(target)
                 .description("meta", "clear", context)

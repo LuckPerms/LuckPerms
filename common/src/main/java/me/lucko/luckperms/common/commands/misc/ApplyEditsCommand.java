@@ -30,11 +30,10 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -43,8 +42,8 @@ import me.lucko.luckperms.common.webeditor.WebEditorResponse;
 import java.io.IOException;
 
 public class ApplyEditsCommand extends SingleCommand {
-    public ApplyEditsCommand(LocaleManager locale) {
-        super(CommandSpec.APPLY_EDITS.localize(locale), "ApplyEdits", CommandPermission.APPLY_EDITS, Predicates.notInRange(1, 2));
+    public ApplyEditsCommand() {
+        super(CommandSpec.APPLY_EDITS, "ApplyEdits", CommandPermission.APPLY_EDITS, Predicates.notInRange(1, 2));
     }
 
     @Override

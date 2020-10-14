@@ -27,11 +27,13 @@ package me.lucko.luckperms.common.command.abstraction;
 
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.Argument;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.command.Argument;
-import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+
+import net.kyori.adventure.text.Component;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -53,7 +55,7 @@ public abstract class Command<T> {
      *
      * Contains details about usage, description, etc
      */
-    private final @NonNull LocalizedCommandSpec spec;
+    private final @NonNull CommandSpec spec;
 
     /**
      * The name of the command. Should be properly capitalised.
@@ -70,7 +72,7 @@ public abstract class Command<T> {
      */
     private final @NonNull Predicate<Integer> argumentCheck;
 
-    public Command(@NonNull LocalizedCommandSpec spec, @NonNull String name, @Nullable CommandPermission permission, @NonNull Predicate<Integer> argumentCheck) {
+    public Command(@NonNull CommandSpec spec, @NonNull String name, @Nullable CommandPermission permission, @NonNull Predicate<Integer> argumentCheck) {
         this.spec = spec;
         this.name = name;
         this.permission = permission;
@@ -82,7 +84,7 @@ public abstract class Command<T> {
      *
      * @return the command spec
      */
-    public @NonNull LocalizedCommandSpec getSpec() {
+    public @NonNull CommandSpec getSpec() {
         return this.spec;
     }
 
@@ -121,7 +123,7 @@ public abstract class Command<T> {
      *
      * @return the description
      */
-    public String getDescription() {
+    public Component getDescription() {
         return getSpec().description();
     }
 

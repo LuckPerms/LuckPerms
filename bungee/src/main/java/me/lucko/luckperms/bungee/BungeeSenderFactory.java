@@ -28,10 +28,9 @@ package me.lucko.luckperms.bungee;
 import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.Component;
-import net.kyori.text.adapter.bungeecord.TextAdapter;
+import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -39,8 +38,11 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import java.util.UUID;
 
 public class BungeeSenderFactory extends SenderFactory<LPBungeePlugin, CommandSender> {
+    private final BungeeAudiences audiences;
+
     public BungeeSenderFactory(LPBungeePlugin plugin) {
         super(plugin);
+        this.audiences = BungeeAudiences.create(plugin.getBootstrap());
     }
 
     @Override
@@ -60,13 +62,8 @@ public class BungeeSenderFactory extends SenderFactory<LPBungeePlugin, CommandSe
     }
 
     @Override
-    protected void sendMessage(CommandSender sender, String s) {
-        sendMessage(sender, TextUtils.fromLegacy(s));
-    }
-
-    @Override
     protected void sendMessage(CommandSender sender, Component message) {
-        TextAdapter.sendComponent(sender, message);
+        this.audiences.sender(sender).sendMessage(message);
     }
 
     @Override
@@ -82,5 +79,11 @@ public class BungeeSenderFactory extends SenderFactory<LPBungeePlugin, CommandSe
     @Override
     protected void performCommand(CommandSender sender, String command) {
         getPlugin().getBootstrap().getProxy().getPluginManager().dispatchCommand(sender, command);
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        this.audiences.close();
     }
 }

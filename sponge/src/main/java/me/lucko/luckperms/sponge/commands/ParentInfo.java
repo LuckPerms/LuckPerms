@@ -30,10 +30,8 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -46,34 +44,34 @@ import java.util.List;
 import java.util.Map;
 
 public class ParentInfo extends ChildCommand<LPSubjectData> {
-    public ParentInfo(LocaleManager locale) {
-        super(CommandSpec.SPONGE_PARENT_INFO.localize(locale), "info", CommandPermission.SPONGE_PARENT_INFO, Predicates.alwaysFalse());
+    public ParentInfo() {
+        super(CommandSpec.SPONGE_PARENT_INFO, "info", CommandPermission.SPONGE_PARENT_INFO, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
         ImmutableContextSet contextSet = args.getContextOrEmpty(0);
         if (contextSet.isEmpty()) {
-            Message.BLANK.send(sender, "&aShowing parents matching contexts &bANY&a.");
+            SpongeCommandUtils.sendPrefixed(sender, "&aShowing parents matching contexts &bANY&a.");
             Map<ImmutableContextSet, ImmutableList<LPSubjectReference>> parents = subjectData.getAllParents();
             if (parents.isEmpty()) {
-                Message.BLANK.send(sender, "That subject does not have any parents defined.");
+                SpongeCommandUtils.sendPrefixed(sender, "That subject does not have any parents defined.");
                 return CommandResult.SUCCESS;
             }
 
             for (Map.Entry<ImmutableContextSet, ImmutableList<LPSubjectReference>> e : parents.entrySet()) {
-                Message.BLANK.send(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey(), plugin.getLocaleManager()) + "\n" + SpongeCommandUtils.parentsToString(e.getValue()));
+                SpongeCommandUtils.sendPrefixed(sender, "&3>> &bContext: " + SpongeCommandUtils.contextToString(e.getKey()) + "\n" + SpongeCommandUtils.parentsToString(e.getValue()));
             }
 
         } else {
             List<LPSubjectReference> parents = subjectData.getParents(contextSet);
             if (parents.isEmpty()) {
-                Message.BLANK.send(sender, "That subject does not have any parents defined in those contexts.");
+                SpongeCommandUtils.sendPrefixed(sender, "That subject does not have any parents defined in those contexts.");
                 return CommandResult.SUCCESS;
             }
 
-            Message.BLANK.send(sender, "&aShowing parents matching contexts &b" +
-                        SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()) + "&a.\n" + SpongeCommandUtils.parentsToString(parents));
+            SpongeCommandUtils.sendPrefixed(sender, "&aShowing parents matching contexts &b" +
+                        SpongeCommandUtils.contextToString(contextSet) + "&a.\n" + SpongeCommandUtils.parentsToString(parents));
 
         }
         return CommandResult.SUCCESS;
