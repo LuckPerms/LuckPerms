@@ -53,7 +53,7 @@ public class ImportCommand extends SingleCommand {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public ImportCommand() {
-        super(CommandSpec.IMPORT, "Import", CommandPermission.IMPORT, Predicates.notInRange(1, 2));
+        super(CommandSpec.IMPORT, "Import", CommandPermission.IMPORT, Predicates.notInRange(1, 3));
     }
 
     @Override
