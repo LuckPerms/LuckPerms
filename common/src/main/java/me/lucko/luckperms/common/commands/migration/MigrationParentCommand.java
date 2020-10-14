@@ -32,9 +32,8 @@ import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.ParentCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -63,19 +62,19 @@ public class MigrationParentCommand extends ParentCommand<Object, Void> {
     private List<Command<Object>> commands = null;
     private boolean display = true;
 
-    public MigrationParentCommand(LocaleManager locale) {
-        super(CommandSpec.MIGRATION.localize(locale), "Migration", Type.NO_TARGET_ARGUMENT, null);
+    public MigrationParentCommand() {
+        super(CommandSpec.MIGRATION, "Migration", Type.NO_TARGET_ARGUMENT, null);
     }
 
     @Override
     public synchronized @NonNull List<Command<Object>> getChildren() {
         if (this.commands == null) {
-            this.commands = getAvailableCommands(getSpec().getLocaleManager());
+            this.commands = getAvailableCommands();
 
             // Add dummy command to show in the list.
             if (this.commands.isEmpty()) {
                 this.display = false;
-                this.commands.add(new ChildCommand<Object>(CommandSpec.MIGRATION_COMMAND.localize(getSpec().getLocaleManager()), "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
+                this.commands.add(new ChildCommand<Object>(CommandSpec.MIGRATION_COMMAND, "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
                     @Override
                     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, ArgumentList args, String label) {
                         return CommandResult.SUCCESS;
@@ -98,13 +97,13 @@ public class MigrationParentCommand extends ParentCommand<Object, Void> {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Command<Object>> getAvailableCommands(LocaleManager locale) {
+    private static List<Command<Object>> getAvailableCommands() {
         List<Command<Object>> available = new ArrayList<>();
 
         for (Map.Entry<String, String> plugin : PLUGINS.entrySet()) {
             try {
                 Class.forName(plugin.getKey());
-                available.add((ChildCommand<Object>) Class.forName(plugin.getValue()).getConstructor(LocaleManager.class).newInstance(locale));
+                available.add((ChildCommand<Object>) Class.forName(plugin.getValue()).getConstructor().newInstance());
             } catch (Throwable ignored) {}
         }
 

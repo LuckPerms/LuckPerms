@@ -98,9 +98,7 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
         dependencies.add(Dependency.SNAKEYAML);
 
         // already included in the proxy
-        dependencies.remove(Dependency.TEXT);
-        dependencies.remove(Dependency.TEXT_SERIALIZER_GSON);
-        dependencies.remove(Dependency.TEXT_SERIALIZER_LEGACY);
+        dependencies.remove(Dependency.ADVENTURE);
         return dependencies;
     }
 

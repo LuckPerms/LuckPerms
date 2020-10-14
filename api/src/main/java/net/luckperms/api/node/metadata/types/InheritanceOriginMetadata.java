@@ -54,4 +54,17 @@ public interface InheritanceOriginMetadata {
      */
     PermissionHolder.@NonNull Identifier getOrigin();
 
+    /**
+     * Gets whether the associated node was inherited from another holder.
+     *
+     * <p>In other terms, it returns whether the origin is not equal to the given holder.</p>
+     *
+     * @param holder the holder defining the node
+     * @return if true the node was inherited, false if it was defined by the same holder
+     * @since 5.3
+     */
+    default boolean wasInherited(PermissionHolder.@NonNull Identifier holder) {
+        return !holder.equals(getOrigin());
+    }
+
 }

@@ -30,9 +30,8 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.ParentCommand;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
@@ -42,14 +41,14 @@ import java.util.concurrent.locks.ReentrantLock;
 public class LogParentCommand extends ParentCommand<Log, Void> {
     private final ReentrantLock lock = new ReentrantLock();
 
-    public LogParentCommand(LocaleManager locale) {
-        super(CommandSpec.LOG.localize(locale), "Log", Type.NO_TARGET_ARGUMENT, ImmutableList.<Command<Log>>builder()
-                .add(new LogRecent(locale))
-                .add(new LogSearch(locale))
-                .add(new LogNotify(locale))
-                .add(new LogUserHistory(locale))
-                .add(new LogGroupHistory(locale))
-                .add(new LogTrackHistory(locale))
+    public LogParentCommand() {
+        super(CommandSpec.LOG, "Log", Type.NO_TARGET_ARGUMENT, ImmutableList.<Command<Log>>builder()
+                .add(new LogRecent())
+                .add(new LogSearch())
+                .add(new LogNotify())
+                .add(new LogUserHistory())
+                .add(new LogGroupHistory())
+                .add(new LogTrackHistory())
                 .build()
         );
     }

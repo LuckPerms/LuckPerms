@@ -28,10 +28,8 @@ package me.lucko.luckperms.sponge.commands;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -40,8 +38,8 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import net.luckperms.api.context.ImmutableContextSet;
 
 public class ParentClear extends ChildCommand<LPSubjectData> {
-    public ParentClear(LocaleManager locale) {
-        super(CommandSpec.SPONGE_PARENT_CLEAR.localize(locale), "clear", CommandPermission.SPONGE_PARENT_CLEAR, Predicates.alwaysFalse());
+    public ParentClear() {
+        super(CommandSpec.SPONGE_PARENT_CLEAR, "clear", CommandPermission.SPONGE_PARENT_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override
@@ -49,10 +47,10 @@ public class ParentClear extends ChildCommand<LPSubjectData> {
         ImmutableContextSet contextSet = args.getContextOrEmpty(0);
         if (contextSet.isEmpty()) {
             subjectData.clearParents();
-            Message.BLANK.send(sender, "&aCleared parents matching contexts &bANY&a.");
+            SpongeCommandUtils.sendPrefixed(sender, "&aCleared parents matching contexts &bANY&a.");
         } else {
             subjectData.clearParents(contextSet);
-            Message.BLANK.send(sender, "&aCleared parents matching contexts &b" + SpongeCommandUtils.contextToString(contextSet, plugin.getLocaleManager()));
+            SpongeCommandUtils.sendPrefixed(sender, "&aCleared parents matching contexts &b" + SpongeCommandUtils.contextToString(contextSet));
         }
         return CommandResult.SUCCESS;
     }

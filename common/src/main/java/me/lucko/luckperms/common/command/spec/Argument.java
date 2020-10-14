@@ -23,36 +23,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale.command;
+package me.lucko.luckperms.common.command.spec;
 
-import com.google.common.collect.ImmutableList;
+import me.lucko.luckperms.common.locale.Message;
 
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.message.Message;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.kyori.adventure.text.Component;
 
 public class Argument {
-    public static Argument create(String name, boolean required, String description) {
-        return new Argument(name, required, description);
-    }
-
-    public static ImmutableList<Argument> list(Argument... args) {
-        return ImmutableList.copyOf(args);
-    }
-
     private final String name;
     private final boolean required;
-    private final String description;
+    private final Component description;
 
-    private Argument(String name, boolean required, String description) {
+    Argument(String name, boolean required, Component description) {
         this.name = name;
         this.required = required;
         this.description = description;
-    }
-
-    public String asPrettyString(@Nullable LocaleManager localeManager) {
-        return (this.required ? Message.REQUIRED_ARGUMENT : Message.OPTIONAL_ARGUMENT).asString(localeManager, this.name);
     }
 
     public String getName() {
@@ -63,7 +48,11 @@ public class Argument {
         return this.required;
     }
 
-    public String getDescription() {
+    public Component getDescription() {
         return this.description;
+    }
+
+    public Component asPrettyString() {
+        return (this.required ? Message.REQUIRED_ARGUMENT : Message.OPTIONAL_ARGUMENT).build(this.name);
     }
 }

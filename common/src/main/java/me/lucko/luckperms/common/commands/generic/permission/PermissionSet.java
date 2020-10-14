@@ -31,14 +31,12 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -54,8 +52,8 @@ import net.luckperms.api.node.types.InheritanceNode;
 import java.util.List;
 
 public class PermissionSet extends GenericChildCommand {
-    public PermissionSet(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_SET.localize(locale), "set", CommandPermission.USER_PERM_SET, CommandPermission.GROUP_PERM_SET, Predicates.is(0));
+    public PermissionSet() {
+        super(CommandSpec.PERMISSION_SET, "set", CommandPermission.USER_PERM_SET, CommandPermission.GROUP_PERM_SET, Predicates.is(0));
     }
 
     @Override
@@ -88,7 +86,7 @@ public class PermissionSet extends GenericChildCommand {
         DataMutateResult result = target.setNode(DataType.NORMAL, builtNode, true);
 
         if (result.wasSuccessful()) {
-            Message.SETPERMISSION_SUCCESS.send(sender, node, value, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.SETPERMISSION_SUCCESS.send(sender, node, value, target.getFormattedDisplayName(), context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("permission", "set", node, value, context)
@@ -97,7 +95,7 @@ public class PermissionSet extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HASPERMISSION.send(sender, target.getFormattedDisplayName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HASPERMISSION.send(sender, target.getFormattedDisplayName(), node, context);
             return CommandResult.STATE_ERROR;
         }
     }

@@ -29,11 +29,10 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -45,8 +44,8 @@ import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.data.DataType;
 
 public class GroupRename extends ChildCommand<Group> {
-    public GroupRename(LocaleManager locale) {
-        super(CommandSpec.GROUP_RENAME.localize(locale), "rename", CommandPermission.GROUP_RENAME, Predicates.not(1));
+    public GroupRename() {
+        super(CommandSpec.GROUP_RENAME, "rename", CommandPermission.GROUP_RENAME, Predicates.not(1));
     }
 
     @Override

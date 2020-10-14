@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
-import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
@@ -58,18 +57,16 @@ import me.lucko.luckperms.common.commands.track.DeleteTrack;
 import me.lucko.luckperms.common.commands.track.ListTracks;
 import me.lucko.luckperms.common.commands.track.TrackParentCommand;
 import me.lucko.luckperms.common.commands.user.UserParentCommand;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -97,35 +94,33 @@ public class CommandManager {
 
     public CommandManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        LocaleManager locale = plugin.getLocaleManager();
-
         this.tabCompletions = new TabCompletions(plugin);
         this.mainCommands = ImmutableList.<Command<?>>builder()
-                .add(new UserParentCommand(locale))
-                .add(new GroupParentCommand(locale))
-                .add(new TrackParentCommand(locale))
+                .add(new UserParentCommand())
+                .add(new GroupParentCommand())
+                .add(new TrackParentCommand())
                 .addAll(plugin.getExtraCommands())
-                .add(new LogParentCommand(locale))
-                .add(new SyncCommand(locale))
-                .add(new InfoCommand(locale))
-                .add(new EditorCommand(locale))
-                .add(new VerboseCommand(locale))
-                .add(new TreeCommand(locale))
-                .add(new SearchCommand(locale))
-                .add(new CheckCommand(locale))
-                .add(new NetworkSyncCommand(locale))
-                .add(new ImportCommand(locale))
-                .add(new ExportCommand(locale))
-                .add(new ReloadConfigCommand(locale))
-                .add(new BulkUpdateCommand(locale))
-                .add(new MigrationParentCommand(locale))
-                .add(new ApplyEditsCommand(locale))
-                .add(new CreateGroup(locale))
-                .add(new DeleteGroup(locale))
-                .add(new ListGroups(locale))
-                .add(new CreateTrack(locale))
-                .add(new DeleteTrack(locale))
-                .add(new ListTracks(locale))
+                .add(new LogParentCommand())
+                .add(new SyncCommand())
+                .add(new InfoCommand())
+                .add(new EditorCommand())
+                .add(new VerboseCommand())
+                .add(new TreeCommand())
+                .add(new SearchCommand())
+                .add(new CheckCommand())
+                .add(new NetworkSyncCommand())
+                .add(new ImportCommand())
+                .add(new ExportCommand())
+                .add(new ReloadConfigCommand())
+                .add(new BulkUpdateCommand())
+                .add(new MigrationParentCommand())
+                .add(new ApplyEditsCommand())
+                .add(new CreateGroup())
+                .add(new DeleteGroup())
+                .add(new ListGroups())
+                .add(new CreateTrack())
+                .add(new DeleteTrack())
+                .add(new ListTracks())
                 .build()
                 .stream()
                 .collect(ImmutableCollectors.toMap(c -> c.getName().toLowerCase(), Function.identity()));
@@ -160,7 +155,15 @@ public class CommandManager {
 
         // Handle no arguments
         if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
-            Message.BLANK.send(sender, "&2Running &b" + AbstractLuckPermsPlugin.getPluginName() + " v" + this.plugin.getBootstrap().getVersion() + "&2.");
+            sender.sendMessage(Message.prefixed(Component.text()
+                    .color(NamedTextColor.DARK_GREEN)
+                    .append(Component.text("Running "))
+                    .append(Component.text(AbstractLuckPermsPlugin.getPluginName(), NamedTextColor.AQUA))
+                    .append(Component.space())
+                    .append(Component.text("v" + this.plugin.getBootstrap().getVersion(), NamedTextColor.AQUA))
+                    .append(Message.FULL_STOP)
+            ));
+
             if (hasPermissionForAny(sender)) {
                 Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
                 return CommandResult.SUCCESS;
@@ -232,27 +235,25 @@ public class CommandManager {
     }
 
     private void sendCommandUsage(Sender sender, String label) {
-        Message.BLANK.send(sender, "&2Running &b" + AbstractLuckPermsPlugin.getPluginName() + " v" + this.plugin.getBootstrap().getVersion() + "&2.");
+        sender.sendMessage(Message.prefixed(Component.text()
+                .color(NamedTextColor.DARK_GREEN)
+                .append(Component.text("Running "))
+                .append(Component.text(AbstractLuckPermsPlugin.getPluginName(), NamedTextColor.AQUA))
+                .append(Component.space())
+                .append(Component.text("v" + this.plugin.getBootstrap().getVersion(), NamedTextColor.AQUA))
+                .append(Message.FULL_STOP)
+        ));
+
         this.mainCommands.values().stream()
                 .filter(Command::shouldDisplay)
                 .filter(c -> c.isAuthorized(sender))
-                .forEach(c -> {
-                    String permission = c.getPermission().map(CommandPermission::getPermission).orElse("None");
-
-                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), TextUtils.AMPERSAND_CHAR)
-                            .toBuilder().applyDeep(comp -> {
-                                comp.hoverEvent(HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                                        "&bCommand: &2" + c.getName(),
-                                        "&bDescription: &2" + c.getDescription(),
-                                        "&bUsage: &2" + String.format(c.getUsage(), label),
-                                        "&bPermission: &2" + permission,
-                                        " ",
-                                        "&7Click to auto-complete."
-                                ), TextUtils.AMPERSAND_CHAR)));
-                                comp.clickEvent(ClickEvent.suggestCommand(String.format(c.getUsage(), label)));
-                            }).build();
-                    sender.sendMessage(component);
-                });
+                .forEach(c -> sender.sendMessage(Component.text()
+                        .append(Component.text('>', NamedTextColor.DARK_AQUA))
+                        .append(Component.space())
+                        .append(Component.text(String.format(c.getUsage(), label), NamedTextColor.GREEN))
+                        .clickEvent(ClickEvent.suggestCommand(String.format(c.getUsage(), label)))
+                        .build()
+                ));
     }
 
     /**

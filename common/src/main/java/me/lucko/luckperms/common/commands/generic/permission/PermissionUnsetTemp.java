@@ -31,19 +31,16 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
@@ -56,8 +53,8 @@ import java.time.Duration;
 import java.util.List;
 
 public class PermissionUnsetTemp extends GenericChildCommand {
-    public PermissionUnsetTemp(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_UNSETTEMP.localize(locale), "unsettemp", CommandPermission.USER_PERM_UNSET_TEMP, CommandPermission.GROUP_PERM_UNSET_TEMP, Predicates.is(0));
+    public PermissionUnsetTemp() {
+        super(CommandSpec.PERMISSION_UNSETTEMP, "unsettemp", CommandPermission.USER_PERM_UNSET_TEMP, CommandPermission.GROUP_PERM_UNSET_TEMP, Predicates.is(0));
     }
 
     @Override
@@ -93,20 +90,13 @@ public class PermissionUnsetTemp extends GenericChildCommand {
             Node mergedNode = result.getMergedNode();
             //noinspection ConstantConditions
             if (mergedNode != null) {
-                Message.UNSET_TEMP_PERMISSION_SUBTRACT_SUCCESS.send(sender,
-                        mergedNode.getKey(),
-                        mergedNode.getValue(),
-                        target.getFormattedDisplayName(),
-                        DurationFormatter.LONG.format(mergedNode.getExpiryDuration()),
-                        MessageUtils.contextSetToString(plugin.getLocaleManager(), context),
-                        DurationFormatter.LONG.format(duration)
-                );
+                Message.UNSET_TEMP_PERMISSION_SUBTRACT_SUCCESS.send(sender, mergedNode.getKey(), mergedNode.getValue(), target.getFormattedDisplayName(), mergedNode.getExpiryDuration(), context, duration);
 
                 LoggedAction.build().source(sender).target(target)
                         .description("permission", "unsettemp", node, duration, context)
                         .build().submit(plugin, sender);
             } else {
-                Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+                Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, target.getFormattedDisplayName(), context);
 
                 LoggedAction.build().source(sender).target(target)
                         .description("permission", "unsettemp", node, context)
@@ -116,7 +106,7 @@ public class PermissionUnsetTemp extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, target.getFormattedDisplayName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, target.getFormattedDisplayName(), node, context);
             return CommandResult.STATE_ERROR;
         }
     }

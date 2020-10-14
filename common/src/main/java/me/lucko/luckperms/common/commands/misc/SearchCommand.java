@@ -34,44 +34,34 @@ import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.node.comparator.NodeEntryComparator;
-import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.node.matcher.StandardNodeMatchers;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.ComponentBuilder;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.node.Node;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SearchCommand extends SingleCommand {
-    public SearchCommand(LocaleManager locale) {
-        super(CommandSpec.SEARCH.localize(locale), "Search", CommandPermission.SEARCH, Predicates.notInRange(1, 3));
+    public SearchCommand() {
+        super(CommandSpec.SEARCH, "Search", CommandPermission.SEARCH, Predicates.notInRange(1, 3));
     }
 
     @Override
@@ -85,7 +75,7 @@ public class SearchCommand extends SingleCommand {
         ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.of(Constraint.of(comparison, args.get(1)));
         int page = args.getIntOrDefault(2, 1);
 
-        Message.SEARCH_SEARCHING.send(sender, matcher);
+        Message.SEARCH_SEARCHING.send(sender, matcher.toString());
 
         List<NodeEntry<UUID, Node>> matchedUsers = plugin.getStorage().searchUserNodes(matcher).join();
         List<NodeEntry<String, Node>> matchedGroups = plugin.getStorage().searchGroupNodes(matcher).join();
@@ -128,7 +118,7 @@ public class SearchCommand extends SingleCommand {
                 .complete(args);
     }
 
-    private static <T extends Comparable<T>> void sendResult(Sender sender, List<NodeEntry<T, Node>> results, Function<T, String> lookupFunction, Message headerMessage, HolderType holderType, String label, int page, Comparison comparison) {
+    private static <T extends Comparable<T>> void sendResult(Sender sender, List<NodeEntry<T, Node>> results, Function<T, String> lookupFunction, Message.Args3<Integer, Integer, Integer> headerMessage, HolderType holderType, String label, int page, Comparison comparison) {
         results = new ArrayList<>(results);
         results.sort(NodeEntryComparator.normal());
 
@@ -150,40 +140,7 @@ public class SearchCommand extends SingleCommand {
         headerMessage.send(sender, page, pages.size(), results.size());
 
         for (Map.Entry<String, NodeEntry<T, Node>> ent : mappedContent) {
-            // only show the permission in the results if the comparison isn't equals
-            String permission = "";
-            if (comparison != StandardComparison.EQUAL) {
-                permission = "&7 - (" + ent.getValue().getNode().getKey() + ")";
-            }
-
-            String s = "&3> &b" + ent.getKey() + permission + "&7 - " + (ent.getValue().getNode().getValue() ? "&a" : "&c") + ent.getValue().getNode().getValue() + getNodeExpiryString(ent.getValue().getNode()) + MessageUtils.getAppendableNodeContextString(sender.getPlugin().getLocaleManager(), ent.getValue().getNode());
-            TextComponent message = TextUtils.fromLegacy(s, TextUtils.AMPERSAND_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), holderType, label, ent.getValue(), sender.getPlugin())).build();
-            sender.sendMessage(message);
+            Message.SEARCH_NODE_ENTRY.send(sender, comparison != StandardComparison.EQUAL, ent.getValue().getNode(), ent.getKey(), holderType, label, sender.getPlugin());
         }
-    }
-
-    private static String getNodeExpiryString(Node node) {
-        if (!node.hasExpiry()) {
-            return "";
-        }
-
-        return " &8(&7expires in " + DurationFormatter.LONG.format(node.getExpiryDuration()) + "&8)";
-    }
-
-    private static Consumer<ComponentBuilder<?, ?>> makeFancy(String holderName, HolderType holderType, String label, NodeEntry<?, ?> perm, LuckPermsPlugin plugin) {
-        HoverEvent hoverEvent = HoverEvent.showText(TextUtils.fromLegacy(TextUtils.joinNewline(
-                "&3> " + (perm.getNode().getValue() ? "&a" : "&c") + perm.getNode().getKey(),
-                " ",
-                "&7Click to remove this node from " + holderName
-        ), TextUtils.AMPERSAND_CHAR));
-
-        boolean explicitGlobalContext = !plugin.getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
-        String command = "/" + label + " " + NodeCommandFactory.undoCommand(perm.getNode(), holderName, holderType, explicitGlobalContext);
-        ClickEvent clickEvent = ClickEvent.suggestCommand(command);
-
-        return component -> {
-            component.hoverEvent(hoverEvent);
-            component.clickEvent(clickEvent);
-        };
     }
 }
