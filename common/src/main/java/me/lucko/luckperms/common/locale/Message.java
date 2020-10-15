@@ -2638,15 +2638,15 @@ public interface Message {
                     .append(FULL_STOP))
     );
 
-    Args0 TRANSLATIONS_DOWNLOADING = () -> prefixed(translatable()
-            // "&bDownloading translations, please wait..."
-            .key("luckperms.command.translations.downloading")
+    Args0 TRANSLATIONS_INSTALLING = () -> prefixed(translatable()
+            // "&bInstalling translations, please wait..."
+            .key("luckperms.command.translations.installing")
             .color(AQUA)
     );
 
-    Args1<String> TRANSLATIONS_INSTALLING = name -> prefixed(translatable()
+    Args1<String> TRANSLATIONS_INSTALLING_SPECIFIC = name -> prefixed(translatable()
             // "&aInstalling language {}..."
-            .key("luckperms.command.translations.installing")
+            .key("luckperms.command.translations.installing-specific")
             .color(GREEN)
             .args(text((name)))
     );

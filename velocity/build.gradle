@@ -8,12 +8,10 @@ repositories {
 }
 
 dependencies {
-
+    compile project(':common')
 
     compileOnly 'com.velocitypowered:velocity-api:1.1.0-SNAPSHOT'
     annotationProcessor 'com.velocitypowered:velocity-api:1.1.0-SNAPSHOT'
-
-    compile project(':common')
 }
 
 blossom {

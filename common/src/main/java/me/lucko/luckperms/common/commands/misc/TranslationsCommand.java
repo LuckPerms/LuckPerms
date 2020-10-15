@@ -85,7 +85,7 @@ public class TranslationsCommand extends SingleCommand {
         }
 
         if (args.size() >= 1 && args.get(0).equalsIgnoreCase("install")) {
-            Message.TRANSLATIONS_DOWNLOADING.send(sender);
+            Message.TRANSLATIONS_INSTALLING.send(sender);
 
             downloadTranslations(plugin, availableTranslations, sender);
             plugin.getTranslationManager().reload();
@@ -113,7 +113,7 @@ public class TranslationsCommand extends SingleCommand {
         }
 
         for (LanguageInfo language : languages) {
-            Message.TRANSLATIONS_INSTALLING.send(sender, language.locale.toString());
+            Message.TRANSLATIONS_INSTALLING_SPECIFIC.send(sender, language.locale.toString());
 
             Request request = new Request.Builder()
                     .header("User-Agent", plugin.getBytebin().getUserAgent())
