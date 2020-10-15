@@ -50,6 +50,7 @@ import me.lucko.luckperms.common.commands.misc.NetworkSyncCommand;
 import me.lucko.luckperms.common.commands.misc.ReloadConfigCommand;
 import me.lucko.luckperms.common.commands.misc.SearchCommand;
 import me.lucko.luckperms.common.commands.misc.SyncCommand;
+import me.lucko.luckperms.common.commands.misc.TranslationsCommand;
 import me.lucko.luckperms.common.commands.misc.TreeCommand;
 import me.lucko.luckperms.common.commands.misc.VerboseCommand;
 import me.lucko.luckperms.common.commands.track.CreateTrack;
@@ -114,6 +115,7 @@ public class CommandManager {
                 .add(new ReloadConfigCommand())
                 .add(new BulkUpdateCommand())
                 .add(new MigrationParentCommand())
+                .add(new TranslationsCommand())
                 .add(new ApplyEditsCommand())
                 .add(new CreateGroup())
                 .add(new DeleteGroup())

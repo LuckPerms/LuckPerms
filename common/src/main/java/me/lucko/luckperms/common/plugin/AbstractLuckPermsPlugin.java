@@ -78,6 +78,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private PermissionRegistry permissionRegistry;
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
+    private OkHttpClient httpClient;
     private BytebinClient bytebin;
     private FileWatcher fileWatcher = null;
     private Storage storage;
@@ -98,7 +99,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.dependencyManager.loadDependencies(getGlobalDependencies());
 
         this.translationManager = new TranslationManager(this);
-        this.translationManager.load();
+        this.translationManager.reload();
     }
 
     public final void enable() {
@@ -118,11 +119,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.configuration = new LuckPermsConfiguration(this, provideConfigurationAdapter());
 
         // setup a bytebin instance
-        OkHttpClient httpClient = new OkHttpClient.Builder()
+        this.httpClient = new OkHttpClient.Builder()
                 .callTimeout(15, TimeUnit.SECONDS)
                 .build();
 
-        this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+        this.bytebin = new BytebinClient(this.httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
@@ -314,6 +315,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public LuckPermsConfiguration getConfiguration() {
         return this.configuration;
+    }
+
+    @Override
+    public OkHttpClient getHttpClient() {
+        return this.httpClient;
     }
 
     @Override

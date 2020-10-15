@@ -2570,6 +2570,104 @@ public interface Message {
             .append(FULL_STOP)
     );
 
+    Args0 TRANSLATIONS_SEARCHING = () -> prefixed(translatable()
+            // "&7Searching for available translations, please wait..."
+            .key("luckperms.command.translations.searching")
+            .color(GRAY)
+    );
+
+    Args0 TRANSLATIONS_SEARCHING_ERROR = () -> prefixed(text()
+            // "&cUnable to obtain a list of available translations. Check the console for errors."
+            .color(RED)
+            .append(translatable("luckperms.command.translations.searching-error"))
+            .append(FULL_STOP)
+            .append(space())
+            .append(translatable("luckperms.command.misc.check-console-for-errors"))
+            .append(FULL_STOP)
+    );
+
+    Args1<Collection<String>> INSTALLED_TRANSLATIONS = locales -> prefixed(translatable()
+            // "&aInstalled Translations:"
+            .key("luckperms.command.translations.installed-translations")
+            .color(GREEN)
+            .append(text(':'))
+            .append(space())
+            .append(formatStringList(locales))
+    );
+
+    Args0 AVAILABLE_TRANSLATIONS_HEADER = () -> prefixed(translatable()
+            // "&aAvailable Translations:"
+            .key("luckperms.command.translations.available-translations")
+            .color(GREEN)
+            .append(text(':'))
+    );
+
+    Args4<String, String, Integer, List<String>> AVAILABLE_TRANSLATIONS_ENTRY = (tag, name, percentComplete, contributors) -> prefixed(text()
+            // - {} ({}) - {}% translated - by {}
+            .color(GRAY)
+            .append(text('-'))
+            .append(space())
+            .append(text(tag, AQUA))
+            .append(space())
+            .append(OPEN_BRACKET)
+            .append(text(name, WHITE))
+            .append(CLOSE_BRACKET)
+            .append(text(" - "))
+            .append(translatable("luckperms.command.translations.percent-translated", text(percentComplete, GREEN)))
+            .apply(builder -> {
+                if (!contributors.isEmpty()) {
+                    builder.append(text(" - "));
+                    builder.append(translatable("luckperms.command.translations.translations-by"));
+                    builder.append(space());
+                    builder.append(formatStringList(contributors));
+                }
+            })
+    );
+
+    Args1<String> TRANSLATIONS_DOWNLOAD_PROMPT = label -> join(newline(),
+            // "Use /lp translations install to download and install up-to-date versions of these translations provided by the community."
+            // "Please note that this will override any changes you've made for these languages."
+            prefixed(translatable()
+                    .key("luckperms.command.translations.download-prompt")
+                    .color(AQUA)
+                    .args(text("/" + label + " translations install", GREEN))
+                    .append(FULL_STOP)),
+            prefixed(translatable()
+                    .key("luckperms.command.translations.download-override-warning")
+                    .color(GRAY)
+                    .append(FULL_STOP))
+    );
+
+    Args0 TRANSLATIONS_DOWNLOADING = () -> prefixed(translatable()
+            // "&bDownloading translations, please wait..."
+            .key("luckperms.command.translations.downloading")
+            .color(AQUA)
+    );
+
+    Args1<String> TRANSLATIONS_INSTALLING = name -> prefixed(translatable()
+            // "&aInstalling language {}..."
+            .key("luckperms.command.translations.installing")
+            .color(GREEN)
+            .args(text((name)))
+    );
+
+    Args0 TRANSLATIONS_INSTALL_COMPLETE = () -> prefixed(translatable()
+            // "&bInstallation complete."
+            .key("luckperms.command.translations.install-complete")
+            .color(AQUA)
+            .append(FULL_STOP)
+    );
+
+    Args1<String> TRANSLATIONS_DOWNLOAD_ERROR = name -> prefixed(text()
+            // "&cUnable download translation for {}. Check the console for errors."
+            .color(RED)
+            .append(translatable("luckperms.command.translations.download-error", text(name, DARK_RED)))
+            .append(FULL_STOP)
+            .append(space())
+            .append(translatable("luckperms.command.misc.check-console-for-errors"))
+            .append(FULL_STOP)
+    );
+
     Args4<String, String, Boolean, Boolean> USER_INFO_GENERAL = (username, uuid, mojang, online) -> join(newline(),
             // "&b&l> &bUser Info: &f{}"
             // "&f- &3UUID: &f{}"

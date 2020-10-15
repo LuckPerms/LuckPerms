@@ -40,6 +40,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,23 +50,40 @@ public class TranslationManager {
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
     private final LuckPermsPlugin plugin;
-    private final TranslationRegistry registry;
+    private final Path translationsDirectory;
+    private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
+    private TranslationRegistry registry;
 
     public TranslationManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
+        this.translationsDirectory = this.plugin.getBootstrap().getConfigDirectory().resolve("translations");
+    }
 
-        // create a translation registry for luckperms
+    public Path getTranslationsDirectory() {
+        return this.translationsDirectory;
+    }
+
+    public Set<Locale> getInstalledLocales() {
+        return Collections.unmodifiableSet(this.installed);
+    }
+
+    public void reload() {
+        // remove any previous registry
+        if (this.registry != null) {
+            GlobalTranslator.get().removeSource(this.registry);
+            this.installed.clear();
+        }
+
+        // create a translation registry
         this.registry = TranslationRegistry.create(Key.key("luckperms", "main"));
         this.registry.defaultLocale(DEFAULT_LOCALE);
 
-        // register it to the global source, so our translations can be picked up by adventure-platform
-        GlobalTranslator.get().addSource(this.registry);
-    }
-
-    public void load() {
         // load custom translations first, then the base (built-in) translations after.
         loadCustom();
         loadBase();
+
+        // register it to the global source, so our translations can be picked up by adventure-platform
+        GlobalTranslator.get().addSource(this.registry);
     }
 
     /**
@@ -80,7 +99,7 @@ public class TranslationManager {
      */
     public void loadCustom() {
         List<Path> translationFiles;
-        try (Stream<Path> stream = Files.list(this.plugin.getBootstrap().getConfigDirectory().resolve("translations"))) {
+        try (Stream<Path> stream = Files.list(this.translationsDirectory)) {
             translationFiles = stream.filter(path -> path.getFileName().toString().endsWith(".properties")).collect(Collectors.toList());
         } catch (IOException e) {
             translationFiles = Collections.emptyList();
@@ -106,7 +125,8 @@ public class TranslationManager {
         }
 
         this.registry.registerAll(locale, translationFile, true);
-        this.plugin.getLogger().info("Registered additional translations for " + locale.toLanguageTag());
+        this.plugin.getLogger().info("Registered additional translations for " + locale.toString());
+        this.installed.add(locale);
     }
 
     public static Locale parseLocale(String locale, Locale defaultLocale) {

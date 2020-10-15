@@ -60,6 +60,9 @@ luckperms {
   migration {
     plugin brigadier:string single_word;
   }
+  translations {
+    install;
+  }
   creategroup {
     name brigadier:string single_word;
   }

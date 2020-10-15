@@ -85,6 +85,9 @@ public enum CommandSpec {
             arg("constraint...", false)
     ),
     MIGRATION("/%s migration"),
+    TRANSLATIONS("/%s translations",
+            arg("install", false)
+    ),
     APPLY_EDITS("/%s applyedits <code> [target]",
             arg("code", true),
             arg("target", false)
