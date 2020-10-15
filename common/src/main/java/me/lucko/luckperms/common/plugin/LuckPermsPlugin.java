@@ -57,8 +57,6 @@ import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import net.luckperms.api.query.QueryOptions;
 
-import okhttp3.OkHttpClient;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -233,13 +231,6 @@ public interface LuckPermsPlugin {
      * @return the file watcher
      */
     Optional<FileWatcher> getFileWatcher();
-
-    /**
-     * Gets the http client used by the plugin.
-     *
-     * @return the http client
-     */
-    OkHttpClient getHttpClient();
 
     /**
      * Gets the bytebin instance in use by platform.

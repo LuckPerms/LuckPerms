@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
+import me.lucko.luckperms.velocity.util.AdventureCompat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -68,7 +69,7 @@ public class VelocitySenderFactory extends SenderFactory<LPVelocityPlugin, Comma
             locale = ((Player) source).getPlayerSettings().getLocale();
         }
         Component rendered = GlobalTranslator.render(message, locale);
-        source.sendMessage(rendered);
+        AdventureCompat.sendMessage(source, rendered);
     }
 
     @Override

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.velocity.listeners;
 
 import com.velocitypowered.api.event.PostOrder;
-import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
@@ -39,6 +38,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 import me.lucko.luckperms.velocity.service.PlayerPermissionProvider;
+import me.lucko.luckperms.velocity.util.AdventureCompat;
 
 import net.kyori.adventure.translation.GlobalTranslator;
 
@@ -108,7 +108,7 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
     public void onPlayerLogin(LoginEvent e) {
         final Player player = e.getPlayer();
         if (this.deniedLogin.remove(player.getUniqueId())) {
-            e.setResult(ResultedEvent.ComponentResult.denied(GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), player.getPlayerSettings().getLocale())));
+            e.setResult(AdventureCompat.deniedResult(GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), player.getPlayerSettings().getLocale())));
         }
     }
 
@@ -136,7 +136,7 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
 
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                 // disconnect the user
-                e.setResult(ResultedEvent.ComponentResult.denied(GlobalTranslator.render(Message.LOADING_STATE_ERROR.build(), player.getPlayerSettings().getLocale())));
+                e.setResult(AdventureCompat.deniedResult(GlobalTranslator.render(Message.LOADING_STATE_ERROR.build(), player.getPlayerSettings().getLocale())));
             } else {
                 // just send a message
                 this.plugin.getBootstrap().getScheduler().asyncLater(() -> {
