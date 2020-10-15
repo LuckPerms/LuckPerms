@@ -98,7 +98,7 @@ public interface Message {
             .append(text()
                     .decoration(BOLD, true)
                     .append(text('L', AQUA))
-                    .append(text('P', DARK_GREEN))
+                    .append(text('P', DARK_AQUA))
             )
             .append(text(']'))
             .build();
