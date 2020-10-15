@@ -6,7 +6,7 @@ dependencies {
     compile project(':common')
 
     compileOnly 'net.md-5:bungeecord-api:1.15-SNAPSHOT'
-    compileOnly 'me.lucko:adventure-platform-bungeecord:4.0.0'
+    compileOnly 'me.lucko:adventure-platform-bungeecord:4.0.0' // re: this artifact - see note in common/build.gradle
     compileOnly 'com.imaginarycode.minecraft:RedisBungee:0.4'
 
     // migration plugins
