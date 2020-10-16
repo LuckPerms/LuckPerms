@@ -40,6 +40,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -243,6 +244,8 @@ public class MongoStorage implements StorageImplementation {
 
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) {
+        BulkUpdateStatistics stats = bulkUpdate.getStatistics();
+
         if (bulkUpdate.getDataType().isIncludingUsers()) {
             MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
             try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -255,6 +258,11 @@ public class MongoStorage implements StorageImplementation {
                             .map(bulkUpdate::apply)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toSet());
+
+                    if (bulkUpdate.isTrackingStatistics() && !results.isEmpty()) {
+                        stats.incrementAffectedUsers();
+                        stats.incrementAffectedNodesBy(results.size());
+                    }
 
                     if (!nodes.equals(results)) {
                         List<Document> newNodes = results.stream()
@@ -280,6 +288,11 @@ public class MongoStorage implements StorageImplementation {
                             .map(bulkUpdate::apply)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toSet());
+
+                    if (bulkUpdate.isTrackingStatistics() && !results.isEmpty()) {
+                        stats.incrementAffectedGroups();
+                        stats.incrementAffectedNodesBy(results.size());
+                    }
 
                     if (!nodes.equals(results)) {
                         List<Document> newNodes = results.stream()

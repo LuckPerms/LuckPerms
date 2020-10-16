@@ -2563,6 +2563,27 @@ public interface Message {
             .append(FULL_STOP)
     );
 
+    Args3<Integer, Integer, Integer> BULK_UPDATE_STATISTICS = (nodes, users, groups) -> join(newline(),
+            // "&bTotal affected nodes: &a{}"
+            // "&bTotal affected users: &a{}"
+            // "&bTotal affected groups: &a{}"
+            prefixed(translatable()
+                     .key("luckperms.command.bulkupdate.success.statistics.nodes")
+                     .color(AQUA)
+                     .append(text(": "))
+                     .append(text(nodes, GREEN))),
+            prefixed(translatable()
+                     .key("luckperms.command.bulkupdate.success.statistics.users")
+                     .color(AQUA)
+                     .append(text(": "))
+                     .append(text(users, GREEN))),
+            prefixed(translatable()
+                     .key("luckperms.command.bulkupdate.success.statistics.groups")
+                     .color(AQUA)
+                     .append(text(": "))
+                     .append(text(groups, GREEN)))
+    );
+
     Args0 BULK_UPDATE_FAILURE = () -> prefixed(translatable()
             // "&cBulk update failed, check the console for errors."
             .key("luckperms.command.bulkupdate.failure")

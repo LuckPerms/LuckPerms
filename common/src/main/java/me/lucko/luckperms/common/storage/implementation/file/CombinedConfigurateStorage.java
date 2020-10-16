@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.storage.implementation.file;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
@@ -240,7 +241,7 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
         if (bulkUpdate.getDataType().isIncludingUsers()) {
             this.usersLoader.apply(true, true, root -> {
                 for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
-                    processBulkUpdate(bulkUpdate, entry.getValue());
+                    processBulkUpdate(bulkUpdate, entry.getValue(), HolderType.USER);
                 }
             });
         }
@@ -248,7 +249,7 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
         if (bulkUpdate.getDataType().isIncludingGroups()) {
             this.groupsLoader.apply(true, true, root -> {
                 for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
-                    processBulkUpdate(bulkUpdate, entry.getValue());
+                    processBulkUpdate(bulkUpdate, entry.getValue(), HolderType.GROUP);
                 }
             });
         }
