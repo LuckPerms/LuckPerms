@@ -87,6 +87,10 @@ public class PluginMessageMessenger implements Messenger, Listener {
 
     @EventHandler
     public void onPluginMessage(PluginMessageEvent e) {
+        if (e.isCancelled()) {
+            return;
+        }
+        
         if (!e.getTag().equals(CHANNEL)) {
             return;
         }
