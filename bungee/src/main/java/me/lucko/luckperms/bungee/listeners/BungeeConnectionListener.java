@@ -63,16 +63,16 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
            This means that a player will have the same UUID across the network, even if parts of the network are running in
            Offline mode. */
 
-        final PendingConnection c = e.getConnection();
-
-        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Processing pre-login for " + c.getUniqueId() + " - " + c.getName());
-        }
-
         if (e.isCancelled()) {
             // another plugin has disallowed the login.
             this.plugin.getLogger().info("Another plugin has cancelled the connection for " + c.getUniqueId() + " - " + c.getName() + ". No permissions data will be loaded.");
             return;
+        }
+        
+        final PendingConnection c = e.getConnection();
+
+        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            this.plugin.getLogger().info("Processing pre-login for " + c.getUniqueId() + " - " + c.getName());
         }
 
         /* registers the plugins intent to modify this events state going forward.
