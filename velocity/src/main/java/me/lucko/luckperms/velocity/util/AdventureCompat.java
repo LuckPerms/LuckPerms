@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.velocity.util;
 
+import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.ResultedEvent.ComponentResult;
 
 import net.kyori.adventure.text.Component;
@@ -42,38 +43,32 @@ import java.lang.reflect.Method;
 public final class AdventureCompat {
     private AdventureCompat() {}
 
-    private static final String PLATFORM_ADVENTURE_PACKAGE;
-
-    private static final Class<?> PLATFORM_AUDIENCE;
-    private static final Class<?> PLATFORM_IDENTITY;
-    private static final Class<?> PLATFORM_COMPONENT;
-    private static final Class<?> PLATFORM_SERIALIZER;
-
-    private static final Method PLATFORM_SERIALIZER_GETTER;
     private static final Method PLATFORM_SERIALIZER_DESERIALIZE;
-    private static final Method PLATFORM_IDENTITY_NIL_GETTER;
     private static final Method PLATFORM_SEND_MESSAGE;
     private static final Method PLATFORM_COMPONENT_RESULT_DENIED;
-
     private static final Object PLATFORM_SERIALIZER_INSTANCE;
-    private static final Object PLATFORM_IDENTITY_INSTANCE;
 
     static {
-        PLATFORM_ADVENTURE_PACKAGE = "net.kyo".concat("ri.adventure.");
+        String adventurePkg = "net.kyo".concat("ri.adventure.");
         try {
-            PLATFORM_AUDIENCE = Class.forName(PLATFORM_ADVENTURE_PACKAGE + "audience.Audience");
-            PLATFORM_IDENTITY = Class.forName(PLATFORM_ADVENTURE_PACKAGE + "identity.Identity");
-            PLATFORM_COMPONENT = Class.forName(PLATFORM_ADVENTURE_PACKAGE + "text.Component");
-            PLATFORM_SERIALIZER = Class.forName(PLATFORM_ADVENTURE_PACKAGE + "text.serializer.gson.GsonComponentSerializer");
+            if (classExists(adventurePkg + "audience.Audience")) {
+                Class<?> audienceClass = Class.forName(adventurePkg + "audience.Audience");
+                Class<?> componentClass = Class.forName(adventurePkg + "text.Component");
+                Class<?> serializerClass = Class.forName(adventurePkg + "text.serializer.gson.GsonComponentSerializer");
 
-            PLATFORM_SERIALIZER_GETTER = PLATFORM_SERIALIZER.getMethod("gson");
-            PLATFORM_SERIALIZER_DESERIALIZE = PLATFORM_SERIALIZER.getMethod("deserialize", Object.class);
-            PLATFORM_IDENTITY_NIL_GETTER = PLATFORM_IDENTITY.getMethod("nil");
-            PLATFORM_SEND_MESSAGE = PLATFORM_AUDIENCE.getMethod("sendMessage", PLATFORM_IDENTITY, PLATFORM_COMPONENT);
-            PLATFORM_COMPONENT_RESULT_DENIED = ComponentResult.class.getMethod("denied", PLATFORM_COMPONENT);
+                PLATFORM_SERIALIZER_DESERIALIZE = serializerClass.getMethod("deserialize", Object.class);
+                PLATFORM_SEND_MESSAGE = audienceClass.getMethod("sendMessage", componentClass);
+                PLATFORM_COMPONENT_RESULT_DENIED = ComponentResult.class.getMethod("denied", componentClass);
+                PLATFORM_SERIALIZER_INSTANCE = serializerClass.getMethod("gson").invoke(null);
+            } else {
+                Class<?> componentClass = Class.forName("net.kyori.text.Component");
+                Class<?> serializerClass = Class.forName("net.kyori.text.serializer.gson.GsonComponentSerializer");
 
-            PLATFORM_SERIALIZER_INSTANCE = PLATFORM_SERIALIZER_GETTER.invoke(null);
-            PLATFORM_IDENTITY_INSTANCE = PLATFORM_IDENTITY_NIL_GETTER.invoke(null);
+                PLATFORM_SERIALIZER_DESERIALIZE = serializerClass.getMethod("deserialize", String.class);
+                PLATFORM_SEND_MESSAGE = CommandSource.class.getMethod("sendMessage", componentClass);
+                PLATFORM_COMPONENT_RESULT_DENIED = ComponentResult.class.getMethod("denied", componentClass);
+                PLATFORM_SERIALIZER_INSTANCE = serializerClass.getField("INSTANCE").get(null);
+            }
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -88,9 +83,9 @@ public final class AdventureCompat {
         }
     }
 
-    public static void sendMessage(Object audience, Component message) {
+    public static void sendMessage(CommandSource audience, Component message) {
         try {
-            PLATFORM_SEND_MESSAGE.invoke(audience, PLATFORM_IDENTITY_INSTANCE, toPlatformComponent(message));
+            PLATFORM_SEND_MESSAGE.invoke(audience, toPlatformComponent(message));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -101,6 +96,15 @@ public final class AdventureCompat {
             return (ComponentResult) PLATFORM_COMPONENT_RESULT_DENIED.invoke(null, toPlatformComponent(message));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 
