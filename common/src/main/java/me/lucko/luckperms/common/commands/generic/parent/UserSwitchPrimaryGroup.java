@@ -90,18 +90,18 @@ public class UserSwitchPrimaryGroup extends GenericChildCommand {
         }
 
         if (user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(group.getName())) {
-            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user.getFormattedDisplayName(), group.getFormattedDisplayName());
+            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user, group);
             return CommandResult.STATE_ERROR;
         }
 
         Node node = Inheritance.builder(group.getName()).build();
         if (!user.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_VALUE).asBoolean()) {
-            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFormattedDisplayName(), group.getName());
+            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user, group);
             target.setNode(DataType.NORMAL, node, true);
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());
-        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFormattedDisplayName(), group.getFormattedDisplayName());
+        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user, group);
 
         LoggedAction.build().source(sender).target(user)
                 .description("parent", "switchprimarygroup", group.getName())

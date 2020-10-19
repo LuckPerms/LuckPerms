@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -82,13 +83,13 @@ public class User extends PermissionHolder {
     }
 
     @Override
-    public String getFormattedDisplayName() {
-        return this.username != null ? this.username : this.uniqueId.toString();
+    public Component getFormattedDisplayName() {
+        return Component.text(getPlainDisplayName());
     }
 
     @Override
     public String getPlainDisplayName() {
-        return getFormattedDisplayName();
+        return this.username != null ? this.username : this.uniqueId.toString();
     }
 
     @Override

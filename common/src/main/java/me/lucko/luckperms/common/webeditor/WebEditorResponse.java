@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Uuids;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
@@ -259,7 +260,7 @@ public class WebEditorResponse {
                         .build().submit(this.plugin, this.sender);
             }
 
-            Message.APPLY_EDITS_SUCCESS.send(this.sender, "track", track.getName());
+            Message.APPLY_EDITS_SUCCESS.send(this.sender, "track", Component.text(track.getName()));
             Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, additions, deletions);
             Message.APPLY_EDITS_TRACK_BEFORE.send(this.sender, before);
             Message.APPLY_EDITS_TRACK_AFTER.send(this.sender, after);
@@ -283,7 +284,7 @@ public class WebEditorResponse {
                     this.plugin.getStorage().deletePlayerData(uuid).get();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Message.DELETE_ERROR.send(this.sender, uuid.toString());
+                    Message.DELETE_ERROR.send(this.sender, Component.text(uuid.toString()));
                 }
                 return true;
             }
@@ -365,11 +366,11 @@ public class WebEditorResponse {
                 this.plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).get();
             } catch (Exception e) {
                 e.printStackTrace();
-                Message.DELETE_ERROR.send(this.sender, track.getName());
+                Message.DELETE_ERROR.send(this.sender, Component.text(track.getName()));
                 return true;
             }
 
-            Message.DELETE_SUCCESS.send(this.sender, trackName);
+            Message.DELETE_SUCCESS.send(this.sender, Component.text(trackName));
 
             LoggedAction.build().source(this.sender).target(track)
                     .description("webeditor", "delete")

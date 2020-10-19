@@ -74,7 +74,7 @@ public class GroupClone extends ChildCommand<Group> {
 
         newGroup.setNodes(DataType.NORMAL, target.normalData().asList());
 
-        Message.CLONE_SUCCESS.send(sender, target.getName(), newGroup.getName());
+        Message.CLONE_SUCCESS.send(sender, target.getFormattedDisplayName(), newGroup.getFormattedDisplayName());
 
         LoggedAction.build().source(sender).target(newGroup)
                 .description("clone", target.getName())

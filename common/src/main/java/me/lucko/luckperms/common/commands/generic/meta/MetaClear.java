@@ -105,7 +105,7 @@ public class MetaClear extends GenericChildCommand {
         }
 
         int changed = before - target.normalData().size();
-        Message.META_CLEAR_SUCCESS.send(sender, target.getFormattedDisplayName(), type.name().toLowerCase(), context, changed);
+        Message.META_CLEAR_SUCCESS.send(sender, target, type.name().toLowerCase(), context, changed);
 
         LoggedAction.build().source(sender).target(target)
                 .description("meta", "clear", context)

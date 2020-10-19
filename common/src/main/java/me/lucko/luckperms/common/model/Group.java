@@ -29,8 +29,11 @@ import me.lucko.luckperms.common.api.implementation.ApiGroup;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.DisplayNameNode;
 import net.luckperms.api.query.QueryOptions;
@@ -105,8 +108,22 @@ public class Group extends PermissionHolder {
     }
 
     @Override
-    public String getFormattedDisplayName() {
-        return getDisplayName().map(s -> this.name + " &r(" + s + "&r)").orElse(this.name);
+    public Component getFormattedDisplayName() {
+        String displayName = getDisplayName().orElse(null);
+        if (displayName != null) {
+            return Component.text()
+                    .content(this.name)
+                    .append(Component.space())
+                    .append(Component.text()
+                            .color(NamedTextColor.WHITE)
+                            .append(Message.OPEN_BRACKET)
+                            .append(Component.text(displayName))
+                            .append(Message.CLOSE_BRACKET)
+                    )
+                    .build();
+        } else {
+            return Component.text(this.name);
+        }
     }
 
     @Override

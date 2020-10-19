@@ -109,10 +109,10 @@ public class UserDemote extends ChildCommand<User> {
         DemotionResult result = track.demote(target, context, previousGroupPermissionChecker, sender, removeFromFirst);
         switch (result.getStatus()) {
             case NOT_ON_TRACK:
-                Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender, target.getFormattedDisplayName(), track.getName());
+                Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender, target, track.getName());
                 return CommandResult.FAILURE;
             case AMBIGUOUS_CALL:
-                Message.TRACK_AMBIGUOUS_CALL.send(sender, target.getFormattedDisplayName());
+                Message.TRACK_AMBIGUOUS_CALL.send(sender, target);
                 return CommandResult.FAILURE;
             case UNDEFINED_FAILURE:
                 Message.COMMAND_NO_PERMISSION.send(sender);
@@ -123,11 +123,11 @@ public class UserDemote extends ChildCommand<User> {
 
             case REMOVED_FROM_FIRST_GROUP: {
                 if (!removeFromFirst && !result.getGroupFrom().isPresent()) {
-                    Message.USER_DEMOTE_ENDOFTRACK_NOT_REMOVED.send(sender, track.getName(), target.getFormattedDisplayName());
+                    Message.USER_DEMOTE_ENDOFTRACK_NOT_REMOVED.send(sender, track.getName(), target);
                     return CommandResult.STATE_ERROR;
                 }
 
-                Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), target.getFormattedDisplayName(), result.getGroupFrom().get());
+                Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), target, result.getGroupFrom().get());
 
                 LoggedAction.build().source(sender).target(target)
                         .description("demote", track.getName(), context)
@@ -141,7 +141,7 @@ public class UserDemote extends ChildCommand<User> {
                 String groupFrom = result.getGroupFrom().get();
                 String groupTo = result.getGroupTo().get();
 
-                Message.USER_DEMOTE_SUCCESS.send(sender, target.getFormattedDisplayName(), track.getName(), groupFrom, groupTo, context);
+                Message.USER_DEMOTE_SUCCESS.send(sender, target, track.getName(), groupFrom, groupTo, context);
                 if (!dontShowTrackProgress) {
                     Message.TRACK_PATH_HIGHLIGHTED_PROGRESSION.send(sender, track.getGroups(), groupTo, groupFrom, true);
                 }

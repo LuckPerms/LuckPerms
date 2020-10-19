@@ -64,7 +64,7 @@ public class PermissionCheck extends GenericChildCommand {
         MutableContextSet context = args.getContextOrDefault(1, plugin);
 
         Tristate result = target.hasNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(node).withContext(context).build(), NodeEqualityPredicate.IGNORE_VALUE_OR_IF_TEMPORARY);
-        Message.CHECK_PERMISSION.send(sender, target.getFormattedDisplayName(), node, result, context);
+        Message.CHECK_PERMISSION.send(sender, target, node, result, context);
         return CommandResult.SUCCESS;
     }
 

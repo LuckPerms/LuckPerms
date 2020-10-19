@@ -62,7 +62,7 @@ public class ListGroups extends SingleCommand {
                 })
                 .forEach(group -> {
                     List<String> tracks = plugin.getTrackManager().getAll().values().stream().filter(t -> t.containsGroup(group)).map(Track::getName).collect(Collectors.toList());
-                    Message.GROUPS_LIST_ENTRY.send(sender, group.getFormattedDisplayName(), group.getWeight().orElse(0), tracks);
+                    Message.GROUPS_LIST_ENTRY.send(sender, group, group.getWeight().orElse(0), tracks);
                 });
 
         return CommandResult.SUCCESS;

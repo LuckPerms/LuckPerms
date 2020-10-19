@@ -76,7 +76,7 @@ public class ParentClear extends GenericChildCommand {
         }
 
         int changed = before - target.normalData().size();
-        Message.PARENT_CLEAR_SUCCESS.send(sender, target.getFormattedDisplayName(), context, changed);
+        Message.PARENT_CLEAR_SUCCESS.send(sender, target, context, changed);
 
         LoggedAction.build().source(sender).target(target)
                 .description("parent", "clear", context)

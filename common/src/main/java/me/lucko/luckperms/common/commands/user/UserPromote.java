@@ -115,19 +115,19 @@ public class UserPromote extends ChildCommand<User> {
                 Message.COMMAND_NO_PERMISSION.send(sender);
                 return CommandResult.NO_PERMISSION;
             case AMBIGUOUS_CALL:
-                Message.TRACK_AMBIGUOUS_CALL.send(sender, target.getFormattedDisplayName());
+                Message.TRACK_AMBIGUOUS_CALL.send(sender, target);
                 return CommandResult.FAILURE;
             case END_OF_TRACK:
-                Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), target.getFormattedDisplayName());
+                Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), target);
                 return CommandResult.STATE_ERROR;
 
             case ADDED_TO_FIRST_GROUP: {
                 if (!addToFirst && !result.getGroupTo().isPresent()) {
-                    Message.USER_PROMOTE_NOT_ON_TRACK.send(sender, track.getName(), target.getFormattedDisplayName());
+                    Message.USER_PROMOTE_NOT_ON_TRACK.send(sender, target, track.getName());
                     return CommandResult.STATE_ERROR;
                 }
 
-                Message.USER_TRACK_ADDED_TO_FIRST.send(sender, target.getFormattedDisplayName(), track.getName(), result.getGroupTo().get(), context);
+                Message.USER_TRACK_ADDED_TO_FIRST.send(sender, target, track.getName(), result.getGroupTo().get(), context);
 
                 LoggedAction.build().source(sender).target(target)
                         .description("promote", track.getName(), context)
@@ -141,7 +141,7 @@ public class UserPromote extends ChildCommand<User> {
                 String groupFrom = result.getGroupFrom().get();
                 String groupTo = result.getGroupTo().get();
 
-                Message.USER_PROMOTE_SUCCESS.send(sender, target.getFormattedDisplayName(), track.getName(), groupFrom, groupTo, context);
+                Message.USER_PROMOTE_SUCCESS.send(sender, target, track.getName(), groupFrom, groupTo, context);
                 if (!dontShowTrackProgress) {
                     Message.TRACK_PATH_HIGHLIGHTED_PROGRESSION.send(sender, track.getGroups(), groupFrom, groupTo, false);
                 }

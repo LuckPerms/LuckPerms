@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.DeletionCause;
 
@@ -67,11 +68,11 @@ public class DeleteTrack extends SingleCommand {
             plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.DELETE_ERROR.send(sender, track.getName());
+            Message.DELETE_ERROR.send(sender, Component.text(track.getName()));
             return CommandResult.FAILURE;
         }
 
-        Message.DELETE_SUCCESS.send(sender, trackName);
+        Message.DELETE_SUCCESS.send(sender, Component.text(trackName));
 
         LoggedAction.build().source(sender).targetName(trackName).targetType(Action.Target.Type.TRACK)
                 .description("delete")

@@ -115,7 +115,7 @@ public class ParentSetTrack extends GenericChildCommand {
         target.removeIf(DataType.NORMAL, context, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), false);
         target.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
 
-        Message.SET_TRACK_PARENT_SUCCESS.send(sender, target.getFormattedDisplayName(), track.getName(), group.getFormattedDisplayName(), context);
+        Message.SET_TRACK_PARENT_SUCCESS.send(sender, target, track.getName(), group, context);
 
         LoggedAction.build().source(sender).target(target)
                 .description("parent", "settrack", track.getName(), groupName, context)

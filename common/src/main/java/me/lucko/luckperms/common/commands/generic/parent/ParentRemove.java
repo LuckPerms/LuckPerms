@@ -48,6 +48,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -93,7 +94,7 @@ public class ParentRemove extends GenericChildCommand {
 
         DataMutateResult result = target.unsetNode(DataType.NORMAL, Inheritance.builder(groupName).withContext(context).build());
         if (result.wasSuccessful()) {
-            Message.UNSET_INHERIT_SUCCESS.send(sender, target.getFormattedDisplayName(), groupName, context);
+            Message.UNSET_INHERIT_SUCCESS.send(sender, target, Component.text(groupName), context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("parent", "remove", groupName, context)
@@ -106,7 +107,7 @@ public class ParentRemove extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_INHERIT.send(sender, target.getFormattedDisplayName(), groupName, context);
+            Message.DOES_NOT_INHERIT.send(sender, target, Component.text(groupName), context);
             return CommandResult.STATE_ERROR;
         }
     }

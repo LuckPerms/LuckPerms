@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.data.DataType;
@@ -66,7 +67,7 @@ public class GroupRename extends ChildCommand<Group> {
             newGroup = plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.CREATE_ERROR.send(sender, newGroupName);
+            Message.CREATE_ERROR.send(sender, Component.text(newGroupName));
             return CommandResult.FAILURE;
         }
 
@@ -80,7 +81,7 @@ public class GroupRename extends ChildCommand<Group> {
 
         newGroup.setNodes(DataType.NORMAL, target.normalData().asList());
 
-        Message.RENAME_SUCCESS.send(sender, target.getName(), newGroup.getName());
+        Message.RENAME_SUCCESS.send(sender, target.getFormattedDisplayName(), newGroup.getFormattedDisplayName());
 
         LoggedAction.build().source(sender).target(target)
                 .description("rename", newGroup.getName())

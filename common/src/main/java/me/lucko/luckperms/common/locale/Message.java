@@ -28,8 +28,10 @@ package me.lucko.luckperms.common.locale;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -479,19 +481,19 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args1<String> USER_SAVE_ERROR = id -> prefixed(translatable()
+    Args1<User> USER_SAVE_ERROR = user -> prefixed(translatable()
             // "&cThere was an error whilst saving user data for &4{}&c."
             .key("luckperms.command.misc.loading.error.user-save-error")
             .color(RED)
-            .args(text(id, DARK_RED))
+            .args(text().color(DARK_RED).append(user.getFormattedDisplayName()))
             .append(FULL_STOP)
     );
 
-    Args1<String> GROUP_SAVE_ERROR = id -> prefixed(translatable()
+    Args1<Group> GROUP_SAVE_ERROR = group -> prefixed(translatable()
             // "&cThere was an error whilst saving group data for &4{}&c."
             .key("luckperms.command.misc.loading.error.group-save-error")
             .color(RED)
-            .args(text(id, DARK_RED))
+            .args(text().color(DARK_RED).append(group.getFormattedDisplayName()))
             .append(FULL_STOP)
     );
 
@@ -913,11 +915,11 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args2<String, String> APPLY_EDITS_SUCCESS = (type, name) -> prefixed(translatable()
+    Args2<String, Component> APPLY_EDITS_SUCCESS = (type, name) -> prefixed(translatable()
             // "&aWeb editor data was applied to {} &b{}&a successfully."
             .key("luckperms.command.editor.apply-edits.success")
             .color(GREEN)
-            .args(text(type), text(name, AQUA))
+            .args(text(type), text().color(AQUA).append(name))
             .append(FULL_STOP)
     );
 
@@ -1055,84 +1057,112 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args3<String, String, Tristate> CHECK_RESULT = (user, permission, result) -> prefixed(translatable()
+    Args3<User, String, Tristate> CHECK_RESULT = (user, permission, result) -> prefixed(translatable()
             // "&aPermission check result on user &b{}&a for permission &b{}&a: &f{}"
             .color(GREEN)
             .key("luckperms.command.check.result")
-            .args(text(user, AQUA), text(permission, AQUA))
+            .args(
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text(permission, AQUA)
+            )
             .append(text(": "))
             .append(formatTristate(result))
     );
 
-    Args1<String> CREATE_SUCCESS = name -> prefixed(translatable()
+    Args1<Component> CREATE_SUCCESS = name -> prefixed(translatable()
             // "&b{}&a was successfully created."
             .color(GREEN)
             .key("luckperms.command.generic.create.success")
-            .args(text(name, AQUA))
+            .args(text().color(AQUA).append(name))
             .append(FULL_STOP)
     );
 
-    Args1<String> DELETE_SUCCESS = name -> prefixed(translatable()
+    Args1<Component> DELETE_SUCCESS = name -> prefixed(translatable()
             // "&b{}&a was successfully deleted."
             .color(GREEN)
             .key("luckperms.command.generic.delete.success")
-            .args(text(name, AQUA))
+            .args(text().color(AQUA).append(name))
             .append(FULL_STOP)
     );
 
-    Args2<String, String> RENAME_SUCCESS = (from, to) -> prefixed(translatable()
+    Args2<Component, Component> RENAME_SUCCESS = (from, to) -> prefixed(translatable()
             // "&b{}&a was successfully renamed to &b{}&a."
             .color(GREEN)
             .key("luckperms.command.generic.rename.success")
-            .args(text(from, AQUA), text(to, AQUA))
+            .args(
+                    text().color(AQUA).append(from),
+                    text().color(AQUA).append(to)
+            )
             .append(FULL_STOP)
     );
 
-    Args2<String, String> CLONE_SUCCESS = (from, to) -> prefixed(translatable()
+    Args2<Component, Component> CLONE_SUCCESS = (from, to) -> prefixed(translatable()
             // "&b{}&a was successfully cloned onto &b{}&a."
             .color(GREEN)
             .key("luckperms.command.generic.clone.success")
-            .args(text(from, AQUA), text(to, AQUA))
+            .args(
+                    text().color(AQUA).append(from),
+                    text().color(AQUA).append(to)
+            )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> ALREADY_INHERITS = (holder, group, context) -> prefixed(translatable()
+    Args3<PermissionHolder, Group, ContextSet> ALREADY_INHERITS = (holder, group, context) -> prefixed(translatable()
             // "&b{}&a already inherits from &b{}&a in context {}&a."
             .color(GREEN)
             .key("luckperms.command.generic.parent.already-inherits")
-            .args(text(holder, AQUA), text(group, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(group.getFormattedDisplayName()),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> DOES_NOT_INHERIT = (holder, group, context) -> prefixed(translatable()
+    Args3<PermissionHolder, Component, ContextSet> DOES_NOT_INHERIT = (holder, group, context) -> prefixed(translatable()
             // "&b{}&a does not inherit from &b{}&a in context {}&a."
             .color(GREEN)
             .key("luckperms.command.generic.parent.doesnt-inherit")
-            .args(text(holder, AQUA), text(group, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(group),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> ALREADY_TEMP_INHERITS = (holder, group, context) -> prefixed(translatable()
+    Args3<PermissionHolder, Group, ContextSet> ALREADY_TEMP_INHERITS = (holder, group, context) -> prefixed(translatable()
             // "&b{}&a already temporarily inherits from &b{}&a in context {}&a."
             .color(GREEN)
             .key("luckperms.command.generic.parent.already-temp-inherits")
-            .args(text(holder, AQUA), text(group, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(group.getFormattedDisplayName()),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> DOES_NOT_TEMP_INHERIT = (holder, group, context) -> prefixed(translatable()
+    Args3<PermissionHolder, Component, ContextSet> DOES_NOT_TEMP_INHERIT = (holder, group, context) -> prefixed(translatable()
             // "&b{}&a does not temporarily inherit from &b{}&a in context {}&a."
             .color(GREEN)
             .key("luckperms.command.generic.parent.doesnt-temp-inherit")
-            .args(text(holder, AQUA), text(group, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(group),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
     );
 
-    Args2<String, String> TRACK_ALREADY_CONTAINS = (track, group) -> prefixed(translatable()
+    Args2<String, Group> TRACK_ALREADY_CONTAINS = (track, group) -> prefixed(translatable()
             // "&b{}&a already contains &b{}&a."
             .color(GREEN)
             .key("luckperms.command.track.already-contains")
-            .args(text(track, AQUA), text(group, AQUA))
+            .args(
+                    text(track, AQUA),
+                    text().color(AQUA).append(group.getFormattedDisplayName())
+            )
             .append(FULL_STOP)
     );
 
@@ -1144,11 +1174,11 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args1<String> TRACK_AMBIGUOUS_CALL = name -> prefixed(translatable()
+    Args1<User> TRACK_AMBIGUOUS_CALL = user -> prefixed(translatable()
             // "&4{}&c is a member of multiple groups on this track. Unable to determine their location."
             .color(RED)
             .key("luckperms.command.track.error-multiple-groups")
-            .args(text(name, DARK_RED))
+            .args(text().color(DARK_RED).append(user.getFormattedDisplayName()))
             .append(FULL_STOP)
             .append(space())
             .append(translatable("luckperms.command.track.error-ambiguous"))
@@ -1443,19 +1473,19 @@ public interface Message {
                     ))
     );
 
-    Args1<String> CREATE_ERROR = name -> prefixed(translatable()
+    Args1<Component> CREATE_ERROR = name -> prefixed(translatable()
             // "&cThere was an error whilst creating &4{}&c."
             .key("luckperms.command.generic.create.error")
             .color(RED)
-            .args(text(name, DARK_RED))
+            .args(text().color(DARK_RED).append(name))
             .append(FULL_STOP)
     );
 
-    Args1<String> DELETE_ERROR = name -> prefixed(translatable()
+    Args1<Component> DELETE_ERROR = name -> prefixed(translatable()
             // "&cThere was an error whilst deleting &4{}&c."
             .key("luckperms.command.generic.delete.error")
             .color(RED)
-            .args(text(name, DARK_RED))
+            .args(text().color(DARK_RED).append(name))
             .append(FULL_STOP)
     );
 
@@ -1474,9 +1504,9 @@ public interface Message {
             .append(text("(name, weight, tracks)", GRAY))
     );
 
-    Args3<String, Integer, Collection<String>> GROUPS_LIST_ENTRY = (name, weight, tracks) -> prefixed(text()
+    Args3<Group, Integer, Collection<String>> GROUPS_LIST_ENTRY = (group, weight, tracks) -> prefixed(text()
             .append(text("-  ", WHITE))
-            .append(text(name, DARK_AQUA))
+            .append(text().color(DARK_AQUA).append(group.getFormattedDisplayName()))
             .append(text(" - ", GRAY))
             .append(text(weight, AQUA))
             .apply(builder -> {
@@ -1495,12 +1525,12 @@ public interface Message {
             .append(formatStringList(list))
     );
 
-    Args4<String, Integer, Integer, Integer> PERMISSION_INFO = (holder, page, totalPages, totalEntries) -> prefixed(text()
+    Args4<PermissionHolder, Integer, Integer, Integer> PERMISSION_INFO = (holder, page, totalPages, totalEntries) -> prefixed(text()
             // "&b{}'s Permissions:  &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)"
             .color(AQUA)
             .append(translatable()
                     .key("luckperms.command.generic.permission.info.title")
-                    .args(text(holder))
+                    .args(holder.getFormattedDisplayName())
             )
             .append(text(':'))
             .append(text("  "))
@@ -1520,11 +1550,11 @@ public interface Message {
             )
     );
 
-    Args1<String> PERMISSION_INFO_NO_DATA = holder -> prefixed(translatable()
+    Args1<PermissionHolder> PERMISSION_INFO_NO_DATA = holder -> prefixed(translatable()
             // "&b{}&a does not have any permissions set."
             .key("luckperms.command.generic.permission.info.empty")
             .color(GREEN)
-            .args(text(holder, AQUA))
+            .args(text().color(AQUA).append(holder.getFormattedDisplayName()))
             .append(FULL_STOP)
     );
 
@@ -1595,12 +1625,12 @@ public interface Message {
                     .build()
     );
 
-    Args4<String, Integer, Integer, Integer> PARENT_INFO = (holder, page, totalPages, totalEntries) -> prefixed(text()
+    Args4<PermissionHolder, Integer, Integer, Integer> PARENT_INFO = (holder, page, totalPages, totalEntries) -> prefixed(text()
             // "&b{}'s Parents:  &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)"
             .color(AQUA)
             .append(translatable()
                     .key("luckperms.command.generic.parent.info.title")
-                    .args(text(holder))
+                    .args(holder.getFormattedDisplayName())
             )
             .append(text(':'))
             .append(text("  "))
@@ -1620,11 +1650,11 @@ public interface Message {
             )
     );
 
-    Args1<String> PARENT_INFO_NO_DATA = holder -> prefixed(translatable()
+    Args1<PermissionHolder> PARENT_INFO_NO_DATA = holder -> prefixed(translatable()
             // "&b{}&a does not have any parents defined."
             .key("luckperms.command.generic.parent.info.empty")
             .color(GREEN)
-            .args(text(holder, AQUA))
+            .args(text().color(AQUA).append(holder.getFormattedDisplayName()))
             .append(FULL_STOP)
     );
 
@@ -1700,11 +1730,11 @@ public interface Message {
                     .build()
     );
 
-    Args1<String> LIST_TRACKS = holder -> prefixed(translatable()
+    Args1<PermissionHolder> LIST_TRACKS = holder -> prefixed(translatable()
             // "&b{}'s Tracks:"
             .key("luckperms.command.generic.show-tracks.title")
             .color(AQUA)
-            .args(text(holder))
+            .args(holder.getFormattedDisplayName())
             .append(text(':'))
     );
 
@@ -1716,35 +1746,35 @@ public interface Message {
             .append(path)
             .build();
 
-    Args1<String> LIST_TRACKS_EMPTY = holder -> prefixed(translatable()
+    Args1<PermissionHolder> LIST_TRACKS_EMPTY = holder -> prefixed(translatable()
             // "&b{}&a is not on any tracks."
             .key("luckperms.command.generic.show-tracks.empty")
             .color(GREEN)
-            .args(text(holder, AQUA))
+            .args(text().color(AQUA).append(holder.getFormattedDisplayName()))
             .append(FULL_STOP)
     );
 
-    Args4<String, String, Tristate, ContextSet> CHECK_PERMISSION = (holder, permission, value, context) -> prefixed(translatable()
+    Args4<PermissionHolder, String, Tristate, ContextSet> CHECK_PERMISSION = (holder, permission, value, context) -> prefixed(translatable()
             // "&b{}&a has permission &b{}&a set to {}&a in context {}&a."
             .key("luckperms.command.generic.permission.check-inherits")
             .color(GREEN)
             .args(
                     text(permission, AQUA),
                     formatTristate(value),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args5<String, String, Tristate, ContextSet, String> CHECK_INHERITS_PERMISSION = (holder, permission, value, context, inheritedFrom) -> prefixed(translatable()
+    Args5<PermissionHolder, String, Tristate, ContextSet, String> CHECK_INHERITS_PERMISSION = (holder, permission, value, context, inheritedFrom) -> prefixed(translatable()
             // "&b{}&a has permission &b{}&a set to {}&a in context {}&a. &7(inherited from &a{}&7)"
             .key("luckperms.command.generic.permission.check-inherits")
             .color(GREEN)
             .args(
                     text(permission, AQUA),
                     formatTristate(value),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
@@ -1759,101 +1789,101 @@ public interface Message {
             )
     );
 
-    Args4<String, Boolean, String, ContextSet> SETPERMISSION_SUCCESS = (permission, value, holder, context) -> prefixed(translatable()
+    Args4<String, Boolean, PermissionHolder, ContextSet> SETPERMISSION_SUCCESS = (permission, value, holder, context) -> prefixed(translatable()
             // "&aSet &b{}&a to &b{}&a for &b{}&a in context {}&a."
             .key("luckperms.command.generic.permission.set")
             .color(GREEN)
             .args(
                     text(permission, AQUA),
                     text(value, AQUA),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> ALREADY_HASPERMISSION = (holder, permission, context) -> prefixed(translatable()
+    Args3<PermissionHolder, String, ContextSet> ALREADY_HASPERMISSION = (holder, permission, context) -> prefixed(translatable()
             // "&b{}&a already has &b{}&a set in context {}&a."
             .key("luckperms.command.generic.permission.already-has")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(permission, AQUA),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args5<String, Boolean, String, Duration, ContextSet> SETPERMISSION_TEMP_SUCCESS = (permission, value, holder, duration, context) -> prefixed(translatable()
+    Args5<String, Boolean, PermissionHolder, Duration, ContextSet> SETPERMISSION_TEMP_SUCCESS = (permission, value, holder, duration, context) -> prefixed(translatable()
             // "&aSet &b{}&a to &b{}&a for &b{}&a for a duration of &b{}&a in context {}&a."
             .key("luckperms.command.generic.permission.set-temp")
             .color(GREEN)
             .args(
                     text(permission, AQUA),
                     text(value, AQUA),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(DurationFormatter.LONG.format(duration), AQUA),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> ALREADY_HAS_TEMP_PERMISSION = (holder, permission, context) -> prefixed(translatable()
+    Args3<PermissionHolder, String, ContextSet> ALREADY_HAS_TEMP_PERMISSION = (holder, permission, context) -> prefixed(translatable()
             // "&b{}&a already has &b{}&a set temporarily in context {}&a."
             .key("luckperms.command.generic.permission.already-has-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(permission, AQUA),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> UNSETPERMISSION_SUCCESS = (permission, holder, context) -> prefixed(translatable()
+    Args3<String, PermissionHolder, ContextSet> UNSETPERMISSION_SUCCESS = (permission, holder, context) -> prefixed(translatable()
             // "&aUnset &b{}&a for &b{}&a in context {}&a."
             .key("luckperms.command.generic.permission.unset")
             .color(GREEN)
             .args(
                     text(permission, AQUA),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> DOES_NOT_HAVE_PERMISSION = (holder, permission, context) -> prefixed(translatable()
+    Args3<PermissionHolder, String, ContextSet> DOES_NOT_HAVE_PERMISSION = (holder, permission, context) -> prefixed(translatable()
             // "&b{}&a does not have &b{}&a set in context {}&a."
             .key("luckperms.command.generic.permission.doesnt-have")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(permission, AQUA),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> UNSET_TEMP_PERMISSION_SUCCESS = (permission, holder, context) -> prefixed(translatable()
+    Args3<String, PermissionHolder, ContextSet> UNSET_TEMP_PERMISSION_SUCCESS = (permission, holder, context) -> prefixed(translatable()
             // "&aUnset temporary permission &b{}&a for &b{}&a in context {}&a."
             .key("luckperms.command.generic.permission.unset-temp")
             .color(GREEN)
             .args(
                     text(permission, AQUA),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args6<String, Boolean, String, Duration, ContextSet, Duration> UNSET_TEMP_PERMISSION_SUBTRACT_SUCCESS = (permission, value, holder, duration, context, durationLess) -> prefixed(translatable()
+    Args6<String, Boolean, PermissionHolder, Duration, ContextSet, Duration> UNSET_TEMP_PERMISSION_SUBTRACT_SUCCESS = (permission, value, holder, duration, context, durationLess) -> prefixed(translatable()
             // "&aSet &b{}&a to &b{}&a for &b{}&a for a duration of &b{}&a in context {}&a, &b{}&a less than before."
             .key("luckperms.command.generic.permission.subtract")
             .color(GREEN)
             .args(
                     text(permission, AQUA),
                     text(value, AQUA),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(DurationFormatter.LONG.format(duration), AQUA),
                     formatContextSet(context),
                     text(DurationFormatter.LONG.format(durationLess), AQUA)
@@ -1861,99 +1891,99 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> DOES_NOT_HAVE_TEMP_PERMISSION = (holder, permission, context) -> prefixed(translatable()
+    Args3<PermissionHolder, String, ContextSet> DOES_NOT_HAVE_TEMP_PERMISSION = (holder, permission, context) -> prefixed(translatable()
             // "&b{}&a does not have &b{}&a set temporarily in context {}&a."
             .key("luckperms.command.generic.permission.doesnt-have-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(permission, AQUA),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> SET_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
+    Args3<PermissionHolder, Group, ContextSet> SET_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
             // "&b{}&a now inherits permissions from &b{}&a in context {}&a."
             .key("luckperms.command.generic.parent.add")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
-                    text(parent, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(parent.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args4<String, String, Duration, ContextSet> SET_TEMP_INHERIT_SUCCESS = (holder, parent, duration, context) -> prefixed(translatable()
+    Args4<PermissionHolder, Group, Duration, ContextSet> SET_TEMP_INHERIT_SUCCESS = (holder, parent, duration, context) -> prefixed(translatable()
             // "&b{}&a now inherits permissions from &b{}&a for a duration of &b{}&a in context {}&a."
             .key("luckperms.command.generic.parent.add-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
-                    text(parent, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(parent.getFormattedDisplayName()),
                     text(DurationFormatter.LONG.format(duration), AQUA),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> SET_PARENT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
+    Args3<PermissionHolder, Group, ContextSet> SET_PARENT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
             // "&b{}&a had their existing parent groups cleared, and now only inherits &b{}&a in context {}&a."
             .key("luckperms.command.generic.parent.set")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
-                    text(parent, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(parent.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args4<String, String, String, ContextSet> SET_TRACK_PARENT_SUCCESS = (holder, track, parent, context) -> prefixed(translatable()
+    Args4<PermissionHolder, String, Group, ContextSet> SET_TRACK_PARENT_SUCCESS = (holder, track, parent, context) -> prefixed(translatable()
             // "&b{}&a had their existing parent groups on track &b{}&a cleared, and now only inherits &b{}&a in context {}&a."
             .key("luckperms.command.generic.parent.set-track")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(track, AQUA),
-                    text(parent, AQUA),
+                    text().color(AQUA).append(parent.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> UNSET_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
+    Args3<PermissionHolder, Component, ContextSet> UNSET_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
             // "&b{}&a no longer inherits permissions from &b{}&a in context {}&a."
             .key("luckperms.command.generic.parent.remove")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
-                    text(parent, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(parent),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> UNSET_TEMP_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
+    Args3<PermissionHolder, Component, ContextSet> UNSET_TEMP_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
             // "&b{}&a no longer temporarily inherits permissions from &b{}&a in context {}&a."
             .key("luckperms.command.generic.parent.remove-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
-                    text(parent, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(parent),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args5<String, String, Duration, ContextSet, Duration> UNSET_TEMP_INHERIT_SUBTRACT_SUCCESS = (holder, parent, duration, context, durationLess) -> prefixed(translatable()
+    Args5<PermissionHolder, Component, Duration, ContextSet, Duration> UNSET_TEMP_INHERIT_SUBTRACT_SUCCESS = (holder, parent, duration, context, durationLess) -> prefixed(translatable()
             // "&b{}&a will inherit permissions from &b{}&a for a duration of &b{}&a in context {}&a, &b{}&a less than before."
             .key("luckperms.command.generic.parent.subtract")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
-                    text(parent, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(parent),
                     text(DurationFormatter.LONG.format(duration), AQUA),
                     formatContextSet(context),
                     text(DurationFormatter.LONG.format(durationLess), AQUA)
@@ -1961,11 +1991,14 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args3<String, ContextSet, Integer> CLEAR_SUCCESS = (holder, context, removeCount) -> prefixed(translatable()
+    Args3<PermissionHolder, ContextSet, Integer> CLEAR_SUCCESS = (holder, context, removeCount) -> prefixed(translatable()
             // "&b{}&a's nodes were cleared in context {}&a. (&b{}&a nodes were removed.)"
             .key("luckperms.command.generic.clear")
             .color(GREEN)
-            .args(text(holder, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
             .append(space())
             .append(text()
@@ -1980,11 +2013,14 @@ public interface Message {
             )
     );
 
-    Args3<String, ContextSet, Integer> PERMISSION_CLEAR_SUCCESS = (holder, context, removeCount) -> prefixed(translatable()
+    Args3<PermissionHolder, ContextSet, Integer> PERMISSION_CLEAR_SUCCESS = (holder, context, removeCount) -> prefixed(translatable()
             // "&b{}&a's parents were cleared in context {}&a. (&b{}&a nodes were removed.)"
             .key("luckperms.command.generic.permission.clear")
             .color(GREEN)
-            .args(text(holder, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
             .append(space())
             .append(text()
@@ -1999,11 +2035,14 @@ public interface Message {
             )
     );
 
-    Args3<String, ContextSet, Integer> PARENT_CLEAR_SUCCESS = (holder, context, removeCount) -> prefixed(translatable()
+    Args3<PermissionHolder, ContextSet, Integer> PARENT_CLEAR_SUCCESS = (holder, context, removeCount) -> prefixed(translatable()
             // "&b{}&a's parents were cleared in context {}&a. (&b{}&a nodes were removed.)"
             .key("luckperms.command.generic.parent.clear-track")
             .color(GREEN)
-            .args(text(holder, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
             .append(space())
             .append(text()
@@ -2018,11 +2057,15 @@ public interface Message {
             )
     );
 
-    Args4<String, String, ContextSet, Integer> PARENT_CLEAR_TRACK_SUCCESS = (holder, track, context, removeCount) -> prefixed(translatable()
+    Args4<PermissionHolder, String, ContextSet, Integer> PARENT_CLEAR_TRACK_SUCCESS = (holder, track, context, removeCount) -> prefixed(translatable()
             // "&b{}&a's parents on track &b{}&a were cleared in context {}&a. (&b{}&a nodes were removed.)"
             .key("luckperms.command.generic.parent.clear-track")
             .color(GREEN)
-            .args(text(holder, AQUA), text(track, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text(track, AQUA),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
             .append(space())
             .append(text()
@@ -2037,11 +2080,15 @@ public interface Message {
             )
     );
 
-    Args4<String, String, ContextSet, Integer> META_CLEAR_SUCCESS = (holder, key, context, removeCount) -> prefixed(translatable()
+    Args4<PermissionHolder, String, ContextSet, Integer> META_CLEAR_SUCCESS = (holder, key, context, removeCount) -> prefixed(translatable()
             // "&b{}&a's meta matching type &b{}&a was cleared in context {}&a. (&b{}&a nodes were removed.)"
             .key("luckperms.command.generic.meta.clear")
             .color(GREEN)
-            .args(text(holder, AQUA), text(key, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text(key, AQUA),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
             .append(space())
             .append(text()
@@ -2070,25 +2117,25 @@ public interface Message {
             .color(RED)
     );
 
-    Args1<String> CHAT_META_PREFIX_HEADER = holder -> prefixed(translatable()
+    Args1<PermissionHolder> CHAT_META_PREFIX_HEADER = holder -> prefixed(translatable()
             // "&b{}'s Prefixes"
             .key("luckperms.command.generic.chat-meta.info.title-prefix")
             .color(AQUA)
-            .args(text(holder))
+            .args(holder.getFormattedDisplayName())
     );
 
-    Args1<String> CHAT_META_SUFFIX_HEADER = holder -> prefixed(translatable()
+    Args1<PermissionHolder> CHAT_META_SUFFIX_HEADER = holder -> prefixed(translatable()
             // "&b{}'s Suffixes"
             .key("luckperms.command.generic.chat-meta.info.title-suffix")
             .color(AQUA)
-            .args(text(holder))
+            .args(holder.getFormattedDisplayName())
     );
 
-    Args1<String> META_HEADER = holder -> prefixed(translatable()
+    Args1<PermissionHolder> META_HEADER = holder -> prefixed(translatable()
             // "&b{}'s Meta"
             .key("luckperms.command.generic.meta.info.title")
             .color(AQUA)
-            .args(text(holder))
+            .args(holder.getFormattedDisplayName())
     );
 
     Args3<ChatMetaNode<?, ?>, PermissionHolder, String> CHAT_META_ENTRY = (node, holder, label) -> prefixed(text()
@@ -2195,27 +2242,27 @@ public interface Message {
                     })
             ));
 
-    Args1<String> CHAT_META_PREFIX_NONE = holder -> prefixed(translatable()
+    Args1<PermissionHolder> CHAT_META_PREFIX_NONE = holder -> prefixed(translatable()
             // "&b{} has no prefixes."
             .key("luckperms.command.generic.chat-meta.info.none-prefix")
             .color(AQUA)
-            .args(text(holder))
+            .args(holder.getFormattedDisplayName())
             .append(FULL_STOP)
     );
 
-    Args1<String> CHAT_META_SUFFIX_NONE = holder -> prefixed(translatable()
+    Args1<PermissionHolder> CHAT_META_SUFFIX_NONE = holder -> prefixed(translatable()
             // "&b{} has no suffixes."
             .key("luckperms.command.generic.chat-meta.info.none-suffix")
             .color(AQUA)
-            .args(text(holder))
+            .args(holder.getFormattedDisplayName())
             .append(FULL_STOP)
     );
 
-    Args1<String> META_NONE = holder -> prefixed(translatable()
+    Args1<PermissionHolder> META_NONE = holder -> prefixed(translatable()
             // "&b{} has no meta."
             .key("luckperms.command.generic.meta.info.none")
             .color(AQUA)
-            .args(text(holder))
+            .args(holder.getFormattedDisplayName())
             .append(FULL_STOP)
     );
 
@@ -2230,12 +2277,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args5<String, ChatMetaType, String, Integer, ContextSet> ALREADY_HAS_CHAT_META = (holder, type, value, priority, context) -> prefixed(translatable()
+    Args5<PermissionHolder, ChatMetaType, String, Integer, ContextSet> ALREADY_HAS_CHAT_META = (holder, type, value, priority, context) -> prefixed(translatable()
             // "&b{}&a already has {} &f'{}&f'&a set at a priority of &b{}&a in context {}&a."
             .key("luckperms.command.generic.chat-meta.already-has")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString()),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     text(priority, AQUA),
@@ -2244,12 +2291,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args5<String, ChatMetaType, String, Integer, ContextSet> ALREADY_HAS_TEMP_CHAT_META = (holder, type, value, priority, context) -> prefixed(translatable()
+    Args5<PermissionHolder, ChatMetaType, String, Integer, ContextSet> ALREADY_HAS_TEMP_CHAT_META = (holder, type, value, priority, context) -> prefixed(translatable()
             // "&b{}&a already has {} &f'{}&f'&a set temporarily at a priority of &b{}&a in context {}&a."
             .key("luckperms.command.generic.chat-meta.already-has-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString()),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     text(priority, AQUA),
@@ -2258,12 +2305,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args5<String, ChatMetaType, String, Integer, ContextSet> DOES_NOT_HAVE_CHAT_META = (holder, type, value, priority, context) -> prefixed(translatable()
+    Args5<PermissionHolder, ChatMetaType, String, Integer, ContextSet> DOES_NOT_HAVE_CHAT_META = (holder, type, value, priority, context) -> prefixed(translatable()
             // "&b{}&a doesn't have {} &f'{}&f'&a set at a priority of &b{}&a in context {}&a."
             .key("luckperms.command.generic.chat-meta.doesnt-have")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString()),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     text(priority, AQUA),
@@ -2272,12 +2319,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args5<String, ChatMetaType, String, Integer, ContextSet> DOES_NOT_HAVE_TEMP_CHAT_META = (holder, type, value, priority, context) -> prefixed(translatable()
+    Args5<PermissionHolder, ChatMetaType, String, Integer, ContextSet> DOES_NOT_HAVE_TEMP_CHAT_META = (holder, type, value, priority, context) -> prefixed(translatable()
             // "&b{}&a doesn't have {} &f'{}&f'&a set temporarily at a priority of &b{}&a in context {}&a."
             .key("luckperms.command.generic.chat-meta.doesnt-have-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString()),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     text(priority, AQUA),
@@ -2286,12 +2333,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args5<String, ChatMetaType, String, Integer, ContextSet> ADD_CHATMETA_SUCCESS = (holder, type, value, priority, context) -> prefixed(translatable()
+    Args5<PermissionHolder, ChatMetaType, String, Integer, ContextSet> ADD_CHATMETA_SUCCESS = (holder, type, value, priority, context) -> prefixed(translatable()
             // "&b{}&a had {} &f'{}&f'&a set at a priority of &b{}&a in context {}&a."
             .key("luckperms.command.generic.chat-meta.add")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString()),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     text(priority, AQUA),
@@ -2300,12 +2347,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args6<String, ChatMetaType, String, Integer, Duration, ContextSet> ADD_TEMP_CHATMETA_SUCCESS = (holder, type, value, priority, duration, context) -> prefixed(translatable()
+    Args6<PermissionHolder, ChatMetaType, String, Integer, Duration, ContextSet> ADD_TEMP_CHATMETA_SUCCESS = (holder, type, value, priority, duration, context) -> prefixed(translatable()
             // "&b{}&a had {} &f'{}&f'&a set at a priority of &b{}&a for a duration of &b{}&a in context {}&a."
             .key("luckperms.command.generic.chat-meta.add-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString()),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     text(priority, AQUA),
@@ -2315,12 +2362,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args5<String, ChatMetaType, String, Integer, ContextSet> REMOVE_CHATMETA_SUCCESS = (holder, type, value, priority, context) -> prefixed(translatable()
+    Args5<PermissionHolder, ChatMetaType, String, Integer, ContextSet> REMOVE_CHATMETA_SUCCESS = (holder, type, value, priority, context) -> prefixed(translatable()
             // "&b{}&a had {} &f'{}&f'&a at priority &b{}&a removed in context {}&a."
             .key("luckperms.command.generic.chat-meta.remove")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString()),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     text(priority, AQUA),
@@ -2329,12 +2376,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args4<String, ChatMetaType, Integer, ContextSet> BULK_REMOVE_CHATMETA_SUCCESS = (holder, type, priority, context) -> prefixed(translatable()
+    Args4<PermissionHolder, ChatMetaType, Integer, ContextSet> BULK_REMOVE_CHATMETA_SUCCESS = (holder, type, priority, context) -> prefixed(translatable()
             // "&b{}&a had all {}es at priority &b{}&a removed in context {}&a."
             .key("luckperms.command.generic.chat-meta.remove-bulk")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString() + "es"),
                     text(priority, AQUA),
                     formatContextSet(context)
@@ -2342,12 +2389,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args5<String, ChatMetaType, String, Integer, ContextSet> REMOVE_TEMP_CHATMETA_SUCCESS = (holder, type, value, priority, context) -> prefixed(translatable()
+    Args5<PermissionHolder, ChatMetaType, String, Integer, ContextSet> REMOVE_TEMP_CHATMETA_SUCCESS = (holder, type, value, priority, context) -> prefixed(translatable()
             // "&b{}&a had temporary {} &f'{}&f'&a at priority &b{}&a removed in context {}&a."
             .key("luckperms.command.generic.chat-meta.remove-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString()),
                     text().color(WHITE).append(text('\'')).append(text(value)).append(text('\'')),
                     text(priority, AQUA),
@@ -2356,12 +2403,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args4<String, ChatMetaType, Integer, ContextSet> BULK_REMOVE_TEMP_CHATMETA_SUCCESS = (holder, type, priority, context) -> prefixed(translatable()
+    Args4<PermissionHolder, ChatMetaType, Integer, ContextSet> BULK_REMOVE_TEMP_CHATMETA_SUCCESS = (holder, type, priority, context) -> prefixed(translatable()
             // "&b{}&a had all temporary {}es at priority &b{}&a removed in context {}&a."
             .key("luckperms.command.generic.chat-meta.remove-temp-bulk")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(type.toString() + "es"),
                     text(priority, AQUA),
                     formatContextSet(context)
@@ -2369,12 +2416,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args4<String, String, String, ContextSet> ALREADY_HAS_META = (holder, key, value, context) -> prefixed(translatable()
+    Args4<PermissionHolder, String, String, ContextSet> ALREADY_HAS_META = (holder, key, value, context) -> prefixed(translatable()
             // "&b{}&a already has meta key &f'{}&f'&a set to &f'{}&f'&a in context {}&a."
             .key("luckperms.command.generic.meta.already-has")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text().color(WHITE).append(text('\'')).append(text(key)).append(text('\'')),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     formatContextSet(context)
@@ -2382,12 +2429,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args4<String, String, String, ContextSet> ALREADY_HAS_TEMP_META = (holder, key, value, context) -> prefixed(translatable()
+    Args4<PermissionHolder, String, String, ContextSet> ALREADY_HAS_TEMP_META = (holder, key, value, context) -> prefixed(translatable()
             // "&b{}&a already has meta key &f'{}&f'&a temporarily set to &f'{}&f'&a in context {}&a."
             .key("luckperms.command.generic.meta.already-has-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text().color(WHITE).append(text('\'')).append(text(key)).append(text('\'')),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     formatContextSet(context)
@@ -2395,76 +2442,76 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> DOESNT_HAVE_META = (holder, key, context) -> prefixed(translatable()
+    Args3<PermissionHolder, String, ContextSet> DOESNT_HAVE_META = (holder, key, context) -> prefixed(translatable()
             // "&b{}&a doesn't have meta key &f'{}&f'&a set in context {}&a."
             .key("luckperms.command.generic.meta.doesnt-have")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text().color(WHITE).append(text('\'')).append(text(key)).append(text('\'')),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> DOESNT_HAVE_TEMP_META = (holder, key, context) -> prefixed(translatable()
+    Args3<PermissionHolder, String, ContextSet> DOESNT_HAVE_TEMP_META = (holder, key, context) -> prefixed(translatable()
             // "&b{}&a doesn't have meta key &f'{}&f'&a set temporarily in context {}&a."
             .key("luckperms.command.generic.meta.doesnt-have-temp")
             .color(GREEN)
             .args(
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text().color(WHITE).append(text('\'')).append(text(key)).append(text('\'')),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args4<String, String, String, ContextSet> SET_META_SUCCESS = (key, value, holder, context) -> prefixed(translatable()
+    Args4<String, String, PermissionHolder, ContextSet> SET_META_SUCCESS = (key, value, holder, context) -> prefixed(translatable()
             // "&aSet meta key &f'{}&f'&a to &f'{}&f'&a for &b{}&a in context {}&a."
             .key("luckperms.command.generic.meta.set")
             .color(GREEN)
             .args(
                     text().color(WHITE).append(text('\'')).append(text(key)).append(text('\'')),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args5<String, String, String, Duration, ContextSet> SET_META_TEMP_SUCCESS = (key, value, holder, duration, context) -> prefixed(translatable()
+    Args5<String, String, PermissionHolder, Duration, ContextSet> SET_META_TEMP_SUCCESS = (key, value, holder, duration, context) -> prefixed(translatable()
             // "&aSet meta key &f'{}&f'&a to &f'{}&f'&a for &b{}&a for a duration of &b{}&a in context {}&a."
             .key("luckperms.command.generic.meta.set-temp")
             .color(GREEN)
             .args(
                     text().color(WHITE).append(text('\'')).append(text(key)).append(text('\'')),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(DurationFormatter.LONG.format(duration), AQUA),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> UNSET_META_SUCCESS = (key, holder, context) -> prefixed(translatable()
+    Args3<String, PermissionHolder, ContextSet> UNSET_META_SUCCESS = (key, holder, context) -> prefixed(translatable()
             // "&aUnset meta key &f'{}&f'&a for &b{}&a in context {}&a."
             .key("luckperms.command.generic.meta.unset")
             .color(GREEN)
             .args(
                     text().color(WHITE).append(text('\'')).append(text(key)).append(text('\'')),
-                    text(holder, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, ContextSet> UNSET_META_TEMP_SUCCESS = (key, holder, context) -> prefixed(translatable()
+    Args3<String, PermissionHolder, ContextSet> UNSET_META_TEMP_SUCCESS = (key, holder, context) -> prefixed(translatable()
             // "&aUnset temporary meta key &f'{}&f'&a for &b{}&a in context {}&a."
             .key("luckperms.command.generic.meta.unset-temp")
             .color(GREEN)
             .args(
                     text().color(WHITE).append(text('\'')).append(text(key)).append(text('\'')),
-                    text(holder, BLUE),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
@@ -2858,11 +2905,14 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args2<String, String> USER_PRIMARYGROUP_SUCCESS = (user, group) -> prefixed(translatable()
+    Args2<User, Group> USER_PRIMARYGROUP_SUCCESS = (user, group) -> prefixed(translatable()
             // "&b{}&a's primary group was set to &b{}&a."
             .key("luckperms.command.user.primarygroup.set")
             .color(GREEN)
-            .args(text(user, AQUA), text(group, AQUA))
+            .args(
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text().color(AQUA).append(group.getFormattedDisplayName())
+            )
             .append(FULL_STOP)
     );
 
@@ -2874,27 +2924,36 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args2<String, String> USER_PRIMARYGROUP_ERROR_ALREADYHAS = (user, group) -> prefixed(translatable()
+    Args2<User, Group> USER_PRIMARYGROUP_ERROR_ALREADYHAS = (user, group) -> prefixed(translatable()
             // "&b{}&a already has &b{}&a set as their primary group."
             .key("luckperms.command.user.primarygroup.already-has")
             .color(GREEN)
-            .args(text(user, AQUA), text(group, AQUA))
+            .args(
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text().color(AQUA).append(group.getFormattedDisplayName())
+            )
             .append(FULL_STOP)
     );
 
-    Args2<String, String> USER_PRIMARYGROUP_ERROR_NOTMEMBER = (user, group) -> prefixed(translatable()
+    Args2<User, Group> USER_PRIMARYGROUP_ERROR_NOTMEMBER = (user, group) -> prefixed(translatable()
             // "&b{}&a was not already a member of &b{}&a, adding them now."
             .key("luckperms.command.user.primarygroup.not-member")
             .color(GREEN)
-            .args(text(user, AQUA), text(group, AQUA))
+            .args(
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text().color(AQUA).append(group.getFormattedDisplayName())
+            )
             .append(FULL_STOP)
     );
 
-    Args2<String, String> USER_TRACK_ERROR_NOT_CONTAIN_GROUP = (user, track) -> prefixed(translatable()
+    Args2<User, String> USER_TRACK_ERROR_NOT_CONTAIN_GROUP = (user, track) -> prefixed(translatable()
             // "&b{}&a isn't already in any groups on &b{}&a."
             .key("luckperms.command.user.track.error-not-contain-group")
             .color(GREEN)
-            .args(text(user, AQUA), text(track, AQUA))
+            .args(
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text(track, AQUA)
+            )
             .append(FULL_STOP)
     );
 
@@ -2905,35 +2964,52 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args4<String, String, String, ContextSet> USER_TRACK_ADDED_TO_FIRST = (user, track, group, context) -> prefixed(translatable()
+    Args4<User, String, String, ContextSet> USER_TRACK_ADDED_TO_FIRST = (user, track, group, context) -> prefixed(translatable()
             // "&b{}&a isn't in any groups on &b{}&a, so they were added to the first group, &b{}&a in context {}&a."
             .key("luckperms.command.user.promote.added-to-first")
             .color(GREEN)
-            .args(text(user, AQUA), text(track, AQUA), text(group, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text(track, AQUA),
+                    text(group, AQUA),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
     );
 
-    Args2<String, String> USER_PROMOTE_NOT_ON_TRACK = (user, track) -> prefixed(translatable()
+    Args2<User, String> USER_PROMOTE_NOT_ON_TRACK = (user, track) -> prefixed(translatable()
             // "&b{}&a isn't in any groups on &b{}&a, so was not promoted."
             .key("luckperms.command.user.demote.end-of-track-not-removed")
             .color(GREEN)
-            .args(text(user, AQUA), text(track, AQUA))
+            .args(
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text(track, AQUA)
+            )
             .append(FULL_STOP)
     );
 
-    Args5<String, String, String, String, ContextSet> USER_PROMOTE_SUCCESS = (user, track, from, to, context) -> prefixed(translatable()
+    Args5<User, String, String, String, ContextSet> USER_PROMOTE_SUCCESS = (user, track, from, to, context) -> prefixed(translatable()
             // "&aPromoting &b{}&a along track &b{}&a from &b{}&a to &b{}&a in context {}&a."
             .key("luckperms.command.user.promote.success")
             .color(GREEN)
-            .args(text(user, AQUA), text(track, AQUA), text(from, AQUA), text(to, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text(track, AQUA),
+                    text(from, AQUA),
+                    text(to, AQUA),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
     );
 
-    Args2<String, String> USER_PROMOTE_ERROR_ENDOFTRACK = (track, user) -> prefixed(translatable()
+    Args2<String, User> USER_PROMOTE_ERROR_ENDOFTRACK = (track, user) -> prefixed(translatable()
             // "&aThe end of track &b{}&a was reached, unable to promote &b{}&a."
             .key("luckperms.command.user.promote.end-of-track")
             .color(GREEN)
-            .args(text(track, AQUA), text(user, AQUA))
+            .args(
+                    text(track, AQUA),
+                    text().color(AQUA).append(user.getFormattedDisplayName())
+            )
             .append(FULL_STOP)
     );
 
@@ -2954,27 +3030,40 @@ public interface Message {
                     .append(FULL_STOP))
     );
 
-    Args5<String, String, String, String, ContextSet> USER_DEMOTE_SUCCESS = (user, track, from, to, context) -> prefixed(translatable()
+    Args5<User, String, String, String, ContextSet> USER_DEMOTE_SUCCESS = (user, track, from, to, context) -> prefixed(translatable()
             // "&aDemoting &b{}&a along track &b{}&a from &b{}&a to &b{}&a in context {}&a."
             .key("luckperms.command.user.demote.success")
             .color(GREEN)
-            .args(text(user, AQUA), text(track, AQUA), text(from, AQUA), text(to, AQUA), formatContextSet(context))
+            .args(
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text(track, AQUA),
+                    text(from, AQUA),
+                    text(to, AQUA),
+                    formatContextSet(context)
+            )
             .append(FULL_STOP)
     );
 
-    Args3<String, String, String> USER_DEMOTE_ENDOFTRACK = (track, user, group) -> prefixed(translatable()
+    Args3<String, User, String> USER_DEMOTE_ENDOFTRACK = (track, user, group) -> prefixed(translatable()
             // "&aThe end of track &b{}&a was reached, so &b{}&a was removed from &b{}&a."
             .key("luckperms.command.user.demote.end-of-track")
             .color(GREEN)
-            .args(text(track, AQUA), text(user, AQUA), text(group, AQUA))
+            .args(
+                    text(track, AQUA),
+                    text().color(AQUA).append(user.getFormattedDisplayName()),
+                    text(group, AQUA)
+            )
             .append(FULL_STOP)
     );
 
-    Args2<String, String> USER_DEMOTE_ENDOFTRACK_NOT_REMOVED = (track, user) -> prefixed(translatable()
+    Args2<String, User> USER_DEMOTE_ENDOFTRACK_NOT_REMOVED = (track, user) -> prefixed(translatable()
             // "&aThe end of track &b{}&a was reached, but &b{}&a was not removed from the first group."
             .key("luckperms.command.user.demote.end-of-track-not-removed")
             .color(GREEN)
-            .args(text(track, AQUA), text(user, AQUA))
+            .args(
+                    text(track, AQUA),
+                    text().color(AQUA).append(user.getFormattedDisplayName())
+            )
             .append(FULL_STOP)
     );
 
@@ -3098,11 +3187,14 @@ public interface Message {
                     }))
     );
 
-    Args2<Integer, String> GROUP_SET_WEIGHT = (weight, group) -> prefixed(translatable()
+    Args2<Integer, Group> GROUP_SET_WEIGHT = (weight, group) -> prefixed(translatable()
             // "&aSet weight to &b{}&a for group &b{}&a."
             .key("luckperms.command.group.setweight.set")
             .color(GREEN)
-            .args(text(weight, AQUA), text(group, AQUA))
+            .args(
+                    text(weight, AQUA),
+                    text().color(AQUA).append(group.getFormattedDisplayName())
+            )
             .append(FULL_STOP)
     );
 

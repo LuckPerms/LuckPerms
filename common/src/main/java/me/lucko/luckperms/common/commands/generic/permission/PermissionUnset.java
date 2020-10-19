@@ -85,7 +85,7 @@ public class PermissionUnset extends GenericChildCommand {
         DataMutateResult result = target.unsetNode(DataType.NORMAL, builtNode);
 
         if (result.wasSuccessful()) {
-            Message.UNSETPERMISSION_SUCCESS.send(sender, node, target.getFormattedDisplayName(), context);
+            Message.UNSETPERMISSION_SUCCESS.send(sender, node, target, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("permission", "unset", node, context)
@@ -94,7 +94,7 @@ public class PermissionUnset extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_PERMISSION.send(sender, target.getFormattedDisplayName(), node, context);
+            Message.DOES_NOT_HAVE_PERMISSION.send(sender, target, node, context);
             return CommandResult.STATE_ERROR;
         }
     }

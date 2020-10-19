@@ -146,7 +146,7 @@ public class EditorCommand extends SingleCommand {
             users.values().stream()
                     .sorted(Comparator
                             .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL)).reversed()
-                            .thenComparing(User::getFormattedDisplayName, String.CASE_INSENSITIVE_ORDER)
+                            .thenComparing(User::getPlainDisplayName, String.CASE_INSENSITIVE_ORDER)
                     )
                     .forEach(holders::add);
         }

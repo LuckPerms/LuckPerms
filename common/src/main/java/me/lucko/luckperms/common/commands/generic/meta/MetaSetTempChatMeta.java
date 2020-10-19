@@ -144,7 +144,7 @@ public class MetaSetTempChatMeta extends GenericChildCommand {
         if (result.getResult().wasSuccessful()) {
             duration = result.getMergedNode().getExpiryDuration();
 
-            Message.ADD_TEMP_CHATMETA_SUCCESS.send(sender, target.getFormattedDisplayName(), this.type, meta, priority, duration, context);
+            Message.ADD_TEMP_CHATMETA_SUCCESS.send(sender, target, this.type, meta, priority, duration, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("meta" , "settemp" + this.type.name().toLowerCase(), priority, meta, duration, context)
@@ -153,7 +153,7 @@ public class MetaSetTempChatMeta extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, target.getFormattedDisplayName(), this.type, meta, priority, context);
+            Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, target, this.type, meta, priority, context);
             return CommandResult.STATE_ERROR;
         }
     }

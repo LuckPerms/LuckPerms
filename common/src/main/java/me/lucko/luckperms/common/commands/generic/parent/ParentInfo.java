@@ -73,7 +73,7 @@ public class ParentInfo extends GenericChildCommand {
 
         // handle empty
         if (nodes.isEmpty()) {
-            Message.PARENT_INFO_NO_DATA.send(sender, target.getFormattedDisplayName());
+            Message.PARENT_INFO_NO_DATA.send(sender, target);
             return CommandResult.SUCCESS;
         }
 
@@ -98,7 +98,7 @@ public class ParentInfo extends GenericChildCommand {
         List<InheritanceNode> content = pages.get(pageIndex);
 
         // send header
-        Message.PARENT_INFO.send(sender, target.getFormattedDisplayName(), page, pages.size(), nodes.size());
+        Message.PARENT_INFO.send(sender, target, page, pages.size(), nodes.size());
 
         // send content
         for (InheritanceNode node : content) {

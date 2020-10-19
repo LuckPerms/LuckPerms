@@ -98,7 +98,7 @@ public class MetaRemoveTempChatMeta extends GenericChildCommand {
         // Handle bulk removal
         if (meta.equalsIgnoreCase("null") || meta.equals("*")) {
             target.removeIf(DataType.NORMAL, context, this.type.nodeType().predicate(n -> n.getPriority() == priority && n.hasExpiry()), false);
-            Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, target.getFormattedDisplayName(), this.type, priority, context);
+            Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, target, this.type, priority, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("meta" , "removetemp" + this.type.name().toLowerCase(), priority, "*", context)
@@ -111,7 +111,7 @@ public class MetaRemoveTempChatMeta extends GenericChildCommand {
         DataMutateResult result = target.unsetNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(10L).withContext(context).build());
 
         if (result.wasSuccessful()) {
-            Message.REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, target.getFormattedDisplayName(), this.type, meta, priority, context);
+            Message.REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, target, this.type, meta, priority, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("meta" , "removetemp" + this.type.name().toLowerCase(), priority, meta, context)
@@ -120,7 +120,7 @@ public class MetaRemoveTempChatMeta extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_TEMP_CHAT_META.send(sender, target.getFormattedDisplayName(), this.type, meta, priority, context);
+            Message.DOES_NOT_HAVE_TEMP_CHAT_META.send(sender, target, this.type, meta, priority, context);
             return CommandResult.STATE_ERROR;
         }
     }

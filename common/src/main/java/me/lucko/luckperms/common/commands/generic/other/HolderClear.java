@@ -77,7 +77,7 @@ public class HolderClear<T extends PermissionHolder> extends ChildCommand<T> {
         }
 
         int changed = before - target.normalData().size();
-        Message.CLEAR_SUCCESS.send(sender, target.getFormattedDisplayName(), context, changed);
+        Message.CLEAR_SUCCESS.send(sender, target, context, changed);
 
         LoggedAction.build().source(sender).target(target)
                 .description("clear", context)

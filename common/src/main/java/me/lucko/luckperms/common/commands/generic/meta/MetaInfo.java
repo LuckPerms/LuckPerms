@@ -89,27 +89,27 @@ public class MetaInfo extends GenericChildCommand {
         }
 
         if (prefixes.isEmpty()) {
-            Message.CHAT_META_PREFIX_NONE.send(sender, target.getFormattedDisplayName());
+            Message.CHAT_META_PREFIX_NONE.send(sender, target);
         } else {
-            Message.CHAT_META_PREFIX_HEADER.send(sender, target.getFormattedDisplayName());
+            Message.CHAT_META_PREFIX_HEADER.send(sender, target);
             for (Map.Entry<Integer, PrefixNode> e : prefixes) {
                 Message.CHAT_META_ENTRY.send(sender, e.getValue(), target, label);
             }
         }
 
         if (suffixes.isEmpty()) {
-            Message.CHAT_META_SUFFIX_NONE.send(sender, target.getFormattedDisplayName());
+            Message.CHAT_META_SUFFIX_NONE.send(sender, target);
         } else {
-            Message.CHAT_META_SUFFIX_HEADER.send(sender, target.getFormattedDisplayName());
+            Message.CHAT_META_SUFFIX_HEADER.send(sender, target);
             for (Map.Entry<Integer, SuffixNode> e : suffixes) {
                 Message.CHAT_META_ENTRY.send(sender, e.getValue(), target, label);
             }
         }
 
         if (meta.isEmpty()) {
-            Message.META_NONE.send(sender, target.getFormattedDisplayName());
+            Message.META_NONE.send(sender, target);
         } else {
-            Message.META_HEADER.send(sender, target.getFormattedDisplayName());
+            Message.META_HEADER.send(sender, target);
             for (MetaNode node : meta) {
                 Message.META_ENTRY.send(sender, node, target, label);
             }

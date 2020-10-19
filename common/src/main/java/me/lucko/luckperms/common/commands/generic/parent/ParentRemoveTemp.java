@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -82,13 +83,13 @@ public class ParentRemoveTemp extends GenericChildCommand {
             Node mergedNode = result.getMergedNode();
             //noinspection ConstantConditions
             if (mergedNode != null) {
-                Message.UNSET_TEMP_INHERIT_SUBTRACT_SUCCESS.send(sender, target.getFormattedDisplayName(), groupName, mergedNode.getExpiryDuration(), context, duration);
+                Message.UNSET_TEMP_INHERIT_SUBTRACT_SUCCESS.send(sender, target, Component.text(groupName), mergedNode.getExpiryDuration(), context, duration);
 
                 LoggedAction.build().source(sender).target(target)
                         .description("parent", "removetemp", groupName, duration, context)
                         .build().submit(plugin, sender);
             } else {
-                Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, target.getFormattedDisplayName(), groupName, context);
+                Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, target, Component.text(groupName), context);
 
                 LoggedAction.build().source(sender).target(target)
                         .description("parent", "removetemp", groupName, context)
@@ -98,7 +99,7 @@ public class ParentRemoveTemp extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_TEMP_INHERIT.send(sender, target.getFormattedDisplayName(), groupName, context);
+            Message.DOES_NOT_TEMP_INHERIT.send(sender, target, Component.text(groupName), context);
             return CommandResult.STATE_ERROR;
         }
     }

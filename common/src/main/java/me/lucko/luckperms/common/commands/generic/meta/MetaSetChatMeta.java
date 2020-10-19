@@ -132,7 +132,7 @@ public class MetaSetChatMeta extends GenericChildCommand {
 
         DataMutateResult result = target.setNode(DataType.NORMAL, this.type.builder(meta, priority).withContext(context).build(), true);
         if (result.wasSuccessful()) {
-            Message.ADD_CHATMETA_SUCCESS.send(sender, target.getFormattedDisplayName(), this.type, meta, priority, context);
+            Message.ADD_CHATMETA_SUCCESS.send(sender, target, this.type, meta, priority, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("meta" , "set" + this.type.name().toLowerCase(), priority, meta, context)
@@ -141,7 +141,7 @@ public class MetaSetChatMeta extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, target.getFormattedDisplayName(), this.type, meta, priority, context);
+            Message.ALREADY_HAS_CHAT_META.send(sender, target, this.type, meta, priority, context);
             return CommandResult.STATE_ERROR;
         }
     }

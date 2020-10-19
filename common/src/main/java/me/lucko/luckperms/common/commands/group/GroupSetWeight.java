@@ -61,7 +61,7 @@ public class GroupSetWeight extends ChildCommand<Group> {
         target.removeIf(DataType.NORMAL, null, NodeType.WEIGHT::matches, false);
         target.setNode(DataType.NORMAL, Weight.builder(weight).build(), true);
 
-        Message.GROUP_SET_WEIGHT.send(sender, weight, target.getFormattedDisplayName());
+        Message.GROUP_SET_WEIGHT.send(sender, weight, target);
 
         LoggedAction.build().source(sender).target(target)
                 .description("setweight", weight)

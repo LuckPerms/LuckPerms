@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.DataSelector;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -201,7 +202,7 @@ public abstract class PermissionHolder {
      *
      * @return the holders formatted display name
      */
-    public abstract String getFormattedDisplayName();
+    public abstract Component getFormattedDisplayName();
 
     /**
      * Gets a display name for this permission holder, without any formatting.

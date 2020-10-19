@@ -73,7 +73,7 @@ public class PermissionInfo extends GenericChildCommand {
 
         // handle empty
         if (nodes.isEmpty()) {
-            Message.PERMISSION_INFO_NO_DATA.send(sender, target.getFormattedDisplayName());
+            Message.PERMISSION_INFO_NO_DATA.send(sender, target);
             return CommandResult.SUCCESS;
         }
 
@@ -98,7 +98,7 @@ public class PermissionInfo extends GenericChildCommand {
         List<Node> content = pages.get(pageIndex);
 
         // send header
-        Message.PERMISSION_INFO.send(sender, target.getFormattedDisplayName(), page, pages.size(), nodes.size());
+        Message.PERMISSION_INFO.send(sender, target, page, pages.size(), nodes.size());
 
         // send content
         for (Node node : content) {

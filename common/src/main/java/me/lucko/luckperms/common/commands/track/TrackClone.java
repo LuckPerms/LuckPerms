@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.event.cause.CreationCause;
 
 public class TrackClone extends ChildCommand<Track> {
@@ -62,7 +63,7 @@ public class TrackClone extends ChildCommand<Track> {
 
         newTrack.setGroups(target.getGroups());
 
-        Message.CLONE_SUCCESS.send(sender, target.getName(), newTrack.getName());
+        Message.CLONE_SUCCESS.send(sender, Component.text(target.getName()), Component.text(newTrack.getName()));
 
         LoggedAction.build().source(sender).target(target)
                 .description("clone", newTrack.getName())

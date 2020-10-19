@@ -92,7 +92,7 @@ public class PermissionSetTemp extends GenericChildCommand {
 
         if (result.getResult().wasSuccessful()) {
             duration = result.getMergedNode().getExpiryDuration();
-            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, target.getFormattedDisplayName(), duration, context);
+            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, target, duration, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("permission", "settemp", node, value, duration, context)
@@ -101,7 +101,7 @@ public class PermissionSetTemp extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, target.getFormattedDisplayName(), node, context);
+            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, target, node, context);
             return CommandResult.STATE_ERROR;
         }
     }

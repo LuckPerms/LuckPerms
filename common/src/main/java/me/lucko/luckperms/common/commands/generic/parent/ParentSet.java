@@ -87,7 +87,7 @@ public class ParentSet extends GenericChildCommand {
             ((User) target).getPrimaryGroup().setStoredValue(group.getName());
         }
 
-        Message.SET_PARENT_SUCCESS.send(sender, target.getFormattedDisplayName(), group.getFormattedDisplayName(), context);
+        Message.SET_PARENT_SUCCESS.send(sender, target, group, context);
 
         LoggedAction.build().source(sender).target(target)
                 .description("parent", "set", group.getName(), context)

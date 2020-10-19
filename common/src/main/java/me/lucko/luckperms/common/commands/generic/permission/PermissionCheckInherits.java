@@ -75,7 +75,7 @@ public class PermissionCheckInherits extends GenericChildCommand {
         }
 
         Tristate result = match.map(n -> Tristate.of(n.getValue())).orElse(Tristate.UNDEFINED);
-        Message.CHECK_INHERITS_PERMISSION.send(sender, target.getFormattedDisplayName(), node, result, context, location);
+        Message.CHECK_INHERITS_PERMISSION.send(sender, target, node, result, context, location);
         return CommandResult.SUCCESS;
     }
 

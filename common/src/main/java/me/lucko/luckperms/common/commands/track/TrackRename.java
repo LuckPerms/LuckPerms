@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 
@@ -65,7 +66,7 @@ public class TrackRename extends ChildCommand<Track> {
             newTrack = plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.CREATE_ERROR.send(sender, newTrackName);
+            Message.CREATE_ERROR.send(sender, Component.text(newTrackName));
             return CommandResult.FAILURE;
         }
 
@@ -73,13 +74,13 @@ public class TrackRename extends ChildCommand<Track> {
             plugin.getStorage().deleteTrack(target, DeletionCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.DELETE_ERROR.send(sender, target.getName());
+            Message.DELETE_ERROR.send(sender, Component.text(target.getName()));
             return CommandResult.FAILURE;
         }
 
         newTrack.setGroups(target.getGroups());
 
-        Message.RENAME_SUCCESS.send(sender, target.getName(), newTrack.getName());
+        Message.RENAME_SUCCESS.send(sender, Component.text(target.getName()), Component.text(newTrack.getName()));
 
         LoggedAction.build().source(sender).target(target)
                 .description("rename", newTrack.getName())

@@ -98,7 +98,7 @@ public class ParentClearTrack extends GenericChildCommand {
         }
 
         int changed = before - target.normalData().size();
-        Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, target.getFormattedDisplayName(), track.getName(), context, changed);
+        Message.PARENT_CLEAR_TRACK_SUCCESS.send(sender, target, track.getName(), context, changed);
 
         LoggedAction.build().source(sender).target(target)
                 .description("parent", "cleartrack", track.getName(), context)

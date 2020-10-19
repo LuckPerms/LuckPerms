@@ -82,14 +82,14 @@ public class MetaSetTemp extends GenericChildCommand {
         Node node = Meta.builder(key, value).withContext(context).expiry(duration).build();
 
         if (target.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
-            Message.ALREADY_HAS_TEMP_META.send(sender, target.getFormattedDisplayName(), key, value, context);
+            Message.ALREADY_HAS_TEMP_META.send(sender, target, key, value, context);
             return CommandResult.STATE_ERROR;
         }
 
         target.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key)), false);
         duration = target.setNode(DataType.NORMAL, node, modifier).getMergedNode().getExpiryDuration();
 
-        Message.SET_META_TEMP_SUCCESS.send(sender, key, value, target.getFormattedDisplayName(), duration, context);
+        Message.SET_META_TEMP_SUCCESS.send(sender, key, value, target, duration, context);
 
         LoggedAction.build().source(sender).target(target)
                 .description("meta", "settemp", key, value, duration, context)

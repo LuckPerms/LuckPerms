@@ -79,7 +79,7 @@ public class TrackAppend extends ChildCommand<Track> {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.TRACK_ALREADY_CONTAINS.send(sender, target.getName(), group.getName());
+            Message.TRACK_ALREADY_CONTAINS.send(sender, target.getName(), group);
             return CommandResult.STATE_ERROR;
         }
     }

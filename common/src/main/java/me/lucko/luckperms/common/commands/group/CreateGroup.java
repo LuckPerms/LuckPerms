@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
 
@@ -67,11 +68,11 @@ public class CreateGroup extends SingleCommand {
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.COMMAND).get();
         } catch (Exception e) {
             e.printStackTrace();
-            Message.CREATE_ERROR.send(sender, groupName);
+            Message.CREATE_ERROR.send(sender, Component.text(groupName));
             return CommandResult.FAILURE;
         }
 
-        Message.CREATE_SUCCESS.send(sender, groupName);
+        Message.CREATE_SUCCESS.send(sender, Component.text(groupName));
 
         LoggedAction.build().source(sender).targetName(groupName).targetType(Action.Target.Type.GROUP)
                 .description("create")
