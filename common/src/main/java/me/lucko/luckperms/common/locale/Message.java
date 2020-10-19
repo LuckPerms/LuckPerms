@@ -3139,7 +3139,7 @@ public interface Message {
                             builder.append(text()
                                     .color(WHITE)
                                     .append(text('"'))
-                                    .append(text(prefix))
+                                    .append(formatColoredValue(prefix))
                                     .append(text('"'))
                             );
                         }
@@ -3156,7 +3156,7 @@ public interface Message {
                             builder.append(text()
                                     .color(WHITE)
                                     .append(text('"'))
-                                    .append(text(suffix))
+                                    .append(formatColoredValue(suffix))
                                     .append(text('"'))
                             );
                         }
