@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.listeners;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -45,6 +44,7 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -101,7 +101,7 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
 
             e.setCancelled(true);
             e.setMessageCancelled(false);
-            Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), TranslationManager.DEFAULT_LOCALE);
+            Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), Locale.getDefault());
             e.setMessage(SpongeComponentSerializer.get().serialize(reason));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(profile.getUniqueId(), username, null);
         }
@@ -155,7 +155,7 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
 
             e.setCancelled(true);
             e.setMessageCancelled(false);
-            Component reason = GlobalTranslator.render(Message.LOADING_STATE_ERROR.build(), TranslationManager.DEFAULT_LOCALE);
+            Component reason = GlobalTranslator.render(Message.LOADING_STATE_ERROR.build(), Locale.getDefault());
             e.setMessage(SpongeComponentSerializer.get().serialize(reason));
         }
     }

@@ -28,7 +28,6 @@ package me.lucko.luckperms.bungee.listeners;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 
@@ -44,6 +43,7 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class BungeeConnectionListener extends AbstractConnectionListener implements Listener {
@@ -100,7 +100,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
                 // there was some error loading
                 if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                     // cancel the login attempt
-                    Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), TranslationManager.DEFAULT_LOCALE);
+                    Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), Locale.getDefault());
                     e.setCancelReason(BungeeComponentSerializer.get().serialize(reason));
                     e.setCancelled(true);
                 }

@@ -27,7 +27,6 @@ package me.lucko.luckperms.nukkit.listeners;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
@@ -48,6 +47,7 @@ import cn.nukkit.event.player.PlayerQuitEvent;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -99,7 +99,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             // deny the connection
             this.deniedAsyncLogin.add(e.getUuid());
 
-            Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), TranslationManager.DEFAULT_LOCALE);
+            Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), Locale.getDefault());
             e.disAllow(LegacyComponentSerializer.legacySection().serialize(reason));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUuid(), e.getName(), null);
         }

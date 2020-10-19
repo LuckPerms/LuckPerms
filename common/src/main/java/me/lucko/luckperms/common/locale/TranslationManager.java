@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.locale;
 
+import com.google.common.collect.Maps;
+
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.adventure.key.Key;
@@ -33,12 +35,17 @@ import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -105,28 +112,51 @@ public class TranslationManager {
             translationFiles = Collections.emptyList();
         }
 
+        Map<Locale, ResourceBundle> loaded = new HashMap<>();
         for (Path translationFile : translationFiles) {
             try {
-                loadCustomTranslationFile(translationFile);
+                Map.Entry<Locale, ResourceBundle> result = loadCustomTranslationFile(translationFile);
+                if (result != null) {
+                    loaded.put(result.getKey(), result.getValue());
+                }
             } catch (Exception e) {
+                this.plugin.getLogger().warn("Error loading locale file: " + translationFile.getFileName().toString());
                 e.printStackTrace();
             }
         }
+
+        // try registering the locale without a country code - if we don't already have a registration for that
+        loaded.forEach((locale, bundle) -> {
+            Locale localeWithoutCountry = new Locale(locale.getLanguage());
+            if (!locale.equals(localeWithoutCountry) && this.installed.add(localeWithoutCountry)) {
+                this.registry.registerAll(localeWithoutCountry, bundle, false);
+            }
+        });
     }
 
-    private void loadCustomTranslationFile(Path translationFile) {
+    private Map.Entry<Locale, ResourceBundle> loadCustomTranslationFile(Path translationFile) {
         String fileName = translationFile.getFileName().toString();
         String localeString = fileName.substring(0, fileName.length() - ".properties".length());
         Locale locale = parseLocale(localeString, null);
 
         if (locale == null) {
             this.plugin.getLogger().warn("Unknown locale '" + localeString + "' - unable to register.");
-            return;
+            return null;
         }
 
-        this.registry.registerAll(locale, translationFile, true);
+        PropertyResourceBundle bundle;
+        try (BufferedReader reader = Files.newBufferedReader(translationFile, StandardCharsets.UTF_8)) {
+            bundle = new PropertyResourceBundle(reader);
+        } catch(IOException e) {
+            this.plugin.getLogger().warn("Error loading locale file: " + localeString);
+            e.printStackTrace();
+            return null;
+        }
+
+        this.registry.registerAll(locale, bundle, false);
         this.plugin.getLogger().info("Registered additional translations for " + locale.toString());
         this.installed.add(locale);
+        return Maps.immutableEntry(locale, bundle);
     }
 
     public static Locale parseLocale(String locale, Locale defaultLocale) {

@@ -48,6 +48,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -128,7 +129,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             // deny the connection
             this.deniedAsyncLogin.add(e.getUniqueId());
 
-            Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), TranslationManager.DEFAULT_LOCALE);
+            Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), Locale.getDefault());
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUniqueId(), e.getName(), null);
         }
@@ -177,7 +178,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
                 if (this.detectedCraftBukkitOfflineMode) {
                     printCraftBukkitOfflineModeError();
 
-                    Component reason = GlobalTranslator.render(Message.LOADING_STATE_ERROR_CB_OFFLINE_MODE.build(), TranslationManager.parseLocale(player.getLocale(), TranslationManager.DEFAULT_LOCALE));
+                    Component reason = GlobalTranslator.render(Message.LOADING_STATE_ERROR_CB_OFFLINE_MODE.build(), TranslationManager.parseLocale(player.getLocale(), Locale.getDefault()));
                     e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
                     return;
                 }
@@ -188,7 +189,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
                         " - denying login.");
             }
 
-            Component reason = GlobalTranslator.render(Message.LOADING_STATE_ERROR.build(), TranslationManager.parseLocale(player.getLocale(), TranslationManager.DEFAULT_LOCALE));
+            Component reason = GlobalTranslator.render(Message.LOADING_STATE_ERROR.build(), TranslationManager.parseLocale(player.getLocale(), Locale.getDefault()));
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }
@@ -207,7 +208,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
                     player.getUniqueId() + " - " + player.getName() + " - denying login.");
             t.printStackTrace();
 
-            Component reason = GlobalTranslator.render(Message.LOADING_SETUP_ERROR.build(), TranslationManager.parseLocale(player.getLocale(), TranslationManager.DEFAULT_LOCALE));
+            Component reason = GlobalTranslator.render(Message.LOADING_SETUP_ERROR.build(), TranslationManager.parseLocale(player.getLocale(), Locale.getDefault()));
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }

@@ -28,7 +28,6 @@ package me.lucko.luckperms.velocity;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
@@ -64,9 +63,11 @@ public class VelocitySenderFactory extends SenderFactory<LPVelocityPlugin, Comma
 
     @Override
     protected void sendMessage(CommandSource source, Component message) {
-        Locale locale = TranslationManager.DEFAULT_LOCALE;
+        Locale locale;
         if (source instanceof Player) {
             locale = ((Player) source).getPlayerSettings().getLocale();
+        } else {
+            locale = Locale.getDefault();
         }
         Component rendered = GlobalTranslator.render(message, locale);
         AdventureCompat.sendMessage(source, rendered);

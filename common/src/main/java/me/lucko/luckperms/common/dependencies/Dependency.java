@@ -70,29 +70,29 @@ public enum Dependency {
     ADVENTURE_PLATFORM(
             "me{}lucko",
             "adventure-platform-api",
-            "4.0.0",
-            "SgUP+9qpF0QogfbR7NOmXJ9zoi3gyMAAh4igc4SivO4=",
+            "4.0.1",
+            "ie3rz49jg5HU04mWe/f6lXjHt6L+S2SQp/x6YFbhxsc=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM_BUKKIT(
             "me{}lucko",
             "adventure-platform-bukkit",
-            "4.0.0",
-            "St2dvhkBLX4Wr+yZeRbICh/hlw0uhA6cfN/0Ua6YGw4=",
+            "4.0.1",
+            "dVbYfUJqmde8jeuTvknCL9hbzqxybal00TELTzQgLbk=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM_BUNGEECORD(
             "me{}lucko",
             "adventure-platform-bungeecord",
-            "4.0.0",
-            "CNvYc3//7OqEz2615Omuq0rRpORvDiy1kEJuzi0lc4Q=",
+            "4.0.1",
+            "4phi0TxNKVj5Lko63nlkrd5snIJcaU+cXUfAWsbCX1U=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM_SPONGEAPI(
             "me{}lucko",
             "adventure-platform-spongeapi",
-            "4.0.0",
-            "qVFz5oHdpiHI+KLMKSigpmu+T5nYZ25BmGYC6Imcx9A=",
+            "4.0.1",
+            "6fjWuZMeJ6633RKuZh6sIlMyVIzryQoewONeei2nB+4=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     EVENT(
