@@ -28,12 +28,12 @@ package me.lucko.luckperms.bungee.listeners;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
-import net.kyori.adventure.translation.GlobalTranslator;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
@@ -43,7 +43,6 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class BungeeConnectionListener extends AbstractConnectionListener implements Listener {
@@ -100,7 +99,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
                 // there was some error loading
                 if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                     // cancel the login attempt
-                    Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), Locale.getDefault());
+                    Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
                     e.setCancelReason(BungeeComponentSerializer.get().serialize(reason));
                     e.setCancelled(true);
                 }
@@ -132,7 +131,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
 
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                 // disconnect the user
-                Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), player.getLocale());
+                Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
                 e.getPlayer().disconnect(BungeeComponentSerializer.get().serialize(reason));
             } else {
                 // just send a message

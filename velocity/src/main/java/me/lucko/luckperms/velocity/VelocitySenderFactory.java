@@ -28,13 +28,13 @@ package me.lucko.luckperms.velocity;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
 import me.lucko.luckperms.velocity.util.AdventureCompat;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.translation.GlobalTranslator;
 import net.luckperms.api.util.Tristate;
 
 import java.util.Locale;
@@ -63,13 +63,11 @@ public class VelocitySenderFactory extends SenderFactory<LPVelocityPlugin, Comma
 
     @Override
     protected void sendMessage(CommandSource source, Component message) {
-        Locale locale;
+        Locale locale = null;
         if (source instanceof Player) {
             locale = ((Player) source).getPlayerSettings().getLocale();
-        } else {
-            locale = Locale.getDefault();
         }
-        Component rendered = GlobalTranslator.render(message, locale);
+        Component rendered = TranslationManager.render(message, locale);
         AdventureCompat.sendMessage(source, rendered);
     }
 

@@ -178,7 +178,7 @@ public class TranslationsCommand extends SingleCommand {
         LanguageInfo(String id, JsonObject data) {
             this.id = id;
             this.name = data.get("name").getAsString();
-            this.locale = Objects.requireNonNull(TranslationManager.parseLocale(data.get("localeTag").getAsString(), null));
+            this.locale = Objects.requireNonNull(TranslationManager.parseLocale(data.get("localeTag").getAsString()));
             this.progress = data.get("progress").getAsInt();
             this.contributors = new ArrayList<>();
             for (JsonElement contributor : data.get("contributors").getAsJsonArray()) {

@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.nukkit;
 
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.translation.GlobalTranslator;
 import net.luckperms.api.util.Tristate;
 
 import cn.nukkit.Player;
@@ -63,13 +63,11 @@ public class NukkitSenderFactory extends SenderFactory<LPNukkitPlugin, CommandSe
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
         // Fallback to legacy format
-        Locale locale;
+        Locale locale = null;
         if (sender instanceof Player) {
             locale = ((Player) sender).getLocale();
-        } else {
-            locale = Locale.getDefault();
         }
-        Component rendered = GlobalTranslator.render(message, locale);
+        Component rendered = TranslationManager.render(message, locale);
         sender.sendMessage(LegacyComponentSerializer.legacySection().serialize(rendered));
     }
 

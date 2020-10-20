@@ -30,10 +30,13 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -137,7 +140,7 @@ public class TranslationManager {
     private Map.Entry<Locale, ResourceBundle> loadCustomTranslationFile(Path translationFile) {
         String fileName = translationFile.getFileName().toString();
         String localeString = fileName.substring(0, fileName.length() - ".properties".length());
-        Locale locale = parseLocale(localeString, null);
+        Locale locale = parseLocale(localeString);
 
         if (locale == null) {
             this.plugin.getLogger().warn("Unknown locale '" + localeString + "' - unable to register.");
@@ -159,13 +162,26 @@ public class TranslationManager {
         return Maps.immutableEntry(locale, bundle);
     }
 
-    public static Locale parseLocale(String locale, Locale defaultLocale) {
-        if (locale == null) {
-            return defaultLocale;
-        }
+    public static Component render(Component component) {
+        return render(component, Locale.getDefault());
+    }
 
-        Locale parsed = Translator.parseLocale(locale);
-        return parsed != null ? parsed : defaultLocale;
+    public static Component render(Component component, @Nullable String locale) {
+        return render(component, parseLocale(locale));
+    }
+
+    public static Component render(Component component, @Nullable Locale locale) {
+        if (locale == null) {
+            locale = Locale.getDefault();
+            if (locale == null) {
+                locale = DEFAULT_LOCALE;
+            }
+        }
+        return GlobalTranslator.render(component, locale);
+    }
+
+    public static @Nullable Locale parseLocale(@Nullable String locale) {
+        return locale == null ? null : Translator.parseLocale(locale);
     }
 
 }

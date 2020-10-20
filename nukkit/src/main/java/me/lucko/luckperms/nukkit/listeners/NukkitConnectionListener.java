@@ -27,6 +27,7 @@ package me.lucko.luckperms.nukkit.listeners;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
@@ -35,7 +36,6 @@ import me.lucko.luckperms.nukkit.inject.permissible.PermissibleInjector;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.translation.GlobalTranslator;
 
 import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
@@ -47,7 +47,6 @@ import cn.nukkit.event.player.PlayerQuitEvent;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -99,7 +98,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             // deny the connection
             this.deniedAsyncLogin.add(e.getUuid());
 
-            Component reason = GlobalTranslator.render(Message.LOADING_DATABASE_ERROR.build(), Locale.getDefault());
+            Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
             e.disAllow(LegacyComponentSerializer.legacySection().serialize(reason));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUuid(), e.getName(), null);
         }
@@ -150,7 +149,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             }
 
             e.setCancelled();
-            Component reason = GlobalTranslator.render(Message.LOADING_STATE_ERROR.build(), player.getLocale());
+            Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
             e.setKickMessage(LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }
@@ -170,7 +169,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             t.printStackTrace();
 
             e.setCancelled();
-            Component reason = GlobalTranslator.render(Message.LOADING_SETUP_ERROR.build(), player.getLocale());
+            Component reason = TranslationManager.render(Message.LOADING_SETUP_ERROR.build());
             e.setKickMessage(LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }
