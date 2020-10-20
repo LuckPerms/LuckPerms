@@ -2139,12 +2139,28 @@ public interface Message {
     );
 
     Args3<ChatMetaNode<?, ?>, PermissionHolder, String> CHAT_META_ENTRY = (node, holder, label) -> prefixed(text()
-            // "&b-> {} &f- &f'{}&f' &8(&7inherited from &a{}&8) {}"
+            // "&b-> {} &f- &f'{}&f' &8(&7expires in &b{}&8) &8(&7inherited from &a{}&8) {}"
             .append(text("->", AQUA))
             .append(space())
             .append(text(node.getPriority(), AQUA))
             .append(text(" - ", WHITE))
             .append(text().color(WHITE).append(text('\'')).append(formatColoredValue(node.getMetaValue())).append(text('\'')))
+            .apply(builder -> {
+                if (node.hasExpiry()) {
+                    builder.append(space());
+                    builder.append(text()
+                            .color(DARK_GRAY)
+                            .append(OPEN_BRACKET)
+                            .append(translatable()
+                                    .key("luckperms.command.generic.info.expires-in")
+                                    .color(GRAY)
+                                    .append(space())
+                                    .append(text(DurationFormatter.CONCISE.format(node.getExpiryDuration()), AQUA))
+                            )
+                            .append(CLOSE_BRACKET)
+                    );
+                }
+            })
             .append(space())
             .append(text()
                     .color(DARK_GRAY)
@@ -2191,12 +2207,28 @@ public interface Message {
             ));
 
     Args3<MetaNode, PermissionHolder, String> META_ENTRY = (node, holder, label) -> prefixed(text()
-            // "&b-> &a{} &f= &f'{}&f' &8(&7inherited from &a{}&8) {}"
+            // "&b-> &a{} &f= &f'{}&f' &8(&7expires in &b{}&8) &8(&7inherited from &a{}&8) {}"
             .append(text("->", AQUA))
             .append(space())
             .append(text(node.getMetaKey(), GREEN))
             .append(text(" = ", WHITE))
             .append(text().color(WHITE).append(text('\'')).append(formatColoredValue(node.getMetaValue())).append(text('\'')))
+            .apply(builder -> {
+                if (node.hasExpiry()) {
+                    builder.append(space());
+                    builder.append(text()
+                            .color(DARK_GRAY)
+                            .append(OPEN_BRACKET)
+                            .append(translatable()
+                                    .key("luckperms.command.generic.info.expires-in")
+                                    .color(GRAY)
+                                    .append(space())
+                                    .append(text(DurationFormatter.CONCISE.format(node.getExpiryDuration()), AQUA))
+                            )
+                            .append(CLOSE_BRACKET)
+                    );
+                }
+            })
             .append(space())
             .append(text()
                     .color(DARK_GRAY)
