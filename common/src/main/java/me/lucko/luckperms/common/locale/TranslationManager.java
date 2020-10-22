@@ -101,7 +101,11 @@ public class TranslationManager {
      */
     private void loadBase() {
         ResourceBundle bundle = ResourceBundle.getBundle("luckperms", DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
-        this.registry.registerAll(DEFAULT_LOCALE, bundle, false);
+        try {
+            this.registry.registerAll(DEFAULT_LOCALE, bundle, false);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -131,7 +135,7 @@ public class TranslationManager {
         // try registering the locale without a country code - if we don't already have a registration for that
         loaded.forEach((locale, bundle) -> {
             Locale localeWithoutCountry = new Locale(locale.getLanguage());
-            if (!locale.equals(localeWithoutCountry) && this.installed.add(localeWithoutCountry)) {
+            if (!locale.equals(localeWithoutCountry) && !localeWithoutCountry.equals(DEFAULT_LOCALE) && this.installed.add(localeWithoutCountry)) {
                 this.registry.registerAll(localeWithoutCountry, bundle, false);
             }
         });
