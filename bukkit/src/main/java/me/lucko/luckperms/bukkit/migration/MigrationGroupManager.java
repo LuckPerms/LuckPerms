@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.util.ProgressLogger;
 import me.lucko.luckperms.common.util.Uuids;
 
 import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
@@ -58,17 +59,15 @@ import org.anjocaido.groupmanager.dataholder.worlds.WorldsHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends ChildCommand<Object> {
+
+    final String DEFAULT_CONTEXT_VALUE = "global";
+
     public MigrationGroupManager() {
         super(CommandSpec.MIGRATION_GROUPMANAGER, "groupmanager", CommandPermission.MIGRATION, Predicates.is(0));
     }
@@ -85,9 +84,20 @@ public class MigrationGroupManager extends ChildCommand<Object> {
             log.logError("Was expecting true/false, but got " + args.get(0) + " instead.");
             return CommandResult.STATE_ERROR;
         }
+
         final boolean migrateAsGlobal = Boolean.parseBoolean(args.get(0));
-        final Function<String, String> worldMappingFunc = s -> migrateAsGlobal || s == null ? "global" : s;
-        
+        final Function<String, String> worldMappingFunc = s -> migrateAsGlobal || s == null ? DEFAULT_CONTEXT_VALUE : s;
+
+        if (!args.get(1).equalsIgnoreCase("true") && !args.get(1).equalsIgnoreCase("false")) {
+            log.logError("Was expecting true/false, but got " + args.get(1) + " instead.");
+            return CommandResult.STATE_ERROR;
+        }
+
+        final boolean migrateServerContext = Boolean.parseBoolean(args.get(1));
+        ImmutableContextSet defaultContexts = plugin.getConfiguration().getContextsFile().getDefaultContexts();
+        final Optional<String> serverContext = defaultContexts.getAnyValue(DefaultContextKeys.SERVER_KEY);
+        final Function<String, String> contextMappingFunc = s -> migrateServerContext || s == null ? DEFAULT_CONTEXT_VALUE : s;
+
         if (!Bukkit.getPluginManager().isPluginEnabled("GroupManager")) {
             log.logError("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
@@ -141,11 +151,21 @@ public class MigrationGroupManager extends ChildCommand<Object> {
 
                 for (String node : group.getPermissionList()) {
                     if (node.isEmpty()) continue;
-                    groups.get(groupName).add(MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                    groups.get(groupName).add(
+                            MigrationUtils.parseNode(node, true)
+                                    .withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world))
+                                    .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                    .build()
+                    );
                 }
                 for (String s : group.getInherits()) {
                     if (s.isEmpty()) continue;
-                    groups.get(groupName).add(Inheritance.builder(MigrationUtils.standardizeName(s)).value(true).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                    groups.get(groupName).add(
+                            Inheritance.builder(MigrationUtils.standardizeName(s)).value(true)
+                                    .withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world))
+                                    .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                    .build()
+                    );
                 }
 
                 String[] metaKeys = group.getVariables().getVarKeyList();
@@ -156,11 +176,26 @@ public class MigrationGroupManager extends ChildCommand<Object> {
                     if (key.equals("build")) continue;
 
                     if (key.equals("prefix")) {
-                        groups.get(groupName).add(Prefix.builder(value, 50).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        groups.get(groupName).add(
+                                Prefix.builder(value, 50)
+                                        .withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world))
+                                        .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                        .build()
+                        );
                     } else if (key.equals("suffix")) {
-                        groups.get(groupName).add(Suffix.builder(value, 50).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        groups.get(groupName).add(
+                                Suffix.builder(value, 50)
+                                        .withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world))
+                                        .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                        .build()
+                        );
                     } else {
-                        groups.get(groupName).add(Meta.builder(key, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        groups.get(groupName).add(
+                                Meta.builder(key, value)
+                                        .withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world))
+                                        .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                        .build()
+                        );
                     }
                 }
 
@@ -186,7 +221,12 @@ public class MigrationGroupManager extends ChildCommand<Object> {
 
                 for (String node : user.getPermissionList()) {
                     if (node.isEmpty()) continue;
-                    users.get(id).add(MigrationUtils.parseNode(node, true).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                    users.get(id).add(
+                            MigrationUtils.parseNode(node, true)
+                                    .withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world))
+                                    .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                    .build()
+                    );
                 }
 
                 // Collect sub groups
@@ -194,7 +234,11 @@ public class MigrationGroupManager extends ChildCommand<Object> {
                 users.get(id).addAll(user.subGroupListStringCopy().stream()
                         .filter(n -> !n.isEmpty())
                         .map(MigrationUtils::standardizeName)
-                        .map(n -> Inheritance.builder(n).value(true).withContext(DefaultContextKeys.WORLD_KEY, finalWorld).build())
+                        .map(n -> Inheritance.builder(n).value(true)
+                                .withContext(DefaultContextKeys.WORLD_KEY, finalWorld)
+                                .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                .build()
+                        )
                         .collect(Collectors.toSet())
                 );
 
@@ -209,11 +253,26 @@ public class MigrationGroupManager extends ChildCommand<Object> {
                     if (key.equals("build")) continue;
 
                     if (key.equals("prefix")) {
-                        users.get(id).add(Prefix.builder(value, 100).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        users.get(id).add(
+                                Prefix.builder(value, 100)
+                                        .withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world))
+                                        .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                        .build()
+                        );
                     } else if (key.equals("suffix")) {
-                        users.get(id).add(Suffix.builder(value, 100).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        users.get(id).add(
+                                Suffix.builder(value, 100)
+                                        .withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world))
+                                        .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                        .build()
+                        );
                     } else {
-                        users.get(id).add(Meta.builder(key, value).withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world)).build());
+                        users.get(id).add(
+                                Meta.builder(key, value)
+                                        .withContext(DefaultContextKeys.WORLD_KEY, worldMappingFunc.apply(world))
+                                        .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                        .build()
+                        );
                     }
                 }
 
@@ -250,7 +309,12 @@ public class MigrationGroupManager extends ChildCommand<Object> {
 
             String primaryGroup = primaryGroups.get(e.getKey().getUniqueId());
             if (primaryGroup != null && !primaryGroup.isEmpty()) {
-                user.setNode(DataType.NORMAL, Inheritance.builder(primaryGroup).build(), true);
+                user.setNode(DataType.NORMAL,
+                        Inheritance.builder(primaryGroup)
+                                .withContext(DefaultContextKeys.SERVER_KEY, contextMappingFunc.apply(serverContext.orElse(DEFAULT_CONTEXT_VALUE)))
+                                .build(),
+                        true
+                );
                 user.getPrimaryGroup().setStoredValue(primaryGroup);
                 user.unsetNode(DataType.NORMAL, Inheritance.builder(me.lucko.luckperms.common.model.manager.group.GroupManager.DEFAULT_GROUP_NAME).build());
             }

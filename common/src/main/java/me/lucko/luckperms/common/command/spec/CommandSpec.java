@@ -413,7 +413,8 @@ public enum CommandSpec {
 
     MIGRATION_COMMAND,
     MIGRATION_GROUPMANAGER(
-            arg("migrate as global", true)
+            arg("migrate world as global", true),
+            arg("migrate context as global", true)
     ),
     MIGRATION_POWERFULPERMS(
             arg("address", true),
