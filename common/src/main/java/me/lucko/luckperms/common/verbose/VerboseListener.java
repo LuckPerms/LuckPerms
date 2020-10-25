@@ -284,7 +284,7 @@ public class VerboseListener {
         // retrieve variables
         String startDate = DATE_FORMAT.format(this.startTime);
         String endDate = DATE_FORMAT.format(Instant.now());
-        String duration = DurationFormatter.CONCISE.format(Duration.between(this.startTime, Instant.now()));
+        String duration = DurationFormatter.CONCISE.formatString(Duration.between(this.startTime, Instant.now()));
         boolean truncated = this.matchedCounter.get() > this.results.size();
 
         JObject metadata = new JObject()

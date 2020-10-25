@@ -776,7 +776,7 @@ public interface Message {
                                     .key("luckperms.command.generic.info.expires-in")
                                     .color(GRAY)
                                     .append(space())
-                                    .append(text(DurationFormatter.LONG.format(node.getExpiryDuration())))
+                                    .append(DurationFormatter.LONG.format(node.getExpiryDuration()))
                             )
                             .append(CLOSE_BRACKET)
                     );
@@ -820,7 +820,7 @@ public interface Message {
                                     .key("luckperms.command.generic.info.expires-in")
                                     .color(GRAY)
                                     .append(space())
-                                    .append(text(DurationFormatter.LONG.format(node.getExpiryDuration())))
+                                    .append(DurationFormatter.LONG.format(node.getExpiryDuration()))
                             )
                             .append(CLOSE_BRACKET)
                     );
@@ -966,7 +966,7 @@ public interface Message {
                     builder.append(text()
                             .color(GRAY)
                             .append(OPEN_BRACKET)
-                            .append(text(DurationFormatter.CONCISE.format(node.getExpiryDuration())))
+                            .append(DurationFormatter.CONCISE.format(node.getExpiryDuration()))
                             .append(CLOSE_BRACKET)
                     );
                 }
@@ -1456,7 +1456,7 @@ public interface Message {
                     .append(text("     "))
                     .append(translatable("luckperms.command.info.uptime-key"))
                     .append(text(": "))
-                    .append(text(DurationFormatter.CONCISE_LOW_ACCURACY.format(Duration.between(plugin.getBootstrap().getStartupTime(), Instant.now())), GRAY))),
+                    .append(text().color(GRAY).append(DurationFormatter.CONCISE_LOW_ACCURACY.format(Duration.between(plugin.getBootstrap().getStartupTime(), Instant.now()))))),
             prefixed(text()
                     .color(DARK_AQUA)
                     .append(text("     "))
@@ -1621,7 +1621,7 @@ public interface Message {
                     .append(text("-    "))
                     .append(translatable("luckperms.command.generic.info.expires-in"))
                     .append(space())
-                    .append(text(DurationFormatter.LONG.format(node.getExpiryDuration())))
+                    .append(DurationFormatter.LONG.format(node.getExpiryDuration()))
                     .build()
     );
 
@@ -1726,7 +1726,7 @@ public interface Message {
                     .append(text("-    "))
                     .append(translatable("luckperms.command.generic.info.expires-in"))
                     .append(space())
-                    .append(text(DurationFormatter.LONG.format(node.getExpiryDuration())))
+                    .append(DurationFormatter.LONG.format(node.getExpiryDuration()))
                     .build()
     );
 
@@ -1822,7 +1822,7 @@ public interface Message {
                     text(permission, AQUA),
                     text(value, AQUA),
                     text().color(AQUA).append(holder.getFormattedDisplayName()),
-                    text(DurationFormatter.LONG.format(duration), AQUA),
+                    text().color(AQUA).append(DurationFormatter.LONG.format(duration)),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
@@ -1884,9 +1884,9 @@ public interface Message {
                     text(permission, AQUA),
                     text(value, AQUA),
                     text().color(AQUA).append(holder.getFormattedDisplayName()),
-                    text(DurationFormatter.LONG.format(duration), AQUA),
+                    text().color(AQUA).append(DurationFormatter.LONG.format(duration)),
                     formatContextSet(context),
-                    text(DurationFormatter.LONG.format(durationLess), AQUA)
+                    text().color(AQUA).append(DurationFormatter.LONG.format(durationLess))
             )
             .append(FULL_STOP)
     );
@@ -1922,7 +1922,7 @@ public interface Message {
             .args(
                     text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text().color(AQUA).append(parent.getFormattedDisplayName()),
-                    text(DurationFormatter.LONG.format(duration), AQUA),
+                    text().color(AQUA).append(DurationFormatter.LONG.format(duration)),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
@@ -1984,9 +1984,9 @@ public interface Message {
             .args(
                     text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text().color(AQUA).append(parent),
-                    text(DurationFormatter.LONG.format(duration), AQUA),
+                    text().color(AQUA).append(DurationFormatter.LONG.format(duration)),
                     formatContextSet(context),
-                    text(DurationFormatter.LONG.format(durationLess), AQUA)
+                    text().color(AQUA).append(DurationFormatter.LONG.format(durationLess))
             )
             .append(FULL_STOP)
     );
@@ -2155,7 +2155,7 @@ public interface Message {
                                     .key("luckperms.command.generic.info.expires-in")
                                     .color(GRAY)
                                     .append(space())
-                                    .append(text(DurationFormatter.CONCISE.format(node.getExpiryDuration()), AQUA))
+                                    .append(text().color(AQUA).append(DurationFormatter.CONCISE.format(node.getExpiryDuration())))
                             )
                             .append(CLOSE_BRACKET)
                     );
@@ -2223,7 +2223,7 @@ public interface Message {
                                     .key("luckperms.command.generic.info.expires-in")
                                     .color(GRAY)
                                     .append(space())
-                                    .append(text(DurationFormatter.CONCISE.format(node.getExpiryDuration()), AQUA))
+                                    .append(text().color(AQUA).append(DurationFormatter.CONCISE.format(node.getExpiryDuration())))
                             )
                             .append(CLOSE_BRACKET)
                     );
@@ -2388,7 +2388,7 @@ public interface Message {
                     text(type.toString()),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     text(priority, AQUA),
-                    text(DurationFormatter.LONG.format(duration), AQUA),
+                    text().color(AQUA).append(DurationFormatter.LONG.format(duration)),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
@@ -2519,7 +2519,7 @@ public interface Message {
                     text().color(WHITE).append(text('\'')).append(text(key)).append(text('\'')),
                     text().color(WHITE).append(text('\'')).append(formatColoredValue(value)).append(text('\'')),
                     text().color(AQUA).append(holder.getFormattedDisplayName()),
-                    text(DurationFormatter.LONG.format(duration), AQUA),
+                    text().color(AQUA).append(DurationFormatter.LONG.format(duration)),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
@@ -2927,7 +2927,7 @@ public interface Message {
                     .append(text("    -    "))
                     .append(translatable("luckperms.command.generic.info.expires-in"))
                     .append(space())
-                    .append(text(DurationFormatter.LONG.format(node.getExpiryDuration()))))
+                    .append(DurationFormatter.LONG.format(node.getExpiryDuration())))
     );
 
     Args0 USER_REMOVEGROUP_ERROR_PRIMARY = () -> prefixed(translatable()
@@ -3385,9 +3385,10 @@ public interface Message {
                     .append(text()
                             .color(DARK_GRAY)
                             .append(OPEN_BRACKET)
-                            .append(text()
-                                    .content(DurationFormatter.CONCISE_LOW_ACCURACY.format(action.getDurationSince()) + " ago")
+                            .append(translatable()
                                     .color(GRAY)
+                                    .key("luckperms.duration.since")
+                                    .args(DurationFormatter.CONCISE_LOW_ACCURACY.format(action.getDurationSince()))
                             )
                             .append(CLOSE_BRACKET)
                     )
