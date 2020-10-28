@@ -29,10 +29,14 @@ import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -119,8 +123,8 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public Map<String, String> getMeta() {
-        Map<String, String> meta = new LinkedHashMap<>();
+    public Map<Component, Component> getMeta() {
+        Map<Component, Component> meta = new LinkedHashMap<>();
         boolean success = true;
 
         long start = System.currentTimeMillis();
@@ -134,11 +138,15 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         long duration = System.currentTimeMillis() - start;
 
         if (success) {
-            meta.put("Ping", duration + "ms");
-            meta.put("Connected", "true");
-        } else {
-            meta.put("Connected", "false");
+            meta.put(
+                    Component.translatable("luckperms.command.info.storage.meta.ping-key"),
+                    Component.text(duration + "ms", NamedTextColor.GREEN)
+            );
         }
+        meta.put(
+                Component.translatable("luckperms.command.info.storage.meta.connected-key"),
+                Message.formatBoolean(success)
+        );
 
         return meta;
     }

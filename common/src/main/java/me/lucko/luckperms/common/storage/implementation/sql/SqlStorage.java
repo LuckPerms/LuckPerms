@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.model.data.DataType;
@@ -219,7 +220,7 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public Map<String, String> getMeta() {
+    public Map<Component, Component> getMeta() {
         return this.connectionFactory.getMeta();
     }
 

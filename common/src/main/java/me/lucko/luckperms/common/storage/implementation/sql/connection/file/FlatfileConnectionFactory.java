@@ -28,11 +28,14 @@ package me.lucko.luckperms.common.storage.implementation.sql.connection.file;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.Map;
 
 abstract class FlatfileConnectionFactory implements ConnectionFactory {
@@ -54,9 +57,8 @@ abstract class FlatfileConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public Map<String, String> getMeta() {
-        Map<String, String> meta = new LinkedHashMap<>();
-
+    public Map<Component, Component> getMeta() {
+        String fileSize;
         Path databaseFile = getWriteFile();
         if (Files.exists(databaseFile)) {
             long length;
@@ -67,11 +69,14 @@ abstract class FlatfileConnectionFactory implements ConnectionFactory {
             }
 
             double size = length / 1048576D;
-            meta.put("File Size", DF.format(size) + "MB");
+            fileSize = DF.format(size) + "MB";
         } else {
-            meta.put("File Size", "0MB");
+            fileSize = "0MB";
         }
 
-        return meta;
+        return Collections.singletonMap(
+                Component.translatable("luckperms.command.info.storage.meta.file-size-key"),
+                Component.text(fileSize, NamedTextColor.GREEN)
+        );
     }
 }

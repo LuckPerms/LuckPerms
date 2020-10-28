@@ -71,7 +71,6 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_GREEN;
@@ -322,7 +321,7 @@ public interface Message {
             .append(space())
             .append(text(target, GREEN))
             .append(text(" - ", GRAY))
-            .append(text("meta: ", BLUE))
+            .append(text("meta: ", AQUA))
             .append(text(metaKey, GREEN))
             .append(text(" - ", GRAY))
             .append(text(result, GRAY))
@@ -1319,7 +1318,7 @@ public interface Message {
             )
     );
 
-    Args2<LuckPermsPlugin, Map<String, String>> INFO = (plugin, storageMeta) -> join(newline(),
+    Args2<LuckPermsPlugin, Map<Component, Component>> INFO = (plugin, storageMeta) -> join(newline(),
             // "&2Running &bLuckPerms v{}&2 by &bLuck&2."
             // "&f-  &3Platform: &f{}"
             // "&f-  &3Server Brand: &f{}"
@@ -1382,28 +1381,14 @@ public interface Message {
                                 .append(text(plugin.getStorage().getName(), WHITE))
                         );
 
-                        for (Map.Entry<String, String> metaEntry : storageMeta.entrySet()) {
+                        for (Map.Entry<Component, Component> metaEntry : storageMeta.entrySet()) {
                             builder.append(newline());
-
-                            String value = metaEntry.getValue();
-                            Component valueComponent;
-                            if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-                                valueComponent = formatBoolean(Boolean.parseBoolean(value));
-                            } else {
-                                try {
-                                    int i = Integer.parseInt(value);
-                                    valueComponent = text(i, GREEN);
-                                } catch (NumberFormatException e) {
-                                    valueComponent = text(value, WHITE);
-                                }
-                            }
-
                             builder.append(prefixed(text()
                                     .color(DARK_AQUA)
                                     .append(text("     "))
-                                    .append(text(metaEntry.getKey()))
+                                    .append(metaEntry.getKey())
                                     .append(text(": "))
-                                    .append(valueComponent)
+                                    .append(metaEntry.getValue())
                             ));
                         }
                     })),

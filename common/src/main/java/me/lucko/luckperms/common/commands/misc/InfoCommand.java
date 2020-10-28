@@ -35,6 +35,8 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
+
 import java.util.Map;
 
 public class InfoCommand extends SingleCommand {
@@ -44,7 +46,7 @@ public class InfoCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
-        Map<String, String> storageMeta = plugin.getStorage().getMeta();
+        Map<Component, Component> storageMeta = plugin.getStorage().getMeta();
         Message.INFO.send(sender, plugin, storageMeta);
         return CommandResult.SUCCESS;
     }

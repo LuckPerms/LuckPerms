@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -38,6 +39,7 @@ import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
@@ -48,6 +50,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class SplitStorage implements StorageImplementation {
     private final LuckPermsPlugin plugin;
@@ -106,9 +109,14 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public Map<String, String> getMeta() {
-        Map<String, String> meta = new LinkedHashMap<>();
-        meta.put("Types", this.types.toString());
+    public Map<Component, Component> getMeta() {
+        Map<Component, Component> meta = new LinkedHashMap<>();
+        meta.put(
+                Component.translatable("luckperms.command.info.storage.meta.split-types-key"),
+                Message.formatStringList(this.types.entrySet().stream()
+                        .map(e -> e.getKey().toString().toLowerCase() + "->" + e.getValue().getName().toLowerCase())
+                        .collect(Collectors.toList()))
+        );
         for (StorageImplementation backing : this.implementations.values()) {
             meta.putAll(backing.getMeta());
         }
