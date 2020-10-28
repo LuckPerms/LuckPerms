@@ -171,7 +171,7 @@ public interface Message {
             // "&3Open your console and run:"
             // " &3&l> &a{} user {} permission set luckperms.* true"
             // "&3After you've done this, you can begin to define your permission assignments and groups."
-            // "&3Don't know where to start? Check here: &7https://github.com/lucko/LuckPerms/wiki/Usage"
+            // "&3Don't know where to start? Check here: &7https://luckperms.net/wiki/Usage"
             prefixed(translatable()
                     .key("luckperms.first-time.no-permissions-setup")
                     .color(DARK_AQUA)),
@@ -197,7 +197,11 @@ public interface Message {
             prefixed(translatable()
                     .key("luckperms.first-time.wiki-prompt")
                     .color(DARK_AQUA)
-                    .args(text("https://github.com/lucko/LuckPerms/wiki/Usage", GRAY)))
+                    .args(text()
+                            .content("https://luckperms.net/wiki/Usage")
+                            .color(GRAY)
+                            .clickEvent(ClickEvent.openUrl("https://luckperms.net/wiki/Usage"))
+                    ))
     );
 
     Args0 LOADING_DATABASE_ERROR = () -> prefixed(translatable()

@@ -79,7 +79,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
         this.plugin.getLogger().warn("It appears that your server is running CraftBukkit and configured in offline (cracked) mode.");
         this.plugin.getLogger().warn("Due to a CraftBukkit limitation, LuckPerms cannot function correctly in this setup.");
         this.plugin.getLogger().warn("To resolve this, please either a) upgrade from CraftBukkit to Spigot or Paper, or b) enable online-mode.");
-        this.plugin.getLogger().warn("For more info, please see: https://github.com/lucko/LuckPerms/wiki/Installation#craftbukkit-and-offline-mode");
+        this.plugin.getLogger().warn("For more info, please see: https://luckperms.net/wiki/Installation#craftbukkit-and-offline-mode");
     }
 
     @EventHandler(priority = EventPriority.LOW)
