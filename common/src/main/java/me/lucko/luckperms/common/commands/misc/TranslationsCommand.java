@@ -98,7 +98,7 @@ public class TranslationsCommand extends SingleCommand {
 
         Message.AVAILABLE_TRANSLATIONS_HEADER.send(sender);
         for (LanguageInfo language : availableTranslations) {
-            Message.AVAILABLE_TRANSLATIONS_ENTRY.send(sender, language.locale.toString(), language.locale.getDisplayLanguage(language.locale), language.progress, language.contributors);
+            Message.AVAILABLE_TRANSLATIONS_ENTRY.send(sender, language.locale.toString(), localeDisplayName(language.locale), language.progress, language.contributors);
         }
         sender.sendMessage(Message.prefixed(Component.empty()));
         Message.TRANSLATIONS_DOWNLOAD_PROMPT.send(sender, label);
@@ -166,6 +166,23 @@ public class TranslationsCommand extends SingleCommand {
         }
         languages.removeIf(language -> language.progress <= 0);
         return languages;
+    }
+
+    private static String localeDisplayName(Locale locale) {
+        if (locale.getLanguage().equals("zh")) {
+            if (locale.getCountry().equals("CN")) {
+                return "简体中文"; // Chinese (Simplified)
+            } else if (locale.getCountry().equals("TW")) {
+                return "繁體中文"; // Chinese (Traditional)
+            }
+            return locale.getDisplayCountry(locale) + locale.getDisplayLanguage(locale);
+        }
+
+        if (locale.getLanguage().equals("en") && locale.getCountry().equals("PT")) {
+            return "Pirate";
+        }
+
+        return locale.getDisplayLanguage(locale);
     }
 
     private static final class LanguageInfo {
