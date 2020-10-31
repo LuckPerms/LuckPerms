@@ -94,7 +94,7 @@ public class TreeCommand extends SingleCommand {
             Message.GENERIC_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
             return CommandResult.STATE_ERROR;
         } catch (IOException e) {
-            new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
+            plugin.getLogger().warn("Error uploading data to bytebin", e);
             Message.GENERIC_HTTP_UNKNOWN_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }

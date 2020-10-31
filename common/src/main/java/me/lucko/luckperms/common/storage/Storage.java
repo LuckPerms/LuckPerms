@@ -115,8 +115,7 @@ public class Storage {
         try {
             this.implementation.init();
         } catch (Exception e) {
-            this.plugin.getLogger().severe("Failed to init storage implementation");
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Failed to init storage implementation", e);
         }
     }
 
@@ -124,8 +123,7 @@ public class Storage {
         try {
             this.implementation.shutdown();
         } catch (Exception e) {
-            this.plugin.getLogger().severe("Failed to shutdown storage implementation");
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Failed to shutdown storage implementation", e);
         }
     }
 

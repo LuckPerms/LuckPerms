@@ -85,7 +85,7 @@ public class ExportCommand extends SingleCommand {
                 Files.createFile(path);
             } catch (IOException e) {
                 Message.EXPORT_FILE_FAILURE.send(sender);
-                e.printStackTrace();
+                plugin.getLogger().warn("Error whilst writing to the file", e);
                 return CommandResult.FAILURE;
             }
 

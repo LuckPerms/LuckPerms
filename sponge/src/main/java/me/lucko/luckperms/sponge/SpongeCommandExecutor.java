@@ -107,8 +107,7 @@ public class SpongeCommandExecutor extends CommandManager implements CommandCall
                         .map(e -> ((Player) e))
                         .collect(Collectors.toList());
             } catch (IllegalArgumentException e) {
-                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + source + " executing " + args);
-                e.printStackTrace();
+                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + source + " executing " + args, e);
                 continue;
             }
 

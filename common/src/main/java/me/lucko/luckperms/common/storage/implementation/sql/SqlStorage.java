@@ -215,7 +215,7 @@ public class SqlStorage implements StorageImplementation {
         try {
             this.connectionFactory.shutdown();
         } catch (Exception e) {
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Exception whilst disabling SQLite storage", e);
         }
     }
 

@@ -86,10 +86,10 @@ public final class SqlNode {
     }
 
     public static SqlNode fromSqlFields(long sqlId, String permission, boolean value, String server, String world, long expiry, String contexts) {
-        if (Strings.emptyToNull(server) == null) {
+        if (Strings.isNullOrEmpty(server)) {
             server = "global";
         }
-        if (Strings.emptyToNull(world) == null) {
+        if (Strings.isNullOrEmpty(world)) {
             world = "global";
         }
 

@@ -73,7 +73,7 @@ public class DeleteGroup extends SingleCommand {
         try {
             plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst deleting group", e);
             Message.DELETE_ERROR.send(sender, group.getFormattedDisplayName());
             return CommandResult.FAILURE;
         }

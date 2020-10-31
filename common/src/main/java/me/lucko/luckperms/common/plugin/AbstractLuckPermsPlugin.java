@@ -140,8 +140,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
             } catch (Throwable e) {
                 // catch throwable here, seems some JVMs throw UnsatisfiedLinkError when trying
                 // to create a watch service. see: https://github.com/lucko/LuckPerms/issues/2066
-                getLogger().warn("Error occurred whilst trying to create a file watcher:");
-                e.printStackTrace();
+                getLogger().warn("Error occurred whilst trying to create a file watcher:", e);
             }
         }
 

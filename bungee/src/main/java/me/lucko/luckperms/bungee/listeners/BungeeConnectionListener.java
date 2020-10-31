@@ -93,8 +93,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
                 recordConnection(c.getUniqueId());
                 this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(c.getUniqueId(), c.getName(), user);
             } catch (Exception ex) {
-                this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
-                ex.printStackTrace();
+                this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName(), ex);
 
                 // there was some error loading
                 if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {

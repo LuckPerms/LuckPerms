@@ -67,7 +67,7 @@ public class CreateTrack extends SingleCommand {
         try {
             plugin.getStorage().createAndLoadTrack(trackName, CreationCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst creating track", e);
             Message.CREATE_ERROR.send(sender, Component.text(trackName));
             return CommandResult.FAILURE;
         }

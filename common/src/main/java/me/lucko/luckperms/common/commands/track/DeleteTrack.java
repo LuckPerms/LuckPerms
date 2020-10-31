@@ -67,7 +67,7 @@ public class DeleteTrack extends SingleCommand {
         try {
             plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst deleting track", e);
             Message.DELETE_ERROR.send(sender, Component.text(track.getName()));
             return CommandResult.FAILURE;
         }

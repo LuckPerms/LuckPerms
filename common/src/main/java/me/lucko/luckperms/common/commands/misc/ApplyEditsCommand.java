@@ -62,7 +62,7 @@ public class ApplyEditsCommand extends SingleCommand {
             Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
             return CommandResult.STATE_ERROR;
         } catch (IOException e) {
-            new RuntimeException("Error reading data from bytebin", e).printStackTrace();
+            plugin.getLogger().warn("Error reading data from bytebin", e);
             Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }

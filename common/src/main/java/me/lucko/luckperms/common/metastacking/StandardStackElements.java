@@ -84,7 +84,7 @@ public final class StandardStackElements {
                 .map(s -> {
                     MetaStackElement parsed = parseFromString(plugin, s);
                     if (parsed == null) {
-                        new IllegalArgumentException("Unable to parse from: " + s).printStackTrace();
+                        plugin.getLogger().warn("Unable to parse from: " + s, new IllegalArgumentException());
                     }
                     return parsed;
                 })

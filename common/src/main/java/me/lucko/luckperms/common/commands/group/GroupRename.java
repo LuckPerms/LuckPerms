@@ -66,7 +66,7 @@ public class GroupRename extends ChildCommand<Group> {
         try {
             newGroup = plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst creating group", e);
             Message.CREATE_ERROR.send(sender, Component.text(newGroupName));
             return CommandResult.FAILURE;
         }
@@ -74,7 +74,7 @@ public class GroupRename extends ChildCommand<Group> {
         try {
             plugin.getStorage().deleteGroup(target, DeletionCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst deleting group", e);
             Message.DELETE_ERROR.send(sender, target.getFormattedDisplayName());
             return CommandResult.FAILURE;
         }

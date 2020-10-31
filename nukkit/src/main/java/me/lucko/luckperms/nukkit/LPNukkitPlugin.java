@@ -221,12 +221,13 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
                                 LuckPermsPermissible lpPermissible = new LuckPermsPermissible(player, user, this);
                                 PermissibleInjector.inject(player, lpPermissible);
                             } catch (Throwable t) {
-                                t.printStackTrace();
+                                getLogger().severe("Exception thrown when setting up permissions for " +
+                                        player.getUniqueId() + " - " + player.getName(), t);
                             }
                         });
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    getLogger().severe("Exception occurred whilst loading data for " + player.getUniqueId() + " - " + player.getName(), e);
                 }
             });
         }
@@ -239,7 +240,8 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
             try {
                 PermissibleInjector.uninject(player, false);
             } catch (Exception e) {
-                e.printStackTrace();
+                getLogger().severe("Exception thrown when unloading permissions from " +
+                        player.getUniqueId() + " - " + player.getName(), e);
             }
 
             if (getConfiguration().get(ConfigKeys.AUTO_OP)) {

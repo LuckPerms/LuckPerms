@@ -65,7 +65,7 @@ public class TrackRename extends ChildCommand<Track> {
         try {
             newTrack = plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst creating track", e);
             Message.CREATE_ERROR.send(sender, Component.text(newTrackName));
             return CommandResult.FAILURE;
         }
@@ -73,7 +73,7 @@ public class TrackRename extends ChildCommand<Track> {
         try {
             plugin.getStorage().deleteTrack(target, DeletionCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst deleting track", e);
             Message.DELETE_ERROR.send(sender, Component.text(target.getName()));
             return CommandResult.FAILURE;
         }

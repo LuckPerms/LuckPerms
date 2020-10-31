@@ -65,7 +65,7 @@ public class VaultHookManager {
             sm.register(Chat.class, this.chat, this.plugin.getBootstrap(), ServicePriority.High);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Error occurred whilst hooking into Vault.", e);
         }
     }
 

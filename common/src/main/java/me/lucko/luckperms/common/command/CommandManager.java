@@ -141,8 +141,7 @@ public class CommandManager {
             try {
                 return execute(sender, label, args);
             } catch (Throwable e) {
-                this.plugin.getLogger().severe("Exception whilst executing command: " + args.toString());
-                e.printStackTrace();
+                this.plugin.getLogger().severe("Exception whilst executing command: " + args, e);
                 return null;
             }
         }, this.executor);

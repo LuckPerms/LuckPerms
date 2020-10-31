@@ -93,8 +93,7 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
             recordConnection(profile.getUniqueId());
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(profile.getUniqueId(), username, user);
         } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + profile.getUniqueId() + " - " + profile.getName());
-            ex.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + profile.getUniqueId() + " - " + profile.getName(), ex);
 
             this.deniedAsyncLogin.add(profile.getUniqueId());
 

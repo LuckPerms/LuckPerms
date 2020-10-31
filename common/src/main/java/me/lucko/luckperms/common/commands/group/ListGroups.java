@@ -49,7 +49,7 @@ public class ListGroups extends SingleCommand {
         try {
             plugin.getStorage().loadAllGroups().get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst loading groups", e);
             Message.GROUPS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }

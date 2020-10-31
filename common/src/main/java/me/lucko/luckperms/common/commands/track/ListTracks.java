@@ -47,7 +47,7 @@ public class ListTracks extends SingleCommand {
         try {
             plugin.getStorage().loadAllTracks().get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst loading tracks", e);
             Message.TRACKS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }

@@ -77,7 +77,7 @@ public final class StorageAssistant {
         try {
             plugin.getStorage().saveUser(user).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst saving user", e);
             Message.USER_SAVE_ERROR.send(sender, user);
             return;
         }
@@ -92,7 +92,7 @@ public final class StorageAssistant {
         try {
             plugin.getStorage().saveGroup(group).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst saving group", e);
             Message.GROUP_SAVE_ERROR.send(sender, group);
             return;
         }
@@ -110,7 +110,7 @@ public final class StorageAssistant {
         try {
             plugin.getStorage().saveTrack(track).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst saving track", e);
             Message.TRACK_SAVE_ERROR.send(sender, track.getName());
             return;
         }

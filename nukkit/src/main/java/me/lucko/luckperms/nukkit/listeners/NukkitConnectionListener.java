@@ -92,8 +92,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             recordConnection(e.getUuid());
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUuid(), e.getName(), user);
         } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUuid() + " - " + e.getName());
-            ex.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUuid() + " - " + e.getName(), ex);
 
             // deny the connection
             this.deniedAsyncLogin.add(e.getUuid());
@@ -165,8 +164,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
 
         } catch (Throwable t) {
             this.plugin.getLogger().warn("Exception thrown when setting up permissions for " +
-                    player.getUniqueId() + " - " + player.getName() + " - denying login.");
-            t.printStackTrace();
+                    player.getUniqueId() + " - " + player.getName() + " - denying login.", t);
 
             e.setCancelled();
             Component reason = TranslationManager.render(Message.LOADING_SETUP_ERROR.build());
@@ -211,7 +209,8 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             try {
                 PermissibleInjector.uninject(player, true);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                this.plugin.getLogger().severe("Exception thrown when unloading permissions from " +
+                        player.getUniqueId() + " - " + player.getName(), ex);
             }
 
             // Handle auto op

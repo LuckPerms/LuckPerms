@@ -68,7 +68,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             try {
                 extension.instance.unload();
             } catch (Exception e) {
-                e.printStackTrace();
+                this.plugin.getLogger().warn("Exception unloading extension", e);
             }
         }
         this.extensions.clear();
@@ -96,12 +96,12 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
                     try {
                         loadExtension(path);
                     } catch (IOException e) {
-                        new RuntimeException("Exception loading extension from " + path, e).printStackTrace();
+                        this.plugin.getLogger().warn("Exception loading extension from " + path, e);
                     }
                 }
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            this.plugin.getLogger().warn("Exception loading extensions from " + directory, e);
         }
     }
 

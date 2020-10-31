@@ -102,7 +102,7 @@ public class ImportCommand extends SingleCommand {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
                 data = GsonProvider.normal().fromJson(reader, JsonObject.class);
             } catch (IOException e) {
-                e.printStackTrace();
+                plugin.getLogger().warn("Error whilst reading from the import file", e);
                 Message.IMPORT_FILE_READ_FAILURE.send(sender);
                 this.running.set(false);
                 return CommandResult.FAILURE;
@@ -121,7 +121,7 @@ public class ImportCommand extends SingleCommand {
                 Message.HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
                 return CommandResult.STATE_ERROR;
             } catch (IOException e) {
-                new RuntimeException("Error reading data to bytebin", e).printStackTrace();
+                plugin.getLogger().severe("Error reading data to bytebin", e);
                 Message.HTTP_UNKNOWN_FAILURE.send(sender);
                 return CommandResult.STATE_ERROR;
             }
