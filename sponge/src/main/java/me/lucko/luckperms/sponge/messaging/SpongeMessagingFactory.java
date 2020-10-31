@@ -47,7 +47,7 @@ public class SpongeMessagingFactory extends MessagingFactory<LPSpongePlugin> {
             try {
                 return new LuckPermsMessagingService(getPlugin(), new PluginMessageMessengerProvider());
             } catch (Exception e) {
-                e.printStackTrace();
+                getPlugin().getLogger().severe("Exception occurred whilst enabling messaging", e);
             }
         }
 

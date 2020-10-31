@@ -103,7 +103,7 @@ public class SplitStorage implements StorageImplementation {
             try {
                 ds.shutdown();
             } catch (Exception e) {
-                e.printStackTrace();
+                this.plugin.getLogger().severe("Exception whilst disabling " + ds + " storage", e);
             }
         }
     }

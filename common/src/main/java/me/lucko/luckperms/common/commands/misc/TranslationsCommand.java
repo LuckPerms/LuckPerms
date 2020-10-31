@@ -80,7 +80,7 @@ public class TranslationsCommand extends SingleCommand {
             availableTranslations = getAvailableTranslations(plugin);
         } catch (IOException | UnsuccessfulRequestException e) {
             Message.TRANSLATIONS_SEARCHING_ERROR.send(sender);
-            e.printStackTrace();
+            plugin.getLogger().warn("Unable to obtain a list of available translations", e);
             return CommandResult.FAILURE;
         }
 
@@ -134,7 +134,7 @@ public class TranslationsCommand extends SingleCommand {
                 }
             } catch (UnsuccessfulRequestException | IOException e) {
                 Message.TRANSLATIONS_DOWNLOAD_ERROR.send(sender, language.locale.toString());
-                e.printStackTrace();
+                plugin.getLogger().warn("Unable to download translations", e);
             }
         }
     }

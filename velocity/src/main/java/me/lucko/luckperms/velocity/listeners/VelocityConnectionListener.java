@@ -91,8 +91,7 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
             e.setProvider(new PlayerPermissionProvider(p, user, this.plugin.getContextManager().getCacheFor(p)));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(p.getUniqueId(), p.getUsername(), user);
         } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + p.getUniqueId() + " - " + p.getUsername());
-            ex.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + p.getUniqueId() + " - " + p.getUsername(), ex);
 
             // there was some error loading
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {

@@ -100,7 +100,7 @@ public class LogDispatcher {
             try {
                 this.plugin.getStorage().logAction(entry).get();
             } catch (Exception e) {
-                e.printStackTrace();
+                plugin.getLogger().warn("Error whilst storing action", e);
             }
         }
 

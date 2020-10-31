@@ -63,8 +63,7 @@ public class BungeePermissionCheckListener implements Listener {
         User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
         if (user == null) {
             this.plugin.getLogger().warn("A permission check was made for player " + player.getName() + " - " + player.getUniqueId() + ", " +
-                    "but LuckPerms does not have any permissions data loaded for them. Perhaps their UUID has been altered since login?");
-            new Exception().printStackTrace();
+                    "but LuckPerms does not have any permissions data loaded for them. Perhaps their UUID has been altered since login?", new Exception());
 
             e.setHasPermission(false);
             return;
@@ -93,8 +92,7 @@ public class BungeePermissionCheckListener implements Listener {
         User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
         if (user == null) {
             this.plugin.getLogger().warn("A permission check was made for player " + player.getName() + " - " + player.getUniqueId() + ", " +
-                    "but LuckPerms does not have any permissions data loaded for them. Perhaps their UUID has been altered since login?");
-            new Exception().printStackTrace();
+                    "but LuckPerms does not have any permissions data loaded for them. Perhaps their UUID has been altered since login?", new Exception());
 
             e.setResult(Tristate.UNDEFINED);
             return;

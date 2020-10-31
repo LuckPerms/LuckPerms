@@ -76,7 +76,7 @@ public class SubjectStorage {
         }
 
         try (Stream<Path> s = Files.list(this.container)) {
-            return s.filter(p -> Files.isDirectory(p))
+            return s.filter(Files::isDirectory)
                     .map(p -> p.getFileName().toString())
                     .collect(ImmutableCollectors.toSet());
         } catch (IOException e) {

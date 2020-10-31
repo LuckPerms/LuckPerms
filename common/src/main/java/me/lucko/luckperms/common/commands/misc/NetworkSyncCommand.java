@@ -60,7 +60,7 @@ public class NetworkSyncCommand extends SingleCommand {
             Message.UPDATE_TASK_PUSH_SUCCESS.send(sender, messagingService.get().getName());
             return CommandResult.SUCCESS;
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst pushing changes to other servers", e);
             Message.UPDATE_TASK_PUSH_FAILURE.send(sender);
             return CommandResult.FAILURE;
         }

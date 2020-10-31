@@ -126,8 +126,7 @@ public class DependencyManager {
                 try {
                     loadDependency(dependency);
                 } catch (Throwable e) {
-                    this.plugin.getLogger().severe("Unable to load dependency " + dependency.name() + ".");
-                    e.printStackTrace();
+                    this.plugin.getLogger().severe("Unable to load dependency " + dependency.name() + ".", e);
                 } finally {
                     latch.countDown();
                 }
@@ -210,7 +209,7 @@ public class DependencyManager {
             try {
                 MoreFiles.deleteDirectory(oldCacheDirectory);
             } catch (IOException e) {
-                e.printStackTrace();
+                plugin.getLogger().warn("Unable to delete lib directory", e);
             }
         }
 

@@ -63,7 +63,7 @@ public class TreeView {
     private final ImmutableTreeNode view;
 
     public TreeView(PermissionRegistry source, String rootPosition) {
-        if (rootPosition.equals("") || rootPosition.equals("*")) {
+        if (rootPosition.isEmpty() || rootPosition.equals("*")) {
             rootPosition = ".";
         } else if (!rootPosition.equals(".") && rootPosition.endsWith(".")) {
             rootPosition = rootPosition.substring(0, rootPosition.length() - 1);

@@ -67,8 +67,7 @@ public class InjectorSubscriptionMap implements Runnable {
                 this.plugin.setSubscriptionMap(subscriptionMap);
             }
         } catch (Exception e) {
-            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Permission Subscription map.");
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Permission Subscription map.", e);
         }
     }
 

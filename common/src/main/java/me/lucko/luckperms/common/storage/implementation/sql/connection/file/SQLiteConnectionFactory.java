@@ -56,7 +56,7 @@ public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
             try {
                 Files.move(data, file);
             } catch (IOException e) {
-                e.printStackTrace();
+                plugin.getLogger().warn("Unable to move old database", e);
             }
         }
 

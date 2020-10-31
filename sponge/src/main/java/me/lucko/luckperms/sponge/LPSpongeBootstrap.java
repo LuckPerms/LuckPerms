@@ -256,7 +256,7 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
         try {
             MoreFiles.createDirectoriesIfNotExists(dataDirectory);
         } catch (IOException e) {
-            e.printStackTrace();
+            this.logger.warn("Unable to create LuckPerms directory", e);
         }
         return dataDirectory;
     }

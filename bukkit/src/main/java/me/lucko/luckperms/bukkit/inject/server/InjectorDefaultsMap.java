@@ -67,8 +67,7 @@ public class InjectorDefaultsMap {
                 this.plugin.setDefaultPermissionMap(defaultsMap);
             }
         } catch (Exception e) {
-            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Default Permission map.");
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Default Permission map.", e);
         }
     }
 
@@ -111,7 +110,7 @@ public class InjectorDefaultsMap {
                 DEFAULT_PERMISSIONS_FIELD.set(pluginManager, new HashMap<>(lpMap));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst uninjecting LuckPerms Default Permission map.", e);
         }
     }
 }

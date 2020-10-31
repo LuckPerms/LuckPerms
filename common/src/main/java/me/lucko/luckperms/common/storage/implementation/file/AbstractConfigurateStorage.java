@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.context.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
-import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
@@ -150,8 +149,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
     // used to report i/o exceptions which took place in a specific file
     protected RuntimeException reportException(String file, Exception ex) throws RuntimeException {
-        this.plugin.getLogger().warn("Exception thrown whilst performing i/o: " + file);
-        ex.printStackTrace();
+        this.plugin.getLogger().warn("Exception thrown whilst performing i/o: " + file, ex);
         Throwables.throwIfUnchecked(ex);
         throw new RuntimeException(ex);
     }

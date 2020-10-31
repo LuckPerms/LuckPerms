@@ -134,7 +134,7 @@ public class Importer implements Runnable {
     @Override
     public void run() {
         long startTime = System.currentTimeMillis();
-        this.notify.forEach(s -> Message.IMPORT_START.send(s));
+        this.notify.forEach(Message.IMPORT_START::send);
 
         // start an update task in the background - we'll #join this later
         CompletableFuture<Void> updateTask = CompletableFuture.runAsync(() -> this.plugin.getSyncTaskBuffer().requestDirectly());

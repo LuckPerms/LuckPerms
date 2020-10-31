@@ -121,8 +121,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             recordConnection(e.getUniqueId());
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUniqueId(), e.getName(), user);
         } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUniqueId() + " - " + e.getName());
-            ex.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUniqueId() + " - " + e.getName(), ex);
 
             // deny the connection
             this.deniedAsyncLogin.add(e.getUniqueId());
@@ -203,8 +202,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
 
         } catch (Throwable t) {
             this.plugin.getLogger().warn("Exception thrown when setting up permissions for " +
-                    player.getUniqueId() + " - " + player.getName() + " - denying login.");
-            t.printStackTrace();
+                    player.getUniqueId() + " - " + player.getName() + " - denying login.", t);
 
             Component reason = TranslationManager.render(Message.LOADING_SETUP_ERROR.build(), player.getLocale());
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
@@ -242,7 +240,8 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             try {
                 PermissibleInjector.uninject(player, true);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                this.plugin.getLogger().severe("Exception thrown when unloading permissions from " +
+                        player.getUniqueId() + " - " + player.getName(), ex);
             }
 
             // Handle auto op

@@ -131,7 +131,7 @@ public class MigrationPowerfulPerms extends ChildCommand<Object> {
                     try (ResultSet rs = ps.executeQuery()) {
                         log.log("Found table: " + dbTable);
                         while (rs.next()) {
-                            log.log("" + rs.getString("COLUMN_NAME") + " - " + rs.getString("COLUMN_TYPE"));
+                            log.log(rs.getString("COLUMN_NAME") + " - " + rs.getString("COLUMN_TYPE"));
                         }
                     }
                 }

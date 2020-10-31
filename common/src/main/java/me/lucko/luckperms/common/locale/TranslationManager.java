@@ -104,7 +104,7 @@ public class TranslationManager {
         try {
             this.registry.registerAll(DEFAULT_LOCALE, bundle, false);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            this.plugin.getLogger().warn("Error loading default locale file", e);
         }
     }
 
@@ -127,8 +127,7 @@ public class TranslationManager {
                     loaded.put(result.getKey(), result.getValue());
                 }
             } catch (Exception e) {
-                this.plugin.getLogger().warn("Error loading locale file: " + translationFile.getFileName().toString());
-                e.printStackTrace();
+                this.plugin.getLogger().warn("Error loading locale file: " + translationFile.getFileName(), e);
             }
         }
 
@@ -155,8 +154,7 @@ public class TranslationManager {
         try (BufferedReader reader = Files.newBufferedReader(translationFile, StandardCharsets.UTF_8)) {
             bundle = new PropertyResourceBundle(reader);
         } catch(IOException e) {
-            this.plugin.getLogger().warn("Error loading locale file: " + localeString);
-            e.printStackTrace();
+            this.plugin.getLogger().warn("Error loading locale file: " + localeString, e);
             return null;
         }
 

@@ -258,7 +258,7 @@ public abstract class Exporter implements Runnable {
             try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
                 GsonProvider.prettyPrinting().toJson(json, writer);
             } catch (IOException e) {
-                e.printStackTrace();
+                this.plugin.getLogger().severe("Error compressing data", e);
             }
 
             try {
@@ -267,7 +267,7 @@ public abstract class Exporter implements Runnable {
             } catch (UnsuccessfulRequestException e) {
                 this.log.getListeners().forEach(l -> Message.HTTP_REQUEST_FAILURE.send(l, e.getResponse().code(), e.getResponse().message()));
             } catch (IOException e) {
-                new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
+                this.plugin.getLogger().severe("Error uploading data to bytebin", e);
                 this.log.getListeners().forEach(Message.HTTP_UNKNOWN_FAILURE::send);
             }
         }

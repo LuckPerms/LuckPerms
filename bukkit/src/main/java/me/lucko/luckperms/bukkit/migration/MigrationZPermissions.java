@@ -201,7 +201,7 @@ public class MigrationZPermissions extends ChildCommand<Object> {
         for (Entry e : entity.getPermissions()) {
             if (e.getPermission().isEmpty()) continue;
 
-            if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
+            if (e.getWorld() != null && !e.getWorld().getName().isEmpty()) {
                 holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build(), true);
             } else {
                 holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).build(), true);

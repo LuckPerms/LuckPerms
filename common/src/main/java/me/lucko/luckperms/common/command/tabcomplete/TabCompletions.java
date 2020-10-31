@@ -104,7 +104,7 @@ public final class TabCompletions {
 
             // cursor is specifying the value
             String key = partial.substring(0, index);
-            if (key.equals("") || key.trim().isEmpty()) {
+            if (key.isEmpty() || key.trim().isEmpty()) {
                 return Collections.emptyList();
             }
 

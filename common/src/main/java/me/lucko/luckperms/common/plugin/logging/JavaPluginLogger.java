@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.plugin.logging;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class JavaPluginLogger implements PluginLogger {
@@ -45,7 +46,17 @@ public class JavaPluginLogger implements PluginLogger {
     }
 
     @Override
+    public void warn(String s, Throwable t) {
+        this.logger.log(Level.WARNING, s, t);
+    }
+
+    @Override
     public void severe(String s) {
         this.logger.severe(s);
+    }
+
+    @Override
+    public void severe(String s, Throwable t) {
+        this.logger.log(Level.SEVERE, s, t);
     }
 }

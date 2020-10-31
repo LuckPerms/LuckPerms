@@ -57,7 +57,7 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
             try {
                 Files.move(data, getWriteFile());
             } catch (IOException e) {
-                e.printStackTrace();
+                plugin.getLogger().warn("Unable to move old database", e);
             }
         }
 

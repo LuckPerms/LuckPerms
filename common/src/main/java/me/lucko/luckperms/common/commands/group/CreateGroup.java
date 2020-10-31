@@ -67,7 +67,7 @@ public class CreateGroup extends SingleCommand {
         try {
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst creating group", e);
             Message.CREATE_ERROR.send(sender, Component.text(groupName));
             return CommandResult.FAILURE;
         }
