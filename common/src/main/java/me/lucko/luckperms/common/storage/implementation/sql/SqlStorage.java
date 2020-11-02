@@ -261,10 +261,7 @@ public class SqlStorage implements StorageImplementation {
                     if (bulkUpdate.isTrackingStatistics()) {
                         PreparedStatementBuilder builder = new PreparedStatementBuilder();
                         builder.append(USER_PERMISSIONS_SELECT_DISTINCT);
-                        if (!bulkUpdate.getQueries().isEmpty()) {
-                            builder.append(" WHERE ");
-                            bulkUpdate.getQueries().forEach(query -> query.appendSql(builder));
-                        }
+                        bulkUpdate.appendConstraintsAsSql(builder);
 
                         try (PreparedStatement lookup = builder.build(c, this.statementProcessor)) {
                             try (ResultSet rs = lookup.executeQuery()) {
@@ -291,10 +288,7 @@ public class SqlStorage implements StorageImplementation {
                     if (bulkUpdate.isTrackingStatistics()) {
                         PreparedStatementBuilder builder = new PreparedStatementBuilder();
                         builder.append(GROUP_PERMISSIONS_SELECT_ALL);
-                        if (!bulkUpdate.getQueries().isEmpty()) {
-                            builder.append(" WHERE ");
-                            bulkUpdate.getQueries().forEach(query -> query.appendSql(builder));
-                        }
+                        bulkUpdate.appendConstraintsAsSql(builder);
 
                         try (PreparedStatement lookup = builder.build(c, this.statementProcessor)) {
                             try (ResultSet rs = lookup.executeQuery()) {
