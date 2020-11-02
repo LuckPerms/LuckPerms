@@ -94,7 +94,9 @@ public enum CommandSpec {
     ),
 
     CREATE_GROUP("/%s creategroup <group>",
-            arg("name", true)
+            arg("name", true),
+            arg("weight", false),
+            arg("display-name", "displayname", false)
     ),
     DELETE_GROUP("/%s deletegroup <group>",
                  arg("name", true)

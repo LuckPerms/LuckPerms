@@ -30,8 +30,12 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
+import me.lucko.luckperms.common.command.utils.ArgumentException;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.node.types.DisplayName;
+import me.lucko.luckperms.common.node.types.Weight;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
@@ -40,10 +44,11 @@ import me.lucko.luckperms.common.util.Predicates;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.model.data.DataType;
 
 public class CreateGroup extends SingleCommand {
     public CreateGroup() {
-        super(CommandSpec.CREATE_GROUP, "CreateGroup", CommandPermission.CREATE_GROUP, Predicates.not(1));
+        super(CommandSpec.CREATE_GROUP, "CreateGroup", CommandPermission.CREATE_GROUP, Predicates.notInRange(1, 3));
     }
 
     @Override
@@ -64,8 +69,32 @@ public class CreateGroup extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
+        Integer weight = null;
         try {
-            plugin.getStorage().createAndLoadGroup(groupName, CreationCause.COMMAND).get();
+            weight = args.getPriority(1);
+        } catch (ArgumentException | IndexOutOfBoundsException e) {
+            // ignored
+        }
+
+        String displayName = null;
+        try {
+            displayName = args.get(weight != null ? 2 : 1);
+        } catch (IndexOutOfBoundsException e) {
+            // ignored
+        }
+
+        try {
+            Group group = plugin.getStorage().createAndLoadGroup(groupName, CreationCause.COMMAND).get();
+
+            if (weight != null) {
+                group.setNode(DataType.NORMAL, Weight.builder(weight).build(), false);
+            }
+
+            if (displayName != null) {
+                group.setNode(DataType.NORMAL, DisplayName.builder(displayName).build(), false);
+            }
+
+            plugin.getStorage().saveGroup(group);
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst creating group", e);
             Message.CREATE_ERROR.send(sender, Component.text(groupName));
