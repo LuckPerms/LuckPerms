@@ -103,6 +103,17 @@ public final class BulkUpdate {
         // (DELETE FROM or UPDATE)
         this.action.appendSql(builder);
 
+        return appendConstraintsAsSql(builder);
+    }
+
+    /**
+     * Appends the constraints of this {@link BulkUpdate} to the provided statement builder in SQL syntax
+     *
+     * @param builder the statement builder to append the constraints to
+     * @return the same statement builder provided as input
+     */
+    public PreparedStatementBuilder appendConstraintsAsSql(PreparedStatementBuilder builder) {
+
         // if there are no constraints, just return without a WHERE clause
         if (this.queries.isEmpty()) {
             return builder;
