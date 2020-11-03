@@ -44,38 +44,38 @@ public final class BulkUpdateStatistics {
     }
 
     public int getAffectedNodes() {
-        return affectedNodes;
+        return this.affectedNodes;
     }
 
     public int getAffectedUsers() {
-        return affectedUsers;
+        return this.affectedUsers;
     }
 
     public int getAffectedGroups() {
-        return affectedGroups;
+        return this.affectedGroups;
     }
 
     public void incrementAffectedNodes() {
-        ++affectedNodes;
+        this.affectedNodes++;
     }
 
     public void incrementAffectedUsers() {
-        ++affectedUsers;
+        this.affectedUsers++;
     }
 
     public void incrementAffectedGroups() {
-        ++affectedGroups;
+        this.affectedGroups++;
     }
 
     public void incrementAffectedNodesBy(int delta) {
-        affectedNodes += delta;
+        this.affectedNodes += delta;
     }
 
     public void incrementAffectedUsersBy(int delta) {
-        affectedUsers += delta;
+        this.affectedUsers += delta;
     }
 
     public void incrementAffectedGroupsBy(int delta) {
-        affectedGroups += delta;
+        this.affectedGroups += delta;
     }
 }

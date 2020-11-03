@@ -82,7 +82,7 @@ public class BulkUpdateBuilder {
             throw new IllegalStateException("no action specified");
         }
 
-        return new BulkUpdate(this.dataType, this.action, ImmutableList.copyOf(this.queries), trackStatistics);
+        return new BulkUpdate(this.dataType, this.action, ImmutableList.copyOf(this.queries), this.trackStatistics);
     }
 
     @Override

@@ -1748,9 +1748,9 @@ public interface Message {
             .key("luckperms.command.generic.permission.check-inherits")
             .color(GREEN)
             .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(permission, AQUA),
                     formatTristate(value),
-                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
@@ -1761,9 +1761,9 @@ public interface Message {
             .key("luckperms.command.generic.permission.check-inherits")
             .color(GREEN)
             .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     text(permission, AQUA),
                     formatTristate(value),
-                    text().color(AQUA).append(holder.getFormattedDisplayName()),
                     formatContextSet(context)
             )
             .append(FULL_STOP)
