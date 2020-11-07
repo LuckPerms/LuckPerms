@@ -72,12 +72,19 @@ public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listen
         this.plugin = plugin;
     }
 
+    @SuppressWarnings("ConstantConditions") // bukkit lies
     @Override
     public void calculate(@NonNull Player subject, @NonNull ContextConsumer consumer) {
+        GameMode mode = subject.getGameMode();
+        if (mode != null) {
+            consumer.accept(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
+        }
+
         World world = subject.getWorld();
-        consumer.accept(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(subject.getGameMode()));
-        consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(world.getEnvironment()));
-        this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
+        if (world != null) {
+            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(world.getEnvironment()));
+            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
+        }
     }
 
     @Override
