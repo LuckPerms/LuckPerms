@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
+import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
@@ -36,7 +37,7 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.CatalogTypes;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandSource;
@@ -70,13 +71,13 @@ public class SpongePlayerCalculator implements ContextCalculator<Subject> {
 
         if (source instanceof Locatable) {
             World world = ((Locatable) source).getWorld();
-            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogKeyName(world.getDimension().getType().getKey()));
+            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogTypeName(world.getDimension().getType()));
             this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
         }
 
         if (source instanceof ValueContainer<?>) {
             ValueContainer<?> valueContainer = (ValueContainer<?>) source;
-            valueContainer.get(Keys.GAME_MODE).ifPresent(mode -> consumer.accept(DefaultContextKeys.GAMEMODE_KEY, getCatalogKeyName(mode.getKey())));
+            valueContainer.get(Keys.GAME_MODE).ifPresent(mode -> consumer.accept(DefaultContextKeys.GAMEMODE_KEY, getCatalogTypeName(mode)));
         }
     }
 
@@ -86,26 +87,29 @@ public class SpongePlayerCalculator implements ContextCalculator<Subject> {
         Game game = this.plugin.getBootstrap().getGame();
 
         for (GameMode mode : game.getRegistry().getAllOf(CatalogTypes.GAME_MODE)) {
-            builder.add(DefaultContextKeys.GAMEMODE_KEY, getCatalogKeyName(mode.getKey()));
+            builder.add(DefaultContextKeys.GAMEMODE_KEY, getCatalogTypeName(mode));
         }
         for (DimensionType dim : game.getRegistry().getAllOf(CatalogTypes.DIMENSION_TYPE)) {
-            builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogKeyName(dim.getKey()));
+            builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogTypeName(dim));
         }
         if (game.isServerAvailable()) {
             for (World world : game.getServer().getWorlds()) {
-                builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
+                String worldName = world.getName();
+                if (Context.isValidValue(worldName)) {
+                    builder.add(DefaultContextKeys.WORLD_KEY, worldName);
+                }
             }
         }
 
         return builder.build();
     }
 
-    private static String getCatalogKeyName(CatalogKey key) {
-        if (key.getNamespace().equals(CatalogKey.MINECRAFT_NAMESPACE)) {
-            return key.getValue();
-        } else {
-            return key.toString();
+    private static String getCatalogTypeName(CatalogType type) {
+        String id = type.getId();
+        if (id.startsWith("minecraft:")){
+            return id.substring("minecraft:".length());
         }
+        return id;
     }
 
     @Listener(order = Order.LAST)

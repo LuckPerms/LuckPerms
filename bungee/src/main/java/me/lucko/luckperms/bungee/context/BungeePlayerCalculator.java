@@ -63,7 +63,7 @@ public class BungeePlayerCalculator implements ContextCalculator<ProxiedPlayer>,
     public ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
-            builder.add(DefaultContextKeys.WORLD_KEY, server.getName().toLowerCase());
+            builder.add(DefaultContextKeys.WORLD_KEY, server.getName());
         }
         return builder.build();
     }

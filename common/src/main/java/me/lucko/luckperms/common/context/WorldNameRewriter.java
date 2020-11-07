@@ -54,7 +54,7 @@ public interface WorldNameRewriter {
         @Override
         public void rewriteAndSubmit(String worldName, ContextConsumer consumer) {
             if (Context.isValidValue(worldName)) {
-                consumer.accept(DefaultContextKeys.WORLD_KEY, worldName.toLowerCase());
+                consumer.accept(DefaultContextKeys.WORLD_KEY, worldName);
             }
         }
     }

@@ -90,9 +90,9 @@ public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listen
             builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(env));
         }
         for (World world : this.plugin.getBootstrap().getServer().getWorlds()) {
-            String name = world.getName().toLowerCase();
-            if (Context.isValidValue(name)) {
-                builder.add(DefaultContextKeys.WORLD_KEY, name);
+            String worldName = world.getName();
+            if (Context.isValidValue(worldName)) {
+                builder.add(DefaultContextKeys.WORLD_KEY, worldName);
             }
         }
         return builder.build();

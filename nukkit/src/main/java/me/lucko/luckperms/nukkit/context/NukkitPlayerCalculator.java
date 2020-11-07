@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
+import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
@@ -74,7 +75,10 @@ public class NukkitPlayerCalculator implements ContextCalculator<Player>, Listen
             builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getDimensionName(dim));
         }
         for (Level world : this.plugin.getBootstrap().getServer().getLevels().values()) {
-            builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
+            String worldName = world.getName();
+            if (Context.isValidValue(worldName)) {
+                builder.add(DefaultContextKeys.WORLD_KEY, worldName);
+            }
         }
         return builder.build();
     }

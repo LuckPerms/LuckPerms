@@ -64,7 +64,7 @@ public class VelocityPlayerCalculator implements ContextCalculator<Player> {
     public ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (RegisteredServer server : this.plugin.getBootstrap().getProxy().getAllServers()) {
-            builder.add(DefaultContextKeys.WORLD_KEY, server.getServerInfo().getName().toLowerCase());
+            builder.add(DefaultContextKeys.WORLD_KEY, server.getServerInfo().getName());
         }
         return builder.build();
     }
