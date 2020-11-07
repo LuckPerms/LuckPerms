@@ -28,7 +28,7 @@ package me.lucko.luckperms.bukkit;
 import me.lucko.luckperms.bukkit.brigadier.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.calculator.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
-import me.lucko.luckperms.bukkit.context.WorldCalculator;
+import me.lucko.luckperms.bukkit.context.BukkitPlayerCalculator;
 import me.lucko.luckperms.bukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleInjector;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleMonitoringInjector;
@@ -186,9 +186,9 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new BukkitContextManager(this);
 
-        WorldCalculator worldCalculator = new WorldCalculator(this);
-        this.bootstrap.getServer().getPluginManager().registerEvents(worldCalculator, this.bootstrap);
-        this.contextManager.registerCalculator(worldCalculator);
+        BukkitPlayerCalculator playerCalculator = new BukkitPlayerCalculator(this);
+        this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap);
+        this.contextManager.registerCalculator(playerCalculator);
     }
 
     @Override

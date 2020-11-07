@@ -43,8 +43,8 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.velocity.calculator.VelocityCalculatorFactory;
-import me.lucko.luckperms.velocity.context.BackendServerCalculator;
 import me.lucko.luckperms.velocity.context.VelocityContextManager;
+import me.lucko.luckperms.velocity.context.VelocityPlayerCalculator;
 import me.lucko.luckperms.velocity.listeners.MonitoringPermissionCheckListener;
 import me.lucko.luckperms.velocity.listeners.VelocityConnectionListener;
 import me.lucko.luckperms.velocity.messaging.VelocityMessagingFactory;
@@ -137,7 +137,10 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupContextManager() {
         this.contextManager = new VelocityContextManager(this);
-        this.contextManager.registerCalculator(new BackendServerCalculator(this));
+
+        VelocityPlayerCalculator playerCalculator = new VelocityPlayerCalculator(this);
+        this.bootstrap.getProxy().getEventManager().register(this.bootstrap, playerCalculator);
+        this.contextManager.registerCalculator(playerCalculator);
     }
 
     @Override

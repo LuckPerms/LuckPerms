@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.nukkit.calculator.NukkitCalculatorFactory;
 import me.lucko.luckperms.nukkit.context.NukkitContextManager;
-import me.lucko.luckperms.nukkit.context.WorldCalculator;
+import me.lucko.luckperms.nukkit.context.NukkitPlayerCalculator;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
 import me.lucko.luckperms.nukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.nukkit.inject.permissible.PermissibleInjector;
@@ -145,9 +145,9 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new NukkitContextManager(this);
 
-        WorldCalculator worldCalculator = new WorldCalculator(this);
-        this.bootstrap.getServer().getPluginManager().registerEvents(worldCalculator, this.bootstrap);
-        this.contextManager.registerCalculator(worldCalculator);
+        NukkitPlayerCalculator playerCalculator = new NukkitPlayerCalculator(this);
+        this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap);
+        this.contextManager.registerCalculator(playerCalculator);
     }
 
     @Override

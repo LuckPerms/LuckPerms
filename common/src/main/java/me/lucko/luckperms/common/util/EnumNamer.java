@@ -23,42 +23,40 @@
  *  SOFTWARE.
  */
 
-package net.luckperms.api.context;
+package me.lucko.luckperms.common.util;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
- * Some default context keys used by the plugin.
+ * Small utility to cache custom name lookups for enum values.
+ *
+ * @param <E> the enum type
  */
-public final class DefaultContextKeys {
-    private DefaultContextKeys() {
-        throw new AssertionError();
+public class EnumNamer<E extends Enum<E>> {
+    public static final Function<Enum<?>, String> LOWER_CASE_NAME = value -> value.name().toLowerCase();
+
+    private final String[] names;
+
+    public EnumNamer(Class<E> enumClass, Map<? super E, String> definedNames, Function<? super E, String> namingFunction) {
+        E[] values = enumClass.getEnumConstants();
+        this.names = new String[values.length];
+        for (E value : values) {
+            String name = definedNames.get(value);
+            if (name == null) {
+                name = namingFunction.apply(value);
+            }
+            this.names[value.ordinal()] = name;
+        }
     }
 
-    /**
-     * The context key used to denote the name of the subjects server.
-     */
-    public static final String SERVER_KEY = "server";
+    public EnumNamer(Class<E> enumClass, Function<? super E, String> namingFunction) {
+        this(enumClass, Collections.emptyMap(), namingFunction);
+    }
 
-    /**
-     * The context key used to denote the name of the subjects world.
-     */
-    public static final String WORLD_KEY = "world";
-
-    /**
-     * The context key used to denote the dimension type of the subjects world.
-     *
-     * <p>Possible values: overworld, the_nether, the_end</p>
-     *
-     * @since 5.3
-     */
-    public static final String DIMENSION_TYPE_KEY = "dimension-type";
-
-    /**
-     * The context key used to denote the subjects gamemode.
-     *
-     * <p>Possible values: survival, creative, adventure, spectator</p>
-     *
-     * @since 5.3
-     */
-    public static final String GAMEMODE_KEY = "gamemode";
+    public String name(E value) {
+        return this.names[value.ordinal()];
+    }
 
 }

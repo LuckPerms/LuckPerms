@@ -44,7 +44,7 @@ import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.sponge.calculator.SpongeCalculatorFactory;
 import me.lucko.luckperms.sponge.commands.SpongeParentCommand;
 import me.lucko.luckperms.sponge.context.SpongeContextManager;
-import me.lucko.luckperms.sponge.context.WorldCalculator;
+import me.lucko.luckperms.sponge.context.SpongePlayerCalculator;
 import me.lucko.luckperms.sponge.listeners.SpongeConnectionListener;
 import me.lucko.luckperms.sponge.listeners.SpongePlatformListener;
 import me.lucko.luckperms.sponge.messaging.SpongeMessagingFactory;
@@ -161,9 +161,9 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new SpongeContextManager(this);
 
-        WorldCalculator worldCalculator = new WorldCalculator(this);
-        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, worldCalculator);
-        this.contextManager.registerCalculator(worldCalculator);
+        SpongePlayerCalculator playerCalculator = new SpongePlayerCalculator(this);
+        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, playerCalculator);
+        this.contextManager.registerCalculator(playerCalculator);
     }
 
     @Override

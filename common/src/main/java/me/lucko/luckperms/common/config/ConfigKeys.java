@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
 import me.lucko.luckperms.common.config.generic.key.SimpleConfigKey;
+import me.lucko.luckperms.common.context.WorldNameRewriter;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
@@ -475,12 +476,12 @@ public final class ConfigKeys {
     /**
      * The world rewrites map
      */
-    public static final ConfigKey<Map<String, String>> WORLD_REWRITES = key(c -> {
-        return c.getStringMap("world-rewrite", ImmutableMap.of()).entrySet().stream()
+    public static final ConfigKey<WorldNameRewriter> WORLD_REWRITES = key(c -> {
+        return WorldNameRewriter.of(c.getStringMap("world-rewrite", ImmutableMap.of()).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> e.getKey().toLowerCase(),
                         e -> e.getValue().toLowerCase()
-                ));
+                )));
     });
 
     /**
