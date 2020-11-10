@@ -29,9 +29,7 @@ import com.zaxxer.hikari.HikariConfig;
 
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
-import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class MariaDbConnectionFactory extends HikariConnectionFactory {
     public MariaDbConnectionFactory(StorageCredentials configuration) {
@@ -44,22 +42,20 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected String getDriverClass() {
-        return "org.mariadb.jdbc.MariaDbDataSource";
+    protected String defaultPort() {
+        return "3306";
     }
 
     @Override
-    protected void appendProperties(HikariConfig config, Map<String, String> properties) {
-        String propertiesString = properties.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(";"));
-
-        // kinda hacky. this will call #setProperties on the datasource, which will append these options
-        // onto the connections.
-        config.addDataSourceProperty("properties", propertiesString);
+    protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
+        config.setDriverClassName("org.mariadb.jdbc.Driver");
+        config.setJdbcUrl("jdbc:mariadb://" + address + ":" + port + "/" + databaseName);
+        config.setUsername(username);
+        config.setPassword(password);
     }
 
     @Override
     public Function<String, String> getStatementProcessor() {
         return s -> s.replace("'", "`"); // use backticks for quotes
     }
-
 }

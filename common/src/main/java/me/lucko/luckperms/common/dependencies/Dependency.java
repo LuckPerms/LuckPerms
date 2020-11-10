@@ -141,15 +141,15 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.6.0",
-            "fgiCp29Z7X38ULAJNsxZ1wFIVT2u3trSx/VCMxTlA6g=",
+            "2.7.0",
+            "ABURDun85Q01kf119r4yjDtl5ju9Fg9uV2nXyU3SEdw=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
             "mysql",
             "mysql-connector-java",
-            "5.1.48",
-            "VuJsqqOCH1rkr0T5x09mz4uE6gFRatOAPLsOkEm27Kg=",
+            "8.0.22",
+            "UBne+9EjFilel6bojyqbB/EYNFpOmCcQu6Iy5JmyL08=",
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(

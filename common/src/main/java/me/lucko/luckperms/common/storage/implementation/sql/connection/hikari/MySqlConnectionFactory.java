@@ -43,12 +43,20 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected String getDriverClass() {
-        return "com.mysql.jdbc.jdbc2.optional.MysqlDataSource";
+    protected String defaultPort() {
+        return "3306";
     }
 
     @Override
-    protected void appendProperties(HikariConfig config, Map<String, String> properties) {
+    protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        config.setJdbcUrl("jdbc:mysql://" + address + ":" + port + "/" + databaseName);
+        config.setUsername(username);
+        config.setPassword(password);
+    }
+
+    @Override
+    protected void overrideProperties(Map<String, String> properties) {
         // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
         properties.putIfAbsent("cachePrepStmts", "true");
         properties.putIfAbsent("prepStmtCacheSize", "250");
@@ -63,13 +71,11 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
         properties.putIfAbsent("alwaysSendSetIsolation", "false");
         properties.putIfAbsent("cacheCallableStmts", "true");
 
-        // append configurable properties
-        super.appendProperties(config, properties);
+        super.overrideProperties(properties);
     }
 
     @Override
     public Function<String, String> getStatementProcessor() {
         return s -> s.replace("'", "`"); // use backticks for quotes
     }
-
 }
