@@ -45,8 +45,14 @@ import net.luckperms.api.query.QueryOptions;
 public class BukkitCalculatorFactory implements CalculatorFactory {
     private final LPBukkitPlugin plugin;
 
+    private final DefaultsProcessor opDefaultsProcessor;
+    private final DefaultsProcessor nonOpDefaultsProcessor;
+
     public BukkitCalculatorFactory(LPBukkitPlugin plugin) {
         this.plugin = plugin;
+
+        this.opDefaultsProcessor = new DefaultsProcessor(this.plugin, true);
+        this.nonOpDefaultsProcessor = new DefaultsProcessor(this.plugin, false);
     }
 
     @Override
@@ -73,11 +79,11 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
 
         boolean op = queryOptions.option(BukkitContextManager.OP_OPTION).orElse(false);
         if (metadata.getHolderType() == HolderType.USER && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
-            processors.add(new DefaultsProcessor(this.plugin, op));
+            processors.add(op ? this.opDefaultsProcessor : this.nonOpDefaultsProcessor);
         }
 
         if (op) {
-            processors.add(new OpProcessor());
+            processors.add(OpProcessor.INSTANCE);
         }
 
         return new PermissionCalculator(this.plugin, metadata, processors.build());
