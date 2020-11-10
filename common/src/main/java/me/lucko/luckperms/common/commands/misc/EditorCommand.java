@@ -57,7 +57,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class EditorCommand extends SingleCommand {
-    public static final int MAX_USERS = 1000;
+    public static final int MAX_USERS = 500;
 
     public EditorCommand() {
         super(CommandSpec.EDITOR, "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 2));
@@ -145,7 +145,11 @@ public class EditorCommand extends SingleCommand {
 
             users.values().stream()
                     .sorted(Comparator
+                            // sort firstly by the users relative weight (depends on the groups they inherit)
                             .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL)).reversed()
+                            // then, prioritise users we actually have a username for
+                            .thenComparing(u -> u.getUsername().isPresent(), ((Comparator<Boolean>) Boolean::compare).reversed())
+                            // then sort according to their username
                             .thenComparing(User::getPlainDisplayName, String.CASE_INSENSITIVE_ORDER)
                     )
                     .forEach(holders::add);
