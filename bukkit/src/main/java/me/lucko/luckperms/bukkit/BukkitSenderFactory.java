@@ -69,7 +69,7 @@ public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSe
         if (sender instanceof Player || sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender) {
             this.audiences.sender(sender).sendMessage(message);
         } else {
-            getPlugin().getBootstrap().getScheduler().executeSync(() -> sendMessage(sender, message));
+            getPlugin().getBootstrap().getScheduler().executeSync(() -> this.audiences.sender(sender).sendMessage(message));
         }
     }
 
