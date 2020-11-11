@@ -71,6 +71,11 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
         properties.putIfAbsent("alwaysSendSetIsolation", "false");
         properties.putIfAbsent("cacheCallableStmts", "true");
 
+        // https://stackoverflow.com/a/54256150
+        // It's not super important which timezone we pick, because we don't use time-based
+        // data types in any of our schemas/queries.
+        properties.putIfAbsent("serverTimezone", "UTC");
+
         super.overrideProperties(properties);
     }
 
