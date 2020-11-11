@@ -46,7 +46,7 @@ class FabricCommandExecutor extends CommandManager implements Command<ServerComm
 
     private final LPFabricPlugin plugin;
 
-    public FabricCommandExecutor(LPFabricPlugin plugin) {
+    FabricCommandExecutor(LPFabricPlugin plugin) {
         super(plugin);
         this.plugin = plugin;
     }

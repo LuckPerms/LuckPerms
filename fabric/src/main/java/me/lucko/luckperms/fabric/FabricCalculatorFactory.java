@@ -41,7 +41,7 @@ import net.luckperms.api.query.QueryOptions;
 class FabricCalculatorFactory implements CalculatorFactory {
     private final LPFabricPlugin plugin;
 
-    public FabricCalculatorFactory(LPFabricPlugin plugin) {
+    FabricCalculatorFactory(LPFabricPlugin plugin) {
         this.plugin = plugin;
     }
 
