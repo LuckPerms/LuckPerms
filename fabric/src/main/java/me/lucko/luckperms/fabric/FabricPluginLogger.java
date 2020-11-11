@@ -30,20 +30,31 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 class FabricPluginLogger implements PluginLogger {
+
     private final Logger logger = LogManager.getLogger(LPFabricPlugin.class);
 
     @Override
     public void info(String s) {
-        logger.info(s);
+        this.logger.info(s);
     }
 
     @Override
     public void warn(String s) {
-        logger.warn(s);
+        this.logger.warn(s);
+    }
+
+    @Override
+    public void warn(String s, Throwable t) {
+        this.logger.warn(s, t);
     }
 
     @Override
     public void severe(String s) {
-        logger.error(s);
+        this.logger.error(s);
+    }
+
+    @Override
+    public void severe(String s, Throwable t) {
+        this.logger.warn(s, t);
     }
 }

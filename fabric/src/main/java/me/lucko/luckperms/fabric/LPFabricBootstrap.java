@@ -63,7 +63,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
     /**
      * The plugin logger
      */
-    private PluginLogger logger = new FabricPluginLogger();
+    private final PluginLogger logger = new FabricPluginLogger();
 
     /**
      * A scheduler adapter for the platform
@@ -73,7 +73,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
     /**
      * The plugin class loader.
      */
-    private PluginClassLoader classLoader;
+    private final PluginClassLoader classLoader;
 
     /**
      * The plugin instance
@@ -205,9 +205,6 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
         return this.plugin.getServer().getPlayerManager().getPlayer(uniqueId) != null;
     }
 
-    /**
-     * Starts LuckPerms
-     */
     @Override
     public final void onInitialize() {
         this.plugin = new LPFabricPlugin(this);
@@ -217,6 +214,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
         } finally {
             this.loadLatch.countDown();
         }
+
         // Register the Server startup/shutdown events now
         ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
         ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStopping);
@@ -238,9 +236,6 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
         this.schedulerAdapter = null; // We need to kill the scheduler in case an integrated server starts in the future.
     }
 
-    /**
-     * Due to Luckperms having the capability of running on an integrated server, the logical server may not always be available in cases such as at the title screen.
-     */
     @Nullable
     public MinecraftServer getServer() {
         return this.plugin.getServer();

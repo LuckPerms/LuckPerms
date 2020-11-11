@@ -35,10 +35,11 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 /**
  * Fabric doesn't have a de facto config API.
- * We use HOCON due to it's json-like syntax which most fabric mods use and it supports comments.
+ * We use HOCON because of it's json-like syntax which most fabric mods use and support for comments.
  */
 class FabricConfigAdapter extends ConfigurateConfigAdapter {
-    public FabricConfigAdapter(LuckPermsPlugin plugin, Path path) {
+
+    FabricConfigAdapter(LuckPermsPlugin plugin, Path path) {
         super(plugin, path);
     }
 

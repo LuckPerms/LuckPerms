@@ -30,19 +30,19 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
-import me.lucko.luckperms.fabric.adapter.FabricTextAdapter;
-import net.kyori.text.Component;
+import net.kyori.adventure.platform.fabric.FabricServerAudiences;
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 
 import java.util.UUID;
 
 class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSource> {
-    private LPFabricPlugin plugin;
+
+    private final LPFabricPlugin plugin;
 
     public FabricSenderFactory(LPFabricPlugin plugin) {
         super(plugin);
@@ -69,14 +69,8 @@ class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSou
     }
 
     @Override
-    protected void sendMessage(ServerCommandSource commandSource, String s) {
-        // Sending to a ServerCommandSource async is always safe
-        commandSource.sendFeedback(new LiteralText(s), false);
-    }
-
-    @Override
-    protected void sendMessage(ServerCommandSource commandSource, Component message) {
-        commandSource.sendFeedback(FabricTextAdapter.convert(message), false);
+    protected void sendMessage(ServerCommandSource sender, Component message) {
+        FabricServerAudiences.of(sender.getMinecraftServer()).audience(sender).sendMessage(message);
     }
 
     @Override

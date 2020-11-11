@@ -36,6 +36,8 @@ class FabricClassLoader implements PluginClassLoader {
     public void addJarToClasspath(Path file) {
         try {
             // Fabric abstracts class loading away to the FabricLauncher.
+            // TODO: Work on API for Fabric Loader which does not touch internals.
+            //  Player wants to use project jigsaw in the future.
             FabricLauncherBase.getLauncher().propose(file.toUri().toURL());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);

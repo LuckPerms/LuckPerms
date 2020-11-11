@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class FabricWorldCalculator implements ContextCalculator<ServerPlayerEntity> {
+
     private final LPFabricPlugin plugin;
 
     public FabricWorldCalculator(LPFabricPlugin plugin) {
@@ -54,9 +55,10 @@ public class FabricWorldCalculator implements ContextCalculator<ServerPlayerEnti
         Set<String> seen = new HashSet<>();
         Identifier worldId = target.getServerWorld().getRegistryKey().getValue();
         String world = worldId.toString();
+
         while (seen.add(world)) {
             consumer.accept(DefaultContextKeys.WORLD_KEY, world);
-            world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
+            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world, consumer);
         }
     }
 
@@ -64,6 +66,7 @@ public class FabricWorldCalculator implements ContextCalculator<ServerPlayerEnti
     public ContextSet estimatePotentialContexts() {
         Iterable<ServerWorld> worlds = this.plugin.getServer().getWorlds();
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
+
         for (ServerWorld world : worlds) {
             Identifier worldId = world.getRegistryKey().getValue();
             String name = worldId.toString();

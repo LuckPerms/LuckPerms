@@ -38,7 +38,8 @@ import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import java.util.List;
 
 class FabricEventBus extends AbstractEventBus<ModContainer> {
-    protected FabricEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
+
+    FabricEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
         super(plugin, apiProvider);
     }
 

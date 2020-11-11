@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
 import java.util.concurrent.Executor;
 
 class FabricSchedulerAdapter extends AbstractJavaScheduler {
+
     private final Executor serverExecutor;
 
     public FabricSchedulerAdapter(LPFabricBootstrap bootstrap) {

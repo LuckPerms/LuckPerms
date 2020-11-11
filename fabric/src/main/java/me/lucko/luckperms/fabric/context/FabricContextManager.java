@@ -41,6 +41,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class FabricContextManager extends ContextManager<ServerPlayerEntity, ServerPlayerEntity> {
+
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
     private final LoadingCache<ServerPlayerEntity, QueryOptionsCache<ServerPlayerEntity>> subjectCaches = CaffeineFactory.newBuilder()

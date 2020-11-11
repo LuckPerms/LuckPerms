@@ -43,7 +43,8 @@ import java.util.concurrent.CompletableFuture;
  * All parsing has been designed in a way where "/execute ... ... ... run lp ..." works fine.
  */
 class FabricCommandExecutor extends CommandManager implements Command<ServerCommandSource>, SuggestionProvider<ServerCommandSource> {
-    private LPFabricPlugin plugin;
+
+    private final LPFabricPlugin plugin;
 
     public FabricCommandExecutor(LPFabricPlugin plugin) {
         super(plugin);

@@ -2,7 +2,7 @@ import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.1'
-    id 'fabric-loom' version '0.4-SNAPSHOT'
+    id 'fabric-loom' version '0.5-SNAPSHOT'
 }
 
 repositories {
@@ -14,16 +14,21 @@ configurations {
     compile.extendsFrom shade
 }
 
-def minecraftVersion = "1.16.1"
-def yarnBuild = 5
-def loaderVersion = "0.9.0+build.204"
-def fabricApiVersion = "0.14.0+build.371-1.16"
+def minecraftVersion = "1.16.4"
+def yarnBuild = 6
+def loaderVersion = "0.10.6+build.214"
+def fabricApiVersion = "0.25.1+build.416-1.16"
 
 dependencies {
     // Fabric Stuff, We don't specifically target only a single version but yarn mappings require a version to be specified.
     minecraft "com.mojang:minecraft:${minecraftVersion}"
     mappings "net.fabricmc:yarn:${minecraftVersion}+build.${yarnBuild}:v2"
     modImplementation "net.fabricmc:fabric-loader:${loaderVersion}"
+
+    // Include the Platform Jar in
+    include(modImplementation("net.kyori:adventure-platform-fabric:4.0.0-SNAPSHOT")) {
+        exclude module: "fabric-api" //
+    }
 
     // We only include the bare minimum of what we use within the Fabric API so we can be somewhat standalone.
     Set<String> apiModules = [
@@ -65,7 +70,8 @@ shadowJar {
         exclude '/mappings/*'
     }
 
-    relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
+    // Do not relocate adventure
+    //relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
     relocate 'okio', 'me.lucko.luckperms.lib.okio'

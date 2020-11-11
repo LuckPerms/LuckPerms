@@ -73,6 +73,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class LPFabricPlugin extends AbstractLuckPermsPlugin {
+
     private static final String[] COMMAND_ALIASES = new String[] { "luckperms", "lp", "perm", "perms", "permission", "permissions" } ;
     @Nullable
     private MinecraftServer server;
@@ -126,6 +127,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
+        dependencies.remove(Dependency.ADVENTURE); // Use Adventure provided by platform
         dependencies.add(Dependency.CONFIGURATE_CORE);
         dependencies.add(Dependency.CONFIGURATE_HOCON);
         dependencies.add(Dependency.HOCON_CONFIG);
@@ -270,7 +272,8 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
         return this.server;
     }
 
-    public void setServer(MinecraftServer server) {
+    // package-private very intentionally
+    void setServer(MinecraftServer server) {
         this.server = server;
     }
 }
