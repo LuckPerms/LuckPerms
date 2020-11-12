@@ -159,7 +159,6 @@ public class TranslationManager {
         }
 
         this.registry.registerAll(locale, bundle, false);
-        this.plugin.getLogger().info("Registered additional translations for " + locale.toString());
         this.installed.add(locale);
         return Maps.immutableEntry(locale, bundle);
     }
@@ -184,6 +183,23 @@ public class TranslationManager {
 
     public static @Nullable Locale parseLocale(@Nullable String locale) {
         return locale == null ? null : Translator.parseLocale(locale);
+    }
+
+    public static String localeDisplayName(Locale locale) {
+        if (locale.getLanguage().equals("zh")) {
+            if (locale.getCountry().equals("CN")) {
+                return "简体中文"; // Chinese (Simplified)
+            } else if (locale.getCountry().equals("TW")) {
+                return "繁體中文"; // Chinese (Traditional)
+            }
+            return locale.getDisplayCountry(locale) + locale.getDisplayLanguage(locale);
+        }
+
+        if (locale.getLanguage().equals("en") && locale.getCountry().equals("PT")) {
+            return "Pirate";
+        }
+
+        return locale.getDisplayLanguage(locale);
     }
 
 }

@@ -43,6 +43,7 @@ import me.lucko.luckperms.common.http.BytebinClient;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
+import me.lucko.luckperms.common.locale.TranslationRepository;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
@@ -79,6 +80,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
     private BytebinClient bytebin;
+    private TranslationRepository translationRepository;
     private FileWatcher fileWatcher = null;
     private Storage storage;
     private InternalMessagingService messagingService = null;
@@ -123,6 +125,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 .build();
 
         this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+
+        // init translation repo and update bundle files
+        this.translationRepository = new TranslationRepository(this);
+        this.translationRepository.scheduleRefresh();
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
@@ -318,6 +324,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public BytebinClient getBytebin() {
         return this.bytebin;
+    }
+
+    @Override
+    public TranslationRepository getTranslationRepository() {
+        return this.translationRepository;
     }
 
     @Override

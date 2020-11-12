@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.http.BytebinClient;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.TranslationManager;
+import me.lucko.luckperms.common.locale.TranslationRepository;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -174,6 +175,13 @@ public interface LuckPermsPlugin {
      * @return the translation manager
      */
     TranslationManager getTranslationManager();
+
+    /**
+     * Gets the translation repository
+     *
+     * @return the translation repository
+     */
+    TranslationRepository getTranslationRepository();
 
     /**
      * Gets the dependency manager for the plugin

@@ -310,6 +310,9 @@ log-notify: true
 log-notify-filtered-descriptions:
 #  - "parent add example"
 
+# If LuckPerms should automatically install translation bundles and periodically update them.
+auto-install-translations: true
+
 # Defines the options for prefix and suffix stacking.
 #
 # - The feature allows you to display multiple prefixes or suffixes alongside a players username in

@@ -417,6 +417,11 @@ public final class ConfigKeys {
     });
 
     /**
+     * If LuckPerms should automatically install translation bundles and periodically update them.
+     */
+    public static final ConfigKey<Boolean> AUTO_INSTALL_TRANSLATIONS = notReloadable(booleanKey("auto-install-translations", true));
+
+    /**
      * If auto op is enabled. Only used by the Bukkit platform.
      */
     public static final ConfigKey<Boolean> AUTO_OP = notReloadable(booleanKey("auto-op", false));
