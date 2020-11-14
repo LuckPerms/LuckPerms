@@ -29,7 +29,9 @@ import com.zaxxer.hikari.HikariConfig;
 
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class MariaDbConnectionFactory extends HikariConnectionFactory {
     public MariaDbConnectionFactory(StorageCredentials configuration) {
@@ -48,10 +50,28 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
 
     @Override
     protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
+        config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
+        config.addDataSourceProperty("serverName", address);
+        config.addDataSourceProperty("port", port);
+        config.addDataSourceProperty("databaseName", databaseName);
+        config.setUsername(username);
+        config.setPassword(password);
+
         config.setDriverClassName("org.mariadb.jdbc.Driver");
         config.setJdbcUrl("jdbc:mariadb://" + address + ":" + port + "/" + databaseName);
         config.setUsername(username);
         config.setPassword(password);
+    }
+
+    @Override
+    protected void setProperties(HikariConfig config, Map<String, String> properties) {
+        String propertiesString = properties.entrySet().stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(Collectors.joining(";"));
+
+        // kinda hacky. this will call #setProperties on the datasource, which will append these options
+        // onto the connections.
+        config.addDataSourceProperty("properties", propertiesString);
     }
 
     @Override

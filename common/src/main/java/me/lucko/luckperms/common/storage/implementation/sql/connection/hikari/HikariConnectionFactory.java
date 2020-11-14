@@ -89,6 +89,18 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         properties.putIfAbsent("socketTimeout", String.valueOf(TimeUnit.SECONDS.toMillis(30)));
     }
 
+    /**
+     * Sets the given connection properties onto the config.
+     *
+     * @param config the hikari config
+     * @param properties the properties
+     */
+    protected void setProperties(HikariConfig config, Map<String, String> properties) {
+        for (Map.Entry<String, String> property : properties.entrySet()) {
+            config.addDataSourceProperty(property.getKey(), property.getValue());
+        }
+    }
+
     @Override
     public void init(LuckPermsPlugin plugin) {
         HikariConfig config;
@@ -119,9 +131,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         overrideProperties(properties);
 
         // set the properties
-        for (Map.Entry<String, String> property : properties.entrySet()) {
-            config.addDataSourceProperty(property.getKey(), property.getValue());
-        }
+        setProperties(config, properties);
 
         // configure the connection pool
         config.setMaximumPoolSize(this.configuration.getMaxPoolSize());
