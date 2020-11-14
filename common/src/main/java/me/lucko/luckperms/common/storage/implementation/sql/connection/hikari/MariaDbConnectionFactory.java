@@ -56,11 +56,6 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
         config.addDataSourceProperty("databaseName", databaseName);
         config.setUsername(username);
         config.setPassword(password);
-
-        config.setDriverClassName("org.mariadb.jdbc.Driver");
-        config.setJdbcUrl("jdbc:mariadb://" + address + ":" + port + "/" + databaseName);
-        config.setUsername(username);
-        config.setPassword(password);
     }
 
     @Override
