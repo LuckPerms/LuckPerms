@@ -29,6 +29,10 @@ import com.zaxxer.hikari.HikariConfig;
 
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -49,11 +53,30 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
 
     @Override
     protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
-        // other plugins shouldn't be able to use our driver, so use the non-registering type.
-        config.setDriverClassName("com.mysql.cj.jdbc.NonRegisteringDriver");
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setJdbcUrl("jdbc:mysql://" + address + ":" + port + "/" + databaseName);
         config.setUsername(username);
         config.setPassword(password);
+    }
+
+    @Override
+    protected void postInitialize() {
+        super.postInitialize();
+
+        // Calling Class.forName("com.mysql.cj.jdbc.Driver") is enough to call the static initializer
+        // which makes our driver available in DriverManager. We don't want that, so unregister it after
+        // the pool has been setup.
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements()) {
+            Driver driver = drivers.nextElement();
+            if (driver.getClass().getName().equals("com.mysql.cj.jdbc.Driver")) {
+                try {
+                    DriverManager.deregisterDriver(driver);
+                } catch (SQLException e) {
+                    // ignore
+                }
+            }
+        }
     }
 
     @Override

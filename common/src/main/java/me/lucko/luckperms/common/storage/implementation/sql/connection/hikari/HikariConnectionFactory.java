@@ -101,6 +101,13 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         }
     }
 
+    /**
+     * Called after the Hikari pool has been initialised
+     */
+    protected void postInitialize() {
+
+    }
+
     @Override
     public void init(LuckPermsPlugin plugin) {
         HikariConfig config;
@@ -144,6 +151,8 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         config.setInitializationFailTimeout(-1);
 
         this.hikari = new HikariDataSource(config);
+
+        postInitialize();
     }
 
     @Override
