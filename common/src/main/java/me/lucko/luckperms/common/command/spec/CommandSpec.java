@@ -49,7 +49,7 @@ public enum CommandSpec {
             arg("type", false),
             arg("filter", false)
     ),
-    //DEBUG("/%s debug"),
+    //DEBUG("/%s debug"), // also commented this incase it is needed, if it's not needed it'll fully remove it.
     VERBOSE("/%s verbose <on|record|off|upload> [filter]",
             arg("action", "on|record|off|upload|command", true),
             arg("filter", false),
@@ -74,7 +74,8 @@ public enum CommandSpec {
     ),
     EXPORT("/%s export <file>",
             arg("file", true),
-            arg("without-users", "--without-users", false)
+            arg("without-users", "--without-users", false),
+            arg("without-groups", "--without-groups", false)
     ),
     RELOAD_CONFIG("/%s reloadconfig"),
     BULK_UPDATE("/%s bulkupdate",
