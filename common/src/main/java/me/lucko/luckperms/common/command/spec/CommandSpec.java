@@ -76,7 +76,8 @@ public enum CommandSpec {
     EXPORT("/%s export <file>",
             arg("file", true),
             arg("without-users", "--without-users", false),
-            arg("without-groups", "--without-groups", false)
+            arg("without-groups", "--without-groups", false),
+            arg("upload", "--upload", false)
     ),
     RELOAD_CONFIG("/%s reloadconfig"),
     BULK_UPDATE("/%s bulkupdate",
