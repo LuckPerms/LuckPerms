@@ -6,7 +6,6 @@ luckperms {
     groups;
     users;
   }
-  debug;
   verbose {
     off;
     on {
