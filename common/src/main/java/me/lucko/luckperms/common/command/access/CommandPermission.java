@@ -35,7 +35,7 @@ public enum CommandPermission {
     SYNC("sync", Type.NONE),
     INFO("info", Type.NONE),
     EDITOR("editor", Type.NONE),
-    DEBUG("debug", Type.NONE),
+    //DEBUG("debug", Type.NONE), // Intellij says that this doesn't have any usages. Haven't fully removed it incase it is needed.
     VERBOSE("verbose", Type.NONE),
     VERBOSE_COMMAND_OTHERS("verbose.command.others", Type.NONE),
     TREE("tree", Type.NONE),
