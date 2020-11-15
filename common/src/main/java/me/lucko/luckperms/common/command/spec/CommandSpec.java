@@ -70,7 +70,8 @@ public enum CommandSpec {
     NETWORK_SYNC("/%s networksync"),
     IMPORT("/%s import <file>",
             arg("file", true),
-            arg("replace", "--replace", false)
+            arg("replace", "--replace", false),
+            arg("upload", "--upload", false)
     ),
     EXPORT("/%s export <file>",
             arg("file", true),
