@@ -59,7 +59,8 @@ subprojects {
     repositories {
         mavenCentral()
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-        maven { url 'https://repo.nukkitx.com/maven-snapshots/' }
+        maven { url 'https://repo.opencollab.dev/maven-releases' }
+        maven { url 'https://repo.opencollab.dev/maven-snapshots' }
         maven { url 'https://repo.lucko.me/' }
     }
 }
