@@ -36,6 +36,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * An implementation of {@link Messenger} using SQL.
@@ -44,6 +46,9 @@ public abstract class AbstractSqlMessenger implements Messenger {
 
     private final IncomingMessageConsumer consumer;
     private long lastId = -1;
+
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private boolean closed = false;
 
     protected AbstractSqlMessenger(IncomingMessageConsumer consumer) {
         this.consumer = consumer;
@@ -82,6 +87,12 @@ public abstract class AbstractSqlMessenger implements Messenger {
 
     @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
+        this.lock.readLock().lock();
+        if (this.closed) {
+            this.lock.readLock().unlock();
+            return;
+        }
+
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("INSERT INTO `" + getTableName() + "` (`time`, `msg`) VALUES(NOW(), ?)")) {
                 ps.setString(1, outgoingMessage.asEncodedString());
@@ -89,10 +100,18 @@ public abstract class AbstractSqlMessenger implements Messenger {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            this.lock.readLock().unlock();
         }
     }
 
     public void pollMessages() {
+        this.lock.readLock().lock();
+        if (this.closed) {
+            this.lock.readLock().unlock();
+            return;
+        }
+
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM `" + getTableName() + "` WHERE `id` > ? AND (NOW() - `time` < 30)")) {
                 ps.setLong(1, this.lastId);
@@ -108,18 +127,36 @@ public abstract class AbstractSqlMessenger implements Messenger {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            this.lock.readLock().unlock();
         }
     }
 
     public void runHousekeeping() {
+        this.lock.readLock().lock();
+        if (this.closed) {
+            this.lock.readLock().unlock();
+            return;
+        }
+
         try (Connection c = getConnection()) {
             try (PreparedStatement ps = c.prepareStatement("DELETE FROM `" + getTableName() + "` WHERE (NOW() - `time` > 60)")) {
                 ps.execute();
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            this.lock.readLock().unlock();
         }
     }
 
-
+    @Override
+    public void close() {
+        this.lock.writeLock().lock();
+        try {
+            this.closed = true;
+        } finally {
+            this.lock.writeLock().unlock();
+        }
+    }
 }

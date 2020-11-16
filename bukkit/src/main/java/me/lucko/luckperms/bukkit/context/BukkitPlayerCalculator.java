@@ -25,9 +25,12 @@
 
 package me.lucko.luckperms.bukkit.context;
 
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.util.EnumNamer;
 
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextCalculator;
@@ -36,45 +39,67 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 
+import org.bukkit.GameMode;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listener {
+    private static final EnumNamer<GameMode> GAMEMODE_NAMER = new EnumNamer<>(
+            GameMode.class,
+            EnumNamer.LOWER_CASE_NAME
+    );
+    private static final EnumNamer<Environment> DIMENSION_TYPE_NAMER = new EnumNamer<>(
+            Environment.class,
+            // use the namespaced keys used by the game
+            ImmutableMap.<Environment, String>builder()
+                    .put(Environment.NORMAL, "overworld")
+                    .put(Environment.NETHER, "the_nether")
+                    .put(Environment.THE_END, "the_end")
+                    .build(),
+            EnumNamer.LOWER_CASE_NAME
+    );
 
-public class WorldCalculator implements ContextCalculator<Player>, Listener {
     private final LPBukkitPlugin plugin;
 
-    public WorldCalculator(LPBukkitPlugin plugin) {
+    public BukkitPlayerCalculator(LPBukkitPlugin plugin) {
         this.plugin = plugin;
     }
 
+    @SuppressWarnings("ConstantConditions") // bukkit lies
     @Override
     public void calculate(@NonNull Player subject, @NonNull ContextConsumer consumer) {
-        Set<String> seen = new HashSet<>();
-        String world = subject.getWorld().getName().toLowerCase();
-        // seems like world names can sometimes be the empty string
-        // see: https://github.com/lucko/LuckPerms/issues/2119
-        while (Context.isValidValue(world) && seen.add(world)) {
-            consumer.accept(DefaultContextKeys.WORLD_KEY, world);
-            world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
+        GameMode mode = subject.getGameMode();
+        if (mode != null) {
+            consumer.accept(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
+        }
+
+        World world = subject.getWorld();
+        if (world != null) {
+            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(world.getEnvironment()));
+            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
         }
     }
 
     @Override
     public ContextSet estimatePotentialContexts() {
-        List<World> worlds = this.plugin.getBootstrap().getServer().getWorlds();
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (World world : worlds) {
-            String name = world.getName().toLowerCase();
-            if (Context.isValidValue(name)) {
-                builder.add(DefaultContextKeys.WORLD_KEY, name);
+        for (GameMode mode : GameMode.values()) {
+            builder.add(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
+        }
+        for (Environment env : Environment.values()) {
+            builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(env));
+        }
+        for (World world : this.plugin.getBootstrap().getServer().getWorlds()) {
+            String worldName = world.getName();
+            if (Context.isValidValue(worldName)) {
+                builder.add(DefaultContextKeys.WORLD_KEY, worldName);
             }
         }
         return builder.build();
@@ -82,6 +107,11 @@ public class WorldCalculator implements ContextCalculator<Player>, Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
+        this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onGameModeChange(PlayerGameModeChangeEvent e) {
         this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
     }
 }

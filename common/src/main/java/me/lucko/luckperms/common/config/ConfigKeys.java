@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
 import me.lucko.luckperms.common.config.generic.key.SimpleConfigKey;
+import me.lucko.luckperms.common.context.WorldNameRewriter;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
@@ -153,6 +154,11 @@ public final class ConfigKeys {
      * If LuckPerms should update the list of commands sent to the client when permissions are changed.
      */
     public static final ConfigKey<Boolean> UPDATE_CLIENT_COMMAND_LIST = notReloadable(booleanKey("update-client-command-list", true));
+
+    /**
+     * If LuckPerms should attempt to register "Brigadier" command list data for its commands.
+     */
+    public static final ConfigKey<Boolean> REGISTER_COMMAND_LIST_DATA = notReloadable(booleanKey("register-command-list-data", true));
 
     /**
      * If LuckPerms should attempt to resolve Vanilla command target selectors for LP commands.
@@ -411,6 +417,11 @@ public final class ConfigKeys {
     });
 
     /**
+     * If LuckPerms should automatically install translation bundles and periodically update them.
+     */
+    public static final ConfigKey<Boolean> AUTO_INSTALL_TRANSLATIONS = notReloadable(booleanKey("auto-install-translations", true));
+
+    /**
      * If auto op is enabled. Only used by the Bukkit platform.
      */
     public static final ConfigKey<Boolean> AUTO_OP = notReloadable(booleanKey("auto-op", false));
@@ -443,7 +454,7 @@ public final class ConfigKeys {
     /**
      * If the vault server option should be used
      */
-    public static final ConfigKey<Boolean> USE_VAULT_SERVER = booleanKey("use-vault-server", true);
+    public static final ConfigKey<Boolean> USE_VAULT_SERVER = booleanKey("use-vault-server", false);
 
     /**
      * The name of the server to use for Vault.
@@ -470,12 +481,12 @@ public final class ConfigKeys {
     /**
      * The world rewrites map
      */
-    public static final ConfigKey<Map<String, String>> WORLD_REWRITES = key(c -> {
-        return c.getStringMap("world-rewrite", ImmutableMap.of()).entrySet().stream()
+    public static final ConfigKey<WorldNameRewriter> WORLD_REWRITES = key(c -> {
+        return WorldNameRewriter.of(c.getStringMap("world-rewrite", ImmutableMap.of()).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> e.getKey().toLowerCase(),
                         e -> e.getValue().toLowerCase()
-                ));
+                )));
     });
 
     /**

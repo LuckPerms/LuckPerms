@@ -29,21 +29,21 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
 
 public class CreateTrack extends SingleCommand {
-    public CreateTrack(LocaleManager locale) {
-        super(CommandSpec.CREATE_TRACK.localize(locale), "CreateTrack", CommandPermission.CREATE_TRACK, Predicates.not(1));
+    public CreateTrack() {
+        super(CommandSpec.CREATE_TRACK, "CreateTrack", CommandPermission.CREATE_TRACK, Predicates.not(1));
     }
 
     @Override
@@ -67,12 +67,12 @@ public class CreateTrack extends SingleCommand {
         try {
             plugin.getStorage().createAndLoadTrack(trackName, CreationCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
-            Message.CREATE_ERROR.send(sender, trackName);
+            plugin.getLogger().warn("Error whilst creating track", e);
+            Message.CREATE_ERROR.send(sender, Component.text(trackName));
             return CommandResult.FAILURE;
         }
 
-        Message.CREATE_SUCCESS.send(sender, trackName);
+        Message.CREATE_SUCCESS.send(sender, Component.text(trackName));
 
         LoggedAction.build().source(sender).targetName(trackName).targetType(Action.Target.Type.TRACK)
                 .description("create").build()

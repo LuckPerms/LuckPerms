@@ -26,8 +26,8 @@
 package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.bungee.calculator.BungeeCalculatorFactory;
-import me.lucko.luckperms.bungee.context.BackendServerCalculator;
 import me.lucko.luckperms.bungee.context.BungeeContextManager;
+import me.lucko.luckperms.bungee.context.BungeePlayerCalculator;
 import me.lucko.luckperms.bungee.context.RedisBungeeCalculator;
 import me.lucko.luckperms.bungee.floodgate.BungeeFloodgateManager;
 import me.lucko.luckperms.bungee.listeners.BungeeConnectionListener;
@@ -95,7 +95,8 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
-        dependencies.add(Dependency.TEXT_ADAPTER_BUNGEECORD);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM_BUNGEECORD);
         return dependencies;
     }
 
@@ -142,9 +143,9 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new BungeeContextManager(this);
 
-        BackendServerCalculator backendServerCalculator = new BackendServerCalculator(this);
-        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap, backendServerCalculator);
-        this.contextManager.registerCalculator(backendServerCalculator);
+        BungeePlayerCalculator playerCalculator = new BungeePlayerCalculator(this);
+        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap, playerCalculator);
+        this.contextManager.registerCalculator(playerCalculator);
 
         if (this.bootstrap.getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
             this.contextManager.registerCalculator(new RedisBungeeCalculator());

@@ -137,8 +137,7 @@ public abstract class ContextManager<S, P extends S> {
             try {
                 calculator.calculate(subject, accumulator::add);
             } catch (Throwable e) {
-                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject);
-                e.printStackTrace();
+                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject, e);
             }
         }
         return formQueryOptions(subject, accumulator.build());
@@ -150,8 +149,7 @@ public abstract class ContextManager<S, P extends S> {
             try {
                 calculator.calculate(accumulator::add);
             } catch (Throwable e) {
-                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts");
-                e.printStackTrace();
+                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts", e);
             }
         }
         return formQueryOptions(accumulator.build());
@@ -164,8 +162,7 @@ public abstract class ContextManager<S, P extends S> {
             try {
                 potentialContexts = calculator.estimatePotentialContexts();
             } catch (Throwable e) {
-                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst estimating potential contexts");
-                e.printStackTrace();
+                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst estimating potential contexts", e);
                 continue;
             }
             builder.addAll(potentialContexts);

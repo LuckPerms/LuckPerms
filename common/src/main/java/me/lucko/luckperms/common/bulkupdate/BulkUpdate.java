@@ -48,10 +48,15 @@ public final class BulkUpdate {
     // a set of constraints which data must match to be acted upon
     private final List<Query> queries;
 
-    public BulkUpdate(DataType dataType, Action action, List<Query> queries) {
+    // update statistics of the operation (number of nodes, users and groups affected)
+    private final BulkUpdateStatistics statistics = new BulkUpdateStatistics();
+    private final boolean trackStatistics;
+
+    public BulkUpdate(DataType dataType, Action action, List<Query> queries, boolean trackStatistics) {
         this.dataType = dataType;
         this.action = action;
         this.queries = queries;
+        this.trackStatistics = trackStatistics;
     }
 
     /**
@@ -98,6 +103,17 @@ public final class BulkUpdate {
         // (DELETE FROM or UPDATE)
         this.action.appendSql(builder);
 
+        return appendConstraintsAsSql(builder);
+    }
+
+    /**
+     * Appends the constraints of this {@link BulkUpdate} to the provided statement builder in SQL syntax
+     *
+     * @param builder the statement builder to append the constraints to
+     * @return the same statement builder provided as input
+     */
+    public PreparedStatementBuilder appendConstraintsAsSql(PreparedStatementBuilder builder) {
+
         // if there are no constraints, just return without a WHERE clause
         if (this.queries.isEmpty()) {
             return builder;
@@ -131,6 +147,14 @@ public final class BulkUpdate {
         return this.queries;
     }
 
+    public boolean isTrackingStatistics() {
+        return trackStatistics;
+    }
+
+    public BulkUpdateStatistics getStatistics() {
+        return statistics;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
@@ -144,7 +168,7 @@ public final class BulkUpdate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDataType(), getAction(), getQueries());
+        return Objects.hash(getDataType(), getAction(), getQueries(), isTrackingStatistics());
     }
 
     @Override
@@ -152,6 +176,7 @@ public final class BulkUpdate {
         return "BulkUpdate(" +
                 "dataType=" + this.getDataType() + ", " +
                 "action=" + this.getAction() + ", " +
-                "constraints=" + this.getQueries() + ")";
+                "constraints=" + this.getQueries() + ", " +
+                "trackStatistics=" + this.isTrackingStatistics() + ")";
     }
 }

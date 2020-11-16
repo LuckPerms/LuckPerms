@@ -96,7 +96,7 @@ public abstract class AbstractConnectionListener {
                 this.plugin.getLogger().warn("If you're using BungeeCord/Velocity, please ensure that IP-Forwarding is setup correctly on all of your backend servers!");
             }
 
-            this.plugin.getLogger().warn("See here for more info: https://github.com/lucko/LuckPerms/wiki/Network-Installation#pre-setup");
+            this.plugin.getLogger().warn("See here for more info: https://luckperms.net/wiki/Network-Installation#pre-setup");
         }
 
         User user = this.plugin.getStorage().loadUser(uniqueId, username).join();

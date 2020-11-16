@@ -31,16 +31,14 @@ import me.lucko.luckperms.common.backup.Importer;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
-import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
-import me.lucko.luckperms.common.web.WebEditor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -54,8 +52,8 @@ import java.util.zip.GZIPInputStream;
 public class ImportCommand extends SingleCommand {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
-    public ImportCommand(LocaleManager locale) {
-        super(CommandSpec.IMPORT.localize(locale), "Import", CommandPermission.IMPORT, Predicates.notInRange(1, 2));
+    public ImportCommand() {
+        super(CommandSpec.IMPORT, "Import", CommandPermission.IMPORT, Predicates.notInRange(1, 3));
     }
 
     @Override
@@ -104,7 +102,7 @@ public class ImportCommand extends SingleCommand {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
                 data = GsonProvider.normal().fromJson(reader, JsonObject.class);
             } catch (IOException e) {
-                e.printStackTrace();
+                plugin.getLogger().warn("Error whilst reading from the import file", e);
                 Message.IMPORT_FILE_READ_FAILURE.send(sender);
                 this.running.set(false);
                 return CommandResult.FAILURE;
@@ -113,18 +111,18 @@ public class ImportCommand extends SingleCommand {
             String code = args.get(0);
 
             if (code.isEmpty()) {
-                Message.IMPORT_INVALID_CODE.send(sender, code);
+                Message.IMPORT_WEB_INVALID_CODE.send(sender, code);
                 return CommandResult.INVALID_ARGS;
             }
 
             try {
-                data = WebEditor.readDataFromBytebin(plugin.getBytebin(), code);
+                data = plugin.getBytebin().getJsonContent(code).getAsJsonObject();
             } catch (UnsuccessfulRequestException e) {
-                Message.IMPORT_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
+                Message.HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
                 return CommandResult.STATE_ERROR;
             } catch (IOException e) {
-                new RuntimeException("Error reading data to bytebin", e).printStackTrace();
-                Message.IMPORT_HTTP_UNKNOWN_FAILURE.send(sender);
+                plugin.getLogger().severe("Error reading data to bytebin", e);
+                Message.HTTP_UNKNOWN_FAILURE.send(sender);
                 return CommandResult.STATE_ERROR;
             }
 
@@ -134,7 +132,7 @@ public class ImportCommand extends SingleCommand {
             }
         }
 
-        Importer importer = new Importer(plugin, sender, data, args.contains("--merge"));
+        Importer importer = new Importer(plugin, sender, data, !args.contains("--replace"));
 
         // Run the importer in its own thread.
         plugin.getBootstrap().getScheduler().executeAsync(() -> {

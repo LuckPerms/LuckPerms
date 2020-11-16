@@ -51,6 +51,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 /**
  * Abstract implementation of {@link CachedDataManager}.
@@ -132,11 +133,13 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
 
     /**
      * Resolves the owners permissions data for the given {@link QueryOptions}.
-     * 
-     * @param accumulator the accumulator to add resolved permissions to
+     *
+     * @param mapFactory a function to create a map instance to return the results in
      * @param queryOptions the query options
+     * @param <M> the map type
+     * @return the resolved permissions
      */
-    protected abstract void resolvePermissions(Map<String, Boolean> accumulator, QueryOptions queryOptions);
+    protected abstract <M extends Map<String, Boolean>> M resolvePermissions(IntFunction<M> mapFactory, QueryOptions queryOptions);
 
     /**
      * Resolves the owners meta data for the given {@link QueryOptions}.
@@ -150,9 +153,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         Objects.requireNonNull(queryOptions, "queryOptions");
         CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
 
-        ConcurrentHashMap<String, Boolean> sourcePermissions = new ConcurrentHashMap<>();
-        resolvePermissions(sourcePermissions, queryOptions);
-
+        ConcurrentHashMap<String, Boolean> sourcePermissions = resolvePermissions(ConcurrentHashMap::new, queryOptions);
         return new PermissionCache(queryOptions, metadata, getCalculatorFactory(), sourcePermissions);
     }
     

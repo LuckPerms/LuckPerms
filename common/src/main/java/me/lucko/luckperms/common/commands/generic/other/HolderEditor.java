@@ -25,18 +25,15 @@
 
 package me.lucko.luckperms.common.commands.generic.other;
 
-import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.commands.misc.EditorCommand;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -49,7 +46,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
-import me.lucko.luckperms.common.web.WebEditor;
+import me.lucko.luckperms.common.webeditor.WebEditorRequest;
 
 import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
@@ -63,8 +60,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
-    public HolderEditor(LocaleManager locale, HolderType type) {
-        super(CommandSpec.HOLDER_EDITOR.localize(locale), "editor", type == HolderType.USER ? CommandPermission.USER_EDITOR : CommandPermission.GROUP_EDITOR, Predicates.alwaysFalse());
+    public HolderEditor(HolderType type) {
+        super(CommandSpec.HOLDER_EDITOR, "editor", type == HolderType.USER ? CommandPermission.USER_EDITOR : CommandPermission.GROUP_EDITOR, Predicates.alwaysFalse());
     }
 
     @Override
@@ -106,7 +103,7 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
             users.values().stream()
                     .sorted(Comparator
                             .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL)).reversed()
-                            .thenComparing(User::getFormattedDisplayName, String.CASE_INSENSITIVE_ORDER)
+                            .thenComparing(User::getPlainDisplayName, String.CASE_INSENSITIVE_ORDER)
                     )
                     .forEach(holders::add);
 
@@ -119,8 +116,8 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
 
         Message.EDITOR_START.send(sender);
 
-        JsonObject payload = WebEditor.formPayload(holders, Collections.emptyList(), sender, label, plugin);
-        return WebEditor.post(payload, sender, plugin);
+        return WebEditorRequest.generate(holders, Collections.emptyList(), sender, label, plugin)
+                .createSession(plugin, sender);
     }
 
 }

@@ -29,10 +29,9 @@ import me.lucko.luckperms.common.backup.Exporter;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -45,8 +44,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ExportCommand extends SingleCommand {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
-    public ExportCommand(LocaleManager locale) {
-        super(CommandSpec.EXPORT.localize(locale), "Export", CommandPermission.EXPORT, Predicates.notInRange(1, 2));
+    public ExportCommand() {
+        super(CommandSpec.EXPORT, "Export", CommandPermission.EXPORT, Predicates.notInRange(1, 2));
     }
 
     @Override
@@ -57,10 +56,18 @@ public class ExportCommand extends SingleCommand {
         }
 
         boolean includeUsers = !args.remove("--without-users");
-        boolean saveFile = !args.remove("--upload");
+        boolean includeGroups = !args.remove("--without-groups");
+        boolean upload = args.remove("--upload");
 
         Exporter exporter;
-        if (saveFile) {
+        if (upload) {
+            if (!this.running.compareAndSet(false, true)) {
+                Message.EXPORT_ALREADY_RUNNING.send(sender);
+                return CommandResult.STATE_ERROR;
+            }
+
+            exporter = new Exporter.WebUpload(plugin, sender, includeUsers, includeGroups, label);
+        } else {
             Path dataDirectory = plugin.getBootstrap().getDataDirectory();
             Path path = dataDirectory.resolve(args.get(0) + ".json.gz");
 
@@ -70,20 +77,20 @@ public class ExportCommand extends SingleCommand {
             }
 
             if (Files.exists(path)) {
-                Message.LOG_EXPORT_ALREADY_EXISTS.send(sender, path.toString());
+                Message.EXPORT_FILE_ALREADY_EXISTS.send(sender, path.toString());
                 return CommandResult.INVALID_ARGS;
             }
 
             try {
                 Files.createFile(path);
             } catch (IOException e) {
-                Message.LOG_EXPORT_FAILURE.send(sender);
-                e.printStackTrace();
+                Message.EXPORT_FILE_FAILURE.send(sender);
+                plugin.getLogger().warn("Error whilst writing to the file", e);
                 return CommandResult.FAILURE;
             }
 
             if (!Files.isWritable(path)) {
-                Message.LOG_EXPORT_NOT_WRITABLE.send(sender, path.toString());
+                Message.EXPORT_FILE_NOT_WRITABLE.send(sender, path.toString());
                 return CommandResult.FAILURE;
             }
 
@@ -92,14 +99,7 @@ public class ExportCommand extends SingleCommand {
                 return CommandResult.STATE_ERROR;
             }
 
-            exporter = new Exporter(plugin, sender, path, includeUsers, saveFile);
-        } else {
-            if (!this.running.compareAndSet(false, true)) {
-                Message.EXPORT_ALREADY_RUNNING.send(sender);
-                return CommandResult.STATE_ERROR;
-            }
-
-            exporter = new Exporter(plugin, sender, includeUsers, saveFile, label);
+            exporter = new Exporter.SaveFile(plugin, sender, path, includeUsers, includeGroups);
         }
 
         // Run the exporter in its own thread.

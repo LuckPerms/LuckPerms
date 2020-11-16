@@ -10,8 +10,8 @@ repositories {
 dependencies {
     compile project(':common')
 
-    compileOnly 'com.velocitypowered:velocity-api:1.0-SNAPSHOT'
-    annotationProcessor 'com.velocitypowered:velocity-api:1.0-SNAPSHOT'
+    compileOnly 'com.velocitypowered:velocity-api:1.1.0-SNAPSHOT'
+    annotationProcessor 'com.velocitypowered:velocity-api:1.1.0-SNAPSHOT'
 
     implementation 'org.geysermc:floodgate-velocity:1.0-SNAPSHOT'
 }
@@ -29,7 +29,7 @@ shadowJar {
         include(dependency('me.lucko.luckperms:.*'))
     }
 
-    //relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
+    relocate 'net.kyori.adventure', 'me.lucko.luckperms.lib.adventure'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
     relocate 'okio', 'me.lucko.luckperms.lib.okio'

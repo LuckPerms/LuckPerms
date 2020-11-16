@@ -23,32 +23,40 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.web;
+package me.lucko.luckperms.common.util;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Function;
 
-import java.io.IOException;
+/**
+ * Small utility to cache custom name lookups for enum values.
+ *
+ * @param <E> the enum type
+ */
+public class EnumNamer<E extends Enum<E>> {
+    public static final Function<Enum<?>, String> LOWER_CASE_NAME = value -> value.name().toLowerCase();
 
-public class AbstractHttpClient {
+    private final String[] names;
 
-    public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
-
-    /** The http client */
-    protected final OkHttpClient okHttp;
-
-    public AbstractHttpClient(OkHttpClient okHttp) {
-        this.okHttp = okHttp;
-    }
-
-    protected Response makeHttpRequest(Request request) throws IOException, UnsuccessfulRequestException {
-        Response response = this.okHttp.newCall(request).execute();
-        if (!response.isSuccessful()) {
-            response.close();
-            throw new UnsuccessfulRequestException(response);
+    public EnumNamer(Class<E> enumClass, Map<? super E, String> definedNames, Function<? super E, String> namingFunction) {
+        E[] values = enumClass.getEnumConstants();
+        this.names = new String[values.length];
+        for (E value : values) {
+            String name = definedNames.get(value);
+            if (name == null) {
+                name = namingFunction.apply(value);
+            }
+            this.names[value.ordinal()] = name;
         }
-        return response;
     }
+
+    public EnumNamer(Class<E> enumClass, Function<? super E, String> namingFunction) {
+        this(enumClass, Collections.emptyMap(), namingFunction);
+    }
+
+    public String name(E value) {
+        return this.names[value.ordinal()];
+    }
+
 }

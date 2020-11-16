@@ -23,47 +23,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale.command;
+package me.lucko.luckperms.common.http;
 
-import com.google.common.collect.ImmutableList;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.message.Message;
+import java.io.IOException;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+public class AbstractHttpClient {
 
-public class Argument {
-    public static Argument create(String name, boolean required, String description) {
-        return new Argument(name, required, description);
+    public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
+
+    /** The http client */
+    protected final OkHttpClient okHttp;
+
+    public AbstractHttpClient(OkHttpClient okHttp) {
+        this.okHttp = okHttp;
     }
 
-    public static ImmutableList<Argument> list(Argument... args) {
-        return ImmutableList.copyOf(args);
-    }
-
-    private final String name;
-    private final boolean required;
-    private final String description;
-
-    private Argument(String name, boolean required, String description) {
-        this.name = name;
-        this.required = required;
-        this.description = description;
-    }
-
-    public String asPrettyString(@Nullable LocaleManager localeManager) {
-        return (this.required ? Message.REQUIRED_ARGUMENT : Message.OPTIONAL_ARGUMENT).asString(localeManager, this.name);
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public boolean isRequired() {
-        return this.required;
-    }
-
-    public String getDescription() {
-        return this.description;
+    protected Response makeHttpRequest(Request request) throws IOException, UnsuccessfulRequestException {
+        Response response = this.okHttp.newCall(request).execute();
+        if (!response.isSuccessful()) {
+            response.close();
+            throw new UnsuccessfulRequestException(response);
+        }
+        return response;
     }
 }

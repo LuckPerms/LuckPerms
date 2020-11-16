@@ -48,6 +48,9 @@ public class BulkUpdateBuilder {
     // the action to apply to the data which matches the constraints
     private Action action = null;
 
+    // should the operation count the number of affected nodes, users and groups
+    private boolean trackStatistics = false;
+
     // a set of constraints which data must match to be acted upon
     private final Set<Query> queries = new LinkedHashSet<>();
 
@@ -64,6 +67,11 @@ public class BulkUpdateBuilder {
         return this;
     }
 
+    public BulkUpdateBuilder trackStatistics(boolean trackStatistics) {
+        this.trackStatistics = trackStatistics;
+        return this;
+    }
+
     public BulkUpdateBuilder query(Query query) {
         this.queries.add(query);
         return this;
@@ -74,7 +82,7 @@ public class BulkUpdateBuilder {
             throw new IllegalStateException("no action specified");
         }
 
-        return new BulkUpdate(this.dataType, this.action, ImmutableList.copyOf(this.queries));
+        return new BulkUpdate(this.dataType, this.action, ImmutableList.copyOf(this.queries), this.trackStatistics);
     }
 
     @Override
@@ -82,6 +90,7 @@ public class BulkUpdateBuilder {
         return "BulkUpdateBuilder(" +
                 "dataType=" + this.dataType + ", " +
                 "action=" + this.action + ", " +
-                "constraints=" + this.queries + ")";
+                "constraints=" + this.queries + ", " +
+                "trackStatistics=" + this.trackStatistics + ")";
     }
 }

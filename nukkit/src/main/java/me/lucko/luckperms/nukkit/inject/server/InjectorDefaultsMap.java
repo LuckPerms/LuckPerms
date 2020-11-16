@@ -79,8 +79,7 @@ public class InjectorDefaultsMap implements Runnable {
                 this.plugin.setDefaultPermissionMap(defaultsMap);
             }
         } catch (Exception e) {
-            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Default Permission map.");
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Default Permission map.", e);
         }
     }
 

@@ -30,13 +30,11 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -51,8 +49,8 @@ import net.luckperms.api.util.Tristate;
 import java.util.List;
 
 public class PermissionCheck extends GenericChildCommand {
-    public PermissionCheck(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_CHECK.localize(locale), "check", CommandPermission.USER_PERM_CHECK, CommandPermission.GROUP_PERM_CHECK, Predicates.is(0));
+    public PermissionCheck() {
+        super(CommandSpec.PERMISSION_CHECK, "check", CommandPermission.USER_PERM_CHECK, CommandPermission.GROUP_PERM_CHECK, Predicates.is(0));
     }
 
     @Override
@@ -66,9 +64,7 @@ public class PermissionCheck extends GenericChildCommand {
         MutableContextSet context = args.getContextOrDefault(1, plugin);
 
         Tristate result = target.hasNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(node).withContext(context).build(), NodeEqualityPredicate.IGNORE_VALUE_OR_IF_TEMPORARY);
-        String s = MessageUtils.formatTristate(result);
-
-        Message.CHECK_PERMISSION.send(sender, target.getFormattedDisplayName(), node, s, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+        Message.CHECK_PERMISSION.send(sender, target, node, result, context);
         return CommandResult.SUCCESS;
     }
 

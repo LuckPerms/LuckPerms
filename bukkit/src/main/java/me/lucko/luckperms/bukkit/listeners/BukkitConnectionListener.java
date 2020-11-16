@@ -29,9 +29,13 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleInjector;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -75,7 +79,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
         this.plugin.getLogger().warn("It appears that your server is running CraftBukkit and configured in offline (cracked) mode.");
         this.plugin.getLogger().warn("Due to a CraftBukkit limitation, LuckPerms cannot function correctly in this setup.");
         this.plugin.getLogger().warn("To resolve this, please either a) upgrade from CraftBukkit to Spigot or Paper, or b) enable online-mode.");
-        this.plugin.getLogger().warn("For more info, please see: https://github.com/lucko/LuckPerms/wiki/Installation#craftbukkit-and-offline-mode");
+        this.plugin.getLogger().warn("For more info, please see: https://luckperms.net/wiki/Installation#craftbukkit-and-offline-mode");
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -117,12 +121,13 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             recordConnection(e.getUniqueId());
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUniqueId(), e.getName(), user);
         } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUniqueId() + " - " + e.getName());
-            ex.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUniqueId() + " - " + e.getName(), ex);
 
             // deny the connection
             this.deniedAsyncLogin.add(e.getUniqueId());
-            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager()));
+
+            Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
+            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUniqueId(), e.getName(), null);
         }
     }
@@ -169,7 +174,9 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
 
                 if (this.detectedCraftBukkitOfflineMode) {
                     printCraftBukkitOfflineModeError();
-                    e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_STATE_ERROR_CB_OFFLINE_MODE.asString(this.plugin.getLocaleManager()));
+
+                    Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR_CB_OFFLINE_MODE.build(), player.getLocale());
+                    e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
                     return;
                 }
 
@@ -179,7 +186,8 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
                         " - denying login.");
             }
 
-            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_STATE_ERROR.asString(this.plugin.getLocaleManager()));
+            Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLocale());
+            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }
 
@@ -194,10 +202,10 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
 
         } catch (Throwable t) {
             this.plugin.getLogger().warn("Exception thrown when setting up permissions for " +
-                    player.getUniqueId() + " - " + player.getName() + " - denying login.");
-            t.printStackTrace();
+                    player.getUniqueId() + " - " + player.getName() + " - denying login.", t);
 
-            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_SETUP_ERROR.asString(this.plugin.getLocaleManager()));
+            Component reason = TranslationManager.render(Message.LOADING_SETUP_ERROR.build(), player.getLocale());
+            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }
 
@@ -232,7 +240,8 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             try {
                 PermissibleInjector.uninject(player, true);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                this.plugin.getLogger().severe("Exception thrown when unloading permissions from " +
+                        player.getUniqueId() + " - " + player.getName(), ex);
             }
 
             // Handle auto op

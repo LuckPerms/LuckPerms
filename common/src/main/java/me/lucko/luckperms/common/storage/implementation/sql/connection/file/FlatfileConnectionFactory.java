@@ -25,38 +25,85 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.connection.file;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Abstract {@link ConnectionFactory} using a file based database driver.
+ */
 abstract class FlatfileConnectionFactory implements ConnectionFactory {
-    protected static final DecimalFormat DF = new DecimalFormat("#.##");
+    /** Format used for formatting database file size. */
+    protected static final DecimalFormat FILE_SIZE_FORMAT = new DecimalFormat("#.##");
 
-    protected final Path file;
+    /** The current open connection, if any */
+    private NonClosableConnection connection;
+    /** The path to the database file */
+    private final Path file;
 
     FlatfileConnectionFactory(Path file) {
         this.file = file;
     }
 
-    @Override
-    public void init(LuckPermsPlugin plugin) {
+    /**
+     * Creates a connection to the database.
+     *
+     * @param file the database file
+     * @return the connection
+     * @throws SQLException if any error occurs
+     */
+    protected abstract Connection createConnection(Path file) throws SQLException;
 
+    @Override
+    public synchronized Connection getConnection() throws SQLException {
+        NonClosableConnection connection = this.connection;
+        if (connection == null || connection.isClosed()) {
+            connection = new NonClosableConnection(createConnection(this.file));
+            this.connection = connection;
+        }
+        return connection;
     }
 
+    @Override
+    public void shutdown() throws Exception {
+        if (this.connection != null) {
+            this.connection.shutdown();
+        }
+    }
+
+    /**
+     * Gets the path of the file the database driver actually ends up writing to.
+     *
+     * @return the write file
+     */
     protected Path getWriteFile() {
         return this.file;
     }
 
-    @Override
-    public Map<String, String> getMeta() {
-        Map<String, String> meta = new LinkedHashMap<>();
+    protected void migrateOldDatabaseFile(String oldName) {
+        Path oldFile = getWriteFile().getParent().resolve(oldName);
+        if (Files.exists(oldFile)) {
+            try {
+                Files.move(oldFile, getWriteFile());
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+    }
 
+    @Override
+    public Map<Component, Component> getMeta() {
+        String fileSize;
         Path databaseFile = getWriteFile();
         if (Files.exists(databaseFile)) {
             long length;
@@ -67,11 +114,14 @@ abstract class FlatfileConnectionFactory implements ConnectionFactory {
             }
 
             double size = length / 1048576D;
-            meta.put("File Size", DF.format(size) + "MB");
+            fileSize = FILE_SIZE_FORMAT.format(size) + "MB";
         } else {
-            meta.put("File Size", "0MB");
+            fileSize = "0MB";
         }
 
-        return meta;
+        return Collections.singletonMap(
+                Component.translatable("luckperms.command.info.storage.meta.file-size-key"),
+                Component.text(fileSize, NamedTextColor.GREEN)
+        );
     }
 }

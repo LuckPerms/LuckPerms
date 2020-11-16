@@ -36,49 +36,39 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.event.EventPriority;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>, Listener {
-
-    private static String getServer(ProxiedPlayer player) {
-        return player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName().toLowerCase());
-    }
-
+public class BungeePlayerCalculator implements ContextCalculator<ProxiedPlayer>, Listener {
     private final LPBungeePlugin plugin;
 
-    public BackendServerCalculator(LPBungeePlugin plugin) {
+    public BungeePlayerCalculator(LPBungeePlugin plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public void calculate(@NonNull ProxiedPlayer subject, @NonNull ContextConsumer consumer) {
-        Set<String> seen = new HashSet<>();
-        String server = getServer(subject);
-        while (server != null && seen.add(server)) {
-            consumer.accept(DefaultContextKeys.WORLD_KEY, server);
-            server = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
+        Server server = subject.getServer();
+        if (server != null) {
+            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(server.getInfo().getName(), consumer);
         }
     }
 
     @Override
     public ContextSet estimatePotentialContexts() {
-        Collection<ServerInfo> servers = this.plugin.getBootstrap().getProxy().getServers().values();
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (ServerInfo server : servers) {
-            builder.add(DefaultContextKeys.WORLD_KEY, server.getName().toLowerCase());
+        for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
+            builder.add(DefaultContextKeys.WORLD_KEY, server.getName());
         }
         return builder.build();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onServerSwitch(ServerSwitchEvent e) {
         this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
     }

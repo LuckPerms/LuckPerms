@@ -26,7 +26,7 @@
 package me.lucko.luckperms.nukkit.listeners;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import cn.nukkit.command.CommandSender;
@@ -48,17 +48,17 @@ public class NukkitPlatformListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
         handleCommand(e.getPlayer(), e.getMessage().toLowerCase(), e);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onServerCommand(ServerCommandEvent e) {
         handleCommand(e.getSender(), e.getCommand().toLowerCase(), e);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onRemoteServerCommand(RemoteServerCommandEvent e) {
         handleCommand(e.getSender(), e.getCommand().toLowerCase(), e);
     }
@@ -74,7 +74,7 @@ public class NukkitPlatformListener implements Listener {
 
         if (OP_COMMAND_PATTERN.matcher(cmdLine).matches()) {
             event.setCancelled(true);
-            sender.sendMessage(Message.OP_DISABLED.asString(this.plugin.getLocaleManager()));
+            Message.OP_DISABLED.send(this.plugin.getSenderFactory().wrap(sender));
         }
     }
 

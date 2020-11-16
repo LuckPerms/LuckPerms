@@ -30,11 +30,10 @@ import com.platymuus.bukkit.permissions.PermissionsPlugin;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -58,8 +57,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationPermissionsBukkit extends ChildCommand<Object> {
-    public MigrationPermissionsBukkit(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_COMMAND.localize(locale), "permissionsbukkit", CommandPermission.MIGRATION, Predicates.alwaysFalse());
+    public MigrationPermissionsBukkit() {
+        super(CommandSpec.MIGRATION_COMMAND, "permissionsbukkit", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override

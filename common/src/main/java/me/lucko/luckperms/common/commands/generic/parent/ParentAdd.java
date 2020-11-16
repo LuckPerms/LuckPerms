@@ -31,14 +31,12 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.types.Inheritance;
@@ -54,8 +52,8 @@ import net.luckperms.api.model.data.DataType;
 import java.util.List;
 
 public class ParentAdd extends GenericChildCommand {
-    public ParentAdd(LocaleManager locale) {
-        super(CommandSpec.PARENT_ADD.localize(locale), "add", CommandPermission.USER_PARENT_ADD, CommandPermission.GROUP_PARENT_ADD, Predicates.is(0));
+    public ParentAdd() {
+        super(CommandSpec.PARENT_ADD, "add", CommandPermission.USER_PARENT_ADD, CommandPermission.GROUP_PARENT_ADD, Predicates.is(0));
     }
 
     @Override
@@ -84,7 +82,7 @@ public class ParentAdd extends GenericChildCommand {
         DataMutateResult result = target.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
 
         if (result.wasSuccessful()) {
-            Message.SET_INHERIT_SUCCESS.send(sender, target.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.SET_INHERIT_SUCCESS.send(sender, target, group, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("parent", "add", group.getName(), context)
@@ -93,7 +91,7 @@ public class ParentAdd extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_INHERITS.send(sender, target.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_INHERITS.send(sender, target, group, context);
             return CommandResult.STATE_ERROR;
         }
     }

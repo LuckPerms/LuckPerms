@@ -43,31 +43,27 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected void appendProperties(HikariConfig config, Map<String, String> properties) {
-        // remove the default config properties which don't exist for PostgreSQL
-        properties.remove("useUnicode");
-        properties.remove("characterEncoding");
-
-        super.appendProperties(config, properties);
+    protected String defaultPort() {
+        return "5432";
     }
 
     @Override
-    protected void appendConfigurationInfo(HikariConfig config) {
-        String address = this.configuration.getAddress();
-        String[] addressSplit = address.split(":");
-        address = addressSplit[0];
-        String port = addressSplit.length > 1 ? addressSplit[1] : "5432";
-
-        String database = this.configuration.getDatabase();
-        String username = this.configuration.getUsername();
-        String password = this.configuration.getPassword();
-
+    protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
         config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("portNumber", port);
-        config.addDataSourceProperty("databaseName", database);
+        config.addDataSourceProperty("databaseName", databaseName);
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
+    }
+
+    @Override
+    protected void overrideProperties(Map<String, String> properties) {
+        super.overrideProperties(properties);
+
+        // remove the default config properties which don't exist for PostgreSQL
+        properties.remove("useUnicode");
+        properties.remove("characterEncoding");
     }
 
     @Override

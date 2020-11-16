@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
@@ -56,7 +57,7 @@ public interface StorageImplementation {
 
     void shutdown();
 
-    default Map<String, String> getMeta() {
+    default Map<Component, Component> getMeta() {
         return Collections.emptyMap();
     }
 
@@ -97,6 +98,8 @@ public interface StorageImplementation {
     void deleteTrack(Track track) throws Exception;
 
     PlayerSaveResult savePlayerData(UUID uniqueId, String username) throws Exception;
+
+    void deletePlayerData(UUID uniqueId) throws Exception;
 
     @Nullable UUID getPlayerUniqueId(String username) throws Exception;
 

@@ -31,14 +31,12 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -55,8 +53,8 @@ import net.luckperms.api.node.NodeType;
 import java.util.List;
 
 public class ParentSetTrack extends GenericChildCommand {
-    public ParentSetTrack(LocaleManager locale) {
-        super(CommandSpec.PARENT_SET_TRACK.localize(locale), "settrack", CommandPermission.USER_PARENT_SET_TRACK, CommandPermission.GROUP_PARENT_SET_TRACK, Predicates.inRange(0, 1));
+    public ParentSetTrack() {
+        super(CommandSpec.PARENT_SET_TRACK, "settrack", CommandPermission.USER_PARENT_SET_TRACK, CommandPermission.GROUP_PARENT_SET_TRACK, Predicates.inRange(0, 1));
     }
 
     @Override
@@ -87,7 +85,7 @@ public class ParentSetTrack extends GenericChildCommand {
         if (index > 0) {
             List<String> trackGroups = track.getGroups();
             if ((index - 1) >= trackGroups.size()) {
-                Message.DOES_NOT_EXIST.send(sender, index);
+                Message.DOES_NOT_EXIST.send(sender, String.valueOf(index));
                 return CommandResult.INVALID_ARGS;
             }
             groupName = track.getGroups().get(index - 1);
@@ -117,7 +115,7 @@ public class ParentSetTrack extends GenericChildCommand {
         target.removeIf(DataType.NORMAL, context, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), false);
         target.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
 
-        Message.SET_TRACK_PARENT_SUCCESS.send(sender, target.getFormattedDisplayName(), track.getName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+        Message.SET_TRACK_PARENT_SUCCESS.send(sender, target, track.getName(), group, context);
 
         LoggedAction.build().source(sender).target(target)
                 .description("parent", "settrack", track.getName(), groupName, context)

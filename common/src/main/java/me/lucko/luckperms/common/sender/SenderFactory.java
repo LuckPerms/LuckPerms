@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.sender;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
 
 import java.util.Objects;
@@ -39,7 +39,7 @@ import java.util.UUID;
  * @param <P> the plugin type
  * @param <T> the command sender type
  */
-public abstract class SenderFactory<P extends LuckPermsPlugin, T> {
+public abstract class SenderFactory<P extends LuckPermsPlugin, T> implements AutoCloseable {
     private final P plugin;
 
     public SenderFactory(P plugin) {
@@ -54,8 +54,6 @@ public abstract class SenderFactory<P extends LuckPermsPlugin, T> {
 
     protected abstract String getName(T sender);
 
-    protected abstract void sendMessage(T sender, String message);
-
     protected abstract void sendMessage(T sender, Component message);
 
     protected abstract Tristate getPermissionValue(T sender, String node);
@@ -67,5 +65,10 @@ public abstract class SenderFactory<P extends LuckPermsPlugin, T> {
     public final Sender wrap(T sender) {
         Objects.requireNonNull(sender, "sender");
         return new AbstractSender<>(this.plugin, this, sender);
+    }
+
+    @Override
+    public void close() {
+
     }
 }

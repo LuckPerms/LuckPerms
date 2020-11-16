@@ -28,13 +28,13 @@ package me.lucko.luckperms.common.commands.misc;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -42,21 +42,14 @@ import me.lucko.luckperms.common.verbose.InvalidFilterException;
 import me.lucko.luckperms.common.verbose.VerboseFilter;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.VerboseListener;
-import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
-
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VerboseCommand extends SingleCommand {
-    public VerboseCommand(LocaleManager locale) {
-        super(CommandSpec.VERBOSE.localize(locale), "Verbose", CommandPermission.VERBOSE, Predicates.is(0));
+    public VerboseCommand() {
+        super(CommandSpec.VERBOSE, "Verbose", CommandPermission.VERBOSE, Predicates.is(0));
     }
 
     @Override
@@ -135,13 +128,13 @@ public class VerboseCommand extends SingleCommand {
             verboseHandler.registerListener(sender, compiledFilter, notify);
 
             if (notify) {
-                if (!filter.equals("")) {
+                if (!filter.isEmpty()) {
                     Message.VERBOSE_ON_QUERY.send(sender, filter);
                 } else {
                     Message.VERBOSE_ON.send(sender);
                 }
             } else {
-                if (!filter.equals("")) {
+                if (!filter.isEmpty()) {
                     Message.VERBOSE_RECORDING_ON_QUERY.send(sender, filter);
                 } else {
                     Message.VERBOSE_RECORDING_ON.send(sender);
@@ -167,21 +160,13 @@ public class VerboseCommand extends SingleCommand {
                         Message.GENERIC_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
                         return CommandResult.STATE_ERROR;
                     } catch (IOException e) {
-                        new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
+                        plugin.getLogger().warn("Error uploading data to bytebin", e);
                         Message.GENERIC_HTTP_UNKNOWN_FAILURE.send(sender);
                         return CommandResult.STATE_ERROR;
                     }
 
                     String url = plugin.getConfiguration().get(ConfigKeys.VERBOSE_VIEWER_URL_PATTERN) + id;
-
-                    Message.VERBOSE_RESULTS_URL.send(sender);
-
-                    Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                            .clickEvent(ClickEvent.openUrl(url))
-                            .hoverEvent(HoverEvent.showText(TextComponent.of("Click to open the results page.").color(TextColor.GRAY)))
-                            .build();
-
-                    sender.sendMessage(message);
+                    Message.VERBOSE_RESULTS_URL.send(sender, url);
                     return CommandResult.SUCCESS;
                 }
             } else {

@@ -42,6 +42,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -282,9 +283,14 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public @Nullable String identifyClassLoader(ClassLoader classLoader) {
-        if (classLoader instanceof org.bukkit.plugin.java.PluginClassLoader) {
-            return ((org.bukkit.plugin.java.PluginClassLoader) classLoader).getPlugin().getName();
+    public @Nullable String identifyClassLoader(ClassLoader classLoader) throws ReflectiveOperationException {
+        Class<?> pluginClassLoaderClass = Class.forName("org.bukkit.plugin.java.PluginClassLoader");
+        if (pluginClassLoaderClass.isInstance(classLoader)) {
+            Method getPluginMethod = pluginClassLoaderClass.getDeclaredMethod("getPlugin");
+            getPluginMethod.setAccessible(true);
+
+            JavaPlugin plugin = (JavaPlugin) getPluginMethod.invoke(classLoader);
+            return plugin.getName();
         }
         return null;
     }

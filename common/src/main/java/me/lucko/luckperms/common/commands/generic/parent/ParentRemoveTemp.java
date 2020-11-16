@@ -31,22 +31,20 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -56,8 +54,8 @@ import java.time.Duration;
 import java.util.List;
 
 public class ParentRemoveTemp extends GenericChildCommand {
-    public ParentRemoveTemp(LocaleManager locale) {
-        super(CommandSpec.PARENT_REMOVE_TEMP.localize(locale), "removetemp", CommandPermission.USER_PARENT_REMOVE_TEMP, CommandPermission.GROUP_PARENT_REMOVE_TEMP, Predicates.is(0));
+    public ParentRemoveTemp() {
+        super(CommandSpec.PARENT_REMOVE_TEMP, "removetemp", CommandPermission.USER_PARENT_REMOVE_TEMP, CommandPermission.GROUP_PARENT_REMOVE_TEMP, Predicates.is(0));
     }
 
     @Override
@@ -85,19 +83,13 @@ public class ParentRemoveTemp extends GenericChildCommand {
             Node mergedNode = result.getMergedNode();
             //noinspection ConstantConditions
             if (mergedNode != null) {
-                Message.UNSET_TEMP_INHERIT_SUBTRACT_SUCCESS.send(sender,
-                        target.getFormattedDisplayName(),
-                        groupName,
-                        DurationFormatter.LONG.format(mergedNode.getExpiryDuration()),
-                        MessageUtils.contextSetToString(plugin.getLocaleManager(), context),
-                        DurationFormatter.LONG.format(duration)
-                );
+                Message.UNSET_TEMP_INHERIT_SUBTRACT_SUCCESS.send(sender, target, Component.text(groupName), mergedNode.getExpiryDuration(), context, duration);
 
                 LoggedAction.build().source(sender).target(target)
                         .description("parent", "removetemp", groupName, duration, context)
                         .build().submit(plugin, sender);
             } else {
-                Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, target.getFormattedDisplayName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+                Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, target, Component.text(groupName), context);
 
                 LoggedAction.build().source(sender).target(target)
                         .description("parent", "removetemp", groupName, context)
@@ -107,7 +99,7 @@ public class ParentRemoveTemp extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_TEMP_INHERIT.send(sender, target.getFormattedDisplayName(), groupName, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOES_NOT_TEMP_INHERIT.send(sender, target, Component.text(groupName), context);
             return CommandResult.STATE_ERROR;
         }
     }

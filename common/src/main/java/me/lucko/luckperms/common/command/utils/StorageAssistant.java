@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.command.utils;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -77,8 +77,8 @@ public final class StorageAssistant {
         try {
             plugin.getStorage().saveUser(user).get();
         } catch (Exception e) {
-            e.printStackTrace();
-            Message.USER_SAVE_ERROR.send(sender, user.getFormattedDisplayName());
+            plugin.getLogger().warn("Error whilst saving user", e);
+            Message.USER_SAVE_ERROR.send(sender, user);
             return;
         }
 
@@ -92,8 +92,8 @@ public final class StorageAssistant {
         try {
             plugin.getStorage().saveGroup(group).get();
         } catch (Exception e) {
-            e.printStackTrace();
-            Message.GROUP_SAVE_ERROR.send(sender, group.getFormattedDisplayName());
+            plugin.getLogger().warn("Error whilst saving group", e);
+            Message.GROUP_SAVE_ERROR.send(sender, group);
             return;
         }
 
@@ -110,7 +110,7 @@ public final class StorageAssistant {
         try {
             plugin.getStorage().saveTrack(track).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst saving track", e);
             Message.TRACK_SAVE_ERROR.send(sender, track.getName());
             return;
         }

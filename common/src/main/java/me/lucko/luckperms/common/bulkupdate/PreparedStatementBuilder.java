@@ -45,7 +45,13 @@ public class PreparedStatementBuilder {
         return this;
     }
 
+    public PreparedStatementBuilder append(char c) {
+        this.sb.append(c);
+        return this;
+    }
+
     public PreparedStatementBuilder variable(String variable) {
+        this.sb.append('?');
         this.variables.add(variable);
         return this;
     }

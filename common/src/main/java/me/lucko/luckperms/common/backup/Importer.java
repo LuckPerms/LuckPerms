@@ -31,7 +31,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -134,7 +134,7 @@ public class Importer implements Runnable {
     @Override
     public void run() {
         long startTime = System.currentTimeMillis();
-        this.notify.forEach(s -> Message.IMPORT_START.send(s));
+        this.notify.forEach(Message.IMPORT_START::send);
 
         // start an update task in the background - we'll #join this later
         CompletableFuture<Void> updateTask = CompletableFuture.runAsync(() -> this.plugin.getSyncTaskBuffer().requestDirectly());
@@ -242,7 +242,7 @@ public class Importer implements Runnable {
 
     private void sendProgress(int processedCount, int total) {
         int percent = (processedCount * 100) / total;
-        this.notify.forEach(s -> Message.IMPORT_PROGRESS.send(s, percent, processedCount, total, 0));
+        this.notify.forEach(s -> Message.IMPORT_PROGRESS.send(s, percent, processedCount, total));
     }
 
 }

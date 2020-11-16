@@ -26,11 +26,11 @@
 package me.lucko.luckperms.common.command.abstraction;
 
 import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -52,7 +52,7 @@ public class GenericParentCommand<T extends PermissionHolder> extends ChildComma
 
     private final HolderType type;
 
-    public GenericParentCommand(LocalizedCommandSpec spec, String name, HolderType type, List<GenericChildCommand> children) {
+    public GenericParentCommand(CommandSpec spec, String name, HolderType type, List<GenericChildCommand> children) {
         super(spec, name, null, Predicates.alwaysFalse());
         this.children = children;
         this.type = type;

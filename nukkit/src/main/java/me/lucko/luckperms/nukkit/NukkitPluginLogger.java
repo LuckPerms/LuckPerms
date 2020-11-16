@@ -47,7 +47,17 @@ public class NukkitPluginLogger implements PluginLogger {
     }
 
     @Override
+    public void warn(String s, Throwable t) {
+        this.logger.warning(s, t);
+    }
+
+    @Override
     public void severe(String s) {
         this.logger.error(s);
+    }
+
+    @Override
+    public void severe(String s, Throwable t) {
+        this.logger.error(s, t);
     }
 }

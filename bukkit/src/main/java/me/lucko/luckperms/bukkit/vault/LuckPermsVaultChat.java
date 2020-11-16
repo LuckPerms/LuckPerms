@@ -273,7 +273,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
 
     private QueryOptions createQueryOptionsForWorldSet(String world) {
         ImmutableContextSet.Builder context = new ImmutableContextSetImpl.BuilderImpl();
-        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+        if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
             context.add(DefaultContextKeys.WORLD_KEY, world.toLowerCase());
         }
         context.add(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());

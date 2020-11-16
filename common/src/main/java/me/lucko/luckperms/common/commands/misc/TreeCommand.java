@@ -29,31 +29,24 @@ import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.treeview.TreeView;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.Uuids;
-import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
-
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
 
 import java.io.IOException;
 import java.util.UUID;
 
 public class TreeCommand extends SingleCommand {
-    public TreeCommand(LocaleManager locale) {
-        super(CommandSpec.TREE.localize(locale), "Tree", CommandPermission.TREE, Predicates.alwaysFalse());
+    public TreeCommand() {
+        super(CommandSpec.TREE, "Tree", CommandPermission.TREE, Predicates.alwaysFalse());
     }
 
     @Override
@@ -101,21 +94,13 @@ public class TreeCommand extends SingleCommand {
             Message.GENERIC_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
             return CommandResult.STATE_ERROR;
         } catch (IOException e) {
-            new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
+            plugin.getLogger().warn("Error uploading data to bytebin", e);
             Message.GENERIC_HTTP_UNKNOWN_FAILURE.send(sender);
             return CommandResult.STATE_ERROR;
         }
 
         String url = plugin.getConfiguration().get(ConfigKeys.TREE_VIEWER_URL_PATTERN) + id;
-
-        Message.TREE_URL.send(sender);
-
-        Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                .clickEvent(ClickEvent.openUrl(url))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("Click to open the tree view.").color(TextColor.GRAY)))
-                .build();
-
-        sender.sendMessage(message);
+        Message.TREE_URL.send(sender, url);
         return CommandResult.SUCCESS;
     }
 }

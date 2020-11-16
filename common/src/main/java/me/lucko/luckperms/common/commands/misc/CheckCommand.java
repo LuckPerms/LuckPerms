@@ -28,14 +28,12 @@ package me.lucko.luckperms.common.commands.misc;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -49,8 +47,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class CheckCommand extends SingleCommand {
-    public CheckCommand(LocaleManager locale) {
-        super(CommandSpec.CHECK.localize(locale), "Check", CommandPermission.CHECK, Predicates.not(2));
+    public CheckCommand() {
+        super(CommandSpec.CHECK, "Check", CommandPermission.CHECK, Predicates.not(2));
     }
 
     @Override
@@ -72,7 +70,7 @@ public class CheckCommand extends SingleCommand {
         }
 
         Tristate tristate = user.getCachedData().getPermissionData(user.getQueryOptions()).checkPermission(permission, PermissionCheckEvent.Origin.INTERNAL).result();
-        Message.CHECK_RESULT.send(sender, user.getFormattedDisplayName(), permission, MessageUtils.formatTristate(tristate));
+        Message.CHECK_RESULT.send(sender, user, permission, tristate);
         return CommandResult.SUCCESS;
     }
 

@@ -115,6 +115,12 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
+    public @NonNull CompletableFuture<Void> deletePlayerData(@NonNull UUID uniqueId) {
+        Objects.requireNonNull(uniqueId, "uniqueId");
+        return this.plugin.getStorage().deletePlayerData(uniqueId);
+    }
+
+    @Override
     public @NonNull CompletableFuture<Set<UUID>> getUniqueUsers() {
         return this.plugin.getStorage().getUniqueUsers();
     }

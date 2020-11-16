@@ -27,11 +27,13 @@ package me.lucko.luckperms.bungee.listeners;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
@@ -91,13 +93,13 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
                 recordConnection(c.getUniqueId());
                 this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(c.getUniqueId(), c.getName(), user);
             } catch (Exception ex) {
-                this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName());
-                ex.printStackTrace();
+                this.plugin.getLogger().severe("Exception occurred whilst loading data for " + c.getUniqueId() + " - " + c.getName(), ex);
 
                 // there was some error loading
                 if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                     // cancel the login attempt
-                    e.setCancelReason(TextComponent.fromLegacyText(Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager())));
+                    Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
+                    e.setCancelReason(BungeeComponentSerializer.get().serialize(reason));
                     e.setCancelled(true);
                 }
                 this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(c.getUniqueId(), c.getName(), null);
@@ -128,7 +130,8 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
 
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                 // disconnect the user
-                e.getPlayer().disconnect(TextComponent.fromLegacyText(Message.LOADING_STATE_ERROR.asString(this.plugin.getLocaleManager())));
+                Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
+                e.getPlayer().disconnect(BungeeComponentSerializer.get().serialize(reason));
             } else {
                 // just send a message
                 this.plugin.getBootstrap().getProxy().getScheduler().schedule(this.plugin.getBootstrap(), () -> {
@@ -136,7 +139,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
                         return;
                     }
 
-                    player.sendMessage(TextComponent.fromLegacyText(Message.LOADING_STATE_ERROR.asString(this.plugin.getLocaleManager())));
+                    Message.LOADING_STATE_ERROR.send(this.plugin.getSenderFactory().wrap(player));
                 }, 1, TimeUnit.SECONDS);
             }
         }

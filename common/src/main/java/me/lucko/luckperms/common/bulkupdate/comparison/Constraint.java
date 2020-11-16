@@ -55,9 +55,9 @@ public class Constraint {
 
     public void appendSql(PreparedStatementBuilder builder, String field) {
         // e.g. field LIKE ?
-        builder.append(field + " ");
+        builder.append(field).append(' ');
         this.comparison.appendSql(builder);
-        builder.append(" ?");
+        builder.append(' ');
         builder.variable(this.expressionValue);
     }
 

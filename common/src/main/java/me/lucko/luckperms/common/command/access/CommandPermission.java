@@ -47,6 +47,7 @@ public enum CommandPermission {
     BULK_UPDATE("bulkupdate", Type.NONE),
     APPLY_EDITS("applyedits", Type.NONE),
     MIGRATION("migration", Type.NONE),
+    TRANSLATIONS("translations", Type.NONE),
 
     CREATE_GROUP("creategroup", Type.NONE),
     DELETE_GROUP("deletegroup", Type.NONE),

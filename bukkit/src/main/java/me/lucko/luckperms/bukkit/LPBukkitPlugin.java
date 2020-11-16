@@ -28,8 +28,8 @@ package me.lucko.luckperms.bukkit;
 import me.lucko.luckperms.bukkit.brigadier.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.calculator.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
-import me.lucko.luckperms.bukkit.context.WorldCalculator;
 import me.lucko.luckperms.bukkit.floodgate.BukkitFloodgateManager;
+import me.lucko.luckperms.bukkit.context.BukkitPlayerCalculator;
 import me.lucko.luckperms.bukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleInjector;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleMonitoringInjector;
@@ -120,7 +120,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
-        dependencies.add(Dependency.TEXT_ADAPTER_BUKKIT);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM_BUKKIT);
         if (isBrigadierSupported()) {
             dependencies.add(Dependency.COMMODORE);
         }
@@ -161,7 +162,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         this.commandManager.register();
 
         // setup brigadier
-        if (isBrigadierSupported()) {
+        if (isBrigadierSupported() && getConfiguration().get(ConfigKeys.REGISTER_COMMAND_LIST_DATA)) {
             try {
                 LuckPermsBrigadier.register(this, command);
             } catch (Exception e) {
@@ -188,9 +189,9 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new BukkitContextManager(this);
 
-        WorldCalculator worldCalculator = new WorldCalculator(this);
-        this.bootstrap.getServer().getPluginManager().registerEvents(worldCalculator, this.bootstrap);
-        this.contextManager.registerCalculator(worldCalculator);
+        BukkitPlayerCalculator playerCalculator = new BukkitPlayerCalculator(this);
+        this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap);
+        this.contextManager.registerCalculator(playerCalculator);
     }
 
     @Override
@@ -249,8 +250,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             }
         } catch (Exception e) {
             this.vaultHookManager = null;
-            getLogger().severe("Error occurred whilst hooking into Vault.");
-            e.printStackTrace();
+            getLogger().severe("Error occurred whilst hooking into Vault.", e);
         }
     }
 
@@ -309,12 +309,14 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
                                 LuckPermsPermissible lpPermissible = new LuckPermsPermissible(player, user, this);
                                 PermissibleInjector.inject(player, lpPermissible);
                             } catch (Throwable t) {
-                                t.printStackTrace();
+                                getLogger().severe("Exception thrown when setting up permissions for " +
+                                        player.getUniqueId() + " - " + player.getName(), t);
                             }
                         });
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    getLogger().severe("Exception occurred whilst loading data for " +
+                            player.getUniqueId() + " - " + player.getName(), e);
                 }
             });
         }
@@ -327,7 +329,8 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
             try {
                 PermissibleInjector.uninject(player, false);
             } catch (Exception e) {
-                e.printStackTrace();
+                getLogger().severe("Exception thrown when unloading permissions from " +
+                        player.getUniqueId() + " - " + player.getName(), e);
             }
 
             if (getConfiguration().get(ConfigKeys.AUTO_OP)) {

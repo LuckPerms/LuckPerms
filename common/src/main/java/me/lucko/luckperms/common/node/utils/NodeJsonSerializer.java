@@ -61,7 +61,7 @@ public class NodeJsonSerializer {
             }
 
             if (!node.getContexts().isEmpty()) {
-                attributes.add("context", ContextSetJsonSerializer.serializeContextSet(node.getContexts()));
+                attributes.add("context", ContextSetJsonSerializer.serialize(node.getContexts()));
             }
 
             arr.add(attributes);
@@ -84,7 +84,7 @@ public class NodeJsonSerializer {
             }
 
             if (attributes.has("context")) {
-                builder.context(ContextSetJsonSerializer.deserializeContextSet(attributes.get("context")));
+                builder.context(ContextSetJsonSerializer.deserialize(attributes.get("context")));
             }
 
             nodes.add(builder.build());

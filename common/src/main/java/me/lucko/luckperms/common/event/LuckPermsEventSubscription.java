@@ -94,8 +94,7 @@ public class LuckPermsEventSubscription<T extends LuckPermsEvent> implements Eve
         try {
             this.consumer.accept(event);
         } catch (Throwable t) {
-            this.eventBus.getPlugin().getLogger().warn("Unable to pass event " + event.getEventType().getSimpleName() + " to handler " + this.consumer.getClass().getName());
-            t.printStackTrace();
+            this.eventBus.getPlugin().getLogger().warn("Unable to pass event " + event.getEventType().getSimpleName() + " to handler " + this.consumer.getClass().getName(), t);
         }
     }
 

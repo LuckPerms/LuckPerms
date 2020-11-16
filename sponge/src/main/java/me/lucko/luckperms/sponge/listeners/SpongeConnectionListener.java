@@ -26,17 +26,20 @@
 package me.lucko.luckperms.sponge.listeners;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.spongeapi.SpongeComponentSerializer;
 
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.Collections;
@@ -90,15 +93,14 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
             recordConnection(profile.getUniqueId());
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(profile.getUniqueId(), username, user);
         } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + profile.getUniqueId() + " - " + profile.getName());
-            ex.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + profile.getUniqueId() + " - " + profile.getName(), ex);
 
             this.deniedAsyncLogin.add(profile.getUniqueId());
 
             e.setCancelled(true);
             e.setMessageCancelled(false);
-            //noinspection deprecation
-            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager())));
+            Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
+            e.setMessage(SpongeComponentSerializer.get().serialize(reason));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(profile.getUniqueId(), username, null);
         }
     }
@@ -151,8 +153,8 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
 
             e.setCancelled(true);
             e.setMessageCancelled(false);
-            //noinspection deprecation
-            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_STATE_ERROR.asString(this.plugin.getLocaleManager())));
+            Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
+            e.setMessage(SpongeComponentSerializer.get().serialize(reason));
         }
     }
 

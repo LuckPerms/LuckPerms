@@ -339,7 +339,7 @@ public class LoggedAction implements Action {
                         parts.add(context.getKey() + "=" + context.getValue());
                     }
                 } else if (o instanceof Duration) {
-                    parts.add(DurationFormatter.CONCISE.format((Duration) o));
+                    parts.add(DurationFormatter.CONCISE.formatString((Duration) o));
                 } else {
                     parts.add(String.valueOf(o));
                 }

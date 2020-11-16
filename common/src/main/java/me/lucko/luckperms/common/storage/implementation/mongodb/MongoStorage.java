@@ -40,7 +40,9 @@ import com.mongodb.client.model.ReplaceOptions;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -54,6 +56,8 @@ import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.Iterators;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSet;
@@ -141,8 +145,8 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public Map<String, String> getMeta() {
-        Map<String, String> meta = new LinkedHashMap<>();
+    public Map<Component, Component> getMeta() {
+        Map<Component, Component> meta = new LinkedHashMap<>();
         boolean success = true;
 
         long start = System.currentTimeMillis();
@@ -154,11 +158,15 @@ public class MongoStorage implements StorageImplementation {
         long duration = System.currentTimeMillis() - start;
 
         if (success) {
-            meta.put("Ping", "&a" + duration + "ms");
-            meta.put("Connected", "true");
-        } else {
-            meta.put("Connected", "false");
+            meta.put(
+                    Component.translatable("luckperms.command.info.storage.meta.ping-key"),
+                    Component.text(duration + "ms", NamedTextColor.GREEN)
+            );
         }
+        meta.put(
+                Component.translatable("luckperms.command.info.storage.meta.connected-key"),
+                Message.formatBoolean(success)
+        );
 
         return meta;
     }
@@ -243,6 +251,8 @@ public class MongoStorage implements StorageImplementation {
 
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) {
+        BulkUpdateStatistics stats = bulkUpdate.getStatistics();
+
         if (bulkUpdate.getDataType().isIncludingUsers()) {
             MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
             try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -255,6 +265,11 @@ public class MongoStorage implements StorageImplementation {
                             .map(bulkUpdate::apply)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toSet());
+
+                    if (bulkUpdate.isTrackingStatistics() && !results.isEmpty()) {
+                        stats.incrementAffectedUsers();
+                        stats.incrementAffectedNodesBy(results.size());
+                    }
 
                     if (!nodes.equals(results)) {
                         List<Document> newNodes = results.stream()
@@ -280,6 +295,11 @@ public class MongoStorage implements StorageImplementation {
                             .map(bulkUpdate::apply)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toSet());
+
+                    if (bulkUpdate.isTrackingStatistics() && !results.isEmpty()) {
+                        stats.incrementAffectedGroups();
+                        stats.incrementAffectedNodesBy(results.size());
+                    }
 
                     if (!nodes.equals(results)) {
                         List<Document> newNodes = results.stream()
@@ -616,6 +636,12 @@ public class MongoStorage implements StorageImplementation {
         }
 
         return result;
+    }
+
+    @Override
+    public void deletePlayerData(UUID uniqueId) {
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
+        c.deleteMany(Filters.eq("_id", uniqueId));
     }
 
     @Override

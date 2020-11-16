@@ -28,11 +28,10 @@ package me.lucko.luckperms.bukkit.migration;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -70,8 +69,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationZPermissions extends ChildCommand<Object> {
-    public MigrationZPermissions(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_COMMAND.localize(locale), "zpermissions", CommandPermission.MIGRATION, Predicates.alwaysFalse());
+    public MigrationZPermissions() {
+        super(CommandSpec.MIGRATION_COMMAND, "zpermissions", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override
@@ -202,7 +201,7 @@ public class MigrationZPermissions extends ChildCommand<Object> {
         for (Entry e : entity.getPermissions()) {
             if (e.getPermission().isEmpty()) continue;
 
-            if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
+            if (e.getWorld() != null && !e.getWorld().getName().isEmpty()) {
                 holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).withContext(DefaultContextKeys.WORLD_KEY, e.getWorld().getName()).build(), true);
             } else {
                 holder.setNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(e.getPermission()).value(e.isValue()).build(), true);

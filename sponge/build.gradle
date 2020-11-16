@@ -25,7 +25,7 @@ dependencies {
         exclude(module: 'configurate-gson')
         exclude(module: 'configurate-yaml')
     }
-    compileOnly 'net.kyori:text-adapter-spongeapi:3.0.4'
+    compileOnly 'me.lucko:adventure-platform-spongeapi:4.0.0' // re: this artifact - see note in common/build.gradle
 }
 
 blossom {
@@ -41,7 +41,7 @@ shadowJar {
         include(dependency('me.lucko.luckperms:.*'))
     }
 
-    relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
+    relocate 'net.kyori.adventure', 'me.lucko.luckperms.lib.adventure'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
     relocate 'okio', 'me.lucko.luckperms.lib.okio'

@@ -68,11 +68,11 @@ public class ContextsFile {
             }
 
             if (data.has("static-contexts")) {
-                this.staticContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).immutableCopy();
+                this.staticContexts = ContextSetJsonSerializer.deserialize(data.get("static-contexts").getAsJsonObject()).immutableCopy();
             }
 
             if (data.has("default-contexts")) {
-                this.defaultContexts = ContextSetJsonSerializer.deserializeContextSet(data.get("default-contexts").getAsJsonObject()).immutableCopy();
+                this.defaultContexts = ContextSetJsonSerializer.deserialize(data.get("default-contexts").getAsJsonObject()).immutableCopy();
             }
 
         } catch (IOException e) {
@@ -85,8 +85,8 @@ public class ContextsFile {
 
         try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             JsonObject data = new JsonObject();
-            data.add("static-contexts", ContextSetJsonSerializer.serializeContextSet(this.staticContexts));
-            data.add("default-contexts", ContextSetJsonSerializer.serializeContextSet(this.defaultContexts));
+            data.add("static-contexts", ContextSetJsonSerializer.serialize(this.staticContexts));
+            data.add("default-contexts", ContextSetJsonSerializer.serialize(this.defaultContexts));
 
             new GsonBuilder().setPrettyPrinting().create().toJson(data, writer);
             writer.flush();

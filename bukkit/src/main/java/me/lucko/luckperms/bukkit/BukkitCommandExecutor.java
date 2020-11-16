@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.sender.Sender;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
@@ -48,7 +47,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
 
-public class BukkitCommandExecutor extends CommandManager implements CommandExecutor, TabExecutor, Listener {
+public class BukkitCommandExecutor extends CommandManager implements TabExecutor, Listener {
     private static final boolean SELECT_ENTITIES_SUPPORTED;
 
     static {
@@ -144,8 +143,7 @@ public class BukkitCommandExecutor extends CommandManager implements CommandExec
                         .map(e -> ((Player) e))
                         .collect(Collectors.toList());
             } catch (IllegalArgumentException e) {
-                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + sender + " executing " + args);
-                e.printStackTrace();
+                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + sender + " executing " + args, e);
                 continue;
             }
 

@@ -27,28 +27,41 @@ package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.common.command.utils.ArgumentException;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.util.Tristate;
 
+import java.util.Collection;
 import java.util.Map;
 
 public final class SpongeCommandUtils {
     private SpongeCommandUtils() {}
 
+    public static void sendPrefixed(Sender sender, String message) {
+        sender.sendMessage(Message.prefixed(LegacyComponentSerializer.legacyAmpersand().deserialize(message)));
+    }
+
     public static Tristate parseTristate(int index, ArgumentList args) throws ArgumentException {
         String s = args.get(index).toLowerCase();
-        if (s.equals("1") || s.equals("true") || s.equals("t")) {
-            return Tristate.TRUE;
-        }
-        if (s.equals("0") || s.equals("null") || s.equals("none") || s.equals("undefined") || s.equals("undef")) {
-            return Tristate.UNDEFINED;
-        }
-        if (s.equals("-1") || s.equals("false") || s.equals("f")) {
-            return Tristate.FALSE;
+        switch (s) {
+            case "1":
+            case "true":
+            case "t":
+                return Tristate.TRUE;
+            case "0":
+            case "null":
+            case "none":
+            case "undefined":
+            case "undef":
+                return Tristate.UNDEFINED;
+            case "-1":
+            case "false":
+            case "f":
+                return Tristate.FALSE;
         }
         throw new ArgumentException.DetailedUsage();
     }
@@ -88,8 +101,12 @@ public final class SpongeCommandUtils {
         return sb.toString();
     }
 
-    public static String contextToString(ContextSet set, LocaleManager localeManager) {
-        return MessageUtils.contextSetToString(localeManager, set);
+    public static String toCommaSep(Collection<String> strings) {
+        return LegacyComponentSerializer.legacyAmpersand().serialize(Message.formatStringList(strings));
+    }
+
+    public static String contextToString(ContextSet set) {
+        return LegacyComponentSerializer.legacyAmpersand().serialize(Message.formatContextSet(set));
     }
 
 }

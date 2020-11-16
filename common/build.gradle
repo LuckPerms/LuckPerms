@@ -1,17 +1,14 @@
 dependencies {
     compile project(':api')
-
     compile 'org.checkerframework:checker-qual:2.5.5'
-    compile('net.kyori:text-api:3.0.4') {
+
+    // This is a special re-packaged version of 'net.kyori:adventure-*' for our own use.
+    // Don't use it in other projects, you want the net.kyori version instead.
+    // See here for more info: https://github.com/KyoriPowered/adventure
+    compile('me.lucko:adventure-api:4.0.0') {
         exclude(module: 'checker-qual')
     }
-    compile('net.kyori:text-serializer-legacy:3.0.4') {
-        exclude(module: 'text-api')
-    }
-    compile('net.kyori:text-serializer-gson:3.0.4') {
-        exclude(module: 'text-api')
-        exclude(module: 'gson')
-    }
+
     compile('net.kyori:event-api:3.0.0') {
         exclude(module: 'checker-qual')
         exclude(module: 'guava')

@@ -29,22 +29,21 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.abstraction.GenericParentCommand;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 
 public class CommandPermission<T extends PermissionHolder> extends GenericParentCommand<T> {
-    public CommandPermission(LocaleManager locale, HolderType type) {
-        super(CommandSpec.PERMISSION.localize(locale), "Permission", type, ImmutableList.<GenericChildCommand>builder()
-                .add(new PermissionInfo(locale))
-                .add(new PermissionSet(locale))
-                .add(new PermissionUnset(locale))
-                .add(new PermissionSetTemp(locale))
-                .add(new PermissionUnsetTemp(locale))
-                .add(new PermissionCheck(locale))
-                .add(new PermissionCheckInherits(locale))
-                .add(new PermissionClear(locale))
+    public CommandPermission(HolderType type) {
+        super(CommandSpec.PERMISSION, "Permission", type, ImmutableList.<GenericChildCommand>builder()
+                .add(new PermissionInfo())
+                .add(new PermissionSet())
+                .add(new PermissionUnset())
+                .add(new PermissionSetTemp())
+                .add(new PermissionUnsetTemp())
+                .add(new PermissionCheck())
+                .add(new PermissionCheckInherits())
+                .add(new PermissionClear())
                 .build());
     }
 }

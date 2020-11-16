@@ -40,13 +40,14 @@ import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.floodgate.FloodgateManager;
+import me.lucko.luckperms.common.http.BytebinClient;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.TranslationManager;
+import me.lucko.luckperms.common.locale.TranslationRepository;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
-import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
@@ -54,7 +55,6 @@ import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.web.BytebinClient;
 
 import net.luckperms.api.LuckPerms;
 
@@ -73,14 +73,15 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
     // init during load
     private DependencyManager dependencyManager;
+    private TranslationManager translationManager;
 
     // init during enable
     private VerboseHandler verboseHandler;
     private PermissionRegistry permissionRegistry;
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
-    private LocaleManager localeManager;
     private BytebinClient bytebin;
+    private TranslationRepository translationRepository;
     private FileWatcher fileWatcher = null;
     private Storage storage;
     private InternalMessagingService messagingService = null;
@@ -99,13 +100,16 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.dependencyManager = new DependencyManager(this);
         this.dependencyManager.loadDependencies(getGlobalDependencies());
 
-        // load the sender factory instance
-        setupSenderFactory();
+        this.translationManager = new TranslationManager(this);
+        this.translationManager.reload();
     }
 
     public final void enable() {
+        // load the sender factory instance
+        setupSenderFactory();
+
         // send the startup banner
-        displayBanner(getConsoleSender());
+        Message.STARTUP_BANNER.send(getConsoleSender(), getBootstrap());
 
         // load some utilities early
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
@@ -116,16 +120,16 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         getLogger().info("Loading configuration...");
         this.configuration = new LuckPermsConfiguration(this, provideConfigurationAdapter());
 
-        // load locale
-        this.localeManager = new LocaleManager();
-        this.localeManager.tryLoad(this, getBootstrap().getConfigDirectory().resolve("lang.yml"));
-
         // setup a bytebin instance
         OkHttpClient httpClient = new OkHttpClient.Builder()
                 .callTimeout(15, TimeUnit.SECONDS)
                 .build();
 
         this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+
+        // init translation repo and update bundle files
+        this.translationRepository = new TranslationRepository(this);
+        this.translationRepository.scheduleRefresh();
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
@@ -143,8 +147,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
             } catch (Throwable e) {
                 // catch throwable here, seems some JVMs throw UnsatisfiedLinkError when trying
                 // to create a watch service. see: https://github.com/lucko/LuckPerms/issues/2066
-                getLogger().warn("Error occurred whilst trying to create a file watcher:");
-                e.printStackTrace();
+                getLogger().warn("Error occurred whilst trying to create a file watcher:", e);
             }
         }
 
@@ -252,9 +255,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
     protected Set<Dependency> getGlobalDependencies() {
         return EnumSet.of(
-                Dependency.TEXT,
-                Dependency.TEXT_SERIALIZER_GSON,
-                Dependency.TEXT_SERIALIZER_LEGACY,
+                Dependency.ADVENTURE,
                 Dependency.CAFFEINE,
                 Dependency.OKIO,
                 Dependency.OKHTTP,
@@ -297,6 +298,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public TranslationManager getTranslationManager() {
+        return this.translationManager;
+    }
+
+    @Override
     public VerboseHandler getVerboseHandler() {
         return this.verboseHandler;
     }
@@ -317,13 +323,13 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public LocaleManager getLocaleManager() {
-        return this.localeManager;
+    public BytebinClient getBytebin() {
+        return this.bytebin;
     }
 
     @Override
-    public BytebinClient getBytebin() {
-        return this.bytebin;
+    public TranslationRepository getTranslationRepository() {
+        return this.translationRepository;
     }
 
     @Override
@@ -371,23 +377,16 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         return this.eventDispatcher;
     }
 
-    @Override
-    public Optional<FloodgateManager> getFloodgateManager() {
-        return Optional.empty();
-    }
-
-    private void displayBanner(Sender sender) {
-        sender.sendMessage(Message.colorize("&b       &3 __    "));
-        sender.sendMessage(Message.colorize("&b  |    &3|__)   " + "&2" + getPluginName() + " &bv" + getBootstrap().getVersion()));
-        sender.sendMessage(Message.colorize("&b  |___ &3|      " + "&8Running on " + getBootstrap().getType().getFriendlyName() + " - " + getBootstrap().getServerBrand()));
-        sender.sendMessage("");
-    }
-
     public static String getPluginName() {
         LocalDate date = LocalDate.now();
         if (date.getMonth() == Month.APRIL && date.getDayOfMonth() == 1) {
             return "LuckyPerms";
         }
         return "LuckPerms";
+    }
+
+    @Override
+    public Optional<FloodgateManager> getFloodgateManager() {
+        return Optional.empty();
     }
 }

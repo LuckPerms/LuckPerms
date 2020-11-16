@@ -31,9 +31,11 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.context.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
@@ -147,8 +149,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
     // used to report i/o exceptions which took place in a specific file
     protected RuntimeException reportException(String file, Exception ex) throws RuntimeException {
-        this.plugin.getLogger().warn("Exception thrown whilst performing i/o: " + file);
-        ex.printStackTrace();
+        this.plugin.getLogger().warn("Exception thrown whilst performing i/o: " + file, ex);
         Throwables.throwIfUnchecked(ex);
         throw new RuntimeException(ex);
     }
@@ -180,12 +181,28 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         return this.actionLogger.getLog();
     }
 
-    protected ConfigurationNode processBulkUpdate(BulkUpdate bulkUpdate, ConfigurationNode node) {
+    protected ConfigurationNode processBulkUpdate(BulkUpdate bulkUpdate, ConfigurationNode node, HolderType holderType) {
+        BulkUpdateStatistics stats = bulkUpdate.getStatistics();
+
         Set<Node> nodes = readNodes(node);
         Set<Node> results = nodes.stream()
                 .map(bulkUpdate::apply)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
+
+        if (bulkUpdate.isTrackingStatistics() && !results.isEmpty()) {
+            stats.incrementAffectedNodesBy(results.size());
+
+            switch (holderType) {
+                case USER:
+                    stats.incrementAffectedUsers();
+                    break;
+
+                case GROUP:
+                    stats.incrementAffectedGroups();
+                    break;
+            }
+        }
 
         if (nodes.equals(results)) {
             return null;
@@ -441,6 +458,11 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     @Override
     public PlayerSaveResult savePlayerData(UUID uniqueId, String username) {
         return this.uuidCache.addMapping(uniqueId, username);
+    }
+
+    @Override
+    public void deletePlayerData(UUID uniqueId) {
+        this.uuidCache.removeMapping(uniqueId);
     }
 
     @Override

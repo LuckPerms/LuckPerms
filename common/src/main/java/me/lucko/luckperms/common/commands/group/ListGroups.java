@@ -28,36 +28,28 @@ package me.lucko.luckperms.common.commands.group;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ListGroups extends SingleCommand {
-    public ListGroups(LocaleManager locale) {
-        super(CommandSpec.LIST_GROUPS.localize(locale), "ListGroups", CommandPermission.LIST_GROUPS, Predicates.alwaysFalse());
+    public ListGroups() {
+        super(CommandSpec.LIST_GROUPS, "ListGroups", CommandPermission.LIST_GROUPS, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
-
         try {
             plugin.getStorage().loadAllGroups().get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst loading groups", e);
             Message.GROUPS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }
@@ -70,27 +62,7 @@ public class ListGroups extends SingleCommand {
                 })
                 .forEach(group -> {
                     List<String> tracks = plugin.getTrackManager().getAll().values().stream().filter(t -> t.containsGroup(group)).map(Track::getName).collect(Collectors.toList());
-                    TextComponent component;
-
-                    if (tracks.isEmpty()) {
-                        component = Message.GROUPS_LIST_ENTRY.asComponent(plugin.getLocaleManager(),
-                                group.getFormattedDisplayName(),
-                                group.getWeight().orElse(0)
-                        );
-                    } else {
-                        component = Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asComponent(plugin.getLocaleManager(),
-                                group.getFormattedDisplayName(),
-                                group.getWeight().orElse(0),
-                                MessageUtils.toCommaSep(tracks)
-                        );
-                    }
-
-                    component = component.toBuilder().applyDeep(c -> {
-                        c.clickEvent(ClickEvent.runCommand("/" + label + " group " + group.getName() + " info"));
-                        c.hoverEvent(HoverEvent.showText(TextComponent.of("Click to view more info about " + group.getName() + ".").color(TextColor.GRAY)));
-                    }).build();
-
-                    sender.sendMessage(component);
+                    Message.GROUPS_LIST_ENTRY.send(sender, group, group.getWeight().orElse(0), tracks);
                 });
 
         return CommandResult.SUCCESS;

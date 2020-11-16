@@ -31,22 +31,19 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
@@ -58,8 +55,8 @@ import java.time.Duration;
 import java.util.List;
 
 public class ParentAddTemp extends GenericChildCommand {
-    public ParentAddTemp(LocaleManager locale) {
-        super(CommandSpec.PARENT_ADD_TEMP.localize(locale), "addtemp", CommandPermission.USER_PARENT_ADD_TEMP, CommandPermission.GROUP_PARENT_ADD_TEMP, Predicates.inRange(0, 1));
+    public ParentAddTemp() {
+        super(CommandSpec.PARENT_ADD_TEMP, "addtemp", CommandPermission.USER_PARENT_ADD_TEMP, CommandPermission.GROUP_PARENT_ADD_TEMP, Predicates.inRange(0, 1));
     }
 
     @Override
@@ -88,7 +85,7 @@ public class ParentAddTemp extends GenericChildCommand {
         }
 
         if (group.getName().equalsIgnoreCase(target.getObjectName())) {
-            Message.ALREADY_TEMP_INHERITS.send(sender, target.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_TEMP_INHERITS.send(sender, target, group, context);
             return CommandResult.STATE_ERROR;
         }
 
@@ -96,7 +93,7 @@ public class ParentAddTemp extends GenericChildCommand {
 
         if (result.getResult().wasSuccessful()) {
             duration = result.getMergedNode().getExpiryDuration();
-            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, target.getFormattedDisplayName(), group.getFormattedDisplayName(), DurationFormatter.LONG.format(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, target, group, duration, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("parent", "addtemp", group.getName(), duration, context)
@@ -105,7 +102,7 @@ public class ParentAddTemp extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_TEMP_INHERITS.send(sender, target.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_TEMP_INHERITS.send(sender, target, group, context);
             return CommandResult.STATE_ERROR;
         }
     }

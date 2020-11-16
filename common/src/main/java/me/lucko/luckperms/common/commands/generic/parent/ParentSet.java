@@ -31,14 +31,12 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -56,8 +54,8 @@ import net.luckperms.api.node.NodeType;
 import java.util.List;
 
 public class ParentSet extends GenericChildCommand {
-    public ParentSet(LocaleManager locale) {
-        super(CommandSpec.PARENT_SET.localize(locale), "set", CommandPermission.USER_PARENT_SET, CommandPermission.GROUP_PARENT_SET, Predicates.is(0));
+    public ParentSet() {
+        super(CommandSpec.PARENT_SET, "set", CommandPermission.USER_PARENT_SET, CommandPermission.GROUP_PARENT_SET, Predicates.is(0));
     }
 
     @Override
@@ -89,7 +87,7 @@ public class ParentSet extends GenericChildCommand {
             ((User) target).getPrimaryGroup().setStoredValue(group.getName());
         }
 
-        Message.SET_PARENT_SUCCESS.send(sender, target.getFormattedDisplayName(), group.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+        Message.SET_PARENT_SUCCESS.send(sender, target, group, context);
 
         LoggedAction.build().source(sender).target(target)
                 .description("parent", "set", group.getName(), context)

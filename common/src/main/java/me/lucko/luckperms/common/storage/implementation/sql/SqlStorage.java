@@ -31,6 +31,7 @@ import com.google.gson.reflect.TypeToken;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.Group;
@@ -46,6 +47,7 @@ import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.model.data.DataType;
@@ -87,6 +89,7 @@ public class SqlStorage implements StorageImplementation {
     private static final String PLAYER_SELECT_USERNAME_BY_UUID = "SELECT username FROM '{prefix}players' WHERE uuid=? LIMIT 1";
     private static final String PLAYER_UPDATE_USERNAME_FOR_UUID = "UPDATE '{prefix}players' SET username=? WHERE uuid=?";
     private static final String PLAYER_INSERT = "INSERT INTO '{prefix}players' (uuid, username, primary_group) VALUES(?, ?, ?)";
+    private static final String PLAYER_DELETE = "DELETE FROM '{prefix}players' WHERE uuid=?";
     private static final String PLAYER_SELECT_ALL_UUIDS_BY_USERNAME = "SELECT uuid FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
     private static final String PLAYER_DELETE_ALL_UUIDS_BY_USERNAME = "DELETE FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
     private static final String PLAYER_SELECT_BY_UUID = "SELECT username, primary_group FROM '{prefix}players' WHERE uuid=?";
@@ -212,12 +215,12 @@ public class SqlStorage implements StorageImplementation {
         try {
             this.connectionFactory.shutdown();
         } catch (Exception e) {
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Exception whilst disabling SQLite storage", e);
         }
     }
 
     @Override
-    public Map<String, String> getMeta() {
+    public Map<Component, Component> getMeta() {
         return this.connectionFactory.getMeta();
     }
 
@@ -248,18 +251,60 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws SQLException {
+        BulkUpdateStatistics stats = bulkUpdate.getStatistics();
+
         try (Connection c = this.connectionFactory.getConnection()) {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
                 String table = this.statementProcessor.apply("{prefix}user_permissions");
                 try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
-                    ps.execute();
+
+                    if (bulkUpdate.isTrackingStatistics()) {
+                        PreparedStatementBuilder builder = new PreparedStatementBuilder();
+                        builder.append(USER_PERMISSIONS_SELECT_DISTINCT);
+                        bulkUpdate.appendConstraintsAsSql(builder);
+
+                        try (PreparedStatement lookup = builder.build(c, this.statementProcessor)) {
+                            try (ResultSet rs = lookup.executeQuery()) {
+                                Set<UUID> uuids = new HashSet<>();
+
+                                while (rs.next()) {
+                                    uuids.add(Uuids.fromString(rs.getString("uuid")));
+                                }
+                                uuids.remove(null);
+                                stats.incrementAffectedUsersBy(uuids.size());
+                            }
+                        }
+                        stats.incrementAffectedNodesBy(ps.executeUpdate());
+                    } else {
+                        ps.execute();
+                    }
                 }
             }
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
                 String table = this.statementProcessor.apply("{prefix}group_permissions");
                 try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
-                    ps.execute();
+
+                    if (bulkUpdate.isTrackingStatistics()) {
+                        PreparedStatementBuilder builder = new PreparedStatementBuilder();
+                        builder.append(GROUP_PERMISSIONS_SELECT_ALL);
+                        bulkUpdate.appendConstraintsAsSql(builder);
+
+                        try (PreparedStatement lookup = builder.build(c, this.statementProcessor)) {
+                            try (ResultSet rs = lookup.executeQuery()) {
+                                Set<String> groups = new HashSet<>();
+
+                                while (rs.next()) {
+                                    groups.add(rs.getString("name"));
+                                }
+                                groups.remove(null);
+                                stats.incrementAffectedGroupsBy(groups.size());
+                            }
+                        }
+                        stats.incrementAffectedNodesBy(ps.executeUpdate());
+                    } else {
+                        ps.execute();
+                    }
                 }
             }
         }
@@ -689,6 +734,16 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
+    public void deletePlayerData(UUID uniqueId) throws SQLException {
+        try (Connection c = this.connectionFactory.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_DELETE))) {
+                ps.setString(1, uniqueId.toString());
+                ps.execute();
+            }
+        }
+    }
+
+    @Override
     public UUID getPlayerUniqueId(String username) throws SQLException {
         username = username.toLowerCase();
         try (Connection c = this.connectionFactory.getConnection()) {
@@ -759,7 +814,7 @@ public class SqlStorage implements StorageImplementation {
         ps.setString(4, nd.getServer());
         ps.setString(5, nd.getWorld());
         ps.setLong(6, nd.getExpiry());
-        ps.setString(7, GsonProvider.normal().toJson(ContextSetJsonSerializer.serializeContextSet(nd.getContexts())));
+        ps.setString(7, GsonProvider.normal().toJson(ContextSetJsonSerializer.serialize(nd.getContexts())));
     }
 
     private static Set<SqlNode> getMissingFromRemote(Set<SqlNode> local, Set<SqlNode> remote) {

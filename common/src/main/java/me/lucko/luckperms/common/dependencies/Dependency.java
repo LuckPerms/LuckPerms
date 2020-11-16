@@ -60,47 +60,40 @@ public enum Dependency {
             "1RsiF3BiVztjlfTA+svDCuoDSGFuSpTZYHvUK8yBx8I="
     ),
 
-    TEXT(
-            "net{}kyori",
-            "text-api",
-            "3.0.4",
-            "qJCoD0fTnRhI0EpqdiLAT9QH5gIyY8aNw4Exe/gTWm0=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE(
+            "me{}lucko",
+            "adventure-api",
+            "4.0.1",
+            "6dKz0iM9MChLzU5MTLW5HSLFEmmNh/D9Bb6kzJvK/1E=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
-    TEXT_SERIALIZER_GSON(
-            "net{}kyori",
-            "text-serializer-gson",
-            "3.0.4",
-            "pes03k1/XKS9OpiK+xqVmk+lXSJIsCEkkg3g36PV65A=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE_PLATFORM(
+            "me{}lucko",
+            "adventure-platform-api",
+            "4.0.1",
+            "ie3rz49jg5HU04mWe/f6lXjHt6L+S2SQp/x6YFbhxsc=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
-    TEXT_SERIALIZER_LEGACY(
-            "net{}kyori",
-            "text-serializer-legacy",
-            "3.0.4",
-            "1ZYqzZ7zhnN2AyU/n/NeRQv0A9R01j/gX1Uq/nE02SI=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE_PLATFORM_BUKKIT(
+            "me{}lucko",
+            "adventure-platform-bukkit",
+            "4.0.1",
+            "dVbYfUJqmde8jeuTvknCL9hbzqxybal00TELTzQgLbk=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
-    TEXT_ADAPTER_BUKKIT(
-            "net{}kyori",
-            "text-adapter-bukkit",
-            "3.0.5",
-            "cXA/7PDtnWpd8l7H4AEhP/3Z/WRNiFhDSqKbqO/1+ig=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE_PLATFORM_BUNGEECORD(
+            "me{}lucko",
+            "adventure-platform-bungeecord",
+            "4.0.1",
+            "4phi0TxNKVj5Lko63nlkrd5snIJcaU+cXUfAWsbCX1U=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
-    TEXT_ADAPTER_BUNGEECORD(
-            "net{}kyori",
-            "text-adapter-bungeecord",
-            "3.0.5",
-            "+yU9AB1mG5wTAFeZc6zArs67loFz00w8VqE34QCjCdw=",
-            Relocation.of("text", "net{}kyori{}text")
-    ),
-    TEXT_ADAPTER_SPONGEAPI(
-            "net{}kyori",
-            "text-adapter-spongeapi",
-            "3.0.5",
-            "/plXxpvDwqYECq+0saN13Y/Qf6F7GthJPc/hjR7SL5s=",
-            Relocation.of("text", "net{}kyori{}text")
+    ADVENTURE_PLATFORM_SPONGEAPI(
+            "me{}lucko",
+            "adventure-platform-spongeapi",
+            "4.0.1",
+            "6fjWuZMeJ6633RKuZh6sIlMyVIzryQoewONeei2nB+4=",
+            Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     EVENT(
             "net{}kyori",
@@ -148,15 +141,15 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.6.0",
-            "fgiCp29Z7X38ULAJNsxZ1wFIVT2u3trSx/VCMxTlA6g=",
+            "2.7.0",
+            "ABURDun85Q01kf119r4yjDtl5ju9Fg9uV2nXyU3SEdw=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
             "mysql",
             "mysql-connector-java",
-            "5.1.48",
-            "VuJsqqOCH1rkr0T5x09mz4uE6gFRatOAPLsOkEm27Kg=",
+            "8.0.22",
+            "UBne+9EjFilel6bojyqbB/EYNFpOmCcQu6Iy5JmyL08=",
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(

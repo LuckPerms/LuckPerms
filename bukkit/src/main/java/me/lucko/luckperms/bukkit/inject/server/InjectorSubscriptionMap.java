@@ -65,8 +65,7 @@ public class InjectorSubscriptionMap {
                 this.plugin.setSubscriptionMap(subscriptionMap);
             }
         } catch (Exception e) {
-            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Permission Subscription map.");
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Permission Subscription map.", e);
         }
     }
 
@@ -113,7 +112,7 @@ public class InjectorSubscriptionMap {
                 PERM_SUBS_FIELD.set(pluginManager, lpMap.detach());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst uninjecting LuckPerms Permission Subscription map.", e);
         }
     }
 

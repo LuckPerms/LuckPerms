@@ -57,6 +57,13 @@ public class JArray implements JElement {
         return this;
     }
 
+    public JArray addAll(Iterable<String> iterable) {
+        for (String s : iterable) {
+            add(s);
+        }
+        return this;
+    }
+
     public JArray add(JElement value) {
         if (value == null) {
             return add(JsonNull.INSTANCE);

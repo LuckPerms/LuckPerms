@@ -26,12 +26,16 @@
 package me.lucko.luckperms.nukkit.listeners;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.nukkit.inject.permissible.PermissibleInjector;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
@@ -88,12 +92,13 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             recordConnection(e.getUuid());
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUuid(), e.getName(), user);
         } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUuid() + " - " + e.getName());
-            ex.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getUuid() + " - " + e.getName(), ex);
 
             // deny the connection
             this.deniedAsyncLogin.add(e.getUuid());
-            e.disAllow(Message.LOADING_DATABASE_ERROR.asString(this.plugin.getLocaleManager()));
+
+            Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
+            e.disAllow(LegacyComponentSerializer.legacySection().serialize(reason));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUuid(), e.getName(), null);
         }
     }
@@ -143,7 +148,8 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             }
 
             e.setCancelled();
-            e.setKickMessage(Message.LOADING_STATE_ERROR.asString(this.plugin.getLocaleManager()));
+            Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
+            e.setKickMessage(LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }
 
@@ -158,11 +164,11 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
 
         } catch (Throwable t) {
             this.plugin.getLogger().warn("Exception thrown when setting up permissions for " +
-                    player.getUniqueId() + " - " + player.getName() + " - denying login.");
-            t.printStackTrace();
+                    player.getUniqueId() + " - " + player.getName() + " - denying login.", t);
 
             e.setCancelled();
-            e.setKickMessage(Message.LOADING_SETUP_ERROR.asString(this.plugin.getLocaleManager()));
+            Component reason = TranslationManager.render(Message.LOADING_SETUP_ERROR.build());
+            e.setKickMessage(LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }
 
@@ -203,7 +209,8 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             try {
                 PermissibleInjector.uninject(player, true);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                this.plugin.getLogger().severe("Exception thrown when unloading permissions from " +
+                        player.getUniqueId() + " - " + player.getName(), ex);
             }
 
             // Handle auto op

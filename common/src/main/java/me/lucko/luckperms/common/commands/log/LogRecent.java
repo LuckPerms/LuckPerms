@@ -30,13 +30,11 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
@@ -46,8 +44,8 @@ import java.util.UUID;
 public class LogRecent extends ChildCommand<Log> {
     private static final int ENTRIES_PER_PAGE = 10;
     
-    public LogRecent(LocaleManager locale) {
-        super(CommandSpec.LOG_RECENT.localize(locale), "recent", CommandPermission.LOG_RECENT, Predicates.notInRange(0, 2));
+    public LogRecent() {
+        super(CommandSpec.LOG_RECENT, "recent", CommandPermission.LOG_RECENT, Predicates.notInRange(0, 2));
     }
 
     @Override
@@ -103,14 +101,7 @@ public class LogRecent extends ChildCommand<Log> {
         }
 
         for (Paginated.Entry<LoggedAction> e : entries) {
-            Message.LOG_ENTRY.send(sender,
-                    e.position(),
-                    DurationFormatter.CONCISE_LOW_ACCURACY.format(e.value().getDurationSince()),
-                    e.value().getSourceFriendlyString(),
-                    Character.toString(LoggedAction.getTypeCharacter(e.value().getTarget().getType())),
-                    e.value().getTargetFriendlyString(),
-                    e.value().getDescription()
-            );
+            Message.LOG_ENTRY.send(sender, e.position(), e.value());
         }
         return CommandResult.SUCCESS;
     }

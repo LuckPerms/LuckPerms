@@ -29,12 +29,11 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -47,8 +46,8 @@ import net.luckperms.api.event.cause.DeletionCause;
 import java.util.List;
 
 public class DeleteGroup extends SingleCommand {
-    public DeleteGroup(LocaleManager locale) {
-        super(CommandSpec.DELETE_GROUP.localize(locale), "DeleteGroup", CommandPermission.DELETE_GROUP, Predicates.not(1));
+    public DeleteGroup() {
+        super(CommandSpec.DELETE_GROUP, "DeleteGroup", CommandPermission.DELETE_GROUP, Predicates.not(1));
     }
 
     @Override
@@ -74,7 +73,7 @@ public class DeleteGroup extends SingleCommand {
         try {
             plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().warn("Error whilst deleting group", e);
             Message.DELETE_ERROR.send(sender, group.getFormattedDisplayName());
             return CommandResult.FAILURE;
         }

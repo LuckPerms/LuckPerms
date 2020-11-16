@@ -29,6 +29,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateBuilder;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.bulkupdate.DataType;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
@@ -41,11 +42,10 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentException;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.CaffeineFactory;
@@ -57,8 +57,8 @@ import java.util.concurrent.TimeUnit;
 public class BulkUpdateCommand extends SingleCommand {
     private final Cache<String, BulkUpdate> pendingOperations = CaffeineFactory.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
-    public BulkUpdateCommand(LocaleManager locale) {
-        super(CommandSpec.BULK_UPDATE.localize(locale), "BulkUpdate", CommandPermission.BULK_UPDATE, Predicates.alwaysFalse());
+    public BulkUpdateCommand() {
+        super(CommandSpec.BULK_UPDATE, "BulkUpdate", CommandPermission.BULK_UPDATE, Predicates.alwaysFalse());
     }
 
     @Override
@@ -82,6 +82,10 @@ public class BulkUpdateCommand extends SingleCommand {
                 if (ex == null) {
                     plugin.getSyncTaskBuffer().requestDirectly();
                     Message.BULK_UPDATE_SUCCESS.send(sender);
+                    if (operation.isTrackingStatistics()) {
+                        BulkUpdateStatistics stats = operation.getStatistics();
+                        Message.BULK_UPDATE_STATISTICS.send(sender, stats.getAffectedNodes(), stats.getAffectedUsers(), stats.getAffectedGroups());
+                    }
                 } else {
                     ex.printStackTrace();
                     Message.BULK_UPDATE_FAILURE.send(sender);
@@ -95,6 +99,8 @@ public class BulkUpdateCommand extends SingleCommand {
         }
 
         BulkUpdateBuilder bulkUpdateBuilder = BulkUpdateBuilder.create();
+
+        bulkUpdateBuilder.trackStatistics(!args.remove("--silent"));
 
         try {
             bulkUpdateBuilder.dataType(DataType.valueOf(args.remove(0).toUpperCase()));

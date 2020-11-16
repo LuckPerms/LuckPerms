@@ -31,14 +31,12 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -54,8 +52,8 @@ import net.luckperms.api.node.types.InheritanceNode;
 import java.util.List;
 
 public class PermissionUnset extends GenericChildCommand {
-    public PermissionUnset(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_UNSET.localize(locale), "unset", CommandPermission.USER_PERM_UNSET, CommandPermission.GROUP_PERM_UNSET, Predicates.is(0));
+    public PermissionUnset() {
+        super(CommandSpec.PERMISSION_UNSET, "unset", CommandPermission.USER_PERM_UNSET, CommandPermission.GROUP_PERM_UNSET, Predicates.is(0));
     }
 
     @Override
@@ -87,7 +85,7 @@ public class PermissionUnset extends GenericChildCommand {
         DataMutateResult result = target.unsetNode(DataType.NORMAL, builtNode);
 
         if (result.wasSuccessful()) {
-            Message.UNSETPERMISSION_SUCCESS.send(sender, node, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.UNSETPERMISSION_SUCCESS.send(sender, node, target, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("permission", "unset", node, context)
@@ -96,7 +94,7 @@ public class PermissionUnset extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_PERMISSION.send(sender, target.getFormattedDisplayName(), node, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.DOES_NOT_HAVE_PERMISSION.send(sender, target, node, context);
             return CommandResult.STATE_ERROR;
         }
     }

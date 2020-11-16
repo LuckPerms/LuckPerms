@@ -36,8 +36,10 @@ import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.floodgate.FloodgateManager;
+import me.lucko.luckperms.common.http.BytebinClient;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
-import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.TranslationManager;
+import me.lucko.luckperms.common.locale.TranslationRepository;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -54,7 +56,6 @@ import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.web.BytebinClient;
 
 import net.luckperms.api.query.QueryOptions;
 
@@ -172,9 +173,16 @@ public interface LuckPermsPlugin {
     /**
      * Gets the instance providing locale translations for the plugin
      *
-     * @return the locale manager
+     * @return the translation manager
      */
-    LocaleManager getLocaleManager();
+    TranslationManager getTranslationManager();
+
+    /**
+     * Gets the translation repository
+     *
+     * @return the translation repository
+     */
+    TranslationRepository getTranslationRepository();
 
     /**
      * Gets the dependency manager for the plugin

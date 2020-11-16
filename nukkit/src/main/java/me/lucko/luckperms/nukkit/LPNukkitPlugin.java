@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.nukkit.calculator.NukkitCalculatorFactory;
 import me.lucko.luckperms.nukkit.context.NukkitContextManager;
-import me.lucko.luckperms.nukkit.context.WorldCalculator;
+import me.lucko.luckperms.nukkit.context.NukkitPlayerCalculator;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
 import me.lucko.luckperms.nukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.nukkit.inject.permissible.PermissibleInjector;
@@ -145,9 +145,9 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new NukkitContextManager(this);
 
-        WorldCalculator worldCalculator = new WorldCalculator(this);
-        this.bootstrap.getServer().getPluginManager().registerEvents(worldCalculator, this.bootstrap);
-        this.contextManager.registerCalculator(worldCalculator);
+        NukkitPlayerCalculator playerCalculator = new NukkitPlayerCalculator(this);
+        this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap);
+        this.contextManager.registerCalculator(playerCalculator);
     }
 
     @Override
@@ -221,12 +221,13 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
                                 LuckPermsPermissible lpPermissible = new LuckPermsPermissible(player, user, this);
                                 PermissibleInjector.inject(player, lpPermissible);
                             } catch (Throwable t) {
-                                t.printStackTrace();
+                                getLogger().severe("Exception thrown when setting up permissions for " +
+                                        player.getUniqueId() + " - " + player.getName(), t);
                             }
                         });
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    getLogger().severe("Exception occurred whilst loading data for " + player.getUniqueId() + " - " + player.getName(), e);
                 }
             });
         }
@@ -239,7 +240,8 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
             try {
                 PermissibleInjector.uninject(player, false);
             } catch (Exception e) {
-                e.printStackTrace();
+                getLogger().severe("Exception thrown when unloading permissions from " +
+                        player.getUniqueId() + " - " + player.getName(), e);
             }
 
             if (getConfiguration().get(ConfigKeys.AUTO_OP)) {

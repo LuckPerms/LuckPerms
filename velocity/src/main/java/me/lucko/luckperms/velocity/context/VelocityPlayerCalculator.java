@@ -25,9 +25,11 @@
 
 package me.lucko.luckperms.velocity.context;
 
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -42,43 +44,32 @@ import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-public class BackendServerCalculator implements ContextCalculator<Player> {
-
-    private static String getServer(Player player) {
-        return player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName().toLowerCase() : null;
-    }
-
+public class VelocityPlayerCalculator implements ContextCalculator<Player> {
     private final LPVelocityPlugin plugin;
 
-    public BackendServerCalculator(LPVelocityPlugin plugin) {
+    public VelocityPlayerCalculator(LPVelocityPlugin plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public void calculate(@NonNull Player subject, @NonNull ContextConsumer consumer) {
-        Set<String> seen = new HashSet<>();
-        String server = getServer(subject);
-        while (server != null && seen.add(server)) {
-            consumer.accept(DefaultContextKeys.WORLD_KEY, server);
-            server = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server).toLowerCase();
+        ServerConnection server = subject.getCurrentServer().orElse(null);
+        if (server == null) {
+            return;
         }
+        this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(server.getServerInfo().getName(), consumer);
     }
 
     @Override
     public ContextSet estimatePotentialContexts() {
-        Collection<RegisteredServer> servers = this.plugin.getBootstrap().getProxy().getAllServers();
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (RegisteredServer server : servers) {
-            builder.add(DefaultContextKeys.WORLD_KEY, server.getServerInfo().getName().toLowerCase());
+        for (RegisteredServer server : this.plugin.getBootstrap().getProxy().getAllServers()) {
+            builder.add(DefaultContextKeys.WORLD_KEY, server.getServerInfo().getName());
         }
         return builder.build();
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.FIRST)
     public void onServerConnect(ServerConnectedEvent e) {
         this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
     }

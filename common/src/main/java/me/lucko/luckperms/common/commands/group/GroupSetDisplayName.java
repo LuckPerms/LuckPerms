@@ -31,14 +31,12 @@ import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.types.DisplayName;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -53,8 +51,8 @@ import net.luckperms.api.node.types.DisplayNameNode;
 import java.util.List;
 
 public class GroupSetDisplayName extends ChildCommand<Group> {
-    public GroupSetDisplayName(LocaleManager locale) {
-        super(CommandSpec.GROUP_SET_DISPLAY_NAME.localize(locale), "setdisplayname", CommandPermission.GROUP_SET_DISPLAY_NAME, Predicates.is(0));
+    public GroupSetDisplayName() {
+        super(CommandSpec.GROUP_SET_DISPLAY_NAME, "setdisplayname", CommandPermission.GROUP_SET_DISPLAY_NAME, Predicates.is(0));
     }
 
     @Override
@@ -93,7 +91,7 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
         target.removeIf(DataType.NORMAL, context, NodeType.DISPLAY_NAME::matches, false);
 
         if (name.equals(target.getName())) {
-            Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, target.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.GROUP_SET_DISPLAY_NAME_REMOVED.send(sender, target.getName(), context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("setdisplayname", name, context)
@@ -105,7 +103,7 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
 
         target.setNode(DataType.NORMAL, DisplayName.builder(name).withContext(context).build(), true);
 
-        Message.GROUP_SET_DISPLAY_NAME.send(sender, name, target.getName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+        Message.GROUP_SET_DISPLAY_NAME.send(sender, name, target.getName(), context);
 
         LoggedAction.build().source(sender).target(target)
                 .description("setdisplayname", name, context)

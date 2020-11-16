@@ -31,25 +31,19 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.DurationFormatter;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
@@ -61,8 +55,8 @@ import java.time.Duration;
 import java.util.List;
 
 public class MetaSetTemp extends GenericChildCommand {
-    public MetaSetTemp(LocaleManager locale) {
-        super(CommandSpec.META_SETTEMP.localize(locale), "settemp", CommandPermission.USER_META_SET_TEMP, CommandPermission.GROUP_META_SET_TEMP, Predicates.inRange(0, 2));
+    public MetaSetTemp() {
+        super(CommandSpec.META_SETTEMP, "settemp", CommandPermission.USER_META_SET_TEMP, CommandPermission.GROUP_META_SET_TEMP, Predicates.inRange(0, 2));
     }
 
     @Override
@@ -88,20 +82,14 @@ public class MetaSetTemp extends GenericChildCommand {
         Node node = Meta.builder(key, value).withContext(context).expiry(duration).build();
 
         if (target.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
-            Message.ALREADY_HAS_TEMP_META.send(sender, target.getFormattedDisplayName(), key, value, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HAS_TEMP_META.send(sender, target, key, value, context);
             return CommandResult.STATE_ERROR;
         }
 
         target.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key)), false);
         duration = target.setNode(DataType.NORMAL, node, modifier).getMergedNode().getExpiryDuration();
 
-        TextComponent.Builder builder = Message.SET_META_TEMP_SUCCESS.asComponent(plugin.getLocaleManager(), key, value, target.getFormattedDisplayName(), DurationFormatter.LONG.format(duration), MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
-        HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                TextUtils.joinNewline("§3Raw key: §r" + key, "§3Raw value: §r" + value),
-                '§'
-        ));
-        builder.applyDeep(c -> c.hoverEvent(event));
-        sender.sendMessage(builder.build());
+        Message.SET_META_TEMP_SUCCESS.send(sender, key, value, target, duration, context);
 
         LoggedAction.build().source(sender).target(target)
                 .description("meta", "settemp", key, value, duration, context)

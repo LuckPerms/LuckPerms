@@ -29,14 +29,14 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
+import me.lucko.luckperms.common.http.AbstractHttpClient;
+import me.lucko.luckperms.common.http.BytebinClient;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
-import me.lucko.luckperms.common.web.AbstractHttpClient;
-import me.lucko.luckperms.common.web.BytebinClient;
-import me.lucko.luckperms.common.web.UnsuccessfulRequestException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -63,7 +63,7 @@ public class TreeView {
     private final ImmutableTreeNode view;
 
     public TreeView(PermissionRegistry source, String rootPosition) {
-        if (rootPosition.equals("") || rootPosition.equals("*")) {
+        if (rootPosition.isEmpty() || rootPosition.equals("*")) {
             rootPosition = ".";
         } else if (!rootPosition.equals(".") && rootPosition.endsWith(".")) {
             rootPosition = rootPosition.substring(0, rootPosition.length() - 1);

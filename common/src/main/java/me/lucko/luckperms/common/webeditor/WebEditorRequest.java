@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.web;
+package me.lucko.luckperms.common.webeditor;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
@@ -32,7 +32,9 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.http.AbstractHttpClient;
+import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
@@ -42,22 +44,10 @@ import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
 import net.luckperms.api.context.ImmutableContextSet;
 
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -65,27 +55,21 @@ import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Utility methods for interacting with the LuckPerms web permission editor.
+ * Encapsulates a request to the web editor.
  */
-public final class WebEditor {
-    private WebEditor() {}
+public class WebEditorRequest {
 
-    private static JObject writeData(PermissionHolder holder) {
-        return new JObject()
-                .add("type", holder.getType().toString())
-                .add("id", holder.getObjectName())
-                .add("displayName", holder.getPlainDisplayName())
-                .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().asList()));
-    }
-
-    private static JObject writeData(Track track) {
-        return new JObject()
-                .add("type", "track")
-                .add("id", track.getName())
-                .add("groups", new JArray().consume(a -> track.getGroups().forEach(a::add)));
-    }
-
-    public static JsonObject formPayload(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
+    /**
+     * Generates a web editor request payload.
+     *
+     * @param holders the holders to edit
+     * @param tracks the tracks to edit
+     * @param sender the sender who is creating the session
+     * @param cmdLabel the command label used by LuckPerms
+     * @param plugin the plugin
+     * @return a payload
+     */
+    public static WebEditorRequest generate(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
         Preconditions.checkArgument(!holders.isEmpty(), "holders is empty");
 
         ImmutableContextSet.Builder potentialContexts = new ImmutableContextSetImpl.BuilderImpl();
@@ -95,55 +79,83 @@ public final class WebEditor {
         }
 
         // form the payload data
-        return new JObject()
-                .add("metadata", new JObject()
-                        .add("commandAlias", cmdLabel)
-                        .add("uploader", new JObject()
-                                .add("name", sender.getNameWithLocation())
-                                .add("uuid", sender.getUniqueId().toString())
-                        )
-                        .add("time", System.currentTimeMillis())
-                        .add("pluginVersion", plugin.getBootstrap().getVersion())
-                )
+        return new WebEditorRequest(holders, tracks, sender, cmdLabel, potentialContexts.build(), plugin);
+    }
+
+    /**
+     * The encoded json object this payload is made up of
+     */
+    private final JsonObject payload;
+
+    private WebEditorRequest(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, ImmutableContextSet potentialContexts, LuckPermsPlugin plugin) {
+        this.payload = new JObject()
+                .add("metadata", formMetadata(sender, cmdLabel, plugin.getBootstrap().getVersion()))
                 .add("permissionHolders", new JArray()
                         .consume(arr -> {
                             for (PermissionHolder holder : holders) {
-                                arr.add(writeData(holder));
+                                arr.add(formPermissionHolder(holder));
                             }
                         })
                 )
                 .add("tracks", new JArray()
                         .consume(arr -> {
                             for (Track track : tracks) {
-                                arr.add(writeData(track));
+                                arr.add(formTrack(track));
                             }
                         })
                 )
-                .add("knownPermissions", new JArray()
-                        .consume(arr -> {
-                            for (String perm : plugin.getPermissionRegistry().rootAsList()) {
-                                arr.add(perm);
-                            }
-                        })
-                )
-                .consume(o -> {
-                    o.add("potentialContexts", ContextSetJsonSerializer.serializeContextSet(potentialContexts.build()));
-                })
+                .add("knownPermissions", new JArray().addAll(plugin.getPermissionRegistry().rootAsList()))
+                .add("potentialContexts", ContextSetJsonSerializer.serialize(potentialContexts))
                 .toJson();
     }
 
-    public static CommandResult post(JsonObject payload, Sender sender, LuckPermsPlugin plugin) {
-        // upload the payload data to gist
+    private static JObject formMetadata(Sender sender, String cmdLabel, String pluginVersion) {
+        return new JObject()
+                .add("commandAlias", cmdLabel)
+                .add("uploader", new JObject()
+                        .add("name", sender.getNameWithLocation())
+                        .add("uuid", sender.getUniqueId().toString())
+                )
+                .add("time", System.currentTimeMillis())
+                .add("pluginVersion", pluginVersion);
+    }
+
+    private static JObject formPermissionHolder(PermissionHolder holder) {
+        return new JObject()
+                .add("type", holder.getType().toString())
+                .add("id", holder.getObjectName())
+                .add("displayName", holder.getPlainDisplayName())
+                .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().asList()));
+    }
+
+    private static JObject formTrack(Track track) {
+        return new JObject()
+                .add("type", "track")
+                .add("id", track.getName())
+                .add("groups", new JArray().addAll(track.getGroups()));
+    }
+
+    public byte[] encode() {
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
-            GsonProvider.prettyPrinting().toJson(payload, writer);
+            GsonProvider.prettyPrinting().toJson(this.payload, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return bytesOut.toByteArray();
+    }
 
+    /**
+     * Creates a web editor session, and sends the URL to the sender.
+     *
+     * @param plugin the plugin
+     * @param sender the sender creating the session
+     * @return the command result
+     */
+    public CommandResult createSession(LuckPermsPlugin plugin, Sender sender) {
         String pasteId;
         try {
-            pasteId = plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+            pasteId = plugin.getBytebin().postContent(encode(), AbstractHttpClient.JSON_TYPE, false).key();
         } catch (UnsuccessfulRequestException e) {
             Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
             return CommandResult.STATE_ERROR;
@@ -155,37 +167,8 @@ public final class WebEditor {
 
         // form a url for the editor
         String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + pasteId;
-
-        Message.EDITOR_URL.send(sender);
-
-        Component message = TextComponent.builder(url).color(TextColor.AQUA)
-                .clickEvent(ClickEvent.openUrl(url))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("Click to open the editor.").color(TextColor.GRAY)))
-                .build();
-
-        sender.sendMessage(message);
+        Message.EDITOR_URL.send(sender, url);
         return CommandResult.SUCCESS;
-    }
-
-    public static JsonObject readDataFromBytebin(BytebinClient bytebin, String id) throws IOException, UnsuccessfulRequestException {
-        Request request = new Request.Builder()
-                .header("User-Agent", bytebin.getUserAgent())
-                .url(bytebin.getUrl() + id)
-                .build();
-
-        try (Response response = bytebin.makeHttpRequest(request)) {
-            try (ResponseBody responseBody = response.body()) {
-                if (responseBody == null) {
-                    throw new RuntimeException("No response");
-                }
-
-                try (InputStream inputStream = responseBody.byteStream()) {
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                        return GsonProvider.normal().fromJson(reader, JsonObject.class);
-                    }
-                }
-            }
-        }
     }
 
 }

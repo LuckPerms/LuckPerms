@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.DataSelector;
 
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -67,6 +68,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -200,7 +202,7 @@ public abstract class PermissionHolder {
      *
      * @return the holders formatted display name
      */
-    public abstract String getFormattedDisplayName();
+    public abstract Component getFormattedDisplayName();
 
     /**
      * Gets a display name for this permission holder, without any formatting.
@@ -357,9 +359,11 @@ public abstract class PermissionHolder {
         return (List) inheritanceTree;
     }
 
-    public void exportPermissions(Map<String, Boolean> accumulator, QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
+    public <M extends Map<String, Boolean>> M exportPermissions(IntFunction<M> mapFactory, QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
         List<Node> entries = resolveInheritedNodes(queryOptions);
-        processExportedPermissions(accumulator, entries, convertToLowercase, resolveShorthand);
+        M map = mapFactory.apply(entries.size());
+        processExportedPermissions(map, entries, convertToLowercase, resolveShorthand);
+        return map;
     }
 
     private static void processExportedPermissions(Map<String, Boolean> accumulator, List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {

@@ -31,14 +31,12 @@ import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -51,8 +49,8 @@ import net.luckperms.api.model.data.DataType;
 import java.util.List;
 
 public class HolderClear<T extends PermissionHolder> extends ChildCommand<T> {
-    public HolderClear(LocaleManager locale, HolderType type) {
-        super(CommandSpec.HOLDER_CLEAR.localize(locale), "clear", type == HolderType.USER ? CommandPermission.USER_CLEAR : CommandPermission.GROUP_CLEAR, Predicates.alwaysFalse());
+    public HolderClear(HolderType type) {
+        super(CommandSpec.HOLDER_CLEAR, "clear", type == HolderType.USER ? CommandPermission.USER_CLEAR : CommandPermission.GROUP_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override
@@ -79,11 +77,7 @@ public class HolderClear<T extends PermissionHolder> extends ChildCommand<T> {
         }
 
         int changed = before - target.normalData().size();
-        if (changed == 1) {
-            Message.CLEAR_SUCCESS_SINGULAR.send(sender, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
-        } else {
-            Message.CLEAR_SUCCESS.send(sender, target.getFormattedDisplayName(), MessageUtils.contextSetToString(plugin.getLocaleManager(), context), changed);
-        }
+        Message.CLEAR_SUCCESS.send(sender, target, context, changed);
 
         LoggedAction.build().source(sender).target(target)
                 .description("clear", context)

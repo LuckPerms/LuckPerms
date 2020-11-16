@@ -96,7 +96,7 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                 try {
                     return new LuckPermsMessagingService(this.plugin, new RedisMessengerProvider());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    getPlugin().getLogger().severe("Exception occurred whilst enabling Redis messaging service", e);
                 }
             } else {
                 this.plugin.getLogger().warn("Messaging Service was set to redis, but redis is not enabled!");
@@ -105,7 +105,7 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             try {
                 return new LuckPermsMessagingService(this.plugin, new SqlMessengerProvider());
             } catch (Exception e) {
-                e.printStackTrace();
+                getPlugin().getLogger().severe("Exception occurred whilst enabling SQL messaging service", e);
             }
         }
 

@@ -25,17 +25,14 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -47,7 +44,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
-import me.lucko.luckperms.common.web.WebEditor;
+import me.lucko.luckperms.common.webeditor.WebEditorRequest;
 
 import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
@@ -60,10 +57,10 @@ import java.util.Map;
 import java.util.UUID;
 
 public class EditorCommand extends SingleCommand {
-    public static final int MAX_USERS = 1000;
+    public static final int MAX_USERS = 500;
 
-    public EditorCommand(LocaleManager locale) {
-        super(CommandSpec.EDITOR.localize(locale), "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 2));
+    public EditorCommand() {
+        super(CommandSpec.EDITOR, "Editor", CommandPermission.EDITOR, Predicates.notInRange(0, 2));
     }
 
     @Override
@@ -148,8 +145,12 @@ public class EditorCommand extends SingleCommand {
 
             users.values().stream()
                     .sorted(Comparator
+                            // sort firstly by the users relative weight (depends on the groups they inherit)
                             .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL)).reversed()
-                            .thenComparing(User::getFormattedDisplayName, String.CASE_INSENSITIVE_ORDER)
+                            // then, prioritise users we actually have a username for
+                            .thenComparing(u -> u.getUsername().isPresent(), ((Comparator<Boolean>) Boolean::compare).reversed())
+                            // then sort according to their username
+                            .thenComparing(User::getPlainDisplayName, String.CASE_INSENSITIVE_ORDER)
                     )
                     .forEach(holders::add);
         }
@@ -171,8 +172,8 @@ public class EditorCommand extends SingleCommand {
 
         Message.EDITOR_START.send(sender);
 
-        JsonObject payload = WebEditor.formPayload(holders, tracks, sender, label, plugin);
-        return WebEditor.post(payload, sender, plugin);
+        return WebEditorRequest.generate(holders, tracks, sender, label, plugin)
+                .createSession(plugin, sender);
     }
 
     private enum Type {

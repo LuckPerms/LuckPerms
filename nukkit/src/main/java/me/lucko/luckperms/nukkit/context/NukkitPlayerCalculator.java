@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
+import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
@@ -38,41 +39,67 @@ import net.luckperms.api.context.ImmutableContextSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.entity.EntityLevelChangeEvent;
+import cn.nukkit.event.player.PlayerGameModeChangeEvent;
 import cn.nukkit.level.Level;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+public class NukkitPlayerCalculator implements ContextCalculator<Player>, Listener {
+    private static final int[] KNOWN_GAMEMODES = {Player.SURVIVAL, Player.CREATIVE, Player.ADVENTURE, Player.SPECTATOR};
+    private static final int[] KNOWN_DIMENSION_TYPES = {Level.DIMENSION_OVERWORLD, Level.DIMENSION_NETHER};
 
-public class WorldCalculator implements ContextCalculator<Player>, Listener {
     private final LPNukkitPlugin plugin;
 
-    public WorldCalculator(LPNukkitPlugin plugin) {
+    public NukkitPlayerCalculator(LPNukkitPlugin plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public void calculate(@NonNull Player subject, @NonNull ContextConsumer consumer) {
-        Set<String> seen = new HashSet<>();
-        String world = subject.getLevel().getName().toLowerCase();
-        while (seen.add(world)) {
-            consumer.accept(DefaultContextKeys.WORLD_KEY, world);
-            world = this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
-        }
+        Level level = subject.getLevel();
+        consumer.accept(DefaultContextKeys.GAMEMODE_KEY, getGamemodeName(subject.getGamemode()));
+        consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getDimensionName(level.getDimension()));
+        this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(level.getName(), consumer);
     }
 
     @Override
     public ContextSet estimatePotentialContexts() {
-        Collection<Level> worlds = this.plugin.getBootstrap().getServer().getLevels().values();
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (Level world : worlds) {
-            builder.add(DefaultContextKeys.WORLD_KEY, world.getName().toLowerCase());
+        for (int mode : KNOWN_GAMEMODES) {
+            builder.add(DefaultContextKeys.GAMEMODE_KEY, getGamemodeName(mode));
+        }
+        for (int dim : KNOWN_DIMENSION_TYPES) {
+            builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getDimensionName(dim));
+        }
+        for (Level world : this.plugin.getBootstrap().getServer().getLevels().values()) {
+            String worldName = world.getName();
+            if (Context.isValidValue(worldName)) {
+                builder.add(DefaultContextKeys.WORLD_KEY, worldName);
+            }
         }
         return builder.build();
+    }
+
+    private static String getGamemodeName(int mode) {
+        switch (mode) {
+            case Player.SURVIVAL: return "survival";
+            case Player.CREATIVE: return "creative";
+            case Player.ADVENTURE: return "adventure";
+            case Player.SPECTATOR: return "spectator";
+            default: return Server.getGamemodeString(mode, true).toLowerCase();
+        }
+    }
+
+    private static String getDimensionName(int dim) {
+        switch (dim) {
+            // use the namespaced keys used by the game
+            case Level.DIMENSION_OVERWORLD: return "overworld";
+            case Level.DIMENSION_NETHER: return "the_nether";
+            default: return "unknown" + dim;
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -81,5 +108,10 @@ public class WorldCalculator implements ContextCalculator<Player>, Listener {
             Player player = (Player) e.getEntity();
             this.plugin.getContextManager().signalContextUpdate(player);
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onGameModeChange(PlayerGameModeChangeEvent e) {
+        this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
     }
 }

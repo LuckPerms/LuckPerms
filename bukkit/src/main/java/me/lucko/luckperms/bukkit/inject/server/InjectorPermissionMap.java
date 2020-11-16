@@ -66,8 +66,7 @@ public class InjectorPermissionMap {
                 this.plugin.setPermissionMap(permissionMap);
             }
         } catch (Exception e) {
-            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Permission map.");
-            e.printStackTrace();
+            this.plugin.getLogger().severe("Exception occurred whilst injecting LuckPerms Permission map.", e);
         }
     }
 

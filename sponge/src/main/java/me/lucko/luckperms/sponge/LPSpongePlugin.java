@@ -44,12 +44,13 @@ import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.sponge.calculator.SpongeCalculatorFactory;
 import me.lucko.luckperms.sponge.commands.SpongeParentCommand;
 import me.lucko.luckperms.sponge.context.SpongeContextManager;
-import me.lucko.luckperms.sponge.context.WorldCalculator;
+import me.lucko.luckperms.sponge.context.SpongePlayerCalculator;
 import me.lucko.luckperms.sponge.listeners.SpongeConnectionListener;
 import me.lucko.luckperms.sponge.listeners.SpongePlatformListener;
 import me.lucko.luckperms.sponge.messaging.SpongeMessagingFactory;
 import me.lucko.luckperms.sponge.model.manager.SpongeGroupManager;
 import me.lucko.luckperms.sponge.model.manager.SpongeUserManager;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.events.UpdateEventHandler;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -58,6 +59,8 @@ import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 import me.lucko.luckperms.sponge.service.model.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 
@@ -89,7 +92,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     private SpongeGroupManager groupManager;
     private StandardTrackManager trackManager;
     private SpongeContextManager contextManager;
-    private me.lucko.luckperms.sponge.service.LuckPermsService service;
+    private LuckPermsService service;
     private UpdateEventHandler updateEventHandler;
 
     private boolean lateLoad = false;
@@ -111,7 +114,8 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
-        dependencies.add(Dependency.TEXT_ADAPTER_SPONGEAPI);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM);
+        dependencies.add(Dependency.ADVENTURE_PLATFORM_SPONGEAPI);
         dependencies.add(Dependency.CONFIGURATE_CORE);
         dependencies.add(Dependency.CONFIGURATE_HOCON);
         dependencies.add(Dependency.HOCON_CONFIG);
@@ -157,16 +161,16 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new SpongeContextManager(this);
 
-        WorldCalculator worldCalculator = new WorldCalculator(this);
-        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, worldCalculator);
-        this.contextManager.registerCalculator(worldCalculator);
+        SpongePlayerCalculator playerCalculator = new SpongePlayerCalculator(this);
+        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, playerCalculator);
+        this.contextManager.registerCalculator(playerCalculator);
     }
 
     @Override
     protected void setupPlatformHooks() {
         getLogger().info("Registering PermissionService...");
         this.updateEventHandler = UpdateEventHandler.obtain(this);
-        this.service = new me.lucko.luckperms.sponge.service.LuckPermsService(this);
+        this.service = new LuckPermsService(this);
 
         PermissionService oldService = this.bootstrap.getGame().getServiceManager().provide(PermissionService.class).orElse(null);
         if (oldService != null && !(oldService instanceof ProxiedServiceObject)) {
@@ -270,8 +274,8 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         } else {
             return new DummySender(this, Sender.CONSOLE_UUID, Sender.CONSOLE_NAME) {
                 @Override
-                protected void consumeMessage(String s) {
-                    LPSpongePlugin.this.bootstrap.getPluginLogger().info(s);
+                public void sendMessage(Component message) {
+                    LPSpongePlugin.this.bootstrap.getPluginLogger().info(LegacyComponentSerializer.legacySection().serialize(message));
                 }
             };
         }
@@ -316,7 +320,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         return this.contextManager;
     }
 
-    public me.lucko.luckperms.sponge.service.LuckPermsService getService() {
+    public LuckPermsService getService() {
         return this.service;
     }
 

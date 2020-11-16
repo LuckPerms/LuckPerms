@@ -30,15 +30,14 @@ import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -55,8 +54,8 @@ import net.luckperms.api.node.NodeEqualityPredicate;
 import java.util.List;
 
 public class UserSwitchPrimaryGroup extends GenericChildCommand {
-    public UserSwitchPrimaryGroup(LocaleManager locale) {
-        super(CommandSpec.USER_SWITCHPRIMARYGROUP.localize(locale), "switchprimarygroup", CommandPermission.USER_PARENT_SWITCHPRIMARYGROUP, null, Predicates.not(1));
+    public UserSwitchPrimaryGroup() {
+        super(CommandSpec.USER_SWITCHPRIMARYGROUP, "switchprimarygroup", CommandPermission.USER_PARENT_SWITCHPRIMARYGROUP, null, Predicates.not(1));
     }
 
     @Override
@@ -91,18 +90,18 @@ public class UserSwitchPrimaryGroup extends GenericChildCommand {
         }
 
         if (user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(group.getName())) {
-            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user.getFormattedDisplayName(), group.getFormattedDisplayName());
+            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user, group);
             return CommandResult.STATE_ERROR;
         }
 
         Node node = Inheritance.builder(group.getName()).build();
         if (!user.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_VALUE).asBoolean()) {
-            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFormattedDisplayName(), group.getName());
+            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user, group);
             target.setNode(DataType.NORMAL, node, true);
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());
-        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFormattedDisplayName(), group.getFormattedDisplayName());
+        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user, group);
 
         LoggedAction.build().source(sender).target(user)
                 .description("parent", "switchprimarygroup", group.getName())

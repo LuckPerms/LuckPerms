@@ -125,6 +125,15 @@ public class FileUuidCache {
     }
 
     /**
+     * Removes a mapping from the cache
+     *
+     * @param uuid the uuid of the player to remove
+     */
+    public void removeMapping(UUID uuid) {
+        this.lookupMap.remove(uuid);
+    }
+
+    /**
      * Gets the most recent uuid which connected with the given username, or null
      *
      * @param username the username to lookup with

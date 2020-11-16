@@ -31,23 +31,17 @@ import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.MessageUtils;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.locale.LocaleManager;
-import me.lucko.luckperms.common.locale.command.CommandSpec;
-import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.util.TextUtils;
 
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.HoverEvent;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -57,20 +51,20 @@ import java.util.List;
 
 public class MetaAddChatMeta extends GenericChildCommand {
 
-    public static MetaAddChatMeta forPrefix(LocaleManager locale) {
+    public static MetaAddChatMeta forPrefix() {
         return new MetaAddChatMeta(
                 ChatMetaType.PREFIX,
-                CommandSpec.META_ADDPREFIX.localize(locale),
+                CommandSpec.META_ADDPREFIX,
                 "addprefix",
                 CommandPermission.USER_META_ADD_PREFIX,
                 CommandPermission.GROUP_META_ADD_PREFIX
         );
     }
 
-    public static MetaAddChatMeta forSuffix(LocaleManager locale) {
+    public static MetaAddChatMeta forSuffix() {
         return new MetaAddChatMeta(
                 ChatMetaType.SUFFIX,
-                CommandSpec.META_ADDSUFFIX.localize(locale),
+                CommandSpec.META_ADDSUFFIX,
                 "addsuffix",
                 CommandPermission.USER_META_ADD_SUFFIX,
                 CommandPermission.GROUP_META_ADD_SUFFIX
@@ -79,7 +73,7 @@ public class MetaAddChatMeta extends GenericChildCommand {
 
     private final ChatMetaType type;
 
-    private MetaAddChatMeta(ChatMetaType type, LocalizedCommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
+    private MetaAddChatMeta(ChatMetaType type, CommandSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission) {
         super(spec, name, userPermission, groupPermission, Predicates.inRange(0, 1));
         this.type = type;
     }
@@ -103,13 +97,7 @@ public class MetaAddChatMeta extends GenericChildCommand {
 
         DataMutateResult result = target.setNode(DataType.NORMAL, this.type.builder(meta, priority).withContext(context).build(), true);
         if (result.wasSuccessful()) {
-            TextComponent.Builder builder = Message.ADD_CHATMETA_SUCCESS.asComponent(plugin.getLocaleManager(), target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context)).toBuilder();
-            HoverEvent event = HoverEvent.showText(TextUtils.fromLegacy(
-                    "§3Raw " + this.type.name().toLowerCase() + ": §r" + meta,
-                    '§'
-            ));
-            builder.applyDeep(c -> c.hoverEvent(event));
-            sender.sendMessage(builder.build());
+            Message.ADD_CHATMETA_SUCCESS.send(sender, target, this.type, meta, priority, context);
 
             LoggedAction.build().source(sender).target(target)
                     .description("meta" , "add" + this.type.name().toLowerCase(), priority, meta, context)
@@ -118,7 +106,7 @@ public class MetaAddChatMeta extends GenericChildCommand {
             StorageAssistant.save(target, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, target.getFormattedDisplayName(), this.type.name().toLowerCase(), meta, priority, MessageUtils.contextSetToString(plugin.getLocaleManager(), context));
+            Message.ALREADY_HAS_CHAT_META.send(sender, target, this.type, meta, priority, context);
             return CommandResult.STATE_ERROR;
         }
     }

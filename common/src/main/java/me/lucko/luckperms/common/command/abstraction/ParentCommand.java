@@ -26,11 +26,11 @@
 package me.lucko.luckperms.common.command.abstraction;
 
 import me.lucko.luckperms.common.command.CommandResult;
+import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.command.LocalizedCommandSpec;
-import me.lucko.luckperms.common.locale.message.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -49,7 +49,7 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
     /** The type of parent command */
     private final Type type;
 
-    public ParentCommand(LocalizedCommandSpec spec, String name, Type type, List<Command<T>> children) {
+    public ParentCommand(CommandSpec spec, String name, Type type, List<Command<T>> children) {
         super(spec, name, null, Predicates.alwaysFalse());
         this.children = children;
         this.type = type;

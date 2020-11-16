@@ -60,8 +60,15 @@ luckperms {
   migration {
     plugin brigadier:string single_word;
   }
+  translations {
+    install;
+  }
   creategroup {
-    name brigadier:string single_word;
+    name brigadier:string single_word {
+      weight brigadier:integer {
+        displayname brigadier:string quotable_phrase;
+      }
+    }
   }
   deletegroup {
     name brigadier:string single_word;
