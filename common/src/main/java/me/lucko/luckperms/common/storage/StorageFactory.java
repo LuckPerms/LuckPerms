@@ -42,7 +42,7 @@ import me.lucko.luckperms.common.storage.implementation.split.SplitStorage;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.file.H2ConnectionFactory;
-import me.lucko.luckperms.common.storage.implementation.sql.connection.file.SQLiteConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.file.SqliteConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.PostgreConnectionFactory;
@@ -108,13 +108,13 @@ public class StorageFactory {
             case SQLITE:
                 return new SqlStorage(
                         this.plugin,
-                        new SQLiteConnectionFactory(this.plugin, this.plugin.getBootstrap().getDataDirectory().resolve("luckperms-sqlite.db")),
+                        new SqliteConnectionFactory(this.plugin.getBootstrap().getDataDirectory().resolve("luckperms-sqlite.db")),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case H2:
                 return new SqlStorage(
                         this.plugin,
-                        new H2ConnectionFactory(this.plugin, this.plugin.getBootstrap().getDataDirectory().resolve("luckperms-h2")),
+                        new H2ConnectionFactory(this.plugin.getBootstrap().getDataDirectory().resolve("luckperms-h2")),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case POSTGRESQL:

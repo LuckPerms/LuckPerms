@@ -37,26 +37,26 @@ import java.util.EnumSet;
 import java.util.Properties;
 import java.util.function.Function;
 
-public class H2ConnectionFactory extends FlatfileConnectionFactory {
+public class SqliteConnectionFactory extends FlatfileConnectionFactory {
     private Constructor<?> connectionConstructor;
 
-    public H2ConnectionFactory(Path file) {
+    public SqliteConnectionFactory(Path file) {
         super(file);
     }
 
     @Override
     public String getImplementationName() {
-        return "H2";
+        return "SQLite";
     }
 
     @Override
     public void init(LuckPermsPlugin plugin) {
-        migrateOldDatabaseFile("luckperms.db.mv.db");
+        migrateOldDatabaseFile("luckperms.sqlite");
 
-        IsolatedClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.H2_DRIVER));
+        IsolatedClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.SQLITE_DRIVER));
         try {
-            Class<?> connectionClass = classLoader.loadClass("org.h2.jdbc.JdbcConnection");
-            this.connectionConstructor = connectionClass.getConstructor(String.class, Properties.class);
+            Class<?> connectionClass = classLoader.loadClass("org.sqlite.jdbc4.JDBC4Connection");
+            this.connectionConstructor = connectionClass.getConstructor(String.class, String.class, Properties.class);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -65,20 +65,13 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
     @Override
     protected Connection createConnection(Path file) throws SQLException {
         try {
-            return (Connection) this.connectionConstructor.newInstance("jdbc:h2:" + file.toString(), new Properties());
+            return (Connection) this.connectionConstructor.newInstance("jdbc:sqlite:" + file.toString(), file.toString(), new Properties());
         } catch (ReflectiveOperationException e) {
             if (e.getCause() instanceof SQLException) {
                 throw ((SQLException) e.getCause());
             }
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    protected Path getWriteFile() {
-        // h2 appends '.mv.db' to the end of the database name
-        Path writeFile = super.getWriteFile();
-        return writeFile.getParent().resolve(writeFile.getFileName().toString() + ".mv.db");
     }
 
     @Override
