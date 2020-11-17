@@ -49,7 +49,6 @@ public enum CommandSpec {
             arg("type", false),
             arg("filter", false)
     ),
-    //DEBUG("/%s debug"), // also commented this incase it is needed, if it's not needed it'll fully remove it.
     VERBOSE("/%s verbose <on|record|off|upload> [filter]",
             arg("action", "on|record|off|upload|command", true),
             arg("filter", false),
