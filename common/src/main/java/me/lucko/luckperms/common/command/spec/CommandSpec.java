@@ -49,7 +49,6 @@ public enum CommandSpec {
             arg("type", false),
             arg("filter", false)
     ),
-    DEBUG("/%s debug"),
     VERBOSE("/%s verbose <on|record|off|upload> [filter]",
             arg("action", "on|record|off|upload|command", true),
             arg("filter", false),
@@ -70,11 +69,14 @@ public enum CommandSpec {
     NETWORK_SYNC("/%s networksync"),
     IMPORT("/%s import <file>",
             arg("file", true),
-            arg("replace", "--replace", false)
+            arg("replace", "--replace", false),
+            arg("upload", "--upload", false)
     ),
     EXPORT("/%s export <file>",
             arg("file", true),
-            arg("without-users", "--without-users", false)
+            arg("without-users", "--without-users", false),
+            arg("without-groups", "--without-groups", false),
+            arg("upload", "--upload", false)
     ),
     RELOAD_CONFIG("/%s reloadconfig"),
     BULK_UPDATE("/%s bulkupdate",
