@@ -41,6 +41,7 @@ import net.md_5.bungee.api.plugin.PluginDescription;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -279,7 +280,8 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     public @Nullable String identifyClassLoader(ClassLoader classLoader) throws Exception {
         Class<?> pluginClassLoader = Class.forName("net.md_5.bungee.api.plugin.PluginClassloader");
         if (pluginClassLoader.isInstance(classLoader)) {
-            PluginDescription desc = (PluginDescription) pluginClassLoader.getDeclaredField("desc").get(classLoader);
+            Field descriptionField = pluginClassLoader.getDeclaredField("desc");
+            PluginDescription desc = (PluginDescription) descriptionField.get(classLoader);
             return desc.getName();
         }
         return null;
