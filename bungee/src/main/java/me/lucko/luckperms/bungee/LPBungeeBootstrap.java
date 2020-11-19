@@ -281,6 +281,8 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
         Class<?> pluginClassLoader = Class.forName("net.md_5.bungee.api.plugin.PluginClassloader");
         if (pluginClassLoader.isInstance(classLoader)) {
             Field descriptionField = pluginClassLoader.getDeclaredField("desc");
+            descriptionField.setAccessible(true);
+            
             PluginDescription desc = (PluginDescription) descriptionField.get(classLoader);
             return desc.getName();
         }
