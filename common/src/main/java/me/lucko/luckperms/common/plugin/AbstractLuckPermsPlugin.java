@@ -51,6 +51,7 @@ import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher;
+import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
@@ -66,6 +67,7 @@ import java.time.Month;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
@@ -289,6 +291,53 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         if (this.messagingService == null) {
             this.messagingService = messagingService;
         }
+    }
+
+    @Override
+    public Optional<UUID> lookupUniqueId(String username) {
+        // get a result from the DB cache
+        UUID uniqueId = getStorage().getPlayerUniqueId(username.toLowerCase()).join();
+
+        // fire the event
+        uniqueId = getEventDispatcher().dispatchUniqueIdLookup(username, uniqueId);
+
+        // try the servers cache
+        if (uniqueId == null && getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
+            uniqueId = getBootstrap().lookupUniqueId(username).orElse(null);
+        }
+
+        return Optional.ofNullable(uniqueId);
+    }
+
+    @Override
+    public Optional<String> lookupUsername(UUID uniqueId) {
+        // get a result from the DB cache
+        String username = getStorage().getPlayerName(uniqueId).join();
+
+        // fire the event
+        username = getEventDispatcher().dispatchUsernameLookup(uniqueId, username);
+
+        // try the servers cache
+        if (username == null && getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
+            username = getBootstrap().lookupUsername(uniqueId).orElse(null);
+        }
+
+        return Optional.ofNullable(username);
+    }
+
+    @Override
+    public boolean testUsernameValidity(String username) {
+        // if the username doesn't even pass the lenient test, don't bother going any further
+        // it's either empty, or too long to fit in the sql column
+        if (!DataConstraints.PLAYER_USERNAME_TEST_LENIENT.test(username)) {
+            return false;
+        }
+
+        // if invalid usernames are allowed in the config, set valid to true, otherwise, use the more strict test
+        boolean valid = getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES) || DataConstraints.PLAYER_USERNAME_TEST.test(username);
+
+        // fire the event & return
+        return getEventDispatcher().dispatchUsernameValidityCheck(username, valid);
     }
 
     @Override

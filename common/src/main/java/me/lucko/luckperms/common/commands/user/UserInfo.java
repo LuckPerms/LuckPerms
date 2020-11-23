@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.UniqueIdType;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.context.ContextSet;
@@ -63,7 +64,7 @@ public class UserInfo extends ChildCommand<User> {
         Message.USER_INFO_GENERAL.send(sender,
                 target.getUsername().orElse("Unknown"),
                 target.getUniqueId().toString(),
-                target.getUniqueId().version() == 4,
+                UniqueIdType.determineType(target.getUniqueId(), plugin).describe(),
                 plugin.getBootstrap().isPlayerOnline(target.getUniqueId())
         );
 

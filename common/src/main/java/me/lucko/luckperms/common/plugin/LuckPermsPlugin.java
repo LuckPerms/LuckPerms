@@ -61,6 +61,7 @@ import net.luckperms.api.query.QueryOptions;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -254,6 +255,30 @@ public interface LuckPermsPlugin {
      * @return a contexts object, or null if one couldn't be generated
      */
     Optional<QueryOptions> getQueryOptionsForUser(User user);
+
+    /**
+     * Lookup a uuid from a username.
+     *
+     * @param username the username to lookup
+     * @return an optional uuid, if found
+     */
+    Optional<UUID> lookupUniqueId(String username);
+
+    /**
+     * Lookup a username from a uuid.
+     *
+     * @param uniqueId the uuid to lookup
+     * @return an optional username, if found
+     */
+    Optional<String> lookupUsername(UUID uniqueId);
+
+    /**
+     * Tests whether the given username is valid.
+     *
+     * @param username the username
+     * @return true if valid
+     */
+    boolean testUsernameValidity(String username);
 
     /**
      * Gets a list of online Senders on the platform

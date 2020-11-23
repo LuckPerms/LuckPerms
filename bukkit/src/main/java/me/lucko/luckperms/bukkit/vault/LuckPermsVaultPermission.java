@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
+import me.lucko.luckperms.common.util.UniqueIdType;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
@@ -124,10 +125,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         }
 
         // lookup a username from the database
-        uuid = this.plugin.getStorage().getPlayerUniqueId(player.toLowerCase()).join();
-        if (uuid == null) {
-            uuid = this.plugin.getBootstrap().lookupUniqueId(player).orElse(null);
-        }
+        uuid = this.plugin.lookupUniqueId(player).orElse(null);
 
         // unable to find a user, throw an exception
         if (uuid == null) {
@@ -146,10 +144,8 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             return user;
         }
 
-        // if the uuid is version 2, assume it is an NPC
-        // see: https://github.com/lucko/LuckPerms/issues/1470
-        // and https://github.com/lucko/LuckPerms/issues/1470#issuecomment-475403162
-        if (uuid.version() == 2) {
+        // is it an npc?
+        if (UniqueIdType.determineType(uuid, this.plugin).getType().equals("npc")) {
             String npcGroupName = this.plugin.getConfiguration().get(ConfigKeys.VAULT_NPC_GROUP);
             Group npcGroup = this.plugin.getGroupManager().getIfLoaded(npcGroupName);
             if (npcGroup == null) {
@@ -380,7 +376,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         boolean op = false;
         if (player != null) {
             op = player.isOp();
-        } else if (uuid != null && uuid.version() == 2) { // npc
+        } else if (uuid != null && UniqueIdType.determineType(uuid, this.plugin).getType().equals("npc")) {
             op = this.plugin.getConfiguration().get(ConfigKeys.VAULT_NPC_OP_STATUS);
         }
 

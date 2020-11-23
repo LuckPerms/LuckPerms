@@ -64,6 +64,10 @@ import net.luckperms.api.event.node.NodeClearEvent;
 import net.luckperms.api.event.node.NodeRemoveEvent;
 import net.luckperms.api.event.player.PlayerDataSaveEvent;
 import net.luckperms.api.event.player.PlayerLoginProcessEvent;
+import net.luckperms.api.event.player.lookup.UniqueIdDetermineTypeEvent;
+import net.luckperms.api.event.player.lookup.UniqueIdLookupEvent;
+import net.luckperms.api.event.player.lookup.UsernameLookupEvent;
+import net.luckperms.api.event.player.lookup.UsernameValidityCheckEvent;
 import net.luckperms.api.event.source.Source;
 import net.luckperms.api.event.sync.ConfigReloadEvent;
 import net.luckperms.api.event.sync.PostSyncEvent;
@@ -95,6 +99,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public final class EventDispatcher {
@@ -313,6 +318,46 @@ public final class EventDispatcher {
         post(PlayerDataSaveEvent.class, () -> generate(PlayerDataSaveEvent.class, uniqueId, username, result));
     }
 
+    public String dispatchUniqueIdDetermineType(UUID uniqueId, String initialType) {
+        if (!shouldPost(UniqueIdDetermineTypeEvent.class)) {
+            return initialType;
+        }
+
+        AtomicReference<String> result = new AtomicReference<>(initialType);
+        post(generate(UniqueIdDetermineTypeEvent.class, result, uniqueId));
+        return result.get();
+    }
+
+    public UUID dispatchUniqueIdLookup(String username, UUID initial) {
+        if (!shouldPost(UniqueIdLookupEvent.class)) {
+            return initial;
+        }
+
+        AtomicReference<UUID> result = new AtomicReference<>(initial);
+        post(generate(UniqueIdLookupEvent.class, result, username));
+        return result.get();
+    }
+
+    public String dispatchUsernameLookup(UUID uniqueId, String initial) {
+        if (!shouldPost(UsernameLookupEvent.class)) {
+            return initial;
+        }
+
+        AtomicReference<String> result = new AtomicReference<>(initial);
+        post(generate(UsernameLookupEvent.class, result, uniqueId));
+        return result.get();
+    }
+
+    public boolean dispatchUsernameValidityCheck(String username, boolean initialState) {
+        if (!shouldPost(UsernameValidityCheckEvent.class)) {
+            return initialState;
+        }
+
+        AtomicBoolean result = new AtomicBoolean(initialState);
+        post(generate(UsernameValidityCheckEvent.class, username, result));
+        return result.get();
+    }
+
     public void dispatchUserLoad(User user) {
         post(UserLoadEvent.class, () -> generate(UserLoadEvent.class, user.getApiProxy()));
     }
@@ -361,6 +406,10 @@ public final class EventDispatcher {
                 NodeRemoveEvent.class,
                 PlayerDataSaveEvent.class,
                 PlayerLoginProcessEvent.class,
+                UniqueIdDetermineTypeEvent.class,
+                UniqueIdLookupEvent.class,
+                UsernameLookupEvent.class,
+                UsernameValidityCheckEvent.class,
                 ConfigReloadEvent.class,
                 PostSyncEvent.class,
                 PreNetworkSyncEvent.class,

@@ -37,14 +37,12 @@ import me.lucko.luckperms.common.commands.generic.other.HolderEditor;
 import me.lucko.luckperms.common.commands.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.Uuids;
 
@@ -81,36 +79,23 @@ public class UserParentCommand extends ParentCommand<User, UserIdentifier> {
     }
 
     public static UUID parseTargetUniqueId(String target, LuckPermsPlugin plugin, Sender sender) {
-        UUID uniqueId = Uuids.parse(target);
-        if (uniqueId == null) {
-            if (!plugin.getConfiguration().get(ConfigKeys.ALLOW_INVALID_USERNAMES)) {
-                if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
-                    return null;
-                }
-            } else {
-                if (!DataConstraints.PLAYER_USERNAME_TEST_LENIENT.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
-                    return null;
-                }
-            }
-
-            uniqueId = plugin.getStorage().getPlayerUniqueId(target.toLowerCase()).join();
-            if (uniqueId == null) {
-                if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
-                    Message.USER_NOT_FOUND.send(sender, target);
-                    return null;
-                }
-
-                uniqueId = plugin.getBootstrap().lookupUniqueId(target).orElse(null);
-                if (uniqueId == null) {
-                    Message.USER_NOT_FOUND.send(sender, target);
-                    return null;
-                }
-            }
+        UUID parsed = Uuids.parse(target);
+        if (parsed != null) {
+            return parsed;
         }
 
-        return uniqueId;
+        if (!plugin.testUsernameValidity(target)) {
+            Message.USER_INVALID_ENTRY.send(sender, target);
+            return null;
+        }
+
+        UUID lookup = plugin.lookupUniqueId(target).orElse(null);
+        if (lookup == null) {
+            Message.USER_NOT_FOUND.send(sender, target);
+            return null;
+        }
+
+        return lookup;
     }
 
     @Override

@@ -2757,7 +2757,7 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args4<String, String, Boolean, Boolean> USER_INFO_GENERAL = (username, uuid, mojang, online) -> join(newline(),
+    Args4<String, String, Component, Boolean> USER_INFO_GENERAL = (username, uuid, uuidType, online) -> join(newline(),
             // "&b&l> &bUser Info: &f{}"
             // "&f- &3UUID: &f{}"
             // "&f    &7(type: {}&7)"
@@ -2781,7 +2781,7 @@ public interface Message {
                     .append(OPEN_BRACKET)
                     .append(translatable("luckperms.command.user.info.uuid-type-key"))
                     .append(text(": "))
-                    .append(mojang ? translatable("luckperms.command.user.info.uuid-type.mojang", DARK_GREEN) : translatable("luckperms.command.user.info.uuid-type.not-mojang", DARK_GRAY))
+                    .append(uuidType)
                     .append(CLOSE_BRACKET)),
             prefixed(text()
                     .color(DARK_AQUA)

@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.node.comparator.NodeEntryComparator;
@@ -86,21 +85,7 @@ public class SearchCommand extends SingleCommand {
         Message.SEARCH_RESULT.send(sender, users + groups, users, groups);
 
         if (!matchedUsers.isEmpty()) {
-            Map<UUID, String> uuidLookups = LoadingMap.of(u -> {
-                String s = plugin.getStorage().getPlayerName(u).join();
-                if (s != null && !s.isEmpty() && !s.equals("null")) {
-                    return s;
-                }
-
-                if (plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
-                    s = plugin.getBootstrap().lookupUsername(u).orElse(null);
-                    if (s != null) {
-                        return s;
-                    }
-                }
-
-                return u.toString();
-            });
+            Map<UUID, String> uuidLookups = LoadingMap.of(u -> plugin.lookupUsername(u).orElseGet(u::toString));
             sendResult(sender, matchedUsers, uuidLookups::get, Message.SEARCH_SHOWING_USERS, HolderType.USER, label, page, comparison);
         }
 
