@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.commands.migration.MigrationUtils;
-import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
@@ -40,33 +39,24 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.ProgressLogger;
-import me.lucko.luckperms.common.util.Uuids;
 
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
-import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeBuilder;
 
+import nl.svenar.PowerRanks.Cache.CachedPlayers;
+import nl.svenar.PowerRanks.Cache.PowerConfigurationSection;
+import nl.svenar.PowerRanks.Data.Users;
 import nl.svenar.PowerRanks.PowerRanks;
 import nl.svenar.PowerRanks.api.PowerRanksAPI;
-import nl.svenar.PowerRanks.Data.Users;
-import nl.svenar.PowerRanks.Cache.CachedPlayers;
+
 import org.bukkit.Bukkit;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-/*
-Migrate PowerRanks v1 to LuckPerms
-*/
 public class MigrationPowerRanks extends ChildCommand<Object> {
-
     public MigrationPowerRanks() {
         super(CommandSpec.MIGRATION_COMMAND, "powerranks", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
@@ -84,81 +74,72 @@ public class MigrationPowerRanks extends ChildCommand<Object> {
             return CommandResult.STATE_ERROR;
         }
 
-        PowerRanksAPI prAPI = ((PowerRanks) Bukkit.getServer().getPluginManager().getPlugin("PowerRanks")).loadAPI();
-	    Users users = new Users(prAPI.plugin);
+        PowerRanks pr = (PowerRanks) Bukkit.getServer().getPluginManager().getPlugin("PowerRanks");
+        PowerRanksAPI prApi = (pr).loadAPI();
+	    Users prUsers = new Users(pr);
 
-        log.log("Starting ranks migration.");
-
-        Set<String> ranks = prAPI.getRanks();
-        String default_rank = users.getDefaultRanks();
-        AtomicInteger rankCount = new AtomicInteger(0);
-
+	    // Migrate all groups
+        log.log("Starting groups migration.");
+        Set<String> ranks = prApi.getRanks();
+        AtomicInteger groupCount = new AtomicInteger(0);
         for (String rank : ranks) {
-            Group lp_group = plugin.getStorage().createAndLoadGroup(rank, CreationCause.INTERNAL).join();
+            Group group = plugin.getStorage().createAndLoadGroup(rank, CreationCause.INTERNAL).join();
 
-            for (String node : prAPI.getPermissions(rank)) {
+            for (String node : prApi.getPermissions(rank)) {
                 if (node.isEmpty()) continue;
-                lp_group.setNode(DataType.NORMAL, 
-                MigrationUtils.parseNode(node.replaceFirst("-", ""), !node.startsWith("-")).build(), true);
+                group.setNode(DataType.NORMAL, MigrationUtils.parseNode(node, true).build(), true);
             }
 
-            for (String s : prAPI.getInheritances(rank)) {
-                if (s.isEmpty()) continue;
-                lp_group.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(s)).build(), true);
+            for (String parent : prApi.getInheritances(rank)) {
+                if (parent.isEmpty()) continue;
+                group.setNode(DataType.NORMAL, Inheritance.builder(MigrationUtils.standardizeName(parent)).build(), true);
             }
 
-            plugin.getStorage().saveGroup(lp_group);
-            log.logAllProgress("Migrated {} ranks so far.", rankCount.incrementAndGet());
+            plugin.getStorage().saveGroup(group);
+            log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
         }
+        log.log("Migrated " + groupCount.get() + " groups");
 
-        log.log(String.format("Migrated %d ranks.", rankCount.get()));
-        
-        log.log("Starting player migration.");
-        
-        Set<String> players = users.getCachedPlayers();
-        AtomicInteger playerCount = new AtomicInteger(0);
-
-        for (String player_uuid : players) {
-            UUID uuid = BukkitUuids.lookupUuid(log, player_uuid);
+        // Migrate all users
+        log.log("Starting user migration.");
+        Set<String> playerUuids = prUsers.getCachedPlayers();
+        AtomicInteger userCount = new AtomicInteger(0);
+        for (String uuidString : playerUuids) {
+            UUID uuid = BukkitUuids.lookupUuid(log, uuidString);
             if (uuid == null) {
                 continue;
             }
 
-            User lp_user = plugin.getStorage().loadUser(uuid, null).join();
+            User user = plugin.getStorage().loadUser(uuid, null).join();
 
-            lp_user.setNode(DataType.NORMAL, Inheritance.builder(CachedPlayers.getString("players." + player_uuid + ".rank")).build(), true);
-            
-            try {
-                for (String subrank_name : CachedPlayers.getConfigurationSection("players." + player_uuid + ".subranks").getKeys(false)) {
-                    NodeBuilder<?, ?> ib = Inheritance.builder(subrank_name);
+            user.setNode(DataType.NORMAL, Inheritance.builder(CachedPlayers.getString("players." + uuidString + ".rank")).build(), true);
 
-                    for (String world_name : CachedPlayers.getStringList("players." + player_uuid + ".subranks." + subrank_name + ".worlds")) {
-                        if (world_name.equalsIgnoreCase("all")) {
-                            break;
-                        } else {
-                            ib.withContext(DefaultContextKeys.WORLD_KEY, world_name);
+            final PowerConfigurationSection subGroups = CachedPlayers.getConfigurationSection("players." + uuidString + ".subranks");
+            if (subGroups != null) {
+                for (String subGroup : subGroups.getKeys(false)) {
+                    Inheritance.Builder builder = Inheritance.builder(subGroup);
+                    for (String worldName : CachedPlayers.getStringList("players." + uuidString + ".subranks." + subGroup + ".worlds")) {
+                        if (!worldName.equalsIgnoreCase("all")) {
+                            builder.withContext(DefaultContextKeys.WORLD_KEY, worldName);
                         }
                     }
-
-                    lp_user.setNode(DataType.NORMAL, ib.build(), true);
+                    user.setNode(DataType.NORMAL, builder.build(), true);
                 }
-            } catch (Exception e) {/* Such emptyness. '.subranks' might not be an configuration section and will fail, but that is not an issue. */}
-
-            for (String permission_node : CachedPlayers.getStringList("players." + player_uuid + ".permissions")) {
-                if (permission_node.isEmpty()) continue;
-                lp_user.setNode(DataType.NORMAL,  MigrationUtils.parseNode(permission_node.replaceFirst("-", ""), !permission_node.startsWith("-")).build(), true);
             }
 
-            lp_user.getPrimaryGroup().setStoredValue(CachedPlayers.getString("players." + player_uuid + ".rank"));
+            for (String node : CachedPlayers.getStringList("players." + uuidString + ".permissions")) {
+                if (node.isEmpty()) continue;
+                user.setNode(DataType.NORMAL,  MigrationUtils.parseNode(node, true).build(), true);
+            }
 
-            plugin.getUserManager().getHouseKeeper().cleanup(lp_user.getUniqueId());
-            plugin.getStorage().saveUser(lp_user);
+            user.getPrimaryGroup().setStoredValue(CachedPlayers.getString("players." + uuidString + ".rank"));
 
-            log.logAllProgress("Migrated {} players so far.", playerCount.incrementAndGet());
+            plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
+            plugin.getStorage().saveUser(user);
+            log.logAllProgress("Migrated {} users so far.", userCount.incrementAndGet());
         }
 
-        log.log(String.format("Migrated %d players.", playerCount.get()));
-        
+        log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
         log.log("Don't forget to remove the PowerRanks jar from your plugins folder & restart the server. " +
                 "LuckPerms may not take over as the server permission handler until this is done.");
