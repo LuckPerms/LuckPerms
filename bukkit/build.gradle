@@ -28,6 +28,9 @@ dependencies {
     }
     compileOnly 'com.github.gustav9797:PowerfulPermsAPI:4.5.2'
     compileOnly 'org.anjocaido:GroupManager:1.4'
+    compileOnly('nl.svenar:powerranks:1.9.2') {
+        exclude(module: 'nametagedit')
+    }
     compileOnly 'de.bananaco:bpermissions-api:2.12'
     compileOnly('com.platymuus:bukkit-permissions:2.5') {
         exclude(module: 'bukkit')

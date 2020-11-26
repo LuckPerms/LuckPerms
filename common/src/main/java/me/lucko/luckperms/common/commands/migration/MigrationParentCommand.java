@@ -54,6 +54,7 @@ public class MigrationParentCommand extends ParentCommand<Object, Void> {
             .put("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService", "me.lucko.luckperms.bukkit.migration.MigrationZPermissions")
             .put("de.bananaco.bpermissions.api.WorldManager",                   "me.lucko.luckperms.bukkit.migration.MigrationBPermissions")
             .put("com.platymuus.bukkit.permissions.PermissionsPlugin",          "me.lucko.luckperms.bukkit.migration.MigrationPermissionsBukkit")
+            .put("nl.svenar.PowerRanks.PowerRanks",                             "me.lucko.luckperms.bukkit.migration.MigrationPowerRanks")
             // bungee
             .put("net.alpenblock.bungeeperms.BungeePerms",                      "me.lucko.luckperms.bungee.migration.MigrationBungeePerms")
             .build();
