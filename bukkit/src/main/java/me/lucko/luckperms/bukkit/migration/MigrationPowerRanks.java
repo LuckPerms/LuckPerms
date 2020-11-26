@@ -76,9 +76,9 @@ public class MigrationPowerRanks extends ChildCommand<Object> {
 
         PowerRanks pr = (PowerRanks) Bukkit.getServer().getPluginManager().getPlugin("PowerRanks");
         PowerRanksAPI prApi = (pr).loadAPI();
-	    Users prUsers = new Users(pr);
+        Users prUsers = new Users(pr);
 
-	    // Migrate all groups
+        // Migrate all groups
         log.log("Starting groups migration.");
         Set<String> ranks = prApi.getRanks();
         AtomicInteger groupCount = new AtomicInteger(0);
