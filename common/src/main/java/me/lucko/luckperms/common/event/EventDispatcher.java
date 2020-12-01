@@ -81,6 +81,7 @@ import net.luckperms.api.event.track.mutate.TrackAddGroupEvent;
 import net.luckperms.api.event.track.mutate.TrackClearEvent;
 import net.luckperms.api.event.track.mutate.TrackRemoveGroupEvent;
 import net.luckperms.api.event.type.Cancellable;
+import net.luckperms.api.event.type.ResultEvent;
 import net.luckperms.api.event.user.UserCacheLoadEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.event.user.UserFirstLoginEvent;
@@ -100,7 +101,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 public final class EventDispatcher {
     private final AbstractEventBus<?> eventBus;
@@ -113,26 +113,57 @@ public final class EventDispatcher {
         return this.eventBus;
     }
 
-    private boolean shouldPost(Class<? extends LuckPermsEvent> eventClass) {
-        return this.eventBus.shouldPost(eventClass);
-    }
-
-    private void post(LuckPermsEvent event) {
-        this.eventBus.post(event);
-    }
-
-    private <T extends LuckPermsEvent> void post(Class<T> eventClass, Supplier<T> supplier) {
+    private <T extends LuckPermsEvent> void postAsync(Class<T> eventClass, Object... params) {
+        // check against common mistakes - events with any sort of result shouldn't be posted async
         if (Cancellable.class.isAssignableFrom(eventClass)) {
             throw new RuntimeException("Cancellable event cannot be posted async (" + eventClass + ")");
         }
+        if (ResultEvent.class.isAssignableFrom(eventClass)) {
+            throw new RuntimeException("ResultEvent event cannot be posted async (" + eventClass + ")");
+        }
 
+        // if there aren't any handlers registered for the event, don't bother trying to post it
+        if (!this.eventBus.shouldPost(eventClass)) {
+            return;
+        }
+
+        // async: generate an event class and post it
         this.eventBus.getPlugin().getBootstrap().getScheduler().executeAsync(() -> {
-            if (!shouldPost(eventClass)) {
-                return;
-            }
-            T event = supplier.get();
-            post(event);
+            T event = generate(eventClass, params);
+            this.eventBus.post(event);
         });
+    }
+
+    private <T extends LuckPermsEvent> void postSync(Class<T> eventClass, Object... params) {
+        // if there aren't any handlers registered for our event, don't bother trying to post it
+        if (!this.eventBus.shouldPost(eventClass)) {
+            return;
+        }
+
+        // generate an event class and post it
+        T event = generate(eventClass, params);
+        this.eventBus.post(event);
+    }
+
+    private <T extends LuckPermsEvent & Cancellable> boolean postCancellable(Class<T> eventClass, Object... params) {
+        // extract the initial state from the first parameter
+        boolean initialState = (boolean) params[0];
+
+        // if there aren't any handlers registered for the event, just return the initial state
+        if (!this.eventBus.shouldPost(eventClass)) {
+            return initialState;
+        }
+
+        // otherwise:
+        // - initialise an AtomicBoolean for the result with the initial state
+        // - replace the boolean with the AtomicBoolean in the params array
+        // - post the event
+        AtomicBoolean cancel = new AtomicBoolean(initialState);
+        params[0] = cancel;
+        postSync(eventClass, params);
+
+        // return the final status
+        return cancel.get();
     }
     
     @SuppressWarnings("unchecked")
@@ -145,235 +176,171 @@ public final class EventDispatcher {
     }
 
     public void dispatchContextUpdate(Object subject) {
-        if (!shouldPost(ContextUpdateEvent.class)) {
-            return;
-        }
-
-        post(generate(ContextUpdateEvent.class, subject));
+        postSync(ContextUpdateEvent.class, subject);
     }
 
     public void dispatchExtensionLoad(Extension extension) {
-        post(ExtensionLoadEvent.class, () -> generate(ExtensionLoadEvent.class, extension));
+        postAsync(ExtensionLoadEvent.class, extension);
     }
 
     public void dispatchGroupCacheLoad(Group group, GroupCachedDataManager data) {
-        post(GroupCacheLoadEvent.class, () -> generate(GroupCacheLoadEvent.class, group.getApiProxy(), data));
+        postAsync(GroupCacheLoadEvent.class, group.getApiProxy(), data);
     }
 
     public void dispatchGroupCreate(Group group, CreationCause cause) {
-        post(GroupCreateEvent.class, () -> generate(GroupCreateEvent.class, group.getApiProxy(), cause));
+        postAsync(GroupCreateEvent.class, group.getApiProxy(), cause);
     }
 
     public void dispatchGroupDelete(Group group, DeletionCause cause) {
-        post(GroupDeleteEvent.class, () -> generate(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.normalData().asSet()), cause));
+        postAsync(GroupDeleteEvent.class, group.getName(), ImmutableSet.copyOf(group.normalData().asSet()), cause);
     }
 
     public void dispatchGroupLoadAll() {
-        post(GroupLoadAllEvent.class, () -> generate(GroupLoadAllEvent.class));
+        postAsync(GroupLoadAllEvent.class);
     }
 
     public void dispatchGroupLoad(Group group) {
-        post(GroupLoadEvent.class, () -> generate(GroupLoadEvent.class, group.getApiProxy()));
+        postAsync(GroupLoadEvent.class, group.getApiProxy());
     }
 
     public boolean dispatchLogBroadcast(boolean initialState, Action entry, LogBroadcastEvent.Origin origin) {
-        if (!shouldPost(LogBroadcastEvent.class)) {
-            return initialState;
-        }
-
-        AtomicBoolean cancel = new AtomicBoolean(initialState);
-        post(generate(LogBroadcastEvent.class, cancel, entry, origin));
-        return cancel.get();
+        return postCancellable(LogBroadcastEvent.class, initialState, entry, origin);
     }
 
     public boolean dispatchLogPublish(boolean initialState, Action entry) {
-        if (!shouldPost(LogPublishEvent.class)) {
-            return initialState;
-        }
-
-        AtomicBoolean cancel = new AtomicBoolean(initialState);
-        post(generate(LogPublishEvent.class, cancel, entry));
-        return cancel.get();
+        return postCancellable(LogPublishEvent.class, initialState, entry);
     }
 
     public boolean dispatchLogNetworkPublish(boolean initialState, UUID id, Action entry) {
-        if (!shouldPost(LogNetworkPublishEvent.class)) {
-            return initialState;
-        }
-
-        AtomicBoolean cancel = new AtomicBoolean(initialState);
-        post(generate(LogNetworkPublishEvent.class, cancel, id, entry));
-        return cancel.get();
+        return postCancellable(LogNetworkPublishEvent.class, initialState, id, entry);
     }
 
     public boolean dispatchLogNotify(boolean initialState, Action entry, LogNotifyEvent.Origin origin, Sender sender) {
-        if (!shouldPost(LogNotifyEvent.class)) {
-            return initialState;
-        }
-
-        AtomicBoolean cancel = new AtomicBoolean(initialState);
-        post(generate(LogNotifyEvent.class, cancel, entry, origin, new SenderPlatformEntity(sender)));
-        return cancel.get();
+        return postCancellable(LogNotifyEvent.class, initialState, entry, origin, new SenderPlatformEntity(sender));
     }
 
     public void dispatchLogReceive(UUID id, Action entry) {
-        post(LogReceiveEvent.class, () -> generate(LogReceiveEvent.class, id, entry));
+        postAsync(LogReceiveEvent.class, id, entry);
     }
 
     public void dispatchNodeAdd(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(NodeAddEvent.class, () -> generate(NodeAddEvent.class, proxy(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
+        postAsync(NodeAddEvent.class, proxy(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node);
     }
 
     public void dispatchNodeClear(PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(NodeClearEvent.class, () -> generate(NodeClearEvent.class, proxy(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after)));
+        postAsync(NodeClearEvent.class, proxy(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
     }
 
     public void dispatchNodeRemove(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
-        post(NodeRemoveEvent.class, () -> generate(NodeRemoveEvent.class, proxy(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node));
+        postAsync(NodeRemoveEvent.class, proxy(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node);
     }
 
     public void dispatchConfigReload() {
-        post(ConfigReloadEvent.class, () -> generate(ConfigReloadEvent.class));
+        postAsync(ConfigReloadEvent.class);
     }
 
     public void dispatchPostSync() {
-        post(PostSyncEvent.class, () -> generate(PostSyncEvent.class));
+        postAsync(PostSyncEvent.class);
     }
 
     public boolean dispatchNetworkPreSync(boolean initialState, UUID id) {
-        if (!shouldPost(PreNetworkSyncEvent.class)) {
-            return initialState;
-        }
-
-        AtomicBoolean cancel = new AtomicBoolean(initialState);
-        post(generate(PreNetworkSyncEvent.class, cancel, id));
-        return cancel.get();
+        return postCancellable(PreNetworkSyncEvent.class, initialState, id);
     }
 
     public boolean dispatchPreSync(boolean initialState) {
-        if (!shouldPost(PreSyncEvent.class)) {
-            return initialState;
-        }
-
-        AtomicBoolean cancel = new AtomicBoolean(initialState);
-        post(generate(PreSyncEvent.class, cancel));
-        return cancel.get();
+        return postCancellable(PreSyncEvent.class, initialState);
     }
 
     public void dispatchTrackCreate(Track track, CreationCause cause) {
-        post(TrackCreateEvent.class, () -> generate(TrackCreateEvent.class, track.getApiProxy(), cause));
+        postAsync(TrackCreateEvent.class, track.getApiProxy(), cause);
     }
 
     public void dispatchTrackDelete(Track track, DeletionCause cause) {
-        post(TrackDeleteEvent.class, () -> generate(TrackDeleteEvent.class, track.getName(), ImmutableList.copyOf(track.getGroups()), cause));
+        postAsync(TrackDeleteEvent.class, track.getName(), ImmutableList.copyOf(track.getGroups()), cause);
     }
 
     public void dispatchTrackLoadAll() {
-        post(TrackLoadAllEvent.class, () -> generate(TrackLoadAllEvent.class));
+        postAsync(TrackLoadAllEvent.class);
     }
 
     public void dispatchTrackLoad(Track track) {
-        post(TrackLoadEvent.class, () -> generate(TrackLoadEvent.class, track.getApiProxy()));
+        postAsync(TrackLoadEvent.class, track.getApiProxy());
     }
 
     public void dispatchTrackAddGroup(Track track, String group, List<String> before, List<String> after) {
-        post(TrackAddGroupEvent.class, () -> generate(TrackAddGroupEvent.class, track.getApiProxy(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
+        postAsync(TrackAddGroupEvent.class, track.getApiProxy(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group);
     }
 
     public void dispatchTrackClear(Track track, List<String> before) {
-        post(TrackClearEvent.class, () -> generate(TrackClearEvent.class, track.getApiProxy(), ImmutableList.copyOf(before), ImmutableList.of()));
+        postAsync(TrackClearEvent.class, track.getApiProxy(), ImmutableList.copyOf(before), ImmutableList.of());
     }
 
     public void dispatchTrackRemoveGroup(Track track, String group, List<String> before, List<String> after) {
-        post(TrackRemoveGroupEvent.class, () -> generate(TrackRemoveGroupEvent.class, track.getApiProxy(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group));
+        postAsync(TrackRemoveGroupEvent.class, track.getApiProxy(), ImmutableList.copyOf(before), ImmutableList.copyOf(after), group);
     }
 
     public void dispatchUserCacheLoad(User user, UserCachedDataManager data) {
-        post(UserCacheLoadEvent.class, () -> generate(UserCacheLoadEvent.class, user.getApiProxy(), data));
+        postAsync(UserCacheLoadEvent.class, user.getApiProxy(), data);
     }
 
     public void dispatchDataRecalculate(PermissionHolder holder) {
         if (holder.getType() == HolderType.USER) {
             User user = (User) holder;
-            post(UserDataRecalculateEvent.class, () -> generate(UserDataRecalculateEvent.class, user.getApiProxy(), user.getCachedData()));
+            postAsync(UserDataRecalculateEvent.class, user.getApiProxy(), user.getCachedData());
         } else {
             Group group = (Group) holder;
-            post(GroupDataRecalculateEvent.class, () -> generate(GroupDataRecalculateEvent.class, group.getApiProxy(), group.getCachedData()));
+            postAsync(GroupDataRecalculateEvent.class, group.getApiProxy(), group.getCachedData());
         }
     }
 
     public void dispatchUserFirstLogin(UUID uniqueId, String username) {
-        post(UserFirstLoginEvent.class, () -> generate(UserFirstLoginEvent.class, uniqueId, username));
+        postAsync(UserFirstLoginEvent.class, uniqueId, username);
     }
 
     public void dispatchPlayerLoginProcess(UUID uniqueId, String username, User user) {
-        if (!shouldPost(PlayerLoginProcessEvent.class)) {
-            return;
-        }
-
-        post(generate(PlayerLoginProcessEvent.class, uniqueId, username, user.getApiProxy()));
+        postSync(PlayerLoginProcessEvent.class, uniqueId, username, user.getApiProxy());
     }
 
     public void dispatchPlayerDataSave(UUID uniqueId, String username, PlayerSaveResult result) {
-        post(PlayerDataSaveEvent.class, () -> generate(PlayerDataSaveEvent.class, uniqueId, username, result));
+        postAsync(PlayerDataSaveEvent.class, uniqueId, username, result);
     }
 
     public String dispatchUniqueIdDetermineType(UUID uniqueId, String initialType) {
-        if (!shouldPost(UniqueIdDetermineTypeEvent.class)) {
-            return initialType;
-        }
-
         AtomicReference<String> result = new AtomicReference<>(initialType);
-        post(generate(UniqueIdDetermineTypeEvent.class, result, uniqueId));
+        postSync(UniqueIdDetermineTypeEvent.class, result, uniqueId);
         return result.get();
     }
 
     public UUID dispatchUniqueIdLookup(String username, UUID initial) {
-        if (!shouldPost(UniqueIdLookupEvent.class)) {
-            return initial;
-        }
-
         AtomicReference<UUID> result = new AtomicReference<>(initial);
-        post(generate(UniqueIdLookupEvent.class, result, username));
+        postSync(UniqueIdLookupEvent.class, result, username);
         return result.get();
     }
 
     public String dispatchUsernameLookup(UUID uniqueId, String initial) {
-        if (!shouldPost(UsernameLookupEvent.class)) {
-            return initial;
-        }
-
         AtomicReference<String> result = new AtomicReference<>(initial);
-        post(generate(UsernameLookupEvent.class, result, uniqueId));
+        postSync(UsernameLookupEvent.class, result, uniqueId);
         return result.get();
     }
 
     public boolean dispatchUsernameValidityCheck(String username, boolean initialState) {
-        if (!shouldPost(UsernameValidityCheckEvent.class)) {
-            return initialState;
-        }
-
         AtomicBoolean result = new AtomicBoolean(initialState);
-        post(generate(UsernameValidityCheckEvent.class, username, result));
+        postSync(UsernameValidityCheckEvent.class, username, result);
         return result.get();
     }
 
     public void dispatchUserLoad(User user) {
-        post(UserLoadEvent.class, () -> generate(UserLoadEvent.class, user.getApiProxy()));
+        postAsync(UserLoadEvent.class, user.getApiProxy());
     }
 
-    public void dispatchUserDemote(User user, Track track, String from, String to, @Nullable Sender source) {
-        post(UserDemoteEvent.class, () -> {
-            Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderPlatformEntity(source));
-            return generate(UserDemoteEvent.class, s, track.getApiProxy(), user.getApiProxy(), Optional.ofNullable(from), Optional.ofNullable(to));
-        });
+    public void dispatchUserDemote(User user, Track track, String from, String to, @Nullable Sender sender) {
+        Source source = sender == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderPlatformEntity(sender));
+        postAsync(UserDemoteEvent.class, source, track.getApiProxy(), user.getApiProxy(), Optional.ofNullable(from), Optional.ofNullable(to));
     }
 
-    public void dispatchUserPromote(User user, Track track, String from, String to, @Nullable Sender source) {
-        post(UserPromoteEvent.class, () -> {
-            Source s = source == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderPlatformEntity(source));
-            return generate(UserPromoteEvent.class, s, track.getApiProxy(), user.getApiProxy(), Optional.ofNullable(from), Optional.ofNullable(to));
-        });
+    public void dispatchUserPromote(User user, Track track, String from, String to, @Nullable Sender sender) {
+        Source source = sender == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderPlatformEntity(sender));
+        postAsync(UserPromoteEvent.class, source, track.getApiProxy(), user.getApiProxy(), Optional.ofNullable(from), Optional.ofNullable(to));
     }
 
     private static ApiPermissionHolder proxy(PermissionHolder holder) {

@@ -61,7 +61,9 @@ public class PermissionRegistry implements AutoCloseable {
     }
 
     public List<String> rootAsList() {
-        return this.rootNode.makeImmutableCopy().getNodeEndings().stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
+        return this.rootNode.makeImmutableCopy().getNodeEndings().stream()
+                .map(Map.Entry::getValue)
+                .collect(ImmutableCollectors.toList());
     }
 
     public void offer(String permission) {
@@ -92,7 +94,7 @@ public class PermissionRegistry implements AutoCloseable {
 
     private void doInsert(String permission) {
         // split the permission up into parts
-        List<String> parts = DOT_SPLIT.splitToList(permission);
+        Iterable<String> parts = DOT_SPLIT.split(permission);
 
         // insert the permission into the node structure
         TreeNode current = this.rootNode;

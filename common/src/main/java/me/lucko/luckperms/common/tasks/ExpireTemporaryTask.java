@@ -30,6 +30,8 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.concurrent.locks.Lock;
+
 public class ExpireTemporaryTask implements Runnable {
     private final LuckPermsPlugin plugin;
 
@@ -67,15 +69,17 @@ public class ExpireTemporaryTask implements Runnable {
 
     // return true if the holder's io lock is currently held, false otherwise
     private static boolean shouldSkip(PermissionHolder holder) {
+        Lock lock = holder.getIoLock();
+
         // if the holder is currently being manipulated by the storage impl,
         // don't attempt to audit temporary permissions
-        if (!holder.getIoLock().tryLock()) {
+        if (!lock.tryLock()) {
             // if #tryLock returns false, it means it's held by something else
             return true;
         }
 
         // immediately release the lock & return false
-        holder.getIoLock().unlock();
+        lock.unlock();
         return false;
     }
 }

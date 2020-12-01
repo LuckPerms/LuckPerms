@@ -52,7 +52,8 @@ public class ApiPlatform implements Platform, PluginMetadata {
 
     @Override
     public @NonNull String getApiVersion() {
-        return "5.2";
+        String[] version = this.plugin.getBootstrap().getVersion().split("\\.");
+        return version[0] + '.' + version[1];
     }
 
     @Override
