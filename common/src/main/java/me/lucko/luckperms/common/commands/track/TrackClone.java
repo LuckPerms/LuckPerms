@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.commands.track;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
+import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
@@ -49,6 +50,11 @@ public class TrackClone extends ChildCommand<Track> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String newTrackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(newTrackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, newTrackName);
@@ -59,6 +65,11 @@ public class TrackClone extends ChildCommand<Track> {
         if (newTrack == null) {
             Message.TRACK_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
+        }
+
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), newTrack)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         newTrack.setGroups(target.getGroups());

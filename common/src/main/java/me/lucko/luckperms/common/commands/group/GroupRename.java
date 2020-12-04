@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.commands.group;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
+import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
@@ -51,6 +52,11 @@ public class GroupRename extends ChildCommand<Group> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), target)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String newGroupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender, newGroupName);

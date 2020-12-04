@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.commands.track;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
+import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -62,6 +63,11 @@ public class DeleteTrack extends SingleCommand {
         if (track == null) {
             Message.TRACK_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
+        }
+
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), track)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         try {
