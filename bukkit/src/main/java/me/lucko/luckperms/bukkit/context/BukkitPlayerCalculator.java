@@ -82,7 +82,10 @@ public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listen
 
         World world = subject.getWorld();
         if (world != null) {
-            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(world.getEnvironment()));
+            Environment environment = world.getEnvironment();
+            if (environment != null) {
+                consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(environment));
+            }
             this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
         }
     }
