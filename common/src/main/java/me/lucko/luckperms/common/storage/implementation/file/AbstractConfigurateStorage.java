@@ -650,6 +650,13 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
     private void writeNodes(ConfigurationNode to, Collection<Node> nodes) {
         ConfigurationNode permissionsSection = SimpleConfigurationNode.root();
+
+        // ensure for CombinedConfigurateStorage that there's at least *something*
+        // to save to the file even if it's just an empty list.
+        if (this instanceof CombinedConfigurateStorage) {
+            permissionsSection.setValue(Collections.emptyList());
+        }
+
         ConfigurationNode parentsSection = SimpleConfigurationNode.root();
         ConfigurationNode prefixesSection = SimpleConfigurationNode.root();
         ConfigurationNode suffixesSection = SimpleConfigurationNode.root();
@@ -713,24 +720,33 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         }
 
         if (permissionsSection.hasListChildren() || this instanceof CombinedConfigurateStorage) {
-            // ensure for CombinedConfigurateStorage that there's at least *something* to save to the file
-            // even if it's just an empty list.
-            if (!permissionsSection.hasListChildren()) {
-                permissionsSection.setValue(Collections.emptyList());
-            }
             to.getNode("permissions").setValue(permissionsSection);
+        } else {
+            to.removeChild("permissions");
         }
+
         if (parentsSection.hasListChildren()) {
             to.getNode("parents").setValue(parentsSection);
+        } else {
+            to.removeChild("parents");
         }
+
         if (prefixesSection.hasListChildren()) {
             to.getNode("prefixes").setValue(prefixesSection);
+        } else {
+            to.removeChild("prefixes");
         }
+
         if (suffixesSection.hasListChildren()) {
             to.getNode("suffixes").setValue(suffixesSection);
+        } else {
+            to.removeChild("suffixes");
         }
+
         if (metaSection.hasListChildren()) {
             to.getNode("meta").setValue(metaSection);
+        } else {
+            to.removeChild("meta");
         }
     }
 }
