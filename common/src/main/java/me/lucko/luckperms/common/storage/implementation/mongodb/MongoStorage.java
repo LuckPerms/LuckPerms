@@ -40,10 +40,10 @@ import com.mongodb.client.model.ReplaceOptions;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
@@ -76,7 +76,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -251,33 +250,15 @@ public class MongoStorage implements StorageImplementation {
 
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) {
-        BulkUpdateStatistics stats = bulkUpdate.getStatistics();
-
         if (bulkUpdate.getDataType().isIncludingUsers()) {
             MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
-
                     UUID uuid = getDocumentId(d);
-                    Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
-                    Set<Node> results = nodes.stream()
-                            .map(bulkUpdate::apply)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toSet());
-
-                    if (bulkUpdate.isTrackingStatistics() && !results.isEmpty()) {
-                        stats.incrementAffectedUsers();
-                        stats.incrementAffectedNodesBy(results.size());
-                    }
-
-                    if (!nodes.equals(results)) {
-                        List<Document> newNodes = results.stream()
-                                .map(MongoStorage::nodeToDoc)
-                                .collect(Collectors.toList());
-
-                        d.append("permissions", newNodes).remove("perms");
-                        c.replaceOne(new Document("_id", uuid), d);
+                    Document results = processBulkUpdate(d, bulkUpdate, HolderType.USER);
+                    if (results != null) {
+                        c.replaceOne(new Document("_id", uuid), results);
                     }
                 }
             }
@@ -288,30 +269,30 @@ public class MongoStorage implements StorageImplementation {
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
-
                     String holder = d.getString("_id");
-                    Set<Node> nodes = new HashSet<>(nodesFromDoc(d));
-                    Set<Node> results = nodes.stream()
-                            .map(bulkUpdate::apply)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toSet());
-
-                    if (bulkUpdate.isTrackingStatistics() && !results.isEmpty()) {
-                        stats.incrementAffectedGroups();
-                        stats.incrementAffectedNodesBy(results.size());
-                    }
-
-                    if (!nodes.equals(results)) {
-                        List<Document> newNodes = results.stream()
-                                .map(MongoStorage::nodeToDoc)
-                                .collect(Collectors.toList());
-
-                        d.append("permissions", newNodes).remove("perms");
-                        c.replaceOne(new Document("_id", holder), d);
+                    Document results = processBulkUpdate(d, bulkUpdate, HolderType.GROUP);
+                    if (results != null) {
+                        c.replaceOne(new Document("_id", holder), results);
                     }
                 }
             }
         }
+    }
+
+    private Document processBulkUpdate(Document document, BulkUpdate bulkUpdate, HolderType holderType) {
+        Set<Node> nodes = new HashSet<>(nodesFromDoc(document));
+        Set<Node> results = bulkUpdate.apply(nodes, holderType);
+
+        if (results == null) {
+            return null;
+        }
+
+        List<Document> newNodes = results.stream()
+                .map(MongoStorage::nodeToDoc)
+                .collect(Collectors.toList());
+
+        document.append("permissions", newNodes).remove("perms");
+        return document;
     }
 
     @Override
@@ -664,8 +645,8 @@ public class MongoStorage implements StorageImplementation {
         return null;
     }
 
-    private static UUID getDocumentId(Document doc) {
-        Object id = doc.get("_id");
+    private static UUID getDocumentId(Document document) {
+        Object id = document.get("_id");
         if (id instanceof UUID) {
             return (UUID) id;
         } else if (id instanceof String) {

@@ -213,8 +213,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
                     try {
                         registerFileAction(StorageLocation.USER, file);
                         ConfigurationNode object = readFile(file);
-                        ConfigurationNode results = processBulkUpdate(bulkUpdate, object, HolderType.USER);
-                        if (results != null) {
+                        if (processBulkUpdate(bulkUpdate, object, HolderType.USER)) {
                             saveFile(file, object);
                         }
                     } catch (Exception e) {
@@ -230,8 +229,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
                     try {
                         registerFileAction(StorageLocation.GROUP, file);
                         ConfigurationNode object = readFile(file);
-                        ConfigurationNode results = processBulkUpdate(bulkUpdate, object, HolderType.GROUP);
-                        if (results != null) {
+                        if (processBulkUpdate(bulkUpdate, object, HolderType.GROUP)) {
                             saveFile(file, object);
                         }
                     } catch (Exception e) {

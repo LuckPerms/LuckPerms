@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.bulkupdate;
 
+import me.lucko.luckperms.common.model.HolderType;
+
 /**
  * Keeps track of the number of nodes, users and groups that were affected in a BulkUpdate operation.
  */
@@ -56,26 +58,43 @@ public final class BulkUpdateStatistics {
     }
 
     public void incrementAffectedNodes() {
-        this.affectedNodes++;
+        incrementAffectedNodes(1);
     }
 
     public void incrementAffectedUsers() {
-        this.affectedUsers++;
+        incrementAffectedUsers(1);
     }
 
     public void incrementAffectedGroups() {
-        this.affectedGroups++;
+        incrementAffectedGroups(1);
     }
 
-    public void incrementAffectedNodesBy(int delta) {
+    public void incrementAffected(HolderType type) {
+        incrementAffected(type, 1);
+    }
+
+    public void incrementAffectedNodes(int delta) {
         this.affectedNodes += delta;
     }
 
-    public void incrementAffectedUsersBy(int delta) {
+    public void incrementAffectedUsers(int delta) {
         this.affectedUsers += delta;
     }
 
-    public void incrementAffectedGroupsBy(int delta) {
+    public void incrementAffectedGroups(int delta) {
         this.affectedGroups += delta;
+    }
+
+    public void incrementAffected(HolderType type, int delta) {
+        switch (type) {
+            case USER:
+                incrementAffectedUsers(delta);
+                break;
+            case GROUP:
+                incrementAffectedGroups(delta);
+                break;
+            default:
+                throw new AssertionError();
+        }
     }
 }

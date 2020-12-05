@@ -271,10 +271,10 @@ public class SqlStorage implements StorageImplementation {
                                     uuids.add(Uuids.fromString(rs.getString("uuid")));
                                 }
                                 uuids.remove(null);
-                                stats.incrementAffectedUsersBy(uuids.size());
+                                stats.incrementAffectedUsers(uuids.size());
                             }
                         }
-                        stats.incrementAffectedNodesBy(ps.executeUpdate());
+                        stats.incrementAffectedNodes(ps.executeUpdate());
                     } else {
                         ps.execute();
                     }
@@ -298,10 +298,10 @@ public class SqlStorage implements StorageImplementation {
                                     groups.add(rs.getString("name"));
                                 }
                                 groups.remove(null);
-                                stats.incrementAffectedGroupsBy(groups.size());
+                                stats.incrementAffectedGroups(groups.size());
                             }
                         }
-                        stats.incrementAffectedNodesBy(ps.executeUpdate());
+                        stats.incrementAffectedNodes(ps.executeUpdate());
                     } else {
                         ps.execute();
                     }

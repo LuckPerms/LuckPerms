@@ -27,11 +27,16 @@ package me.lucko.luckperms.common.bulkupdate;
 
 import me.lucko.luckperms.common.bulkupdate.action.Action;
 import me.lucko.luckperms.common.bulkupdate.query.Query;
+import me.lucko.luckperms.common.model.HolderType;
 
 import net.luckperms.api.node.Node;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Represents a query to be applied to a set of data.
@@ -75,17 +80,55 @@ public final class BulkUpdate {
     }
 
     /**
-     * Applies this query to the given NodeModel, and returns the result.
+     * Applies this query to the given node, and returns the result.
      *
-     * @param from the node to base changes from
-     * @return the new nodemodel instance, or null if the node should be deleted.
+     * @param node the node to apply changes to
+     * @return the transformed node, or null if the node should be deleted
      */
-    public Node apply(Node from) {
-        if (!satisfiesConstraints(from)) {
-            return from; // make no change
+    private Node apply(Node node) {
+        if (!satisfiesConstraints(node)) {
+            return node; // make no change
         }
 
-        return this.action.apply(from);
+        Node result = this.action.apply(node);
+
+        if (this.trackStatistics && result != node) {
+            this.statistics.incrementAffectedNodes();
+        }
+
+        return result;
+    }
+
+    /**
+     * Applies this query to the given set of nodes, and returns the result.
+     *
+     * @param nodes the input nodes
+     * @param holderType the holder type the nodes are from
+     * @return the transformed nodes, or null if no change was made
+     */
+    public @Nullable Set<Node> apply(Set<Node> nodes, HolderType holderType) {
+        Set<Node> results = new HashSet<>();
+        boolean change = false;
+
+        for (Node node : nodes) {
+            Node result = apply(node);
+            if (result != node) {
+                change = true;
+            }
+            if (result != null) {
+                results.add(result);
+            }
+        }
+
+        if (!change) {
+            return null;
+        }
+
+        if (this.trackStatistics) {
+            this.statistics.incrementAffected(holderType);
+        }
+
+        return results;
     }
 
     /**
@@ -148,11 +191,11 @@ public final class BulkUpdate {
     }
 
     public boolean isTrackingStatistics() {
-        return trackStatistics;
+        return this.trackStatistics;
     }
 
     public BulkUpdateStatistics getStatistics() {
-        return statistics;
+        return this.statistics;
     }
 
     @Override

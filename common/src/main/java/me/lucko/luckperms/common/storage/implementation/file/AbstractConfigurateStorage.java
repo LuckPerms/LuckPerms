@@ -31,7 +31,6 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.context.ContextSetConfigurateSerializer;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
@@ -77,12 +76,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Abstract implementation using configurate {@link ConfigurationNode}s to serialize and deserialize
@@ -181,35 +178,16 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         return this.actionLogger.getLog();
     }
 
-    protected ConfigurationNode processBulkUpdate(BulkUpdate bulkUpdate, ConfigurationNode node, HolderType holderType) {
-        BulkUpdateStatistics stats = bulkUpdate.getStatistics();
-
+    protected boolean processBulkUpdate(BulkUpdate bulkUpdate, ConfigurationNode node, HolderType holderType) {
         Set<Node> nodes = readNodes(node);
-        Set<Node> results = nodes.stream()
-                .map(bulkUpdate::apply)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+        Set<Node> results = bulkUpdate.apply(nodes, holderType);
 
-        if (bulkUpdate.isTrackingStatistics() && !results.isEmpty()) {
-            stats.incrementAffectedNodesBy(results.size());
-
-            switch (holderType) {
-                case USER:
-                    stats.incrementAffectedUsers();
-                    break;
-
-                case GROUP:
-                    stats.incrementAffectedGroups();
-                    break;
-            }
-        }
-
-        if (nodes.equals(results)) {
-            return null;
+        if (results == null) {
+            return false;
         }
 
         writeNodes(node, results);
-        return node;
+        return true;
     }
 
     @Override
