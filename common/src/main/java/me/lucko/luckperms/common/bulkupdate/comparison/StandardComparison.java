@@ -100,14 +100,13 @@ public enum StandardComparison implements Comparison {
     }
 
     static Pattern compilePatternForLikeSyntax(String expression) {
-        expression = expression.toLowerCase();
         expression = expression.replace(".", "\\.");
 
         // convert from SQL LIKE syntax to regex
         expression = expression.replace(WILDCARD_ONE, ".");
         expression = expression.replace(WILDCARD, ".*");
 
-        return Pattern.compile(expression);
+        return Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
     }
 
 }

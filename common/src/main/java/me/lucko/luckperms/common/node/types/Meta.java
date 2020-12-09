@@ -28,11 +28,9 @@ package me.lucko.luckperms.common.node.types;
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
 import me.lucko.luckperms.common.node.factory.Delimiters;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.MetaNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -45,7 +43,7 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
     private static final String NODE_MARKER = NODE_KEY + ".";
 
     public static String key(String key, String value) {
-        return NODE_MARKER + Delimiters.escapeCharacters(key) + AbstractNode.NODE_SEPARATOR + Delimiters.escapeCharacters(value);
+        return NODE_MARKER + Delimiters.escapeCharacters(key).toLowerCase() + AbstractNode.NODE_SEPARATOR + Delimiters.escapeCharacters(value);
     }
 
     public static Builder builder() {
@@ -61,7 +59,7 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
 
     public Meta(String metaKey, String metaValue, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(key(metaKey, metaValue), value, expireAt, contexts, metadata);
-        this.metaKey = metaKey;
+        this.metaKey = metaKey.toLowerCase();
         this.metaValue = metaValue;
     }
 

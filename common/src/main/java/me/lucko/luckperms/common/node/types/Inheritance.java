@@ -27,12 +27,10 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.InheritanceNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -44,7 +42,7 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
     private static final String NODE_MARKER = NODE_KEY + ".";
 
     public static String key(String groupName) {
-        return NODE_MARKER + groupName;
+        return NODE_MARKER + groupName.toLowerCase();
     }
 
     public static Builder builder() {
@@ -59,7 +57,7 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
 
     public Inheritance(String groupName, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(key(groupName), value, expireAt, contexts, metadata);
-        this.groupName = groupName;
+        this.groupName = groupName.toLowerCase();
     }
 
     @Override
@@ -96,7 +94,7 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
 
         @Override
         public @NonNull Builder group(@NonNull String group) {
-            this.groupName = Objects.requireNonNull(group, "group").toLowerCase();
+            this.groupName = Objects.requireNonNull(group, "group");
             return this;
         }
 
