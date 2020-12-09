@@ -145,7 +145,7 @@ public abstract class AbstractFileWatcher implements AutoCloseable {
                 Path context = event.context();
 
                 // ignore contexts with a name count of zero
-                if (context.getNameCount() == 0) {
+                if (context == null || context.getNameCount() == 0) {
                     continue;
                 }
 
