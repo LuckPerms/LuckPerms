@@ -105,6 +105,6 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
 
     @Override
     public Function<String, String> getStatementProcessor() {
-        return s -> s.replace("'", "`"); // use backticks for quotes
+        return s -> s.replace('\'', '`'); // use backticks for quotes
     }
 }
