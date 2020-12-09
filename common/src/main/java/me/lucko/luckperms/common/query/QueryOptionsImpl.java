@@ -47,8 +47,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public class QueryOptionsImpl implements QueryOptions {
-    public static final QueryOptions DEFAULT_CONTEXTUAL = new QueryOptionsImpl(QueryMode.CONTEXTUAL, ImmutableContextSetImpl.EMPTY, FlagUtils.DEFAULT_FLAGS, null);
-    public static final QueryOptions DEFAULT_NON_CONTEXTUAL = new QueryOptionsImpl(QueryMode.NON_CONTEXTUAL, null, FlagUtils.DEFAULT_FLAGS, null);
+    public static final QueryOptions DEFAULT_CONTEXTUAL = new QueryOptionsImpl(QueryMode.CONTEXTUAL, ImmutableContextSetImpl.EMPTY, FlagUtils.ALL_FLAGS, null);
+    public static final QueryOptions DEFAULT_NON_CONTEXTUAL = new QueryOptionsImpl(QueryMode.NON_CONTEXTUAL, null, FlagUtils.ALL_FLAGS, null);
 
     // state
     private final QueryMode mode;

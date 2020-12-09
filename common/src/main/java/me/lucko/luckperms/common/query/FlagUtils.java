@@ -33,9 +33,9 @@ import java.util.Set;
 final class FlagUtils {
     private FlagUtils() {}
 
-    private static final EnumSet<Flag> DEFAULT_FLAGS_SET = EnumSet.allOf(Flag.class);
-    private static final int DEFAULT_FLAGS_SIZE = DEFAULT_FLAGS_SET.size();
-    static final byte DEFAULT_FLAGS = toByte0(DEFAULT_FLAGS_SET);
+    private static final EnumSet<Flag> ALL_FLAGS_SET = EnumSet.allOf(Flag.class);
+    private static final int ALL_FLAGS_SIZE = ALL_FLAGS_SET.size();
+    static final byte ALL_FLAGS = toByte0(ALL_FLAGS_SET);
 
     /* bitwise utility methods */
 
@@ -45,8 +45,8 @@ final class FlagUtils {
 
     static byte toByte(Set<Flag> settings) {
         // fast path for the default set of flags.
-        if (settings.size() == DEFAULT_FLAGS_SIZE) {
-            return DEFAULT_FLAGS;
+        if (settings.size() == ALL_FLAGS_SIZE) {
+            return ALL_FLAGS;
         }
         return toByte0(settings);
     }

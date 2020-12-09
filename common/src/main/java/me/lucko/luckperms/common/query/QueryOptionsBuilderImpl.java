@@ -54,7 +54,7 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
     public QueryOptionsBuilderImpl(QueryMode mode) {
         this.mode = mode;
         this.context = mode == QueryMode.CONTEXTUAL ? ImmutableContextSetImpl.EMPTY : null;
-        this.flags = FlagUtils.DEFAULT_FLAGS;
+        this.flags = FlagUtils.ALL_FLAGS;
         this.flagsSet = null;
         this.options = null;
         this.copyOptions = false;
@@ -150,13 +150,13 @@ public class QueryOptionsBuilderImpl implements QueryOptions.Builder {
 
         if (this.options == null) {
             if (this.mode == QueryMode.NON_CONTEXTUAL) {
-                if (FlagUtils.DEFAULT_FLAGS == flags) {
+                if (FlagUtils.ALL_FLAGS == flags) {
                     // mode same, contexts null, flags same, options null
                     // so therefore, equal to default - return that instead!
                     return QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL;
                 }
             } else if (this.mode == QueryMode.CONTEXTUAL) {
-                if (FlagUtils.DEFAULT_FLAGS == flags && this.context.isEmpty()) {
+                if (FlagUtils.ALL_FLAGS == flags && this.context.isEmpty()) {
                     // mode same, contexts empty, flags same, options null
                     // so therefore, equal to default - return that instead!
                     return QueryOptionsImpl.DEFAULT_CONTEXTUAL;
