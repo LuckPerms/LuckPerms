@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.DisplayNameNode;
 import net.luckperms.api.query.QueryOptions;
 
@@ -137,11 +137,8 @@ public class Group extends PermissionHolder {
 
     public Optional<String> calculateDisplayName(QueryOptions queryOptions) {
         // query for a displayname node
-        for (Node n : getOwnNodes(queryOptions)) {
-            if (n instanceof DisplayNameNode) {
-                DisplayNameNode displayNameNode = (DisplayNameNode) n;
-                return Optional.of(displayNameNode.getDisplayName());
-            }
+        for (DisplayNameNode n : getOwnNodes(NodeType.DISPLAY_NAME, queryOptions)) {
+            return Optional.of(n.getDisplayName());
         }
 
         // fallback to config

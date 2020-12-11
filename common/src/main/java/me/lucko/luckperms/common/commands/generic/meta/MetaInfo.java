@@ -72,11 +72,7 @@ public class MetaInfo extends GenericChildCommand {
         Set<MetaNode> meta = new LinkedHashSet<>();
 
         // Collect data
-        for (Node node : target.resolveInheritedNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)) {
-            if (!NodeType.META_OR_CHAT_META.matches(node)) {
-                continue;
-            }
-
+        for (Node node : target.resolveInheritedNodes(NodeType.META_OR_CHAT_META, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)) {
             if (node instanceof PrefixNode) {
                 PrefixNode pn = (PrefixNode) node;
                 prefixes.add(Maps.immutableEntry(pn.getPriority(), pn));

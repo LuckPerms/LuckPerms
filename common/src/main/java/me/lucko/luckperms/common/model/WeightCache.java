@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
-import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.WeightNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -50,29 +50,25 @@ public class WeightCache extends Cache<OptionalInt> {
     @Override
     protected @NonNull OptionalInt supply() {
         boolean seen = false;
-        int best = 0;
-        for (Node n : this.group.getOwnNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)) {
-            if (n instanceof WeightNode) {
-                WeightNode weightNode = (WeightNode) n;
-                int value = weightNode.getWeight();
+        int weight = 0;
 
-                if (!seen || value > best) {
-                    seen = true;
-                    best = value;
-                }
+        for (WeightNode n : this.group.getOwnNodes(NodeType.WEIGHT, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)) {
+            int value = n.getWeight();
+            if (!seen || value > weight) {
+                seen = true;
+                weight = value;
             }
         }
 
-        OptionalInt weight = seen ? OptionalInt.of(best) : OptionalInt.empty();
-
-        if (!weight.isPresent()) {
+        if (!seen) {
             Map<String, Integer> configWeights = this.group.getPlugin().getConfiguration().get(ConfigKeys.GROUP_WEIGHTS);
-            Integer w = configWeights.get(this.group.getObjectName().toLowerCase());
-            if (w != null) {
-                weight = OptionalInt.of(w);
+            Integer value = configWeights.get(this.group.getObjectName().toLowerCase());
+            if (value != null) {
+                seen = true;
+                weight = value;
             }
         }
 
-        return weight;
+        return seen ? OptionalInt.of(weight) : OptionalInt.empty();
     }
 }
