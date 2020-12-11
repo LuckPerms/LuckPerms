@@ -62,11 +62,15 @@ public class RecordedNodeMap implements NodeMap {
     }
 
     public MutateResult exportChanges() {
-        return this.changes.getAndSet(new MutateResult());
+        synchronized (this.changes) {
+            return this.changes.getAndSet(new MutateResult());
+        }
     }
 
     private MutateResult record(MutateResult result) {
-        this.changes.get().mergeFrom(result);
+        synchronized (this.changes) {
+            this.changes.get().mergeFrom(result);
+        }
         return result;
     }
 

@@ -325,7 +325,7 @@ public class SqlStorage implements StorageImplementation {
         String savedUsername = null;
 
         try (Connection c = this.connectionFactory.getConnection()) {
-            nodes = selectUserPermissions(new ArrayList<>(), c, user.getUniqueId());
+            nodes = selectUserPermissions(c, user.getUniqueId());
 
             SqlPlayerData playerData = selectPlayerData(c, user.getUniqueId());
             if (playerData != null) {
@@ -452,7 +452,7 @@ public class SqlStorage implements StorageImplementation {
         Group group = this.plugin.getGroupManager().getOrMake(name);
         List<Node> nodes;
         try (Connection c = this.connectionFactory.getConnection()) {
-            nodes = selectGroupPermissions(new ArrayList<>(), c, group.getName());
+            nodes = selectGroupPermissions(c, group.getName());
         }
 
         group.loadNodesFromStorage(nodes);
@@ -778,7 +778,62 @@ public class SqlStorage implements StorageImplementation {
         ps.setString(7, GsonProvider.normal().toJson(ContextSetJsonSerializer.serialize(contexts)));
     }
 
-    private <T extends Collection<Node>> T selectUserPermissions(T nodes, Connection c, UUID user) throws SQLException {
+    private void updateUserPermissions(Connection c, UUID user, Set<Node> add, Set<Node> delete) throws SQLException {
+        updatePermissions(c, user.toString(), add, delete, USER_PERMISSIONS_DELETE_SPECIFIC, USER_PERMISSIONS_DELETE_SPECIFIC_PROPS, USER_PERMISSIONS_INSERT);
+    }
+
+    private void updateGroupPermissions(Connection c, String group, Set<Node> add, Set<Node> delete) throws SQLException {
+        updatePermissions(c, group, add, delete, GROUP_PERMISSIONS_DELETE_SPECIFIC, GROUP_PERMISSIONS_DELETE_SPECIFIC_PROPS, GROUP_PERMISSIONS_INSERT);
+    }
+
+    private void updatePermissions(Connection c, String holder, Set<Node> add, Set<Node> delete, String deleteSpecificQuery, String deleteQuery, String insertQuery) throws SQLException {
+        if (!delete.isEmpty()) {
+            List<Long> deleteRows = new ArrayList<>(delete.size());
+            List<Node> deleteNodes = new ArrayList<>(delete.size());
+            for (Node node : delete) {
+                SqlRowId rowId = node.getMetadata(SqlRowId.KEY).orElse(null);
+                if (rowId != null) {
+                    deleteRows.add(rowId.getRowId());
+                } else {
+                    deleteNodes.add(node);
+                }
+            }
+
+            if (!deleteRows.isEmpty()) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(deleteSpecificQuery))) {
+                    for (Long id : deleteRows) {
+                        ps.setLong(1, id);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            }
+            if (!deleteNodes.isEmpty()) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(deleteQuery))) {
+                    for (Node node : deleteNodes) {
+                        ps.setString(1, holder);
+                        writeNode(node, ps);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            }
+        }
+
+        if (!add.isEmpty()) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(insertQuery))) {
+                for (Node node : add) {
+                    ps.setString(1, holder);
+                    writeNode(node, ps);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+            }
+        }
+    }
+
+    private List<Node> selectUserPermissions(Connection c, UUID user) throws SQLException {
+        List<Node> nodes = new ArrayList<>();
         try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT))) {
             ps.setString(1, user.toString());
             try (ResultSet rs = ps.executeQuery()) {
@@ -812,51 +867,6 @@ public class SqlStorage implements StorageImplementation {
             ps.setString(1, GroupManager.DEFAULT_GROUP_NAME);
             ps.setString(2, user.toString());
             ps.execute();
-        }
-    }
-
-    private void updateUserPermissions(Connection c, UUID user, Set<Node> add, Set<Node> delete) throws SQLException {
-        if (!delete.isEmpty()) {
-            List<Long> rowIds = new ArrayList<>();
-            List<Node> nodesWithoutRow = new ArrayList<>();
-            for (Node node : delete) {
-                SqlRowId rowId = node.getMetadata(SqlRowId.KEY).orElse(null);
-                if (rowId != null) {
-                    rowIds.add(rowId.getRowId());
-                } else {
-                    nodesWithoutRow.add(node);
-                }
-            }
-
-            if (!rowIds.isEmpty()) {
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
-                    for (Long id : rowIds) {
-                        ps.setLong(1, id);
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                }
-            }
-            if (!nodesWithoutRow.isEmpty()) {
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE_SPECIFIC_PROPS))) {
-                    for (Node node : nodesWithoutRow) {
-                        ps.setString(1, user.toString());
-                        writeNode(node, ps);
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                }
-            }
-        }
-        if (!add.isEmpty()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_INSERT))) {
-                for (Node node : add) {
-                    ps.setString(1, user.toString());
-                    writeNode(node, ps);
-                    ps.addBatch();
-                }
-                ps.executeBatch();
-            }
         }
     }
 
@@ -899,7 +909,8 @@ public class SqlStorage implements StorageImplementation {
         return groups;
     }
 
-    private <T extends Collection<Node>> T selectGroupPermissions(T nodes, Connection c, String group) throws SQLException {
+    private List<Node> selectGroupPermissions(Connection c, String group) throws SQLException {
+        List<Node> nodes = new ArrayList<>();
         try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT))) {
             ps.setString(1, group);
             try (ResultSet rs = ps.executeQuery()) {
@@ -929,51 +940,6 @@ public class SqlStorage implements StorageImplementation {
         try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE))) {
             ps.setString(1, group);
             ps.execute();
-        }
-    }
-
-    private void updateGroupPermissions(Connection c, String group, Set<Node> add, Set<Node> delete) throws SQLException {
-        if (!delete.isEmpty()) {
-            List<Long> rowIds = new ArrayList<>();
-            List<Node> nodesWithoutRow = new ArrayList<>();
-            for (Node node : delete) {
-                SqlRowId rowId = node.getMetadata(SqlRowId.KEY).orElse(null);
-                if (rowId != null) {
-                    rowIds.add(rowId.getRowId());
-                } else {
-                    nodesWithoutRow.add(node);
-                }
-            }
-
-            if (!rowIds.isEmpty()) {
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
-                    for (Long id : rowIds) {
-                        ps.setLong(1, id);
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                }
-            }
-            if (!nodesWithoutRow.isEmpty()) {
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC_PROPS))) {
-                    for (Node node : nodesWithoutRow) {
-                        ps.setString(1, group);
-                        writeNode(node, ps);
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                }
-            }
-        }
-        if (!add.isEmpty()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_INSERT))) {
-                for (Node node : add) {
-                    ps.setString(1, group);
-                    writeNode(node, ps);
-                    ps.addBatch();
-                }
-                ps.executeBatch();
-            }
         }
     }
 
