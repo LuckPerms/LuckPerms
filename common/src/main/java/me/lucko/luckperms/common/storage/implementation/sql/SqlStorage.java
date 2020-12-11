@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 
@@ -38,6 +39,8 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.model.nodemap.MutateResult;
+import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
@@ -49,8 +52,9 @@ import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.PlayerSaveResult;
-import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
 import java.io.IOException;
@@ -65,6 +69,7 @@ import java.sql.Statement;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -80,6 +85,7 @@ public class SqlStorage implements StorageImplementation {
 
     private static final String USER_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM '{prefix}user_permissions' WHERE uuid=?";
     private static final String USER_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM '{prefix}user_permissions' WHERE id=?";
+    private static final String USER_PERMISSIONS_DELETE_SPECIFIC_PROPS = "DELETE FROM '{prefix}user_permissions' WHERE uuid=? AND permission=? AND value=? AND server=? AND world=? AND expiry=? AND contexts=?";
     private static final String USER_PERMISSIONS_DELETE = "DELETE FROM '{prefix}user_permissions' WHERE uuid=?";
     private static final String USER_PERMISSIONS_INSERT = "INSERT INTO '{prefix}user_permissions' (uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM '{prefix}user_permissions'";
@@ -99,6 +105,7 @@ public class SqlStorage implements StorageImplementation {
     private static final String GROUP_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM '{prefix}group_permissions' WHERE name=?";
     private static final String GROUP_PERMISSIONS_SELECT_ALL = "SELECT name, id, permission, value, server, world, expiry, contexts FROM '{prefix}group_permissions'";
     private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM '{prefix}group_permissions' WHERE id=?";
+    private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC_PROPS = "DELETE FROM '{prefix}group_permissions' WHERE name=? AND permission=? AND value=? AND server=? AND world=? AND expiry=? AND contexts=?";
     private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM '{prefix}group_permissions' WHERE name=?";
     private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO '{prefix}group_permissions' (name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String GROUP_PERMISSIONS_SELECT_PERMISSION = "SELECT name, id, permission, value, server, world, expiry, contexts FROM '{prefix}group_permissions' WHERE ";
@@ -313,82 +320,65 @@ public class SqlStorage implements StorageImplementation {
     @Override
     public User loadUser(UUID uniqueId, String username) throws SQLException {
         User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
-        user.getIoLock().lock();
-        try {
-            List<SqlNode> nodes;
-            String primaryGroup = null;
-            String savedUsername = null;
+        List<Node> nodes;
+        String primaryGroup = null;
+        String savedUsername = null;
 
-            try (Connection c = this.connectionFactory.getConnection()) {
-                nodes = selectUserPermissions(new ArrayList<>(), c, user.getUniqueId());
+        try (Connection c = this.connectionFactory.getConnection()) {
+            nodes = selectUserPermissions(new ArrayList<>(), c, user.getUniqueId());
 
-                SqlPlayerData playerData = selectPlayerData(c, user.getUniqueId());
-                if (playerData != null) {
-                    primaryGroup = playerData.primaryGroup;
-                    savedUsername = playerData.username;
-                }
+            SqlPlayerData playerData = selectPlayerData(c, user.getUniqueId());
+            if (playerData != null) {
+                primaryGroup = playerData.primaryGroup;
+                savedUsername = playerData.username;
+            }
+        }
+
+        // update username & primary group
+        if (primaryGroup == null) {
+            primaryGroup = GroupManager.DEFAULT_GROUP_NAME;
+        }
+        user.getPrimaryGroup().setStoredValue(primaryGroup);
+
+        // Update their username to what was in the storage if the one in the local instance is null
+        user.setUsername(savedUsername, true);
+
+        if (!nodes.isEmpty()) {
+            user.loadNodesFromStorage(nodes);
+
+            // Save back to the store if data they were given any defaults or had permissions expire
+            if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false) | user.auditTemporaryNodes()) {
+                // This should be fine, as the lock will be acquired by the same thread.
+                saveUser(user);
             }
 
-            // update username & primary group
-            if (primaryGroup == null) {
-                primaryGroup = GroupManager.DEFAULT_GROUP_NAME;
+        } else {
+            if (this.plugin.getUserManager().shouldSave(user)) {
+                user.loadNodesFromStorage(Collections.emptyList());
+                user.getPrimaryGroup().setStoredValue(null);
+                this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
             }
-            user.getPrimaryGroup().setStoredValue(primaryGroup);
-
-            // Update their username to what was in the storage if the one in the local instance is null
-            user.setUsername(savedUsername, true);
-
-            if (!nodes.isEmpty()) {
-                user.setNodes(DataType.NORMAL, nodes.stream().map(SqlNode::toNode));
-
-                // Save back to the store if data they were given any defaults or had permissions expire
-                if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false) | user.auditTemporaryNodes()) {
-                    // This should be fine, as the lock will be acquired by the same thread.
-                    saveUser(user);
-                }
-
-            } else {
-                if (this.plugin.getUserManager().shouldSave(user)) {
-                    user.clearNodes(DataType.NORMAL, null, true);
-                    user.getPrimaryGroup().setStoredValue(null);
-                    this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                }
-            }
-        } finally {
-            user.getIoLock().unlock();
         }
         return user;
     }
 
     @Override
     public void saveUser(User user) throws SQLException {
-        user.getIoLock().lock();
-        try {
-            if (!this.plugin.getUserManager().shouldSave(user)) {
-                try (Connection c = this.connectionFactory.getConnection()) {
-                    deleteUser(c, user.getUniqueId());
-                }
-                return;
-            }
-
-            Set<SqlNode> remote;
+        if (!this.plugin.getUserManager().shouldSave(user)) {
             try (Connection c = this.connectionFactory.getConnection()) {
-                remote = selectUserPermissions(new HashSet<>(), c, user.getUniqueId());
+                deleteUser(c, user.getUniqueId());
             }
+            return;
+        }
 
-            Set<SqlNode> local = user.normalData().asList().stream().map(SqlNode::fromNode).collect(Collectors.toSet());
-            Set<SqlNode> missingFromRemote = getMissingFromRemote(local, remote);
-            Set<SqlNode> missingFromLocal = getMissingFromLocal(local, remote);
+        MutateResult changes = user.normalData().exportChanges();
 
-            try (Connection c = this.connectionFactory.getConnection()) {
-                updateUserPermissions(c, user.getUniqueId(), missingFromRemote, missingFromLocal);
-                insertPlayerData(c, user.getUniqueId(), new SqlPlayerData(
-                        user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME),
-                        user.getUsername().orElse("null").toLowerCase()
-                ));
-            }
-        } finally {
-            user.getIoLock().unlock();
+        try (Connection c = this.connectionFactory.getConnection()) {
+            updateUserPermissions(c, user.getUniqueId(), changes.getAdded(), changes.getRemoved());
+            insertPlayerData(c, user.getUniqueId(), new SqlPlayerData(
+                    user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME),
+                    user.getUsername().orElse("null").toLowerCase()
+            ));
         }
     }
 
@@ -421,7 +411,7 @@ public class SqlStorage implements StorageImplementation {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         UUID holder = UUID.fromString(rs.getString("uuid"));
-                        Node node = readNode(rs).toNode();
+                        Node node = readNode(rs);
 
                         N match = constraint.filterConstraintMatch(node);
                         if (match != null) {
@@ -460,45 +450,27 @@ public class SqlStorage implements StorageImplementation {
         }
 
         Group group = this.plugin.getGroupManager().getOrMake(name);
-        group.getIoLock().lock();
-        try {
-            List<SqlNode> nodes;
-            try (Connection c = this.connectionFactory.getConnection()) {
-                nodes = selectGroupPermissions(new ArrayList<>(), c, group.getName());
-            }
-
-            if (!nodes.isEmpty()) {
-                group.setNodes(DataType.NORMAL, nodes.stream().map(SqlNode::toNode));
-            } else {
-                group.clearNodes(DataType.NORMAL, null, false);
-            }
-        } finally {
-            group.getIoLock().unlock();
+        List<Node> nodes;
+        try (Connection c = this.connectionFactory.getConnection()) {
+            nodes = selectGroupPermissions(new ArrayList<>(), c, group.getName());
         }
+
+        group.loadNodesFromStorage(nodes);
         return Optional.of(group);
     }
 
     @Override
     public void loadAllGroups() throws SQLException {
-        Map<String, Collection<SqlNode>> groups = new HashMap<>();
+        Map<String, Collection<Node>> groups = new HashMap<>();
         try (Connection c = this.connectionFactory.getConnection()) {
             selectGroups(c).forEach(name -> groups.put(name, new ArrayList<>()));
             selectAllGroupPermissions(groups, c);
         }
 
-        for (Map.Entry<String, Collection<SqlNode>> entry : groups.entrySet()) {
+        for (Map.Entry<String, Collection<Node>> entry : groups.entrySet()) {
             Group group = this.plugin.getGroupManager().getOrMake(entry.getKey());
-            group.getIoLock().lock();
-            try {
-                Collection<SqlNode> nodes = entry.getValue();
-                if (!nodes.isEmpty()) {
-                    group.setNodes(DataType.NORMAL, nodes.stream().map(SqlNode::toNode));
-                } else {
-                    group.clearNodes(DataType.NORMAL, null, false);
-                }
-            } finally {
-                group.getIoLock().unlock();
-            }
+            Collection<Node> nodes = entry.getValue();
+            group.loadNodesFromStorage(nodes);
         }
 
         this.plugin.getGroupManager().retainAll(groups.keySet());
@@ -506,48 +478,31 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public void saveGroup(Group group) throws SQLException {
-        group.getIoLock().lock();
-        try {
-            if (group.normalData().isEmpty()) {
-                try (Connection c = this.connectionFactory.getConnection()) {
-                    deleteGroupPermissions(c, group.getName());
-                }
-                return;
-            }
-
-            Set<SqlNode> remote;
+        if (group.normalData().isEmpty()) {
             try (Connection c = this.connectionFactory.getConnection()) {
-                remote = selectGroupPermissions(new HashSet<>(), c, group.getName());
+                deleteGroupPermissions(c, group.getName());
             }
+            return;
+        }
 
-            Set<SqlNode> local = group.normalData().asList().stream().map(SqlNode::fromNode).collect(Collectors.toSet());
-            Set<SqlNode> missingFromRemote = getMissingFromRemote(local, remote);
-            Set<SqlNode> missingFromLocal = getMissingFromLocal(local, remote);
+        MutateResult changes = group.normalData().exportChanges();
 
-            if (!missingFromLocal.isEmpty() || !missingFromRemote.isEmpty()) {
-                try (Connection c = this.connectionFactory.getConnection()) {
-                    updateGroupPermissions(c, group.getName(), missingFromRemote, missingFromLocal);
-                }
+        if (!changes.isEmpty()) {
+            try (Connection c = this.connectionFactory.getConnection()) {
+                updateGroupPermissions(c, group.getName(), changes.getAdded(), changes.getRemoved());
             }
-        } finally {
-            group.getIoLock().unlock();
         }
     }
 
     @Override
     public void deleteGroup(Group group) throws SQLException {
-        group.getIoLock().lock();
-        try {
-            try (Connection c = this.connectionFactory.getConnection()) {
-                deleteGroupPermissions(c, group.getName());
+        try (Connection c = this.connectionFactory.getConnection()) {
+            deleteGroupPermissions(c, group.getName());
 
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_DELETE))) {
-                    ps.setString(1, group.getName());
-                    ps.execute();
-                }
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_DELETE))) {
+                ps.setString(1, group.getName());
+                ps.execute();
             }
-        } finally {
-            group.getIoLock().unlock();
         }
 
         this.plugin.getGroupManager().unload(group.getName());
@@ -564,7 +519,7 @@ public class SqlStorage implements StorageImplementation {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String holder = rs.getString("name");
-                        Node node = readNode(rs).toNode();
+                        Node node = readNode(rs);
 
                         N match = constraint.filterConstraintMatch(node);
                         if (match != null) {
@@ -580,22 +535,17 @@ public class SqlStorage implements StorageImplementation {
     @Override
     public Track createAndLoadTrack(String name) throws SQLException {
         Track track = this.plugin.getTrackManager().getOrMake(name);
-        track.getIoLock().lock();
-        try {
-            List<String> groups;
-            try (Connection c = this.connectionFactory.getConnection()) {
-                groups = selectTrack(c, track.getName());
-            }
+        List<String> groups;
+        try (Connection c = this.connectionFactory.getConnection()) {
+            groups = selectTrack(c, track.getName());
+        }
 
-            if (groups != null) {
-                track.setGroups(groups);
-            } else {
-                try (Connection c = this.connectionFactory.getConnection()) {
-                    insertTrack(c, track.getName(), track.getGroups());
-                }
+        if (groups != null) {
+            track.setGroups(groups);
+        } else {
+            try (Connection c = this.connectionFactory.getConnection()) {
+                insertTrack(c, track.getName(), track.getGroups());
             }
-        } finally {
-            track.getIoLock().unlock();
         }
         return track;
     }
@@ -612,17 +562,12 @@ public class SqlStorage implements StorageImplementation {
         }
 
         Track track = this.plugin.getTrackManager().getOrMake(name);
-        track.getIoLock().lock();
-        try {
-            List<String> groups;
-            try (Connection c = this.connectionFactory.getConnection()) {
-                groups = selectTrack(c, name);
-            }
-
-            track.setGroups(groups);
-        } finally {
-            track.getIoLock().unlock();
+        List<String> groups;
+        try (Connection c = this.connectionFactory.getConnection()) {
+            groups = selectTrack(c, name);
         }
+
+        track.setGroups(groups);
         return Optional.of(track);
     }
 
@@ -634,13 +579,8 @@ public class SqlStorage implements StorageImplementation {
 
             for (String trackName : tracks) {
                 Track track = this.plugin.getTrackManager().getOrMake(trackName);
-                track.getIoLock().lock();
-                try {
-                    List<String> groups = selectTrack(c, trackName);
-                    track.setGroups(groups);
-                } finally {
-                    track.getIoLock().unlock();
-                }
+                List<String> groups = selectTrack(c, trackName);
+                track.setGroups(groups);
             }
         }
 
@@ -649,28 +589,18 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public void saveTrack(Track track) throws SQLException {
-        track.getIoLock().lock();
-        try {
-            try (Connection c = this.connectionFactory.getConnection()) {
-                updateTrack(c, track.getName(), track.getGroups());
-            }
-        } finally {
-            track.getIoLock().unlock();
+        try (Connection c = this.connectionFactory.getConnection()) {
+            updateTrack(c, track.getName(), track.getGroups());
         }
     }
 
     @Override
     public void deleteTrack(Track track) throws SQLException {
-        track.getIoLock().lock();
-        try {
-            try (Connection c = this.connectionFactory.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_DELETE))) {
-                    ps.setString(1, track.getName());
-                    ps.execute();
-                }
+        try (Connection c = this.connectionFactory.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_DELETE))) {
+                ps.setString(1, track.getName());
+                ps.execute();
             }
-        } finally {
-            track.getIoLock().unlock();
         }
 
         this.plugin.getTrackManager().unload(track.getName());
@@ -797,7 +727,7 @@ public class SqlStorage implements StorageImplementation {
                 .build();
     }
 
-    private static SqlNode readNode(ResultSet rs) throws SQLException {
+    private static Node readNode(ResultSet rs) throws SQLException {
         long id = rs.getLong("id");
         String permission = rs.getString("permission");
         boolean value = rs.getBoolean("value");
@@ -805,33 +735,50 @@ public class SqlStorage implements StorageImplementation {
         String world = rs.getString("world");
         long expiry = rs.getLong("expiry");
         String contexts = rs.getString("contexts");
-        return SqlNode.fromSqlFields(id, permission, value, server, world, expiry, contexts);
+
+        if (Strings.isNullOrEmpty(server)) {
+            server = "global";
+        }
+        if (Strings.isNullOrEmpty(world)) {
+            world = "global";
+        }
+
+        return NodeBuilders.determineMostApplicable(permission)
+                .value(value)
+                .withContext(DefaultContextKeys.SERVER_KEY, server)
+                .withContext(DefaultContextKeys.WORLD_KEY, world)
+                .expiry(expiry)
+                .withContext(ContextSetJsonSerializer.deserialize(GsonProvider.normal(), contexts).immutableCopy())
+                .withMetadata(SqlRowId.KEY, new SqlRowId(id))
+                .build();
     }
 
-    private static void writeNode(SqlNode nd, PreparedStatement ps) throws SQLException {
-        ps.setString(2, nd.getPermission());
-        ps.setBoolean(3, nd.getValue());
-        ps.setString(4, nd.getServer());
-        ps.setString(5, nd.getWorld());
-        ps.setLong(6, nd.getExpiry());
-        ps.setString(7, GsonProvider.normal().toJson(ContextSetJsonSerializer.serialize(nd.getContexts())));
+    private static String getFirstContextValue(MutableContextSet set, String key) {
+        Set<String> values = set.getValues(key);
+        String value = values.stream().sorted().findFirst().orElse(null);
+        if (value != null) {
+            set.remove(key, value);
+        } else {
+            value = "global";
+        }
+        return value;
     }
 
-    private static Set<SqlNode> getMissingFromRemote(Set<SqlNode> local, Set<SqlNode> remote) {
-        // entries in local but not remote need to be added
-        Set<SqlNode> missingFromRemote = new HashSet<>(local);
-        missingFromRemote.removeAll(remote);
-        return missingFromRemote;
+    private static void writeNode(Node node, PreparedStatement ps) throws SQLException {
+        MutableContextSet contexts = node.getContexts().mutableCopy();
+        String server = getFirstContextValue(contexts, DefaultContextKeys.SERVER_KEY);
+        String world = getFirstContextValue(contexts, DefaultContextKeys.WORLD_KEY);
+        long expiry = node.hasExpiry() ? node.getExpiry().getEpochSecond() : 0L;
+
+        ps.setString(2, node.getKey());
+        ps.setBoolean(3, node.getValue());
+        ps.setString(4, server);
+        ps.setString(5, world);
+        ps.setLong(6, expiry);
+        ps.setString(7, GsonProvider.normal().toJson(ContextSetJsonSerializer.serialize(contexts)));
     }
 
-    private static Set<SqlNode> getMissingFromLocal(Set<SqlNode> local, Set<SqlNode> remote) {
-        // entries in remote but not local need to be removed
-        Set<SqlNode> missingFromLocal = new HashSet<>(remote);
-        missingFromLocal.removeAll(local);
-        return missingFromLocal;
-    }
-
-    private <T extends Collection<SqlNode>> T selectUserPermissions(T nodes, Connection c, UUID user) throws SQLException {
+    private <T extends Collection<Node>> T selectUserPermissions(T nodes, Connection c, UUID user) throws SQLException {
         try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT))) {
             ps.setString(1, user.toString());
             try (ResultSet rs = ps.executeQuery()) {
@@ -868,19 +815,42 @@ public class SqlStorage implements StorageImplementation {
         }
     }
 
-    private void updateUserPermissions(Connection c, UUID user, Set<SqlNode> add, Set<SqlNode> delete) throws SQLException {
+    private void updateUserPermissions(Connection c, UUID user, Set<Node> add, Set<Node> delete) throws SQLException {
         if (!delete.isEmpty()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
-                for (SqlNode node : delete) {
-                    ps.setLong(1, node.getSqlId());
-                    ps.addBatch();
+            List<Long> rowIds = new ArrayList<>();
+            List<Node> nodesWithoutRow = new ArrayList<>();
+            for (Node node : delete) {
+                SqlRowId rowId = node.getMetadata(SqlRowId.KEY).orElse(null);
+                if (rowId != null) {
+                    rowIds.add(rowId.getRowId());
+                } else {
+                    nodesWithoutRow.add(node);
                 }
-                ps.executeBatch();
+            }
+
+            if (!rowIds.isEmpty()) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
+                    for (Long id : rowIds) {
+                        ps.setLong(1, id);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            }
+            if (!nodesWithoutRow.isEmpty()) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE_SPECIFIC_PROPS))) {
+                    for (Node node : nodesWithoutRow) {
+                        ps.setString(1, user.toString());
+                        writeNode(node, ps);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
             }
         }
         if (!add.isEmpty()) {
             try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_INSERT))) {
-                for (SqlNode node : add) {
+                for (Node node : add) {
                     ps.setString(1, user.toString());
                     writeNode(node, ps);
                     ps.addBatch();
@@ -929,7 +899,7 @@ public class SqlStorage implements StorageImplementation {
         return groups;
     }
 
-    private <T extends Collection<SqlNode>> T selectGroupPermissions(T nodes, Connection c, String group) throws SQLException {
+    private <T extends Collection<Node>> T selectGroupPermissions(T nodes, Connection c, String group) throws SQLException {
         try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT))) {
             ps.setString(1, group);
             try (ResultSet rs = ps.executeQuery()) {
@@ -941,12 +911,12 @@ public class SqlStorage implements StorageImplementation {
         return nodes;
     }
 
-    private void selectAllGroupPermissions(Map<String, Collection<SqlNode>> nodes, Connection c) throws SQLException {
+    private void selectAllGroupPermissions(Map<String, Collection<Node>> nodes, Connection c) throws SQLException {
         try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT_ALL))) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String holder = rs.getString("name");
-                    Collection<SqlNode> list = nodes.get(holder);
+                    Collection<Node> list = nodes.get(holder);
                     if (list != null) {
                         list.add(readNode(rs));
                     }
@@ -962,19 +932,42 @@ public class SqlStorage implements StorageImplementation {
         }
     }
 
-    private void updateGroupPermissions(Connection c, String group, Set<SqlNode> add, Set<SqlNode> delete) throws SQLException {
+    private void updateGroupPermissions(Connection c, String group, Set<Node> add, Set<Node> delete) throws SQLException {
         if (!delete.isEmpty()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
-                for (SqlNode node : delete) {
-                    ps.setLong(1, node.getSqlId());
-                    ps.addBatch();
+            List<Long> rowIds = new ArrayList<>();
+            List<Node> nodesWithoutRow = new ArrayList<>();
+            for (Node node : delete) {
+                SqlRowId rowId = node.getMetadata(SqlRowId.KEY).orElse(null);
+                if (rowId != null) {
+                    rowIds.add(rowId.getRowId());
+                } else {
+                    nodesWithoutRow.add(node);
                 }
-                ps.executeBatch();
+            }
+
+            if (!rowIds.isEmpty()) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
+                    for (Long id : rowIds) {
+                        ps.setLong(1, id);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            }
+            if (!nodesWithoutRow.isEmpty()) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC_PROPS))) {
+                    for (Node node : nodesWithoutRow) {
+                        ps.setString(1, group);
+                        writeNode(node, ps);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
             }
         }
         if (!add.isEmpty()) {
             try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_INSERT))) {
-                for (SqlNode node : add) {
+                for (Node node : add) {
                     ps.setString(1, group);
                     writeNode(node, ps);
                     ps.addBatch();

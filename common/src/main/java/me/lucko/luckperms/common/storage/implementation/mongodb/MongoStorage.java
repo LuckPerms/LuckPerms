@@ -64,7 +64,6 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.PlayerSaveResult;
-import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 
@@ -72,6 +71,7 @@ import org.bson.Document;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -298,53 +298,44 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public User loadUser(UUID uniqueId, String username) {
         User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
-        user.getIoLock().lock();
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUniqueId())).iterator()) {
-                if (cursor.hasNext()) {
-                    // User exists, let's load.
-                    Document d = cursor.next();
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
+        try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUniqueId())).iterator()) {
+            if (cursor.hasNext()) {
+                // User exists, let's load.
+                Document d = cursor.next();
 
-                    String name = d.getString("name");
-                    user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
-                    user.setNodes(DataType.NORMAL, nodesFromDoc(d));
-                    user.setUsername(name, true);
+                String name = d.getString("name");
+                user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
+                user.loadNodesFromStorage(nodesFromDoc(d));
+                user.setUsername(name, true);
 
-                    boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                    if (user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name))) {
-                        save = true;
-                    }
+                boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                if (user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name))) {
+                    save = true;
+                }
 
-                    if (save | user.auditTemporaryNodes()) {
-                        c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user));
-                    }
-                } else {
-                    if (this.plugin.getUserManager().shouldSave(user)) {
-                        user.clearNodes(DataType.NORMAL, null, true);
-                        user.getPrimaryGroup().setStoredValue(null);
-                        this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                    }
+                if (save | user.auditTemporaryNodes()) {
+                    c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user));
+                }
+            } else {
+                if (this.plugin.getUserManager().shouldSave(user)) {
+                    user.loadNodesFromStorage(Collections.emptyList());
+                    user.getPrimaryGroup().setStoredValue(null);
+                    this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
                 }
             }
-        } finally {
-            user.getIoLock().unlock();
         }
         return user;
     }
 
     @Override
     public void saveUser(User user) {
-        user.getIoLock().lock();
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-            if (!this.plugin.getUserManager().shouldSave(user)) {
-                c.deleteOne(new Document("_id", user.getUniqueId()));
-            } else {
-                c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user), new ReplaceOptions().upsert(true));
-            }
-        } finally {
-            user.getIoLock().unlock();
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
+        user.normalData().exportChanges();
+        if (!this.plugin.getUserManager().shouldSave(user)) {
+            c.deleteOne(new Document("_id", user.getUniqueId()));
+        } else {
+            c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user), new ReplaceOptions().upsert(true));
         }
     }
 
@@ -388,50 +379,31 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public Group createAndLoadGroup(String name) {
         Group group = this.plugin.getGroupManager().getOrMake(name);
-        group.getIoLock().lock();
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
-                if (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    group.setNodes(DataType.NORMAL, nodesFromDoc(d));
-                } else {
-                    c.insertOne(groupToDoc(group));
-                }
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
+        try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
+            if (cursor.hasNext()) {
+                Document d = cursor.next();
+                group.loadNodesFromStorage(nodesFromDoc(d));
+            } else {
+                c.insertOne(groupToDoc(group));
             }
-        } finally {
-            group.getIoLock().unlock();
         }
         return group;
     }
 
     @Override
     public Optional<Group> loadGroup(String name) {
-        Group group = this.plugin.getGroupManager().getIfLoaded(name);
-        if (group != null) {
-            group.getIoLock().lock();
-        }
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
-                if (!cursor.hasNext()) {
-                    return Optional.empty();
-                }
-
-                if (group == null) {
-                    group = this.plugin.getGroupManager().getOrMake(name);
-                    group.getIoLock().lock();
-                }
-
-                Document d = cursor.next();
-                group.setNodes(DataType.NORMAL, nodesFromDoc(d));
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
+        try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
+            if (!cursor.hasNext()) {
+                return Optional.empty();
             }
-        } finally {
-            if (group != null) {
-                group.getIoLock().unlock();
-            }
+
+            Group group = this.plugin.getGroupManager().getOrMake(name);
+            Document d = cursor.next();
+            group.loadNodesFromStorage(nodesFromDoc(d));
+            return Optional.of(group);
         }
-        return Optional.of(group);
     }
 
     @Override
@@ -454,24 +426,15 @@ public class MongoStorage implements StorageImplementation {
 
     @Override
     public void saveGroup(Group group) {
-        group.getIoLock().lock();
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-            c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new ReplaceOptions().upsert(true));
-        } finally {
-            group.getIoLock().unlock();
-        }
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
+        group.normalData().exportChanges();
+        c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new ReplaceOptions().upsert(true));
     }
 
     @Override
     public void deleteGroup(Group group) {
-        group.getIoLock().lock();
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-            c.deleteOne(new Document("_id", group.getName()));
-        } finally {
-            group.getIoLock().unlock();
-        }
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
+        c.deleteOne(new Document("_id", group.getName()));
     }
 
     @Override
@@ -498,53 +461,33 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public Track createAndLoadTrack(String name) {
         Track track = this.plugin.getTrackManager().getOrMake(name);
-        track.getIoLock().lock();
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
-                if (!cursor.hasNext()) {
-                    c.insertOne(trackToDoc(track));
-                } else {
-                    Document d = cursor.next();
-                    //noinspection unchecked
-                    track.setGroups((List<String>) d.get("groups"));
-                }
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
+        try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
+            if (!cursor.hasNext()) {
+                c.insertOne(trackToDoc(track));
+            } else {
+                Document d = cursor.next();
+                //noinspection unchecked
+                track.setGroups((List<String>) d.get("groups"));
             }
-        } finally {
-            track.getIoLock().unlock();
         }
         return track;
     }
 
     @Override
     public Optional<Track> loadTrack(String name) {
-        Track track = this.plugin.getTrackManager().getIfLoaded(name);
-        if (track != null) {
-            track.getIoLock().lock();
-        }
-
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
-                if (!cursor.hasNext()) {
-                    return Optional.empty();
-                }
-
-                if (track == null) {
-                    track = this.plugin.getTrackManager().getOrMake(name);
-                    track.getIoLock().lock();
-                }
-
-                Document d = cursor.next();
-                //noinspection unchecked
-                track.setGroups((List<String>) d.get("groups"));
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
+        try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
+            if (!cursor.hasNext()) {
+                return Optional.empty();
             }
-        } finally {
-            if (track != null) {
-                track.getIoLock().unlock();
-            }
+
+            Track track = this.plugin.getTrackManager().getOrMake(name);
+            Document d = cursor.next();
+            //noinspection unchecked
+            track.setGroups((List<String>) d.get("groups"));
+            return Optional.of(track);
         }
-        return Optional.of(track);
     }
 
     @Override
@@ -567,24 +510,14 @@ public class MongoStorage implements StorageImplementation {
 
     @Override
     public void saveTrack(Track track) {
-        track.getIoLock().lock();
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
-            c.replaceOne(new Document("_id", track.getName()), trackToDoc(track));
-        } finally {
-            track.getIoLock().unlock();
-        }
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
+        c.replaceOne(new Document("_id", track.getName()), trackToDoc(track));
     }
 
     @Override
     public void deleteTrack(Track track) {
-        track.getIoLock().lock();
-        try {
-            MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
-            c.deleteOne(new Document("_id", track.getName()));
-        } finally {
-            track.getIoLock().unlock();
-        }
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
+        c.deleteOne(new Document("_id", track.getName()));
     }
 
     @Override

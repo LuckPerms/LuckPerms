@@ -55,7 +55,6 @@ import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.PlayerSaveResult;
-import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
@@ -193,14 +192,13 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     @Override
     public User loadUser(UUID uniqueId, String username) {
         User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
-        user.getIoLock().lock();
         try {
             ConfigurationNode object = readFile(StorageLocation.USER, uniqueId.toString());
             if (object != null) {
                 String name = object.getNode("name").getString();
                 user.getPrimaryGroup().setStoredValue(object.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").getString());
 
-                user.setNodes(DataType.NORMAL, readNodes(object));
+                user.loadNodesFromStorage(readNodes(object));
                 user.setUsername(name, true);
 
                 boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -213,23 +211,21 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 }
             } else {
                 if (this.plugin.getUserManager().shouldSave(user)) {
-                    user.clearNodes(DataType.NORMAL, null, true);
+                    user.loadNodesFromStorage(Collections.emptyList());
                     user.getPrimaryGroup().setStoredValue(null);
                     this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
                 }
             }
         } catch (Exception e) {
             throw reportException(uniqueId.toString(), e);
-        } finally {
-            user.getIoLock().unlock();
         }
         return user;
     }
 
     @Override
     public void saveUser(User user) {
-        user.getIoLock().lock();
         try {
+            user.normalData().exportChanges();
             if (!this.plugin.getUserManager().shouldSave(user)) {
                 saveFile(StorageLocation.USER, user.getUniqueId().toString(), null);
             } else {
@@ -245,20 +241,17 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             }
         } catch (Exception e) {
             throw reportException(user.getUniqueId().toString(), e);
-        } finally {
-            user.getIoLock().unlock();
         }
     }
 
     @Override
     public Group createAndLoadGroup(String name) {
         Group group = this.plugin.getGroupManager().getOrMake(name);
-        group.getIoLock().lock();
         try {
             ConfigurationNode object = readFile(StorageLocation.GROUP, name);
 
             if (object != null) {
-                group.setNodes(DataType.NORMAL, readNodes(object));
+                group.loadNodesFromStorage(readNodes(object));
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
                 if (this instanceof SeparatedConfigurateStorage) {
@@ -270,19 +263,12 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             }
         } catch (Exception e) {
             throw reportException(name, e);
-        } finally {
-            group.getIoLock().unlock();
         }
         return group;
     }
 
     @Override
     public Optional<Group> loadGroup(String name) {
-        Group group = this.plugin.getGroupManager().getIfLoaded(name);
-        if (group != null) {
-            group.getIoLock().lock();
-        }
-
         try {
             ConfigurationNode object = readFile(StorageLocation.GROUP, name);
 
@@ -290,26 +276,17 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 return Optional.empty();
             }
 
-            if (group == null) {
-                group = this.plugin.getGroupManager().getOrMake(name);
-                group.getIoLock().lock();
-            }
-
-            group.setNodes(DataType.NORMAL, readNodes(object));
-
+            Group group = this.plugin.getGroupManager().getOrMake(name);
+            group.loadNodesFromStorage(readNodes(object));
+            return Optional.of(group);
         } catch (Exception e) {
             throw reportException(name, e);
-        } finally {
-            if (group != null) {
-                group.getIoLock().unlock();
-            }
         }
-        return Optional.of(group);
     }
 
     @Override
     public void saveGroup(Group group) {
-        group.getIoLock().lock();
+        group.normalData().exportChanges();
         try {
             ConfigurationNode data = SimpleConfigurationNode.root();
             if (this instanceof SeparatedConfigurateStorage) {
@@ -320,20 +297,15 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             saveFile(StorageLocation.GROUP, group.getName(), data);
         } catch (Exception e) {
             throw reportException(group.getName(), e);
-        } finally {
-            group.getIoLock().unlock();
         }
     }
 
     @Override
     public void deleteGroup(Group group) {
-        group.getIoLock().lock();
         try {
             saveFile(StorageLocation.GROUP, group.getName(), null);
         } catch (Exception e) {
             throw reportException(group.getName(), e);
-        } finally {
-            group.getIoLock().unlock();
         }
         this.plugin.getGroupManager().unload(group.getName());
     }
@@ -341,7 +313,6 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     @Override
     public Track createAndLoadTrack(String name) {
         Track track = this.plugin.getTrackManager().getOrMake(name);
-        track.getIoLock().lock();
         try {
             ConfigurationNode object = readFile(StorageLocation.TRACK, name);
 
@@ -362,19 +333,12 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
         } catch (Exception e) {
             throw reportException(name, e);
-        } finally {
-            track.getIoLock().unlock();
         }
         return track;
     }
 
     @Override
     public Optional<Track> loadTrack(String name) {
-        Track track = this.plugin.getTrackManager().getIfLoaded(name);
-        if (track != null) {
-            track.getIoLock().lock();
-        }
-
         try {
             ConfigurationNode object = readFile(StorageLocation.TRACK, name);
 
@@ -382,30 +346,19 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 return Optional.empty();
             }
 
-            if (track == null) {
-                track = this.plugin.getTrackManager().getOrMake(name);
-                track.getIoLock().lock();
-            }
-
+            Track track = this.plugin.getTrackManager().getOrMake(name);
             List<String> groups = object.getNode("groups").getChildrenList().stream()
                     .map(ConfigurationNode::getString)
                     .collect(ImmutableCollectors.toList());
-
             track.setGroups(groups);
-
+            return Optional.of(track);
         } catch (Exception e) {
             throw reportException(name, e);
-        } finally {
-            if (track != null) {
-                track.getIoLock().unlock();
-            }
         }
-        return Optional.of(track);
     }
 
     @Override
     public void saveTrack(Track track) {
-        track.getIoLock().lock();
         try {
             ConfigurationNode data = SimpleConfigurationNode.root();
             if (this instanceof SeparatedConfigurateStorage) {
@@ -415,20 +368,15 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             saveFile(StorageLocation.TRACK, track.getName(), data);
         } catch (Exception e) {
             throw reportException(track.getName(), e);
-        } finally {
-            track.getIoLock().unlock();
         }
     }
 
     @Override
     public void deleteTrack(Track track) {
-        track.getIoLock().lock();
         try {
             saveFile(StorageLocation.TRACK, track.getName(), null);
         } catch (Exception e) {
             throw reportException(track.getName(), e);
-        } finally {
-            track.getIoLock().unlock();
         }
         this.plugin.getTrackManager().unload(track.getName());
     }
