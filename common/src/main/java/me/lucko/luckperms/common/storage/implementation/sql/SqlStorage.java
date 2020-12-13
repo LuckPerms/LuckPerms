@@ -69,7 +69,6 @@ import java.sql.Statement;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -320,58 +319,57 @@ public class SqlStorage implements StorageImplementation {
     @Override
     public User loadUser(UUID uniqueId, String username) throws SQLException {
         User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
+
         List<Node> nodes;
-        String primaryGroup = null;
-        String savedUsername = null;
+        SqlPlayerData playerData;
 
         try (Connection c = this.connectionFactory.getConnection()) {
             nodes = selectUserPermissions(c, user.getUniqueId());
-
-            SqlPlayerData playerData = selectPlayerData(c, user.getUniqueId());
-            if (playerData != null) {
-                primaryGroup = playerData.primaryGroup;
-                savedUsername = playerData.username;
-            }
+            playerData = selectPlayerData(c, user.getUniqueId());
         }
 
-        // update username & primary group
-        if (primaryGroup == null) {
-            primaryGroup = GroupManager.DEFAULT_GROUP_NAME;
-        }
-        user.getPrimaryGroup().setStoredValue(primaryGroup);
-
-        // Update their username to what was in the storage if the one in the local instance is null
-        user.setUsername(savedUsername, true);
-
-        if (!nodes.isEmpty()) {
-            user.loadNodesFromStorage(nodes);
-
-            // Save back to the store if data they were given any defaults or had permissions expire
-            if (this.plugin.getUserManager().giveDefaultIfNeeded(user, false) | user.auditTemporaryNodes()) {
-                // This should be fine, as the lock will be acquired by the same thread.
-                saveUser(user);
+        if (playerData != null) {
+            if (playerData.primaryGroup != null) {
+                user.getPrimaryGroup().setStoredValue(playerData.primaryGroup);
+            } else {
+                user.getPrimaryGroup().setStoredValue(GroupManager.DEFAULT_GROUP_NAME);
             }
 
-        } else {
-            if (this.plugin.getUserManager().shouldSave(user)) {
-                user.loadNodesFromStorage(Collections.emptyList());
-                user.getPrimaryGroup().setStoredValue(null);
-                this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
-            }
+            user.setUsername(playerData.username, true);
         }
+
+        user.loadNodesFromStorage(nodes);
+        this.plugin.getUserManager().giveDefaultIfNeeded(user);
+
+        if (user.auditTemporaryNodes()) {
+            saveUser(user);
+        }
+
         return user;
     }
 
     @Override
     public void saveUser(User user) throws SQLException {
-        if (!this.plugin.getUserManager().shouldSave(user)) {
+        MutateResult changes = user.normalData().exportChanges(results -> {
+            if (this.plugin.getUserManager().isNonDefaultUser(user)) {
+                return true;
+            }
+
+            // if the only change is adding the default node, we don't need to export
+            if (results.getChanges().size() == 1) {
+                MutateResult.Change onlyChange = results.getChanges().iterator().next();
+                return !(onlyChange.getType() == MutateResult.ChangeType.ADD && this.plugin.getUserManager().isDefaultNode(onlyChange.getNode()));
+            }
+
+            return true;
+        });
+
+        if (changes == null) {
             try (Connection c = this.connectionFactory.getConnection()) {
                 deleteUser(c, user.getUniqueId());
             }
             return;
         }
-
-        MutateResult changes = user.normalData().exportChanges();
 
         try (Connection c = this.connectionFactory.getConnection()) {
             updateUserPermissions(c, user.getUniqueId(), changes.getAdded(), changes.getRemoved());
@@ -478,14 +476,7 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public void saveGroup(Group group) throws SQLException {
-        if (group.normalData().isEmpty()) {
-            try (Connection c = this.connectionFactory.getConnection()) {
-                deleteGroupPermissions(c, group.getName());
-            }
-            return;
-        }
-
-        MutateResult changes = group.normalData().exportChanges();
+        MutateResult changes = group.normalData().exportChanges(c -> true);
 
         if (!changes.isEmpty()) {
             try (Connection c = this.connectionFactory.getConnection()) {

@@ -51,6 +51,10 @@ public class MutateResult {
         return changes;
     }
 
+    void clear() {
+        this.changes.clear();
+    }
+
     public boolean isEmpty() {
         return this.changes.isEmpty();
     }

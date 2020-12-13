@@ -303,25 +303,24 @@ public class MongoStorage implements StorageImplementation {
             if (cursor.hasNext()) {
                 // User exists, let's load.
                 Document d = cursor.next();
-
                 String name = d.getString("name");
+
                 user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
-                user.loadNodesFromStorage(nodesFromDoc(d));
                 user.setUsername(name, true);
 
-                boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                if (user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name))) {
-                    save = true;
-                }
+                user.loadNodesFromStorage(nodesFromDoc(d));
+                this.plugin.getUserManager().giveDefaultIfNeeded(user);
 
-                if (save | user.auditTemporaryNodes()) {
+
+                boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
+                if (updatedUsername | user.auditTemporaryNodes()) {
                     c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user));
                 }
             } else {
-                if (this.plugin.getUserManager().shouldSave(user)) {
+                if (this.plugin.getUserManager().isNonDefaultUser(user)) {
                     user.loadNodesFromStorage(Collections.emptyList());
                     user.getPrimaryGroup().setStoredValue(null);
-                    this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                    this.plugin.getUserManager().giveDefaultIfNeeded(user);
                 }
             }
         }
@@ -331,8 +330,8 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public void saveUser(User user) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-        user.normalData().exportChanges();
-        if (!this.plugin.getUserManager().shouldSave(user)) {
+        user.normalData().discardChanges();
+        if (!this.plugin.getUserManager().isNonDefaultUser(user)) {
             c.deleteOne(new Document("_id", user.getUniqueId()));
         } else {
             c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user), new ReplaceOptions().upsert(true));
@@ -427,7 +426,7 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public void saveGroup(Group group) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-        group.normalData().exportChanges();
+        group.normalData().discardChanges();
         c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new ReplaceOptions().upsert(true));
     }
 

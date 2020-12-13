@@ -79,8 +79,8 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
     }
 
     @Override
-    public boolean giveDefaultIfNeeded(User user, boolean save) {
-        boolean work = false;
+    public boolean giveDefaultIfNeeded(User user) {
+        boolean requireSave = false;
 
         Collection<InheritanceNode> globalGroups = user.normalData().inheritanceNodesInContext(ImmutableContextSetImpl.EMPTY);
 
@@ -106,7 +106,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
                 // if the group is null, it'll be resolved in the next step
                 if (group != null) {
                     user.getPrimaryGroup().setStoredValue(group);
-                    work = true;
+                    requireSave = true;
                 }
             }
         }
@@ -120,14 +120,39 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         if (!hasGroup) {
             user.getPrimaryGroup().setStoredValue(GroupManager.DEFAULT_GROUP_NAME);
             user.setNode(DataType.NORMAL, Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build(), false);
-            work = true;
+            requireSave = true;
         }
 
-        if (work && save) {
-            this.plugin.getStorage().saveUser(user);
+        return requireSave;
+    }
+
+    @Override
+    public boolean isNonDefaultUser(User user) {
+        if (user.normalData().size() != 1) {
+            return true;
         }
 
-        return work;
+        List<Node> nodes = user.normalData().asList();
+        if (nodes.size() != 1) {
+            return true;
+        }
+
+        Node onlyNode = nodes.iterator().next();
+        if (!isDefaultNode(onlyNode)) {
+            return true;
+        }
+
+        // Not in the default primary group
+        return !user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME);
+    }
+
+    @Override
+    public boolean isDefaultNode(Node node) {
+        return node instanceof InheritanceNode &&
+                node.getValue() &&
+                !node.hasExpiry() &&
+                node.getContexts().isEmpty() &&
+                ((InheritanceNode) node).getGroupName().equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME);
     }
 
     @Override
@@ -157,39 +182,4 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         getAll().values().forEach(u -> u.getCachedData().invalidatePermissionCalculators());
     }
 
-    /**
-     * Check whether the user's state indicates that they should be persisted to storage.
-     *
-     * @param user the user to check
-     * @return true if the user should be saved
-     */
-    @Override
-    public boolean shouldSave(User user) {
-        if (user.normalData().size() != 1) {
-            return true;
-        }
-
-        List<Node> nodes = user.normalData().asList();
-        if (nodes.size() != 1) {
-            return true;
-        }
-
-        Node onlyNode = nodes.iterator().next();
-        if (!(onlyNode instanceof InheritanceNode)) {
-            return true;
-        }
-
-        if (onlyNode.hasExpiry() || !onlyNode.getContexts().isEmpty()) {
-            return true;
-        }
-
-        if (!((InheritanceNode) onlyNode).getGroupName().equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
-            // The user's only node is not the default group one.
-            return true;
-        }
-
-
-        // Not in the default primary group
-        return !user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME);
-    }
 }

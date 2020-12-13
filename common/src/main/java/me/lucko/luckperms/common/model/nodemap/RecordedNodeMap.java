@@ -40,7 +40,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -51,7 +50,8 @@ import java.util.stream.Stream;
 public class RecordedNodeMap implements NodeMap {
 
     private final NodeMap delegate;
-    private final AtomicReference<MutateResult> changes = new AtomicReference<>(new MutateResult());
+    private final Object[] mutex = new Object[0];
+    private MutateResult changes = new MutateResult();
 
     public RecordedNodeMap(NodeMap delegate) {
         this.delegate = delegate;
@@ -61,15 +61,26 @@ public class RecordedNodeMap implements NodeMap {
         return this.delegate;
     }
 
-    public MutateResult exportChanges() {
-        synchronized (this.changes) {
-            return this.changes.getAndSet(new MutateResult());
+    public void discardChanges() {
+        synchronized (this.mutex) {
+            this.changes.clear();
+        }
+    }
+
+    public MutateResult exportChanges(Predicate<MutateResult> onlyIf) {
+        synchronized (this.mutex) {
+            MutateResult existing = this.changes;
+            if (onlyIf.test(existing)) {
+                this.changes = new MutateResult();
+                return existing;
+            }
+            return null;
         }
     }
 
     private MutateResult record(MutateResult result) {
-        synchronized (this.changes) {
-            this.changes.get().mergeFrom(result);
+        synchronized (this.mutex) {
+            this.changes.mergeFrom(result);
         }
         return result;
     }

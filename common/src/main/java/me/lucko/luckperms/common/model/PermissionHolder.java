@@ -227,6 +227,7 @@ public abstract class PermissionHolder {
     }
 
     public void loadNodesFromStorage(Iterable<? extends Node> set) {
+        normalData().discardChanges(); // TODO: should be attempt to "replay" existing changes on top of the new data?
         normalData().bypass().setContent(set);
         invalidateCache();
     }
@@ -592,7 +593,7 @@ public abstract class PermissionHolder {
         }
 
         if (getType() == HolderType.USER && giveDefault) {
-            getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
+            getPlugin().getUserManager().giveDefaultIfNeeded((User) this);
         }
 
         ImmutableSet<Node> after = data.asImmutableSet();
@@ -614,7 +615,7 @@ public abstract class PermissionHolder {
         }
 
         if (getType() == HolderType.USER && giveDefault) {
-            getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
+            getPlugin().getUserManager().giveDefaultIfNeeded((User) this);
         }
 
         ImmutableSet<Node> after = data.asImmutableSet();

@@ -197,23 +197,20 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             if (object != null) {
                 String name = object.getNode("name").getString();
                 user.getPrimaryGroup().setStoredValue(object.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").getString());
-
-                user.loadNodesFromStorage(readNodes(object));
                 user.setUsername(name, true);
 
-                boolean save = this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                if (user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name))) {
-                    save = true;
-                }
+                user.loadNodesFromStorage(readNodes(object));
+                this.plugin.getUserManager().giveDefaultIfNeeded(user);
 
-                if (save | user.auditTemporaryNodes()) {
+                boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
+                if (updatedUsername | user.auditTemporaryNodes()) {
                     saveUser(user);
                 }
             } else {
-                if (this.plugin.getUserManager().shouldSave(user)) {
+                if (this.plugin.getUserManager().isNonDefaultUser(user)) {
                     user.loadNodesFromStorage(Collections.emptyList());
                     user.getPrimaryGroup().setStoredValue(null);
-                    this.plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                    this.plugin.getUserManager().giveDefaultIfNeeded(user);
                 }
             }
         } catch (Exception e) {
@@ -224,9 +221,9 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
     @Override
     public void saveUser(User user) {
+        user.normalData().discardChanges();
         try {
-            user.normalData().exportChanges();
-            if (!this.plugin.getUserManager().shouldSave(user)) {
+            if (!this.plugin.getUserManager().isNonDefaultUser(user)) {
                 saveFile(StorageLocation.USER, user.getUniqueId().toString(), null);
             } else {
                 ConfigurationNode data = SimpleConfigurationNode.root();
@@ -286,7 +283,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
     @Override
     public void saveGroup(Group group) {
-        group.normalData().exportChanges();
+        group.normalData().discardChanges();
         try {
             ConfigurationNode data = SimpleConfigurationNode.root();
             if (this instanceof SeparatedConfigurateStorage) {
