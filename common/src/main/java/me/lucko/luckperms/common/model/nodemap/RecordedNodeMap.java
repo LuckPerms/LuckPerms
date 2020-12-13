@@ -40,6 +40,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -50,7 +52,7 @@ import java.util.stream.Stream;
 public class RecordedNodeMap implements NodeMap {
 
     private final NodeMap delegate;
-    private final Object[] mutex = new Object[0];
+    private final Lock lock = new ReentrantLock();
     private MutateResult changes = new MutateResult();
 
     public RecordedNodeMap(NodeMap delegate) {
@@ -62,25 +64,34 @@ public class RecordedNodeMap implements NodeMap {
     }
 
     public void discardChanges() {
-        synchronized (this.mutex) {
+        this.lock.lock();
+        try {
             this.changes.clear();
+        } finally {
+            this.lock.unlock();
         }
     }
 
     public MutateResult exportChanges(Predicate<MutateResult> onlyIf) {
-        synchronized (this.mutex) {
+        this.lock.lock();
+        try {
             MutateResult existing = this.changes;
             if (onlyIf.test(existing)) {
                 this.changes = new MutateResult();
                 return existing;
             }
             return null;
+        } finally {
+            this.lock.unlock();
         }
     }
 
     private MutateResult record(MutateResult result) {
-        synchronized (this.mutex) {
+        this.lock.lock();
+        try {
             this.changes.mergeFrom(result);
+        } finally {
+            this.lock.unlock();
         }
         return result;
     }

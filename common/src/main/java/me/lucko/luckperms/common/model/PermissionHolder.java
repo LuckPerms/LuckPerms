@@ -227,7 +227,8 @@ public abstract class PermissionHolder {
     }
 
     public void loadNodesFromStorage(Iterable<? extends Node> set) {
-        normalData().discardChanges(); // TODO: should be attempt to "replay" existing changes on top of the new data?
+        // TODO: should we attempt to "replay" existing changes on top of the new data?
+        normalData().discardChanges();
         normalData().bypass().setContent(set);
         invalidateCache();
     }
