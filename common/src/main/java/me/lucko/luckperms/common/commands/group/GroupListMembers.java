@@ -84,7 +84,7 @@ public class GroupListMembers extends ChildCommand<Group> {
         if (target.getName().equals(GroupManager.DEFAULT_GROUP_NAME)) {
             // include all non-saved online players in the results
             for (User user : plugin.getUserManager().getAll().values()) {
-                if (!plugin.getUserManager().shouldSave(user)) {
+                if (!plugin.getUserManager().isNonDefaultUser(user)) {
                     matchedUsers.add(NodeEntry.of(user.getUniqueId(), node));
                 }
             }

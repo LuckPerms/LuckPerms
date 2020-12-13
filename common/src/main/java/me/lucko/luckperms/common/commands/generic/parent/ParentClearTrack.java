@@ -94,7 +94,7 @@ public class ParentClearTrack extends GenericChildCommand {
         target.removeIf(DataType.NORMAL, context.isEmpty() ? null : context, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), false);
 
         if (target.getType() == HolderType.USER) {
-            plugin.getUserManager().giveDefaultIfNeeded(((User) target), false);
+            plugin.getUserManager().giveDefaultIfNeeded(((User) target));
         }
 
         int changed = before - target.normalData().size();

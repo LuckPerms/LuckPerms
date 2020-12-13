@@ -77,11 +77,6 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
                 .build(s -> {
                     SpongeGroup group = getIfLoaded(s);
                     if (group != null) {
-                        // they're already loaded, but the data might not actually be there yet
-                        // if stuff is being loaded, then the user's i/o lock will be locked by the storage impl
-                        group.getIoLock().lock();
-                        group.getIoLock().unlock();
-
                         return group.sponge();
                     }
 

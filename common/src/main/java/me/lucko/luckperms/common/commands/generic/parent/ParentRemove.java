@@ -101,7 +101,7 @@ public class ParentRemove extends GenericChildCommand {
                     .build().submit(plugin, sender);
 
             if (target.getType() == HolderType.USER) {
-                plugin.getUserManager().giveDefaultIfNeeded(((User) target), false);
+                plugin.getUserManager().giveDefaultIfNeeded(((User) target));
             }
 
             StorageAssistant.save(target, sender, plugin);

@@ -83,11 +83,6 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
                     // check if the user instance is already loaded.
                     SpongeUser user = getIfLoaded(u);
                     if (user != null) {
-                        // they're already loaded, but the data might not actually be there yet
-                        // if stuff is being loaded, then the user's i/o lock will be locked by the storage impl
-                        user.getIoLock().lock();
-                        user.getIoLock().unlock();
-
                         return user.sponge();
                     }
 

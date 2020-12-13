@@ -23,39 +23,35 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.tasks;
+package me.lucko.luckperms.common.storage.implementation.sql;
 
-import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import net.luckperms.api.node.metadata.NodeMetadataKey;
 
-public class ExpireTemporaryTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+public final class SqlRowId {
+    public static final NodeMetadataKey<SqlRowId> KEY = NodeMetadataKey.of("sqlrowid", SqlRowId.class);
 
-    public ExpireTemporaryTask(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
+    private final long rowId;
+
+    public SqlRowId(long rowId) {
+        this.rowId = rowId;
+    }
+
+    public long getRowId() {
+        return this.rowId;
     }
 
     @Override
-    public void run() {
-        boolean groupChanges = false;
-        for (Group group : this.plugin.getGroupManager().getAll().values()) {
-            if (group.auditTemporaryNodes()) {
-                this.plugin.getStorage().saveGroup(group);
-                groupChanges = true;
-            }
-        }
-
-        for (User user : this.plugin.getUserManager().getAll().values()) {
-            if (user.auditTemporaryNodes()) {
-                this.plugin.getStorage().saveUser(user);
-            }
-        }
-
-        if (groupChanges) {
-            this.plugin.getGroupManager().invalidateAllGroupCaches();
-            this.plugin.getUserManager().invalidateAllUserCaches();
-        }
+    public boolean equals(Object o) {
+        return this == o || (o instanceof SqlRowId && this.rowId == ((SqlRowId) o).rowId);
     }
 
+    @Override
+    public int hashCode() {
+        return Long.hashCode(this.rowId);
+    }
+
+    @Override
+    public String toString() {
+        return "SqlRowId{rowId=" + this.rowId + '}';
+    }
 }

@@ -32,6 +32,10 @@ import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
+import me.lucko.luckperms.common.model.nodemap.MutateResult;
+import me.lucko.luckperms.common.model.nodemap.NodeMap;
+import me.lucko.luckperms.common.model.nodemap.NodeMapMutable;
+import me.lucko.luckperms.common.model.nodemap.RecordedNodeMap;
 import me.lucko.luckperms.common.node.NodeEquality;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -59,18 +63,13 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Represents an object that can hold permissions, (a user or group)
@@ -112,7 +111,7 @@ public abstract class PermissionHolder {
      *
      * @see #normalData()
      */
-    private final NodeMap normalNodes = new NodeMap(this);
+    private final RecordedNodeMap normalNodes = new RecordedNodeMap(new NodeMapMutable(this));
 
     /**
      * The holders transient nodes.
@@ -124,13 +123,7 @@ public abstract class PermissionHolder {
      *
      * @see #transientData()
      */
-    private final NodeMap transientNodes = new NodeMap(this);
-
-    /**
-     * Lock used by Storage implementations to prevent concurrent read/writes
-     * @see #getIoLock()
-     */
-    private final Lock ioLock = new ReentrantLock();
+    private final NodeMap transientNodes = new NodeMapMutable(this);
 
     /**
      * Comparator used to ordering groups when calculating inheritance
@@ -152,10 +145,6 @@ public abstract class PermissionHolder {
         return this.plugin;
     }
 
-    public Lock getIoLock() {
-        return this.ioLock;
-    }
-
     public Comparator<? super PermissionHolder> getInheritanceComparator() {
         return this.inheritanceComparator;
     }
@@ -171,7 +160,7 @@ public abstract class PermissionHolder {
         }
     }
 
-    public NodeMap normalData() {
+    public RecordedNodeMap normalData() {
         return this.normalNodes;
     }
 
@@ -237,18 +226,20 @@ public abstract class PermissionHolder {
         getPlugin().getEventDispatcher().dispatchDataRecalculate(this);
     }
 
+    public void loadNodesFromStorage(Iterable<? extends Node> set) {
+        // TODO: should we attempt to "replay" existing changes on top of the new data?
+        normalData().discardChanges();
+        normalData().bypass().setContent(set);
+        invalidateCache();
+    }
+
     public void setNodes(DataType type, Iterable<? extends Node> set) {
         getData(type).setContent(set);
         invalidateCache();
     }
 
-    public void setNodes(DataType type, Stream<? extends Node> stream) {
-        getData(type).setContent(stream);
-        invalidateCache();
-    }
-
     public void mergeNodes(DataType type, Iterable<? extends Node> set) {
-        getData(type).mergeContent(set);
+        getData(type).addAll(set);
         invalidateCache();
     }
 
@@ -436,20 +427,19 @@ public abstract class PermissionHolder {
 
     private boolean auditTemporaryNodes(DataType dataType) {
         ImmutableSet<Node> before = getData(dataType).asImmutableSet();
-        Set<Node> removed = new HashSet<>();
 
-        boolean work = getData(dataType).auditTemporaryNodes(removed);
-        if (work) {
+        MutateResult result = getData(dataType).removeIf(Node::hasExpired);
+        if (!result.isEmpty()) {
             // call event
             ImmutableSet<Node> after = getData(dataType).asImmutableSet();
-            for (Node r : removed) {
+            for (Node r : result.getRemoved()) {
                 this.plugin.getEventDispatcher().dispatchNodeRemove(r, this, dataType, before, after);
             }
 
             // invalidate
             invalidateCache();
         }
-        return work;
+        return !result.isEmpty();
     }
 
     public Tristate hasNode(DataType type, Node node, NodeEqualityPredicate equalityPredicate) {
@@ -522,7 +512,7 @@ public abstract class PermissionHolder {
                 if (newNode != null) {
                     // Remove the old Node & add the new one.
                     ImmutableSet<Node> before = data.asImmutableSet();
-                    data.replace(newNode, otherMatch);
+                    data.removeThenAdd(otherMatch, newNode);
                     ImmutableSet<Node> after = data.asImmutableSet();
 
                     this.plugin.getEventDispatcher().dispatchNodeAdd(newNode, this, dataType, before, after);
@@ -572,7 +562,7 @@ public abstract class PermissionHolder {
 
                     // Remove the old Node & add the new one.
                     ImmutableSet<Node> before = data.asImmutableSet();
-                    data.replace(newNode, otherMatch);
+                    data.removeThenAdd(otherMatch, newNode);
                     ImmutableSet<Node> after = data.asImmutableSet();
 
                     this.plugin.getEventDispatcher().dispatchNodeRemove(otherMatch, this, dataType, before, after);
@@ -594,17 +584,17 @@ public abstract class PermissionHolder {
         ImmutableSet<Node> before = data.asImmutableSet();
 
         if (contextSet == null) {
-            if (!data.removeIf(predicate)) {
+            if (data.removeIf(predicate).isEmpty()) {
                 return false;
             }
         } else {
-            if (!data.removeIf(contextSet, predicate)) {
+            if (data.removeIf(contextSet, predicate).isEmpty()) {
                 return false;
             }
         }
 
         if (getType() == HolderType.USER && giveDefault) {
-            getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
+            getPlugin().getUserManager().giveDefaultIfNeeded((User) this);
         }
 
         ImmutableSet<Node> after = data.asImmutableSet();
@@ -626,7 +616,7 @@ public abstract class PermissionHolder {
         }
 
         if (getType() == HolderType.USER && giveDefault) {
-            getPlugin().getUserManager().giveDefaultIfNeeded((User) this, false);
+            getPlugin().getUserManager().giveDefaultIfNeeded((User) this);
         }
 
         ImmutableSet<Node> after = data.asImmutableSet();
