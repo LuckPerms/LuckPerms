@@ -180,16 +180,18 @@ public final class LuckPermsPermissionMap extends ForwardingMap<String, Permissi
                 continue;
             }
 
-            if (accumulator.containsKey(e.getKey())) {
+            String key = e.getKey().toLowerCase();
+
+            if (accumulator.containsKey(key)) {
                 continue; // Prevent infinite loops
             }
 
             // xor the value using the parent (nukkit logic, not mine)
             boolean value = e.getValue() ^ invert;
-            accumulator.put(e.getKey().toLowerCase(), value);
+            accumulator.put(key, value);
 
             // lookup any deeper children & resolve if present
-            Permission perm = this.delegate.get(e.getKey());
+            Permission perm = this.delegate.get(key);
             if (perm != null) {
                 resolveChildren(accumulator, perm.getChildren(), !value);
             }
