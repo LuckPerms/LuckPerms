@@ -3,7 +3,6 @@ version: ${pluginVersion}
 description: A permissions plugin
 author: Luck
 website: https://luckperms.net
-
 main: me.lucko.luckperms.bukkit.LPBukkitBootstrap
 load: STARTUP
 
@@ -12,14 +11,17 @@ load: STARTUP
 # LP is still compatible with pre-1.13 releases.
 api-version: 1.13
 
-# This means that all plugins that (soft-)depend on Vault, depend on LuckPerms too.
-# It in turn fixes issues where plugins using Vault cache the provided instance
-# when their plugin enables, or when they check for the presence of a service
-# provider, before LuckPerms has enabled.
+# Load LuckPerms before Vault. This means that all plugins that (soft-)depend
+# on Vault depend on LuckPerms too.
+#
+# This fixes issues caused by plugins obtaining the Vault service provider instance
+# only once when they initially enable. (if they haven't depended on LP, our registration
+# won't be there yet)
 loadbefore: [Vault]
 
 # Soft depend on LilyPad for messaging service impl
-softdepend: [LilyPad-Connect]
+# Soft depend on ViaVersion for adventure protocol facet
+softdepend: [LilyPad-Connect, ViaVersion]
 
 commands:
   luckperms:
