@@ -586,6 +586,21 @@ public interface Message {
             .append(FULL_STOP)
     );
 
+    Args0 VERBOSE_OFF_COMMAND_NO_CHECKS = () -> join(newline(),
+            // &bThe command execution completed, but no permission checks were made.
+            // &7This might be because the plugin runs commands in the background (async). You can still use verbose manually to detect checks made like this.
+            prefixed(translatable()
+                    .key("luckperms.command.verbose.command.no-checks")
+                    .color(AQUA)
+                    .append(FULL_STOP)),
+            prefixed(text()
+                    .color(GRAY)
+                    .append(translatable("luckperms.command.verbose.command.possibly-async"))
+                    .append(FULL_STOP)
+                    .append(translatable("luckperms.command.verbose.command.try-again-manually"))
+                    .append(FULL_STOP))
+    );
+
     Args0 VERBOSE_RECORDING_ON = () -> prefixed(translatable()
             // "&bVerbose recording &aenabled &bfor checks matching &aANY&b."
             .key("luckperms.command.verbose.enabled-recording")

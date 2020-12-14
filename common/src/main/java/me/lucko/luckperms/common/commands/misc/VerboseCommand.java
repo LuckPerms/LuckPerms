@@ -99,9 +99,13 @@ public class VerboseCommand extends SingleCommand {
 
                 verboseHandler.registerListener(sender, VerboseFilter.acceptAll(), true);
                 executor.performCommand(command);
-                verboseHandler.unregisterListener(sender);
 
-                Message.VERBOSE_OFF_COMMAND.send(sender);
+                VerboseListener listener = verboseHandler.unregisterListener(sender);
+                if (listener.getMatchedCount() == 0) {
+                    Message.VERBOSE_OFF_COMMAND_NO_CHECKS.send(sender);
+                } else {
+                    Message.VERBOSE_OFF_COMMAND.send(sender);
+                }
             });
 
             return CommandResult.SUCCESS;
