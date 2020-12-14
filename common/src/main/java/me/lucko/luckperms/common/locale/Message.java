@@ -2041,7 +2041,7 @@ public interface Message {
 
     Args3<PermissionHolder, ContextSet, Integer> PARENT_CLEAR_SUCCESS = (holder, context, removeCount) -> prefixed(translatable()
             // "&b{}&a's parents were cleared in context {}&a. (&b{}&a nodes were removed.)"
-            .key("luckperms.command.generic.parent.clear-track")
+            .key("luckperms.command.generic.parent.clear")
             .color(GREEN)
             .args(
                     text().color(AQUA).append(holder.getFormattedDisplayName()),
