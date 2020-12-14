@@ -39,6 +39,7 @@ import net.luckperms.api.node.types.WeightNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -97,6 +98,7 @@ import java.util.stream.Stream;
  *
  * <p>The core node state must be immutable in all implementations.</p>
  */
+@NonExtendable
 public interface Node {
 
     /**

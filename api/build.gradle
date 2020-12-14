@@ -2,7 +2,8 @@ group = 'net.luckperms'
 project.version = '5.2'
 
 dependencies {
-    compileOnly 'org.checkerframework:checker-qual:2.5.5'
+    compileOnly 'org.checkerframework:checker-qual:3.8.0'
+    compileOnly 'org.jetbrains:annotations:20.1.0'
 }
 
 // Only used occasionally for deployment - not needed for normal builds.

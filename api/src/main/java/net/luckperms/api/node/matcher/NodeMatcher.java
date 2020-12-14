@@ -32,15 +32,19 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.util.function.Predicate;
 
 /**
  * A predicate which matches certain {@link Node}s.
  *
+ * <p>API users should not implement this interface directly.</p>
+ *
  * @param <T> the node type matched
  * @since 5.1
  */
+@NonExtendable
 public interface NodeMatcher<T extends Node> extends Predicate<Node> {
 
     /**

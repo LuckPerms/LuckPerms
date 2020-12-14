@@ -26,6 +26,7 @@
 package net.luckperms.api.node.metadata;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.util.Objects;
 
@@ -40,6 +41,7 @@ import java.util.Objects;
  *
  * @param <T> the metadata type
  */
+@NonExtendable
 public interface NodeMetadataKey<T> {
 
     /**

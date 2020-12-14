@@ -28,6 +28,7 @@ package net.luckperms.api.query;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.util.Objects;
 
@@ -41,6 +42,7 @@ import java.util.Objects;
  *
  * @param <T> the option type
  */
+@NonExtendable
 public interface OptionKey<T> {
 
     /**
