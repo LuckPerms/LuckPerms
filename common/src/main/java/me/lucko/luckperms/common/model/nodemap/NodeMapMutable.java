@@ -138,7 +138,7 @@ public class NodeMapMutable extends NodeMapBase {
             result.recordChange(ChangeType.ADD, node);
 
             // remove any others that were in the set already with a different value/expiry time
-            removeMatching(nodes.iterator(), node, result);
+            removeMatchingButNotSame(nodes.iterator(), node, result);
 
             // update the inheritanceMap too if necessary
             if (node instanceof InheritanceNode) {
@@ -189,6 +189,16 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     private static void removeMatching(Iterator<Node> it, Node node, MutateResult result) {
+        while (it.hasNext()) {
+            Node el = it.next();
+            if (node.equals(el, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE)) {
+                it.remove();
+                result.recordChange(ChangeType.REMOVE, el);
+            }
+        }
+    }
+
+    private static void removeMatchingButNotSame(Iterator<Node> it, Node node, MutateResult result) {
         while (it.hasNext()) {
             Node el = it.next();
             if (el != node && node.equals(el, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE)) {
