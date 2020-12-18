@@ -90,8 +90,9 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
 
     @Override
     public @NonNull CompletableFuture<Void> saveUser(net.luckperms.api.model.user.@NonNull User user) {
-        Objects.requireNonNull(user, "user");
-        return this.plugin.getStorage().saveUser(ApiUser.cast(user));
+        User internal = ApiUser.cast(Objects.requireNonNull(user, "user"));
+        this.plugin.getUserManager().giveDefaultIfNeeded(internal);
+        return this.plugin.getStorage().saveUser(internal);
     }
 
     @Override
