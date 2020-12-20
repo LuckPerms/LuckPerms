@@ -38,6 +38,7 @@ public class EnumNamer<E extends Enum<E>> {
     public static final Function<Enum<?>, String> LOWER_CASE_NAME = value -> value.name().toLowerCase();
 
     private final String[] names;
+    private final Function<? super E, String> namingFunction;
 
     public EnumNamer(Class<E> enumClass, Map<? super E, String> definedNames, Function<? super E, String> namingFunction) {
         E[] values = enumClass.getEnumConstants();
@@ -49,6 +50,7 @@ public class EnumNamer<E extends Enum<E>> {
             }
             this.names[value.ordinal()] = name;
         }
+        this.namingFunction = namingFunction;
     }
 
     public EnumNamer(Class<E> enumClass, Function<? super E, String> namingFunction) {
@@ -56,7 +58,12 @@ public class EnumNamer<E extends Enum<E>> {
     }
 
     public String name(E value) {
-        return this.names[value.ordinal()];
+        int ordinal = value.ordinal();
+        // support the Bukkit-Forge hack where enum constants are added at runtime...
+        if (ordinal >= this.names.length) {
+            return this.namingFunction.apply(value);
+        }
+        return this.names[ordinal];
     }
 
 }
