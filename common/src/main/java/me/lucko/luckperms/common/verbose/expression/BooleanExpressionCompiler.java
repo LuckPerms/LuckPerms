@@ -227,8 +227,8 @@ public class BooleanExpressionCompiler {
         Lexer(String expression) {
             this.tokenizer = new StreamTokenizer(new StringReader(expression));
             this.tokenizer.resetSyntax();
-            this.tokenizer.wordChars('!', '~'); // all ascii characters
-            this.tokenizer.whitespaceChars('\u0000', ' ');
+            this.tokenizer.whitespaceChars('\u0000', '\u0020');
+            this.tokenizer.wordChars('\u0021', '\u007E');
             "()&|!".chars().forEach(this.tokenizer::ordinaryChar);
         }
 
@@ -277,21 +277,5 @@ public class BooleanExpressionCompiler {
             this.string = string;
         }
     }
-
-    /*
-    private static void assertion(String expression, boolean expected) {
-        if (compile(expression).eval(var -> var.equals("true")) != expected) {
-            throw new AssertionError(expression + " is not " + expected);
-        }
-    }
-
-    public static void main(String[] args) {
-        assertion("false & false | true", true);
-        assertion("false & (false | true)", false);
-        assertion("true | false & false", true);
-        assertion("(true | false) & false", false);
-        assertion("(true & ((true | false) & !(true & false)))", true);
-    }
-    */
 
 }

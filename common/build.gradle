@@ -1,4 +1,11 @@
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testCompile 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
     compile project(':api')
     compile 'org.checkerframework:checker-qual:2.5.5'
 
