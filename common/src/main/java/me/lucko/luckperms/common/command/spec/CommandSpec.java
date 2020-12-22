@@ -86,7 +86,6 @@ public enum CommandSpec {
             arg("action value", false),
             arg("constraint...", false)
     ),
-    MIGRATION("/%s migration"),
     TRANSLATIONS("/%s translations",
             arg("install", false)
     ),
@@ -413,18 +412,6 @@ public enum CommandSpec {
     ),
     SPONGE_OPTION_CLEAR(
             arg("contexts...", false)
-    ),
-
-    MIGRATION_COMMAND,
-    MIGRATION_GROUPMANAGER(
-            arg("migrate as global", true)
-    ),
-    MIGRATION_POWERFULPERMS(
-            arg("address", true),
-            arg("database", true),
-            arg("username", true),
-            arg("password", true),
-            arg("db table", true)
     );
 
     private final String usage;

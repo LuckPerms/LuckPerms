@@ -8,17 +8,6 @@ dependencies {
     compileOnly 'net.md-5:bungeecord-api:1.15-SNAPSHOT'
     compileOnly 'me.lucko:adventure-platform-bungeecord:4.0.0' // re: this artifact - see note in common/build.gradle
     compileOnly 'com.imaginarycode.minecraft:RedisBungee:0.4'
-
-    // migration plugins
-    compileOnly('net.alpenblock:BungeePerms:3.0') {
-        exclude(module: 'bungeecord-api')
-        exclude(module: 'lombok')
-        exclude(module: 'spigot-api')
-        exclude(module: 'worldedit')
-        exclude(module: 'Vault')
-        exclude(module: 'Essentials')
-        exclude(module: 'EssentialsX')
-    }
 }
 
 processResources {

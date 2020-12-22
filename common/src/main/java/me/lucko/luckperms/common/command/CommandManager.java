@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.commands.group.DeleteGroup;
 import me.lucko.luckperms.common.commands.group.GroupParentCommand;
 import me.lucko.luckperms.common.commands.group.ListGroups;
 import me.lucko.luckperms.common.commands.log.LogParentCommand;
-import me.lucko.luckperms.common.commands.migration.MigrationParentCommand;
 import me.lucko.luckperms.common.commands.misc.ApplyEditsCommand;
 import me.lucko.luckperms.common.commands.misc.BulkUpdateCommand;
 import me.lucko.luckperms.common.commands.misc.CheckCommand;
@@ -114,7 +113,6 @@ public class CommandManager {
                 .add(new ExportCommand())
                 .add(new ReloadConfigCommand())
                 .add(new BulkUpdateCommand())
-                .add(new MigrationParentCommand())
                 .add(new TranslationsCommand())
                 .add(new ApplyEditsCommand())
                 .add(new CreateGroup())

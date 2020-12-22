@@ -38,10 +38,11 @@ import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.util.ProgressLogger;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
+
+import net.kyori.adventure.text.Component;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -90,7 +91,7 @@ public abstract class Exporter implements Runnable {
         this.includeUsers = includeUsers;
         this.includeGroups = includeGroups;
 
-        this.log = new ProgressLogger(Message.EXPORT_LOG, Message.EXPORT_LOG_PROGRESS);
+        this.log = new ProgressLogger();
         this.log.addListener(plugin.getConsoleSender());
         this.log.addListener(executor);
     }
@@ -203,7 +204,7 @@ public abstract class Exporter implements Runnable {
                 break;
             } catch (TimeoutException e) {
                 // still executing - send a progress report and continue waiting
-                this.log.logAllProgress("Exported {} users so far.", userCount.get());
+                this.log.logProgress("Exported " + userCount.get() + " users so far.");
                 continue;
             }
 
@@ -269,6 +270,33 @@ public abstract class Exporter implements Runnable {
             } catch (IOException e) {
                 this.plugin.getLogger().severe("Error uploading data to bytebin", e);
                 this.log.getListeners().forEach(Message.HTTP_UNKNOWN_FAILURE::send);
+            }
+        }
+    }
+
+    private static final class ProgressLogger {
+        private final Set<Sender> listeners = new HashSet<>();
+
+        public void addListener(Sender sender) {
+            this.listeners.add(sender);
+        }
+
+        public Set<Sender> getListeners() {
+            return this.listeners;
+        }
+
+        public void log(String msg) {
+            dispatchMessage(Message.EXPORT_LOG, msg);
+        }
+
+        public void logProgress(String msg) {
+            dispatchMessage(Message.EXPORT_LOG_PROGRESS, msg);
+        }
+
+        private void dispatchMessage(Message.Args1<String> messageType, String content) {
+            final Component message = messageType.build(content);
+            for (Sender s : this.listeners) {
+                s.sendMessage(message);
             }
         }
     }

@@ -45,7 +45,6 @@ public enum CommandPermission {
     RELOAD_CONFIG("reloadconfig", Type.NONE),
     BULK_UPDATE("bulkupdate", Type.NONE),
     APPLY_EDITS("applyedits", Type.NONE),
-    MIGRATION("migration", Type.NONE),
     TRANSLATIONS("translations", Type.NONE),
 
     CREATE_GROUP("creategroup", Type.NONE),

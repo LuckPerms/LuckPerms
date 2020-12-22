@@ -349,38 +349,6 @@ public interface Message {
             .append(text(msg, GRAY))
     );
 
-    Args2<String, String> MIGRATION_LOG = (pluginName, msg) -> prefixed(text()
-            // "&3MIGRATION &7[&3{}&7] &3&l> &f{}"
-            .append(translatable("luckperms.logs.migration-prefix", DARK_AQUA))
-            .append(space())
-            .append(text()
-                    .color(GRAY)
-                    .append(text('['))
-                    .append(text(pluginName, DARK_AQUA))
-                    .append(text(']'))
-            )
-            .append(space())
-            .append(text('>', DARK_AQUA, BOLD))
-            .append(space())
-            .append(text(msg, WHITE))
-    );
-
-    Args2<String, String> MIGRATION_LOG_PROGRESS = (pluginName, msg) -> prefixed(text()
-            // "&3MIGRATION &7[&3{}&7] &3&l> &7{}"
-            .append(translatable("luckperms.logs.migration-prefix", DARK_AQUA))
-            .append(space())
-            .append(text()
-                    .color(GRAY)
-                    .append(text('['))
-                    .append(text(pluginName, DARK_AQUA))
-                    .append(text(']'))
-            )
-            .append(space())
-            .append(text('>', DARK_AQUA, BOLD))
-            .append(space())
-            .append(text(msg, GRAY))
-    );
-
     Args0 COMMAND_NOT_RECOGNISED = () -> prefixed(translatable()
             // "&cCommand not recognised."
             .key("luckperms.commandsystem.command-not-recognised")

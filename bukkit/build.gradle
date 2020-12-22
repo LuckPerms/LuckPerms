@@ -17,25 +17,6 @@ dependencies {
         exclude(module: 'bukkit')
     }
     compileOnly 'lilypad.client.connect:api:0.0.1-SNAPSHOT'
-
-    // migration plugins
-    compileOnly 'org.tyrannyofheaven.bukkit:zPermissions:1.3'
-    compileOnly('ru.tehkode:PermissionsEx:1.23.5') {
-        exclude(module: 'bukkit')
-        exclude(module: 'updater')
-        exclude(module: 'commons-dbcp')
-        exclude(module: 'AccountsClient')
-    }
-    compileOnly 'com.github.gustav9797:PowerfulPermsAPI:4.5.2'
-    compileOnly 'org.anjocaido:GroupManager:1.4'
-    compileOnly('nl.svenar:powerranks:1.9.2') {
-        exclude(module: 'nametagedit')
-    }
-    compileOnly 'de.bananaco:bpermissions-api:2.12'
-    compileOnly('com.platymuus:bukkit-permissions:2.5') {
-        exclude(module: 'bukkit')
-        exclude(module: 'metrics')
-    }
 }
 
 processResources {
