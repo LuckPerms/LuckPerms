@@ -238,6 +238,11 @@ public final class ConfigKeys {
     }));
 
     /**
+     * If default negated permissions should be applied before wildcards.
+     */
+    public static final ConfigKey<Boolean> APPLY_DEFAULT_NEGATIONS_BEFORE_WILDCARDS = notReloadable(booleanKey("apply-default-negated-permissions-before-wildcards", false));
+
+    /**
      * If regex permissions are being applied
      */
     public static final ConfigKey<Boolean> APPLYING_REGEX = notReloadable(booleanKey("apply-regex", true));

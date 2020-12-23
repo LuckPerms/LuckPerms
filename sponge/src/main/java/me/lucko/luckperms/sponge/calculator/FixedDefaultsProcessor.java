@@ -33,8 +33,8 @@ import net.luckperms.api.query.QueryOptions;
 public class FixedDefaultsProcessor extends DefaultsProcessor {
     private final LPSubject defaultsSubject;
 
-    public FixedDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions, LPSubject defaultsSubject) {
-        super(service, queryOptions);
+    public FixedDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions, LPSubject defaultsSubject, boolean overrideWildcards) {
+        super(service, queryOptions, overrideWildcards);
         this.defaultsSubject = defaultsSubject;
     }
 

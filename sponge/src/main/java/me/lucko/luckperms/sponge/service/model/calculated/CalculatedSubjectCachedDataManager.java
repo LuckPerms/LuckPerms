@@ -103,7 +103,7 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
         processors.add(new WildcardProcessor());
 
         if (!this.subject.getParentCollection().isDefaultsCollection()) {
-            processors.add(new FixedDefaultsProcessor(this.subject.getService(), queryOptions, this.subject.getDefaults()));
+            processors.add(new FixedDefaultsProcessor(this.subject.getService(), queryOptions, this.subject.getDefaults(), true));
         }
 
         return new PermissionCalculator(getPlugin(), metadata, processors.build());

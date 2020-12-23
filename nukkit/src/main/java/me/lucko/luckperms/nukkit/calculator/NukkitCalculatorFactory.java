@@ -45,14 +45,8 @@ import net.luckperms.api.query.QueryOptions;
 public class NukkitCalculatorFactory implements CalculatorFactory {
     private final LPNukkitPlugin plugin;
 
-    private final DefaultsProcessor opDefaultsProcessor;
-    private final DefaultsProcessor nonOpDefaultsProcessor;
-
     public NukkitCalculatorFactory(LPNukkitPlugin plugin) {
         this.plugin = plugin;
-
-        this.opDefaultsProcessor = new DefaultsProcessor(this.plugin, true);
-        this.nonOpDefaultsProcessor = new DefaultsProcessor(this.plugin, false);
     }
 
     @Override
@@ -79,7 +73,8 @@ public class NukkitCalculatorFactory implements CalculatorFactory {
 
         boolean op = queryOptions.option(NukkitContextManager.OP_OPTION).orElse(false);
         if (metadata.getHolderType() == HolderType.USER && this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS)) {
-            processors.add(op ? this.opDefaultsProcessor : this.nonOpDefaultsProcessor);
+            boolean overrideWildcards = this.plugin.getConfiguration().get(ConfigKeys.APPLY_DEFAULT_NEGATIONS_BEFORE_WILDCARDS);
+            processors.add(new DefaultsProcessor(this.plugin, overrideWildcards, op));
         }
 
         if (op) {

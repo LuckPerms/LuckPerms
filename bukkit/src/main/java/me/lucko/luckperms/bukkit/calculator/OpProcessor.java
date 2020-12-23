@@ -44,7 +44,10 @@ public final class OpProcessor implements PermissionProcessor {
     }
 
     @Override
-    public TristateResult hasPermission(String permission) {
+    public TristateResult hasPermission(TristateResult prev, String permission) {
+        if (prev != TristateResult.UNDEFINED) {
+            return prev;
+        }
         return TRUE_RESULT;
     }
 }

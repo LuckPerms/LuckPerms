@@ -35,8 +35,6 @@ import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
-import net.luckperms.api.util.Tristate;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
@@ -106,14 +104,11 @@ public class PermissionCalculator implements Function<String, TristateResult> {
         // that this call is behind the cache.
         this.plugin.getPermissionRegistry().offer(permission);
 
+        TristateResult result = TristateResult.UNDEFINED;
         for (PermissionProcessor processor : this.processors) {
-            TristateResult result = processor.hasPermission(permission);
-            if (result.result() != Tristate.UNDEFINED) {
-                return result;
-            }
+            result = processor.hasPermission(result, permission);
         }
-
-        return TristateResult.UNDEFINED;
+        return result;
     }
 
     /**

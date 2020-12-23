@@ -67,10 +67,11 @@ public class SpongeCalculatorFactory implements CalculatorFactory {
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_DEFAULT_SUBJECTS)) {
+            boolean overrideWildcards = this.plugin.getConfiguration().get(ConfigKeys.APPLY_DEFAULT_NEGATIONS_BEFORE_WILDCARDS);
             if (metadata.getHolderType() == HolderType.USER) {
-                processors.add(new UserDefaultsProcessor(this.plugin.getService(), queryOptions));
+                processors.add(new UserDefaultsProcessor(this.plugin.getService(), queryOptions, overrideWildcards));
             } else if (metadata.getHolderType() == HolderType.GROUP) {
-                processors.add(new GroupDefaultsProcessor(this.plugin.getService(), queryOptions));
+                processors.add(new GroupDefaultsProcessor(this.plugin.getService(), queryOptions, overrideWildcards));
             }
         }
 

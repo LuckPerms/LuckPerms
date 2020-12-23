@@ -26,6 +26,8 @@
 package me.lucko.luckperms.sponge.calculator;
 
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
+import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -39,16 +41,41 @@ public abstract class DefaultsProcessor implements PermissionProcessor {
 
     protected final LPPermissionService service;
     private final QueryOptions queryOptions;
+    private final boolean overrideWildcards;
 
-    public DefaultsProcessor(LPPermissionService service, QueryOptions queryOptions) {
+    public DefaultsProcessor(LPPermissionService service, QueryOptions queryOptions, boolean overrideWildcards) {
         this.service = service;
         this.queryOptions = queryOptions;
+        this.overrideWildcards = overrideWildcards;
     }
 
     protected abstract LPSubject getTypeDefaults();
 
+    private boolean canOverrideWildcard(TristateResult prev) {
+        return this.overrideWildcards &&
+                (prev.processorClass() == WildcardProcessor.class || prev.processorClass() == SpongeWildcardProcessor.class) &&
+                prev.result() == Tristate.TRUE;
+    }
+
     @Override
-    public TristateResult hasPermission(String permission) {
+    public TristateResult hasPermission(TristateResult prev, String permission) {
+        if (prev != TristateResult.UNDEFINED) {
+            // Check to see if the result should be overridden
+            if (canOverrideWildcard(prev)) {
+                Tristate t = getTypeDefaults().getPermissionValue(this.queryOptions, permission);
+                if (t == Tristate.FALSE) {
+                    return TYPE_DEFAULTS_RESULT_FACTORY.result(Tristate.FALSE, "type defaults (overriding wildcard): " + prev.cause());
+                }
+
+                t = this.service.getRootDefaults().getPermissionValue(this.queryOptions, permission);
+                if (t == Tristate.FALSE) {
+                    return ROOT_DEFAULTS_RESULT_FACTORY.result(Tristate.FALSE, "root defaults (overriding wildcard): " + prev.cause());
+                }
+            }
+
+            return prev;
+        }
+
         Tristate t = getTypeDefaults().getPermissionValue(this.queryOptions, permission);
         if (t != Tristate.UNDEFINED) {
             return TYPE_DEFAULTS_RESULT_FACTORY.result(t);

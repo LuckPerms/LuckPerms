@@ -32,8 +32,8 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import net.luckperms.api.query.QueryOptions;
 
 public class UserDefaultsProcessor extends DefaultsProcessor implements PermissionProcessor {
-    public UserDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions) {
-        super(service, queryOptions);
+    public UserDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions, boolean overrideWildcards) {
+        super(service, queryOptions, overrideWildcards);
     }
 
     @Override

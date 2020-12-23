@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.calculator.processor;
 
+import me.lucko.luckperms.common.calculator.result.TristateResult;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -35,4 +37,14 @@ public abstract class AbstractPermissionProcessor implements PermissionProcessor
     public void setSource(Map<String, Boolean> sourceMap) {
         this.sourceMap = sourceMap;
     }
+
+    @Override
+    public TristateResult hasPermission(TristateResult prev, String permission) {
+        if (prev != TristateResult.UNDEFINED) {
+            return prev;
+        }
+        return hasPermission(permission);
+    }
+
+    public abstract TristateResult hasPermission(String permission);
 }

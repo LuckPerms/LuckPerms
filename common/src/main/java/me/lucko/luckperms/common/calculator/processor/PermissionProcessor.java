@@ -41,10 +41,11 @@ public interface PermissionProcessor {
     /**
      * Returns the permission value determined by this calculator.
      *
+     * @param prev the result of the previous calculator in the chain
      * @param permission the permission
      * @return a tristate
      */
-    TristateResult hasPermission(String permission);
+    TristateResult hasPermission(TristateResult prev, String permission);
 
     /**
      * Sets the source permissions which should be used by this processor

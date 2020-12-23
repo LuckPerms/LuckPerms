@@ -26,6 +26,8 @@
 package me.lucko.luckperms.nukkit.calculator;
 
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
+import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
@@ -40,15 +42,37 @@ public class DefaultsProcessor implements PermissionProcessor {
     private static final TristateResult.Factory PERMISSION_MAP_RESULT_FACTORY = new TristateResult.Factory(DefaultsProcessor.class, "permission map");
 
     private final LPNukkitPlugin plugin;
+    private final boolean overrideWildcards;
     private final boolean isOp;
 
-    public DefaultsProcessor(LPNukkitPlugin plugin, boolean isOp) {
+    public DefaultsProcessor(LPNukkitPlugin plugin, boolean overrideWildcards, boolean isOp) {
         this.plugin = plugin;
+        this.overrideWildcards = overrideWildcards;
         this.isOp = isOp;
     }
 
+    private boolean canOverrideWildcard(TristateResult prev) {
+        return this.overrideWildcards &&
+                (prev.processorClass() == WildcardProcessor.class || prev.processorClass() == SpongeWildcardProcessor.class) &&
+                prev.result() == Tristate.TRUE;
+    }
+
     @Override
-    public TristateResult hasPermission(String permission) {
+    public TristateResult hasPermission(TristateResult prev, String permission) {
+        if (prev != TristateResult.UNDEFINED) {
+            // Check to see if the result should be overridden
+            if (canOverrideWildcard(prev)) {
+                PermissionDefault def = PermissionDefault.fromPermission(this.plugin.getPermissionMap().get(permission));
+                if (def != null) {
+                    if (def == PermissionDefault.FALSE || (this.isOp && def == PermissionDefault.NOT_OP)) {
+                        return PERMISSION_MAP_RESULT_FACTORY.result(Tristate.FALSE, "permission map (overriding wildcard): " + prev.cause());
+                    }
+                }
+            }
+
+            return prev;
+        }
+
         Tristate t = this.plugin.getDefaultPermissionMap().lookupDefaultPermission(permission, this.isOp);
         if (t != Tristate.UNDEFINED) {
             return DEFAULT_PERMISSION_MAP_RESULT_FACTORY.result(t);

@@ -465,6 +465,17 @@ apply-wildcards: true
 #   and so on.
 apply-sponge-implicit-wildcards: false
 
+# If the plugin should apply negated Nukkit default permissions before it considers wildcard
+# assignments.
+#
+# - Plugin authors can define permissions which explicitly should not be given automatically to OPs.
+#   This is usually used for so called "anti-permissions" - permissions which, when granted, apply
+#   something negative.
+# - If this option is set to true, LuckPerms will consider any negated declarations made by
+#   plugins before it considers wildcards. (similar to the way the OP system works)
+# - If this option is set to false, LuckPerms will consider any wildcard assignments first.
+apply-default-negated-permissions-before-wildcards: true
+
 # If the plugin should parse regex permissions.
 #
 # - If set to true, LuckPerms will detect regex permissions, marked with "r=" at the start of the
