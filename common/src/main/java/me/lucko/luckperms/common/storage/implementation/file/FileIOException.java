@@ -25,8 +25,12 @@
 
 package me.lucko.luckperms.common.storage.implementation.file;
 
-public enum StorageLocation {
+import java.io.IOException;
 
-    USERS, GROUPS, TRACKS
+public class FileIOException extends IOException {
+
+    public FileIOException(String fileName, Throwable cause) {
+        super("Exception thrown whilst reading/writing file: " + fileName, cause);
+    }
 
 }

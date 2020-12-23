@@ -319,7 +319,7 @@ public class VerboseListener {
             e.printStackTrace();
         }
 
-        return bytebin.postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+        return bytebin.postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE).key();
     }
 
     public Sender getNotifiedSender() {

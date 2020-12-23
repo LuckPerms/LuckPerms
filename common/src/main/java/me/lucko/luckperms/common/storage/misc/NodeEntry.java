@@ -30,6 +30,7 @@ import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+@SuppressWarnings("deprecation")
 public final class NodeEntry<H extends Comparable<H>, N extends Node> implements HeldNode<H> {
 
     public static <H extends Comparable<H>, N extends Node> NodeEntry<H, N> of(H holder, N node) {

@@ -34,7 +34,6 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.MutableContextSet;
 
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.SimpleConfigurationNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public final class ContextSetConfigurateSerializer {
     private ContextSetConfigurateSerializer() {}
 
     public static ConfigurationNode serializeContextSet(ContextSet contextSet) {
-        ConfigurationNode data = SimpleConfigurationNode.root();
+        ConfigurationNode data = ConfigurationNode.root();
         Map<String, Set<String>> map = contextSet.toMap();
 
         for (Map.Entry<String, Set<String>> entry : map.entrySet()) {
@@ -63,7 +62,7 @@ public final class ContextSetConfigurateSerializer {
     }
 
     public static ContextSet deserializeContextSet(ConfigurationNode data) {
-        Preconditions.checkArgument(data.hasMapChildren());
+        Preconditions.checkArgument(data.isMap());
         Map<Object, ? extends ConfigurationNode> dataMap = data.getChildrenMap();
 
         if (dataMap.isEmpty()) {
@@ -75,9 +74,8 @@ public final class ContextSetConfigurateSerializer {
             String k = e.getKey().toString();
             ConfigurationNode v = e.getValue();
 
-            if (v.hasListChildren()) {
-                List<? extends ConfigurationNode> values = v.getChildrenList();
-                for (ConfigurationNode value : values) {
+            if (v.isList()) {
+                for (ConfigurationNode value : v.getChildrenList()) {
                     map.add(k, value.getString());
                 }
             } else {

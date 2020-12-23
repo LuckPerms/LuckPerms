@@ -52,33 +52,221 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * Flat-file storage using Configurate {@link ConfigurationNode}s.
+ * The data for users/groups/tracks is stored in a single shared file.
+ */
 public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
     private final String fileExtension;
 
-    private Path usersFile;
-    private Path groupsFile;
-    private Path tracksFile;
+    private CachedLoader users;
+    private CachedLoader groups;
+    private CachedLoader tracks;
+    private FileWatcher.WatchedLocation watcher = null;
 
-    private CachedLoader usersLoader;
-    private CachedLoader groupsLoader;
-    private CachedLoader tracksLoader;
+    public CombinedConfigurateStorage(LuckPermsPlugin plugin, String implementationName, ConfigurateLoader loader, String fileExtension, String dataFolderName) {
+        super(plugin, implementationName, loader, dataFolderName);
+        this.fileExtension = fileExtension;
+    }
+
+    @Override
+    protected ConfigurationNode readFile(StorageLocation location, String name) throws IOException {
+        ConfigurationNode root = getLoader(location).getNode();
+        ConfigurationNode node = root.getNode(name);
+        return node.isVirtual() ? null : node;
+    }
+
+    @Override
+    protected void saveFile(StorageLocation location, String name, ConfigurationNode node) throws IOException {
+        getLoader(location).apply(true, false, root -> root.getNode(name).setValue(node));
+    }
+
+    private CachedLoader getLoader(StorageLocation location) {
+        switch (location) {
+            case USERS:
+                return this.users;
+            case GROUPS:
+                return this.groups;
+            case TRACKS:
+                return this.tracks;
+            default:
+                throw new RuntimeException();
+        }
+    }
+
+    @Override
+    public void init() throws IOException {
+        super.init();
+
+        this.users = new CachedLoader(super.dataDirectory.resolve("users" + this.fileExtension));
+        this.groups = new CachedLoader(super.dataDirectory.resolve("groups" + this.fileExtension));
+        this.tracks = new CachedLoader(super.dataDirectory.resolve("tracks" + this.fileExtension));
+
+        // Listen for file changes.
+        FileWatcher watcher = this.plugin.getFileWatcher().orElse(null);
+        if (watcher != null) {
+            this.watcher = watcher.getWatcher(super.dataDirectory);
+            this.watcher.addListener(path -> {
+                if (path.getFileName().equals(this.users.file.getFileName())) {
+                    this.plugin.getLogger().info("[FileWatcher] Detected change in users file - reloading...");
+                    this.users.reload();
+                    this.plugin.getSyncTaskBuffer().request();
+                } else if (path.getFileName().equals(this.groups.file.getFileName())) {
+                    this.plugin.getLogger().info("[FileWatcher] Detected change in groups file - reloading...");
+                    this.groups.reload();
+                    this.plugin.getSyncTaskBuffer().request();
+                } else if (path.getFileName().equals(this.tracks.file.getFileName())) {
+                    this.plugin.getLogger().info("[FileWatcher] Detected change in tracks file - reloading...");
+                    this.tracks.reload();
+                    this.plugin.getStorage().loadAllTracks();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        try {
+            this.users.save();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            this.groups.save();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            this.tracks.save();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        super.shutdown();
+    }
+
+    @Override
+    public void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
+        if (bulkUpdate.getDataType().isIncludingUsers()) {
+            this.users.apply(true, true, root -> {
+                for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
+                    processBulkUpdate(bulkUpdate, entry.getValue(), HolderType.USER);
+                }
+            });
+        }
+
+        if (bulkUpdate.getDataType().isIncludingGroups()) {
+            this.groups.apply(true, true, root -> {
+                for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
+                    processBulkUpdate(bulkUpdate, entry.getValue(), HolderType.GROUP);
+                }
+            });
+        }
+    }
+
+    @Override
+    public Set<UUID> getUniqueUsers() throws IOException {
+        return this.users.getNode().getChildrenMap().keySet().stream()
+                .map(Object::toString)
+                .map(Uuids::fromString)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
+        List<NodeEntry<UUID, N>> held = new ArrayList<>();
+        this.users.apply(false, true, root -> {
+            for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
+                try {
+                    UUID holder = UUID.fromString(entry.getKey().toString());
+                    ConfigurationNode object = entry.getValue();
+
+                    Set<Node> nodes = readNodes(object);
+                    for (Node e : nodes) {
+                        N match = constraint.match(e);
+                        if (match != null) {
+                            held.add(NodeEntry.of(holder, match));
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return held;
+    }
+
+    @Override
+    public void loadAllGroups() throws IOException {
+        List<String> groups = new ArrayList<>();
+        this.groups.apply(false, true, root -> {
+            groups.addAll(root.getChildrenMap().keySet().stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList()));
+        });
+
+        if (!Iterators.tryIterate(groups, this::loadGroup)) {
+            throw new RuntimeException("Exception occurred whilst loading a group");
+        }
+
+        this.plugin.getGroupManager().retainAll(groups);
+    }
+
+    @Override
+    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
+        List<NodeEntry<String, N>> held = new ArrayList<>();
+        this.groups.apply(false, true, root -> {
+            for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
+                try {
+                    String holder = entry.getKey().toString();
+                    ConfigurationNode object = entry.getValue();
+
+                    Set<Node> nodes = readNodes(object);
+                    for (Node e : nodes) {
+                        N match = constraint.match(e);
+                        if (match != null) {
+                            held.add(NodeEntry.of(holder, match));
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return held;
+    }
+
+    @Override
+    public void loadAllTracks() throws IOException {
+        List<String> tracks = new ArrayList<>();
+        this.tracks.apply(false, true, root -> {
+            tracks.addAll(root.getChildrenMap().keySet().stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList()));
+        });
+
+        if (!Iterators.tryIterate(tracks, this::loadTrack)) {
+            throw new RuntimeException("Exception occurred whilst loading a track");
+        }
+
+        this.plugin.getTrackManager().retainAll(tracks);
+    }
 
     private final class CachedLoader {
-        private final Path path;
-
+        private final Path file;
         private final ConfigurationLoader<? extends ConfigurationNode> loader;
-        private ConfigurationNode node = null;
         private final ReentrantLock lock = new ReentrantLock();
+        private ConfigurationNode node = null;
 
-        private CachedLoader(Path path) {
-            this.path = path;
-            this.loader = CombinedConfigurateStorage.super.loader.loader(path);
+        private CachedLoader(Path file) {
+            this.file = file;
+            this.loader = CombinedConfigurateStorage.super.loader.loader(file);
             reload();
         }
 
         private void recordChange() {
             if (CombinedConfigurateStorage.this.watcher != null) {
-                CombinedConfigurateStorage.this.watcher.recordChange(this.path.getFileName().toString());
+                CombinedConfigurateStorage.this.watcher.recordChange(this.file.getFileName().toString());
             }
         }
 
@@ -140,208 +328,6 @@ public class CombinedConfigurateStorage extends AbstractConfigurateStorage {
                 this.lock.unlock();
             }
         }
-    }
-
-    private FileWatcher.WatchedLocation watcher = null;
-
-    /**
-     * Creates a new configurate storage implementation
-     *
-     * @param plugin the plugin instance
-     * @param implementationName the name of this implementation
-     * @param fileExtension the file extension used by this instance, including a "." at the start
-     * @param dataFolderName the name of the folder used to store data
-     */
-    public CombinedConfigurateStorage(LuckPermsPlugin plugin, String implementationName, ConfigurateLoader loader, String fileExtension, String dataFolderName) {
-        super(plugin, implementationName, loader, dataFolderName);
-        this.fileExtension = fileExtension;
-    }
-
-    @Override
-    protected ConfigurationNode readFile(StorageLocation location, String name) throws IOException {
-        ConfigurationNode root = getStorageLoader(location).getNode();
-        ConfigurationNode node = root.getNode(name);
-        return node.isVirtual() ? null : node;
-    }
-
-    @Override
-    protected void saveFile(StorageLocation location, String name, ConfigurationNode node) throws IOException {
-        getStorageLoader(location).apply(true, false, root -> root.getNode(name).setValue(node));
-    }
-
-    private CachedLoader getStorageLoader(StorageLocation location) {
-        switch (location) {
-            case USER:
-                return this.usersLoader;
-            case GROUP:
-                return this.groupsLoader;
-            case TRACK:
-                return this.tracksLoader;
-            default:
-                throw new RuntimeException();
-        }
-    }
-
-    @Override
-    public void init() throws IOException {
-        super.init();
-
-        this.usersFile = super.dataDirectory.resolve("users" + this.fileExtension);
-        this.groupsFile = super.dataDirectory.resolve("groups" + this.fileExtension);
-        this.tracksFile = super.dataDirectory.resolve("tracks" + this.fileExtension);
-
-        this.usersLoader = new CachedLoader(this.usersFile);
-        this.groupsLoader = new CachedLoader(this.groupsFile);
-        this.tracksLoader = new CachedLoader(this.tracksFile);
-
-        // Listen for file changes.
-        FileWatcher watcher = this.plugin.getFileWatcher().orElse(null);
-        if (watcher != null) {
-            this.watcher = watcher.getWatcher(super.dataDirectory);
-            this.watcher.addListener(path -> {
-                if (path.getFileName().equals(this.usersFile.getFileName())) {
-                    this.plugin.getLogger().info("[FileWatcher] Detected change in users file - reloading...");
-                    this.usersLoader.reload();
-                    this.plugin.getSyncTaskBuffer().request();
-                } else if (path.getFileName().equals(this.groupsFile.getFileName())) {
-                    this.plugin.getLogger().info("[FileWatcher] Detected change in groups file - reloading...");
-                    this.groupsLoader.reload();
-                    this.plugin.getSyncTaskBuffer().request();
-                } else if (path.getFileName().equals(this.tracksFile.getFileName())) {
-                    this.plugin.getLogger().info("[FileWatcher] Detected change in tracks file - reloading...");
-                    this.tracksLoader.reload();
-                    this.plugin.getStorage().loadAllTracks();
-                }
-            });
-        }
-    }
-
-    @Override
-    public void shutdown() {
-        try {
-            this.usersLoader.save();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            this.groupsLoader.save();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            this.tracksLoader.save();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        super.shutdown();
-    }
-
-    @Override
-    public void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
-        if (bulkUpdate.getDataType().isIncludingUsers()) {
-            this.usersLoader.apply(true, true, root -> {
-                for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
-                    processBulkUpdate(bulkUpdate, entry.getValue(), HolderType.USER);
-                }
-            });
-        }
-
-        if (bulkUpdate.getDataType().isIncludingGroups()) {
-            this.groupsLoader.apply(true, true, root -> {
-                for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
-                    processBulkUpdate(bulkUpdate, entry.getValue(), HolderType.GROUP);
-                }
-            });
-        }
-    }
-
-    @Override
-    public Set<UUID> getUniqueUsers() throws IOException {
-        return this.usersLoader.getNode().getChildrenMap().keySet().stream()
-                .map(Object::toString)
-                .map(Uuids::fromString)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
-        List<NodeEntry<UUID, N>> held = new ArrayList<>();
-        this.usersLoader.apply(false, true, root -> {
-            for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
-                try {
-                    UUID holder = UUID.fromString(entry.getKey().toString());
-                    ConfigurationNode object = entry.getValue();
-
-                    Set<Node> nodes = readNodes(object);
-                    for (Node e : nodes) {
-                        N match = constraint.match(e);
-                        if (match != null) {
-                            held.add(NodeEntry.of(holder, match));
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        return held;
-    }
-
-    @Override
-    public void loadAllGroups() throws IOException {
-        List<String> groups = new ArrayList<>();
-        this.groupsLoader.apply(false, true, root -> {
-            groups.addAll(root.getChildrenMap().keySet().stream()
-                    .map(Object::toString)
-                    .collect(Collectors.toList()));
-        });
-
-        if (!Iterators.tryIterate(groups, this::loadGroup)) {
-            throw new RuntimeException("Exception occurred whilst loading a group");
-        }
-
-        this.plugin.getGroupManager().retainAll(groups);
-    }
-
-    @Override
-    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
-        List<NodeEntry<String, N>> held = new ArrayList<>();
-        this.groupsLoader.apply(false, true, root -> {
-            for (Map.Entry<Object, ? extends ConfigurationNode> entry : root.getChildrenMap().entrySet()) {
-                try {
-                    String holder = entry.getKey().toString();
-                    ConfigurationNode object = entry.getValue();
-
-                    Set<Node> nodes = readNodes(object);
-                    for (Node e : nodes) {
-                        N match = constraint.match(e);
-                        if (match != null) {
-                            held.add(NodeEntry.of(holder, match));
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        return held;
-    }
-
-    @Override
-    public void loadAllTracks() throws IOException {
-        List<String> tracks = new ArrayList<>();
-        this.tracksLoader.apply(false, true, root -> {
-            tracks.addAll(root.getChildrenMap().keySet().stream()
-                    .map(Object::toString)
-                    .collect(Collectors.toList()));
-        });
-
-        if (!Iterators.tryIterate(tracks, this::loadTrack)) {
-            throw new RuntimeException("Exception occurred whilst loading a track");
-        }
-
-        this.plugin.getTrackManager().retainAll(tracks);
     }
 
 }

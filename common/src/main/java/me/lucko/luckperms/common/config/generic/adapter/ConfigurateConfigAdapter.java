@@ -88,7 +88,7 @@ public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
     @Override
     public List<String> getStringList(String path, List<String> def) {
         ConfigurationNode node = resolvePath(path);
-        if (node.isVirtual() || !node.hasListChildren()) {
+        if (node.isVirtual() || !node.isList()) {
             return def;
         }
 
@@ -98,7 +98,7 @@ public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
     @Override
     public List<String> getKeys(String path, List<String> def) {
         ConfigurationNode node = resolvePath(path);
-        if (node.isVirtual() || !node.hasMapChildren()) {
+        if (node.isVirtual() || !node.isMap()) {
             return def;
         }
 

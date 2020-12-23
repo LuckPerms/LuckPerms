@@ -263,7 +263,7 @@ public abstract class Exporter implements Runnable {
             }
 
             try {
-                String pasteId = this.plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE, false).key();
+                String pasteId = this.plugin.getBytebin().postContent(bytesOut.toByteArray(), AbstractHttpClient.JSON_TYPE).key();
                 this.log.getListeners().forEach(l -> Message.EXPORT_WEB_SUCCESS.send(l, pasteId, this.label));
             } catch (UnsuccessfulRequestException e) {
                 this.log.getListeners().forEach(l -> Message.HTTP_REQUEST_FAILURE.send(l, e.getResponse().code(), e.getResponse().message()));

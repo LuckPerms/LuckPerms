@@ -37,7 +37,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
 public class ApiPlayerAdapter<S, P extends S> implements PlayerAdapter<P> {
     private final UserManager<?> userManager;
     private final ContextManager<S, P> contextManager;

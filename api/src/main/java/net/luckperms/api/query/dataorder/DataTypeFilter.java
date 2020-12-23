@@ -93,8 +93,8 @@ public enum DataTypeFilter implements Predicate<DataType> {
     };
 
     private static final List<DataType> ALL_LIST = Collections.unmodifiableList(Arrays.asList(DataType.NORMAL, DataType.TRANSIENT));
-    private static final List<DataType> NORMAL_ONLY_LIST = Collections.unmodifiableList(Collections.singletonList(DataType.NORMAL));
-    private static final List<DataType> TRANSIENT_ONLY_LIST = Collections.unmodifiableList(Collections.singletonList(DataType.TRANSIENT));
+    private static final List<DataType> NORMAL_ONLY_LIST = Collections.singletonList(DataType.NORMAL);
+    private static final List<DataType> TRANSIENT_ONLY_LIST = Collections.singletonList(DataType.TRANSIENT);
 
     /**
      * Gets a {@link List} of all {@link DataType}s, filtered by the {@code predicate}.

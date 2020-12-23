@@ -155,7 +155,7 @@ public class WebEditorRequest {
     public CommandResult createSession(LuckPermsPlugin plugin, Sender sender) {
         String pasteId;
         try {
-            pasteId = plugin.getBytebin().postContent(encode(), AbstractHttpClient.JSON_TYPE, false).key();
+            pasteId = plugin.getBytebin().postContent(encode(), AbstractHttpClient.JSON_TYPE).key();
         } catch (UnsuccessfulRequestException e) {
             Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
             return CommandResult.STATE_ERROR;

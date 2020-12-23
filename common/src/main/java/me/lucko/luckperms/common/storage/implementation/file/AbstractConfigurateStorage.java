@@ -25,9 +25,7 @@
 
 package me.lucko.luckperms.common.storage.implementation.file;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
@@ -48,7 +46,6 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
 import me.lucko.luckperms.common.storage.implementation.file.loader.JsonLoader;
 import me.lucko.luckperms.common.storage.implementation.file.loader.YamlLoader;
-import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.MoreFiles;
 
 import net.luckperms.api.actionlog.Action;
@@ -63,53 +60,51 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
 
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.SimpleConfigurationNode;
 import ninja.leaping.configurate.Types;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 
 /**
- * Abstract implementation using configurate {@link ConfigurationNode}s to serialize and deserialize
- * data.
+ * Abstract storage implementation using Configurate {@link ConfigurationNode}s to
+ * serialize and deserialize data.
  */
 public abstract class AbstractConfigurateStorage implements StorageImplementation {
-
+    /** The plugin instance */
     protected final LuckPermsPlugin plugin;
+
+    /** The name of this implementation */
     private final String implementationName;
 
-    // the loader responsible for i/o
+    /** The Configurate loader used to read/write data */
     protected final ConfigurateLoader loader;
 
-    // the name of the data directory
-    private final String dataDirectoryName;
-    // the data directory
+    /* The data directory */
     protected Path dataDirectory;
+    private final String dataDirectoryName;
 
-    // the uuid cache instance
-    private final FileUuidCache uuidCache = new FileUuidCache();
-    // the action logger instance
+    /* The UUID cache */
+    private final FileUuidCache uuidCache;
+    private Path uuidCacheFile;
+
+    /** The action logger */
     private final FileActionLogger actionLogger;
-
-    // the file used to store uuid data
-    private Path uuidDataFile;
 
     protected AbstractConfigurateStorage(LuckPermsPlugin plugin, String implementationName, ConfigurateLoader loader, String dataDirectoryName) {
         this.plugin = plugin;
         this.implementationName = implementationName;
         this.loader = loader;
         this.dataDirectoryName = dataDirectoryName;
+
+        this.uuidCache = new FileUuidCache();
         this.actionLogger = new FileActionLogger(plugin);
     }
 
@@ -143,27 +138,23 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
      */
     protected abstract void saveFile(StorageLocation location, String name, ConfigurationNode node) throws IOException;
 
-    // used to report i/o exceptions which took place in a specific file
-    protected RuntimeException reportException(String file, Exception ex) throws RuntimeException {
-        this.plugin.getLogger().warn("Exception thrown whilst performing i/o: " + file, ex);
-        Throwables.throwIfUnchecked(ex);
-        throw new RuntimeException(ex);
-    }
-
     @Override
     public void init() throws IOException {
+        // init the data directory and ensure it exists
         this.dataDirectory = this.plugin.getBootstrap().getDataDirectory().resolve(this.dataDirectoryName);
         MoreFiles.createDirectoriesIfNotExists(this.dataDirectory);
 
-        this.uuidDataFile = MoreFiles.createFileIfNotExists(this.dataDirectory.resolve("uuidcache.txt"));
-        this.uuidCache.load(this.uuidDataFile);
+        // setup the uuid cache
+        this.uuidCacheFile = MoreFiles.createFileIfNotExists(this.dataDirectory.resolve("uuidcache.txt"));
+        this.uuidCache.load(this.uuidCacheFile);
 
+        // setup the action logger
         this.actionLogger.init(this.dataDirectory.resolve("actions.txt"), this.dataDirectory.resolve("actions.json"));
     }
 
     @Override
     public void shutdown() {
-        this.uuidCache.save(this.uuidDataFile);
+        this.uuidCache.save(this.uuidCacheFile);
         this.actionLogger.flush();
     }
 
@@ -177,29 +168,19 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         return this.actionLogger.getLog();
     }
 
-    protected boolean processBulkUpdate(BulkUpdate bulkUpdate, ConfigurationNode node, HolderType holderType) {
-        Set<Node> nodes = readNodes(node);
-        Set<Node> results = bulkUpdate.apply(nodes, holderType);
-
-        if (results == null) {
-            return false;
-        }
-
-        writeNodes(node, results);
-        return true;
-    }
-
     @Override
-    public User loadUser(UUID uniqueId, String username) {
+    public User loadUser(UUID uniqueId, String username) throws IOException {
         User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
         try {
-            ConfigurationNode object = readFile(StorageLocation.USER, uniqueId.toString());
-            if (object != null) {
-                String name = object.getNode("name").getString();
-                user.getPrimaryGroup().setStoredValue(object.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").getString());
+            ConfigurationNode file = readFile(StorageLocation.USERS, uniqueId.toString());
+            if (file != null) {
+                String name = file.getNode("name").getString();
+                String primaryGroup = file.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").getString();
+
+                user.getPrimaryGroup().setStoredValue(primaryGroup);
                 user.setUsername(name, true);
 
-                user.loadNodesFromStorage(readNodes(object));
+                user.loadNodesFromStorage(readNodes(file));
                 this.plugin.getUserManager().giveDefaultIfNeeded(user);
 
                 boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
@@ -214,166 +195,159 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 }
             }
         } catch (Exception e) {
-            throw reportException(uniqueId.toString(), e);
+            throw new FileIOException(uniqueId.toString(), e);
         }
         return user;
     }
 
     @Override
-    public void saveUser(User user) {
+    public void saveUser(User user) throws IOException {
         user.normalData().discardChanges();
         try {
             if (!this.plugin.getUserManager().isNonDefaultUser(user)) {
-                saveFile(StorageLocation.USER, user.getUniqueId().toString(), null);
+                saveFile(StorageLocation.USERS, user.getUniqueId().toString(), null);
             } else {
-                ConfigurationNode data = SimpleConfigurationNode.root();
+                ConfigurationNode file = ConfigurationNode.root();
                 if (this instanceof SeparatedConfigurateStorage) {
-                    data.getNode("uuid").setValue(user.getUniqueId().toString());
+                    file.getNode("uuid").setValue(user.getUniqueId().toString());
                 }
-                data.getNode("name").setValue(user.getUsername().orElse("null"));
-                data.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").setValue(user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME));
 
-                writeNodes(data, user.normalData().asList());
-                saveFile(StorageLocation.USER, user.getUniqueId().toString(), data);
+                String name = user.getUsername().orElse("null");
+                String primaryGroup = user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME);
+
+                file.getNode("name").setValue(name);
+                file.getNode(this.loader instanceof JsonLoader ? "primaryGroup" : "primary-group").setValue(primaryGroup);
+
+                writeNodes(file, user.normalData().asList());
+                saveFile(StorageLocation.USERS, user.getUniqueId().toString(), file);
             }
         } catch (Exception e) {
-            throw reportException(user.getUniqueId().toString(), e);
+            throw new FileIOException(user.getUniqueId().toString(), e);
         }
     }
 
     @Override
-    public Group createAndLoadGroup(String name) {
+    public Group createAndLoadGroup(String name) throws IOException {
         Group group = this.plugin.getGroupManager().getOrMake(name);
         try {
-            ConfigurationNode object = readFile(StorageLocation.GROUP, name);
+            ConfigurationNode file = readFile(StorageLocation.GROUPS, name);
 
-            if (object != null) {
-                group.loadNodesFromStorage(readNodes(object));
+            if (file != null) {
+                group.loadNodesFromStorage(readNodes(file));
             } else {
-                ConfigurationNode data = SimpleConfigurationNode.root();
+                file = ConfigurationNode.root();
                 if (this instanceof SeparatedConfigurateStorage) {
-                    data.getNode("name").setValue(group.getName());
+                    file.getNode("name").setValue(group.getName());
                 }
 
-                writeNodes(data, group.normalData().asList());
-                saveFile(StorageLocation.GROUP, name, data);
+                writeNodes(file, group.normalData().asList());
+                saveFile(StorageLocation.GROUPS, name, file);
             }
         } catch (Exception e) {
-            throw reportException(name, e);
+            throw new FileIOException(name, e);
         }
         return group;
     }
 
     @Override
-    public Optional<Group> loadGroup(String name) {
+    public Optional<Group> loadGroup(String name) throws IOException {
         try {
-            ConfigurationNode object = readFile(StorageLocation.GROUP, name);
-
-            if (object == null) {
+            ConfigurationNode file = readFile(StorageLocation.GROUPS, name);
+            if (file == null) {
                 return Optional.empty();
             }
 
             Group group = this.plugin.getGroupManager().getOrMake(name);
-            group.loadNodesFromStorage(readNodes(object));
+            group.loadNodesFromStorage(readNodes(file));
             return Optional.of(group);
         } catch (Exception e) {
-            throw reportException(name, e);
+            throw new FileIOException(name, e);
         }
     }
 
     @Override
-    public void saveGroup(Group group) {
+    public void saveGroup(Group group) throws IOException {
         group.normalData().discardChanges();
         try {
-            ConfigurationNode data = SimpleConfigurationNode.root();
+            ConfigurationNode file = ConfigurationNode.root();
             if (this instanceof SeparatedConfigurateStorage) {
-                data.getNode("name").setValue(group.getName());
+                file.getNode("name").setValue(group.getName());
             }
 
-            writeNodes(data, group.normalData().asList());
-            saveFile(StorageLocation.GROUP, group.getName(), data);
+            writeNodes(file, group.normalData().asList());
+            saveFile(StorageLocation.GROUPS, group.getName(), file);
         } catch (Exception e) {
-            throw reportException(group.getName(), e);
+            throw new FileIOException(group.getName(), e);
         }
     }
 
     @Override
-    public void deleteGroup(Group group) {
+    public void deleteGroup(Group group) throws IOException {
         try {
-            saveFile(StorageLocation.GROUP, group.getName(), null);
+            saveFile(StorageLocation.GROUPS, group.getName(), null);
         } catch (Exception e) {
-            throw reportException(group.getName(), e);
+            throw new FileIOException(group.getName(), e);
         }
         this.plugin.getGroupManager().unload(group.getName());
     }
 
     @Override
-    public Track createAndLoadTrack(String name) {
+    public Track createAndLoadTrack(String name) throws IOException {
         Track track = this.plugin.getTrackManager().getOrMake(name);
         try {
-            ConfigurationNode object = readFile(StorageLocation.TRACK, name);
-
-            if (object != null) {
-                List<String> groups = object.getNode("groups").getChildrenList().stream()
-                        .map(ConfigurationNode::getString)
-                        .collect(ImmutableCollectors.toList());
-
-                track.setGroups(groups);
+            ConfigurationNode file = readFile(StorageLocation.TRACKS, name);
+            if (file != null) {
+                track.setGroups(file.getNode("groups").getList(Types::asString));
             } else {
-                ConfigurationNode data = SimpleConfigurationNode.root();
+                file = ConfigurationNode.root();
                 if (this instanceof SeparatedConfigurateStorage) {
-                    data.getNode("name").setValue(name);
+                    file.getNode("name").setValue(name);
                 }
-                data.getNode("groups").setValue(track.getGroups());
-                saveFile(StorageLocation.TRACK, name, data);
+                file.getNode("groups").setValue(track.getGroups());
+                saveFile(StorageLocation.TRACKS, name, file);
             }
-
         } catch (Exception e) {
-            throw reportException(name, e);
+            throw new FileIOException(name, e);
         }
         return track;
     }
 
     @Override
-    public Optional<Track> loadTrack(String name) {
+    public Optional<Track> loadTrack(String name) throws IOException {
         try {
-            ConfigurationNode object = readFile(StorageLocation.TRACK, name);
-
-            if (object == null) {
+            ConfigurationNode file = readFile(StorageLocation.TRACKS, name);
+            if (file == null) {
                 return Optional.empty();
             }
 
             Track track = this.plugin.getTrackManager().getOrMake(name);
-            List<String> groups = object.getNode("groups").getChildrenList().stream()
-                    .map(ConfigurationNode::getString)
-                    .collect(ImmutableCollectors.toList());
-            track.setGroups(groups);
+            track.setGroups(file.getNode("groups").getList(Types::asString));
             return Optional.of(track);
         } catch (Exception e) {
-            throw reportException(name, e);
+            throw new FileIOException(name, e);
         }
     }
 
     @Override
-    public void saveTrack(Track track) {
+    public void saveTrack(Track track) throws IOException {
         try {
-            ConfigurationNode data = SimpleConfigurationNode.root();
+            ConfigurationNode file = ConfigurationNode.root();
             if (this instanceof SeparatedConfigurateStorage) {
-                data.getNode("name").setValue(track.getName());
+                file.getNode("name").setValue(track.getName());
             }
-            data.getNode("groups").setValue(track.getGroups());
-            saveFile(StorageLocation.TRACK, track.getName(), data);
+            file.getNode("groups").setValue(track.getGroups());
+            saveFile(StorageLocation.TRACKS, track.getName(), file);
         } catch (Exception e) {
-            throw reportException(track.getName(), e);
+            throw new FileIOException(track.getName(), e);
         }
     }
 
     @Override
-    public void deleteTrack(Track track) {
+    public void deleteTrack(Track track) throws IOException {
         try {
-            saveFile(StorageLocation.TRACK, track.getName(), null);
+            saveFile(StorageLocation.TRACKS, track.getName(), null);
         } catch (Exception e) {
-            throw reportException(track.getName(), e);
+            throw new FileIOException(track.getName(), e);
         }
         this.plugin.getTrackManager().unload(track.getName());
     }
@@ -398,71 +372,54 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         return this.uuidCache.lookupUsername(uniqueId);
     }
 
+    protected boolean processBulkUpdate(BulkUpdate bulkUpdate, ConfigurationNode node, HolderType holderType) {
+        Set<Node> nodes = readNodes(node);
+        Set<Node> results = bulkUpdate.apply(nodes, holderType);
+
+        if (results == null) {
+            return false;
+        }
+
+        writeNodes(node, results);
+        return true;
+    }
+
     private static ImmutableContextSet readContexts(ConfigurationNode attributes) {
         ImmutableContextSet.Builder contextBuilder = new ImmutableContextSetImpl.BuilderImpl();
         ConfigurationNode contextMap = attributes.getNode("context");
-        if (!contextMap.isVirtual() && contextMap.hasMapChildren()) {
+        if (!contextMap.isVirtual() && contextMap.isMap()) {
             contextBuilder.addAll(ContextSetConfigurateSerializer.deserializeContextSet(contextMap));
         }
 
         String server = attributes.getNode("server").getString("global");
-        if (!server.equals("global")) {
-            contextBuilder.add(DefaultContextKeys.SERVER_KEY, server);
-        }
+        contextBuilder.add(DefaultContextKeys.SERVER_KEY, server);
 
         String world = attributes.getNode("world").getString("global");
-        if (!world.equals("global")) {
-            contextBuilder.add(DefaultContextKeys.WORLD_KEY, world);
-        }
+        contextBuilder.add(DefaultContextKeys.WORLD_KEY, world);
 
         return contextBuilder.build();
     }
 
-    private static Node readMetaAttributes(ConfigurationNode attributes, Function<ConfigurationNode, NodeBuilder<?, ?>> permissionFunction) {
+    private static Node readAttributes(NodeBuilder<?, ?> builder, ConfigurationNode attributes) {
         long expiryVal = attributes.getNode("expiry").getLong(0L);
         Instant expiry = expiryVal == 0L ? null : Instant.ofEpochSecond(expiryVal);
         ImmutableContextSet context = readContexts(attributes);
 
-        return permissionFunction.apply(attributes)
-                .expiry(expiry)
-                .context(context)
-                .build();
+        return builder.expiry(expiry).context(context).build();
     }
 
-    private static Collection<Node> readAttributes(ConfigurationNode attributes, String permission) {
-        boolean value = attributes.getNode("value").getBoolean(true);
-        long expiryVal = attributes.getNode("expiry").getLong(0L);
-        Instant expiry = expiryVal == 0L ? null : Instant.ofEpochSecond(expiryVal);
-        ImmutableContextSet context = readContexts(attributes);
+    private static final class NodeEntry {
+        final String key;
+        final ConfigurationNode attributes;
 
-        ConfigurationNode batchAttribute = attributes.getNode("permissions");
-        if (permission.startsWith("luckperms.batch") && !batchAttribute.isVirtual() && batchAttribute.hasListChildren()) {
-            List<Node> nodes = new ArrayList<>();
-            for (ConfigurationNode element : batchAttribute.getChildrenList()) {
-                Node node = NodeBuilders.determineMostApplicable(element.getString())
-                        .value(value)
-                        .expiry(expiry)
-                        .context(context)
-                        .build();
-                nodes.add(node);
-            }
-            return nodes;
-        } else {
-            Node node = NodeBuilders.determineMostApplicable(permission)
-                    .value(value)
-                    .expiry(expiry)
-                    .context(context)
-                    .build();
-            return Collections.singleton(node);
+        private NodeEntry(String key, ConfigurationNode attributes) {
+            this.key = key;
+            this.attributes = attributes;
         }
     }
 
-    private static Map.Entry<String, ConfigurationNode> parseEntry(ConfigurationNode appended, String keyFieldName) {
-        if (!appended.hasMapChildren()) {
-            return null;
-        }
-
-        Map<Object, ? extends ConfigurationNode> children = appended.getChildrenMap();
+    private static NodeEntry parseNode(ConfigurationNode configNode, String keyFieldName) {
+        Map<Object, ? extends ConfigurationNode> children = configNode.getChildrenMap();
         if (children.isEmpty()) {
             return null;
         }
@@ -476,88 +433,93 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 ConfigurationNode attributes = entry.getValue();
 
                 if (!permission.equals(keyFieldName)) {
-                    return Maps.immutableEntry(permission, attributes);
+                    return new NodeEntry(permission, attributes);
                 }
             }
         }
 
-        // assume 'appended' is the actual entry.
+        // assume 'configNode' is the actual entry.
         String permission = children.get(keyFieldName).getString(null);
         if (permission == null) {
             return null;
         }
 
-        return Maps.immutableEntry(permission, appended);
+        return new NodeEntry(permission, configNode);
     }
 
     protected static Set<Node> readNodes(ConfigurationNode data) {
         Set<Node> nodes = new HashSet<>();
 
-        if (data.getNode("permissions").hasListChildren()) {
-            List<? extends ConfigurationNode> children = data.getNode("permissions").getChildrenList();
-            for (ConfigurationNode appended : children) {
-                String plainValue = appended.getValue(Types::strictAsString);
-                if (plainValue != null) {
-                    nodes.add(NodeBuilders.determineMostApplicable(plainValue).build());
-                    continue;
-                }
-
-                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended, "permission");
-                if (entry == null) {
-                    continue;
-                }
-                nodes.addAll(readAttributes(entry.getValue(), entry.getKey()));
+        for (ConfigurationNode appended : data.getNode("permissions").getChildrenList()) {
+            String plainValue = appended.getValue(Types::strictAsString);
+            if (plainValue != null) {
+                nodes.add(NodeBuilders.determineMostApplicable(plainValue).build());
+                continue;
             }
+
+            NodeEntry entry = parseNode(appended, "permission");
+            if (entry == null) {
+                continue;
+            }
+
+            nodes.add(readAttributes(
+                    NodeBuilders.determineMostApplicable(entry.key).value(entry.attributes.getNode("value").getBoolean(true)),
+                    entry.attributes
+            ));
         }
 
-        if (data.getNode("parents").hasListChildren()) {
-            List<? extends ConfigurationNode> children = data.getNode("parents").getChildrenList();
-            for (ConfigurationNode appended : children) {
-                String plainValue = appended.getValue(Types::strictAsString);
-                if (plainValue != null) {
-                    nodes.add(Inheritance.builder(plainValue).build());
-                    continue;
-                }
-
-                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended, "group");
-                if (entry == null) {
-                    continue;
-                }
-                nodes.add(readMetaAttributes(entry.getValue(), c -> Inheritance.builder(entry.getKey())));
+        for (ConfigurationNode appended : data.getNode("parents").getChildrenList()) {
+            String plainValue = appended.getValue(Types::strictAsString);
+            if (plainValue != null) {
+                nodes.add(Inheritance.builder(plainValue).build());
+                continue;
             }
+
+            NodeEntry entry = parseNode(appended, "group");
+            if (entry == null) {
+                continue;
+            }
+
+            nodes.add(readAttributes(
+                    Inheritance.builder(entry.key),
+                    entry.attributes
+            ));
         }
 
-        if (data.getNode("prefixes").hasListChildren()) {
-            List<? extends ConfigurationNode> children = data.getNode("prefixes").getChildrenList();
-            for (ConfigurationNode appended : children) {
-                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended, "prefix");
-                if (entry == null) {
-                    continue;
-                }
-                nodes.add(readMetaAttributes(entry.getValue(), c -> Prefix.builder(entry.getKey(), c.getNode("priority").getInt(0))));
+        for (ConfigurationNode appended : data.getNode("prefixes").getChildrenList()) {
+            NodeEntry entry = parseNode(appended, "prefix");
+            if (entry == null) {
+                continue;
             }
+
+            nodes.add(readAttributes(
+                    Prefix.builder(entry.key, entry.attributes.getNode("priority").getInt(0)),
+                    entry.attributes
+            ));
         }
 
-        if (data.getNode("suffixes").hasListChildren()) {
-            List<? extends ConfigurationNode> children = data.getNode("suffixes").getChildrenList();
-            for (ConfigurationNode appended : children) {
-                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended, "suffix");
-                if (entry == null) {
-                    continue;
-                }
-                nodes.add(readMetaAttributes(entry.getValue(), c -> Suffix.builder(entry.getKey(), c.getNode("priority").getInt(0))));
+        for (ConfigurationNode appended : data.getNode("suffixes").getChildrenList()) {
+            NodeEntry entry = parseNode(appended, "suffix");
+            if (entry == null) {
+                continue;
             }
+
+            nodes.add(readAttributes(
+                    Suffix.builder(entry.key, entry.attributes.getNode("priority").getInt(0)),
+                    entry.attributes
+            ));
         }
 
-        if (data.getNode("meta").hasListChildren()) {
-            List<? extends ConfigurationNode> children = data.getNode("meta").getChildrenList();
-            for (ConfigurationNode appended : children) {
-                Map.Entry<String, ConfigurationNode> entry = parseEntry(appended, "key");
-                if (entry == null) {
-                    continue;
-                }
-                nodes.add(readMetaAttributes(entry.getValue(), c -> Meta.builder(entry.getKey(), c.getNode("value").getString("null"))));
+        for (ConfigurationNode appended : data.getNode("meta").getChildrenList()) {
+            NodeEntry entry = parseNode(appended, "key");
+            if (entry == null) {
+                continue;
             }
+
+            nodes.add(readAttributes(
+                    Meta.builder(entry.key, entry.attributes.getNode("value").getString("null")),
+                    entry.attributes
+            ));
         }
 
         return nodes;
@@ -582,7 +544,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     }
 
     private void appendNode(ConfigurationNode base, String key, ConfigurationNode attributes, String keyFieldName) {
-        ConfigurationNode appended = base.getAppendedNode();
+        ConfigurationNode appended = base.appendListNode();
         if (this.loader instanceof YamlLoader) {
             // create a map node with a single entry of key --> attributes
             appended.getNode(key).setValue(attributes);
@@ -594,7 +556,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     }
 
     private void writeNodes(ConfigurationNode to, Collection<Node> nodes) {
-        ConfigurationNode permissionsSection = SimpleConfigurationNode.root();
+        ConfigurationNode permissionsSection = ConfigurationNode.root();
 
         // ensure for CombinedConfigurateStorage that there's at least *something*
         // to save to the file even if it's just an empty list.
@@ -602,20 +564,20 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             permissionsSection.setValue(Collections.emptyList());
         }
 
-        ConfigurationNode parentsSection = SimpleConfigurationNode.root();
-        ConfigurationNode prefixesSection = SimpleConfigurationNode.root();
-        ConfigurationNode suffixesSection = SimpleConfigurationNode.root();
-        ConfigurationNode metaSection = SimpleConfigurationNode.root();
+        ConfigurationNode parentsSection = ConfigurationNode.root();
+        ConfigurationNode prefixesSection = ConfigurationNode.root();
+        ConfigurationNode suffixesSection = ConfigurationNode.root();
+        ConfigurationNode metaSection = ConfigurationNode.root();
 
         for (Node n : nodes) {
             // just add a string to the list.
             if (this.loader instanceof YamlLoader && isPlain(n)) {
                 if (n instanceof InheritanceNode) {
-                    parentsSection.getAppendedNode().setValue(((InheritanceNode) n).getGroupName());
+                    parentsSection.appendListNode().setValue(((InheritanceNode) n).getGroupName());
                     continue;
                 }
                 if (!NodeType.META_OR_CHAT_META.matches(n)) {
-                    permissionsSection.getAppendedNode().setValue(n.getKey());
+                    permissionsSection.appendListNode().setValue(n.getKey());
                     continue;
                 }
             }
@@ -624,7 +586,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 // handle prefixes / suffixes
                 ChatMetaNode<?, ?> chatMeta = (ChatMetaNode<?, ?>) n;
 
-                ConfigurationNode attributes = SimpleConfigurationNode.root();
+                ConfigurationNode attributes = ConfigurationNode.root();
                 attributes.getNode("priority").setValue(chatMeta.getPriority());
                 writeAttributesTo(attributes, n, false);
 
@@ -642,7 +604,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 // handle meta nodes
                 MetaNode meta = (MetaNode) n;
 
-                ConfigurationNode attributes = SimpleConfigurationNode.root();
+                ConfigurationNode attributes = ConfigurationNode.root();
                 attributes.getNode("value").setValue(meta.getMetaValue());
                 writeAttributesTo(attributes, n, false);
 
@@ -651,44 +613,44 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 // handle group nodes
                 InheritanceNode inheritance = (InheritanceNode) n;
 
-                ConfigurationNode attributes = SimpleConfigurationNode.root();
+                ConfigurationNode attributes = ConfigurationNode.root();
                 writeAttributesTo(attributes, n, false);
 
                 appendNode(parentsSection, inheritance.getGroupName(), attributes, "group");
             } else {
                 // handle regular permissions and negated meta+prefixes+suffixes
-                ConfigurationNode attributes = SimpleConfigurationNode.root();
+                ConfigurationNode attributes = ConfigurationNode.root();
                 writeAttributesTo(attributes, n, true);
 
                 appendNode(permissionsSection, n.getKey(), attributes, "permission");
             }
         }
 
-        if (permissionsSection.hasListChildren() || this instanceof CombinedConfigurateStorage) {
+        if (permissionsSection.isList() || this instanceof CombinedConfigurateStorage) {
             to.getNode("permissions").setValue(permissionsSection);
         } else {
             to.removeChild("permissions");
         }
 
-        if (parentsSection.hasListChildren()) {
+        if (parentsSection.isList()) {
             to.getNode("parents").setValue(parentsSection);
         } else {
             to.removeChild("parents");
         }
 
-        if (prefixesSection.hasListChildren()) {
+        if (prefixesSection.isList()) {
             to.getNode("prefixes").setValue(prefixesSection);
         } else {
             to.removeChild("prefixes");
         }
 
-        if (suffixesSection.hasListChildren()) {
+        if (suffixesSection.isList()) {
             to.getNode("suffixes").setValue(suffixesSection);
         } else {
             to.removeChild("suffixes");
         }
 
-        if (metaSection.hasListChildren()) {
+        if (metaSection.isList()) {
             to.getNode("meta").setValue(metaSection);
         } else {
             to.removeChild("meta");

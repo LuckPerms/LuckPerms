@@ -340,37 +340,4 @@ public enum Dependency {
         }
     }
 
-    /*
-    public static void main(String[] args) {
-        Dependency[] dependencies = values();
-        DependencyRepository[] repos = DependencyRepository.values();
-
-        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newCachedThreadPool();
-
-        for (Dependency dependency : dependencies) {
-            for (DependencyRepository repo : repos) {
-                pool.submit(() -> {
-                    try {
-                        byte[] hash = createDigest().digest(repo.downloadRaw(dependency));
-                        if (!dependency.checksumMatches(hash)) {
-                            System.out.println("NO MATCH - " + repo.name() + " - " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
-                        } else {
-                            System.out.println("OK - " + repo.name() + " - " + dependency.name());
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-        }
-
-        pool.shutdown();
-        try {
-            pool.awaitTermination(1, java.util.concurrent.TimeUnit.HOURS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-    */
-
 }

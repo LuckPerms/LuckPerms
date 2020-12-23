@@ -51,24 +51,14 @@ public final class AdventureCompat {
     static {
         String adventurePkg = "net.kyo".concat("ri.adventure.");
         try {
-            if (classExists(adventurePkg + "audience.Audience")) {
-                Class<?> audienceClass = Class.forName(adventurePkg + "audience.Audience");
-                Class<?> componentClass = Class.forName(adventurePkg + "text.Component");
-                Class<?> serializerClass = Class.forName(adventurePkg + "text.serializer.gson.GsonComponentSerializer");
+            Class<?> audienceClass = Class.forName(adventurePkg + "audience.Audience");
+            Class<?> componentClass = Class.forName(adventurePkg + "text.Component");
+            Class<?> serializerClass = Class.forName(adventurePkg + "text.serializer.gson.GsonComponentSerializer");
 
-                PLATFORM_SERIALIZER_DESERIALIZE = serializerClass.getMethod("deserialize", Object.class);
-                PLATFORM_SEND_MESSAGE = audienceClass.getMethod("sendMessage", componentClass);
-                PLATFORM_COMPONENT_RESULT_DENIED = ComponentResult.class.getMethod("denied", componentClass);
-                PLATFORM_SERIALIZER_INSTANCE = serializerClass.getMethod("gson").invoke(null);
-            } else {
-                Class<?> componentClass = Class.forName("net.kyori.text.Component");
-                Class<?> serializerClass = Class.forName("net.kyori.text.serializer.gson.GsonComponentSerializer");
-
-                PLATFORM_SERIALIZER_DESERIALIZE = serializerClass.getMethod("deserialize", String.class);
-                PLATFORM_SEND_MESSAGE = CommandSource.class.getMethod("sendMessage", componentClass);
-                PLATFORM_COMPONENT_RESULT_DENIED = ComponentResult.class.getMethod("denied", componentClass);
-                PLATFORM_SERIALIZER_INSTANCE = serializerClass.getField("INSTANCE").get(null);
-            }
+            PLATFORM_SERIALIZER_DESERIALIZE = serializerClass.getMethod("deserialize", Object.class);
+            PLATFORM_SEND_MESSAGE = audienceClass.getMethod("sendMessage", componentClass);
+            PLATFORM_COMPONENT_RESULT_DENIED = ComponentResult.class.getMethod("denied", componentClass);
+            PLATFORM_SERIALIZER_INSTANCE = serializerClass.getMethod("gson").invoke(null);
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -96,15 +86,6 @@ public final class AdventureCompat {
             return (ComponentResult) PLATFORM_COMPONENT_RESULT_DENIED.invoke(null, toPlatformComponent(message));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static boolean classExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
         }
     }
 

@@ -157,24 +157,20 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     @Override
     public String getGroupChatPrefix(String world, String name) {
         Objects.requireNonNull(name, "name");
-        Group group = getGroup(name);
-        if (group == null) {
+        MetaCache metaData = getGroupMetaCache(name, world);
+        if (metaData == null) {
             return null;
         }
-        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
-        MetaCache metaData = group.getCachedData().getMetaData(queryOptions);
         return Strings.nullToEmpty(metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API));
     }
 
     @Override
     public String getGroupChatSuffix(String world, String name) {
         Objects.requireNonNull(name, "name");
-        Group group = getGroup(name);
-        if (group == null) {
+        MetaCache metaData = getGroupMetaCache(name, world);
+        if (metaData == null) {
             return null;
         }
-        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
-        MetaCache metaData = group.getCachedData().getMetaData(queryOptions);
         return Strings.nullToEmpty(metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API));
     }
 
@@ -202,12 +198,10 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     public String getGroupMeta(String world, String name, String key) {
         Objects.requireNonNull(name, "name");
         Objects.requireNonNull(key, "key");
-        Group group = getGroup(name);
-        if (group == null) {
+        MetaCache metaData = getGroupMetaCache(name, world);
+        if (metaData == null) {
             return null;
         }
-        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
-        MetaCache metaData = group.getCachedData().getMetaData(queryOptions);
         return metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
     }
 
@@ -226,6 +220,15 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
 
     private Group getGroup(String name) {
         return this.plugin.getGroupManager().getByDisplayName(name);
+    }
+
+    private MetaCache getGroupMetaCache(String name, String world) {
+        Group group = getGroup(name);
+        if (group == null) {
+            return null;
+        }
+        QueryOptions queryOptions = this.vaultPermission.getQueryOptions(null, world);
+        return group.getCachedData().getMetaData(queryOptions);
     }
 
     private void setChatMeta(PermissionHolder holder, ChatMetaType type, String value, String world) {

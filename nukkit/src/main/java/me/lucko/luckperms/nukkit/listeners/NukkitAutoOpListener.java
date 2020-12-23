@@ -67,7 +67,7 @@ public class NukkitAutoOpListener implements LuckPermsEventListener {
     }
 
     private void refreshAutoOp(Player player) {
-        User user = plugin.getUserManager().getIfLoaded(player.getUniqueId());
+        User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
         boolean value;
 
         if (user != null) {

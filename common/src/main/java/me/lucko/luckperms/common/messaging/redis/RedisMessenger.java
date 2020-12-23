@@ -64,7 +64,7 @@ public class RedisMessenger implements Messenger {
         this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password, ssl);
 
         this.sub = new Subscription(this);
-        this.plugin.getBootstrap().getScheduler().executeAsync(sub);
+        this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
     }
 
     @Override
@@ -95,13 +95,13 @@ public class RedisMessenger implements Messenger {
             while (!Thread.interrupted() && !this.parent.jedisPool.isClosed()) {
                 try (Jedis jedis = this.parent.jedisPool.getResource()) {
                     if (wasBroken) {
-                        parent.plugin.getLogger().info("Redis pubsub connection re-established");
+                        this.parent.plugin.getLogger().info("Redis pubsub connection re-established");
                         wasBroken = false;
                     }
                     jedis.subscribe(this, CHANNEL);
                 } catch (Exception e) {
                     wasBroken = true;
-                    parent.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection: " + e.getMessage());
+                    this.parent.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection: " + e.getMessage());
                     try {
                         unsubscribe();
                     } catch (Exception ignored) {

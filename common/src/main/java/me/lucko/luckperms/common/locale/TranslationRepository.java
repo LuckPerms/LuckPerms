@@ -320,10 +320,5 @@ public class TranslationRepository {
             }
             return res;
         }
-
-        @Override
-        public void close() throws IOException {
-            super.close();
-        }
     }
 }

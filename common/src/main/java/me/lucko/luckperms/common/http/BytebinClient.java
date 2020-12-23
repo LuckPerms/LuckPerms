@@ -83,11 +83,10 @@ public class BytebinClient extends AbstractHttpClient {
      *
      * @param buf the compressed content
      * @param contentType the type of the content
-     * @param allowModification if the paste should be modifiable
      * @return the key of the resultant content
      * @throws IOException if an error occurs
      */
-    public Content postContent(byte[] buf, MediaType contentType, boolean allowModification) throws IOException, UnsuccessfulRequestException {
+    public Content postContent(byte[] buf, MediaType contentType) throws IOException, UnsuccessfulRequestException {
         RequestBody body = RequestBody.create(contentType, buf);
 
         Request.Builder requestBuilder = new Request.Builder()
@@ -95,52 +94,14 @@ public class BytebinClient extends AbstractHttpClient {
                 .header("User-Agent", this.userAgent)
                 .header("Content-Encoding", "gzip");
 
-        if (allowModification) {
-            requestBuilder.header("Allow-Modification", "true");
-        }
-
         Request request = requestBuilder.post(body).build();
         try (Response response = makeHttpRequest(request)) {
             String key = response.header("Location");
             if (key == null) {
                 throw new IllegalStateException("Key not returned");
             }
-
-            if (allowModification) {
-                String modificationKey = response.header("Modification-Key");
-                if (modificationKey == null) {
-                    throw new IllegalStateException("Modification key not returned");
-                }
-                return new Content(key, modificationKey);
-            } else {
-                return new Content(key);
-            }
+            return new Content(key);
         }
-    }
-
-    /**
-     * PUTs modified GZIP compressed content to bytebin in place of existing content.
-     *
-     * @param existingContent the existing content
-     * @param buf the compressed content to put
-     * @param contentType the type of the content
-     * @throws IOException if an error occurs
-     */
-    public void modifyContent(Content existingContent, byte[] buf, MediaType contentType) throws IOException, UnsuccessfulRequestException {
-        if (!existingContent.modifiable) {
-            throw new IllegalArgumentException("Existing content is not modifiable");
-        }
-
-        RequestBody body = RequestBody.create(contentType, buf);
-
-        Request.Builder requestBuilder = new Request.Builder()
-                .url(this.url + existingContent.key())
-                .header("User-Agent", this.userAgent)
-                .header("Content-Encoding", "gzip")
-                .header("Modification-Key", existingContent.modificationKey);
-
-        Request request = requestBuilder.put(body).build();
-        makeHttpRequest(request).close();
     }
 
     /**
@@ -173,19 +134,9 @@ public class BytebinClient extends AbstractHttpClient {
 
     public static final class Content {
         private final String key;
-        private final boolean modifiable;
-        private final String modificationKey;
 
         Content(String key) {
             this.key = key;
-            this.modifiable = false;
-            this.modificationKey = null;
-        }
-
-        Content(String key, String modificationKey) {
-            this.key = key;
-            this.modifiable = true;
-            this.modificationKey = modificationKey;
         }
 
         public String key() {

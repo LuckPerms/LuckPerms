@@ -59,44 +59,6 @@ public class FileUuidCache {
     // the lookup map
     private final LookupMap lookupMap = new LookupMap();
 
-    private static final class LookupMap extends ConcurrentHashMap<UUID, String> {
-        private final SetMultimap<String, UUID> reverse = Multimaps.newSetMultimap(new ConcurrentHashMap<>(), ConcurrentHashMap::newKeySet);
-
-        @Override
-        public String put(@NonNull UUID key, @NonNull String value) {
-            String existing = super.put(key, value);
-
-            // check if we need to remove a reverse entry which has been replaced
-            // existing might be null
-            if (!value.equalsIgnoreCase(existing)) {
-                if (existing != null) {
-                    this.reverse.remove(existing.toLowerCase(), key);
-                }
-            }
-
-            this.reverse.put(value.toLowerCase(), key);
-            return existing;
-        }
-
-        @Override
-        public String remove(@NonNull Object k) {
-            UUID key = (UUID) k;
-            String username = super.remove(key);
-            if (username != null) {
-                this.reverse.remove(username.toLowerCase(), key);
-            }
-            return username;
-        }
-
-        public String lookupUsername(UUID uuid) {
-            return super.get(uuid);
-        }
-
-        public Set<UUID> lookupUuid(String name) {
-            return this.reverse.get(name.toLowerCase());
-        }
-    }
-
     /**
      * Adds a mapping to the cache
      *
@@ -154,6 +116,40 @@ public class FileUuidCache {
         return this.lookupMap.lookupUsername(uuid);
     }
 
+    public void load(Path file) {
+        if (!Files.exists(file)) {
+            return;
+        }
+
+        try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+            String entry;
+            while ((entry = reader.readLine()) != null) {
+                entry = entry.trim();
+                if (entry.isEmpty() || entry.startsWith("#")) {
+                    continue;
+                }
+                loadEntry(entry);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void save(Path file) {
+        try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+            writer.write("# LuckPerms UUID lookup cache");
+            writer.newLine();
+            for (Map.Entry<UUID, String> ent : this.lookupMap.entrySet()) {
+                String out = ent.getKey() + ":" + ent.getValue();
+                writer.write(out);
+                writer.newLine();
+            }
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void loadEntry(String entry) {
         if (entry.contains(":")) {
             // new format
@@ -193,37 +189,41 @@ public class FileUuidCache {
         }
     }
 
-    public void load(Path file) {
-        if (!Files.exists(file)) {
-            return;
-        }
+    private static final class LookupMap extends ConcurrentHashMap<UUID, String> {
+        private final SetMultimap<String, UUID> reverse = Multimaps.newSetMultimap(new ConcurrentHashMap<>(), ConcurrentHashMap::newKeySet);
 
-        try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            String entry;
-            while ((entry = reader.readLine()) != null) {
-                entry = entry.trim();
-                if (entry.isEmpty() || entry.startsWith("#")) {
-                    continue;
+        @Override
+        public String put(@NonNull UUID key, @NonNull String value) {
+            String existing = super.put(key, value);
+
+            // check if we need to remove a reverse entry which has been replaced
+            // existing might be null
+            if (!value.equalsIgnoreCase(existing)) {
+                if (existing != null) {
+                    this.reverse.remove(existing.toLowerCase(), key);
                 }
-                loadEntry(entry);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void save(Path file) {
-        try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
-            writer.write("# LuckPerms UUID lookup cache");
-            writer.newLine();
-            for (Map.Entry<UUID, String> ent : this.lookupMap.entrySet()) {
-                String out = ent.getKey() + ":" + ent.getValue();
-                writer.write(out);
-                writer.newLine();
+            this.reverse.put(value.toLowerCase(), key);
+            return existing;
+        }
+
+        @Override
+        public String remove(@NonNull Object k) {
+            UUID key = (UUID) k;
+            String username = super.remove(key);
+            if (username != null) {
+                this.reverse.remove(username.toLowerCase(), key);
             }
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+            return username;
+        }
+
+        public String lookupUsername(UUID uuid) {
+            return super.get(uuid);
+        }
+
+        public Set<UUID> lookupUuid(String name) {
+            return this.reverse.get(name.toLowerCase());
         }
     }
 

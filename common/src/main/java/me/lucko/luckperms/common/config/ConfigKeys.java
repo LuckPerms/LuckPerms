@@ -124,7 +124,7 @@ public final class ConfigKeys {
      */
     public static final ConfigKey<ContextSatisfyMode> CONTEXT_SATISFY_MODE = key(c -> {
         String value = c.getString("context-satisfy-mode", "at-least-one-value-per-key");
-        if (value.toLowerCase().equals("all-values-per-key")) {
+        if (value.equalsIgnoreCase("all-values-per-key")) {
             return ContextSatisfyMode.ALL_VALUES_PER_KEY;
         }
         return ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY;
@@ -199,11 +199,11 @@ public final class ConfigKeys {
         String option = PRIMARY_GROUP_CALCULATION_METHOD.get(c);
         switch (option) {
             case "stored":
-                return (Function<User, PrimaryGroupHolder>) PrimaryGroupHolder.Stored::new;
+                return PrimaryGroupHolder.Stored::new;
             case "parents-by-weight":
-                return (Function<User, PrimaryGroupHolder>) PrimaryGroupHolder.ParentsByWeight::new;
+                return PrimaryGroupHolder.ParentsByWeight::new;
             default:
-                return (Function<User, PrimaryGroupHolder>) PrimaryGroupHolder.AllParentsByWeight::new;
+                return PrimaryGroupHolder.AllParentsByWeight::new;
         }
     }));
 

@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.storage.implementation.file;
 
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.User;
@@ -45,7 +47,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -53,30 +57,38 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Flat-file storage using Configurate {@link ConfigurationNode}s.
+ * The data for each user/group/track is stored in a separate file.
+ */
 public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     private final String fileExtension;
     private final Predicate<Path> fileExtensionFilter;
 
-    private Path usersDirectory;
-    private Path groupsDirectory;
-    private Path tracksDirectory;
+    private final Map<StorageLocation, FileGroup> fileGroups;
+    private final FileGroup users;
+    private final FileGroup groups;
+    private final FileGroup tracks;
 
-    private FileWatcher.WatchedLocation userWatcher = null;
-    private FileWatcher.WatchedLocation groupWatcher = null;
-    private FileWatcher.WatchedLocation trackWatcher = null;
+    private static final class FileGroup {
+        private Path directory;
+        private FileWatcher.WatchedLocation watcher;
+    }
 
-    /**
-     * Creates a new configurate storage implementation
-     *
-     * @param plugin the plugin instance
-     * @param implementationName the name of this implementation
-     * @param fileExtension the file extension used by this instance, including a "." at the start
-     * @param dataFolderName the name of the folder used to store data
-     */
     public SeparatedConfigurateStorage(LuckPermsPlugin plugin, String implementationName, ConfigurateLoader loader, String fileExtension, String dataFolderName) {
         super(plugin, implementationName, loader, dataFolderName);
         this.fileExtension = fileExtension;
         this.fileExtensionFilter = path -> path.getFileName().toString().endsWith(this.fileExtension);
+
+        this.users = new FileGroup();
+        this.groups = new FileGroup();
+        this.tracks = new FileGroup();
+
+        EnumMap<StorageLocation, FileGroup> fileGroups = new EnumMap<>(StorageLocation.class);
+        fileGroups.put(StorageLocation.USERS, this.users);
+        fileGroups.put(StorageLocation.GROUPS, this.groups);
+        fileGroups.put(StorageLocation.TRACKS, this.tracks);
+        this.fileGroups = ImmutableMap.copyOf(fileGroups);
     }
 
     @Override
@@ -111,37 +123,13 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     private Path getDirectory(StorageLocation location) {
-        switch (location) {
-            case USER:
-                return this.usersDirectory;
-            case GROUP:
-                return this.groupsDirectory;
-            case TRACK:
-                return this.tracksDirectory;
-            default:
-                throw new RuntimeException();
-        }
+        return this.fileGroups.get(location).directory;
     }
 
     private void registerFileAction(StorageLocation type, Path file) {
-        switch (type) {
-            case USER:
-                if (this.userWatcher != null) {
-                    this.userWatcher.recordChange(file.getFileName().toString());
-                }
-                break;
-            case GROUP:
-                if (this.groupWatcher != null) {
-                    this.groupWatcher.recordChange(file.getFileName().toString());
-                }
-                break;
-            case TRACK:
-                if (this.trackWatcher != null) {
-                    this.trackWatcher.recordChange(file.getFileName().toString());
-                }
-                break;
-            default:
-                throw new RuntimeException();
+        FileWatcher.WatchedLocation watcher = this.fileGroups.get(type).watcher;
+        if (watcher != null) {
+            watcher.recordChange(file.getFileName().toString());
         }
     }
 
@@ -149,22 +137,21 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     public void init() throws IOException {
         super.init();
 
-        this.usersDirectory = MoreFiles.createDirectoryIfNotExists(super.dataDirectory.resolve("users"));
-        this.groupsDirectory = MoreFiles.createDirectoryIfNotExists(super.dataDirectory.resolve("groups"));
-        this.tracksDirectory = MoreFiles.createDirectoryIfNotExists(super.dataDirectory.resolve("tracks"));
+        this.users.directory = MoreFiles.createDirectoryIfNotExists(super.dataDirectory.resolve("users"));
+        this.groups.directory = MoreFiles.createDirectoryIfNotExists(super.dataDirectory.resolve("groups"));
+        this.tracks.directory = MoreFiles.createDirectoryIfNotExists(super.dataDirectory.resolve("tracks"));
 
         // Listen for file changes.
         FileWatcher watcher = this.plugin.getFileWatcher().orElse(null);
         if (watcher != null) {
-            this.userWatcher = watcher.getWatcher(this.usersDirectory);
-            this.userWatcher.addListener(path -> {
-                String s = path.getFileName().toString();
-
-                if (!s.endsWith(this.fileExtension)) {
+            this.users.watcher = watcher.getWatcher(this.users.directory);
+            this.users.watcher.addListener(path -> {
+                String fileName = path.getFileName().toString();
+                if (!fileName.endsWith(this.fileExtension)) {
                     return;
                 }
 
-                String user = s.substring(0, s.length() - this.fileExtension.length());
+                String user = fileName.substring(0, fileName.length() - this.fileExtension.length());
                 UUID uuid = Uuids.parse(user);
                 if (uuid == null) {
                     return;
@@ -177,28 +164,26 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
                 }
             });
 
-            this.groupWatcher = watcher.getWatcher(this.groupsDirectory);
-            this.groupWatcher.addListener(path -> {
-                String s = path.getFileName().toString();
-
-                if (!s.endsWith(this.fileExtension)) {
+            this.groups.watcher = watcher.getWatcher(this.groups.directory);
+            this.groups.watcher.addListener(path -> {
+                String fileName = path.getFileName().toString();
+                if (!fileName.endsWith(this.fileExtension)) {
                     return;
                 }
 
-                String groupName = s.substring(0, s.length() - this.fileExtension.length());
+                String groupName = fileName.substring(0, fileName.length() - this.fileExtension.length());
                 this.plugin.getLogger().info("[FileWatcher] Detected change in group file for " + groupName + " - reloading...");
                 this.plugin.getSyncTaskBuffer().request();
             });
 
-            this.trackWatcher = watcher.getWatcher(this.tracksDirectory);
-            this.trackWatcher.addListener(path -> {
-                String s = path.getFileName().toString();
-
-                if (!s.endsWith(this.fileExtension)) {
+            this.tracks.watcher = watcher.getWatcher(this.tracks.directory);
+            this.tracks.watcher.addListener(path -> {
+                String fileName = path.getFileName().toString();
+                if (!fileName.endsWith(this.fileExtension)) {
                     return;
                 }
 
-                String trackName = s.substring(0, s.length() - this.fileExtension.length());
+                String trackName = fileName.substring(0, fileName.length() - this.fileExtension.length());
                 this.plugin.getLogger().info("[FileWatcher] Detected change in track file for " + trackName + " - reloading...");
                 this.plugin.getStorage().loadAllTracks();
             });
@@ -208,32 +193,38 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception {
         if (bulkUpdate.getDataType().isIncludingUsers()) {
-            try (Stream<Path> s = Files.list(getDirectory(StorageLocation.USER))) {
+            try (Stream<Path> s = Files.list(getDirectory(StorageLocation.USERS))) {
                 s.filter(this.fileExtensionFilter).forEach(file -> {
                     try {
-                        registerFileAction(StorageLocation.USER, file);
+                        registerFileAction(StorageLocation.USERS, file);
                         ConfigurationNode object = readFile(file);
                         if (processBulkUpdate(bulkUpdate, object, HolderType.USER)) {
                             saveFile(file, object);
                         }
                     } catch (Exception e) {
-                        throw reportException(file.getFileName().toString(), e);
+                        this.plugin.getLogger().severe(
+                                "Exception whilst performing bulkupdate",
+                                new FileIOException(file.getFileName().toString(), e)
+                        );
                     }
                 });
             }
         }
 
         if (bulkUpdate.getDataType().isIncludingGroups()) {
-            try (Stream<Path> s = Files.list(getDirectory(StorageLocation.GROUP))) {
+            try (Stream<Path> s = Files.list(getDirectory(StorageLocation.GROUPS))) {
                 s.filter(this.fileExtensionFilter).forEach(file -> {
                     try {
-                        registerFileAction(StorageLocation.GROUP, file);
+                        registerFileAction(StorageLocation.GROUPS, file);
                         ConfigurationNode object = readFile(file);
                         if (processBulkUpdate(bulkUpdate, object, HolderType.GROUP)) {
                             saveFile(file, object);
                         }
                     } catch (Exception e) {
-                        throw reportException(file.getFileName().toString(), e);
+                        this.plugin.getLogger().severe(
+                                "Exception whilst performing bulkupdate",
+                                new FileIOException(file.getFileName().toString(), e)
+                        );
                     }
                 });
             }
@@ -242,7 +233,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
 
     @Override
     public Set<UUID> getUniqueUsers() throws IOException {
-        try (Stream<Path> stream = Files.list(this.usersDirectory)) {
+        try (Stream<Path> stream = Files.list(this.users.directory)) {
             return stream.filter(this.fileExtensionFilter)
                     .map(p -> p.getFileName().toString())
                     .map(s -> s.substring(0, s.length() - this.fileExtension.length()))
@@ -253,14 +244,14 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws IOException {
         List<NodeEntry<UUID, N>> held = new ArrayList<>();
-        try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.USER))) {
+        try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.USERS))) {
             stream.filter(this.fileExtensionFilter)
                     .forEach(file -> {
                         String fileName = file.getFileName().toString();
                         try {
-                            registerFileAction(StorageLocation.USER, file);
+                            registerFileAction(StorageLocation.USERS, file);
                             ConfigurationNode object = readFile(file);
                             UUID holder = UUID.fromString(fileName.substring(0, fileName.length() - this.fileExtension.length()));
                             Set<Node> nodes = readNodes(object);
@@ -271,7 +262,10 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
                                 }
                             }
                         } catch (Exception e) {
-                            throw reportException(file.getFileName().toString(), e);
+                            this.plugin.getLogger().severe(
+                                    "Exception whilst searching user nodes",
+                                    new FileIOException(file.getFileName().toString(), e)
+                            );
                         }
                     });
         }
@@ -281,7 +275,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     @Override
     public void loadAllGroups() throws IOException {
         List<String> groups;
-        try (Stream<Path> stream = Files.list(this.groupsDirectory)) {
+        try (Stream<Path> stream = Files.list(this.groups.directory)) {
             groups = stream.filter(this.fileExtensionFilter)
                     .map(p -> p.getFileName().toString())
                     .map(s -> s.substring(0, s.length() - this.fileExtension.length()))
@@ -296,14 +290,14 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     @Override
-    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
+    public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws IOException {
         List<NodeEntry<String, N>> held = new ArrayList<>();
-        try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.GROUP))) {
+        try (Stream<Path> stream = Files.list(getDirectory(StorageLocation.GROUPS))) {
             stream.filter(this.fileExtensionFilter)
                     .forEach(file -> {
                         String fileName = file.getFileName().toString();
                         try {
-                            registerFileAction(StorageLocation.GROUP, file);
+                            registerFileAction(StorageLocation.GROUPS, file);
                             ConfigurationNode object = readFile(file);
                             String holder = fileName.substring(0, fileName.length() - this.fileExtension.length());
                             Set<Node> nodes = readNodes(object);
@@ -314,7 +308,10 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
                                 }
                             }
                         } catch (Exception e) {
-                            throw reportException(file.getFileName().toString(), e);
+                            this.plugin.getLogger().severe(
+                                    "Exception whilst searching group nodes",
+                                    new FileIOException(file.getFileName().toString(), e)
+                            );
                         }
                     });
         }
@@ -324,7 +321,7 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     @Override
     public void loadAllTracks() throws IOException {
         List<String> tracks;
-        try (Stream<Path> stream = Files.list(this.tracksDirectory)) {
+        try (Stream<Path> stream = Files.list(this.tracks.directory)) {
             tracks = stream.filter(this.fileExtensionFilter)
                     .map(p -> p.getFileName().toString())
                     .map(s -> s.substring(0, s.length() - this.fileExtension.length()))

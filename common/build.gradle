@@ -1,5 +1,7 @@
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'dependency_checksum'
+    }
 }
 
 dependencies {
