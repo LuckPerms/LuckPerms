@@ -26,23 +26,44 @@
 package me.lucko.luckperms.fabric.listeners;
 
 import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
+import me.lucko.luckperms.fabric.LPFabricPlugin;
 
 import net.fabricmc.fabric.api.util.TriState;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.command.CommandSource;
+import net.minecraft.entity.Entity;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 /**
  * Listener to route permission checks made via fabric-permissions-api to LuckPerms.
  */
 public class PermissionCheckListener {
+    private final LPFabricPlugin plugin;
+
+    public PermissionCheckListener(LPFabricPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     public void registerListeners() {
         PermissionCheckEvent.EVENT.register(this::onPermissionCheck);
     }
 
-    private TriState onPermissionCheck(ServerPlayerEntity player, String permission) {
+    private TriState onPermissionCheck(CommandSource source, String permission) {
+        if (source instanceof ServerCommandSource) {
+            Entity entity = ((ServerCommandSource) source).getEntity();
+            if (entity instanceof ServerPlayerEntity) {
+                return onPlayerPermissionCheck((ServerPlayerEntity) entity, permission);
+            }
+        }
+        return onOtherPermissionCheck(source, permission);
+    }
+
+    private TriState onPlayerPermissionCheck(ServerPlayerEntity player, String permission) {
         switch (((MixinSubject) player).hasPermission(permission)) {
             case TRUE:
                 return TriState.TRUE;
@@ -53,6 +74,16 @@ public class PermissionCheckListener {
             default:
                 throw new AssertionError();
         }
+    }
+
+    private TriState onOtherPermissionCheck(CommandSource source, String permission) {
+        if (source instanceof ServerCommandSource) {
+            String name = ((ServerCommandSource) source).getName();
+            this.plugin.getVerboseHandler().offerPermissionCheckEvent(me.lucko.luckperms.common.verbose.event.PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, name, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.UNDEFINED);
+            this.plugin.getPermissionRegistry().offer(permission);
+        }
+
+        return TriState.DEFAULT;
     }
 
     public interface MixinSubject {

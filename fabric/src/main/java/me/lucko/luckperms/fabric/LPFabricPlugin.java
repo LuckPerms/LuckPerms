@@ -85,7 +85,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
         this.connectionListener = new FabricConnectionListener(this);
         this.connectionListener.registerListeners();
 
-        new PermissionCheckListener().registerListeners();
+        new PermissionCheckListener(this).registerListeners();
 
         // Command registration also need to occur early, and will persist across game states as well.
         this.commandManager = new FabricCommandExecutor(this);
