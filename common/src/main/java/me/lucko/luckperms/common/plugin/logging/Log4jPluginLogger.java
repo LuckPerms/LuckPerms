@@ -23,15 +23,16 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric;
+package me.lucko.luckperms.common.plugin.logging;
 
-import me.lucko.luckperms.common.plugin.logging.PluginLogger;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-class FabricPluginLogger implements PluginLogger {
+public class Log4jPluginLogger implements PluginLogger {
+    private final Logger logger;
 
-    private final Logger logger = LogManager.getLogger(LPFabricPlugin.class);
+    public Log4jPluginLogger(Logger logger) {
+        this.logger = logger;
+    }
 
     @Override
     public void info(String s) {
@@ -55,6 +56,6 @@ class FabricPluginLogger implements PluginLogger {
 
     @Override
     public void severe(String s, Throwable t) {
-        this.logger.warn(s, t);
+        this.logger.error(s, t);
     }
 }

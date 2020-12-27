@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.fabric;
 
-import com.mojang.brigadier.tree.ArgumentCommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
@@ -43,21 +41,14 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
-import me.lucko.luckperms.fabric.context.FabricWorldCalculator;
-import me.lucko.luckperms.fabric.event.EarlyLoginCallback;
-import me.lucko.luckperms.fabric.event.PlayerLoginCallback;
-import me.lucko.luckperms.fabric.event.PlayerQuitCallback;
-import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
-import me.lucko.luckperms.fabric.event.RespawnPlayerCallback;
+import me.lucko.luckperms.fabric.context.FabricPlayerCalculator;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
-import me.lucko.luckperms.fabric.listeners.FabricEventListeners;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import me.lucko.luckperms.fabric.listeners.PermissionCheckListener;
+
 import net.fabricmc.loader.api.ModContainer;
+import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,60 +59,43 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
-
 public class LPFabricPlugin extends AbstractLuckPermsPlugin {
+    private final LPFabricBootstrap bootstrap;
 
-    private static final String[] COMMAND_ALIASES = new String[] { "luckperms", "lp", "perm", "perms", "permission", "permissions" } ;
-    @Nullable
-    private MinecraftServer server;
-    private LPFabricBootstrap bootstrap;
-    private FabricContextManager contextManager;
+    private FabricConnectionListener connectionListener;
+    private FabricCommandExecutor commandManager;
+    private FabricServerAudiences audiences;
     private FabricSenderFactory senderFactory;
-
+    private FabricContextManager contextManager;
     private StandardUserManager userManager;
     private StandardGroupManager groupManager;
     private StandardTrackManager trackManager;
-
-    private FabricCommandExecutor commandManager;
-    private FabricConnectionListener connectionListener = new FabricConnectionListener(this);
 
     public LPFabricPlugin(LPFabricBootstrap bootstrap) {
         this.bootstrap = bootstrap;
     }
 
-    protected void setupFabricListeners() {
+    @Override
+    public LPFabricBootstrap getBootstrap() {
+        return this.bootstrap;
+    }
+
+    protected void registerFabricListeners() {
         // Events are registered very early on, and persist between game states
-        EarlyLoginCallback.EVENT.register(this.getConnectionListener()::onEarlyLogin);
-        PlayerLoginCallback.EVENT.register(this.getConnectionListener()::onLogin);
-        PlayerQuitCallback.EVENT.register(this.getConnectionListener()::onDisconnect);
-        FabricEventListeners listeners = new FabricEventListeners(this);
-        PlayerChangeWorldCallback.EVENT.register(listeners::onWorldChange);
-        RespawnPlayerCallback.EVENT.register(listeners::onPlayerRespawn);
+        this.connectionListener = new FabricConnectionListener(this);
+        this.connectionListener.registerListeners();
+
+        new PermissionCheckListener().registerListeners();
 
         // Command registration also need to occur early, and will persist across game states as well.
         this.commandManager = new FabricCommandExecutor(this);
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            for (String alias : COMMAND_ALIASES) {
-                LiteralCommandNode<ServerCommandSource> lp = literal(alias)
-                        .executes(this.getCommandManager())
-                        .build();
-
-                ArgumentCommandNode<ServerCommandSource, String> args = argument("args", greedyString())
-                        .suggests(this.getCommandManager())
-                        .executes(this.getCommandManager())
-                        .build();
-                lp.addChild(args);
-                dispatcher.getRoot().addChild(lp);
-            }
-        });
+        this.commandManager.register();
     }
 
     @Override
     protected void setupSenderFactory() {
-        this.senderFactory = new FabricSenderFactory(this);
+        this.audiences = FabricServerAudiences.of(this.bootstrap.getServer());
+        this.senderFactory = new FabricSenderFactory(this, this.audiences);
     }
 
     @Override
@@ -154,6 +128,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerPlatformListeners() {
+        // Too late for Fabric, registered in #registerFabricListeners
     }
 
     @Override
@@ -163,7 +138,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerCommands() {
-        // Too late for fabric.
+        // Too late for Fabric, registered in #registerFabricListeners
     }
 
     @Override
@@ -181,7 +156,10 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void setupContextManager() {
         this.contextManager = new FabricContextManager(this);
-        this.contextManager.registerCalculator(new FabricWorldCalculator(this));
+
+        FabricPlayerCalculator playerCalculator = new FabricPlayerCalculator(this);
+        playerCalculator.registerListeners();
+        this.contextManager.registerCalculator(playerCalculator);
     }
 
     @Override
@@ -207,9 +185,27 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     protected void performFinalSetup() {
     }
 
+    public FabricSenderFactory getSenderFactory() {
+        return this.senderFactory;
+    }
+
+    public FabricServerAudiences getAudiences() {
+        return this.audiences;
+    }
+
     @Override
-    public LPFabricBootstrap getBootstrap() {
-        return this.bootstrap;
+    public FabricConnectionListener getConnectionListener() {
+        return this.connectionListener;
+    }
+
+    @Override
+    public FabricCommandExecutor getCommandManager() {
+        return this.commandManager;
+    }
+
+    @Override
+    public FabricContextManager getContextManager() {
+        return this.contextManager;
     }
 
     @Override
@@ -228,21 +224,6 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    public FabricCommandExecutor getCommandManager() {
-        return this.commandManager;
-    }
-
-    @Override
-    public FabricConnectionListener getConnectionListener() {
-        return this.connectionListener;
-    }
-
-    @Override
-    public FabricContextManager getContextManager() {
-        return this.contextManager;
-    }
-
-    @Override
     public Optional<QueryOptions> getQueryOptionsForUser(User user) {
         return this.bootstrap.getPlayer(user.getUniqueId()).map(player -> this.contextManager.getQueryOptions(player));
     }
@@ -251,29 +232,13 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     public Stream<Sender> getOnlineSenders() {
         return Stream.concat(
                 Stream.of(getConsoleSender()),
-                this.getServer().getPlayerManager().getPlayerList().stream().map(serverPlayerEntity -> getSenderFactory().wrap(serverPlayerEntity.getCommandSource()))
+                this.bootstrap.getServer().getPlayerManager().getPlayerList().stream().map(serverPlayerEntity -> getSenderFactory().wrap(serverPlayerEntity.getCommandSource()))
         );
     }
 
     @Override
     public Sender getConsoleSender() {
-        return this.getSenderFactory().wrap(this.getServer().getCommandSource());
+        return this.getSenderFactory().wrap(this.bootstrap.getServer().getCommandSource());
     }
 
-    public FabricSenderFactory getSenderFactory() {
-        return this.senderFactory;
-    }
-
-    public MinecraftServer getServer() {
-        if (this.server == null) {
-            throw new UnsupportedOperationException("Minecraft's server is not availible right now");
-        }
-
-        return this.server;
-    }
-
-    // package-private very intentionally
-    void setServer(MinecraftServer server) {
-        this.server = server;
-    }
 }

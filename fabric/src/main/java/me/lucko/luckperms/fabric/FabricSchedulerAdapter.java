@@ -27,14 +27,15 @@ package me.lucko.luckperms.fabric;
 
 import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
 
+import net.minecraft.util.thread.ThreadExecutor;
+
 import java.util.concurrent.Executor;
 
-class FabricSchedulerAdapter extends AbstractJavaScheduler {
-
+public class FabricSchedulerAdapter extends AbstractJavaScheduler {
     private final Executor serverExecutor;
 
-    public FabricSchedulerAdapter(LPFabricBootstrap bootstrap) {
-        this.serverExecutor = r -> bootstrap.getServer().submitAndJoin(r);
+    public FabricSchedulerAdapter(ThreadExecutor<?> executor) {
+        this.serverExecutor = executor::submitAndJoin;
     }
 
     @Override

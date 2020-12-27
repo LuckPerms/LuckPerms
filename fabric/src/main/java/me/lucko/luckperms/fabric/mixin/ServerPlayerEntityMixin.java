@@ -25,9 +25,20 @@
 
 package me.lucko.luckperms.fabric.mixin;
 
+import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
+import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.fabric.context.FabricContextManager;
+import me.lucko.luckperms.fabric.context.PlayerQueryOptionsHolder;
 import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
+import me.lucko.luckperms.fabric.listeners.PermissionCheckListener;
+
+import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,12 +47,59 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(ServerPlayerEntity.class)
-abstract class ServerPlayerEntityMixin {
+public abstract class ServerPlayerEntityMixin implements PlayerQueryOptionsHolder, PermissionCheckListener.MixinSubject {
+
+    private QueryOptionsCache<ServerPlayerEntity> queryOptionsCache;
+    private User user;
+
     @Shadow public abstract ServerWorld getServerWorld();
+
+    @Override
+    public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(PlayerQueryOptionsHolder.Factory factory) {
+        if (this.queryOptionsCache == null) {
+            this.queryOptionsCache = factory.createCache(((ServerPlayerEntity) (Object) this));
+        }
+        return this.queryOptionsCache;
+    }
+
+    @Override
+    public void initializePermissions(User user) {
+        this.user = user;
+
+        // ensure query options cache is initialised too.
+        FabricContextManager contextManager = (FabricContextManager) user.getPlugin().getContextManager();
+        getQueryOptionsCache(contextManager);
+    }
+
+    @Override
+    public Tristate hasPermission(String permission) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+        return hasPermission(permission, this.queryOptionsCache.getQueryOptions());
+    }
+
+    @Override
+    public Tristate hasPermission(String permission, QueryOptions queryOptions) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+        if (queryOptions == null) {
+            throw new NullPointerException("queryOptions");
+        }
+
+        final User user = this.user;
+        if (user == null) {
+            throw new IllegalStateException("Permissions have not been initialised for this player yet.");
+        }
+
+        PermissionCache data = user.getCachedData().getPermissionData(queryOptions);
+        return data.checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
+    }
 
     @Inject(
             at = @At("TAIL"),
-            method = "dimensionChanged",
+            method = "worldChanged",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION
     )
     private void luckperms_onChangeDimension(ServerWorld targetWorld, CallbackInfo ci) {

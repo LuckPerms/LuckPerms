@@ -7,12 +7,13 @@ plugins {
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
+    mavenLocal()
 }
 
 def minecraftVersion = '1.16.4'
-def yarnBuild = 6
-def loaderVersion = '0.10.6+build.214'
-def fabricApiVersion = '0.25.1+build.416-1.16'
+def yarnBuild = 7
+def loaderVersion = '0.10.8'
+def fabricApiVersion = '0.28.4+1.16'
 
 dependencies {
     // Fabric Stuff, We don't specifically target only a single version but yarn mappings require a version to be specified.
@@ -22,6 +23,10 @@ dependencies {
 
     // Include the Platform Jar in
     include(modImplementation('net.kyori:adventure-platform-fabric:4.0.0-SNAPSHOT')) {
+        exclude module: 'fabric-api'
+    }
+
+    include(modImplementation('me.lucko:fabric-permissions-api-v0:1.0-SNAPSHOT')) {
         exclude module: 'fabric-api' //
     }
 
@@ -30,7 +35,7 @@ dependencies {
             'fabric-api-base',
             'fabric-command-api-v1',
             'fabric-lifecycle-events-v1',
-            'fabric-networking-v0' // TODO: Use networking v1 when released
+            'fabric-networking-api-v1'
     ]
 
     apiModules.forEach {

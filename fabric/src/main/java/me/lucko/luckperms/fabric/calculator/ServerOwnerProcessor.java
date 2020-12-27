@@ -23,22 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.event;
+package me.lucko.luckperms.fabric.calculator;
 
-import com.mojang.authlib.GameProfile;
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
+import me.lucko.luckperms.common.calculator.result.TristateResult;
+
+import net.luckperms.api.util.Tristate;
 
 /**
- * TODO: Use Fabric API alternative when merged
- * https://github.com/FabricMC/fabric/pull/605
+ * Permission processor which is added to the owner of an Integrated server to
+ * simply return true if no other processors match.
  */
-public interface EarlyLoginCallback {
-    Event<EarlyLoginCallback> EVENT = EventFactory.createArrayBacked(EarlyLoginCallback.class, (callbacks) -> (profile) -> {
-        for (EarlyLoginCallback callback : callbacks) {
-            callback.onAccept(profile);
-        }
-    });
+public class ServerOwnerProcessor extends AbstractPermissionProcessor {
+    private static final TristateResult TRUE_RESULT = new TristateResult.Factory(ServerOwnerProcessor.class).result(Tristate.TRUE);
 
-    void onAccept(GameProfile profile);
+    @Override
+    public TristateResult hasPermission(String permission) {
+        return TRUE_RESULT;
+    }
 }

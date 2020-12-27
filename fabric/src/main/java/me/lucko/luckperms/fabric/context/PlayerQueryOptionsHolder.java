@@ -23,34 +23,30 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.listeners;
+package me.lucko.luckperms.fabric.context;
 
-import me.lucko.luckperms.fabric.LPFabricPlugin;
+import me.lucko.luckperms.common.context.QueryOptionsCache;
+
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 
-public class FabricEventListeners {
-    private final LPFabricPlugin plugin;
-
-    public FabricEventListeners(LPFabricPlugin plugin) {
-        this.plugin = plugin;
-    }
+/**
+ * Mixin interface for objects holding their own {@link QueryOptionsCache}.
+ */
+public interface PlayerQueryOptionsHolder {
 
     /**
-     * TODO: Use Fabric API alternative when merged
+     * Gets (or creates using the factory) the objects {@link QueryOptionsCache}.
+     *
+     * @param factory the factory to use if a cache hasn't been created yet
+     * @return the cache
      */
-    @Deprecated
-    public void onWorldChange(ServerWorld origin, ServerWorld destination, ServerPlayerEntity player) {
-        this.plugin.getContextManager().invalidateCache(player);
-    }
+    QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(Factory factory);
 
     /**
-     * TODO: Use Fabric API alternative when merged
+     * Factory used to create {@link QueryOptionsCache}s.
      */
-    @Deprecated
-    public void onPlayerRespawn(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer, ServerWorld respawnWorld, boolean alive) {
-        this.plugin.getContextManager().invalidateCacheOnRespawn(oldPlayer, newPlayer);
+    interface Factory {
+        QueryOptionsCache<ServerPlayerEntity> createCache(ServerPlayerEntity player);
     }
+
 }

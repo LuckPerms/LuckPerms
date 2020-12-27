@@ -23,21 +23,41 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.calculator;
+package me.lucko.luckperms.fabric.listeners;
 
-import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
+import me.lucko.luckperms.common.model.User;
+
+import net.fabricmc.fabric.api.util.TriState;
+import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 /**
- * Permission processor which is added to the owner of an Integrated server to
- * simply return true if no other processors match.
+ * Listener to route permission checks made via fabric-permissions-api to LuckPerms.
  */
-public class IntegratedServerProcessor extends AbstractPermissionProcessor {
-    private static final TristateResult TRUE_RESULT = new TristateResult.Factory(IntegratedServerProcessor.class).result(Tristate.TRUE);
+public class PermissionCheckListener {
 
-    @Override
-    public TristateResult hasPermission(String permission) {
-        return TRUE_RESULT;
+    public void registerListeners() {
+        PermissionCheckEvent.EVENT.register(this::onPermissionCheck);
+    }
+
+    private TriState onPermissionCheck(ServerPlayerEntity player, String permission) {
+        switch (((MixinSubject) player).hasPermission(permission)) {
+            case TRUE:
+                return TriState.TRUE;
+            case FALSE:
+                return TriState.FALSE;
+            case UNDEFINED:
+                return TriState.DEFAULT;
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    public interface MixinSubject {
+        void initializePermissions(User user);
+        Tristate hasPermission(String permission);
+        Tristate hasPermission(String permission, QueryOptions queryOptions);
     }
 }

@@ -37,7 +37,8 @@
     "fabric-api-base": "*",
     "fabric-command-api-v1": "*",
     "fabric-lifecycle-events-v1": "*",
-    "fabric-networking-v0": "*"
+    "fabric-networking-v0": "*",
+    "fabric-permissions-api-v0": "*"
   },
   "custom": {
     "modmenu:api": true

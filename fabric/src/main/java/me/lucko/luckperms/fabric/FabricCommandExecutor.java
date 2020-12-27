@@ -30,72 +30,89 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
+
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Fabric uses brigadier.
- * All parsing has been designed in a way where "/execute ... ... ... run lp ..." works fine.
- */
-class FabricCommandExecutor extends CommandManager implements Command<ServerCommandSource>, SuggestionProvider<ServerCommandSource> {
+import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
+
+public class FabricCommandExecutor extends CommandManager implements Command<ServerCommandSource>, SuggestionProvider<ServerCommandSource> {
+    private static final String[] COMMAND_ALIASES = new String[] {"luckperms", "lp", "perm", "perms", "permission", "permissions"};
 
     private final LPFabricPlugin plugin;
 
-    FabricCommandExecutor(LPFabricPlugin plugin) {
+    public FabricCommandExecutor(LPFabricPlugin plugin) {
         super(plugin);
         this.plugin = plugin;
     }
 
+    public void register() {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            for (String alias : COMMAND_ALIASES) {
+                LiteralCommandNode<ServerCommandSource> cmd = literal(alias)
+                        .executes(this)
+                        .build();
+
+                ArgumentCommandNode<ServerCommandSource, String> args = argument("args", greedyString())
+                        .suggests(this)
+                        .executes(this)
+                        .build();
+
+                cmd.addChild(args);
+                dispatcher.getRoot().addChild(cmd);
+            }
+        });
+    }
+
+    @Override
     public int run(CommandContext<ServerCommandSource> ctx) {
-        Sender lpSender = this.plugin.getSenderFactory().wrap(ctx.getSource());
-        String rawInput = ctx.getInput();
+        Sender wrapped = this.plugin.getSenderFactory().wrap(ctx.getSource());
 
         int start = ctx.getRange().getStart();
-        String lpArguments = rawInput.substring(start);
+        List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(ctx.getInput().substring(start));
 
-        List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(lpArguments);
-        // Pop the literal LP uses off the arguments
         String label = arguments.remove(0);
-
         if (label.startsWith("/")) {
             label = label.substring(1);
         }
 
-        this.executeCommand(lpSender, label, arguments);
-
-        return 1;
+        executeCommand(wrapped, label, arguments);
+        return Command.SINGLE_SUCCESS;
     }
 
     @Override
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        Sender lpSender = this.plugin.getSenderFactory().wrap(ctx.getSource());
-        String rawInput = ctx.getInput();
+        Sender wrapped = this.plugin.getSenderFactory().wrap(ctx.getSource());
 
-        int start = builder.getStart();
-        String lpArguments = rawInput.substring(start);
+        int idx = builder.getStart();
 
-        start += lpArguments.length();
+        String buffer = ctx.getInput().substring(idx);
+        idx += buffer.length();
 
-        List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(lpArguments);
-
-        if (arguments.size() != 0) {
-            start -= arguments.get(arguments.size() - 1).length();
+        List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(buffer);
+        if (!arguments.isEmpty()) {
+            idx -= arguments.get(arguments.size() - 1).length();
         }
 
-        List<String> completions = this.tabCompleteCommand(lpSender, arguments);
+        List<String> completions = tabCompleteCommand(wrapped, arguments);
 
         // Offset the builder from the current string range so suggestions are placed in the right spot
-        builder = builder.createOffset(start);
-
+        builder = builder.createOffset(idx);
         for (String completion : completions) {
             builder.suggest(completion);
         }
-
         return builder.buildFuture();
     }
+
 }

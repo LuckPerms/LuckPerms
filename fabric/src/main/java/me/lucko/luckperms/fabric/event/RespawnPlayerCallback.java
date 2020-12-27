@@ -29,12 +29,9 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.dimension.DimensionType;
 
-/**
- * TODO: Use Fabric API alternative when merged.
- * https://github.com/FabricMC/fabric/pull/508
- */
+// TODO: Use Fabric API alternative when merged.
+// https://github.com/FabricMC/fabric/pull/957
 public interface RespawnPlayerCallback {
     Event<RespawnPlayerCallback> EVENT = EventFactory.createArrayBacked(RespawnPlayerCallback.class, (callbacks) -> (newPlayer, oldPlayer, dimension, alive) -> {
         for (RespawnPlayerCallback callback : callbacks) {

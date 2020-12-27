@@ -26,22 +26,25 @@
 package me.lucko.luckperms.fabric;
 
 import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.processor.MapProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.RegexProcessor;
+import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.fabric.calculator.IntegratedServerProcessor;
+import me.lucko.luckperms.fabric.calculator.ServerOwnerProcessor;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
+
 import net.luckperms.api.query.QueryOptions;
 
-class FabricCalculatorFactory implements CalculatorFactory {
+public class FabricCalculatorFactory implements CalculatorFactory {
     private final LPFabricPlugin plugin;
 
-    FabricCalculatorFactory(LPFabricPlugin plugin) {
+    public FabricCalculatorFactory(LPFabricPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -59,9 +62,13 @@ class FabricCalculatorFactory implements CalculatorFactory {
             processors.add(new WildcardProcessor());
         }
 
+        if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS_SPONGE)) {
+            processors.add(new SpongeWildcardProcessor());
+        }
+
         boolean integratedOwner = queryOptions.option(FabricContextManager.INTEGRATED_SERVER_OWNER).orElse(false);
         if (integratedOwner && this.plugin.getConfiguration().get(ConfigKeys.FABRIC_INTEGRATED_SERVER_OWNER_BYPASSES_CHECKS)) {
-            processors.add(new IntegratedServerProcessor());
+            processors.add(new ServerOwnerProcessor());
         }
 
         return new PermissionCalculator(this.plugin, metadata, processors.build());

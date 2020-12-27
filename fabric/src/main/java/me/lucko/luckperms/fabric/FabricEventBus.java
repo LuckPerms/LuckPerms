@@ -28,25 +28,14 @@ package me.lucko.luckperms.fabric;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
+
 import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 
-import java.util.List;
-
-class FabricEventBus extends AbstractEventBus<ModContainer> {
-
-    FabricEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
+public class FabricEventBus extends AbstractEventBus<ModContainer> {
+    public FabricEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
         super(plugin, apiProvider);
     }
 
-    /**
-     * Fabric doesn't have a "Mod" class you extend.
-     * For simplicity, passing the ModContainer is allowed as other systems to detect the entrypoint get quite exhaustive.
-     */
     @Override
     protected ModContainer checkPlugin(Object mod) throws IllegalArgumentException {
         if (mod instanceof ModContainer) {

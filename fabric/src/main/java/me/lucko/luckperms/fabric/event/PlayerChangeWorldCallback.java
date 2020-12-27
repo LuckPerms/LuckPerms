@@ -30,9 +30,7 @@ import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 
-/**
- * TODO: Use Fabric API alternative when merged.
- */
+// TODO: Use Fabric API alternative when merged.
 public interface PlayerChangeWorldCallback {
     Event<PlayerChangeWorldCallback> EVENT = EventFactory.createArrayBacked(PlayerChangeWorldCallback.class, (callbacks) -> (originalWorld, destination, player) -> {
         for (PlayerChangeWorldCallback callback : callbacks) {

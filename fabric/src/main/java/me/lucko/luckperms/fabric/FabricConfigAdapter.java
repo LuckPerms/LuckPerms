@@ -25,21 +25,17 @@
 
 package me.lucko.luckperms.fabric;
 
-import java.nio.file.Path;
-
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-/**
- * Fabric doesn't have a de facto config API.
- * We use HOCON because of it's json-like syntax which most fabric mods use and support for comments.
- */
-class FabricConfigAdapter extends ConfigurateConfigAdapter {
+import java.nio.file.Path;
 
-    FabricConfigAdapter(LuckPermsPlugin plugin, Path path) {
+public class FabricConfigAdapter extends ConfigurateConfigAdapter {
+    public FabricConfigAdapter(LuckPermsPlugin plugin, Path path) {
         super(plugin, path);
     }
 

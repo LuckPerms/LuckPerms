@@ -26,10 +26,13 @@
 package me.lucko.luckperms.fabric;
 
 import com.mojang.authlib.GameProfile;
+
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -38,32 +41,35 @@ import net.luckperms.api.platform.Platform;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
+/**
+ * Bootstrap plugin for LuckPerms running on Fabric.
+ */
 public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializer {
 
     private static final String MODID = "luckperms";
     private static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MODID)
-            .orElseThrow(() -> new RuntimeException("Could not get the LuckPerms mod container. This a bug with fabric loader and should be reported."));
-
-    public LPFabricBootstrap() {
-        this.classLoader = new FabricClassLoader();
-        this.plugin = new LPFabricPlugin(this);
-    }
+            .orElseThrow(() -> new RuntimeException("Could not get the LuckPerms mod container."));
 
     /**
      * The plugin logger
      */
-    private final PluginLogger logger = new FabricPluginLogger();
+    private final PluginLogger logger;
 
     /**
      * A scheduler adapter for the platform
@@ -89,6 +95,19 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
     private final CountDownLatch loadLatch = new CountDownLatch(1);
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
+    /**
+     * The Minecraft server instance
+     */
+    private MinecraftServer server;
+    
+    public LPFabricBootstrap() {
+        this.logger = new Log4jPluginLogger(LogManager.getLogger(MODID));
+        this.classLoader = new FabricClassLoader();
+        this.plugin = new LPFabricPlugin(this);
+    }
+    
+    // provide adapters
+
     @Override
     public PluginLogger getPluginLogger() {
         return this.logger;
@@ -103,6 +122,37 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
     public PluginClassLoader getPluginClassLoader() {
         return this.classLoader;
     }
+    
+    // lifecycle
+
+    @Override
+    public final void onInitialize() {
+        this.plugin = new LPFabricPlugin(this);
+        try {
+            this.plugin.load();
+        } finally {
+            this.loadLatch.countDown();
+        }
+
+        // Register the Server startup/shutdown events now
+        ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
+        ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStopping);
+        this.plugin.registerFabricListeners();
+    }
+
+    private void onServerStarted(MinecraftServer server) {
+        this.server = server;
+        this.schedulerAdapter = new FabricSchedulerAdapter(server);
+        
+        this.startTime = Instant.now();
+        this.plugin.enable();
+    }
+
+    private void onServerStopping(MinecraftServer server) {
+        this.plugin.disable();
+        this.server = null;
+        this.schedulerAdapter = null;
+    }
 
     @Override
     public CountDownLatch getLoadLatch() {
@@ -114,6 +164,18 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
         return this.enableLatch;
     }
 
+    // MinecraftServer singleton getter
+
+    public MinecraftServer getServer() {
+        if (this.server == null) {
+            throw new IllegalStateException("Server not available");
+        }
+
+        return this.server;
+    }
+
+    // provide information about the plugin
+
     @Override
     public String getVersion() {
         return MOD_CONTAINER.getMetadata().getVersion().getFriendlyString();
@@ -124,6 +186,8 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
         return this.startTime;
     }
 
+    // provide information about the platform
+
     @Override
     public Platform.Type getType() {
         return Platform.Type.FABRIC;
@@ -131,12 +195,12 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
 
     @Override
     public String getServerBrand() {
-        return plugin.getServer().getServerModName();
+        return getServer().getServerModName();
     }
 
     @Override
     public String getServerVersion() {
-        return plugin.getServer().getVersion();
+        return getServer().getVersion();
     }
 
     @Override
@@ -160,84 +224,45 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
 
     @Override
     public Optional<ServerPlayerEntity> getPlayer(UUID uniqueId) {
-        return Optional.ofNullable(this.plugin.getServer().getPlayerManager().getPlayer(uniqueId));
+        return Optional.ofNullable(this.getServer().getPlayerManager().getPlayer(uniqueId));
     }
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        GameProfile profile = this.plugin.getServer().getUserCache().findByName(username);
-
+        GameProfile profile = this.getServer().getUserCache().findByName(username);
         if (profile != null && profile.getId() != null) {
             return Optional.of(profile.getId());
         }
-
         return Optional.empty();
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        GameProfile profile = this.plugin.getServer().getUserCache().getByUuid(uniqueId);
-
+        GameProfile profile = this.getServer().getUserCache().getByUuid(uniqueId);
         if (profile != null && profile.getId() != null) {
             return Optional.of(profile.getName());
         }
-
         return Optional.empty();
     }
 
     @Override
     public int getPlayerCount() {
-        return this.plugin.getServer().getCurrentPlayerCount();
+        return this.getServer().getCurrentPlayerCount();
     }
 
     @Override
     public Collection<String> getPlayerList() {
-        return Collections.unmodifiableList(Arrays.asList(this.plugin.getServer().getPlayerManager().getPlayerNames()));
+        return Collections.unmodifiableList(Arrays.asList(this.getServer().getPlayerManager().getPlayerNames()));
     }
 
     @Override
     public Collection<UUID> getOnlinePlayers() {
-        return this.plugin.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getUuid).collect(Collectors.toList());
+        return this.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getUuid).collect(Collectors.toList());
     }
 
     @Override
     public boolean isPlayerOnline(UUID uniqueId) {
-        return this.plugin.getServer().getPlayerManager().getPlayer(uniqueId) != null;
+        return this.getServer().getPlayerManager().getPlayer(uniqueId) != null;
     }
 
-    @Override
-    public final void onInitialize() {
-        this.plugin = new LPFabricPlugin(this);
-        this.schedulerAdapter = new FabricSchedulerAdapter(this);
-        try {
-            this.plugin.load();
-        } finally {
-            this.loadLatch.countDown();
-        }
-
-        // Register the Server startup/shutdown events now
-        ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
-        ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStopping);
-        this.plugin.setupFabricListeners();
-    }
-
-    private void onServerStarted(MinecraftServer server) {
-        this.startTime = Instant.now();
-        // We need to create a new scheduler adapter every time we start the server.
-        // This is because an integrated server will shutdown the executor services, which cannot be started back up.
-        this.schedulerAdapter = new FabricSchedulerAdapter(this);
-        this.plugin.setServer(server);
-        this.plugin.enable();
-    }
-
-    private void onServerStopping(MinecraftServer server) {
-        this.plugin.disable();
-        this.plugin.setServer(null); // Clear the server
-        this.schedulerAdapter = null; // We need to kill the scheduler in case an integrated server starts in the future.
-    }
-
-    @Nullable
-    public MinecraftServer getServer() {
-        return this.plugin.getServer();
-    }
 }

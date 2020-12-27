@@ -25,31 +25,22 @@
 
 package me.lucko.luckperms.fabric.context;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.QueryOptionsCache;
-import me.lucko.luckperms.common.context.QueryOptionsSupplier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.util.CaffeineFactory;
+
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-public class FabricContextManager extends ContextManager<ServerPlayerEntity, ServerPlayerEntity> {
-
+public class FabricContextManager extends ContextManager<ServerPlayerEntity, ServerPlayerEntity> implements PlayerQueryOptionsHolder.Factory {
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
-    private final LoadingCache<ServerPlayerEntity, QueryOptionsCache<ServerPlayerEntity>> subjectCaches = CaffeineFactory.newBuilder()
-            .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build(key -> new QueryOptionsCache<>(key, this));
-
     public FabricContextManager(LuckPermsPlugin plugin) {
-        // TODO: Pass Fabric's Actor as the subject
         super(plugin, ServerPlayerEntity.class, ServerPlayerEntity.class);
     }
 
@@ -59,18 +50,22 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity, Ser
     }
 
     @Override
+    public QueryOptionsCache<ServerPlayerEntity> createCache(ServerPlayerEntity player) {
+        return new QueryOptionsCache<>(player, this);
+    }
+
+    @Override
     public QueryOptionsCache<ServerPlayerEntity> getCacheFor(ServerPlayerEntity subject) {
-        // TODO: Pass Fabric's Actor as the subject
         if (subject == null) {
             throw new NullPointerException("subject");
         }
 
-        return this.subjectCaches.get(subject);
+        return ((PlayerQueryOptionsHolder) subject).getQueryOptionsCache(this);
     }
 
     @Override
-    public QueryOptionsSupplier getCacheForPlayer(ServerPlayerEntity player) {
-        return getCacheFor(player);
+    public void invalidateCache(ServerPlayerEntity subject) {
+        getCacheFor(subject).invalidate();
     }
 
     @Override
@@ -83,24 +78,4 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity, Ser
         return queryOptions.context(contextSet).build();
     }
 
-    @Override
-    public void invalidateCache(ServerPlayerEntity subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
-        QueryOptionsCache<ServerPlayerEntity> cache = this.subjectCaches.getIfPresent(subject);
-        if (cache != null) {
-            cache.invalidate();
-        }
-    }
-
-    public void invalidateCacheOnRespawn(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer) {
-        if (oldPlayer == null) {
-            throw new NullPointerException("subject");
-        }
-
-        this.subjectCaches.invalidate(oldPlayer); // Invalidate the old player completely as it will be regenerated soon.
-        this.subjectCaches.refresh(newPlayer);
-    }
 }

@@ -25,30 +25,25 @@
 
 package me.lucko.luckperms.fabric.mixin;
 
-import me.lucko.luckperms.fabric.event.PlayerLoginCallback;
 import me.lucko.luckperms.fabric.event.RespawnPlayerCallback;
-import net.minecraft.network.ClientConnection;
+
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.dimension.DimensionType;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(PlayerManager.class)
-abstract class PlayerManagerMixin {
-    @Inject(at = @At("HEAD"), method = "onPlayerConnect")
-    private void luckperms_onLogin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        PlayerLoginCallback.EVENT.invoker().onLogin(player);
-    }
+public abstract class PlayerManagerMixin {
 
     @Inject(at = @At("TAIL"), method = "respawnPlayer", locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private void luckperms_onRespawnPlayer(ServerPlayerEntity player, boolean alive, CallbackInfoReturnable<ServerPlayerEntity> cir, BlockPos spawnPosition, boolean hasSpawnPoint, ServerWorld respawnWorld) {
         RespawnPlayerCallback.EVENT.invoker().onRespawn(player, cir.getReturnValue(), respawnWorld, alive); // Transfer the old caches to the new player.
     }
+
 }

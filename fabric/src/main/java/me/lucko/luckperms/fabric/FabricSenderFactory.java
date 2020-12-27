@@ -25,28 +25,26 @@
 
 package me.lucko.luckperms.fabric;
 
-import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
-import me.lucko.luckperms.common.model.User;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
-import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.UUID;
 
-class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSource> {
-
+public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSource> {
     private final LPFabricPlugin plugin;
+    private final FabricServerAudiences audiences;
 
-    public FabricSenderFactory(LPFabricPlugin plugin) {
+    public FabricSenderFactory(LPFabricPlugin plugin, FabricServerAudiences audiences) {
         super(plugin);
         this.plugin = plugin;
+        this.audiences = audiences;
     }
 
     @Override
@@ -70,39 +68,30 @@ class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSou
 
     @Override
     protected void sendMessage(ServerCommandSource sender, Component message) {
-        FabricServerAudiences.of(sender.getMinecraftServer()).audience(sender).sendMessage(message);
+        this.audiences.audience(sender).sendMessage(message);
+    }
+
+    @Override
+    protected Tristate getPermissionValue(ServerCommandSource commandSource, String node) {
+        switch (Permissions.getPermissionValue(commandSource, node)) {
+            case TRUE:
+                return Tristate.TRUE;
+            case FALSE:
+                return Tristate.FALSE;
+            case DEFAULT:
+                return Tristate.UNDEFINED;
+            default:
+                throw new AssertionError();
+        }
     }
 
     @Override
     protected boolean hasPermission(ServerCommandSource commandSource, String node) {
-        Tristate value = this.getPermissionValue(commandSource, node);
-        return value.asBoolean();
+        return getPermissionValue(commandSource, node).asBoolean();
     }
 
     @Override
     protected void performCommand(ServerCommandSource sender, String command) {
         sender.getMinecraftServer().getCommandManager().execute(sender, command);
-    }
-
-    @Override
-    protected Tristate getPermissionValue(ServerCommandSource commandSource, String node) {
-        // TODO: Route through Fabric API's Permission API
-        Entity entity = commandSource.getEntity();
-
-        if (entity instanceof ServerPlayerEntity) {
-            final ServerPlayerEntity player = (ServerPlayerEntity) entity;
-            User user = this.getPlugin().getUserManager().getIfLoaded(player.getGameProfile().getId());
-
-            if (user == null) {
-                return Tristate.UNDEFINED;
-            }
-
-            QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
-            PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
-
-            return permissionData.checkPermission(node, PermissionCheckEvent.Origin.INTERNAL).result();
-        }
-
-        return Tristate.UNDEFINED;
     }
 }
