@@ -76,13 +76,14 @@ public final class PermissibleInjector {
      * @throws Exception propagates any exceptions which were thrown during injection
      */
     public static void inject(Player player, LuckPermsPermissible newPermissible) throws Exception {
-
         // get the existing PermissibleBase held by the player
         PermissibleBase oldPermissible = (PermissibleBase) PLAYER_PERMISSIBLE_FIELD.get(player);
 
-        // seems we have already injected into this player.
         if (oldPermissible instanceof LuckPermsPermissible) {
-            throw new IllegalStateException("LPPermissible already injected into player " + player.toString());
+            // Nukkit seems to re-use player instances (or perhaps calls the login event twice?)
+            // so, just uninject here instead of throwing an exception like we do on Bukkit
+            // See: https://github.com/lucko/LuckPerms/issues/2791
+            uninject(player, false);
         }
 
         // Move attachments over from the old permissible
