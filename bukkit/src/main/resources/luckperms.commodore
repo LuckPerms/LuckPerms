@@ -321,7 +321,7 @@ luckperms {
         context brigadier:string greedy_phrase;
       }
       clone {
-        user brigadier:string single_word;
+        newname brigadier:string single_word;
       }
     }
   }
@@ -379,36 +379,36 @@ luckperms {
       parent {
         info;
         set {
-          group brigadier:string single_word {
+          other_group brigadier:string single_word {
             context brigadier:string greedy_phrase;
           }
         }
         add {
-          group brigadier:string single_word {
+          other_group brigadier:string single_word {
             context brigadier:string greedy_phrase;
           }
         }
         remove {
-          group brigadier:string single_word {
+          other_group brigadier:string single_word {
             context brigadier:string greedy_phrase;
           }
         }
         settrack {
           track brigadier:string single_word {
-            group brigadier:string single_word {
+            other_group brigadier:string single_word {
               context brigadier:string greedy_phrase;
             }
           }
         }
         addtemp {
-          group brigadier:string quotable_phrase {
+          other_group brigadier:string quotable_phrase {
             duration brigadier:string single_word {
               context brigadier:string greedy_phrase;
             }
           }
         }
         removetemp {
-          group brigadier:string single_word {
+          other_group brigadier:string single_word {
             context brigadier:string greedy_phrase;
             duration brigadier:string single_word {
               context brigadier:string greedy_phrase;
@@ -422,9 +422,6 @@ luckperms {
           track brigadier:string single_word {
             context brigadier:string greedy_phrase;
           }
-        }
-        switchprimarygroup {
-          group brigadier:string quotable_phrase;
         }
       }
 
