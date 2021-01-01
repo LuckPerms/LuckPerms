@@ -38,44 +38,39 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TreeNode {
 
+    /*
+     * We enforce a limit of the size of the node tree to ensure memory
+     * usage remains sane. some plugins check for "dynamic" permissions (cc: griefprevention)
+     * which means this tree can grow to very large sizes and use tons of memory
+     *
+     * The rules for limiting the tree size are designed to ensure the system is
+     * still useful, but that unnecessarily large amounts of data aren't stored
+     */
     private static boolean allowInsert(TreeNode node) {
-        /*
-        We enforce a limit of the size of the node tree to ensure memory
-        usage remains sane. some plugins check for "dynamic" permissions (cc: griefprevention)
-        which means this tree can grow to very large sizes and use tons of memory
+        // level 0    =>  no limit
+        // level 1/2  =>  up to 500
+        // level 3+   =>  up to 100
 
-        the rules for limiting the tree size are designed to ensure the system is
-        still useful, but that unnecessarily large amounts of data aren't stored
-
-        the rules are:
-        1. there can be an unlimited number of root nodes e.g. (luckperms, minecraft)
-        2. each root node can then have up to 500 child nodes
-        3. *but*, each root node can have an unlimited number of 2nd level nodes (e.g. luckperms.user)
-           this takes priority over #2
-        */
-
-        if (node.level == 2) {
-            // only allow up to a deep size of 500
-            return node.parent.getDeepSize() < 500;
+        if (node.level == 0) {
+            return true;
+        } else if (node.level <= 2) {
+            return node.getChildrenSize() < 500;
+        } else {
+            return node.getChildrenSize() < 100;
         }
-        return true;
     }
 
     private Map<String, TreeNode> children = null;
 
     private final int level;
-    private final TreeNode parent;
-
-    private int cachedDeepSize = Integer.MIN_VALUE;
 
     public TreeNode() {
         this.level = 0;
-        this.parent = null;
     }
 
+    @SuppressWarnings("CopyConstructorMissesField") // it's not a copy constructor
     TreeNode(TreeNode parent) {
         this.level = parent.level + 1;
-        this.parent = parent;
     }
 
     // lazy init
@@ -91,31 +86,18 @@ public class TreeNode {
         if (!allowInsert(this)) {
             return null;
         }
-
-        return childMap.compute(s, (key, prev) -> {
-            if (prev != null) {
-                return prev;
-            }
-
-            // dirty the cache & return a new node
-            this.cachedDeepSize = Integer.MIN_VALUE;
-            return new TreeNode(this);
-        });
+        return childMap.computeIfAbsent(s, x -> new TreeNode(this));
     }
 
     public Optional<Map<String, TreeNode>> getChildren() {
         return Optional.ofNullable(this.children);
     }
 
-    public int getDeepSize() {
-        if (this.cachedDeepSize != Integer.MIN_VALUE) {
-            return this.cachedDeepSize;
-        }
-
+    public int getChildrenSize() {
         if (this.children == null) {
-            return (this.cachedDeepSize = 1);
+            return 0;
         } else {
-            return (this.cachedDeepSize = this.children.values().stream().mapToInt(TreeNode::getDeepSize).sum());
+            return this.children.size();
         }
     }
 
