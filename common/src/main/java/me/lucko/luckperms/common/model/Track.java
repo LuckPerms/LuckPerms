@@ -316,7 +316,7 @@ public final class Track {
         }
 
         user.unsetNode(DataType.NORMAL, oldNode);
-        user.setNode(DataType.NORMAL, Inheritance.builder(nextGroup.getName()).withContext(context).build(), true);
+        user.setNode(DataType.NORMAL, oldNode.toBuilder().group(nextGroup.getName()).build(), true);
 
         if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
@@ -370,7 +370,7 @@ public final class Track {
         }
 
         user.unsetNode(DataType.NORMAL, oldNode);
-        user.setNode(DataType.NORMAL, Inheritance.builder(previousGroup.getName()).withContext(context).build(), true);
+        user.setNode(DataType.NORMAL, oldNode.toBuilder().group(previousGroup.getName()).build(), true);
 
         if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(previousGroup.getName());
