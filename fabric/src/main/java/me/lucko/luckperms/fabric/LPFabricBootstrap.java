@@ -38,7 +38,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.luckperms.api.platform.Platform;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -49,13 +48,13 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
 
 /**
  * Bootstrap plugin for LuckPerms running on Fabric.
@@ -74,7 +73,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
     /**
      * A scheduler adapter for the platform
      */
-    private SchedulerAdapter schedulerAdapter;
+    private final SchedulerAdapter schedulerAdapter;
 
     /**
      * The plugin class loader.
@@ -102,6 +101,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
     
     public LPFabricBootstrap() {
         this.logger = new Log4jPluginLogger(LogManager.getLogger(MODID));
+        this.schedulerAdapter = new FabricSchedulerAdapter(this);
         this.classLoader = new FabricClassLoader();
         this.plugin = new LPFabricPlugin(this);
     }
@@ -135,15 +135,13 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
         }
 
         // Register the Server startup/shutdown events now
-        ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
+        ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStarting);
         ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStopping);
         this.plugin.registerFabricListeners();
     }
 
-    private void onServerStarted(MinecraftServer server) {
+    private void onServerStarting(MinecraftServer server) {
         this.server = server;
-        this.schedulerAdapter = new FabricSchedulerAdapter(server);
-        
         this.startTime = Instant.now();
         this.plugin.enable();
     }
@@ -151,7 +149,6 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
     private void onServerStopping(MinecraftServer server) {
         this.plugin.disable();
         this.server = null;
-        this.schedulerAdapter = null;
     }
 
     @Override
@@ -166,12 +163,8 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
 
     // MinecraftServer singleton getter
 
-    public MinecraftServer getServer() {
-        if (this.server == null) {
-            throw new IllegalStateException("Server not available");
-        }
-
-        return this.server;
+    public Optional<MinecraftServer> getServer() {
+        return Optional.ofNullable(this.server);
     }
 
     // provide information about the plugin
@@ -195,12 +188,12 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
 
     @Override
     public String getServerBrand() {
-        return getServer().getServerModName();
+        return getServer().map(MinecraftServer::getServerModName).orElse("null");
     }
 
     @Override
     public String getServerVersion() {
-        return getServer().getVersion();
+        return getServer().map(MinecraftServer::getVersion).orElse("null");
     }
 
     @Override
@@ -224,45 +217,56 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
 
     @Override
     public Optional<ServerPlayerEntity> getPlayer(UUID uniqueId) {
-        return Optional.ofNullable(this.getServer().getPlayerManager().getPlayer(uniqueId));
+        return getServer().map(MinecraftServer::getPlayerManager).map(s -> s.getPlayer(uniqueId));
     }
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        GameProfile profile = this.getServer().getUserCache().findByName(username);
-        if (profile != null && profile.getId() != null) {
-            return Optional.of(profile.getId());
-        }
-        return Optional.empty();
+        return getServer().map(MinecraftServer::getUserCache).map(c -> c.findByName(username)).map(GameProfile::getId);
+
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        GameProfile profile = this.getServer().getUserCache().getByUuid(uniqueId);
-        if (profile != null && profile.getId() != null) {
-            return Optional.of(profile.getName());
-        }
-        return Optional.empty();
+        return getServer().map(MinecraftServer::getUserCache).map(c -> c.getByUuid(uniqueId)).map(GameProfile::getName);
     }
 
     @Override
     public int getPlayerCount() {
-        return this.getServer().getCurrentPlayerCount();
+        return getServer().map(MinecraftServer::getCurrentPlayerCount).orElse(0);
     }
 
     @Override
     public Collection<String> getPlayerList() {
-        return Collections.unmodifiableList(Arrays.asList(this.getServer().getPlayerManager().getPlayerNames()));
+        return getServer().map(MinecraftServer::getPlayerManager)
+                .map(server -> {
+                    List<ServerPlayerEntity> players = server.getPlayerList();
+                    List<String> list = new ArrayList<>(players.size());
+                    for (ServerPlayerEntity player : players) {
+                        list.add(player.getGameProfile().getName());
+                    }
+                    return list;
+                })
+                .orElse(Collections.emptyList());
     }
 
     @Override
     public Collection<UUID> getOnlinePlayers() {
-        return this.getServer().getPlayerManager().getPlayerList().stream().map(PlayerEntity::getUuid).collect(Collectors.toList());
+        return getServer().map(MinecraftServer::getPlayerManager)
+                .map(server -> {
+                    List<ServerPlayerEntity> players = server.getPlayerList();
+                    List<UUID> list = new ArrayList<>(players.size());
+                    for (ServerPlayerEntity player : players) {
+                        list.add(player.getGameProfile().getId());
+                    }
+                    return list;
+                })
+                .orElse(Collections.emptyList());
     }
 
     @Override
     public boolean isPlayerOnline(UUID uniqueId) {
-        return this.getServer().getPlayerManager().getPlayer(uniqueId) != null;
+        return getServer().map(MinecraftServer::getPlayerManager).map(s -> s.getPlayer(uniqueId) != null).orElse(false);
     }
 
 }

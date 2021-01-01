@@ -27,17 +27,17 @@ package me.lucko.luckperms.fabric.listeners;
 
 import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
+import me.lucko.luckperms.fabric.model.MixinUser;
 
 import net.fabricmc.fabric.api.util.TriState;
-import net.luckperms.api.query.QueryOptions;
-import net.luckperms.api.util.Tristate;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Listener to route permission checks made via fabric-permissions-api to LuckPerms.
@@ -53,7 +53,7 @@ public class PermissionCheckListener {
         PermissionCheckEvent.EVENT.register(this::onPermissionCheck);
     }
 
-    private TriState onPermissionCheck(CommandSource source, String permission) {
+    private @NonNull TriState onPermissionCheck(CommandSource source, String permission) {
         if (source instanceof ServerCommandSource) {
             Entity entity = ((ServerCommandSource) source).getEntity();
             if (entity instanceof ServerPlayerEntity) {
@@ -64,7 +64,7 @@ public class PermissionCheckListener {
     }
 
     private TriState onPlayerPermissionCheck(ServerPlayerEntity player, String permission) {
-        switch (((MixinSubject) player).hasPermission(permission)) {
+        switch (((MixinUser) player).hasPermission(permission)) {
             case TRUE:
                 return TriState.TRUE;
             case FALSE:
@@ -86,9 +86,4 @@ public class PermissionCheckListener {
         return TriState.DEFAULT;
     }
 
-    public interface MixinSubject {
-        void initializePermissions(User user);
-        Tristate hasPermission(String permission);
-        Tristate hasPermission(String permission, QueryOptions queryOptions);
-    }
 }

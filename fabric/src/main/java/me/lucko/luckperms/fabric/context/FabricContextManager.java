@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextManager;
 import me.lucko.luckperms.common.context.QueryOptionsCache;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.fabric.model.MixinUser;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
@@ -37,7 +38,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.UUID;
 
-public class FabricContextManager extends ContextManager<ServerPlayerEntity, ServerPlayerEntity> implements PlayerQueryOptionsHolder.Factory {
+public class FabricContextManager extends ContextManager<ServerPlayerEntity, ServerPlayerEntity> {
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
     public FabricContextManager(LuckPermsPlugin plugin) {
@@ -49,8 +50,7 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity, Ser
         return player.getUuid();
     }
 
-    @Override
-    public QueryOptionsCache<ServerPlayerEntity> createCache(ServerPlayerEntity player) {
+    public QueryOptionsCache<ServerPlayerEntity> newQueryOptionsCache(ServerPlayerEntity player) {
         return new QueryOptionsCache<>(player, this);
     }
 
@@ -60,7 +60,7 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity, Ser
             throw new NullPointerException("subject");
         }
 
-        return ((PlayerQueryOptionsHolder) subject).getQueryOptionsCache(this);
+        return ((MixinUser) subject).getQueryOptionsCache(this);
     }
 
     @Override

@@ -29,8 +29,6 @@ import me.lucko.luckperms.fabric.event.RespawnPlayerCallback;
 
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,9 +39,11 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(PlayerManager.class)
 public abstract class PlayerManagerMixin {
 
+    // Implement the callback for RespawnPlayerCallback
+    // We'll switch to Fabric's event when FabricMC/fabric#957 is merged.
     @Inject(at = @At("TAIL"), method = "respawnPlayer", locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void luckperms_onRespawnPlayer(ServerPlayerEntity player, boolean alive, CallbackInfoReturnable<ServerPlayerEntity> cir, BlockPos spawnPosition, boolean hasSpawnPoint, ServerWorld respawnWorld) {
-        RespawnPlayerCallback.EVENT.invoker().onRespawn(player, cir.getReturnValue(), respawnWorld, alive); // Transfer the old caches to the new player.
+    private void luckperms_onRespawnPlayer(ServerPlayerEntity player, boolean alive, CallbackInfoReturnable<ServerPlayerEntity> cir) {
+        RespawnPlayerCallback.EVENT.invoker().onRespawn(player, cir.getReturnValue(), alive); // Transfer the old caches to the new player.
     }
 
 }

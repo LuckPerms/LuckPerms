@@ -32,8 +32,10 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
+import me.lucko.luckperms.fabric.FabricSenderFactory;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.mixin.ServerLoginNetworkHandlerAccessor;
+import me.lucko.luckperms.fabric.model.MixinUser;
 
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
@@ -95,7 +97,7 @@ public class FabricConnectionListener extends AbstractConnectionListener {
 
             // deny the connection
             Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
-            netHandler.disconnect(this.plugin.getAudiences().toNative(reason));
+            netHandler.disconnect(FabricSenderFactory.toNativeText(reason));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getId(), e.getName(), null);
         }
     }
@@ -113,12 +115,13 @@ public class FabricConnectionListener extends AbstractConnectionListener {
         if (user == null) {
             this.plugin.getLogger().warn("User " + player.getUuid() + " - " + player.getName() +
                     " doesn't currently have data pre-loaded - denying login.");
-            netHandler.disconnect(this.plugin.getAudiences().toNative(Message.LOADING_STATE_ERROR.build()));
+            Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
+            netHandler.disconnect(FabricSenderFactory.toNativeText(reason));
             return;
         }
 
         // init permissions handler
-        ((PermissionCheckListener.MixinSubject) player).initializePermissions(user);
+        ((MixinUser) player).initializePermissions(user);
 
         this.plugin.getContextManager().signalContextUpdate(player);
     }

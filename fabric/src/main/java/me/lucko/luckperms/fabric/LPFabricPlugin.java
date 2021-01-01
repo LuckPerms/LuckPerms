@@ -30,12 +30,14 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.StandardGroupManager;
 import me.lucko.luckperms.common.model.manager.track.StandardTrackManager;
 import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
+import me.lucko.luckperms.common.sender.DummySender;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
@@ -46,9 +48,11 @@ import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.PermissionCheckListener;
 
 import net.fabricmc.loader.api.ModContainer;
-import net.kyori.adventure.platform.fabric.FabricServerAudiences;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
+import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +68,6 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     private FabricConnectionListener connectionListener;
     private FabricCommandExecutor commandManager;
-    private FabricServerAudiences audiences;
     private FabricSenderFactory senderFactory;
     private FabricContextManager contextManager;
     private StandardUserManager userManager;
@@ -94,14 +97,12 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void setupSenderFactory() {
-        this.audiences = FabricServerAudiences.of(this.bootstrap.getServer());
-        this.senderFactory = new FabricSenderFactory(this, this.audiences);
+        this.senderFactory = new FabricSenderFactory(this);
     }
 
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
-        dependencies.remove(Dependency.ADVENTURE); // Use Adventure provided by platform
         dependencies.add(Dependency.CONFIGURATE_CORE);
         dependencies.add(Dependency.CONFIGURATE_HOCON);
         dependencies.add(Dependency.HOCON_CONFIG);
@@ -189,10 +190,6 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
         return this.senderFactory;
     }
 
-    public FabricServerAudiences getAudiences() {
-        return this.audiences;
-    }
-
     @Override
     public FabricConnectionListener getConnectionListener() {
         return this.connectionListener;
@@ -232,13 +229,20 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     public Stream<Sender> getOnlineSenders() {
         return Stream.concat(
                 Stream.of(getConsoleSender()),
-                this.bootstrap.getServer().getPlayerManager().getPlayerList().stream().map(serverPlayerEntity -> getSenderFactory().wrap(serverPlayerEntity.getCommandSource()))
+                this.bootstrap.getServer().map(MinecraftServer::getPlayerManager).map(s -> s.getPlayerList().stream().map(p -> this.senderFactory.wrap(p.getCommandSource()))).orElseGet(Stream::empty)
         );
     }
 
     @Override
     public Sender getConsoleSender() {
-        return this.getSenderFactory().wrap(this.bootstrap.getServer().getCommandSource());
+        return this.bootstrap.getServer()
+                .map(s -> this.senderFactory.wrap(s.getCommandSource()))
+                .orElseGet(() -> new DummySender(this, Sender.CONSOLE_UUID, Sender.CONSOLE_NAME) {
+                    @Override
+                    public void sendMessage(Component message) {
+                        LPFabricPlugin.this.bootstrap.getPluginLogger().info(PlainComponentSerializer.plain().serialize(TranslationManager.render(message)));
+                    }
+                });
     }
 
 }

@@ -21,13 +21,8 @@ dependencies {
     mappings "net.fabricmc:yarn:${minecraftVersion}+build.${yarnBuild}:v2"
     modImplementation "net.fabricmc:fabric-loader:${loaderVersion}"
 
-    // Include the Platform Jar in
-    include(modImplementation('net.kyori:adventure-platform-fabric:4.0.0-SNAPSHOT')) {
-        exclude module: 'fabric-api'
-    }
-
     include(modImplementation('me.lucko:fabric-permissions-api-v0:1.0-SNAPSHOT')) {
-        exclude module: 'fabric-api' //
+        exclude module: 'fabric-api'
     }
 
     // We only include the bare minimum of what we use within the Fabric API so we can be somewhat standalone.
@@ -46,11 +41,11 @@ dependencies {
 }
 
 processResources {
-    inputs.property 'version', project.version
+    inputs.property 'version', project.ext.fullVersion
 
     from(sourceSets.main.resources.srcDirs) {
         include 'fabric.mod.json'
-        expand 'version': project.version
+        expand 'version': project.ext.fullVersion
     }
 
     from(sourceSets.main.resources.srcDirs) {
@@ -69,13 +64,13 @@ shadowJar {
         exclude '/mappings/*'
     }
 
-    // Do not relocate adventure
-    //relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
+    relocate 'net.kyori.adventure', 'me.lucko.luckperms.lib.adventure'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
     relocate 'okio', 'me.lucko.luckperms.lib.okio'
     relocate 'okhttp3', 'me.lucko.luckperms.lib.okhttp3'
     relocate 'net.bytebuddy', 'me.lucko.luckperms.lib.bytebuddy'
+    relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
     relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
     relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
     relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'

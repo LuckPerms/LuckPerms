@@ -38,12 +38,15 @@ import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.Optional;
 
 public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEntity> {
     private static final EnumNamer<GameMode> GAMEMODE_NAMER = new EnumNamer<>(
@@ -84,13 +87,17 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
 
         // TODO: dimension type
 
-        Iterable<ServerWorld> worlds = this.plugin.getBootstrap().getServer().getWorlds();
-        for (ServerWorld world : worlds) {
-            String worldName = getContextKey(world.getRegistryKey().getValue());
-            if (Context.isValidValue(worldName)) {
-                builder.add(DefaultContextKeys.WORLD_KEY, worldName);
+        Optional<MinecraftServer> server = this.plugin.getBootstrap().getServer();
+        if (server.isPresent()) {
+            Iterable<ServerWorld> worlds = server.get().getWorlds();
+            for (ServerWorld world : worlds) {
+                String worldName = getContextKey(world.getRegistryKey().getValue());
+                if (Context.isValidValue(worldName)) {
+                    builder.add(DefaultContextKeys.WORLD_KEY, worldName);
+                }
             }
         }
+
         return builder.build();
     }
 
@@ -105,7 +112,7 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
         this.plugin.getContextManager().invalidateCache(player);
     }
 
-    private void onPlayerRespawn(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer, ServerWorld respawnWorld, boolean alive) {
+    private void onPlayerRespawn(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer, boolean alive) {
         this.plugin.getContextManager().invalidateCache(oldPlayer);
         this.plugin.getContextManager().invalidateCache(newPlayer);
     }

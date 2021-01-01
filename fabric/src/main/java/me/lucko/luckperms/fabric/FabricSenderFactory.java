@@ -26,25 +26,27 @@
 package me.lucko.luckperms.fabric;
 
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
+import me.lucko.luckperms.fabric.model.MixinUser;
 
-import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 
+import java.util.Locale;
 import java.util.UUID;
 
 public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSource> {
     private final LPFabricPlugin plugin;
-    private final FabricServerAudiences audiences;
 
-    public FabricSenderFactory(LPFabricPlugin plugin, FabricServerAudiences audiences) {
+    public FabricSenderFactory(LPFabricPlugin plugin) {
         super(plugin);
         this.plugin = plugin;
-        this.audiences = audiences;
     }
 
     @Override
@@ -54,21 +56,28 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     @Override
     protected UUID getUniqueId(ServerCommandSource commandSource) {
-        if (commandSource.getEntity() instanceof ServerPlayerEntity) {
+        if (commandSource.getEntity() != null) {
             return commandSource.getEntity().getUuid();
         }
-
         return Sender.CONSOLE_UUID;
     }
 
     @Override
     protected String getName(ServerCommandSource commandSource) {
-        return commandSource.getName();
+        String name = commandSource.getName();
+        if (commandSource.getEntity() != null && name.equals("Server")) {
+            return Sender.CONSOLE_NAME;
+        }
+        return name;
     }
 
     @Override
     protected void sendMessage(ServerCommandSource sender, Component message) {
-        this.audiences.audience(sender).sendMessage(message);
+        Locale locale = null;
+        if (sender.getEntity() instanceof ServerPlayerEntity) {
+            locale = ((MixinUser) sender.getEntity()).getCachedLocale();
+        }
+        sender.sendFeedback(toNativeText(TranslationManager.render(message, locale)), false);
     }
 
     @Override
@@ -93,5 +102,9 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
     @Override
     protected void performCommand(ServerCommandSource sender, String command) {
         sender.getMinecraftServer().getCommandManager().execute(sender, command);
+    }
+
+    public static Text toNativeText(Component component) {
+        return Text.Serializer.fromJson(GsonComponentSerializer.gson().serialize(component));
     }
 }

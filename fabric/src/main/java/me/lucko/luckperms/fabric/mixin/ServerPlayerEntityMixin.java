@@ -27,15 +27,16 @@ package me.lucko.luckperms.fabric.mixin;
 
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
-import me.lucko.luckperms.fabric.context.PlayerQueryOptionsHolder;
 import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
-import me.lucko.luckperms.fabric.listeners.PermissionCheckListener;
+import me.lucko.luckperms.fabric.model.MixinUser;
 
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 
@@ -46,29 +47,53 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.util.Locale;
+
+/**
+ * Mixin into {@link ServerPlayerEntity} to store LP caches and implement {@link MixinUser}.
+ *
+ * <p>This mixin is also temporarily used to implement our internal PlayerChangeWorldCallback,
+ * until a similar event is added to Fabric itself.</p>
+ */
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin implements PlayerQueryOptionsHolder, PermissionCheckListener.MixinSubject {
+public abstract class ServerPlayerEntityMixin implements MixinUser {
 
-    private QueryOptionsCache<ServerPlayerEntity> queryOptionsCache;
-    private User user;
+    /** Cache a reference to the LP {@link User} instance loaded for this player */
+    private User luckperms$user;
 
+    /**
+     * Hold a QueryOptionsCache instance on the player itself, so we can just cast instead of
+     * having to maintain a map of Player->Cache.
+     */
+    private QueryOptionsCache<ServerPlayerEntity> luckperms$queryOptions;
+
+    // Cache player locale
+    private Locale luckperms$locale;
+
+    // Used by PlayerChangeWorldCallback hook below.
     @Shadow public abstract ServerWorld getServerWorld();
 
     @Override
-    public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(PlayerQueryOptionsHolder.Factory factory) {
-        if (this.queryOptionsCache == null) {
-            this.queryOptionsCache = factory.createCache(((ServerPlayerEntity) (Object) this));
+    public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(FabricContextManager contextManager) {
+        if (this.luckperms$queryOptions == null) {
+            this.luckperms$queryOptions = contextManager.newQueryOptionsCache(((ServerPlayerEntity) (Object) this));
         }
-        return this.queryOptionsCache;
+        return this.luckperms$queryOptions;
+    }
+
+    @Override
+    public Locale getCachedLocale() {
+        return this.luckperms$locale;
     }
 
     @Override
     public void initializePermissions(User user) {
-        this.user = user;
+        this.luckperms$user = user;
 
         // ensure query options cache is initialised too.
-        FabricContextManager contextManager = (FabricContextManager) user.getPlugin().getContextManager();
-        getQueryOptionsCache(contextManager);
+        if (this.luckperms$queryOptions == null) {
+            this.getQueryOptionsCache((FabricContextManager) user.getPlugin().getContextManager());
+        }
     }
 
     @Override
@@ -76,7 +101,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerQueryOptionsHolde
         if (permission == null) {
             throw new NullPointerException("permission");
         }
-        return hasPermission(permission, this.queryOptionsCache.getQueryOptions());
+        return hasPermission(permission, this.luckperms$queryOptions.getQueryOptions());
     }
 
     @Override
@@ -88,13 +113,22 @@ public abstract class ServerPlayerEntityMixin implements PlayerQueryOptionsHolde
             throw new NullPointerException("queryOptions");
         }
 
-        final User user = this.user;
+        final User user = this.luckperms$user;
         if (user == null) {
             throw new IllegalStateException("Permissions have not been initialised for this player yet.");
         }
 
         PermissionCache data = user.getCachedData().getPermissionData(queryOptions);
         return data.checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
+    }
+
+    @Inject(
+            at = @At("HEAD"),
+            method = "setClientSettings"
+    )
+    private void luckperms_setClientSettings(ClientSettingsC2SPacket information, CallbackInfo ci) {
+        String language = ((ClientSettingsC2SPacketAccessor) information).getLanguage();
+        this.luckperms$locale = TranslationManager.parseLocale(language);
     }
 
     @Inject(

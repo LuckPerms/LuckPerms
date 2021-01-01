@@ -23,30 +23,45 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.context;
+package me.lucko.luckperms.fabric.model;
 
 import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.fabric.context.FabricContextManager;
 
+import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.util.Locale;
+
 /**
- * Mixin interface for objects holding their own {@link QueryOptionsCache}.
+ * Mixin interface for {@link ServerPlayerEntity} implementing {@link User} related
+ * caches and functions.
  */
-public interface PlayerQueryOptionsHolder {
+public interface MixinUser {
 
     /**
-     * Gets (or creates using the factory) the objects {@link QueryOptionsCache}.
+     * Gets (or creates using the manager) the objects {@link QueryOptionsCache}.
      *
-     * @param factory the factory to use if a cache hasn't been created yet
+     * @param contextManager the contextManager
      * @return the cache
      */
-    QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(Factory factory);
+    QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(FabricContextManager contextManager);
+
+    Locale getCachedLocale();
 
     /**
-     * Factory used to create {@link QueryOptionsCache}s.
+     * Initialises permissions for this player using the given {@link User}.
+     *
+     * @param user the user
      */
-    interface Factory {
-        QueryOptionsCache<ServerPlayerEntity> createCache(ServerPlayerEntity player);
-    }
+    void initializePermissions(User user);
+
+    // methods to perform permission checks using the User instance initialised on login
+
+    Tristate hasPermission(String permission);
+
+    Tristate hasPermission(String permission, QueryOptions queryOptions);
 
 }
