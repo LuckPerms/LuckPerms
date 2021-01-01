@@ -198,12 +198,12 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
 
     @Override
     public Path getDataDirectory() {
-        return FabricLoader.getInstance().getGameDir().resolve("mods").resolve("LuckPerms");
+        return FabricLoader.getInstance().getGameDir().resolve("mods").resolve(MODID);
     }
 
     @Override
     public Path getConfigDirectory() {
-        return FabricLoader.getInstance().getConfigDir().resolve("LuckPerms");
+        return FabricLoader.getInstance().getConfigDir().resolve(MODID);
     }
 
     @Override

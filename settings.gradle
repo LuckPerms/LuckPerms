@@ -17,7 +17,7 @@ include (
         'bukkit-legacy',
         'bungee',
         'fabric',
-        'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7',
         'nukkit',
+        'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7',
         'velocity'
 )
