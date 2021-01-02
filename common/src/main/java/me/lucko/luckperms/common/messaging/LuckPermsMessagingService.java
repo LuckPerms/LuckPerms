@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.messaging.message.UpdateMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UserUpdateMessageImpl;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.ExpiringSet;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JObject;
 
@@ -51,8 +52,6 @@ import net.luckperms.api.messenger.message.type.UserUpdateMessage;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -73,7 +72,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         this.messenger = messengerProvider.obtain(this);
         Objects.requireNonNull(this.messenger, "messenger");
 
-        this.receivedMessages = Collections.synchronizedSet(new HashSet<>());
+        this.receivedMessages = new ExpiringSet<>(1, TimeUnit.HOURS);
         this.updateBuffer = new PushUpdateBuffer(plugin);
     }
 
