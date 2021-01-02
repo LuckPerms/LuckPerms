@@ -565,6 +565,7 @@ public interface Message {
                     .color(GRAY)
                     .append(translatable("luckperms.command.verbose.command.possibly-async"))
                     .append(FULL_STOP)
+                    .append(space())
                     .append(translatable("luckperms.command.verbose.command.try-again-manually"))
                     .append(FULL_STOP))
     );
