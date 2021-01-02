@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.model.nodemap.MutateResult;
 import me.lucko.luckperms.common.sender.Sender;
 
 import net.luckperms.api.actionlog.Action;
@@ -61,6 +62,7 @@ import net.luckperms.api.event.log.LogPublishEvent;
 import net.luckperms.api.event.log.LogReceiveEvent;
 import net.luckperms.api.event.node.NodeAddEvent;
 import net.luckperms.api.event.node.NodeClearEvent;
+import net.luckperms.api.event.node.NodeMutateEvent;
 import net.luckperms.api.event.node.NodeRemoveEvent;
 import net.luckperms.api.event.player.PlayerDataSaveEvent;
 import net.luckperms.api.event.player.PlayerLoginProcessEvent;
@@ -96,8 +98,10 @@ import net.luckperms.api.node.Node;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -223,16 +227,47 @@ public final class EventDispatcher {
         postAsync(LogReceiveEvent.class, id, entry);
     }
 
-    public void dispatchNodeAdd(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
-        postAsync(NodeAddEvent.class, proxy(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node);
+    public void dispatchNodeChanges(PermissionHolder target, DataType dataType, MutateResult changes) {
+        if (!this.eventBus.shouldPost(NodeAddEvent.class) && !this.eventBus.shouldPost(NodeRemoveEvent.class)) {
+            return;
+        }
+
+        if (changes.isEmpty()) {
+            return;
+        }
+
+        ApiPermissionHolder proxy = proxy(target);
+        ImmutableSet<Node> state = target.getData(dataType).asImmutableSet();
+
+        // call an event for each recorded change
+        for (MutateResult.Change change : changes.getChanges()) {
+            Class<? extends NodeMutateEvent> type = change.getType() == MutateResult.ChangeType.ADD ?
+                    NodeAddEvent.class : NodeRemoveEvent.class;
+
+            postAsync(type, proxy, dataType, state, change.getNode());
+        }
     }
 
-    public void dispatchNodeClear(PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
-        postAsync(NodeClearEvent.class, proxy(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
-    }
+    public void dispatchNodeClear(PermissionHolder target, DataType dataType, MutateResult changes) {
+        if (!this.eventBus.shouldPost(NodeClearEvent.class)) {
+            return;
+        }
 
-    public void dispatchNodeRemove(Node node, PermissionHolder target, DataType dataType, Collection<? extends Node> before, Collection<? extends Node> after) {
-        postAsync(NodeRemoveEvent.class, proxy(target), dataType, ImmutableSet.copyOf(before), ImmutableSet.copyOf(after), node);
+        if (changes.isEmpty()) {
+            return;
+        }
+
+        ApiPermissionHolder proxy = proxy(target);
+        ImmutableSet<Node> state = target.getData(dataType).asImmutableSet();
+
+        // call clear event
+        ImmutableSet<Node> nodes = ImmutableSet.copyOf(changes.getRemoved());
+        postAsync(NodeClearEvent.class, proxy, dataType, state, nodes);
+
+        // call add event if needed for any nodes that were added
+        for (Node added : changes.getAdded()) {
+            postAsync(NodeAddEvent.class, proxy, dataType, state, added);
+        }
     }
 
     public void dispatchConfigReload() {

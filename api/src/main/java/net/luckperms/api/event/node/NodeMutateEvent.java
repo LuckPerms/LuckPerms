@@ -63,7 +63,6 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return the data before the change
      */
-    @Param(2)
     @NonNull Set<Node> getDataBefore();
 
     /**
@@ -71,7 +70,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return the data after the change
      */
-    @Param(3)
+    @Param(2)
     @NonNull Set<Node> getDataAfter();
 
     /**
