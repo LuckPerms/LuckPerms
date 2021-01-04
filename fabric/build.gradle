@@ -32,7 +32,7 @@ dependencies {
         modImplementation(fabricApi.module(it, fabricApiVersion))
     }
 
-    modImplementation 'me.lucko:fabric-permissions-api:0.1-SNAPSHOT'
+    include(modImplementation('me.lucko:fabric-permissions-api:0.1-SNAPSHOT'))
 
     compile project(':common')
 }

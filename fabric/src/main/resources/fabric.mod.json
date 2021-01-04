@@ -20,8 +20,9 @@
     "source": "https://github.com/lucko/LuckPerms",
     "issues": "https://github.com/lucko/LuckPerms/issues"
   },
+  "environment": "server",
   "entrypoints": {
-    "main": [
+    "server": [
       "me.lucko.luckperms.fabric.LPFabricBootstrap"
     ]
   },

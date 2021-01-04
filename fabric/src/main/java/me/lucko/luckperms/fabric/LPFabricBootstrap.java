@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -59,7 +59,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Bootstrap plugin for LuckPerms running on Fabric.
  */
-public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializer {
+public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedServerModInitializer {
 
     private static final String MODID = "luckperms";
     private static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MODID)
@@ -126,7 +126,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
     // lifecycle
 
     @Override
-    public final void onInitialize() {
+    public void onInitializeServer() {
         this.plugin = new LPFabricPlugin(this);
         try {
             this.plugin.load();
@@ -188,12 +188,20 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, ModInitializ
 
     @Override
     public String getServerBrand() {
-        return getServer().map(MinecraftServer::getServerModName).orElse("null");
+        String fabricVersion = FabricLoader.getInstance().getModContainer("fabric")
+                .map(c -> c.getMetadata().getVersion().getFriendlyString())
+                .orElse("unknown");
+
+        return "fabric@" + fabricVersion;
     }
 
     @Override
     public String getServerVersion() {
-        return getServer().map(MinecraftServer::getVersion).orElse("null");
+        String fabricApiVersion = FabricLoader.getInstance().getModContainer("fabric-api-base")
+                .map(c -> c.getMetadata().getVersion().getFriendlyString())
+                .orElse("unknown");
+
+        return getServer().map(MinecraftServer::getVersion).orElse("null") + " - fabric-api@" + fabricApiVersion;
     }
 
     @Override
