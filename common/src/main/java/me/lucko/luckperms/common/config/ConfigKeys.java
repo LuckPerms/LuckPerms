@@ -484,6 +484,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> VAULT_IGNORE_WORLD = booleanKey("vault-ignore-world", false);
 
     /**
+     * If the owner of an integrated server should automatically bypasses all permission checks. On fabric, this only applies on an Integrated Server.
+     */
+    public static final ConfigKey<Boolean> FABRIC_INTEGRATED_SERVER_OWNER_BYPASSES_CHECKS = booleanKey("integrated-server-owner-bypasses-checks", true);
+
+    /**
      * The world rewrites map
      */
     public static final ConfigKey<WorldNameRewriter> WORLD_REWRITES = key(c -> {

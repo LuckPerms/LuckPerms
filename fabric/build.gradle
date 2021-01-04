@@ -1,0 +1,94 @@
+import net.fabricmc.loom.task.RemapJarTask
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '4.0.1'
+    id 'fabric-loom' version '0.5-SNAPSHOT'
+}
+
+repositories {
+    maven { url 'https://maven.fabricmc.net/' }
+    mavenLocal()
+}
+
+def minecraftVersion = '1.16.4'
+def yarnBuild = 7
+def loaderVersion = '0.10.8'
+def fabricApiVersion = '0.28.4+1.16'
+
+dependencies {
+    // Fabric Stuff, We don't specifically target only a single version but yarn mappings require a version to be specified.
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    mappings "net.fabricmc:yarn:${minecraftVersion}+build.${yarnBuild}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${loaderVersion}"
+
+    Set<String> apiModules = [
+            'fabric-api-base',
+            'fabric-command-api-v1',
+            'fabric-lifecycle-events-v1',
+            'fabric-networking-api-v1'
+    ]
+
+    apiModules.forEach {
+        modImplementation(fabricApi.module(it, fabricApiVersion))
+    }
+
+    include(modImplementation('me.lucko:fabric-permissions-api:0.1-SNAPSHOT'))
+
+    compile project(':common')
+}
+
+processResources {
+    inputs.property 'version', project.ext.fullVersion
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'fabric.mod.json'
+        expand 'version': project.ext.fullVersion
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'fabric.mod.json'
+    }
+}
+
+shadowJar {
+    archiveName = "LuckPerms-Fabric-${project.ext.fullVersion}-dev.jar"
+
+    dependencies {
+        exclude('net.fabricmc:.*')
+        include(dependency('net.luckperms:.*'))
+        include(dependency('me.lucko.luckperms:.*'))
+        // We don't want to include the mappings in the jar do we?
+        exclude '/mappings/*'
+    }
+
+    relocate 'net.kyori.adventure', 'me.lucko.luckperms.lib.adventure'
+    relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
+    relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
+    relocate 'okio', 'me.lucko.luckperms.lib.okio'
+    relocate 'okhttp3', 'me.lucko.luckperms.lib.okhttp3'
+    relocate 'net.bytebuddy', 'me.lucko.luckperms.lib.bytebuddy'
+    relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
+    relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
+    relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
+    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
+    relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
+    relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
+    relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
+    relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
+    relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
+    relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
+}
+
+task remappedShadowJar(type: RemapJarTask) {
+    dependsOn tasks.shadowJar
+    input = tasks.shadowJar.archivePath
+    addNestedDependencies = true
+    archiveName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
+}
+
+tasks.assemble.dependsOn tasks.remappedShadowJar
+
+artifacts {
+    archives remappedShadowJar
+    shadow shadowJar
+}

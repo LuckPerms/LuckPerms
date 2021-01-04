@@ -73,7 +73,8 @@ public interface Platform {
         BUNGEECORD("BungeeCord"),
         SPONGE("Sponge"),
         NUKKIT("Nukkit"),
-        VELOCITY("Velocity");
+        VELOCITY("Velocity"),
+        FABRIC("Fabric");
 
         private final String friendlyName;
 

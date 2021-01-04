@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "luckperms",
+  "version": "${version}",
+  "name": "LuckPerms",
+  "icon": "assets/luckperms/icon.png",
+  "description": "A permissions plugin (mod)",
+  "authors": [
+    {
+      "name": "Luck",
+      "contact": {
+        "sources": "https://github.com/lucko",
+        "homepage": "https://lucko.me/"
+      }
+    }
+  ],
+  "license": "MIT",
+  "contact": {
+    "homepage": "https://luckperms.net",
+    "source": "https://github.com/lucko/LuckPerms",
+    "issues": "https://github.com/lucko/LuckPerms/issues"
+  },
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "me.lucko.luckperms.fabric.LPFabricBootstrap"
+    ]
+  },
+  "mixins": [
+    "mixins.luckperms.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.9.0",
+    "fabric-api-base": "*",
+    "fabric-command-api-v1": "*",
+    "fabric-lifecycle-events-v1": "*",
+    "fabric-networking-v0": "*",
+    "fabric-permissions-api-v0": "*"
+  },
+  "custom": {
+    "modmenu:api": true
+  }
+}

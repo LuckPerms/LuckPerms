@@ -9,7 +9,10 @@ dependencies {
     testCompile 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
     compile project(':api')
-    compile 'org.checkerframework:checker-qual:2.5.5'
+    compile 'org.checkerframework:checker-qual:3.8.0'
+
+    compileOnly 'org.slf4j:slf4j-api:1.7.30'
+    compileOnly 'org.apache.logging.log4j:log4j-api:2.14.0'
 
     // This is a special re-packaged version of 'net.kyori:adventure-*' for our own use.
     // Don't use it in other projects, you want the net.kyori version instead.
