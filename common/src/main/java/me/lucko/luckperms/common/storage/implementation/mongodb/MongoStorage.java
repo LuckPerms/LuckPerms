@@ -56,6 +56,7 @@ import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.Iterators;
 
+import me.lucko.luckperms.common.util.Uuids;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.actionlog.Action;
@@ -67,7 +68,9 @@ import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 
+import org.bson.BsonBinarySubType;
 import org.bson.Document;
+import org.bson.types.Binary;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -132,7 +135,7 @@ public class MongoStorage implements StorageImplementation {
                 this.mongoClient = new MongoClient(address, credential, MongoClientOptions.builder().build());
             }
         }
-        
+
         this.database = this.mongoClient.getDatabase(this.configuration.getDatabase());
     }
 
@@ -258,7 +261,7 @@ public class MongoStorage implements StorageImplementation {
                     UUID uuid = getDocumentId(d);
                     Document results = processBulkUpdate(d, bulkUpdate, HolderType.USER);
                     if (results != null) {
-                        c.replaceOne(new Document("_id", uuid), results);
+                        c.replaceOne(new Document("_id", uuidAsBinary(uuid)), results);
                     }
                 }
             }
@@ -299,7 +302,8 @@ public class MongoStorage implements StorageImplementation {
     public User loadUser(UUID uniqueId, String username) {
         User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-        try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUniqueId())).iterator()) {
+        Binary uuid = uuidAsBinary(user.getUniqueId());
+        try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
             if (cursor.hasNext()) {
                 // User exists, let's load.
                 Document d = cursor.next();
@@ -314,7 +318,7 @@ public class MongoStorage implements StorageImplementation {
 
                 boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
                 if (updatedUsername | user.auditTemporaryNodes()) {
-                    c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user));
+                    c.replaceOne(new Document("_id", uuid), userToDoc(user));
                 }
             } else {
                 if (this.plugin.getUserManager().isNonDefaultUser(user)) {
@@ -332,9 +336,9 @@ public class MongoStorage implements StorageImplementation {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         user.normalData().discardChanges();
         if (!this.plugin.getUserManager().isNonDefaultUser(user)) {
-            c.deleteOne(new Document("_id", user.getUniqueId()));
+            c.deleteOne(new Document("_id", uuidAsBinary(user.getUniqueId())));
         } else {
-            c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user), new ReplaceOptions().upsert(true));
+            c.replaceOne(new Document("_id", uuidAsBinary(user.getUniqueId())), userToDoc(user), new ReplaceOptions().upsert(true));
         }
     }
 
@@ -529,7 +533,7 @@ public class MongoStorage implements StorageImplementation {
 
         // do the insert
         if (!username.equalsIgnoreCase(oldUsername)) {
-            c.replaceOne(new Document("_id", uniqueId), new Document("_id", uniqueId).append("name", username), new ReplaceOptions().upsert(true));
+            c.replaceOne(new Document("_id", uuidAsBinary(uniqueId)), new Document("_id", uuidAsBinary(uniqueId)).append("name", username), new ReplaceOptions().upsert(true));
         }
 
         PlayerSaveResultImpl result = PlayerSaveResultImpl.determineBaseResult(username, oldUsername);
@@ -544,7 +548,7 @@ public class MongoStorage implements StorageImplementation {
 
         if (!conflicting.isEmpty()) {
             // remove the mappings for conflicting uuids
-            c.deleteMany(Filters.and(conflicting.stream().map(u -> Filters.eq("_id", u)).collect(Collectors.toList())));
+            c.deleteMany(Filters.and(conflicting.stream().map(u -> Filters.eq("_id", uuidAsBinary(u))).collect(Collectors.toList())));
             result = result.withOtherUuidsPresent(conflicting);
         }
 
@@ -554,7 +558,7 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public void deletePlayerData(UUID uniqueId) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
-        c.deleteMany(Filters.eq("_id", uniqueId));
+        c.deleteMany(Filters.eq("_id", uuidAsBinary(uniqueId)));
     }
 
     @Override
@@ -570,7 +574,7 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public String getPlayerName(UUID uniqueId) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
-        Document doc = c.find(new Document("_id", uniqueId)).first();
+        Document doc = c.find(new Document("_id", uuidAsBinary(uniqueId))).first();
         if (doc != null) {
             return doc.get("name", String.class);
         }
@@ -593,7 +597,7 @@ public class MongoStorage implements StorageImplementation {
                 .map(MongoStorage::nodeToDoc)
                 .collect(Collectors.toList());
 
-        return new Document("_id", user.getUniqueId())
+        return new Document("_id", uuidAsBinary(user.getUniqueId()))
                 .append("name", user.getUsername().orElse("null"))
                 .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME))
                 .append("permissions", nodes);
@@ -682,6 +686,10 @@ public class MongoStorage implements StorageImplementation {
             map.add(doc.getString("key"), doc.getString("value"));
         }
         return map;
+    }
+
+    private static Binary uuidAsBinary(UUID uuid){
+        return new Binary(BsonBinarySubType.UUID_STANDARD, Uuids.asBytes(uuid));
     }
 
 }

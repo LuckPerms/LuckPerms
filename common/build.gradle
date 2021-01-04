@@ -51,6 +51,6 @@ dependencies {
     }
     compile 'com.zaxxer:HikariCP:3.4.5'
     compile 'redis.clients:jedis:3.3.0'
-    compile 'org.mongodb:mongo-java-driver:3.12.2'
+    compile group: 'org.mongodb', name: 'mongodb-driver-legacy', version: '4.1.1'
     compile 'org.yaml:snakeyaml:1.23'
 }
