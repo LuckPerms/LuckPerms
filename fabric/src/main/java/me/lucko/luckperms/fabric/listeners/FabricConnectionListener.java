@@ -42,11 +42,13 @@ import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchronizer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.kyori.adventure.text.Component;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class FabricConnectionListener extends AbstractConnectionListener {
@@ -68,15 +70,16 @@ public class FabricConnectionListener extends AbstractConnectionListener {
 
         // Get their profile from the net handler - it should have been initialised by now.
         GameProfile profile = ((ServerLoginNetworkHandlerAccessor) netHandler).getGameProfile();
-
+        UUID uniqueId = PlayerEntity.getUuidFromProfile(profile);
+        String username = profile.getName();
 
         // Register with the LoginSynchronizer that we want to perform a task before the login proceeds.
-        sync.waitFor(CompletableFuture.runAsync(() -> onPreLoginAsync(netHandler, profile), this.plugin.getBootstrap().getScheduler().async()));
+        sync.waitFor(CompletableFuture.runAsync(() -> onPreLoginAsync(netHandler, uniqueId, username), this.plugin.getBootstrap().getScheduler().async()));
     }
 
-    private void onPreLoginAsync(ServerLoginNetworkHandler netHandler, GameProfile e) {
+    private void onPreLoginAsync(ServerLoginNetworkHandler netHandler, UUID uniqueId, String username) {
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Processing pre-login for " + e.getId() + " - " + e.getName());
+            this.plugin.getLogger().info("Processing pre-login for " + uniqueId + " - " + username);
         }
 
         /* Actually process the login for the connection.
@@ -89,16 +92,16 @@ public class FabricConnectionListener extends AbstractConnectionListener {
            - creating a user instance in the UserManager for this connection.
            - setting up cached data. */
         try {
-            User user = loadUser(e.getId(), e.getName());
-            recordConnection(e.getId());
-            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getId(), e.getName(), user);
+            User user = loadUser(uniqueId, username);
+            recordConnection(uniqueId);
+            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, user);
         } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + e.getId() + " - " + e.getName(), ex);
+            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + uniqueId + " - " + username, ex);
 
             // deny the connection
             Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
             netHandler.disconnect(FabricSenderFactory.toNativeText(reason));
-            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getId(), e.getName(), null);
+            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, null);
         }
     }
 

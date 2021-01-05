@@ -332,8 +332,8 @@ public final class EventDispatcher {
         postAsync(UserFirstLoginEvent.class, uniqueId, username);
     }
 
-    public void dispatchPlayerLoginProcess(UUID uniqueId, String username, User user) {
-        postSync(PlayerLoginProcessEvent.class, uniqueId, username, user.getApiProxy());
+    public void dispatchPlayerLoginProcess(UUID uniqueId, String username, @Nullable User user) {
+        postSync(PlayerLoginProcessEvent.class, uniqueId, username, user == null ? null : user.getApiProxy());
     }
 
     public void dispatchPlayerDataSave(UUID uniqueId, String username, PlayerSaveResult result) {

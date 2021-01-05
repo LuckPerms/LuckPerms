@@ -51,7 +51,7 @@ processResources {
 }
 
 shadowJar {
-    archiveName = "LuckPerms-Fabric-${project.ext.fullVersion}-dev.jar"
+    archiveName = "luckpermsfabric-${project.ext.fullVersion}-dev.jar"
 
     dependencies {
         exclude('net.fabricmc:.*')
