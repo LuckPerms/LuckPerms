@@ -46,6 +46,7 @@ import me.lucko.luckperms.fabric.context.FabricContextManager;
 import me.lucko.luckperms.fabric.context.FabricPlayerCalculator;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.PermissionCheckListener;
+import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
 
 import net.fabricmc.loader.api.ModContainer;
 import net.kyori.adventure.text.Component;
@@ -133,8 +134,8 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected MessagingFactory<LPFabricPlugin> provideMessagingFactory() {
-        return new MessagingFactory<>(this);
+    protected MessagingFactory<?> provideMessagingFactory() {
+        return new FabricMessagingFactory(this);
     }
 
     @Override

@@ -47,7 +47,7 @@ The project is split up into a few separate modules.
 
 * **API** - The public, semantically versioned API used by other plugins wishing to integrate with and retrieve data from LuckPerms. This module (for the most part) does not contain any implementation itself, and is provided by the plugin.
 * **Common** - The common module contains most of the code which implements the respective LuckPerms plugins. This abstract module reduces duplicated code throughout the project.
-* **Bukkit, BungeeCord, Sponge, Nukkit & Velocity** - Each use the common module to implement plugins on the respective server platforms.
+* **Bukkit, BungeeCord, Sponge, Fabric, Nukkit & Velocity** - Each use the common module to implement plugins on the respective server platforms.
 
 ## License
 LuckPerms is licensed under the permissive MIT license. Please see [`LICENSE.txt`](https://github.com/lucko/LuckPerms/blob/master/LICENSE.txt) for more info.
