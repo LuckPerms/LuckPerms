@@ -587,6 +587,12 @@ commands-allow-op: true
 # option to 'true.
 vault-unsafe-lookups: false
 
+# If LuckPerms should use the 'display name' of a group when returning groups in Vault API calls.
+#
+# - When this option is set to true, the display name of the group is returned.
+# - When this option is set to false, the standard name/id of the group is returned.
+vault-group-use-displaynames: true
+
 # Controls which group LuckPerms should use for NPC players when handling Vault requests.
 #
 # - As NPCs aren't actually real players, LuckPerms does not load any user data for them. This

@@ -176,7 +176,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     @Override
     public String[] getGroups() {
         return this.plugin.getGroupManager().getAll().values().stream()
-                .map(Group::getPlainDisplayName)
+                .map(this::groupName)
                 .toArray(String[]::new);
     }
 
@@ -252,10 +252,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         return user.getOwnNodes(NodeType.INHERITANCE, queryOptions).stream()
                 .map(n -> {
                     Group group = this.plugin.getGroupManager().getIfLoaded(n.getGroupName());
-                    if (group != null) {
-                        return group.getPlainDisplayName();
-                    }
-                    return n.getGroupName();
+                    return group != null ? groupName(group) : n.getGroupName();
                 })
                 .toArray(String[]::new);
     }
@@ -274,11 +271,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         String value = metaData.getPrimaryGroup(MetaCheckEvent.Origin.THIRD_PARTY_API);
 
         Group group = getGroup(value);
-        if (group != null) {
-            return group.getPlainDisplayName();
-        }
-
-        return value;
+        return group != null ? groupName(group) : value;
     }
 
     @Override
@@ -326,6 +319,14 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
     private Group getGroup(String name) {
         return this.plugin.getGroupManager().getByDisplayName(name);
+    }
+
+    private String groupName(Group group) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.VAULT_GROUP_USE_DISPLAYNAMES)) {
+            return group.getPlainDisplayName();
+        } else {
+            return group.getName();
+        }
     }
 
     private boolean checkGroupExists(String group) {

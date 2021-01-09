@@ -447,6 +447,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> VAULT_UNSAFE_LOOKUPS = booleanKey("vault-unsafe-lookups", false);
 
     /**
+     * If LuckPerms should use the 'display name' of a group when returning groups in Vault API calls.
+     */
+    public static final ConfigKey<Boolean> VAULT_GROUP_USE_DISPLAYNAMES = booleanKey("vault-group-use-displaynames", true);
+
+    /**
      * Controls which group LuckPerms should use for NPC players when handling Vault requests
      */
     public static final ConfigKey<String> VAULT_NPC_GROUP = stringKey("vault-npc-group", "default");
