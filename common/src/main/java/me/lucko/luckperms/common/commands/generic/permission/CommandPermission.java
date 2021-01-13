@@ -42,7 +42,6 @@ public class CommandPermission<T extends PermissionHolder> extends GenericParent
                 .add(new PermissionSetTemp())
                 .add(new PermissionUnsetTemp())
                 .add(new PermissionCheck())
-                .add(new PermissionCheckInherits())
                 .add(new PermissionClear())
                 .build());
     }

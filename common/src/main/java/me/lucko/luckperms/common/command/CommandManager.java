@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.commands.group.ListGroups;
 import me.lucko.luckperms.common.commands.log.LogParentCommand;
 import me.lucko.luckperms.common.commands.misc.ApplyEditsCommand;
 import me.lucko.luckperms.common.commands.misc.BulkUpdateCommand;
-import me.lucko.luckperms.common.commands.misc.CheckCommand;
 import me.lucko.luckperms.common.commands.misc.EditorCommand;
 import me.lucko.luckperms.common.commands.misc.ExportCommand;
 import me.lucko.luckperms.common.commands.misc.ImportCommand;
@@ -107,7 +106,6 @@ public class CommandManager {
                 .add(new VerboseCommand())
                 .add(new TreeCommand())
                 .add(new SearchCommand())
-                .add(new CheckCommand())
                 .add(new NetworkSyncCommand())
                 .add(new ImportCommand())
                 .add(new ExportCommand())

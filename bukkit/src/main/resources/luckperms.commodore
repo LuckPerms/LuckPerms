@@ -29,11 +29,6 @@ luckperms {
   search {
     permission brigadier:string quotable_phrase;
   }
-  check {
-    user brigadier:string single_word {
-      permission brigadier:string quotable_phrase;
-    }
-  }
   networksync;
   import {
     file brigadier:string quotable_phrase;
@@ -114,14 +109,7 @@ luckperms {
           }
         }
         check {
-          node brigadier:string quotable_phrase {
-            context brigadier:string greedy_phrase;
-          }
-        }
-        checkinherits {
-          node brigadier:string quotable_phrase {
-            context brigadier:string greedy_phrase;
-          }
+          node brigadier:string quotable_phrase;
         }
         clear {
           context brigadier:string greedy_phrase;
@@ -362,14 +350,7 @@ luckperms {
           }
         }
         check {
-          node brigadier:string quotable_phrase {
-            context brigadier:string greedy_phrase;
-          }
-        }
-        checkinherits {
-          node brigadier:string quotable_phrase {
-            context brigadier:string greedy_phrase;
-          }
+          node brigadier:string quotable_phrase;
         }
         clear {
           context brigadier:string greedy_phrase;

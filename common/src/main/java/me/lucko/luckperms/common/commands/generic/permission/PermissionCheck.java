@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.generic.permission;
 
+import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
@@ -36,16 +37,22 @@ import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
-import net.luckperms.api.context.MutableContextSet;
-import net.luckperms.api.model.data.DataType;
-import net.luckperms.api.node.NodeEqualityPredicate;
+import net.kyori.adventure.text.Component;
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.PermissionHolder.Identifier;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
+import net.luckperms.api.node.types.RegexPermissionNode;
+import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PermissionCheck extends GenericChildCommand {
@@ -61,10 +68,77 @@ public class PermissionCheck extends GenericChildCommand {
         }
 
         String node = args.get(0);
-        MutableContextSet context = args.getContextOrDefault(1, plugin);
 
-        Tristate result = target.hasNode(DataType.NORMAL, NodeBuilders.determineMostApplicable(node).withContext(context).build(), NodeEqualityPredicate.IGNORE_VALUE_OR_IF_TEMPORARY);
-        Message.CHECK_PERMISSION.send(sender, target, node, result, context);
+        // accumulate nodes
+        List<Node> own = new ArrayList<>();
+        List<Node> inherited = new ArrayList<>();
+
+        List<Node> resolved = target.resolveInheritedNodes(QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
+        for (Node n : resolved) {
+            if (!matches(node, n)) {
+                continue;
+            }
+
+            Identifier origin = n.getMetadata(InheritanceOriginMetadata.KEY)
+                    .map(InheritanceOriginMetadata::getOrigin)
+                    .orElse(null);
+
+            if (origin == null || target.getIdentifier().equals(origin)) {
+                own.add(n);
+            } else {
+                inherited.add(n);
+            }
+        }
+
+        // send results
+        Message.PERMISSION_CHECK_INFO_HEADER.send(sender, node);
+        if (own.isEmpty()) {
+            Message.PERMISSION_CHECK_INFO_NOT_DIRECTLY.send(sender, target, node);
+        } else {
+            for (Node n : own) {
+                Message.PERMISSION_CHECK_INFO_DIRECTLY.send(sender, target, node, Tristate.of(n.getValue()), n.getContexts());
+            }
+        }
+        if (inherited.isEmpty()) {
+            Message.PERMISSION_CHECK_INFO_NOT_INHERITED.send(sender, target, node);
+        } else {
+            for (Node n : inherited) {
+                String origin = n.metadata(InheritanceOriginMetadata.KEY).getOrigin().getName();
+                Message.PERMISSION_CHECK_INFO_INHERITED.send(sender, target, node, Tristate.of(n.getValue()), n.getContexts(), origin);
+            }
+        }
+
+        // blank line
+        sender.sendMessage(Message.prefixed(Component.empty()));
+
+        // perform a "real" check
+        QueryOptions queryOptions = target.getQueryOptions();
+        TristateResult checkResult = target.getCachedData().getPermissionData(queryOptions).checkPermission(node, PermissionCheckEvent.Origin.INTERNAL);
+
+        Tristate result = checkResult.result();
+        String processor;
+        String cause;
+        ImmutableContextSet context = queryOptions.context();
+
+        if (result != Tristate.UNDEFINED) {
+            Class<?> processorClass = checkResult.processorClass();
+            if (processorClass.getName().startsWith("me.lucko.luckperms.")) {
+                String simpleName = processorClass.getSimpleName();
+                String platform = processorClass.getName().split("\\.")[3];
+                processor = platform + "." + simpleName;
+            } else {
+                processor = processorClass.getName();
+            }
+
+            cause = checkResult.cause();
+        } else {
+            processor = null;
+            cause = null;
+        }
+
+        // send results
+        Message.PERMISSION_CHECK_RESULT.send(sender, node, result, processor, cause, context);
+
         return CommandResult.SUCCESS;
     }
 
@@ -72,7 +146,12 @@ public class PermissionCheck extends GenericChildCommand {
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, TabCompletions.permissions(plugin))
-                .from(1, TabCompletions.contexts(plugin))
                 .complete(args);
+    }
+
+    private static boolean matches(String permission, Node node) {
+        return node.getKey().equals(permission) ||
+                node.resolveShorthand().contains(permission) ||
+                node instanceof RegexPermissionNode && ((RegexPermissionNode) node).getPattern().map(p -> p.matcher(permission).matches()).orElse(false);
     }
 }

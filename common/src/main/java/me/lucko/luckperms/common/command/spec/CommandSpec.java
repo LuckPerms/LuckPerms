@@ -62,10 +62,6 @@ public enum CommandSpec {
             arg("permission", true),
             arg("page", false)
     ),
-    CHECK("/%s check <user> <permission>",
-            arg("user", true),
-            arg("permission", true)
-    ),
     NETWORK_SYNC("/%s networksync"),
     IMPORT("/%s import <file>",
             arg("file", true),
@@ -184,12 +180,7 @@ public enum CommandSpec {
             arg("context...", false)
     ),
     PERMISSION_CHECK(
-            arg("node", true),
-            arg("context...", false)
-    ),
-    PERMISSION_CHECK_INHERITS(
-            arg("node", true),
-            arg("context...", false)
+            arg("node", true)
     ),
     PERMISSION_CLEAR(
             arg("context...", false)
