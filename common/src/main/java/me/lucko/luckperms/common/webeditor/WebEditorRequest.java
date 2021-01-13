@@ -35,29 +35,46 @@ import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.http.AbstractHttpClient;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
+import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.query.QueryOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
 /**
  * Encapsulates a request to the web editor.
  */
 public class WebEditorRequest {
+
+    public static final int MAX_USERS = 500;
 
     /**
      * Generates a web editor request payload.
@@ -169,6 +186,82 @@ public class WebEditorRequest {
         String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + pasteId;
         Message.EDITOR_URL.send(sender, url);
         return CommandResult.SUCCESS;
+    }
+
+    public static void includeMatchingGroups(List<? super Group> holders, Predicate<? super Group> filter, LuckPermsPlugin plugin) {
+        plugin.getGroupManager().getAll().values().stream()
+                .filter(filter)
+                .sorted(Comparator
+                        .<Group>comparingInt(g -> g.getWeight().orElse(0)).reversed()
+                        .thenComparing(Group::getName, String.CASE_INSENSITIVE_ORDER)
+                )
+                .forEach(holders::add);
+    }
+
+    public static void includeMatchingUsers(List<? super User> holders, ConstraintNodeMatcher<Node> matcher, boolean includeOffline, LuckPermsPlugin plugin) {
+        includeMatchingUsers(holders, matcher == null ? Collections.emptyList() : Collections.singleton(matcher), includeOffline, plugin);
+    }
+
+    public static void includeMatchingUsers(List<? super User> holders, Collection<ConstraintNodeMatcher<Node>> matchers, boolean includeOffline, LuckPermsPlugin plugin) {
+        Map<UUID, User> users = new LinkedHashMap<>(plugin.getUserManager().getAll());
+
+        if (!matchers.isEmpty()) {
+            users.values().removeIf(user -> {
+                for (ConstraintNodeMatcher<Node> matcher : matchers) {
+                    if (user.normalData().asList().stream().anyMatch(matcher)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        }
+
+        if (includeOffline && users.size() < MAX_USERS) {
+            if (matchers.isEmpty()) {
+                findMatchingOfflineUsers(users, null, plugin);
+            } else {
+                for (ConstraintNodeMatcher<Node> matcher : matchers) {
+                    if (users.size() < MAX_USERS) {
+                        findMatchingOfflineUsers(users, matcher, plugin);
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        users.values().stream()
+                .sorted(Comparator
+                        // sort firstly by the users relative weight (depends on the groups they inherit)
+                        .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL)).reversed()
+                        // then, prioritise users we actually have a username for
+                        .thenComparing(u -> u.getUsername().isPresent(), ((Comparator<Boolean>) Boolean::compare).reversed())
+                        // then sort according to their username
+                        .thenComparing(User::getPlainDisplayName, String.CASE_INSENSITIVE_ORDER)
+                )
+                .forEach(holders::add);
+    }
+
+    private static void findMatchingOfflineUsers(Map<UUID, User> users, ConstraintNodeMatcher<Node> matcher, LuckPermsPlugin plugin) {
+        Stream<UUID> stream;
+        if (matcher == null) {
+            stream = plugin.getStorage().getUniqueUsers().join().stream();
+        } else {
+            stream = plugin.getStorage().searchUserNodes(matcher).join().stream()
+                    .map(NodeEntry::getHolder)
+                    .distinct();
+        }
+
+        stream.filter(uuid -> !users.containsKey(uuid))
+                .sorted()
+                .limit(MAX_USERS - users.size())
+                .forEach(uuid -> {
+                    User user = plugin.getStorage().loadUser(uuid, null).join();
+                    if (user != null) {
+                        users.put(uuid, user);
+                    }
+                    plugin.getUserManager().getHouseKeeper().cleanup(uuid);
+                });
     }
 
 }

@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.model;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;

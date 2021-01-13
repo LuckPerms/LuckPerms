@@ -55,6 +55,7 @@ public class TrackParentCommand extends ParentCommand<Track, String> {
     public TrackParentCommand() {
         super(CommandSpec.TRACK, "Track", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<Track>>builder()
                 .add(new TrackInfo())
+                .add(new TrackEditor())
                 .add(new TrackAppend())
                 .add(new TrackInsert())
                 .add(new TrackRemove())

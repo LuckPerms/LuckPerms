@@ -325,6 +325,7 @@ public enum CommandSpec {
     ),
 
     TRACK_INFO,
+    TRACK_EDITOR,
     TRACK_APPEND(
             arg("group", true)
     ),

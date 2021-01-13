@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.generic.other;
+package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
@@ -34,8 +34,8 @@ import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.node.matcher.StandardNodeMatchers;
 import me.lucko.luckperms.common.node.types.Inheritance;
@@ -49,43 +49,51 @@ import net.luckperms.api.node.Node;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
-    public HolderEditor(HolderType type) {
-        super(CommandSpec.HOLDER_EDITOR, "editor", type == HolderType.USER ? CommandPermission.USER_EDITOR : CommandPermission.GROUP_EDITOR, Predicates.alwaysFalse());
+public class TrackEditor extends ChildCommand<Track> {
+    public TrackEditor() {
+        super(CommandSpec.TRACK_EDITOR, "editor", CommandPermission.TRACK_EDITOR, Predicates.alwaysFalse());
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T target, ArgumentList args, String label) {
-        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target) || ArgumentPermissions.checkGroup(plugin, sender, target, ImmutableContextSetImpl.EMPTY)) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        List<PermissionHolder> holders = new ArrayList<>();
+        // run a sync task
+        plugin.getSyncTaskBuffer().requestDirectly();
 
-        // also include users who are a member of the group
-        if (target instanceof Group) {
-            Group group = (Group) target;
-            ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.key(Inheritance.key(group.getName()));
-            WebEditorRequest.includeMatchingUsers(holders, matcher, true, plugin);
+        // collect groups
+        List<Group> groups = new ArrayList<>();
+        WebEditorRequest.includeMatchingGroups(groups, target::containsGroup, plugin);
+
+        // remove groups which the sender doesn't have perms to view
+        groups.removeIf(holder -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder) || ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSetImpl.EMPTY));
+
+        // then collect users which are a member of any of those groups
+        // (users which are on the track)
+        List<PermissionHolder> users = new ArrayList<>();
+        if (!groups.isEmpty()) {
+            List<ConstraintNodeMatcher<Node>> matchers = groups.stream()
+                    .map(group -> StandardNodeMatchers.key(Inheritance.key(group.getName())))
+                    .collect(Collectors.toList());
+
+            WebEditorRequest.includeMatchingUsers(users, matchers, true, plugin);
         }
 
-        // include the original holder too
-        holders.add(target);
+        // remove users which the sender doesn't have perms to view
+        users.removeIf(holder -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder));
 
-        // remove holders which the sender doesn't have perms to view
-        holders.removeIf(h -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), h) || ArgumentPermissions.checkGroup(plugin, sender, h, ImmutableContextSetImpl.EMPTY));
-
-        // they don't have perms to view any of them
-        if (holders.isEmpty()) {
-            Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
-        }
+        List<PermissionHolder> holders = new ArrayList<>(groups.size() + users.size());
+        holders.addAll(groups);
+        holders.addAll(users);
 
         Message.EDITOR_START.send(sender);
 
-        return WebEditorRequest.generate(holders, Collections.emptyList(), sender, label, plugin)
+        return WebEditorRequest.generate(holders, Collections.singletonList(target), sender, label, plugin)
                 .createSession(plugin, sender);
     }
 

@@ -145,6 +145,7 @@ public enum CommandPermission {
     GROUP_CLONE("clone", Type.GROUP),
 
     TRACK_INFO("info", Type.TRACK),
+    TRACK_EDITOR("editor", Type.TRACK),
     TRACK_APPEND("append", Type.TRACK),
     TRACK_INSERT("insert", Type.TRACK),
     TRACK_REMOVE("remove", Type.TRACK),

@@ -97,11 +97,8 @@ import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
