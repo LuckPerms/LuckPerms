@@ -56,7 +56,6 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
      */
     public static final char NODE_SEPARATOR = '.';
     public static final String NODE_SEPARATOR_STRING = String.valueOf(NODE_SEPARATOR);
-    public static final int NODE_SEPARATOR_CODE = Character.getNumericValue(NODE_SEPARATOR);
 
     // node attributes
     protected final String key;

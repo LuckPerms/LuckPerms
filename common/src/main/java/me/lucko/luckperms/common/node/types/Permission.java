@@ -50,7 +50,7 @@ public class Permission extends AbstractNode<PermissionNode, PermissionNode.Buil
 
     public Permission(String permission, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(permission, value, expireAt, contexts, metadata);
-        this.wildcardLevel = permission.endsWith(WildcardProcessor.WILDCARD_SUFFIX) ? permission.chars().filter(num -> num == NODE_SEPARATOR_CODE).sum() : -1;
+        this.wildcardLevel = WildcardProcessor.isWildcardPermission(permission) ? permission.chars().filter(num -> num == NODE_SEPARATOR).sum() : -1;
     }
 
     @Override
