@@ -29,8 +29,8 @@ import me.lucko.luckperms.common.calculator.result.TristateResult;
 
 import net.luckperms.api.util.Tristate;
 
-public class MapProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
-    private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(MapProcessor.class);
+public class DirectProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+    private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(DirectProcessor.class);
 
     @Override
     public TristateResult hasPermission(String permission) {

@@ -31,7 +31,7 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
-import me.lucko.luckperms.common.calculator.processor.MapProcessor;
+import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
@@ -225,7 +225,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
 
         TristateResult result = permissionData.checkPermission(Inheritance.key(rewriteGroupName(group)), PermissionCheckEvent.Origin.THIRD_PARTY_API);
-        return result.processorClass() == MapProcessor.class && result.result().asBoolean();
+        return result.processorClass() == DirectProcessor.class && result.result().asBoolean();
     }
 
     @Override

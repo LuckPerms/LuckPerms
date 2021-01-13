@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
-import me.lucko.luckperms.common.calculator.processor.MapProcessor;
+import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
@@ -98,7 +98,7 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
     @Override
     public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
-        processors.add(new MapProcessor());
+        processors.add(new DirectProcessor());
         processors.add(new SpongeWildcardProcessor());
         processors.add(new WildcardProcessor());
 

@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.command.access;
 
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
-import me.lucko.luckperms.common.calculator.processor.MapProcessor;
+import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
@@ -306,7 +306,7 @@ public final class ArgumentPermissions {
 
         PermissionCache permissionData = user.getCachedData().getPermissionData(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(contextSet).build());
         TristateResult result = permissionData.checkPermission(Inheritance.key(targetGroupName), PermissionCheckEvent.Origin.INTERNAL);
-        return result.result() != Tristate.TRUE || result.processorClass() != MapProcessor.class;
+        return result.result() != Tristate.TRUE || result.processorClass() != DirectProcessor.class;
     }
     
 }
