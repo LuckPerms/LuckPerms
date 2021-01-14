@@ -31,7 +31,6 @@ import net.luckperms.api.node.types.PermissionNode;
 import java.util.Comparator;
 
 public class NodeComparator implements Comparator<Node> {
-
     private static final Comparator<? super Node> INSTANCE = new NodeComparator();
     private static final Comparator<? super Node> REVERSE = INSTANCE.reversed();
 
@@ -43,17 +42,20 @@ public class NodeComparator implements Comparator<Node> {
         return REVERSE;
     }
 
+    @SuppressWarnings({"ConstantConditions", "OptionalGetWithoutIsPresent"})
     @Override
     public int compare(Node o1, Node o2) {
         if (o1.equals(o2)) {
             return 0;
         }
 
+        // compare whether nodes are temporary
         int result = Boolean.compare(o1.hasExpiry(), o2.hasExpiry());
         if (result != 0) {
             return result;
         }
 
+        // compare whether nodes are wildcard nodes
         result = Boolean.compare(
                 o1 instanceof PermissionNode && ((PermissionNode) o1).isWildcard(),
                 o2 instanceof PermissionNode && ((PermissionNode) o2).isWildcard()
@@ -62,6 +64,8 @@ public class NodeComparator implements Comparator<Node> {
             return result;
         }
 
+        // compare expiry times if both nodes are temporary
+        // due to the comparison earlier, either both nodes are temporary or neither are.
         if (o1.hasExpiry()) {
             result = o1.getExpiry().compareTo(o2.getExpiry());
             if (result != 0) {
@@ -69,20 +73,27 @@ public class NodeComparator implements Comparator<Node> {
             }
         }
 
-        if (o1 instanceof PermissionNode && ((PermissionNode) o1).isWildcard()) {
-            result = Integer.compare(((PermissionNode) o1).getWildcardLevel().getAsInt(), ((PermissionNode) o2).getWildcardLevel().getAsInt());
+        // compare wildcard level if both nodes are wildcards
+        // due to the comparison earlier, either both nodes are wildcards or neither are
+        if (o1 instanceof PermissionNode && ((PermissionNode) o1).isWildcard()) { // implies o2.isWildcard too
+            int o1Level = ((PermissionNode) o1).getWildcardLevel().getAsInt();
+            int o2Level = ((PermissionNode) o2).getWildcardLevel().getAsInt();
+
+            result = Integer.compare(o1Level, o2Level);
             if (result != 0) {
                 return result;
             }
         }
 
-        // note vvv
+        // compare node keys lexicographically
+        // note that the order is reversed - A comes before Z
         result = -o1.getKey().compareTo(o2.getKey());
         if (result != 0) {
             return result;
         }
 
-        // note vvv - we want false to have priority
+        // compare the boolean node values
+        // note that the order is reversed, false comes before true
         result = -Boolean.compare(o1.getValue(), o2.getValue());
         if (result != 0) {
             return result;

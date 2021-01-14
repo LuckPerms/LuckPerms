@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.node.comparator;
 
 import me.lucko.luckperms.common.context.ContextSetComparator;
 
+import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
 
 import java.util.Comparator;
@@ -35,10 +36,8 @@ import java.util.Comparator;
  * Compares permission nodes based upon their supposed "priority".
  */
 public class NodeWithContextComparator implements Comparator<Node> {
-    private NodeWithContextComparator() {}
-
-    private static final Comparator<? super Node> INSTANCE = new NodeWithContextComparator();
-    private static final Comparator<? super Node> REVERSE = INSTANCE.reversed();
+    private static final Comparator<? super Node> INSTANCE = new NodeWithContextComparator(ContextSetComparator.normal(), NodeComparator.normal());
+    private static final Comparator<? super Node> REVERSE = new NodeWithContextComparator(ContextSetComparator.reverse(), NodeComparator.reverse());
 
     public static Comparator<? super Node> normal() {
         return INSTANCE;
@@ -48,22 +47,26 @@ public class NodeWithContextComparator implements Comparator<Node> {
         return REVERSE;
     }
 
+    private final Comparator<? super ImmutableContextSet> contextSetComparator;
+    private final Comparator<? super Node> nodeComparator;
+
+    NodeWithContextComparator(Comparator<? super ImmutableContextSet> contextSetComparator, Comparator<? super Node> nodeComparator) {
+        this.contextSetComparator = contextSetComparator;
+        this.nodeComparator = nodeComparator;
+    }
+
     @Override
     public int compare(Node o1, Node o2) {
         if (o1.equals(o2)) {
             return 0;
         }
 
-        int result = ContextSetComparator.normal().compare(
-                o1.getContexts(),
-                o2.getContexts()
-        );
-
+        int result = this.contextSetComparator.compare(o1.getContexts(), o2.getContexts());
         if (result != 0) {
             return result;
         }
 
-        return NodeComparator.normal().compare(o1, o2);
+        return this.nodeComparator.compare(o1, o2);
     }
 
 }

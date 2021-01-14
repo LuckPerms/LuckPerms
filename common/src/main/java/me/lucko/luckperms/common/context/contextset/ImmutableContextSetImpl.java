@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.context.contextset;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -42,11 +41,9 @@ import net.luckperms.api.context.MutableContextSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Spliterator;
 
 public final class ImmutableContextSetImpl extends AbstractContextSet implements ImmutableContextSet {
     public static final ImmutableContextSetImpl EMPTY = new ImmutableContextSetImpl(ImmutableSetMultimap.of());
@@ -64,11 +61,19 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
     }
 
     private final ImmutableSetMultimap<String, String> map;
+    private final Context[] array;
     private final int hashCode;
 
     ImmutableContextSetImpl(ImmutableSetMultimap<String, String> contexts) {
         this.map = contexts;
         this.hashCode = this.map.hashCode();
+
+        Set<Map.Entry<String, String>> entries = this.map.entries();
+        this.array = new Context[entries.size()];
+        int i = 0;
+        for (Map.Entry<String, String> e : entries) {
+            this.array[i++] = new ContextImpl(e.getKey(), e.getValue());
+        }
     }
 
     @Override
@@ -99,12 +104,7 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
 
     @Override
     public @NonNull Set<Context> toSet() {
-        ImmutableSet.Builder<Context> builder = ImmutableSet.builder();
-        Set<Map.Entry<String, String>> entries = this.map.entries();
-        for (Map.Entry<String, String> e : entries) {
-            builder.add(new ContextImpl(e.getKey(), e.getValue()));
-        }
-        return builder.build();
+        return ImmutableSet.copyOf(this.array);
     }
 
     @Override
@@ -122,24 +122,9 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
         return m.build();
     }
 
-    private ImmutableList<Context> toList() {
-        Set<Map.Entry<String, String>> entries = this.map.entries();
-        Context[] array = new Context[entries.size()];
-        int i = 0;
-        for (Map.Entry<String, String> e : entries) {
-            array[i++] = new ContextImpl(e.getKey(), e.getValue());
-        }
-        return ImmutableList.copyOf(array);
-    }
-
     @Override
-    public @NonNull Iterator<Context> iterator() {
-        return toList().iterator();
-    }
-
-    @Override
-    public Spliterator<Context> spliterator() {
-        return toList().spliterator();
+    public Context[] toArray() {
+        return this.array;
     }
 
     @Override

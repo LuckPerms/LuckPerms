@@ -25,14 +25,14 @@
 
 package me.lucko.luckperms.common.context;
 
+import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 
 public class ContextSetComparator implements Comparator<ImmutableContextSet> {
 
@@ -53,40 +53,41 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             return 0;
         }
 
+        // compare presence of a server context
         int result = Boolean.compare(o1.containsKey(DefaultContextKeys.SERVER_KEY), o2.containsKey(DefaultContextKeys.SERVER_KEY));
         if (result != 0) {
             return result;
         }
 
+        // compare presence of a world context
         result = Boolean.compare(o1.containsKey(DefaultContextKeys.WORLD_KEY), o2.containsKey(DefaultContextKeys.WORLD_KEY));
         if (result != 0) {
             return result;
         }
 
+        // compare overall size
         result = Integer.compare(o1.size(), o2.size());
         if (result != 0) {
             return result;
         }
 
-        // we *have* to maintain transitivity in this comparator. this may be expensive, but it's necessary, as this
-        // comparator is used in the PermissionHolder nodes treemap
+        // At this point, we don't really care about the order between the two sets.
+        // However, we *have* to maintain transitivity in this comparator (despite how
+        // expensive/complex it may be) as it is used in the PermissionHolder nodes treemap.
 
-        // in order to have consistent ordering, we have to compare the content of the context sets by ordering the
-        // elements and then comparing which set is greater.
-        List<Context> o1Entries = new ArrayList<>(o1.toSet());
-        List<Context> o2Entries = new ArrayList<>(o2.toSet());
-        o1Entries.sort(CONTEXT_COMPARATOR);
-        o2Entries.sort(CONTEXT_COMPARATOR);
+        // in order to have consistent ordering, we have to compare the content of the context sets
+        // by sorting the contents and then comparing which set is greater.
+        Context[] o1Array = o1 instanceof ImmutableContextSetImpl ? ((ImmutableContextSetImpl) o1).toArray() : o1.toSet().toArray(new Context[0]);
+        Context[] o2Array = o2 instanceof ImmutableContextSetImpl ? ((ImmutableContextSetImpl) o2).toArray() : o2.toSet().toArray(new Context[0]);
 
-        // size is definitely the same
-        Iterator<Context> it1 = o1Entries.iterator();
-        Iterator<Context> it2 = o2Entries.iterator();
+        Arrays.sort(o1Array, CONTEXT_COMPARATOR);
+        Arrays.sort(o2Array, CONTEXT_COMPARATOR);
 
-        while (it1.hasNext()) {
-            Context ent1 = it1.next();
-            Context ent2 = it2.next();
+        for (int i = 0; i < o1Array.length; i++) {
+            Context ent1 = o1Array[i];
+            Context ent2 = o2Array[i];
 
-            result = CONTEXT_COMPARATOR.compare(ent1, ent2);
+            result = compareContexts(ent1, ent2);
             if (result != 0) {
                 return result;
             }
@@ -95,19 +96,23 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
         throw new AssertionError("sets are equal? " + o1 + " - " + o2);
     }
 
-    @SuppressWarnings("StringEquality")
-    private static final Comparator<String> FAST_STRING_COMPARATOR = (o1, o2) -> o1 == o2 ? 0 : o1.compareTo(o2);
+    private static final Comparator<Context> CONTEXT_COMPARATOR = ContextSetComparator::compareContexts;
 
-    private static final Comparator<Context> CONTEXT_COMPARATOR = (o1, o2) -> {
+    private static int compareContexts(Context o1, Context o2) {
         if (o1 == o2) {
             return 0;
         }
 
-        int i = FAST_STRING_COMPARATOR.compare(o1.getKey(), o2.getKey());
+        int i = compareStringsFast(o1.getKey(), o2.getKey());
         if (i != 0) {
             return i;
         }
 
-        return FAST_STRING_COMPARATOR.compare(o1.getValue(), o2.getValue());
-    };
+        return compareStringsFast(o1.getValue(), o2.getValue());
+    }
+
+    @SuppressWarnings("StringEquality")
+    private static int compareStringsFast(String o1, String o2) {
+        return o1 == o2 ? 0 : o1.compareTo(o2);
+    }
 }

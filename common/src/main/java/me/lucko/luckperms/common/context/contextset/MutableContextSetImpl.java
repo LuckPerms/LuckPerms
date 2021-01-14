@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.context.contextset;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -43,11 +42,9 @@ import net.luckperms.api.context.MutableContextSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Spliterator;
 
 public final class MutableContextSetImpl extends AbstractContextSet implements MutableContextSet {
     private final SetMultimap<String, String> map;
@@ -132,7 +129,8 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
         return builder.build();
     }
 
-    private ImmutableList<Context> toList() {
+    @Override
+    public Context[] toArray() {
         Set<Map.Entry<String, String>> entries = this.map.entries();
         Context[] array;
         synchronized (this.map) {
@@ -142,17 +140,7 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
                 array[i++] = new ContextImpl(e.getKey(), e.getValue());
             }
         }
-        return ImmutableList.copyOf(array);
-    }
-
-    @Override
-    public @NonNull Iterator<Context> iterator() {
-        return toList().iterator();
-    }
-
-    @Override
-    public Spliterator<Context> spliterator() {
-        return toList().spliterator();
+        return array;
     }
 
     @Override
