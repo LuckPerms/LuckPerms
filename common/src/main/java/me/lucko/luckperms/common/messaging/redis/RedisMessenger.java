@@ -101,16 +101,16 @@ public class RedisMessenger implements Messenger {
                     jedis.subscribe(this, CHANNEL);
                 } catch (Exception e) {
                     wasBroken = true;
-                    this.parent.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection: " + e.getMessage());
+                    this.parent.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection", e);
                     try {
                         unsubscribe();
                     } catch (Exception ignored) {
 
                     }
 
-                    // Sleep for 2 seconds to prevent massive spam in console
+                    // Sleep for 5 seconds to prevent massive spam in console
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(5000);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                     }
