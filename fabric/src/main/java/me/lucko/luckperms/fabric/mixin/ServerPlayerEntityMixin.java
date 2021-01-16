@@ -45,7 +45,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Locale;
 
@@ -72,6 +71,16 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
 
     // Used by PlayerChangeWorldCallback hook below.
     @Shadow public abstract ServerWorld getServerWorld();
+
+    @Override
+    public User getLuckPermsUser() {
+        return this.luckperms$user;
+    }
+
+    @Override
+    public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache() {
+        return this.luckperms$queryOptions;
+    }
 
     @Override
     public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(FabricContextManager contextManager) {
@@ -122,20 +131,23 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
         return data.checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
     }
 
-    @Inject(
-            at = @At("HEAD"),
-            method = "setClientSettings"
-    )
+
+    @Inject(at = @At("TAIL"), method = "copyFrom")
+    private void luckperms_copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
+        MixinUser oldMixin = (MixinUser) oldPlayer;
+        this.luckperms$user = oldMixin.getLuckPermsUser();
+        this.luckperms$queryOptions = oldMixin.getQueryOptionsCache();
+        this.luckperms$queryOptions.invalidate();
+        this.luckperms$locale = oldMixin.getCachedLocale();
+    }
+
+    @Inject(at = @At("HEAD"), method = "setClientSettings")
     private void luckperms_setClientSettings(ClientSettingsC2SPacket information, CallbackInfo ci) {
         String language = ((ClientSettingsC2SPacketAccessor) information).getLanguage();
         this.luckperms$locale = TranslationManager.parseLocale(language);
     }
 
-    @Inject(
-            at = @At("TAIL"),
-            method = "worldChanged",
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION
-    )
+    @Inject(at = @At("TAIL"), method = "worldChanged")
     private void luckperms_onChangeDimension(ServerWorld targetWorld, CallbackInfo ci) {
         PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getServerWorld(), targetWorld, (ServerPlayerEntity) (Object) this);
     }

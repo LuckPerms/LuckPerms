@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.EnumNamer;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
-import me.lucko.luckperms.fabric.event.RespawnPlayerCallback;
 
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextCalculator;
@@ -62,7 +61,6 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
 
     public void registerListeners() {
         PlayerChangeWorldCallback.EVENT.register(this::onWorldChange);
-        RespawnPlayerCallback.EVENT.register(this::onPlayerRespawn);
     }
 
     @Override
@@ -112,8 +110,4 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
         this.plugin.getContextManager().invalidateCache(player);
     }
 
-    private void onPlayerRespawn(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer, boolean alive) {
-        this.plugin.getContextManager().invalidateCache(oldPlayer);
-        this.plugin.getContextManager().invalidateCache(newPlayer);
-    }
 }
