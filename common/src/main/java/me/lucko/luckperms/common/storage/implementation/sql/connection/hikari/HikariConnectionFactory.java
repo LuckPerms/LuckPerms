@@ -114,9 +114,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         try {
             config = new HikariConfig();
         } catch (LinkageError e) {
-            // dumb plugins seem to keep doing stupid stuff with shading of SLF4J and Log4J.
-            // detect this and print a more useful error message.
-            handleLinkageError(e, plugin);
+            handleClassloadingError(e, plugin);
             throw e;
         }
 
@@ -129,7 +127,11 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         String port = addressSplit.length > 1 ? addressSplit[1] : defaultPort();
 
         // allow the implementation to configure the HikariConfig appropriately with these values
-        configureDatabase(config, address, port, this.configuration.getDatabase(), this.configuration.getUsername(), this.configuration.getPassword());
+        try {
+            configureDatabase(config, address, port, this.configuration.getDatabase(), this.configuration.getUsername(), this.configuration.getPassword());
+        } catch (NoSuchMethodError e) {
+            handleClassloadingError(e, plugin);
+        }
 
         // get the extra connection properties from the config
         Map<String, String> properties = new HashMap<>(this.configuration.getProperties());
@@ -205,18 +207,21 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         return meta;
     }
 
-    private static void handleLinkageError(LinkageError linkageError, LuckPermsPlugin plugin) {
+    // dumb plugins seem to keep doing stupid stuff with shading of SLF4J and Log4J.
+    // detect this and print a more useful error message.
+    private static void handleClassloadingError(Throwable throwable, LuckPermsPlugin plugin) {
         List<String> noteworthyClasses = ImmutableList.of(
                 "org.slf4j.LoggerFactory",
                 "org.slf4j.ILoggerFactory",
                 "org.apache.logging.slf4j.Log4jLoggerFactory",
                 "org.apache.logging.log4j.spi.LoggerContext",
                 "org.apache.logging.log4j.spi.AbstractLoggerAdapter",
-                "org.slf4j.impl.StaticLoggerBinder"
+                "org.slf4j.impl.StaticLoggerBinder",
+                "org.slf4j.helpers.MessageFormatter"
         );
 
         PluginLogger logger = plugin.getLogger();
-        logger.warn("A " + linkageError.getClass().getSimpleName() + " has occurred whilst initialising Hikari. This is likely due to classloading conflicts between other plugins.");
+        logger.warn("A " + throwable.getClass().getSimpleName() + " has occurred whilst initialising Hikari. This is likely due to classloading conflicts between other plugins.");
         logger.warn("Please check for other plugins below (and try loading LuckPerms without them installed) before reporting the issue.");
 
         for (String className : noteworthyClasses) {
