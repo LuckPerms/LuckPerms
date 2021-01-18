@@ -25,7 +25,7 @@ dependencies {
         exclude(module: 'configurate-gson')
         exclude(module: 'configurate-yaml')
     }
-    compileOnly 'me.lucko:adventure-platform-spongeapi:4.0.0' // re: this artifact - see note in common/build.gradle
+    //compileOnly 'me.lucko:adventure-platform-spongeapi:4.0.0' // re: this artifact - see note in common/build.gradle
 }
 
 blossom {

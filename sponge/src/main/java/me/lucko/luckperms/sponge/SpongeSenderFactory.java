@@ -25,25 +25,25 @@
 
 package me.lucko.luckperms.sponge;
 
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 
-import net.kyori.adventure.platform.spongeapi.SpongeAudiences;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.UUID;
 
 public class SpongeSenderFactory extends SenderFactory<LPSpongePlugin, CommandSource> {
-    private final SpongeAudiences audiences;
-
     public SpongeSenderFactory(LPSpongePlugin plugin) {
         super(plugin);
-        this.audiences = SpongeAudiences.create(plugin.getBootstrap().getPluginContainer(), plugin.getBootstrap().getGame());
     }
 
     @Override
@@ -64,7 +64,7 @@ public class SpongeSenderFactory extends SenderFactory<LPSpongePlugin, CommandSo
 
     @Override
     protected void sendMessage(CommandSource source, Component message) {
-        this.audiences.receiver(source).sendMessage(message);
+        source.sendMessage(toNativeText(TranslationManager.render(message, source.getLocale())));
     }
 
     @Override
@@ -89,9 +89,8 @@ public class SpongeSenderFactory extends SenderFactory<LPSpongePlugin, CommandSo
         getPlugin().getBootstrap().getGame().getCommandManager().process(source, command);
     }
 
-    @Override
-    public void close() {
-        super.close();
-        this.audiences.close();
+    public static Text toNativeText(Component component) {
+        return TextSerializers.JSON.deserialize(GsonComponentSerializer.gson().serialize(component));
     }
+
 }

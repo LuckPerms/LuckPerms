@@ -116,7 +116,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
         dependencies.add(Dependency.ADVENTURE_PLATFORM);
-        dependencies.add(Dependency.ADVENTURE_PLATFORM_SPONGEAPI);
+        //dependencies.add(Dependency.ADVENTURE_PLATFORM_SPONGEAPI);
         dependencies.add(Dependency.CONFIGURATE_CORE);
         dependencies.add(Dependency.CONFIGURATE_HOCON);
         dependencies.add(Dependency.HOCON_CONFIG);
