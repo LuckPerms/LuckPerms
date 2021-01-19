@@ -479,7 +479,7 @@ apply-sponge-implicit-wildcards: false
 # - If this option is set to true, LuckPerms will consider any negated declarations made by
 #   plugins before it considers wildcards. (similar to the way the OP system works)
 # - If this option is set to false, LuckPerms will consider any wildcard assignments first.
-apply-default-negated-permissions-before-wildcards: true
+apply-default-negated-permissions-before-wildcards: false
 
 # If the plugin should parse regex permissions.
 #
