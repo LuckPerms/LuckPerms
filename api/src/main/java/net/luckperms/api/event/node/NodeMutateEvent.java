@@ -34,6 +34,7 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Set;
 
@@ -63,7 +64,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      *
      * @return the data before the change
      */
-    @NonNull Set<Node> getDataBefore();
+    @NonNull @Unmodifiable Set<Node> getDataBefore();
 
     /**
      * Gets an immutable copy of the holders data after the change
@@ -71,7 +72,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      * @return the data after the change
      */
     @Param(2)
-    @NonNull Set<Node> getDataAfter();
+    @NonNull @Unmodifiable Set<Node> getDataAfter();
 
     /**
      * Gets whether the target of this event is a {@link User}

@@ -30,6 +30,7 @@ import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.util.Optional;
 
@@ -48,6 +49,7 @@ import java.util.Optional;
  * <li>{@code org.bukkit.entity.Player}</li>
  * <li>{@code net.md_5.bungee.api.connection.ProxiedPlayer}</li>
  * <li>{@code org.spongepowered.api.service.permission.Subject}</li>
+ * <li>{@code net.minecraft.server.network.ServerPlayerEntity} (Fabric)</li>
  * <li>{@code cn.nukkit.Player}</li>
  * <li>{@code com.velocitypowered.api.proxy.Player}</li>
  * </ul>
@@ -156,6 +158,7 @@ public interface ContextManager {
      *
      * @return the context set factory
      */
+    @Internal
     @NonNull ContextSetFactory getContextSetFactory();
 
     /**

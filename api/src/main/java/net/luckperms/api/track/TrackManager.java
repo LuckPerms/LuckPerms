@@ -27,6 +27,7 @@ package net.luckperms.api.track;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -116,7 +117,7 @@ public interface TrackManager {
      *
      * @return a {@link Set} of {@link Track} objects
      */
-    @NonNull Set<Track> getLoadedTracks();
+    @NonNull @Unmodifiable Set<Track> getLoadedTracks();
 
     /**
      * Check if a track is loaded in memory

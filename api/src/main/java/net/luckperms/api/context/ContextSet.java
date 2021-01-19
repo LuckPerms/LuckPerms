@@ -26,6 +26,7 @@
 package net.luckperms.api.context;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -111,7 +112,7 @@ public interface ContextSet extends Iterable<Context> {
      *
      * @return an immutable set
      */
-    @NonNull Set<Context> toSet();
+    @NonNull @Unmodifiable Set<Context> toSet();
 
     /**
      * Returns a {@link Map} representing the current state of this
@@ -122,7 +123,7 @@ public interface ContextSet extends Iterable<Context> {
      *
      * @return a map
      */
-    @NonNull Map<String, Set<String>> toMap();
+    @NonNull @Unmodifiable Map<String, Set<String>> toMap();
 
     /**
      * Returns a {@link Map} <b>loosely</b> representing the current state of
@@ -138,7 +139,7 @@ public interface ContextSet extends Iterable<Context> {
      * @deprecated because the resultant map may not contain all data in the ContextSet
      */
     @Deprecated
-    @NonNull Map<String, String> toFlattenedMap();
+    @NonNull @Unmodifiable Map<String, String> toFlattenedMap();
 
     /**
      * Returns an {@link Iterator} over each of the context pairs in this set.
@@ -151,7 +152,7 @@ public interface ContextSet extends Iterable<Context> {
      * @return an iterator
      */
     @Override
-    @NonNull Iterator<Context> iterator();
+    @NonNull @Unmodifiable Iterator<Context> iterator();
 
     /**
      * Returns if the {@link ContextSet} contains at least one value for the
@@ -173,7 +174,7 @@ public interface ContextSet extends Iterable<Context> {
      * @return a set of values
      * @throws NullPointerException if the key is null
      */
-    @NonNull Set<String> getValues(@NonNull String key);
+    @NonNull @Unmodifiable Set<String> getValues(@NonNull String key);
 
     /**
      * Returns any value from this {@link ContextSet} matching the key, if present.

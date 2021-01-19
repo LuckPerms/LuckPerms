@@ -31,6 +31,7 @@ import net.luckperms.api.node.matcher.NodeMatcher;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
 import java.util.List;
@@ -138,7 +139,7 @@ public interface GroupManager {
      * @return the entries which matched
      * @since 5.1
      */
-    @NonNull <T extends Node> CompletableFuture<Map<String, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher);
+    <T extends Node> @NonNull CompletableFuture<@Unmodifiable Map<String, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher);
 
     /**
      * Searches for a list of groups with a given permission.
@@ -149,7 +150,7 @@ public interface GroupManager {
      * @deprecated use {@link #searchAll(NodeMatcher)}
      */
     @Deprecated
-    @NonNull CompletableFuture<List<HeldNode<String>>> getWithPermission(@NonNull String permission);
+    @NonNull CompletableFuture<@Unmodifiable List<HeldNode<String>>> getWithPermission(@NonNull String permission);
 
     /**
      * Gets a loaded group.
@@ -165,7 +166,7 @@ public interface GroupManager {
      *
      * @return a {@link Set} of {@link Group} objects
      */
-    @NonNull Set<Group> getLoadedGroups();
+    @NonNull @Unmodifiable Set<Group> getLoadedGroups();
 
     /**
      * Check if a group is loaded in memory

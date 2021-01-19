@@ -32,6 +32,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +41,7 @@ import java.util.Set;
 /**
  * Represents the parameters for a lookup query.
  */
+@NonExtendable
 public interface QueryOptions {
 
     /**
@@ -201,6 +203,7 @@ public interface QueryOptions {
     /**
      * Builder for {@link QueryOptions}.
      */
+    @NonExtendable
     interface Builder {
 
         /**

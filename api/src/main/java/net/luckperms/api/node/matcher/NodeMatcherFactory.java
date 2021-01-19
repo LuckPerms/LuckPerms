@@ -31,12 +31,14 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
  * A factory which creates {@link NodeMatcher}s.
  *
  * @since 5.1
  */
+@Internal
 public interface NodeMatcherFactory {
 
     /**
@@ -87,7 +89,7 @@ public interface NodeMatcherFactory {
      * @param <T> the node type
      * @return the matcher
      */
-    @NonNull <T extends Node> NodeMatcher<T> equals(@NonNull T other, @NonNull NodeEqualityPredicate equalityPredicate);
+    <T extends Node> @NonNull NodeMatcher<T> equals(@NonNull T other, @NonNull NodeEqualityPredicate equalityPredicate);
 
     /**
      * Gets a {@link NodeMatcher} which matches {@link MetaNode}s with the same

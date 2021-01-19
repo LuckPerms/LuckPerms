@@ -125,7 +125,7 @@ public class LuckPermsApiProvider implements LuckPerms {
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NonNull <T> PlayerAdapter<T> getPlayerAdapter(@NonNull Class<T> playerClass) {
+    public <T> @NonNull PlayerAdapter<T> getPlayerAdapter(@NonNull Class<T> playerClass) {
         Objects.requireNonNull(playerClass, "playerClass");
         Class<?> expectedClass = this.plugin.getContextManager().getPlayerClass();
         if (!expectedClass.equals(playerClass)) {

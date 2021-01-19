@@ -30,6 +30,7 @@ import net.luckperms.api.node.metadata.NodeMetadataKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.time.Duration;
 import java.time.temporal.TemporalAccessor;
@@ -43,6 +44,7 @@ import java.util.concurrent.TimeUnit;
  * @param <N> the node type
  * @param <B> the node builder type
  */
+@NonExtendable
 public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N, B>> {
 
     /**
@@ -161,7 +163,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @param <T> the metadata type
      * @return the builder
      */
-    @NonNull <T> B withMetadata(@NonNull NodeMetadataKey<T> key, @Nullable T metadata);
+    <T> @NonNull B withMetadata(@NonNull NodeMetadataKey<T> key, @Nullable T metadata);
 
     /**
      * Creates a {@link Node} instance from the builder.

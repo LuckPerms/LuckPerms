@@ -123,7 +123,7 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     }
 
     @Override
-    public @NonNull <T extends Node> Collection<T> getNodes(@NonNull NodeType<T> type) {
+    public <T extends Node> @NonNull Collection<T> getNodes(@NonNull NodeType<T> type) {
         Objects.requireNonNull(type, "type");
         return this.handle.getOwnNodes(type, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL);
     }
@@ -140,7 +140,7 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
     }
 
     @Override
-    public @NonNull <T extends Node> Collection<T> resolveInheritedNodes(@NonNull NodeType<T> type, @NonNull QueryOptions queryOptions) {
+    public <T extends Node> @NonNull Collection<T> resolveInheritedNodes(@NonNull NodeType<T> type, @NonNull QueryOptions queryOptions) {
         Objects.requireNonNull(type, "type");
         Objects.requireNonNull(queryOptions, "queryOptions");
         return this.handle.resolveInheritedNodes(type, queryOptions);

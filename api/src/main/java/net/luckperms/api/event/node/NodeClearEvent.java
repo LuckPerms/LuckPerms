@@ -29,6 +29,7 @@ import net.luckperms.api.event.util.Param;
 import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -46,10 +47,10 @@ public interface NodeClearEvent extends NodeMutateEvent {
      * @since 5.3
      */
     @Param(3)
-    @NonNull Set<Node> getNodes();
+    @NonNull @Unmodifiable Set<Node> getNodes();
 
     @Override
-    default @NonNull Set<Node> getDataBefore() {
+    default @NonNull @Unmodifiable Set<Node> getDataBefore() {
         // Get data after, then reverse the action
         Set<Node> nodes = new HashSet<>(this.getDataAfter());
         nodes.addAll(this.getNodes());

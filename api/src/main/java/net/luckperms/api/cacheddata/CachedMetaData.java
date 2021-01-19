@@ -29,6 +29,7 @@ import net.luckperms.api.metastacking.MetaStackDefinition;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,7 @@ public interface CachedMetaData extends CachedData {
      *
      * @return an immutable map of meta
      */
-    @NonNull Map<String, List<String>> getMeta();
+    @NonNull @Unmodifiable Map<String, List<String>> getMeta();
 
     /**
      * Gets an immutable sorted map of all of the prefixes the holder has, whereby the first
@@ -74,7 +75,7 @@ public interface CachedMetaData extends CachedData {
      *
      * @return a sorted map of prefixes
      */
-    @NonNull SortedMap<Integer, String> getPrefixes();
+    @NonNull @Unmodifiable SortedMap<Integer, String> getPrefixes();
 
     /**
      * Gets an immutable sorted map of all of the suffixes the holder has, whereby the first
@@ -82,7 +83,7 @@ public interface CachedMetaData extends CachedData {
      *
      * @return a sorted map of suffixes
      */
-    @NonNull SortedMap<Integer, String> getSuffixes();
+    @NonNull @Unmodifiable SortedMap<Integer, String> getSuffixes();
 
     /**
      * Gets the name of the holders primary group.

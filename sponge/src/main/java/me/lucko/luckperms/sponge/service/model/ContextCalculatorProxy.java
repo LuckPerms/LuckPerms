@@ -85,7 +85,7 @@ public class ContextCalculatorProxy implements ForwardingContextCalculator<Subje
         @Override public boolean contains(Object o) { throw new UnsupportedOperationException(); }
         @Override public @NonNull Iterator<Context> iterator() { throw new UnsupportedOperationException(); }
         @Override public @NonNull Object[] toArray() { throw new UnsupportedOperationException(); }
-        @Override public @NonNull <T> T[] toArray(@NonNull T[] a) { throw new UnsupportedOperationException(); }
+        @Override public <T> @NonNull T[] toArray(@NonNull T[] a) { throw new UnsupportedOperationException(); }
         @Override public boolean remove(Object o) { throw new UnsupportedOperationException(); }
         @Override public boolean containsAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
         @Override public boolean retainAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }

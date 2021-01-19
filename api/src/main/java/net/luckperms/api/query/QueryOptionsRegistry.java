@@ -26,12 +26,14 @@
 package net.luckperms.api.query;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
  * A registry providing useful {@link QueryOptions} instances.
  *
  * @since 5.1
  */
+@Internal
 public interface QueryOptionsRegistry {
 
     /**

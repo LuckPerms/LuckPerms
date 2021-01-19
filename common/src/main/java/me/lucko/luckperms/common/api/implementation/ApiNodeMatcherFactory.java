@@ -52,7 +52,7 @@ public final class ApiNodeMatcherFactory implements NodeMatcherFactory {
     }
 
     @Override
-    public @NonNull <T extends Node> NodeMatcher<T> key(@NonNull T node) {
+    public <T extends Node> @NonNull NodeMatcher<T> key(@NonNull T node) {
         return StandardNodeMatchers.key(node);
     }
 
@@ -76,7 +76,7 @@ public final class ApiNodeMatcherFactory implements NodeMatcherFactory {
     }
 
     @Override
-    public @NonNull <T extends Node> NodeMatcher<T> type(NodeType<? extends T> type) {
+    public <T extends Node> @NonNull NodeMatcher<T> type(NodeType<? extends T> type) {
         Objects.requireNonNull(type, "type");
         return StandardNodeMatchers.type(type);
     }

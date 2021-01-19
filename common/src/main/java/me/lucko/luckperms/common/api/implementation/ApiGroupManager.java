@@ -120,7 +120,7 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NonNull <T extends Node> CompletableFuture<Map<String, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher) {
+    public <T extends Node> @NonNull CompletableFuture<Map<String, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher) {
         Objects.requireNonNull(matcher, "matcher");
         ConstraintNodeMatcher<? extends T> constraint = (ConstraintNodeMatcher<? extends T>) matcher;
         return this.plugin.getStorage().searchGroupNodes(constraint).thenApply(list -> {

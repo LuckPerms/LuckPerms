@@ -32,6 +32,7 @@ import net.luckperms.api.node.matcher.NodeMatcher;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
 import java.util.List;
@@ -165,7 +166,7 @@ public interface UserManager {
      *
      * @return a set of uuids
      */
-    @NonNull CompletableFuture<Set<UUID>> getUniqueUsers();
+    @NonNull CompletableFuture<@Unmodifiable Set<UUID>> getUniqueUsers();
 
     /**
      * Searches the {@link User#data() normal node maps} of all known {@link User}s for {@link Node}
@@ -175,7 +176,7 @@ public interface UserManager {
      * @return the entries which matched
      * @since 5.1
      */
-    @NonNull <T extends Node> CompletableFuture<Map<UUID, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher);
+    <T extends Node> @NonNull CompletableFuture<@Unmodifiable Map<UUID, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher);
 
     /**
      * Searches for a list of users with a given permission.
@@ -186,7 +187,7 @@ public interface UserManager {
      * @deprecated use {@link #searchAll(NodeMatcher)}
      */
     @Deprecated
-    @NonNull CompletableFuture<List<HeldNode<UUID>>> getWithPermission(@NonNull String permission);
+    @NonNull CompletableFuture<@Unmodifiable List<HeldNode<UUID>>> getWithPermission(@NonNull String permission);
 
     /**
      * Gets a loaded user.
@@ -211,7 +212,7 @@ public interface UserManager {
      *
      * @return a {@link Set} of {@link User} objects
      */
-    @NonNull Set<User> getLoadedUsers();
+    @NonNull @Unmodifiable Set<User> getLoadedUsers();
 
     /**
      * Check if a user is loaded in memory

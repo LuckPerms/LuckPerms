@@ -35,11 +35,13 @@ import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
  * A registry of methods for obtaining {@link NodeBuilder}s for the various
  * node types.
  */
+@Internal
 public interface NodeBuilderRegistry {
 
     /**

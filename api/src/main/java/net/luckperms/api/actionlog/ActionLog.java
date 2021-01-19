@@ -26,6 +26,7 @@
 package net.luckperms.api.actionlog;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.SortedSet;
 import java.util.UUID;
@@ -47,7 +48,7 @@ public interface ActionLog {
      *
      * @return the content
      */
-    @NonNull SortedSet<Action> getContent();
+    @NonNull @Unmodifiable SortedSet<Action> getContent();
 
     /**
      * Gets the entries in the log performed by the given actor.
@@ -55,7 +56,7 @@ public interface ActionLog {
      * @param actor the uuid of the actor to filter by
      * @return the content for the given actor
      */
-    @NonNull SortedSet<Action> getContent(@NonNull UUID actor);
+    @NonNull @Unmodifiable SortedSet<Action> getContent(@NonNull UUID actor);
 
     /**
      * Gets the log content for a given user
@@ -63,7 +64,7 @@ public interface ActionLog {
      * @param uniqueId the uuid to filter by
      * @return all content in this log where the user = uuid
      */
-    @NonNull SortedSet<Action> getUserHistory(@NonNull UUID uniqueId);
+    @NonNull @Unmodifiable SortedSet<Action> getUserHistory(@NonNull UUID uniqueId);
 
     /**
      * Gets the log content for a given group
@@ -71,7 +72,7 @@ public interface ActionLog {
      * @param name the name to filter by
      * @return all content in this log where the group = name
      */
-    @NonNull SortedSet<Action> getGroupHistory(@NonNull String name);
+    @NonNull @Unmodifiable SortedSet<Action> getGroupHistory(@NonNull String name);
 
     /**
      * Gets the log content for a given track
@@ -79,6 +80,6 @@ public interface ActionLog {
      * @param name the name to filter by
      * @return all content in this log where the track = name
      */
-    @NonNull SortedSet<Action> getTrackHistory(@NonNull String name);
+    @NonNull @Unmodifiable SortedSet<Action> getTrackHistory(@NonNull String name);
 
 }

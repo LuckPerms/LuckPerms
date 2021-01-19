@@ -30,6 +30,7 @@ import net.luckperms.api.event.util.Param;
 import net.luckperms.api.track.Track;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
@@ -52,7 +53,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      * @return the data before the change
      */
     @Param(1)
-    @NonNull List<String> getStateBefore();
+    @NonNull @Unmodifiable List<String> getStateBefore();
 
     /**
      * Gets an immutable copy of the tracks data after the change
@@ -60,6 +61,6 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      * @return the data after the change
      */
     @Param(2)
-    @NonNull List<String> getStateAfter();
+    @NonNull @Unmodifiable List<String> getStateAfter();
 
 }

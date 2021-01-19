@@ -101,7 +101,7 @@ public class QueryOptionsImpl implements QueryOptions {
     }
 
     @Override
-    public @NonNull <O> Optional<O> option(@NonNull OptionKey<O> key) {
+    public <O> @NonNull Optional<O> option(@NonNull OptionKey<O> key) {
         if (this.options == null) {
             return Optional.empty();
         }

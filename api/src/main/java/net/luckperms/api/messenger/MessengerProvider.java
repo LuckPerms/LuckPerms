@@ -28,6 +28,7 @@ package net.luckperms.api.messenger;
 import net.luckperms.api.LuckPerms;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.OverrideOnly;
 
 /**
  * Represents a provider for {@link Messenger} instances.
@@ -37,6 +38,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  *
  * @see LuckPerms#registerMessengerProvider(MessengerProvider)
  */
+@OverrideOnly
 public interface MessengerProvider {
 
     /**

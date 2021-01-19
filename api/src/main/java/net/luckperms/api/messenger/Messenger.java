@@ -29,10 +29,12 @@ import net.luckperms.api.messenger.message.Message;
 import net.luckperms.api.messenger.message.OutgoingMessage;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.OverrideOnly;
 
 /**
  * Represents an object which dispatches {@link OutgoingMessage}s.
  */
+@OverrideOnly
 public interface Messenger extends AutoCloseable {
 
     /**

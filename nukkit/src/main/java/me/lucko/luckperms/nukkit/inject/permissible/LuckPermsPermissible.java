@@ -379,7 +379,7 @@ public class LuckPermsPermissible extends PermissibleBase {
         }
 
         @Override
-        public @NonNull <T> T[] toArray(@NonNull T[] a) {
+        public <T> @NonNull T[] toArray(@NonNull T[] a) {
             return ImmutableList.<PermissionAttachment>copyOf(LuckPermsPermissible.this.hookedAttachments).toArray(a);
         }
 

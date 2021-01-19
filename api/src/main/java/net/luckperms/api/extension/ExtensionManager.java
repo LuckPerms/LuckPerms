@@ -26,6 +26,7 @@
 package net.luckperms.api.extension;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -57,6 +58,6 @@ public interface ExtensionManager {
      *
      * @return the loaded extensions
      */
-    @NonNull Collection<Extension> getLoadedExtensions();
+    @NonNull @Unmodifiable Collection<Extension> getLoadedExtensions();
 
 }

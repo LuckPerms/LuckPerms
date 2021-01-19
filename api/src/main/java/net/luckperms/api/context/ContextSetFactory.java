@@ -26,10 +26,12 @@
 package net.luckperms.api.context;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
  * A factory for creating {@link ContextSet}s.
  */
+@Internal
 public interface ContextSetFactory {
 
     ImmutableContextSet.@NonNull Builder immutableBuilder();

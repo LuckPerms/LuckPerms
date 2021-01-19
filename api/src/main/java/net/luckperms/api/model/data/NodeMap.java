@@ -37,6 +37,7 @@ import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
 import java.util.Map;
@@ -65,7 +66,7 @@ public interface NodeMap {
      *
      * @return a map of nodes
      */
-    @NonNull Map<ImmutableContextSet, Collection<Node>> toMap();
+    @NonNull @Unmodifiable Map<ImmutableContextSet, Collection<Node>> toMap();
 
     /**
      * Gets a flattened view of {@link Node}s contained within this instance.
@@ -75,7 +76,7 @@ public interface NodeMap {
      *
      * @return a flattened collection of nodes
      */
-    @NonNull Collection<Node> toCollection();
+    @NonNull @Unmodifiable Collection<Node> toCollection();
 
     /**
      * Gets if this instance contains a given {@link Node}.

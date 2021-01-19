@@ -28,12 +28,14 @@ package net.luckperms.api.messenger.message;
 import net.luckperms.api.messenger.Messenger;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.util.UUID;
 
 /**
  * Represents a message sent received via a {@link Messenger}.
  */
+@NonExtendable
 public interface Message {
 
     /**

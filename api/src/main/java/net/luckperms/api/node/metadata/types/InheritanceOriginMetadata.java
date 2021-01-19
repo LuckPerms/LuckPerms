@@ -30,10 +30,12 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 /**
  * Node metadata indicating where a node was inherited from.
  */
+@NonExtendable
 public interface InheritanceOriginMetadata {
 
     /**

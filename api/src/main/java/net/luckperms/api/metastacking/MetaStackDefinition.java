@@ -28,6 +28,7 @@ package net.luckperms.api.metastacking;
 import net.luckperms.api.query.OptionKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
@@ -57,7 +58,7 @@ public interface MetaStackDefinition {
      *
      * @return the elements in this stack
      */
-    @NonNull List<MetaStackElement> getElements();
+    @NonNull @Unmodifiable List<MetaStackElement> getElements();
 
     /**
      * Gets the duplicate removal function, applied to the entries before

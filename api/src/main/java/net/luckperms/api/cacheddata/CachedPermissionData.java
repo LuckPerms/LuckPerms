@@ -28,6 +28,7 @@ package net.luckperms.api.cacheddata;
 import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Map;
 
@@ -57,6 +58,6 @@ public interface CachedPermissionData extends CachedData {
      *
      * @return an immutable set of permissions
      */
-    @NonNull Map<String, Boolean> getPermissionMap();
+    @NonNull @Unmodifiable Map<String, Boolean> getPermissionMap();
 
 }

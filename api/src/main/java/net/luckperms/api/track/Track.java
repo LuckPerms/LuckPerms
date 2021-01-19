@@ -32,6 +32,7 @@ import net.luckperms.api.model.user.User;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
@@ -56,7 +57,7 @@ public interface Track {
      *
      * @return an ordered {@link List} of the groups on this track
      */
-    @NonNull List<String> getGroups();
+    @NonNull @Unmodifiable List<String> getGroups();
 
     /**
      * Gets the next group on the track, after the one provided

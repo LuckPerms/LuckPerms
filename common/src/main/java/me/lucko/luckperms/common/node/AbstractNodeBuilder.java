@@ -128,7 +128,7 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
     }
 
     @Override
-    public @NonNull <T> B withMetadata(@NonNull NodeMetadataKey<T> key, @Nullable T metadata) {
+    public <T> @NonNull B withMetadata(@NonNull NodeMetadataKey<T> key, @Nullable T metadata) {
         Objects.requireNonNull(key, "key");
         if (metadata == null) {
             this.metadata.remove(key);

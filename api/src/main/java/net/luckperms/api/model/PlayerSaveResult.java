@@ -29,6 +29,7 @@ import net.luckperms.api.model.user.UserManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Objects;
 import java.util.Set;
@@ -47,7 +48,7 @@ public interface PlayerSaveResult {
      *
      * @return the status
      */
-    @NonNull Set<Outcome> getOutcomes();
+    @NonNull @Unmodifiable Set<Outcome> getOutcomes();
 
     /**
      * Gets if the result includes a certain outcome.
@@ -80,7 +81,7 @@ public interface PlayerSaveResult {
      * @return the other uuids
      * @see Outcome#OTHER_UNIQUE_IDS_PRESENT_FOR_USERNAME
      */
-    @Nullable Set<UUID> getOtherUniqueIds();
+    @Nullable @Unmodifiable Set<UUID> getOtherUniqueIds();
 
     /**
      * The various states the result can take

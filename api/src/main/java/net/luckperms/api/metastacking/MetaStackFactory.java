@@ -26,6 +26,7 @@
 package net.luckperms.api.metastacking;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +52,7 @@ public interface MetaStackFactory {
      * @param definitions the definition strings
      * @return a list of parsed elements
      */
-    @NonNull List<MetaStackElement> fromStrings(@NonNull List<String> definitions);
+    @NonNull @Unmodifiable List<MetaStackElement> fromStrings(@NonNull List<String> definitions);
 
     /**
      * Creates a new {@link MetaStackDefinition} with the given properties.

@@ -26,6 +26,7 @@
 package net.luckperms.api.platform;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -49,14 +50,14 @@ public interface Platform {
      *
      * @return the unique connections
      */
-    @NonNull Set<UUID> getUniqueConnections();
+    @NonNull @Unmodifiable Set<UUID> getUniqueConnections();
 
     /**
      * Gets a {@link Collection} of all known permission strings.
      *
      * @return a collection of the known permissions
      */
-    @NonNull Collection<String> getKnownPermissions();
+    @NonNull @Unmodifiable Collection<String> getKnownPermissions();
 
     /**
      * Gets the time when the plugin first started.

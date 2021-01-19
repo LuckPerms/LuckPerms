@@ -48,6 +48,7 @@ import net.luckperms.api.track.Track;
 import net.luckperms.api.track.TrackManager;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -131,6 +132,7 @@ public interface LuckPerms {
      * <li>{@code org.bukkit.entity.Player}</li>
      * <li>{@code net.md_5.bungee.api.connection.ProxiedPlayer}</li>
      * <li>{@code org.spongepowered.api/entity.living.player.Player}</li>
+     * <li>{@code net.minecraft.server.network.ServerPlayerEntity} (Fabric)</li>
      * <li>{@code cn.nukkit.Player}</li>
      * <li>{@code com.velocitypowered.api.proxy.Player}</li>
      * </ul>
@@ -195,21 +197,6 @@ public interface LuckPerms {
     @NonNull ContextManager getContextManager();
 
     /**
-     * Gets the {@link NodeBuilderRegistry}.
-     *
-     * @return the node builder registry
-     */
-    @NonNull NodeBuilderRegistry getNodeBuilderRegistry();
-
-    /**
-     * Gets the {@link QueryOptionsRegistry}.
-     *
-     * @return the query options registry
-     * @since 5.1
-     */
-    @NonNull QueryOptionsRegistry getQueryOptionsRegistry();
-
-    /**
      * Gets the {@link MetaStackFactory}.
      *
      * <p>The metastack factory provides methods for retrieving
@@ -219,14 +206,6 @@ public interface LuckPerms {
      * @return the meta stack factory
      */
     @NonNull MetaStackFactory getMetaStackFactory();
-
-    /**
-     * Gets the {@link NodeMatcherFactory}.
-     *
-     * @return the node matcher factory
-     * @since 5.1
-     */
-    @NonNull NodeMatcherFactory getNodeMatcherFactory();
 
     /**
      * Schedules the execution of an update task, and returns an encapsulation
@@ -250,5 +229,31 @@ public interface LuckPerms {
      * @param messengerProvider the messenger provider.
      */
     void registerMessengerProvider(@NonNull MessengerProvider messengerProvider);
+
+    /**
+     * Gets the {@link NodeBuilderRegistry}.
+     *
+     * @return the node builder registry
+     */
+    @Internal
+    @NonNull NodeBuilderRegistry getNodeBuilderRegistry();
+
+    /**
+     * Gets the {@link QueryOptionsRegistry}.
+     *
+     * @return the query options registry
+     * @since 5.1
+     */
+    @Internal
+    @NonNull QueryOptionsRegistry getQueryOptionsRegistry();
+
+    /**
+     * Gets the {@link NodeMatcherFactory}.
+     *
+     * @return the node matcher factory
+     * @since 5.1
+     */
+    @Internal
+    @NonNull NodeMatcherFactory getNodeMatcherFactory();
 
 }

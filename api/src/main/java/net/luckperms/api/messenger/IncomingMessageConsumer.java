@@ -29,11 +29,13 @@ import net.luckperms.api.messenger.message.Message;
 import net.luckperms.api.messenger.message.OutgoingMessage;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 /**
  * Encapsulates the LuckPerms system which accepts incoming {@link Message}s
  * from implementations of {@link Messenger}.
  */
+@NonExtendable
 public interface IncomingMessageConsumer {
 
     /**
