@@ -33,7 +33,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.util.Tristate;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -47,24 +46,24 @@ import java.util.UUID;
  * @param <T> the command sender type
  */
 public final class AbstractSender<T> implements Sender {
-    private final LuckPermsPlugin platform;
+    private final LuckPermsPlugin plugin;
     private final SenderFactory<?, T> factory;
-    private final WeakReference<T> sender;
+    private final T sender;
 
     private final UUID uniqueId;
     private final String name;
 
-    AbstractSender(LuckPermsPlugin platform, SenderFactory<?, T> factory, T t) {
-        this.platform = platform;
+    AbstractSender(LuckPermsPlugin plugin, SenderFactory<?, T> factory, T sender) {
+        this.plugin = plugin;
         this.factory = factory;
-        this.sender = new WeakReference<>(t);
-        this.uniqueId = factory.getUniqueId(t);
-        this.name = factory.getName(t);
+        this.sender = sender;
+        this.uniqueId = factory.getUniqueId(this.sender);
+        this.name = factory.getName(this.sender);
     }
 
     @Override
     public LuckPermsPlugin getPlugin() {
-        return this.platform;
+        return this.plugin;
     }
 
     @Override
@@ -79,51 +78,33 @@ public final class AbstractSender<T> implements Sender {
 
     @Override
     public void sendMessage(Component message) {
-        final T sender = this.sender.get();
-        if (sender != null) {
-            if (isConsole()) {
-                for (Component line : splitNewlines(message)) {
-                    this.factory.sendMessage(sender, line);
-                }
-            } else {
-                this.factory.sendMessage(sender, message);
+        if (isConsole()) {
+            for (Component line : splitNewlines(message)) {
+                this.factory.sendMessage(this.sender, line);
             }
+        } else {
+            this.factory.sendMessage(this.sender, message);
         }
     }
 
     @Override
     public Tristate getPermissionValue(String permission) {
-        T sender = this.sender.get();
-        if (sender != null) {
-            return this.factory.getPermissionValue(sender, permission);
-        }
-
-        return isConsole() ? Tristate.TRUE : Tristate.UNDEFINED;
+        return this.factory.getPermissionValue(this.sender, permission);
     }
 
     @Override
     public boolean hasPermission(String permission) {
-        T sender = this.sender.get();
-        if (sender != null) {
-            if (this.factory.hasPermission(sender, permission)) {
-                return true;
-            }
-        }
-
-        return isConsole();
+        return this.factory.hasPermission(this.sender, permission);
     }
 
     @Override
     public void performCommand(String commandLine) {
-        T sender = this.sender.get();
-        if (sender != null) {
-            this.factory.performCommand(sender, commandLine);
-        }
+        this.factory.performCommand(this.sender, commandLine);
     }
 
     @Override
     public boolean isValid() {
-        return this.sender.get() != null;
+        return isConsole() || this.plugin.getBootstrap().isPlayerOnline(this.uniqueId);
     }
 
     @Override
