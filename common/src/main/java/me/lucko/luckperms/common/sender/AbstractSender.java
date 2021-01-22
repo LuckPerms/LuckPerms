@@ -89,12 +89,12 @@ public final class AbstractSender<T> implements Sender {
 
     @Override
     public Tristate getPermissionValue(String permission) {
-        return this.factory.getPermissionValue(this.sender, permission);
+        return isConsole() ? Tristate.TRUE : this.factory.getPermissionValue(this.sender, permission);
     }
 
     @Override
     public boolean hasPermission(String permission) {
-        return this.factory.hasPermission(this.sender, permission);
+        return isConsole() || this.factory.hasPermission(this.sender, permission);
     }
 
     @Override
