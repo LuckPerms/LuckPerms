@@ -41,17 +41,26 @@ import java.util.Set;
 public class BukkitConfigAdapter implements ConfigurationAdapter {
     private final LuckPermsPlugin plugin;
     private final File file;
-    private YamlConfiguration configuration;
+    private final YamlConfiguration configuration;
 
     public BukkitConfigAdapter(LuckPermsPlugin plugin, File file) {
         this.plugin = plugin;
         this.file = file;
+        this.configuration = new YamlConfiguration();
         reload();
     }
 
     @Override
     public void reload() {
-        this.configuration = YamlConfiguration.loadConfiguration(this.file);
+        try {
+            this.configuration.load(this.file);
+        } catch (FileNotFoundException exception) {
+            throw new RuntimeException(exception);
+        } catch (IOException exception) {
+            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, exception);
+        } catch (InvalidConfigurationException exception) {
+            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, v);
+        }
     }
 
     @Override
