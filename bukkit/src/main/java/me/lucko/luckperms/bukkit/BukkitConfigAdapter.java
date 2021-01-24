@@ -28,10 +28,14 @@ package me.lucko.luckperms.bukkit;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +63,7 @@ public class BukkitConfigAdapter implements ConfigurationAdapter {
         } catch (IOException exception) {
             Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, exception);
         } catch (InvalidConfigurationException exception) {
-            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, v);
+            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, exception);
         }
     }
 
