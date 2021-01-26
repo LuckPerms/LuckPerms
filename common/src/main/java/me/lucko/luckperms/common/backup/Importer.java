@@ -98,7 +98,7 @@ public class Importer implements Runnable {
         if (this.merge) {
             group.mergeNodes(DataType.NORMAL, nodes);
         } else {
-            group.setNodes(DataType.NORMAL, nodes);
+            group.setNodes(DataType.NORMAL, nodes, false);
         }
         this.plugin.getStorage().saveGroup(group);
     }
@@ -117,7 +117,7 @@ public class Importer implements Runnable {
         if (this.merge) {
             user.mergeNodes(DataType.NORMAL, userData.nodes);
         } else {
-            user.setNodes(DataType.NORMAL, userData.nodes);
+            user.setNodes(DataType.NORMAL, userData.nodes, false);
         }
         this.plugin.getStorage().saveUser(user).join();
         this.plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());

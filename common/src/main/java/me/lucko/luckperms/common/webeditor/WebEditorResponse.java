@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.model.nodemap.MutateResult;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -54,7 +55,6 @@ import net.luckperms.api.node.Node;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -177,38 +177,33 @@ public class WebEditorResponse {
                 return false;
             }
 
-            Set<Node> before = holder.normalData().asSet();
-            Set<Node> after = new HashSet<>(NodeJsonSerializer.deserializeNodes(changeInfo.getAsJsonArray("nodes")));
+            Set<Node> nodes = NodeJsonSerializer.deserializeNodes(changeInfo.getAsJsonArray("nodes"));
+            MutateResult res = holder.setNodes(DataType.NORMAL, nodes, true);
 
-            Set<Node> diffAdded = getAdded(before, after);
-            Set<Node> diffRemoved = getRemoved(before, after);
-
-            int additions = diffAdded.size();
-            int deletions = diffRemoved.size();
-
-            if (additions == 0 && deletions == 0) {
+            if (res.isEmpty()) {
                 return false;
             }
 
-            holder.setNodes(DataType.NORMAL, after);
+            Set<Node> added = res.getAdded();
+            Set<Node> removed = res.getRemoved();
 
-            for (Node n : diffAdded) {
+            for (Node n : added) {
                 LoggedAction.build().source(this.sender).target(holder)
                         .description("webeditor", "add", n.getKey(), n.getValue(), n.getContexts())
                         .build().submit(this.plugin, this.sender);
             }
-            for (Node n : diffRemoved) {
+            for (Node n : removed) {
                 LoggedAction.build().source(this.sender).target(holder)
                         .description("webeditor", "remove", n.getKey(), n.getValue(), n.getContexts())
                         .build().submit(this.plugin, this.sender);
             }
 
             Message.APPLY_EDITS_SUCCESS.send(this.sender, type, holder.getFormattedDisplayName());
-            Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, additions, deletions);
-            for (Node n : diffAdded) {
+            Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, added.size(), removed.size());
+            for (Node n : added) {
                 Message.APPLY_EDITS_DIFF_ADDED.send(this.sender, n);
             }
-            for (Node n : diffRemoved) {
+            for (Node n : removed) {
                 Message.APPLY_EDITS_DIFF_REMOVED.send(this.sender, n);
             }
             StorageAssistant.save(holder, this.sender, this.plugin);
