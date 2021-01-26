@@ -72,7 +72,7 @@ public class BukkitConfigAdapter implements ConfigurationAdapter {
     @Override
     public List<String> getStringList(String path, List<String> def) {
         List<String> list = this.configuration.getStringList(path);
-        return list == null ? def : list;
+        return this.configuration.isSet(path) ? list : def;
     }
 
     @Override
