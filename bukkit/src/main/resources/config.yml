@@ -652,3 +652,7 @@ register-command-list-data: true
 # If LuckPerms should attempt to resolve Vanilla command target selectors for LP commands.
 # See here for more info: https://minecraft.gamepedia.com/Commands#Target_selectors
 resolve-command-selectors: false
+
+# RCON commands run synchronously, blocking the main game thread. This controls the maximum time
+# in seconds before the command is aborted.
+rcon-timeout-seconds: 5

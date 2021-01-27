@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.bukkit.util.CommandMapUtil;
 import me.lucko.luckperms.common.command.CommandManager;
+import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.sender.Sender;
@@ -36,6 +37,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.command.RemoteConsoleCommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -45,6 +47,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class BukkitCommandExecutor extends CommandManager implements TabExecutor, Listener {
@@ -80,7 +84,16 @@ public class BukkitCommandExecutor extends CommandManager implements TabExecutor
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
         List<String> arguments = resolveSelectors(sender, ArgumentTokenizer.EXECUTE.tokenizeInput(args));
-        executeCommand(wrapped, label, arguments);
+        CompletableFuture<CommandResult> commandFuture = executeCommand(wrapped, label, arguments);
+
+        if (sender instanceof RemoteConsoleCommandSender) {
+            try {
+                Integer timeoutSeconds = plugin.getConfiguration().get(ConfigKeys.RCON_TIMEOUT_SECONDS);
+                commandFuture.get(timeoutSeconds, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                sender.sendMessage("Failed to execute command: " + e.getMessage());
+            }
+        }
         return true;
     }
 

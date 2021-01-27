@@ -67,6 +67,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.booleanKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.integerKey;
 import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.key;
 import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.lowercaseStringKey;
 import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.mapKey;
@@ -649,4 +650,8 @@ public final class ConfigKeys {
         return KEYS;
     }
 
+    /**
+     * RCON command timeout
+     */
+    public static final ConfigKey<Integer> RCON_TIMEOUT_SECONDS = integerKey("rcon-timeout-seconds", 5);
 }
