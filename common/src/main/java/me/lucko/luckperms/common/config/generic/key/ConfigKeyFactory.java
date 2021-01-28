@@ -38,6 +38,7 @@ public interface ConfigKeyFactory<T> {
     ConfigKeyFactory<String> STRING = ConfigurationAdapter::getString;
     ConfigKeyFactory<String> LOWERCASE_STRING = (adapter, path, def) -> adapter.getString(path, def).toLowerCase();
     ConfigKeyFactory<Map<String, String>> STRING_MAP = (config, path, def) -> ImmutableMap.copyOf(config.getStringMap(path, ImmutableMap.of()));
+    ConfigKeyFactory<Integer> INTEGER = ConfigurationAdapter::getInteger;
 
     static <T> SimpleConfigKey<T> key(Function<ConfigurationAdapter, T> function) {
         return new SimpleConfigKey<>(function);
@@ -50,6 +51,10 @@ public interface ConfigKeyFactory<T> {
 
     static SimpleConfigKey<Boolean> booleanKey(String path, boolean def) {
         return key(new Bound<>(BOOLEAN, path, def));
+    }
+
+    static SimpleConfigKey<Integer> integerKey(String path, Integer def) {
+        return key(new Bound<>(INTEGER, path, def));
     }
 
     static SimpleConfigKey<String> stringKey(String path, String def) {
