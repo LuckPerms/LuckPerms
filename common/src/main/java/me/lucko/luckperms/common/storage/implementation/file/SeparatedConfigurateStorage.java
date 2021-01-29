@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.storage.implementation.file;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
@@ -35,6 +36,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
 import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
+import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.common.util.Uuids;
@@ -53,6 +55,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,6 +79,8 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
         private FileWatcher.WatchedLocation watcher;
     }
 
+    private final LoadingCache<Path, ReentrantLock> ioLocks;
+
     public SeparatedConfigurateStorage(LuckPermsPlugin plugin, String implementationName, ConfigurateLoader loader, String fileExtension, String dataFolderName) {
         super(plugin, implementationName, loader, dataFolderName);
         this.fileExtension = fileExtension;
@@ -89,6 +95,10 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
         fileGroups.put(StorageLocation.GROUPS, this.groups);
         fileGroups.put(StorageLocation.TRACKS, this.tracks);
         this.fileGroups = ImmutableMap.copyOf(fileGroups);
+
+        this.ioLocks = CaffeineFactory.newBuilder()
+                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .build(key -> new ReentrantLock());
     }
 
     @Override
@@ -99,11 +109,17 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     private ConfigurationNode readFile(Path file) throws IOException {
-        if (!Files.exists(file)) {
-            return null;
-        }
+        ReentrantLock lock = Objects.requireNonNull(this.ioLocks.get(file));
+        lock.lock();
+        try {
+            if (!Files.exists(file)) {
+                return null;
+            }
 
-        return this.loader.loader(file).load();
+            return this.loader.loader(file).load();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -114,12 +130,18 @@ public class SeparatedConfigurateStorage extends AbstractConfigurateStorage {
     }
 
     private void saveFile(Path file, ConfigurationNode node) throws IOException {
-        if (node == null) {
-            Files.deleteIfExists(file);
-            return;
-        }
+        ReentrantLock lock = Objects.requireNonNull(this.ioLocks.get(file));
+        lock.lock();
+        try {
+            if (node == null) {
+                Files.deleteIfExists(file);
+                return;
+            }
 
-        this.loader.loader(file).save(node);
+            this.loader.loader(file).save(node);
+        } finally {
+            lock.unlock();
+        }
     }
 
     private Path getDirectory(StorageLocation location) {
