@@ -50,8 +50,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 public class BukkitConnectionListener extends AbstractConnectionListener implements Listener {
+    private static final Predicate<? super String> IS_CRAFTBUKKIT_PREDICATE = Pattern.compile("^(?:git|\\d+)-Bukkit-[0-9a-f]{7}(?: .*)?$").asPredicate();
+
     private final LPBukkitPlugin plugin;
 
     private final boolean detectedCraftBukkitOfflineMode;
@@ -67,7 +71,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
         String version = plugin.getBootstrap().getServer().getVersion();
         boolean onlineMode = plugin.getBootstrap().getServer().getOnlineMode();
 
-        if (!onlineMode && version.startsWith("git-Bukkit-")) {
+        if (!onlineMode && IS_CRAFTBUKKIT_PREDICATE.test(version)) {
             printCraftBukkitOfflineModeError();
             this.detectedCraftBukkitOfflineMode = true;
         } else {
