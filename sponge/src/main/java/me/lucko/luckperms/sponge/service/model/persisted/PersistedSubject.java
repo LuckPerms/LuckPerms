@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
+import me.lucko.luckperms.sponge.service.events.UpdateEventHandler;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
@@ -109,7 +110,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
      * @param subjectData the subject data
      */
     private void fireUpdateEvent(LPSubjectData subjectData) {
-        this.service.getPlugin().getUpdateEventHandler().fireUpdateEvent(subjectData);
+        UpdateEventHandler.fireUpdateEvent(this.service.getPlugin(), subjectData);
     }
 
     /**

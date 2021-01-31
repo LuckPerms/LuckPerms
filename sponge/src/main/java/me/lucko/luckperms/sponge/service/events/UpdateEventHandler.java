@@ -28,23 +28,15 @@ package me.lucko.luckperms.sponge.service.events;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
-public interface UpdateEventHandler {
+import org.spongepowered.api.event.permission.SubjectDataUpdateEvent;
 
-    static UpdateEventHandler obtain(LPSpongePlugin plugin) {
-        try {
-            Class.forName("org.spongepowered.api.event.permission.SubjectDataUpdateEvent");
-            return new UpdateEventHandlerImpl(plugin);
-        } catch (ClassNotFoundException e) {
-            return new Noop();
-        }
-    }
+public final class UpdateEventHandler {
+    private UpdateEventHandler() {}
 
-    void fireUpdateEvent(LPSubjectData subjectData);
-
-    class Noop implements UpdateEventHandler {
-        @Override
-        public void fireUpdateEvent(LPSubjectData subjectData) {
-
-        }
+    public static void fireUpdateEvent(LPSpongePlugin plugin, LPSubjectData subjectData) {
+        plugin.getBootstrap().getScheduler().executeAsync(() -> {
+            SubjectDataUpdateEvent event = new LPSubjectDataUpdateEvent(plugin, subjectData);
+            plugin.getBootstrap().getGame().getEventManager().post(event);
+        });
     }
 }

@@ -41,6 +41,7 @@ import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
+import me.lucko.luckperms.sponge.service.events.UpdateEventHandler;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
@@ -74,8 +75,8 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     }
 
     public void fireUpdateEvent() {
-        this.plugin.getUpdateEventHandler().fireUpdateEvent(this.subjectData);
-        this.plugin.getUpdateEventHandler().fireUpdateEvent(this.transientSubjectData);
+        UpdateEventHandler.fireUpdateEvent(this.plugin, this.subjectData);
+        UpdateEventHandler.fireUpdateEvent(this.plugin, this.transientSubjectData);
     }
 
     public T getParent() {

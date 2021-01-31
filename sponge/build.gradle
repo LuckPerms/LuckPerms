@@ -13,13 +13,13 @@ dependencies {
     compile project(':sponge:sponge-service-api6')
     compile project(':sponge:sponge-service-api7')
 
-    compileOnly('org.spongepowered:spongeapi:8.0.0-SNAPSHOT') {
+    compileOnly('org.spongepowered:spongeapi:7.3.0') {
         exclude(module: 'configurate-core')
         exclude(module: 'configurate-hocon')
         exclude(module: 'configurate-gson')
         exclude(module: 'configurate-yaml')
     }
-    annotationProcessor('org.spongepowered:spongeapi:8.0.0-SNAPSHOT') {
+    annotationProcessor('org.spongepowered:spongeapi:7.3.0') {
         exclude(module: 'configurate-core')
         exclude(module: 'configurate-hocon')
         exclude(module: 'configurate-gson')

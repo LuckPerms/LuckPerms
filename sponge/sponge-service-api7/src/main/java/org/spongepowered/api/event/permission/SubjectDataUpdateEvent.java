@@ -23,25 +23,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.events;
+package org.spongepowered.api.event.permission;
 
-import me.lucko.luckperms.sponge.LPSpongePlugin;
-import me.lucko.luckperms.sponge.service.model.LPSubjectData;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.service.permission.SubjectData;
 
-import org.spongepowered.api.event.permission.SubjectDataUpdateEvent;
+// Copy of https://github.com/SpongePowered/SpongeAPI/blob/api-8/src/main/java/org/spongepowered/api/event/permission/SubjectDataUpdateEvent.java
+public interface SubjectDataUpdateEvent extends Event {
 
-public class UpdateEventHandlerImpl implements UpdateEventHandler {
-    private final LPSpongePlugin plugin;
+    SubjectData getUpdatedData();
 
-    public UpdateEventHandlerImpl(LPSpongePlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    @Override
-    public void fireUpdateEvent(LPSubjectData subjectData) {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
-            SubjectDataUpdateEvent event = new LPSubjectDataUpdateEvent(this.plugin, subjectData);
-            this.plugin.getBootstrap().getGame().getEventManager().post(event);
-        });
-    }
 }
