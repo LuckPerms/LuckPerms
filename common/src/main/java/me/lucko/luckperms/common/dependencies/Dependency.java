@@ -212,6 +212,13 @@ public enum Dependency {
             Relocation.of("jedis", "redis{}clients{}jedis"),
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
+    RABBITMQ(
+            "com{}rabbitmq",
+            "amqp-client",
+            "5.10.0",
+            "z9/pvANy1mMAQb+VJtN+COybfxPeg/m9BgcfZRO1jcE=",
+            Relocation.of("rabbitmq", "com{}rabbitmq")
+    ),
     COMMONS_POOL_2(
             "org.apache.commons",
             "commons-pool2",

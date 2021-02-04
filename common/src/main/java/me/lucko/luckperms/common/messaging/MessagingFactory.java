@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.messaging;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+import me.lucko.luckperms.common.messaging.rabbitmq.RabbitMQMessenger;
 import me.lucko.luckperms.common.messaging.redis.RedisMessenger;
 import me.lucko.luckperms.common.messaging.sql.SqlMessenger;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -62,6 +63,8 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
         if (messagingType.equals("auto")) {
             if (this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
                 messagingType = "redis";
+            } else if (this.plugin.getConfiguration().get(ConfigKeys.RABBITMQ_ENABLED)) {
+                messagingType = "rabbitmq";
             } else {
                 for (StorageImplementation implementation : this.plugin.getStorage().getImplementations()) {
                     if (implementation instanceof SqlStorage) {
@@ -101,6 +104,16 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             } else {
                 this.plugin.getLogger().warn("Messaging Service was set to redis, but redis is not enabled!");
             }
+        } else if (messagingType.equals("rabbitmq")) {
+            if (this.plugin.getConfiguration().get(ConfigKeys.RABBITMQ_ENABLED)) {
+                try {
+                    return new LuckPermsMessagingService(this.plugin, new RabbitMQMessengerProvider());
+                } catch (Exception e) {
+                    getPlugin().getLogger().severe("Exception occurred whilst enabling RabbitMQ messaging service", e);
+                }
+            } else {
+                this.plugin.getLogger().warn("Messaging Service was set to rabbitmq, but rabbitmq is not enabled!");
+            }
         } else if (messagingType.equals("sql")) {
             try {
                 return new LuckPermsMessagingService(this.plugin, new SqlMessengerProvider());
@@ -133,6 +146,27 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
             redis.init(address, password, ssl);
             return redis;
+        }
+    }
+
+    private class RabbitMQMessengerProvider implements MessengerProvider {
+
+        @Override
+        public @NonNull String getName() {
+            return "RabbitMQ";
+        }
+
+        @Override
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
+            RabbitMQMessenger rabbitmq = new RabbitMQMessenger(getPlugin(), incomingMessageConsumer);
+
+            LuckPermsConfiguration config = getPlugin().getConfiguration();
+            String address = config.get(ConfigKeys.RABBITMQ_ADDRESS);
+            String username = config.get(ConfigKeys.RABBITMQ_USERNAME);
+            String password = config.get(ConfigKeys.RABBITMQ_PASSWORD);
+
+            rabbitmq.init(address, username, password);
+            return rabbitmq;
         }
     }
 
