@@ -25,14 +25,6 @@
 
 package me.lucko.luckperms.common.messaging.rabbitmq;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
-import net.luckperms.api.messenger.IncomingMessageConsumer;
-import net.luckperms.api.messenger.Messenger;
-import net.luckperms.api.messenger.message.OutgoingMessage;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -43,6 +35,14 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
+
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
+import net.luckperms.api.messenger.IncomingMessageConsumer;
+import net.luckperms.api.messenger.Messenger;
+import net.luckperms.api.messenger.message.OutgoingMessage;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * An implementation of {@link Messenger} using RabbitMQ.
@@ -85,7 +85,7 @@ public class RabbitMQMessenger implements Messenger {
         try {
             ByteArrayDataOutput output = ByteStreams.newDataOutput();
             output.writeUTF(outgoingMessage.asEncodedString());
-            channel.basicPublish(EXCHANGE, ROUTING_KEY, new AMQP.BasicProperties.Builder().build(), output.toByteArray());
+            this.channel.basicPublish(EXCHANGE, ROUTING_KEY, new AMQP.BasicProperties.Builder().build(), output.toByteArray());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,20 +113,20 @@ public class RabbitMQMessenger implements Messenger {
 
         @Override
         public void run() {
-            while (!Thread.interrupted() && !isClosed) {
+            while (!Thread.interrupted() && !this.isClosed) {
                 try {
                     if (!checkAndReopenConnection()) {
-                        firstStartup = false;
                         // Sleep for 5 seconds to prevent massive spam in console
                         Thread.sleep(5000);
                         continue;
                     }
-                    firstStartup = false;
 
                     // Check connection life every every 30 seconds
                     Thread.sleep(30_000);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
+                } finally {
+                    this.firstStartup = false;
                 }
             }
         }
@@ -136,7 +136,7 @@ public class RabbitMQMessenger implements Messenger {
             if (channelIsDead) {
                 boolean connectionIsDead = this.parent.connection == null || !this.parent.connection.isOpen();
                 if (connectionIsDead) {
-                    if (!firstStartup) {
+                    if (!this.firstStartup) {
                         this.parent.plugin.getLogger().warn("RabbitMQ pubsub connection dropped, trying to re-open the connection");
                     }
                     try {
@@ -148,7 +148,7 @@ public class RabbitMQMessenger implements Messenger {
                         this.parent.channel.queueBind(queue, EXCHANGE, ROUTING_KEY);
                         this.parent.channel.basicConsume(queue, true, new ChannelListener(), (consumerTag) -> { });
 
-                        if (!firstStartup) {
+                        if (!this.firstStartup) {
                             this.parent.plugin.getLogger().info("RabbitMQ pubsub connection re-established");
                         }
                         return true;
@@ -174,7 +174,7 @@ public class RabbitMQMessenger implements Messenger {
                     byte[] data = message.getBody();
                     ByteArrayDataInput input = ByteStreams.newDataInput(data);
                     String msg = input.readUTF();
-                    parent.consumer.consumeIncomingMessageAsString(msg);
+                    Subscription.this.parent.consumer.consumeIncomingMessageAsString(msg);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
