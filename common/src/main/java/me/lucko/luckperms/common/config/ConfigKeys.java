@@ -620,6 +620,26 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> REDIS_SSL = notReloadable(booleanKey("redis.ssl", false));
 
     /**
+     * If rabbitmq messaging is enabled
+     */
+    public static final ConfigKey<Boolean> RABBITMQ_ENABLED = notReloadable(booleanKey("rabbitmq.enabled", false));
+
+    /**
+     * The address of the rabbitmq server
+     */
+    public static final ConfigKey<String> RABBITMQ_ADDRESS = notReloadable(stringKey("rabbitmq.address", null));
+
+    /**
+     * The username in use by the rabbitmq server
+     */
+    public static final ConfigKey<String> RABBITMQ_USERNAME = notReloadable(stringKey("rabbitmq.username", "guest"));
+
+    /**
+     * The password in use by the rabbitmq server, or an empty string if there is no password
+     */
+    public static final ConfigKey<String> RABBITMQ_PASSWORD = notReloadable(stringKey("rabbitmq.password", "guest"));
+
+    /**
      * The URL of the bytebin instance used to upload data
      */
     public static final ConfigKey<String> BYTEBIN_URL = stringKey("bytebin-url", "https://bytebin.lucko.me/");
