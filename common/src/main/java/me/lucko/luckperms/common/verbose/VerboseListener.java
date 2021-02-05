@@ -314,7 +314,7 @@ public class VerboseListener {
 
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
-            GsonProvider.prettyPrinting().toJson(payload, writer);
+            GsonProvider.normal().toJson(payload, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }

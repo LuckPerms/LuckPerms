@@ -155,7 +155,7 @@ public class WebEditorRequest {
     public byte[] encode() {
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
-            GsonProvider.prettyPrinting().toJson(this.payload, writer);
+            GsonProvider.normal().toJson(this.payload, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
