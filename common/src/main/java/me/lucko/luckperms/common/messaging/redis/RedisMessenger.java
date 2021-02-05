@@ -63,7 +63,7 @@ public class RedisMessenger implements Messenger {
 
         this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password, ssl);
 
-        this.sub = new Subscription(this);
+        this.sub = new Subscription();
         this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
     }
 
@@ -82,26 +82,21 @@ public class RedisMessenger implements Messenger {
         this.jedisPool.destroy();
     }
 
-    private static class Subscription extends JedisPubSub implements Runnable {
-        private final RedisMessenger parent;
-
-        private Subscription(RedisMessenger parent) {
-            this.parent = parent;
-        }
+    private class Subscription extends JedisPubSub implements Runnable {
 
         @Override
         public void run() {
             boolean wasBroken = false;
-            while (!Thread.interrupted() && !this.parent.jedisPool.isClosed()) {
-                try (Jedis jedis = this.parent.jedisPool.getResource()) {
+            while (!Thread.interrupted() && !RedisMessenger.this.jedisPool.isClosed()) {
+                try (Jedis jedis = RedisMessenger.this.jedisPool.getResource()) {
                     if (wasBroken) {
-                        this.parent.plugin.getLogger().info("Redis pubsub connection re-established");
+                        RedisMessenger.this.plugin.getLogger().info("Redis pubsub connection re-established");
                         wasBroken = false;
                     }
                     jedis.subscribe(this, CHANNEL);
                 } catch (Exception e) {
                     wasBroken = true;
-                    this.parent.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection", e);
+                    RedisMessenger.this.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection", e);
                     try {
                         unsubscribe();
                     } catch (Exception ignored) {
@@ -123,7 +118,7 @@ public class RedisMessenger implements Messenger {
             if (!channel.equals(CHANNEL)) {
                 return;
             }
-            this.parent.consumer.consumeIncomingMessageAsString(msg);
+            RedisMessenger.this.consumer.consumeIncomingMessageAsString(msg);
         }
     }
 
