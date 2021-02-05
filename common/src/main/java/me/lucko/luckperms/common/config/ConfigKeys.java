@@ -630,6 +630,11 @@ public final class ConfigKeys {
     public static final ConfigKey<String> RABBITMQ_ADDRESS = notReloadable(stringKey("rabbitmq.address", null));
 
     /**
+     * The virtual host to be used by the rabbitmq server
+     */
+    public static final ConfigKey<String> RABBITMQ_VIRTUAL_HOST = notReloadable(stringKey("rabbitmq.vhost", "/"));
+
+    /**
      * The username in use by the rabbitmq server
      */
     public static final ConfigKey<String> RABBITMQ_USERNAME = notReloadable(stringKey("rabbitmq.username", "guest"));

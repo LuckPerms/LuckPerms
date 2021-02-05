@@ -162,10 +162,11 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
             LuckPermsConfiguration config = getPlugin().getConfiguration();
             String address = config.get(ConfigKeys.RABBITMQ_ADDRESS);
+            String virtualHost = config.get(ConfigKeys.RABBITMQ_VIRTUAL_HOST);
             String username = config.get(ConfigKeys.RABBITMQ_USERNAME);
             String password = config.get(ConfigKeys.RABBITMQ_PASSWORD);
 
-            rabbitmq.init(address, username, password);
+            rabbitmq.init(address, virtualHost, username, password);
             return rabbitmq;
         }
     }
