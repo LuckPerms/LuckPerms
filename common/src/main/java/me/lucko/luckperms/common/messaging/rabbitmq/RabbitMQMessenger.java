@@ -65,7 +65,7 @@ public class RabbitMQMessenger implements Messenger {
         this.consumer = consumer;
     }
 
-    public void init(String address, String username, String password) {
+    public void init(String address, String virtualHost, String username, String password) {
         String[] addressSplit = address.split(":");
         String host = addressSplit[0];
         int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : DEFAULT_PORT;
@@ -73,6 +73,7 @@ public class RabbitMQMessenger implements Messenger {
         this.connectionFactory = new ConnectionFactory();
         this.connectionFactory.setHost(host);
         this.connectionFactory.setPort(port);
+        this.connectionFactory.setVirtualHost(virtualHost);
         this.connectionFactory.setUsername(username);
         this.connectionFactory.setPassword(password);
 

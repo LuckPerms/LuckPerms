@@ -248,6 +248,7 @@ redis:
 rabbitmq:
   enabled: false
   address: localhost
+  vhost: '/'
   username: 'guest'
   password: 'guest'
 
