@@ -51,7 +51,7 @@ public class SubjectInheritanceGraph implements Graph<CalculatedSubject> {
         return subject.getCombinedParents(this.queryOptions).stream()
                 .map(ref -> ref.resolveLp().join())
                 .filter(p -> p instanceof CalculatedSubject)
-                .map(p -> ((CalculatedSubject) p))
+                .map(p -> (CalculatedSubject) p)
                 .collect(Collectors.toList());
     }
 

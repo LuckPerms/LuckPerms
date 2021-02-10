@@ -52,7 +52,7 @@ public final class NodeCommandFactory {
             // value
             sb.append(((InheritanceNode) node).getGroupName());
 
-        } else if (node.getValue() && (node instanceof ChatMetaNode<?, ?>)) {
+        } else if (node.getValue() && node instanceof ChatMetaNode<?, ?>) {
             ChatMetaNode<?, ?> chatNode = (ChatMetaNode<?, ?>) node;
 
             // command

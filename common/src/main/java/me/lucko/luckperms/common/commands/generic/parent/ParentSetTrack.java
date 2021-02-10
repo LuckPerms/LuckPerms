@@ -84,7 +84,7 @@ public class ParentSetTrack extends GenericChildCommand {
         String groupName;
         if (index > 0) {
             List<String> trackGroups = track.getGroups();
-            if ((index - 1) >= trackGroups.size()) {
+            if (index - 1 >= trackGroups.size()) {
                 Message.DOES_NOT_EXIST.send(sender, String.valueOf(index));
                 return CommandResult.INVALID_ARGS;
             }

@@ -225,7 +225,7 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
         public @NonNull BuilderImpl addAll(@NonNull ContextSet contextSet) {
             Objects.requireNonNull(contextSet, "contextSet");
             if (contextSet instanceof AbstractContextSet) {
-                AbstractContextSet other = ((AbstractContextSet) contextSet);
+                AbstractContextSet other = (AbstractContextSet) contextSet;
                 if (!other.isEmpty()) {
                     builder().putAll(other.backing());
                 }

@@ -42,7 +42,7 @@ public final class SqlRowId {
 
     @Override
     public boolean equals(Object o) {
-        return this == o || (o instanceof SqlRowId && this.rowId == ((SqlRowId) o).rowId);
+        return this == o || o instanceof SqlRowId && this.rowId == ((SqlRowId) o).rowId;
     }
 
     @Override

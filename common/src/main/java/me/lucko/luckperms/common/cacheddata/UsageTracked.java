@@ -33,6 +33,6 @@ public abstract class UsageTracked {
     }
 
     public boolean usedSince(long duration) {
-        return this.lastUsed > (System.currentTimeMillis() - duration);
+        return this.lastUsed > System.currentTimeMillis() - duration;
     }
 }

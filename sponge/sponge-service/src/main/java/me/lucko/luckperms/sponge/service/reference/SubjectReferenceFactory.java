@@ -95,7 +95,7 @@ public final class SubjectReferenceFactory {
     public LPSubjectReference obtain(SubjectReference reference) {
         Objects.requireNonNull(reference, "reference");
         if (reference instanceof LPSubjectReference) {
-            return ((LPSubjectReference) reference);
+            return (LPSubjectReference) reference;
         } else {
             return obtain(reference.getCollectionIdentifier(), reference.getSubjectIdentifier());
         }

@@ -63,7 +63,7 @@ public class UserSwitchPrimaryGroup extends GenericChildCommand {
         // cast to user
         // although this command is build as a sharedsubcommand,
         // it is only added to the listings for users.
-        User user = ((User) target);
+        User user = (User) target;
 
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, user)) {
             Message.COMMAND_NO_PERMISSION.send(sender);

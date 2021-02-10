@@ -64,7 +64,7 @@ public class DefaultsProcessor implements PermissionProcessor {
             if (canOverrideWildcard(prev)) {
                 PermissionDefault def = PermissionDefault.fromPermission(this.plugin.getPermissionMap().get(permission));
                 if (def != null) {
-                    if (def == PermissionDefault.FALSE || (this.isOp && def == PermissionDefault.NOT_OP)) {
+                    if (def == PermissionDefault.FALSE || this.isOp && def == PermissionDefault.NOT_OP) {
                         return PERMISSION_MAP_RESULT_FACTORY.result(Tristate.FALSE, "permission map (overriding wildcard): " + prev.cause());
                     }
                 }

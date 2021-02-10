@@ -82,7 +82,7 @@ public class TabCompleter {
         String partial;
 
         // nothing entered yet
-        if (args.isEmpty() || (partial = args.get((lastIndex = args.size() - 1))).trim().isEmpty()) {
+        if (args.isEmpty() || (partial = args.get(lastIndex = args.size() - 1)).trim().isEmpty()) {
             return getCompletions(lastIndex, "");
         }
 

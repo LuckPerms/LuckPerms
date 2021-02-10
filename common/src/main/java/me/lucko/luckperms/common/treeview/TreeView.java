@@ -139,7 +139,7 @@ public class TreeView {
 
         // work out the prefix to apply
         // since the view is relative, we need to prepend this to all permissions
-        String prefix = this.rootPosition.equals(".") ? "" : (this.rootPosition + ".");
+        String prefix = this.rootPosition.equals(".") ? "" : this.rootPosition + ".";
         JsonObject jsonTree = this.view.toJson(prefix);
 
         JObject metadata = new JObject()

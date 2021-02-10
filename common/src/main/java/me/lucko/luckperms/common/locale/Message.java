@@ -2797,7 +2797,7 @@ public interface Message {
             // "&aInstalling language {}..."
             .key("luckperms.command.translations.installing-specific")
             .color(GREEN)
-            .args(text((name)))
+            .args(text(name))
     );
 
     Args0 TRANSLATIONS_INSTALL_COMPLETE = () -> prefixed(translatable()

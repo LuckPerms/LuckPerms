@@ -118,6 +118,6 @@ public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
 
     @Override
     public int compareTo(@NonNull ImmutableTreeNode o) {
-        return (this.children != null) == o.getChildren().isPresent() ? 0 : (this.children != null ? 1 : -1);
+        return (this.children != null) == o.getChildren().isPresent() ? 0 : this.children != null ? 1 : -1;
     }
 }

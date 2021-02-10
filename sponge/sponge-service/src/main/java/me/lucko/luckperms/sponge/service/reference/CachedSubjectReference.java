@@ -99,7 +99,7 @@ final class CachedSubjectReference implements LPSubjectReference {
     }
 
     private LPSubject tryCache() {
-        if ((System.currentTimeMillis() - this.lastLookup) < CACHE_TIME) {
+        if (System.currentTimeMillis() - this.lastLookup < CACHE_TIME) {
             if (this.cache != null) {
                 return this.cache.get();
             }

@@ -68,7 +68,7 @@ public abstract class ExpiringCache<T> implements Supplier<T> {
                     nanos = now + this.durationNanos;
                     // In the very unlikely event that nanos is 0, set it to 1;
                     // no one will notice 1 ns of tardiness.
-                    this.expirationNanos = (nanos == 0) ? 1 : nanos;
+                    this.expirationNanos = nanos == 0 ? 1 : nanos;
                     return t;
                 }
             }

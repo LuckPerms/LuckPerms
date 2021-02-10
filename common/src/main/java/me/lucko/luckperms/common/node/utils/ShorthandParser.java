@@ -45,7 +45,7 @@ public enum ShorthandParser {
         @Override
         public Iterator<String> extract(String input) throws NumberFormatException {
             int index = input.indexOf(RANGE_SEPARATOR);
-            if (index == -1 || index == 0 || index == (input.length() - 1)) {
+            if (index == -1 || index == 0 || index == input.length() - 1) {
                 return null;
             }
 

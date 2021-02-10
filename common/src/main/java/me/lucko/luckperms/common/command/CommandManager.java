@@ -150,7 +150,7 @@ public class CommandManager {
         applyConvenienceAliases(arguments, true);
 
         // Handle no arguments
-        if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
+        if (arguments.isEmpty() || arguments.size() == 1 && arguments.get(0).trim().isEmpty()) {
             sender.sendMessage(Message.prefixed(Component.text()
                     .color(NamedTextColor.DARK_GREEN)
                     .append(Component.text("Running "))

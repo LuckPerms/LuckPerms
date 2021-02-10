@@ -101,7 +101,7 @@ public class SubjectDataContainer {
             return new JsonArray();
         }
         Preconditions.checkArgument(element instanceof JsonArray);
-        return ((JsonArray) element);
+        return (JsonArray) element;
     }
     
     private SubjectDataContainer(LPPermissionService service, JsonObject root) {

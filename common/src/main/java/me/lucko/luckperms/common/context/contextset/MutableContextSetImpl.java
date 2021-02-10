@@ -160,7 +160,7 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
     public void addAll(@NonNull ContextSet contextSet) {
         Objects.requireNonNull(contextSet, "contextSet");
         if (contextSet instanceof AbstractContextSet) {
-            AbstractContextSet other = ((AbstractContextSet) contextSet);
+            AbstractContextSet other = (AbstractContextSet) contextSet;
             other.copyTo(this.map);
         } else {
             addAll(contextSet.toSet());

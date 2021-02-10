@@ -69,7 +69,7 @@ public class LogDispatcher {
         this.plugin.getOnlineSenders()
                 .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                 .filter(s -> {
-                    boolean shouldCancel = LogNotify.isIgnoring(this.plugin, s.getUniqueId()) || (sender != null && s.getUniqueId().equals(sender.getUniqueId()));
+                    boolean shouldCancel = LogNotify.isIgnoring(this.plugin, s.getUniqueId()) || sender != null && s.getUniqueId().equals(sender.getUniqueId());
                     return !this.plugin.getEventDispatcher().dispatchLogNotify(shouldCancel, entry, origin, s);
                 })
                 .forEach(s -> Message.LOG.send(s, entry));

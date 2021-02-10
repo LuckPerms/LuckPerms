@@ -173,7 +173,7 @@ public enum TraversalAlgorithm {
                 NodeAndSuccessors node = this.stack.getFirst();
                 boolean firstVisit = this.visited.add(node.node);
                 boolean lastVisit = !node.successorIterator.hasNext();
-                boolean produceNode = (firstVisit && this.order == Order.PRE_ORDER) || (lastVisit && this.order == Order.POST_ORDER);
+                boolean produceNode = firstVisit && this.order == Order.PRE_ORDER || lastVisit && this.order == Order.POST_ORDER;
                 if (lastVisit) {
                     this.stack.pop();
                 } else {

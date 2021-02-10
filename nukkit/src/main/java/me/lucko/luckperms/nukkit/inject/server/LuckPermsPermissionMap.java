@@ -133,7 +133,7 @@ public final class LuckPermsPermissionMap extends ForwardingMap<String, Permissi
 
     @Override
     public boolean remove(Object key, Object value) {
-        return key != null && value != null && super.remove(key, uninject(((Permission) value)));
+        return key != null && value != null && super.remove(key, uninject((Permission) value));
     }
 
     // check for null

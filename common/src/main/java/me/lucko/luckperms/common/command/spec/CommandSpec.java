@@ -110,7 +110,7 @@ public enum CommandSpec {
 
     USER_INFO,
     USER_SWITCHPRIMARYGROUP(
-            (arg("group", true))
+            arg("group", true)
     ),
     USER_PROMOTE(
             arg("track", false),

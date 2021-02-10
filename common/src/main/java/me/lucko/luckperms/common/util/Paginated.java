@@ -56,7 +56,7 @@ public class Paginated<T> {
             throw new IllegalArgumentException("pageNo cannot be less than 1: " + pageNo);
         }
 
-        int first = ((pageNo - 1) * pageSize);
+        int first = (pageNo - 1) * pageSize;
         if (this.content.size() <= first) {
             throw new IllegalStateException("Content does not contain that many elements. (requested page: " + pageNo +
                     ", page size: " + pageSize + ", page first index: " + first + ", content size: " + this.content.size() + ")");

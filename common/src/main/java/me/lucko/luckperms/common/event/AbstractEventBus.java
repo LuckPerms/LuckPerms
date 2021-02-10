@@ -163,7 +163,7 @@ public abstract class AbstractEventBus<P> implements EventBus, AutoCloseable {
             //noinspection unchecked
             return super.subscribers().values().stream()
                     .filter(s -> s instanceof EventSubscription && ((EventSubscription<?>) s).getEventClass().isAssignableFrom(eventClass))
-                    .map(s -> ((EventSubscription<T>) s))
+                    .map(s -> (EventSubscription<T>) s)
                     .collect(Collectors.toSet());
         }
     }

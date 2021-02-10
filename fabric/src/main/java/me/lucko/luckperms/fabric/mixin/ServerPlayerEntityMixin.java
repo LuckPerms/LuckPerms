@@ -85,7 +85,7 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     @Override
     public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(FabricContextManager contextManager) {
         if (this.luckperms$queryOptions == null) {
-            this.luckperms$queryOptions = contextManager.newQueryOptionsCache(((ServerPlayerEntity) (Object) this));
+            this.luckperms$queryOptions = contextManager.newQueryOptionsCache((ServerPlayerEntity) (Object) this);
         }
         return this.luckperms$queryOptions;
     }

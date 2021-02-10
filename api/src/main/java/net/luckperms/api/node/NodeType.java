@@ -48,47 +48,47 @@ public interface NodeType<T extends Node> {
     /**
      * Node type for {@link PermissionNode}.
      */
-    NodeType<PermissionNode> PERMISSION = new SimpleNodeType<>("PERMISSION", n ->  n instanceof PermissionNode, n -> ((PermissionNode) n));
+    NodeType<PermissionNode> PERMISSION = new SimpleNodeType<>("PERMISSION", n ->  n instanceof PermissionNode, n -> (PermissionNode) n);
 
     /**
      * Node type for {@link RegexPermissionNode}.
      */
-    NodeType<RegexPermissionNode> REGEX_PERMISSION = new SimpleNodeType<>("REGEX_PERMISSION", n ->  n instanceof RegexPermissionNode, n -> ((RegexPermissionNode) n));
+    NodeType<RegexPermissionNode> REGEX_PERMISSION = new SimpleNodeType<>("REGEX_PERMISSION", n ->  n instanceof RegexPermissionNode, n -> (RegexPermissionNode) n);
 
     /**
      * Node type for {@link InheritanceNode}.
      */
-    NodeType<InheritanceNode> INHERITANCE = new SimpleNodeType<>("INHERITANCE", n ->  n instanceof InheritanceNode, n -> ((InheritanceNode) n));
+    NodeType<InheritanceNode> INHERITANCE = new SimpleNodeType<>("INHERITANCE", n ->  n instanceof InheritanceNode, n -> (InheritanceNode) n);
 
     /**
      * Node type for {@link PrefixNode}.
      */
-    NodeType<PrefixNode> PREFIX = new SimpleNodeType<>("PREFIX", n ->  n instanceof PrefixNode, n -> ((PrefixNode) n));
+    NodeType<PrefixNode> PREFIX = new SimpleNodeType<>("PREFIX", n ->  n instanceof PrefixNode, n -> (PrefixNode) n);
 
     /**
      * Node type for {@link SuffixNode}.
      */
-    NodeType<SuffixNode> SUFFIX = new SimpleNodeType<>("SUFFIX", n ->  n instanceof SuffixNode, n -> ((SuffixNode) n));
+    NodeType<SuffixNode> SUFFIX = new SimpleNodeType<>("SUFFIX", n ->  n instanceof SuffixNode, n -> (SuffixNode) n);
 
     /**
      * Node type for {@link MetaNode}.
      */
-    NodeType<MetaNode> META = new SimpleNodeType<>("META", n ->  n instanceof MetaNode, n -> ((MetaNode) n));
+    NodeType<MetaNode> META = new SimpleNodeType<>("META", n ->  n instanceof MetaNode, n -> (MetaNode) n);
 
     /**
      * Node type for {@link WeightNode}.
      */
-    NodeType<WeightNode> WEIGHT = new SimpleNodeType<>("WEIGHT", n ->  n instanceof WeightNode, n -> ((WeightNode) n));
+    NodeType<WeightNode> WEIGHT = new SimpleNodeType<>("WEIGHT", n ->  n instanceof WeightNode, n -> (WeightNode) n);
 
     /**
      * Node type for {@link DisplayNameNode}.
      */
-    NodeType<DisplayNameNode> DISPLAY_NAME = new SimpleNodeType<>("DISPLAY_NAME", n ->  n instanceof DisplayNameNode, n -> ((DisplayNameNode) n));
+    NodeType<DisplayNameNode> DISPLAY_NAME = new SimpleNodeType<>("DISPLAY_NAME", n ->  n instanceof DisplayNameNode, n -> (DisplayNameNode) n);
 
     /**
      * Node type for {@link ChatMetaNode}.
      */
-    NodeType<ChatMetaNode<?, ?>> CHAT_META = new SimpleNodeType<>("CHAT_META", n ->  n instanceof ChatMetaNode<?, ?>, n -> ((ChatMetaNode<?, ?>) n));
+    NodeType<ChatMetaNode<?, ?>> CHAT_META = new SimpleNodeType<>("CHAT_META", n ->  n instanceof ChatMetaNode<?, ?>, n -> (ChatMetaNode<?, ?>) n);
 
     /**
      * Node type for {@link ChatMetaNode} or {@link MetaNode}.

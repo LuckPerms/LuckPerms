@@ -41,7 +41,7 @@ public class InheritanceComparator implements Comparator<PermissionHolder> {
 
     public static Comparator<? super PermissionHolder> getFor(PermissionHolder origin) {
         if (origin.getType() == HolderType.USER) {
-            return new InheritanceComparator(((User) origin)).reversed();
+            return new InheritanceComparator((User) origin).reversed();
         }
         return NULL_ORIGIN;
     }

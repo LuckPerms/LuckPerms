@@ -371,10 +371,10 @@ public class PermissionHolderSubjectData implements LPSubjectData {
         }
 
         if (t.getType() == HolderType.USER) {
-            User user = ((User) t);
+            User user = (User) t;
             return this.service.getPlugin().getStorage().saveUser(user);
         } else {
-            Group group = ((Group) t);
+            Group group = (Group) t;
             return this.service.getPlugin().getStorage().saveGroup(group);
         }
     }

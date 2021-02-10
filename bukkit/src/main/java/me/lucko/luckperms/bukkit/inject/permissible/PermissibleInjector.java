@@ -127,7 +127,7 @@ public final class PermissibleInjector {
 
         // only uninject if the permissible was a luckperms one.
         if (permissible instanceof LuckPermsPermissible) {
-            LuckPermsPermissible lpPermissible = ((LuckPermsPermissible) permissible);
+            LuckPermsPermissible lpPermissible = (LuckPermsPermissible) permissible;
 
             // clear all permissions
             lpPermissible.clearPermissions();

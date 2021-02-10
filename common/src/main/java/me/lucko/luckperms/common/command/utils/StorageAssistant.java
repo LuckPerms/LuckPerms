@@ -126,10 +126,10 @@ public final class StorageAssistant {
 
     public static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {
         if (holder.getType() == HolderType.USER) {
-            User user = ((User) holder);
+            User user = (User) holder;
             save(user, sender, plugin);
         } else if (holder.getType() == HolderType.GROUP) {
-            Group group = ((Group) holder);
+            Group group = (Group) holder;
             save(group, sender, plugin);
         } else {
             throw new IllegalArgumentException();

@@ -256,7 +256,7 @@ public class BooleanExpressionCompiler {
                     case '!':
                         return ConstantToken.NOT;
                     default:
-                        throw new LexerException("Unknown token: " + ((char) token) + "(" + token + ")");
+                        throw new LexerException("Unknown token: " + (char) token + "(" + token + ")");
                 }
             } catch (IOException e) {
                 throw new LexerException(e);

@@ -80,7 +80,7 @@ public class MetaInfo extends GenericChildCommand {
                 SuffixNode sn = (SuffixNode) node;
                 suffixes.add(Maps.immutableEntry(sn.getPriority(), sn));
             } else if (node instanceof MetaNode) {
-                meta.add(((MetaNode) node));
+                meta.add((MetaNode) node);
             }
         }
 

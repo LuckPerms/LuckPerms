@@ -140,7 +140,7 @@ public class BukkitCommandExecutor extends CommandManager implements TabExecutor
             try {
                 matchedPlayers = this.plugin.getBootstrap().getServer().selectEntities(sender, arg).stream()
                         .filter(e -> e instanceof Player)
-                        .map(e -> ((Player) e))
+                        .map(e -> (Player) e)
                         .collect(Collectors.toList());
             } catch (IllegalArgumentException e) {
                 this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + sender + " executing " + args, e);

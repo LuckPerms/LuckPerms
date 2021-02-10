@@ -68,7 +68,7 @@ public class SqliteConnectionFactory extends FlatfileConnectionFactory {
             return (Connection) this.connectionConstructor.newInstance("jdbc:sqlite:" + file.toString(), file.toString(), new Properties());
         } catch (ReflectiveOperationException e) {
             if (e.getCause() instanceof SQLException) {
-                throw ((SQLException) e.getCause());
+                throw (SQLException) e.getCause();
             }
             throw new RuntimeException(e);
         }

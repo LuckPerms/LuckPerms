@@ -93,7 +93,7 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Set<Permissi
             return null;
         }
 
-        String permission = ((String) key);
+        String permission = (String) key;
 
         LPSubscriptionValueSet result = (LPSubscriptionValueSet) super.get(key);
         if (result == null) {

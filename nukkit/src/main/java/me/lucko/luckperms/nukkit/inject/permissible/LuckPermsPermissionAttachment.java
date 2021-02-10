@@ -360,7 +360,7 @@ public class LuckPermsPermissionAttachment extends PermissionAttachment {
                 return null;
             }
 
-            String permission = ((String) key);
+            String permission = (String) key;
 
             // grab the previous result, so we can still satisfy the method signature of Map
             Boolean previous = LuckPermsPermissionAttachment.this.perms.get(permission);

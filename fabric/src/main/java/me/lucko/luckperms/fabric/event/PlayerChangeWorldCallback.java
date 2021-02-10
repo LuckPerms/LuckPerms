@@ -32,7 +32,7 @@ import net.minecraft.server.world.ServerWorld;
 
 // TODO: Use Fabric API alternative when merged.
 public interface PlayerChangeWorldCallback {
-    Event<PlayerChangeWorldCallback> EVENT = EventFactory.createArrayBacked(PlayerChangeWorldCallback.class, (callbacks) -> (originalWorld, destination, player) -> {
+    Event<PlayerChangeWorldCallback> EVENT = EventFactory.createArrayBacked(PlayerChangeWorldCallback.class, callbacks -> (originalWorld, destination, player) -> {
         for (PlayerChangeWorldCallback callback : callbacks) {
             callback.onChangeWorld(originalWorld, destination, player);
         }

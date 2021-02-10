@@ -40,7 +40,7 @@ final class FlagUtils {
     /* bitwise utility methods */
 
     static boolean read(byte b, Flag setting) {
-        return ((b >> setting.ordinal()) & 1) == 1;
+        return (b >> setting.ordinal() & 1) == 1;
     }
 
     static byte toByte(Set<Flag> settings) {
@@ -54,7 +54,7 @@ final class FlagUtils {
     private static byte toByte0(Set<Flag> settings) {
         byte b = 0;
         for (Flag setting : settings) {
-            b |= (1 << setting.ordinal());
+            b |= 1 << setting.ordinal();
         }
         return b;
     }

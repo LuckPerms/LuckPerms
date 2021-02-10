@@ -58,7 +58,7 @@ public class BungeePermissionCheckListener implements Listener {
         Objects.requireNonNull(e.getPermission(), "permission");
         Objects.requireNonNull(e.getSender(), "sender");
 
-        ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
+        ProxiedPlayer player = (ProxiedPlayer) e.getSender();
 
         User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
         if (user == null) {
@@ -87,7 +87,7 @@ public class BungeePermissionCheckListener implements Listener {
         Objects.requireNonNull(e.getPermission(), "permission");
         Objects.requireNonNull(e.getSender(), "sender");
 
-        ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
+        ProxiedPlayer player = (ProxiedPlayer) e.getSender();
 
         User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
         if (user == null) {

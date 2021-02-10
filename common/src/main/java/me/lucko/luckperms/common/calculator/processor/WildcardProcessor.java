@@ -47,7 +47,7 @@ public class WildcardProcessor extends AbstractPermissionProcessor implements Pe
     }
 
     public static boolean isWildcardPermission(String permission) {
-        return isRootWildcard(permission) || (permission.endsWith(WILDCARD_SUFFIX) && permission.length() > 2);
+        return isRootWildcard(permission) || permission.endsWith(WILDCARD_SUFFIX) && permission.length() > 2;
     }
 
     private Map<String, TristateResult> wildcardPermissions = Collections.emptyMap();

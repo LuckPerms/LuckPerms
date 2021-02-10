@@ -107,7 +107,7 @@ public final class ArgumentPermissions {
         }
         
         if (target instanceof User) {
-            User targetUser = ((User) target);
+            User targetUser = (User) target;
             
             if (targetUser.getUniqueId().equals(sender.getUniqueId())) {
                 // the sender is trying to edit themselves
@@ -131,7 +131,7 @@ public final class ArgumentPermissions {
                 }
             }
         } else if (target instanceof Group) {
-            Group targetGroup = ((Group) target);
+            Group targetGroup = (Group) target;
 
             Tristate state = sender.getPermissionValue(base.getPermission() + ".modify." + targetGroup.getName());
             if (state != Tristate.UNDEFINED) {
@@ -142,7 +142,7 @@ public final class ArgumentPermissions {
                 return !globalState.asBoolean();
             }
         } else if (target instanceof Track) {
-            Track targetTrack = ((Track) target);
+            Track targetTrack = (Track) target;
 
             Tristate state = sender.getPermissionValue(base.getPermission() + ".modify." + targetTrack.getName());
             if (state != Tristate.UNDEFINED) {
@@ -172,7 +172,7 @@ public final class ArgumentPermissions {
         }
 
         if (target instanceof User) {
-            User targetUser = ((User) target);
+            User targetUser = (User) target;
 
             if (targetUser.getUniqueId().equals(sender.getUniqueId())) {
                 // the sender is trying to view themselves
@@ -196,7 +196,7 @@ public final class ArgumentPermissions {
                 }
             }
         } else if (target instanceof Group) {
-            Group targetGroup = ((Group) target);
+            Group targetGroup = (Group) target;
 
             Tristate state = sender.getPermissionValue(base.getPermission() + ".view." + targetGroup.getName());
             if (state != Tristate.UNDEFINED) {
@@ -207,7 +207,7 @@ public final class ArgumentPermissions {
                 return !globalState.asBoolean();
             }
         } else if (target instanceof Track) {
-            Track targetTrack = ((Track) target);
+            Track targetTrack = (Track) target;
 
             Tristate state = sender.getPermissionValue(base.getPermission() + ".view." + targetTrack.getName());
             if (state != Tristate.UNDEFINED) {
