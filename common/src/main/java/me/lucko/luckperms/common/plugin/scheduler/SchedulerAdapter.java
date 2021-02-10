@@ -25,8 +25,11 @@
 
 package me.lucko.luckperms.common.plugin.scheduler;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * A scheduler for running tasks using the systems provided by the platform
@@ -84,6 +87,27 @@ public interface SchedulerAdapter {
      * @return the resultant task instance
      */
     SchedulerTask asyncRepeating(Runnable task, long interval, TimeUnit unit);
+
+    /**
+     * Waits for the given time for {@code future} to complete. If the future isn't completed,
+     * {@code onTimeout} is executed.
+     *
+     * @param future the future to wait for
+     * @param timeout the time to wait
+     * @param unit the unit of timeout
+     * @param onTimeout the function to execute when the timeout expires
+     */
+    default void awaitTimeout(CompletableFuture<?> future, long timeout, TimeUnit unit, Runnable onTimeout) {
+        executeAsync(() -> {
+            try {
+                future.get(timeout, unit);
+            } catch (InterruptedException | ExecutionException e) {
+                // ignore
+            } catch (TimeoutException e) {
+                onTimeout.run();
+            }
+        });
+    }
 
     /**
      * Shuts down the scheduler instance.

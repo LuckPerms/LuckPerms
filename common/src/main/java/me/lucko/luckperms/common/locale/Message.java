@@ -165,6 +165,12 @@ public interface Message {
             .append(FULL_STOP)
     );
 
+    Args0 ALREADY_EXECUTING_COMMAND = () -> prefixed(translatable()
+            // "&7Another command is being executed, waiting for it to finish..."
+            .key("luckperms.commandsystem.already-executing-command")
+            .color(GRAY)
+    );
+
     Args2<String, String> FIRST_TIME_SETUP = (label, username) -> join(newline(),
             // "&3It seems that no permissions have been setup yet!"
             // "&3Before you can use any of the LuckPerms commands in-game, you need to use the console to give yourself access."

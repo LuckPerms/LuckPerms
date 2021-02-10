@@ -60,6 +60,7 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
@@ -67,11 +68,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -129,8 +133,17 @@ public class CommandManager {
     }
 
     public CompletableFuture<CommandResult> executeCommand(Sender sender, String label, List<String> args) {
-        return CompletableFuture.supplyAsync(() -> {
-            this.lock.lock();
+        SchedulerAdapter scheduler = this.plugin.getBootstrap().getScheduler();
+
+        // schedule a future to execute the command
+        AtomicReference<Thread> thread = new AtomicReference<>();
+        CompletableFuture<CommandResult> future = CompletableFuture.supplyAsync(() -> {
+            thread.set(Thread.currentThread());
+            if (!this.lock.tryLock()) {
+                Message.ALREADY_EXECUTING_COMMAND.send(sender);
+                this.lock.lock();
+            }
+
             try {
                 return execute(sender, label, args);
             } catch (Throwable e) {
@@ -138,8 +151,26 @@ public class CommandManager {
                 return null;
             } finally {
                 this.lock.unlock();
+                thread.set(null);
             }
-        }, this.plugin.getBootstrap().getScheduler().async());
+        }, scheduler.async());
+
+        // catch if the command doesn't complete within a given time
+        scheduler.awaitTimeout(future, 10, TimeUnit.SECONDS, () -> handleCommandTimeout(thread, args));
+
+        return future;
+    }
+
+    private void handleCommandTimeout(AtomicReference<Thread> thread, List<String> args) {
+        Thread executorThread = thread.get();
+        if (executorThread == null) {
+            this.plugin.getLogger().warn("Command execution " + args + " has not completed - but executor thread is null!");
+        } else {
+            String stackTrace = Arrays.stream(executorThread.getStackTrace())
+                    .map(el -> "  " + el.toString())
+                    .collect(Collectors.joining("\n"));
+            this.plugin.getLogger().warn("Command execution " + args + " has not completed. Trace: \n" + stackTrace);
+        }
     }
 
     public boolean hasPermissionForAny(Sender sender) {
