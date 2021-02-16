@@ -48,6 +48,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listener {
@@ -110,6 +111,11 @@ public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listen
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
+        this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerJoinWorld(PlayerJoinEvent e) {
         this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
     }
 
