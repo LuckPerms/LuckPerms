@@ -23,15 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.dependencies.classloader;
+package me.lucko.luckperms.bukkit.loader;
 
-import java.nio.file.Path;
+import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
 
-/**
- * Represents the plugins classloader
- */
-public interface PluginClassLoader {
+import org.bukkit.plugin.java.JavaPlugin;
 
-    void addJarToClasspath(Path file);
+public class BukkitLoaderPlugin extends JavaPlugin {
+    private static final String JAR_NAME = "luckperms-bukkit.innerjar";
+    private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.bukkit.LPBukkitBootstrap";
+
+    private final LoaderBootstrap plugin;
+
+    public BukkitLoaderPlugin() {
+        JarInJarClassLoader loader = new JarInJarClassLoader(getClassLoader(), JAR_NAME);
+        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, JavaPlugin.class, this);
+    }
+
+    @Override
+    public void onLoad() {
+        this.plugin.onLoad();
+    }
+
+    @Override
+    public void onEnable() {
+        this.plugin.onEnable();
+    }
+
+    @Override
+    public void onDisable() {
+        this.plugin.onDisable();
+    }
 
 }

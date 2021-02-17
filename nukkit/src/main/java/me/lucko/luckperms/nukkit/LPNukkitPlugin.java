@@ -68,8 +68,6 @@ import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.plugin.service.ServicePriority;
 import cn.nukkit.utils.Config;
 
-import java.io.File;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -107,7 +105,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new NukkitConfigAdapter(this, resolveConfig());
+        return new NukkitConfigAdapter(this, resolveConfig("config.yml").toFile());
     }
 
     @Override
@@ -260,33 +258,6 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
         InjectorPermissionMap.uninject();
         InjectorDefaultsMap.uninject();
         new PermissibleMonitoringInjector(this, PermissibleMonitoringInjector.Mode.UNINJECT).run();
-    }
-
-    public void refreshAutoOp(Player player) {
-        if (!getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            return;
-        }
-
-        User user = getUserManager().getIfLoaded(player.getUniqueId());
-        boolean value;
-
-        if (user != null) {
-            Map<String, Boolean> permData = user.getCachedData().getPermissionData(this.contextManager.getQueryOptions(player)).getPermissionMap();
-            value = permData.getOrDefault("luckperms.autoop", false);
-        } else {
-            value = false;
-        }
-
-        player.setOp(value);
-    }
-
-    private File resolveConfig() {
-        File configFile = new File(this.bootstrap.getDataFolder(), "config.yml");
-        if (!configFile.exists()) {
-            this.bootstrap.getDataFolder().mkdirs();
-            this.bootstrap.saveResource("config.yml", false);
-        }
-        return configFile;
     }
 
     @Override

@@ -13,7 +13,9 @@ rootProject.name = 'luckperms'
 include (
         'api',
         'common',
+        'common:loader-utils',
         'bukkit',
+        'bukkit:loader',
         'bukkit-legacy',
         'bungee',
         'fabric',

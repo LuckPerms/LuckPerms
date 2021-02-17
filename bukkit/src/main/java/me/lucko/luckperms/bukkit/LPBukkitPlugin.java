@@ -74,7 +74,6 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -127,14 +126,14 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new BukkitConfigAdapter(this, resolveConfig());
+        return new BukkitConfigAdapter(this, resolveConfig("config.yml").toFile());
     }
 
     @Override
     protected void registerPlatformListeners() {
         this.connectionListener = new BukkitConnectionListener(this);
-        this.bootstrap.getServer().getPluginManager().registerEvents(this.connectionListener, this.bootstrap);
-        this.bootstrap.getServer().getPluginManager().registerEvents(new BukkitPlatformListener(this), this.bootstrap);
+        this.bootstrap.getServer().getPluginManager().registerEvents(this.connectionListener, this.bootstrap.getLoader());
+        this.bootstrap.getServer().getPluginManager().registerEvents(new BukkitPlatformListener(this), this.bootstrap.getLoader());
     }
 
     @Override
@@ -144,7 +143,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerCommands() {
-        PluginCommand command = this.bootstrap.getCommand("luckperms");
+        PluginCommand command = this.bootstrap.getLoader().getCommand("luckperms");
         if (command == null) {
             getLogger().severe("Unable to register /luckperms command with the server");
             return;
@@ -187,7 +186,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         this.contextManager = new BukkitContextManager(this);
 
         BukkitPlayerCalculator playerCalculator = new BukkitPlayerCalculator(this);
-        this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap);
+        this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap.getLoader());
         this.contextManager.registerCalculator(playerCalculator);
     }
 
@@ -206,7 +205,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
             // schedule another injection after all plugins have loaded
             // the entire pluginmanager instance is replaced by some plugins :(
-            this.bootstrap.getServer().getScheduler().runTaskLaterAsynchronously(this.bootstrap, injector, 1);
+            this.bootstrap.getServer().getScheduler().runTaskLaterAsynchronously(this.bootstrap.getLoader(), injector, 1);
         }
 
         /*
@@ -221,7 +220,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
          * - https://hub.spigotmc.org/jira/browse/SPIGOT-5546
          * - https://github.com/PaperMC/Paper/pull/3509
          */
-        PluginManagerUtil.injectDependency(this.bootstrap.getServer().getPluginManager(), this.bootstrap.getName(), "Vault");
+        PluginManagerUtil.injectDependency(this.bootstrap.getServer().getPluginManager(), this.bootstrap.getLoader().getName(), "Vault");
 
         // Provide vault support
         tryVaultHook(false);
@@ -251,7 +250,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerApiOnPlatform(LuckPerms api) {
-        this.bootstrap.getServer().getServicesManager().register(LuckPerms.class, api, this.bootstrap, ServicePriority.Normal);
+        this.bootstrap.getServer().getServicesManager().register(LuckPerms.class, api, this.bootstrap.getLoader(), ServicePriority.Normal);
     }
 
     @Override
@@ -276,7 +275,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
         // remove all operators on startup if they're disabled
         if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
-            this.bootstrap.getServer().getScheduler().runTaskAsynchronously(this.bootstrap, () -> {
+            this.bootstrap.getServer().getScheduler().runTaskAsynchronously(this.bootstrap.getLoader(), () -> {
                 for (OfflinePlayer player : this.bootstrap.getServer().getOperators()) {
                     player.setOp(false);
                 }
@@ -349,15 +348,6 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         if (this.vaultHookManager != null) {
             this.vaultHookManager.unhook();
         }
-    }
-
-    private File resolveConfig() {
-        File configFile = new File(this.bootstrap.getDataFolder(), "config.yml");
-        if (!configFile.exists()) {
-            this.bootstrap.getDataFolder().mkdirs();
-            this.bootstrap.saveResource("config.yml", false);
-        }
-        return configFile;
     }
 
     private static boolean classExists(String className) {

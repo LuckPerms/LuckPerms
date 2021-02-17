@@ -23,23 +23,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit;
+package me.lucko.luckperms.fabric;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 
-import java.util.concurrent.Executor;
+import net.fabricmc.loader.launch.common.FabricLauncherBase;
 
-public class BukkitSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
-    private final Executor sync;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 
-    public BukkitSchedulerAdapter(LPBukkitBootstrap bootstrap) {
-        this.sync = r -> bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(bootstrap.getLoader(), r);
-    }
+public class FabricClassPathAppender implements ClassPathAppender {
 
     @Override
-    public Executor sync() {
-        return this.sync;
+    public void addJarToClasspath(Path file) {
+        try {
+            // Fabric abstracts class loading away to the FabricLauncher.
+            // TODO(i509VCB): Work on API for Fabric Loader which does not touch internals.
+            //  Player wants to use project jigsaw in the future.
+            FabricLauncherBase.getLauncher().propose(file.toUri().toURL());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

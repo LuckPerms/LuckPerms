@@ -39,7 +39,7 @@ public class BukkitEventBus extends AbstractEventBus<Plugin> implements Listener
 
         // register listener
         LPBukkitBootstrap bootstrap = plugin.getBootstrap();
-        bootstrap.getServer().getPluginManager().registerEvents(this, bootstrap);
+        bootstrap.getServer().getPluginManager().registerEvents(this, bootstrap.getLoader());
     }
 
     @Override

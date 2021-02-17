@@ -150,7 +150,7 @@ public class DependencyManager {
         this.loaded.put(dependency, file);
 
         if (this.registry.shouldAutoLoad(dependency)) {
-            this.plugin.getBootstrap().getPluginClassLoader().addJarToClasspath(file);
+            this.plugin.getBootstrap().getClassPathAppender().addJarToClasspath(file);
         }
     }
 

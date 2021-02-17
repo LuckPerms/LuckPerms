@@ -23,23 +23,17 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit;
+package me.lucko.luckperms.common.loader;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+/**
+ * Minimal bootstrap plugin, called by the loader plugin.
+ */
+public interface LoaderBootstrap {
 
-import java.util.concurrent.Executor;
+    void onLoad();
 
-public class BukkitSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
-    private final Executor sync;
+    void onEnable();
 
-    public BukkitSchedulerAdapter(LPBukkitBootstrap bootstrap) {
-        this.sync = r -> bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(bootstrap.getLoader(), r);
-    }
-
-    @Override
-    public Executor sync() {
-        return this.sync;
-    }
+    void onDisable();
 
 }

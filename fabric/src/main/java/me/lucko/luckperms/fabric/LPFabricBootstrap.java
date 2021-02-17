@@ -27,8 +27,8 @@ package me.lucko.luckperms.fabric;
 
 import com.mojang.authlib.GameProfile;
 
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
@@ -76,9 +76,9 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
     private final SchedulerAdapter schedulerAdapter;
 
     /**
-     * The plugin class loader.
+     * The plugin class path appender
      */
-    private final PluginClassLoader classLoader;
+    private final ClassPathAppender classPathAppender;
 
     /**
      * The plugin instance
@@ -102,7 +102,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
     public LPFabricBootstrap() {
         this.logger = new Log4jPluginLogger(LogManager.getLogger(MODID));
         this.schedulerAdapter = new FabricSchedulerAdapter(this);
-        this.classLoader = new FabricClassLoader();
+        this.classPathAppender = new FabricClassPathAppender();
         this.plugin = new LPFabricPlugin(this);
     }
     
@@ -119,8 +119,8 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
     }
 
     @Override
-    public PluginClassLoader getPluginClassLoader() {
-        return this.classLoader;
+    public ClassPathAppender getClassPathAppender() {
+        return this.classPathAppender;
     }
     
     // lifecycle

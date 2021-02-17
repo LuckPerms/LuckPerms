@@ -26,9 +26,9 @@
 package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
-import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.ReflectionClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
@@ -40,7 +40,6 @@ import net.md_5.bungee.api.plugin.PluginDescription;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -67,9 +66,9 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     private final SchedulerAdapter schedulerAdapter;
 
     /**
-     * The plugin classloader
+     * The plugin class path appender
      */
-    private final PluginClassLoader classLoader;
+    private final ClassPathAppender classPathAppender;
 
     /**
      * The plugin instance
@@ -90,7 +89,7 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     public LPBungeeBootstrap() {
         this.schedulerAdapter = new BungeeSchedulerAdapter(this);
-        this.classLoader = new ReflectionClassLoader(this);
+        this.classPathAppender = new ReflectionClassPathAppender(this);
         this.plugin = new LPBungeePlugin(this);
     }
 
@@ -110,8 +109,8 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     }
 
     @Override
-    public PluginClassLoader getPluginClassLoader() {
-        return this.classLoader;
+    public ClassPathAppender getClassPathAppender() {
+        return this.classPathAppender;
     }
 
     // lifecycle
@@ -208,11 +207,6 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     @Override
     public Path getDataDirectory() {
         return getDataFolder().toPath().toAbsolutePath();
-    }
-
-    @Override
-    public InputStream getResourceStream(String path) {
-        return getResourceAsStream(path);
     }
 
     @Override

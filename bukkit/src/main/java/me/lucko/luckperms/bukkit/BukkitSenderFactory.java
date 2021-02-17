@@ -44,7 +44,7 @@ public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSe
 
     public BukkitSenderFactory(LPBukkitPlugin plugin) {
         super(plugin);
-        this.audiences = BukkitAudiences.create(plugin.getBootstrap());
+        this.audiences = BukkitAudiences.create(plugin.getBootstrap().getLoader());
     }
 
     @Override

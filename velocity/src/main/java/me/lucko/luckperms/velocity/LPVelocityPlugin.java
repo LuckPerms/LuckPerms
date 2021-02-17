@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
-import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.velocity.calculator.VelocityCalculatorFactory;
 import me.lucko.luckperms.velocity.context.VelocityContextManager;
 import me.lucko.luckperms.velocity.context.VelocityPlayerCalculator;
@@ -52,10 +51,6 @@ import me.lucko.luckperms.velocity.messaging.VelocityMessagingFactory;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -101,7 +96,7 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new VelocityConfigAdapter(this, resolveConfig());
+        return new VelocityConfigAdapter(this, resolveConfig("config.yml"));
     }
 
     @Override
@@ -167,22 +162,6 @@ public class LPVelocityPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void performFinalSetup() {
 
-    }
-
-    private Path resolveConfig() {
-        Path path = this.bootstrap.getConfigDirectory().resolve("config.yml");
-        if (!Files.exists(path)) {
-            try {
-                MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigDirectory());
-                try (InputStream is = getClass().getClassLoader().getResourceAsStream("config.yml")) {
-                    Files.copy(is, path);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return path;
     }
 
     @Override

@@ -287,7 +287,7 @@ public class LuckPermsPermissionAttachment extends PermissionAttachment {
 
     @Override
     public @NonNull Plugin getPlugin() {
-        return this.owner != null ? this.owner : this.permissible.getPlugin().getBootstrap();
+        return this.owner != null ? this.owner : this.permissible.getPlugin().getBootstrap().getLoader();
     }
 
     @Override

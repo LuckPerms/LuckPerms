@@ -23,27 +23,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric;
+package me.lucko.luckperms.common.plugin.classpath;
 
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
-
-import net.fabricmc.loader.launch.common.FabricLauncherBase;
-
-import java.net.MalformedURLException;
 import java.nio.file.Path;
 
-public class FabricClassLoader implements PluginClassLoader {
+/**
+ * Interface which allows access to add URLs to the plugin classpath at runtime.
+ */
+public interface ClassPathAppender {
 
-    @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            // Fabric abstracts class loading away to the FabricLauncher.
-            // TODO(i509VCB): Work on API for Fabric Loader which does not touch internals.
-            //  Player wants to use project jigsaw in the future.
-            FabricLauncherBase.getLauncher().propose(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    void addJarToClasspath(Path file);
 
 }

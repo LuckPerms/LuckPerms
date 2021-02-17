@@ -52,10 +52,6 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -99,7 +95,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new BungeeConfigAdapter(this, resolveConfig());
+        return new BungeeConfigAdapter(this, resolveConfig("config.yml").toFile());
     }
 
     @Override
@@ -173,21 +169,6 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void performFinalSetup() {
 
-    }
-
-    private File resolveConfig() {
-        File configFile = new File(this.bootstrap.getDataFolder(), "config.yml");
-
-        if (!configFile.exists()) {
-            this.bootstrap.getDataFolder().mkdirs();
-            try (InputStream is = this.bootstrap.getResourceAsStream("config.yml")) {
-                Files.copy(is, configFile.toPath());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return configFile;
     }
 
     @Override

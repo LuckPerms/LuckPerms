@@ -23,23 +23,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit;
+package me.lucko.luckperms.velocity;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 
-import java.util.concurrent.Executor;
+import java.nio.file.Path;
 
-public class BukkitSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
-    private final Executor sync;
+public class VelocityClassPathAppender implements ClassPathAppender {
+    private final LPVelocityBootstrap bootstrap;
 
-    public BukkitSchedulerAdapter(LPBukkitBootstrap bootstrap) {
-        this.sync = r -> bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(bootstrap.getLoader(), r);
+    public VelocityClassPathAppender(LPVelocityBootstrap bootstrap) {
+        this.bootstrap = bootstrap;
     }
 
     @Override
-    public Executor sync() {
-        return this.sync;
+    public void addJarToClasspath(Path file) {
+        this.bootstrap.getProxy().getPluginManager().addToClasspath(this.bootstrap, file);
     }
-
 }

@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
-import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.ReflectionClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
 import net.luckperms.api.platform.Platform;
@@ -35,7 +35,6 @@ import net.luckperms.api.platform.Platform;
 import cn.nukkit.Player;
 import cn.nukkit.plugin.PluginBase;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -61,9 +60,9 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     private final NukkitSchedulerAdapter schedulerAdapter;
 
     /**
-     * The plugin classloader
+     * The plugin class path appender
      */
-    private final PluginClassLoader classLoader;
+    private final ClassPathAppender classPathAppender;
 
     /**
      * The plugin instance
@@ -81,7 +80,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
 
     public LPNukkitBootstrap() {
         this.schedulerAdapter = new NukkitSchedulerAdapter(this);
-        this.classLoader = new ReflectionClassLoader(this);
+        this.classPathAppender = new ReflectionClassPathAppender(this);
         this.plugin = new LPNukkitPlugin(this);
     }
 
@@ -101,8 +100,8 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     }
 
     @Override
-    public PluginClassLoader getPluginClassLoader() {
-        return this.classLoader;
+    public ClassPathAppender getClassPathAppender() {
+        return this.classPathAppender;
     }
 
     // lifecycle
@@ -175,11 +174,6 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     @Override
     public Path getDataDirectory() {
         return getDataFolder().toPath().toAbsolutePath();
-    }
-
-    @Override
-    public InputStream getResourceStream(String path) {
-        return getResource(path);
     }
 
     @Override

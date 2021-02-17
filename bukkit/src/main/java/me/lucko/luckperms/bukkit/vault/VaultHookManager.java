@@ -61,8 +61,8 @@ public class VaultHookManager {
             }
 
             final ServicesManager sm = this.plugin.getBootstrap().getServer().getServicesManager();
-            sm.register(Permission.class, this.permission, this.plugin.getBootstrap(), ServicePriority.High);
-            sm.register(Chat.class, this.chat, this.plugin.getBootstrap(), ServicePriority.High);
+            sm.register(Permission.class, this.permission, this.plugin.getBootstrap().getLoader(), ServicePriority.High);
+            sm.register(Chat.class, this.chat, this.plugin.getBootstrap().getLoader(), ServicePriority.High);
 
         } catch (Exception e) {
             this.plugin.getLogger().severe("Error occurred whilst hooking into Vault.", e);

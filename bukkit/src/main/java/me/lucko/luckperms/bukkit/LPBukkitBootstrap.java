@@ -26,9 +26,10 @@
 package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.bukkit.util.NullSafeConsoleCommandSender;
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
-import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
@@ -41,7 +42,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -51,11 +51,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 /**
  * Bootstrap plugin for LuckPerms running on Bukkit.
  */
-public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap {
+public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
+    private final JavaPlugin loader;
 
     /**
      * The plugin logger
@@ -68,9 +70,9 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     private final BukkitSchedulerAdapter schedulerAdapter;
 
     /**
-     * The plugin classloader
+     * The plugin class path appender
      */
-    private final PluginClassLoader classLoader;
+    private final ClassPathAppender classPathAppender;
 
     /**
      * A null-safe console instance which delegates to the server logger
@@ -97,15 +99,25 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     // if the plugin has been loaded on an incompatible version
     private boolean incompatibleVersion = false;
 
-    public LPBukkitBootstrap() {
-        this.logger = new JavaPluginLogger(getLogger());
+    public LPBukkitBootstrap(JavaPlugin loader) {
+        this.loader = loader;
+
+        this.logger = new JavaPluginLogger(loader.getLogger());
         this.schedulerAdapter = new BukkitSchedulerAdapter(this);
-        this.classLoader = new ReflectionClassLoader(this);
+        this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
         this.console = new NullSafeConsoleCommandSender(getServer());
         this.plugin = new LPBukkitPlugin(this);
     }
 
     // provide adapters
+
+    public JavaPlugin getLoader() {
+        return loader;
+    }
+
+    public Server getServer() {
+        return this.loader.getServer();
+    }
 
     @Override
     public PluginLogger getPluginLogger() {
@@ -118,8 +130,8 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     }
 
     @Override
-    public PluginClassLoader getPluginClassLoader() {
-        return this.classLoader;
+    public ClassPathAppender getClassPathAppender() {
+        return this.classPathAppender;
     }
 
     public ConsoleCommandSender getConsole() {
@@ -144,14 +156,15 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
     @Override
     public void onEnable() {
         if (this.incompatibleVersion) {
-            getLogger().severe("----------------------------------------------------------------------");
-            getLogger().severe("Your server version is not compatible with this build of LuckPerms. :(");
-            getLogger().severe("");
-            getLogger().severe("If your server is running 1.8, please update to 1.8.8 or higher.");
-            getLogger().severe("If your server is running 1.7.10, please download the Bukkit-Legacy version of LuckPerms from here:");
-            getLogger().severe("==> https://ci.lucko.me/job/LuckPerms/");
-            getLogger().severe("----------------------------------------------------------------------");
-            getServer().getPluginManager().disablePlugin(this);
+            Logger logger = loader.getLogger();
+            logger.severe("----------------------------------------------------------------------");
+            logger.severe("Your server version is not compatible with this build of LuckPerms. :(");
+            logger.severe("");
+            logger.severe("If your server is running 1.8, please update to 1.8.8 or higher.");
+            logger.severe("If your server is running 1.7.10, please download the Bukkit-Legacy version of LuckPerms from here:");
+            logger.severe("==> https://ci.lucko.me/job/LuckPerms/");
+            logger.severe("----------------------------------------------------------------------");
+            getServer().getPluginManager().disablePlugin(this.loader);
             return;
         }
 
@@ -162,7 +175,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
             this.plugin.enable();
 
             // schedule a task to update the 'serverStarting' flag
-            getServer().getScheduler().runTask(this, () -> this.serverStarting = false);
+            getServer().getScheduler().runTask(this.loader, () -> this.serverStarting = false);
         } finally {
             this.enableLatch.countDown();
         }
@@ -200,7 +213,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
 
     @Override
     public String getVersion() {
-        return getDescription().getVersion();
+        return this.loader.getDescription().getVersion();
     }
 
     @Override
@@ -227,12 +240,7 @@ public class LPBukkitBootstrap extends JavaPlugin implements LuckPermsBootstrap 
 
     @Override
     public Path getDataDirectory() {
-        return getDataFolder().toPath().toAbsolutePath();
-    }
-
-    @Override
-    public InputStream getResourceStream(String path) {
-        return getResource(path);
+        return this.loader.getDataFolder().toPath().toAbsolutePath();
     }
 
     @Override

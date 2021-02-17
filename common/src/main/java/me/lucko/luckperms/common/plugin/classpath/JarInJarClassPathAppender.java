@@ -23,23 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit;
+package me.lucko.luckperms.common.plugin.classpath;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 
-import java.util.concurrent.Executor;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 
-public class BukkitSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
-    private final Executor sync;
+public class JarInJarClassPathAppender implements ClassPathAppender {
+    private final JarInJarClassLoader classLoader;
 
-    public BukkitSchedulerAdapter(LPBukkitBootstrap bootstrap) {
-        this.sync = r -> bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(bootstrap.getLoader(), r);
+    public JarInJarClassPathAppender(ClassLoader classLoader) {
+        if (!(classLoader instanceof JarInJarClassLoader)) {
+            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
+        }
+        this.classLoader = (JarInJarClassLoader) classLoader;
     }
 
     @Override
-    public Executor sync() {
-        return this.sync;
+    public void addJarToClasspath(Path file) {
+        try {
+            this.classLoader.addJarToClasspath(file.toUri().toURL());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
-
 }
