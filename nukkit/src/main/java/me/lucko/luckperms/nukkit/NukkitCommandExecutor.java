@@ -52,7 +52,7 @@ public class NukkitCommandExecutor extends CommandManager implements CommandExec
 
     public void register() {
         this.command.setExecutor(this);
-        this.plugin.getBootstrap().getServer().getPluginManager().registerEvents(this, this.plugin.getBootstrap());
+        this.plugin.getBootstrap().getServer().getPluginManager().registerEvents(this, this.plugin.getLoader());
     }
 
     @Override

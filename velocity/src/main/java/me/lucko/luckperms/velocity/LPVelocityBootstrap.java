@@ -35,8 +35,8 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
@@ -45,7 +45,6 @@ import net.luckperms.api.platform.Platform;
 
 import org.slf4j.Logger;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -79,9 +78,9 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     private final SchedulerAdapter schedulerAdapter;
 
     /**
-     * The plugin classloader
+     * The plugin class path appender
      */
-    private final PluginClassLoader classLoader;
+    private final ClassPathAppender classPathAppender;
 
     /**
      * The plugin instance
@@ -108,7 +107,7 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     public LPVelocityBootstrap(Logger logger) {
         this.logger = new Slf4jPluginLogger(logger);
         this.schedulerAdapter = new VelocitySchedulerAdapter(this);
-        this.classLoader = new VelocityClassLoader(this);
+        this.classPathAppender = new VelocityClassPathAppender(this);
         this.plugin = new LPVelocityPlugin(this);
     }
 
@@ -125,8 +124,8 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public PluginClassLoader getPluginClassLoader() {
-        return this.classLoader;
+    public ClassPathAppender getClassPathAppender() {
+        return this.classPathAppender;
     }
 
     // lifecycle
@@ -200,11 +199,6 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
     @Override
     public Path getDataDirectory() {
         return this.configDirectory.toAbsolutePath();
-    }
-
-    @Override
-    public InputStream getResourceStream(String path) {
-        return getClass().getClassLoader().getResourceAsStream(path);
     }
 
     @Override

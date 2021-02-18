@@ -4,24 +4,17 @@ plugins {
 
 dependencies {
     compile project(':common')
+    compileOnly project(':common:loader-utils')
 
     compileOnly 'net.md-5:bungeecord-api:1.15-SNAPSHOT'
     compileOnly 'me.lucko:adventure-platform-bungeecord:4.0.0' // re: this artifact - see note in common/build.gradle
     compileOnly 'com.imaginarycode.minecraft:RedisBungee:0.4'
 }
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        expand 'pluginVersion': project.ext.fullVersion
-        include 'plugin.yml'
-    }
-}
-
 shadowJar {
-    archiveName = "LuckPerms-Bungee-${project.ext.fullVersion}.jar"
+    archiveName = 'luckperms-bungee.jarinjar'
 
     dependencies {
-        include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
     }
 

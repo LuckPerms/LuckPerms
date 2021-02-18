@@ -3,7 +3,7 @@ version: ${pluginVersion}
 description: A permissions plugin
 author: Luck
 website: https://luckperms.net
-main: me.lucko.luckperms.bukkit.LPBukkitBootstrap
+main: me.lucko.luckperms.bukkit.loader.BukkitLoaderPlugin
 load: STARTUP
 
 # Mark the plugin as 1.13 compatible to avoid CB having to perform quite as much unnecessary

@@ -23,21 +23,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.velocity;
+package me.lucko.luckperms.common.loader;
 
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
+/**
+ * Runtime exception used if there is a problem during loading
+ */
+public class LoadingException extends RuntimeException {
 
-import java.nio.file.Path;
-
-public class VelocityClassLoader implements PluginClassLoader {
-    private final LPVelocityBootstrap bootstrap;
-
-    public VelocityClassLoader(LPVelocityBootstrap bootstrap) {
-        this.bootstrap = bootstrap;
+    public LoadingException(String message) {
+        super(message);
     }
 
-    @Override
-    public void addJarToClasspath(Path file) {
-        this.bootstrap.getProxy().getPluginManager().addToClasspath(this.bootstrap, file);
+    public LoadingException(String message, Throwable cause) {
+        super(message, cause);
     }
+
 }

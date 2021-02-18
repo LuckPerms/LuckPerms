@@ -1,0 +1,29 @@
+plugins {
+    id 'com.github.johnrengelman.shadow'
+}
+
+dependencies {
+    compileOnly 'net.md-5:bungeecord-api:1.15-SNAPSHOT'
+
+    compile project(':api')
+    compile project(':common:loader-utils')
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        expand 'pluginVersion': project.ext.fullVersion
+        include 'plugin.yml'
+    }
+}
+
+shadowJar {
+    archiveName = "LuckPerms-Bungee-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':bungee').tasks.shadowJar.archiveFile
+    }
+}
+
+artifacts {
+    archives shadowJar
+}

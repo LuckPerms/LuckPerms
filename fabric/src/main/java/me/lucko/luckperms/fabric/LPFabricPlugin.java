@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.sender.DummySender;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
-import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 import me.lucko.luckperms.fabric.context.FabricPlayerCalculator;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
@@ -55,10 +54,6 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.MinecraftServer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -112,20 +107,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        Path configPath = this.getBootstrap().getConfigDirectory().resolve("luckperms.conf");
-
-        if (!Files.exists(configPath)) {
-            try {
-                MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigDirectory());
-                try (InputStream is = this.getBootstrap().getResourceStream("luckperms.conf")) {
-                    Files.copy(is, configPath);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return new FabricConfigAdapter(this, configPath);
+        return new FabricConfigAdapter(this, resolveConfig("luckperms.conf"));
     }
 
     @Override

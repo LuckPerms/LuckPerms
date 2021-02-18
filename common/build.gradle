@@ -11,6 +11,8 @@ dependencies {
     compile project(':api')
     compile 'org.checkerframework:checker-qual:3.8.0'
 
+    compileOnly project(':common:loader-utils')
+
     compileOnly 'org.slf4j:slf4j-api:1.7.30'
     compileOnly 'org.apache.logging.log4j:log4j-api:2.14.0'
 

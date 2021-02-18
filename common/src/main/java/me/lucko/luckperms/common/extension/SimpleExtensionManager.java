@@ -136,7 +136,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             throw new IllegalArgumentException("class is null");
         }
 
-        this.plugin.getBootstrap().getPluginClassLoader().addJarToClasspath(path);
+        this.plugin.getBootstrap().getClassPathAppender().addJarToClasspath(path);
 
         Class<? extends Extension> extensionClass;
         try {

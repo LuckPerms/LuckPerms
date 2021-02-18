@@ -73,7 +73,7 @@ public class BukkitCommandExecutor extends CommandManager implements TabExecutor
     public void register() {
         this.command.setExecutor(this);
         this.command.setTabCompleter(this);
-        this.plugin.getBootstrap().getServer().getPluginManager().registerEvents(this, this.plugin.getBootstrap());
+        this.plugin.getBootstrap().getServer().getPluginManager().registerEvents(this, this.plugin.getLoader());
     }
 
     @Override

@@ -51,11 +51,8 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
+import net.md_5.bungee.api.plugin.Plugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -84,6 +81,10 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
         return this.bootstrap;
     }
 
+    public Plugin getLoader() {
+        return this.bootstrap.getLoader();
+    }
+
     @Override
     protected void setupSenderFactory() {
         this.senderFactory = new BungeeSenderFactory(this);
@@ -99,14 +100,14 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new BungeeConfigAdapter(this, resolveConfig());
+        return new BungeeConfigAdapter(this, resolveConfig("config.yml").toFile());
     }
 
     @Override
     protected void registerPlatformListeners() {
         this.connectionListener = new BungeeConnectionListener(this);
-        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap, this.connectionListener);
-        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap, new BungeePermissionCheckListener(this));
+        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap.getLoader(), this.connectionListener);
+        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap.getLoader(), new BungeePermissionCheckListener(this));
     }
 
     @Override
@@ -141,7 +142,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
         this.contextManager = new BungeeContextManager(this);
 
         BungeePlayerCalculator playerCalculator = new BungeePlayerCalculator(this);
-        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap, playerCalculator);
+        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap.getLoader(), playerCalculator);
         this.contextManager.registerCalculator(playerCalculator);
 
         if (this.bootstrap.getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
@@ -173,21 +174,6 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void performFinalSetup() {
 
-    }
-
-    private File resolveConfig() {
-        File configFile = new File(this.bootstrap.getDataFolder(), "config.yml");
-
-        if (!configFile.exists()) {
-            this.bootstrap.getDataFolder().mkdirs();
-            try (InputStream is = this.bootstrap.getResourceAsStream("config.yml")) {
-                Files.copy(is, configFile.toPath());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return configFile;
     }
 
     @Override

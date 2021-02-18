@@ -9,6 +9,7 @@ repositories {
 
 dependencies {
     compile project(':common')
+    compileOnly project(':common:loader-utils')
 
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
     compileOnly 'me.lucko:adventure-platform-bukkit:4.0.0' // re: this artifact - see note in common/build.gradle
@@ -19,18 +20,10 @@ dependencies {
     compileOnly 'lilypad.client.connect:api:0.0.1-SNAPSHOT'
 }
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        expand 'pluginVersion': project.ext.fullVersion
-        include 'plugin.yml'
-    }
-}
-
 shadowJar {
-    archiveName = "LuckPerms-Bukkit-${project.ext.fullVersion}.jar"
+    archiveName = 'luckperms-bukkit.jarinjar'
 
     dependencies {
-        include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
     }
 

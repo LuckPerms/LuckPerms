@@ -59,7 +59,7 @@ public class PluginMessageMessenger implements Messenger, Listener {
 
     public void init() {
         ProxyServer proxy = this.plugin.getBootstrap().getProxy();
-        proxy.getPluginManager().registerListener(this.plugin.getBootstrap(), this);
+        proxy.getPluginManager().registerListener(this.plugin.getLoader(), this);
         proxy.registerChannel(CHANNEL);
     }
 

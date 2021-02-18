@@ -76,7 +76,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
 
         /* registers the plugins intent to modify this events state going forward.
            this will prevent the event from completing until we're finished handling. */
-        e.registerIntent(this.plugin.getBootstrap());
+        e.registerIntent(this.plugin.getLoader());
 
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
             /* Actually process the login for the connection.
@@ -106,7 +106,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
             }
 
             // finally, complete our intent to modify state, so the proxy can continue handling the connection.
-            e.completeIntent(this.plugin.getBootstrap());
+            e.completeIntent(this.plugin.getLoader());
         });
     }
 
@@ -134,7 +134,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
                 e.getPlayer().disconnect(BungeeComponentSerializer.get().serialize(reason));
             } else {
                 // just send a message
-                this.plugin.getBootstrap().getProxy().getScheduler().schedule(this.plugin.getBootstrap(), () -> {
+                this.plugin.getBootstrap().getProxy().getScheduler().schedule(this.plugin.getLoader(), () -> {
                     if (!player.isConnected()) {
                         return;
                     }
