@@ -17,6 +17,7 @@ include (
         'bukkit',
         'bukkit:loader',
         'bukkit-legacy',
+        'bukkit-legacy:loader',
         'bungee',
         'bungee:loader',
         'fabric',
