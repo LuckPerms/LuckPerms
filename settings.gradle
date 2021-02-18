@@ -18,8 +18,10 @@ include (
         'bukkit:loader',
         'bukkit-legacy',
         'bungee',
+        'bungee:loader',
         'fabric',
         'nukkit',
+        'nukkit:loader',
         'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7',
         'velocity'
 )

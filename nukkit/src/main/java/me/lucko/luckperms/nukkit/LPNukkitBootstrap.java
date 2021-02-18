@@ -25,14 +25,16 @@
 
 package me.lucko.luckperms.nukkit;
 
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
-import me.lucko.luckperms.common.plugin.classpath.ReflectionClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
 import net.luckperms.api.platform.Platform;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.plugin.PluginBase;
 
 import java.nio.file.Path;
@@ -47,7 +49,8 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Bootstrap plugin for LuckPerms running on Nukkit.
  */
-public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap {
+public class LPNukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
+    private final PluginBase loader;
 
     /**
      * The plugin logger
@@ -78,13 +81,23 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
     private final CountDownLatch loadLatch = new CountDownLatch(1);
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
-    public LPNukkitBootstrap() {
+    public LPNukkitBootstrap(PluginBase loader) {
+        this.loader = loader;
+
         this.schedulerAdapter = new NukkitSchedulerAdapter(this);
-        this.classPathAppender = new ReflectionClassPathAppender(this);
+        this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
         this.plugin = new LPNukkitPlugin(this);
     }
 
     // provide adapters
+
+    public PluginBase getLoader() {
+        return this.loader;
+    }
+
+    public Server getServer() {
+        return this.loader.getServer();
+    }
 
     @Override
     public PluginLogger getPluginLogger() {
@@ -108,7 +121,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
 
     @Override
     public void onLoad() {
-        this.logger = new NukkitPluginLogger(getLogger());
+        this.logger = new NukkitPluginLogger(this.loader.getLogger());
 
         try {
             this.plugin.load();
@@ -146,7 +159,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
 
     @Override
     public String getVersion() {
-        return getDescription().getVersion();
+        return this.loader.getDescription().getVersion();
     }
 
     @Override
@@ -173,7 +186,7 @@ public class LPNukkitBootstrap extends PluginBase implements LuckPermsBootstrap 
 
     @Override
     public Path getDataDirectory() {
-        return getDataFolder().toPath().toAbsolutePath();
+        return this.loader.getDataFolder().toPath().toAbsolutePath();
     }
 
     @Override

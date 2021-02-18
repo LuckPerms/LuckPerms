@@ -73,6 +73,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +107,10 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     public LPBukkitBootstrap getBootstrap() {
         return this.bootstrap;
+    }
+
+    public JavaPlugin getLoader() {
+        return this.bootstrap.getLoader();
     }
 
     @Override

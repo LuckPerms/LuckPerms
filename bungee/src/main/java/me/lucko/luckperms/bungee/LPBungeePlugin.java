@@ -51,6 +51,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
+import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.Optional;
 import java.util.Set;
@@ -80,6 +81,10 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
         return this.bootstrap;
     }
 
+    public Plugin getLoader() {
+        return this.bootstrap.getLoader();
+    }
+
     @Override
     protected void setupSenderFactory() {
         this.senderFactory = new BungeeSenderFactory(this);
@@ -101,8 +106,8 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerPlatformListeners() {
         this.connectionListener = new BungeeConnectionListener(this);
-        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap, this.connectionListener);
-        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap, new BungeePermissionCheckListener(this));
+        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap.getLoader(), this.connectionListener);
+        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap.getLoader(), new BungeePermissionCheckListener(this));
     }
 
     @Override
@@ -137,7 +142,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
         this.contextManager = new BungeeContextManager(this);
 
         BungeePlayerCalculator playerCalculator = new BungeePlayerCalculator(this);
-        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap, playerCalculator);
+        this.bootstrap.getProxy().getPluginManager().registerListener(this.bootstrap.getLoader(), playerCalculator);
         this.contextManager.registerCalculator(playerCalculator);
 
         if (this.bootstrap.getProxy().getPluginManager().getPlugin("RedisBungee") != null) {

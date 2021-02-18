@@ -23,22 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.loader;
+package me.lucko.luckperms.bungee.loader;
 
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import net.md_5.bungee.api.plugin.Plugin;
 
-public class BukkitLoaderPlugin extends JavaPlugin {
-    private static final String JAR_NAME = "luckperms-bukkit.jarinjar";
-    private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.bukkit.LPBukkitBootstrap";
+public class BungeeLoaderPlugin extends Plugin {
+    private static final String JAR_NAME = "luckperms-bungee.jarinjar";
+    private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.bungee.LPBungeeBootstrap";
 
     private final LoaderBootstrap plugin;
 
-    public BukkitLoaderPlugin() {
+    public BungeeLoaderPlugin() {
         JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
-        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, JavaPlugin.class, this);
+        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, Plugin.class, this);
     }
 
     @Override

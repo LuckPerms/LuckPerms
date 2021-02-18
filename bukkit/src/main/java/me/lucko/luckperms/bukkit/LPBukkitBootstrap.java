@@ -112,7 +112,7 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
     // provide adapters
 
     public JavaPlugin getLoader() {
-        return loader;
+        return this.loader;
     }
 
     public Server getServer() {
@@ -156,7 +156,7 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
     @Override
     public void onEnable() {
         if (this.incompatibleVersion) {
-            Logger logger = loader.getLogger();
+            Logger logger = this.loader.getLogger();
             logger.severe("----------------------------------------------------------------------");
             logger.severe("Your server version is not compatible with this build of LuckPerms. :(");
             logger.severe("");

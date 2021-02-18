@@ -64,6 +64,7 @@ import net.luckperms.api.query.QueryOptions;
 import cn.nukkit.Player;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.permission.Permission;
+import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.plugin.service.ServicePriority;
 import cn.nukkit.utils.Config;
@@ -98,6 +99,10 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
         return this.bootstrap;
     }
 
+    public PluginBase getLoader() {
+        return this.bootstrap.getLoader();
+    }
+
     @Override
     protected void setupSenderFactory() {
         this.senderFactory = new NukkitSenderFactory(this);
@@ -111,8 +116,8 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerPlatformListeners() {
         this.connectionListener = new NukkitConnectionListener(this);
-        this.bootstrap.getServer().getPluginManager().registerEvents(this.connectionListener, this.bootstrap);
-        this.bootstrap.getServer().getPluginManager().registerEvents(new NukkitPlatformListener(this), this.bootstrap);
+        this.bootstrap.getServer().getPluginManager().registerEvents(this.connectionListener, this.bootstrap.getLoader());
+        this.bootstrap.getServer().getPluginManager().registerEvents(new NukkitPlatformListener(this), this.bootstrap.getLoader());
     }
 
     @Override
@@ -144,7 +149,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
         this.contextManager = new NukkitContextManager(this);
 
         NukkitPlayerCalculator playerCalculator = new NukkitPlayerCalculator(this);
-        this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap);
+        this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap.getLoader());
         this.contextManager.registerCalculator(playerCalculator);
     }
 
@@ -163,7 +168,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
 
             // schedule another injection after all plugins have loaded
             // the entire pluginmanager instance is replaced by some plugins :(
-            this.bootstrap.getServer().getScheduler().scheduleDelayedTask(this.bootstrap, injector, 1, true);
+            this.bootstrap.getServer().getScheduler().scheduleDelayedTask(this.bootstrap.getLoader(), injector, 1, true);
         }
     }
 
@@ -174,7 +179,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerApiOnPlatform(LuckPerms api) {
-        this.bootstrap.getServer().getServiceManager().register(LuckPerms.class, api, this.bootstrap, ServicePriority.NORMAL);
+        this.bootstrap.getServer().getServiceManager().register(LuckPerms.class, api, this.bootstrap.getLoader(), ServicePriority.NORMAL);
     }
 
     @Override

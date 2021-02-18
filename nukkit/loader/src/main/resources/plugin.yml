@@ -5,7 +5,7 @@ description: A permissions plugin
 author: Luck
 website: https://luckperms.net
 
-main: me.lucko.luckperms.nukkit.LPNukkitBootstrap
+main: me.lucko.luckperms.nukkit.loader.NukkitLoaderPlugin
 load: STARTUP
 
 commands:

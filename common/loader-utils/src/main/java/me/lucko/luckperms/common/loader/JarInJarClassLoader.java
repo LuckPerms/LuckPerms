@@ -111,10 +111,11 @@ public class JarInJarClassLoader extends URLClassLoader {
             throw new LoadingException("Could not locate jar-in-jar");
         }
 
-        // get a temporary file
+        // create a temporary file
+        // on posix systems by default this is only read/writable by the process owner
         Path path;
         try {
-            path = Files.createTempFile("luckpermsplugin", "jar");
+            path = Files.createTempFile("luckperms-jarinjar", ".jar.tmp");
         } catch (IOException e) {
             throw new LoadingException("Unable to create a temporary file", e);
         }

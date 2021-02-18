@@ -33,7 +33,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 
-@Deprecated // TODO: no longer works on Java 16 - Bungee, Nukkit & Sponge need to switch to JarInJar
+@Deprecated // TODO: no longer works on Java 16 - Sponge needs to switch to JarInJar or find an API to add to classpath at runtime
 public class ReflectionClassPathAppender implements ClassPathAppender {
     private static final Method ADD_URL_METHOD;
 

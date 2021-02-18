@@ -23,22 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.loader;
+package me.lucko.luckperms.nukkit.loader;
 
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import cn.nukkit.plugin.PluginBase;
 
-public class BukkitLoaderPlugin extends JavaPlugin {
-    private static final String JAR_NAME = "luckperms-bukkit.jarinjar";
-    private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.bukkit.LPBukkitBootstrap";
+public class NukkitLoaderPlugin extends PluginBase {
+    private static final String JAR_NAME = "luckperms-nukkit.jarinjar";
+    private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.nukkit.LPNukkitBootstrap";
 
     private final LoaderBootstrap plugin;
 
-    public BukkitLoaderPlugin() {
+    public NukkitLoaderPlugin() {
         JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
-        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, JavaPlugin.class, this);
+        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, PluginBase.class, this);
     }
 
     @Override

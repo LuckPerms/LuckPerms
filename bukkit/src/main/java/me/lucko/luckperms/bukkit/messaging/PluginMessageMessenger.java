@@ -58,14 +58,14 @@ public class PluginMessageMessenger implements Messenger, PluginMessageListener 
     }
 
     public void init() {
-        this.plugin.getBootstrap().getServer().getMessenger().registerOutgoingPluginChannel(this.plugin.getBootstrap().getLoader(), CHANNEL);
-        this.plugin.getBootstrap().getServer().getMessenger().registerIncomingPluginChannel(this.plugin.getBootstrap().getLoader(), CHANNEL, this);
+        this.plugin.getBootstrap().getServer().getMessenger().registerOutgoingPluginChannel(this.plugin.getLoader(), CHANNEL);
+        this.plugin.getBootstrap().getServer().getMessenger().registerIncomingPluginChannel(this.plugin.getLoader(), CHANNEL, this);
     }
 
     @Override
     public void close() {
-        this.plugin.getBootstrap().getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.getBootstrap().getLoader(), CHANNEL);
-        this.plugin.getBootstrap().getServer().getMessenger().unregisterOutgoingPluginChannel(this.plugin.getBootstrap().getLoader(), CHANNEL);
+        this.plugin.getBootstrap().getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.getLoader(), CHANNEL);
+        this.plugin.getBootstrap().getServer().getMessenger().unregisterOutgoingPluginChannel(this.plugin.getLoader(), CHANNEL);
     }
 
     @Override
@@ -83,10 +83,10 @@ public class PluginMessageMessenger implements Messenger, PluginMessageListener 
                     return;
                 }
 
-                p.sendPluginMessage(PluginMessageMessenger.this.plugin.getBootstrap().getLoader(), CHANNEL, data);
+                p.sendPluginMessage(PluginMessageMessenger.this.plugin.getLoader(), CHANNEL, data);
                 cancel();
             }
-        }.runTaskTimer(this.plugin.getBootstrap().getLoader(), 1L, 100L);
+        }.runTaskTimer(this.plugin.getLoader(), 1L, 100L);
     }
 
     @Override
