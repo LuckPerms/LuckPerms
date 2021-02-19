@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.cacheddata.type;
 
+import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
@@ -74,13 +75,13 @@ public class SimpleMetaCache extends UsageTracked implements CachedMetaData {
         this.plugin = plugin;
         this.queryOptions = queryOptions;
 
-        this.meta = Multimaps.asMap(ImmutableListMultimap.copyOf(sourceMeta.getMeta()));
+        Map<String, List<String>> meta = Multimaps.asMap(ImmutableListMultimap.copyOf(sourceMeta.getMeta()));
 
         MetaValueSelector metaValueSelector = this.queryOptions.option(MetaValueSelector.KEY)
                 .orElseGet(() -> this.plugin.getConfiguration().get(ConfigKeys.META_VALUE_SELECTOR));
 
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        for (Map.Entry<String, List<String>> e : this.meta.entrySet()) {
+        for (Map.Entry<String, List<String>> e : meta.entrySet()) {
             if (e.getValue().isEmpty()) {
                 continue;
             }
@@ -93,6 +94,7 @@ public class SimpleMetaCache extends UsageTracked implements CachedMetaData {
             builder.put(e.getKey(), selected);
         }
         this.flattenedMeta = builder.build();
+        this.meta = new LowerCaseMetaMap(meta);
 
         this.prefixes = ImmutableSortedMap.copyOfSorted(sourceMeta.getPrefixes());
         this.suffixes = ImmutableSortedMap.copyOfSorted(sourceMeta.getSuffixes());
@@ -106,7 +108,7 @@ public class SimpleMetaCache extends UsageTracked implements CachedMetaData {
 
     public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
         Objects.requireNonNull(key, "key");
-        return this.flattenedMeta.get(key);
+        return this.flattenedMeta.get(key.toLowerCase());
     }
 
     @Override
@@ -182,6 +184,29 @@ public class SimpleMetaCache extends UsageTracked implements CachedMetaData {
     @Override
     public @NonNull QueryOptions getQueryOptions() {
         return this.queryOptions;
+    }
+
+    private static final class LowerCaseMetaMap extends ForwardingMap<String, List<String>> {
+        private final Map<String, List<String>> delegate;
+
+        private LowerCaseMetaMap(Map<String, List<String>> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        protected Map<String, List<String>> delegate() {
+            return this.delegate;
+        }
+
+        @Override
+        public List<String> get(Object k) {
+            if (k == null) {
+                return null;
+            }
+
+            String key = (String) k;
+            return super.get(key.toLowerCase());
+        }
     }
 
 }
