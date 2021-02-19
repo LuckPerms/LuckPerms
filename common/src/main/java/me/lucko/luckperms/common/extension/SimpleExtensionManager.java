@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.extension;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
@@ -144,7 +143,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             throw new IllegalArgumentException("class is null");
         }
 
-        if (useParentClassLoader && getClass().getClassLoader() instanceof JarInJarClassLoader) {
+        if (useParentClassLoader && isJarInJar()) {
             try {
                 addJarToParentClasspath(path);
             } catch (Exception e) {
@@ -194,6 +193,11 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
     @Override
     public @NonNull Collection<Extension> getLoadedExtensions() {
         return this.extensions.stream().map(e -> e.instance).collect(Collectors.toSet());
+    }
+
+    private static boolean isJarInJar() {
+        String thisClassLoaderName = SimpleExtensionManager.class.getClassLoader().getClass().getName();
+        return thisClassLoaderName.equals("me.lucko.luckperms.common.loader.JarInJarClassLoader");
     }
 
     private static void addJarToParentClasspath(Path path) throws Exception {
