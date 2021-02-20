@@ -155,8 +155,8 @@ public enum Dependency {
     POSTGRESQL_DRIVER(
             "org{}postgresql",
             "postgresql",
-            "9.4.1212",
-            "DLKhWL4xrPIY4KThjI89usaKO8NIBkaHc/xECUsMNl0=",
+            "42.2.19",
+            "IydH+gkk2Iom36QrgSi2+hFAgC2AQSWJFZboyl8pEyI=",
             Relocation.of("postgresql", "org{}postgresql")
     ),
     H2_DRIVER(
@@ -180,8 +180,8 @@ public enum Dependency {
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "3.4.5",
-            "i3MvlHBXDUqEHcHvbIJrWGl4sluoMHEv8fpZ3idd+mE=",
+            "4.0.2",
+            "DP9czSdMnMysTbuoBK5cy9w5r2zR6rdaB09L/HfHncU=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
