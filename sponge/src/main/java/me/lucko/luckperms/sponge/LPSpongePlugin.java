@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.sender.DummySender;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
-import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.sponge.calculator.SpongeCalculatorFactory;
 import me.lucko.luckperms.sponge.commands.SpongeParentCommand;
 import me.lucko.luckperms.sponge.context.SpongeContextManager;
@@ -67,10 +66,6 @@ import net.luckperms.api.query.QueryOptions;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -123,7 +118,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new SpongeConfigAdapter(this, resolveConfig());
+        return new SpongeConfigAdapter(this, resolveConfig("luckperms.conf"));
     }
 
     @Override
@@ -236,22 +231,6 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         this.service.invalidateAllCaches();
     }
 
-    private Path resolveConfig() {
-        Path path = this.bootstrap.getConfigDirectory().resolve("luckperms.conf");
-        if (!Files.exists(path)) {
-            try {
-                MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigDirectory());
-                try (InputStream is = getClass().getClassLoader().getResourceAsStream("luckperms.conf")) {
-                    Files.copy(is, path);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return path;
-    }
-
     @Override
     public Optional<QueryOptions> getQueryOptionsForUser(User user) {
         return this.bootstrap.getPlayer(user.getUniqueId()).map(player -> this.contextManager.getQueryOptions(player));
@@ -273,7 +252,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
             return new DummySender(this, Sender.CONSOLE_UUID, Sender.CONSOLE_NAME) {
                 @Override
                 public void sendMessage(Component message) {
-                    LPSpongePlugin.this.bootstrap.getPluginLogger().info(LegacyComponentSerializer.legacySection().serialize(TranslationManager.render(message)));
+                    LPSpongePlugin.this.getLogger().info(LegacyComponentSerializer.legacySection().serialize(TranslationManager.render(message)));
                 }
             };
         }

@@ -26,21 +26,22 @@
 package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
-import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
 import net.luckperms.api.platform.Platform;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginDescription;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -50,11 +51,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 /**
  * Bootstrap plugin for LuckPerms running on BungeeCord.
  */
-public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
+public class LPBungeeBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
+    private final Plugin loader;
 
     /**
      * The plugin logger
@@ -67,9 +70,9 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     private final SchedulerAdapter schedulerAdapter;
 
     /**
-     * The plugin classloader
+     * The plugin class path appender
      */
-    private final PluginClassLoader classLoader;
+    private final ClassPathAppender classPathAppender;
 
     /**
      * The plugin instance
@@ -88,13 +91,23 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     // if the plugin has been loaded on an incompatible version
     private boolean incompatibleVersion = false;
 
-    public LPBungeeBootstrap() {
+    public LPBungeeBootstrap(Plugin loader) {
+        this.loader = loader;
+
         this.schedulerAdapter = new BungeeSchedulerAdapter(this);
-        this.classLoader = new ReflectionClassLoader(this);
+        this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
         this.plugin = new LPBungeePlugin(this);
     }
 
     // provide adapters
+
+    public Plugin getLoader() {
+        return this.loader;
+    }
+
+    public ProxyServer getProxy() {
+        return this.loader.getProxy();
+    }
 
     @Override
     public PluginLogger getPluginLogger() {
@@ -110,15 +123,15 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     }
 
     @Override
-    public PluginClassLoader getPluginClassLoader() {
-        return this.classLoader;
+    public ClassPathAppender getClassPathAppender() {
+        return this.classPathAppender;
     }
 
     // lifecycle
 
     @Override
     public void onLoad() {
-        this.logger = new JavaPluginLogger(getLogger());
+        this.logger = new JavaPluginLogger(this.loader.getLogger());
 
         if (checkIncompatibleVersion()) {
             this.incompatibleVersion = true;
@@ -135,16 +148,17 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
     @Override
     public void onEnable() {
         if (this.incompatibleVersion) {
-            getLogger().severe("----------------------------------------------------------------------");
-            getLogger().severe("Your proxy version is not compatible with this build of LuckPerms. :(");
-            getLogger().severe("");
-            getLogger().severe("This is most likely because you are using an old/outdated version of BungeeCord.");
-            getLogger().severe("If you need 1.7 support, replace your BungeeCord.jar file with the latest build of");
-            getLogger().severe("'Travertine' from here:");
-            getLogger().severe("==> https://papermc.io/downloads#Travertine");
-            getLogger().severe("");
-            getLogger().severe("The proxy will now shutdown.");
-            getLogger().severe("----------------------------------------------------------------------");
+            Logger logger = this.loader.getLogger();
+            logger.severe("----------------------------------------------------------------------");
+            logger.severe("Your proxy version is not compatible with this build of LuckPerms. :(");
+            logger.severe("");
+            logger.severe("This is most likely because you are using an old/outdated version of BungeeCord.");
+            logger.severe("If you need 1.7 support, replace your BungeeCord.jar file with the latest build of");
+            logger.severe("'Travertine' from here:");
+            logger.severe("==> https://papermc.io/downloads#Travertine");
+            logger.severe("");
+            logger.severe("The proxy will now shutdown.");
+            logger.severe("----------------------------------------------------------------------");
             getProxy().stop();
             return;
         }
@@ -180,7 +194,7 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     @Override
     public String getVersion() {
-        return getDescription().getVersion();
+        return this.loader.getDescription().getVersion();
     }
 
     @Override
@@ -207,12 +221,7 @@ public class LPBungeeBootstrap extends Plugin implements LuckPermsBootstrap {
 
     @Override
     public Path getDataDirectory() {
-        return getDataFolder().toPath().toAbsolutePath();
-    }
-
-    @Override
-    public InputStream getResourceStream(String path) {
-        return getResourceAsStream(path);
+        return this.loader.getDataFolder().toPath().toAbsolutePath();
     }
 
     @Override

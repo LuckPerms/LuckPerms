@@ -60,6 +60,10 @@ import net.luckperms.api.LuckPerms;
 
 import okhttp3.OkHttpClient;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -263,6 +267,24 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 Dependency.BYTEBUDDY,
                 Dependency.EVENT
         );
+    }
+
+    protected Path resolveConfig(String fileName) {
+        Path configFile = getBootstrap().getDataDirectory().resolve(fileName);
+        if (!Files.exists(configFile)) {
+            try {
+                Files.createDirectories(configFile.getParent());
+            } catch (IOException e) {
+                // ignore
+            }
+
+            try (InputStream is = getBootstrap().getResourceStream(fileName)) {
+                Files.copy(is, configFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return configFile;
     }
 
     protected abstract void setupSenderFactory();

@@ -44,7 +44,7 @@ public final class LuckPermsBrigadier {
     private LuckPermsBrigadier() {}
 
     public static void register(LPBukkitPlugin plugin, Command pluginCommand) throws Exception {
-        Commodore commodore = CommodoreProvider.getCommodore(plugin.getBootstrap());
+        Commodore commodore = CommodoreProvider.getCommodore(plugin.getLoader());
         try (InputStream is = plugin.getBootstrap().getResourceStream("luckperms.commodore")) {
             if (is == null) {
                 throw new Exception("Brigadier command data missing from jar");

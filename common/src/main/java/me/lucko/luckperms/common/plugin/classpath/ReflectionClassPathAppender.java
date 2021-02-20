@@ -23,19 +23,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.dependencies.classloader;
+package me.lucko.luckperms.common.plugin.classpath;
 
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 
-public class ReflectionClassLoader implements PluginClassLoader {
-
+@Deprecated // TODO: no longer works on Java 16 - Sponge needs to switch to JarInJar or find an API to add to classpath at runtime
+public class ReflectionClassPathAppender implements ClassPathAppender {
     private static final Method ADD_URL_METHOD;
 
     static {
@@ -58,7 +57,7 @@ public class ReflectionClassLoader implements PluginClassLoader {
 
     private final URLClassLoader classLoader;
 
-    public ReflectionClassLoader(LuckPermsBootstrap bootstrap) throws IllegalStateException {
+    public ReflectionClassPathAppender(LuckPermsBootstrap bootstrap) throws IllegalStateException {
         ClassLoader classLoader = bootstrap.getClass().getClassLoader();
         if (classLoader instanceof URLClassLoader) {
             this.classLoader = (URLClassLoader) classLoader;
@@ -71,7 +70,7 @@ public class ReflectionClassLoader implements PluginClassLoader {
     public void addJarToClasspath(Path file) {
         try {
             ADD_URL_METHOD.invoke(this.classLoader, file.toUri().toURL());
-        } catch (IllegalAccessException | InvocationTargetException | MalformedURLException e) {
+        } catch (ReflectiveOperationException | MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -92,7 +91,7 @@ public class ReflectionClassLoader implements PluginClassLoader {
         Method addOpensMethod = moduleClass.getMethod("addOpens", String.class, moduleClass);
 
         Object urlClassLoaderModule = getModuleMethod.invoke(URLClassLoader.class);
-        Object thisModule = getModuleMethod.invoke(ReflectionClassLoader.class);
+        Object thisModule = getModuleMethod.invoke(ReflectionClassPathAppender.class);
 
         addOpensMethod.invoke(urlClassLoaderModule, URLClassLoader.class.getPackage().getName(), thisModule);
     }

@@ -23,27 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric;
+package me.lucko.luckperms.bukkit.loader;
 
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
+import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
 
-import net.fabricmc.loader.launch.common.FabricLauncherBase;
+import org.bukkit.plugin.java.JavaPlugin;
 
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+public class BukkitLoaderPlugin extends JavaPlugin {
+    private static final String JAR_NAME = "luckperms-bukkit.jarinjar";
+    private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.bukkit.LPBukkitBootstrap";
 
-public class FabricClassLoader implements PluginClassLoader {
+    private final LoaderBootstrap plugin;
+
+    public BukkitLoaderPlugin() {
+        JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
+        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, JavaPlugin.class, this);
+    }
 
     @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            // Fabric abstracts class loading away to the FabricLauncher.
-            // TODO(i509VCB): Work on API for Fabric Loader which does not touch internals.
-            //  Player wants to use project jigsaw in the future.
-            FabricLauncherBase.getLauncher().propose(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+    public void onLoad() {
+        this.plugin.onLoad();
+    }
+
+    @Override
+    public void onEnable() {
+        this.plugin.onEnable();
+    }
+
+    @Override
+    public void onDisable() {
+        this.plugin.onDisable();
     }
 
 }

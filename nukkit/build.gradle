@@ -9,22 +9,15 @@ repositories {
 
 dependencies {
     compile project(':common')
+    compileOnly project(':common:loader-utils')
 
     compileOnly 'cn.nukkit:nukkit:1.0-SNAPSHOT'
 }
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        expand 'pluginVersion': project.ext.fullVersion
-        include 'plugin.yml'
-    }
-}
-
 shadowJar {
-    archiveName = "LuckPerms-Nukkit-${project.ext.fullVersion}.jar"
+    archiveName = 'luckperms-nukkit.jarinjar'
 
     dependencies {
-        include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
     }
 

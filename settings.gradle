@@ -13,11 +13,16 @@ rootProject.name = 'luckperms'
 include (
         'api',
         'common',
+        'common:loader-utils',
         'bukkit',
+        'bukkit:loader',
         'bukkit-legacy',
+        'bukkit-legacy:loader',
         'bungee',
+        'bungee:loader',
         'fabric',
         'nukkit',
+        'nukkit:loader',
         'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7',
         'velocity'
 )

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.plugin.bootstrap;
 
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
@@ -66,11 +66,11 @@ public interface LuckPermsBootstrap {
     SchedulerAdapter getScheduler();
 
     /**
-     * Gets a {@link PluginClassLoader} for this instance
+     * Gets a {@link ClassPathAppender} for this bootstrap plugin
      *
-     * @return a classloader
+     * @return a class path appender
      */
-    PluginClassLoader getPluginClassLoader();
+    ClassPathAppender getClassPathAppender();
 
     /**
      * Returns a countdown latch which {@link CountDownLatch#countDown() counts down}
@@ -159,7 +159,9 @@ public interface LuckPermsBootstrap {
      * @param path the path of the file
      * @return the file as an input stream
      */
-    InputStream getResourceStream(String path);
+    default InputStream getResourceStream(String path) {
+        return getClass().getClassLoader().getResourceAsStream(path);
+    }
 
     /**
      * Gets a player object linked to this User. The returned object must be the same type

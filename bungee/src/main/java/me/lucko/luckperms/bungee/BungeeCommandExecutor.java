@@ -73,7 +73,7 @@ public class BungeeCommandExecutor extends Command implements TabExecutor {
 
     public void register() {
         ProxyServer proxy = this.plugin.getBootstrap().getProxy();
-        proxy.getPluginManager().registerCommand(this.plugin.getBootstrap(), this);
+        proxy.getPluginManager().registerCommand(this.plugin.getLoader(), this);
 
         // don't allow players to execute the slash aliases - these are just for the console.
         proxy.getDisabledCommands().addAll(Arrays.asList(SLASH_ALIASES));

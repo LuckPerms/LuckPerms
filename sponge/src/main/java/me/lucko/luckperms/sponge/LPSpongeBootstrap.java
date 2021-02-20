@@ -27,9 +27,9 @@ package me.lucko.luckperms.sponge;
 
 import com.google.inject.Inject;
 
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader;
-import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.ReflectionClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
@@ -56,7 +56,6 @@ import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.SynchronousExecutor;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -95,9 +94,9 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     private final SchedulerAdapter schedulerAdapter;
 
     /**
-     * The plugin classloader
+     * The plugin class path appender
      */
-    private final PluginClassLoader classLoader;
+    private final ClassPathAppender classPathAppender;
 
     /**
      * The plugin instance
@@ -142,7 +141,7 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
         this.logger = new Slf4jPluginLogger(logger);
         this.spongeScheduler = Sponge.getScheduler();
         this.schedulerAdapter = new SpongeSchedulerAdapter(this, this.spongeScheduler, syncExecutor, asyncExecutor);
-        this.classLoader = new ReflectionClassLoader(this);
+        this.classPathAppender = new ReflectionClassPathAppender(this);
         this.plugin = new LPSpongePlugin(this);
     }
 
@@ -159,8 +158,8 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
 
     @Override
-    public PluginClassLoader getPluginClassLoader() {
-        return this.classLoader;
+    public ClassPathAppender getClassPathAppender() {
+        return this.classPathAppender;
     }
 
     // lifecycle
@@ -264,11 +263,6 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     @Override
     public Path getConfigDirectory() {
         return this.configDirectory.toAbsolutePath();
-    }
-
-    @Override
-    public InputStream getResourceStream(String path) {
-        return getClass().getClassLoader().getResourceAsStream(path);
     }
 
     @Override

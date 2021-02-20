@@ -34,7 +34,7 @@ public class NukkitSchedulerAdapter extends AbstractJavaScheduler implements Sch
     private final Executor sync;
 
     public NukkitSchedulerAdapter(LPNukkitBootstrap bootstrap) {
-        this.sync = r -> bootstrap.getServer().getScheduler().scheduleTask(bootstrap, r, false);
+        this.sync = r -> bootstrap.getServer().getScheduler().scheduleTask(bootstrap.getLoader(), r, false);
     }
 
     @Override

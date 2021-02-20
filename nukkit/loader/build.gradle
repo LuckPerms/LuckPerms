@@ -1,0 +1,34 @@
+plugins {
+    id 'com.github.johnrengelman.shadow'
+}
+
+repositories {
+    mavenLocal()
+    maven { url 'https://repo.nukkitx.com/main/' }
+}
+
+dependencies {
+    compileOnly 'cn.nukkit:nukkit:1.0-SNAPSHOT'
+
+    compile project(':api')
+    compile project(':common:loader-utils')
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        expand 'pluginVersion': project.ext.fullVersion
+        include 'plugin.yml'
+    }
+}
+
+shadowJar {
+    archiveName = "LuckPerms-Nukkit-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':nukkit').tasks.shadowJar.archiveFile
+    }
+}
+
+artifacts {
+    archives shadowJar
+}

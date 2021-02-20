@@ -39,7 +39,7 @@ public class NukkitEventBus extends AbstractEventBus<Plugin> implements Listener
 
         // register listener
         LPNukkitBootstrap bootstrap = plugin.getBootstrap();
-        bootstrap.getServer().getPluginManager().registerEvents(this, bootstrap);
+        bootstrap.getServer().getPluginManager().registerEvents(this, bootstrap.getLoader());
     }
 
     @Override
