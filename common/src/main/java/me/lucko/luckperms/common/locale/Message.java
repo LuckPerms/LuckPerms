@@ -60,6 +60,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -2237,7 +2238,14 @@ public interface Message {
                     .append(space())
                     .append(formatContextSetBracketed(node.getContexts(), empty()))
                     .apply(builder -> {
-                        String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                        InheritanceOriginMetadata origin = node.metadata(InheritanceOriginMetadata.KEY);
+                        String originName;
+                        if (origin.wasInherited(holder.getIdentifier())) {
+                            originName = origin.getOrigin().getName();
+                        } else {
+                            originName = holder.getPlainDisplayName();
+                        }
+                        HolderType originType = HolderType.valueOf(origin.getOrigin().getType().toUpperCase(Locale.ROOT));
                         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                         Component hover = join(newline(),
@@ -2251,10 +2259,10 @@ public interface Message {
                                 translatable()
                                         .key("luckperms.command.generic.chat-meta.info.click-to-remove")
                                         .color(GRAY)
-                                        .args(text(node.getMetaType().toString()), text(holderName))
+                                        .args(text(node.getMetaType().toString()), text(originName))
                         );
 
-                        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, holderName, holder.getType(), explicitGlobalContext);
+                        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, originName, originType, explicitGlobalContext);
 
                         builder.hoverEvent(HoverEvent.showText(hover));
                         builder.clickEvent(ClickEvent.suggestCommand(command));
@@ -2305,7 +2313,14 @@ public interface Message {
                     .append(space())
                     .append(formatContextSetBracketed(node.getContexts(), empty()))
                     .apply(builder -> {
-                        String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                        InheritanceOriginMetadata origin = node.metadata(InheritanceOriginMetadata.KEY);
+                        String originName;
+                        if (origin.wasInherited(holder.getIdentifier())) {
+                            originName = origin.getOrigin().getName();
+                        } else {
+                            originName = holder.getPlainDisplayName();
+                        }
+                        HolderType originType = HolderType.valueOf(origin.getOrigin().getType().toUpperCase(Locale.ROOT));
                         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                         Component hover = join(newline(),
@@ -2319,10 +2334,10 @@ public interface Message {
                                 translatable()
                                         .key("luckperms.command.generic.meta.info.click-to-remove")
                                         .color(GRAY)
-                                        .args(text(holderName))
+                                        .args(text(originName))
                         );
 
-                        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, holderName, holder.getType(), explicitGlobalContext);
+                        String command = "/" + label + " " + NodeCommandFactory.undoCommand(node, originName, originType, explicitGlobalContext);
 
                         builder.hoverEvent(HoverEvent.showText(hover));
                         builder.clickEvent(ClickEvent.suggestCommand(command));
