@@ -162,7 +162,7 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
             logger.severe("");
             logger.severe("If your server is running 1.8, please update to 1.8.8 or higher.");
             logger.severe("If your server is running 1.7.10, please download the Bukkit-Legacy version of LuckPerms from here:");
-            logger.severe("==> https://ci.lucko.me/job/LuckPerms/");
+            logger.severe("==> https://luckperms.net/download");
             logger.severe("----------------------------------------------------------------------");
             getServer().getPluginManager().disablePlugin(this.loader);
             return;

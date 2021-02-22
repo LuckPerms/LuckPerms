@@ -191,15 +191,13 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void performFinalSetup() {
         // register permissions
-        try {
-            PluginManager pm = this.bootstrap.getServer().getPluginManager();
-            PermissionDefault permDefault = getConfiguration().get(ConfigKeys.COMMANDS_ALLOW_OP) ? PermissionDefault.OP : PermissionDefault.FALSE;
+        PluginManager pluginManager = this.bootstrap.getServer().getPluginManager();
+        PermissionDefault permDefault = getConfiguration().get(ConfigKeys.COMMANDS_ALLOW_OP) ? PermissionDefault.OP : PermissionDefault.FALSE;
 
-            for (CommandPermission p : CommandPermission.values()) {
-                pm.addPermission(new Permission(p.getPermission(), null, permDefault.toString()));
-            }
-        } catch (Exception e) {
-            // this throws an exception if the plugin is /reloaded, grr
+        for (CommandPermission permission : CommandPermission.values()) {
+            Permission bukkitPermission = new Permission(permission.getPermission(), null, permDefault.toString());
+            pluginManager.removePermission(bukkitPermission);
+            pluginManager.addPermission(bukkitPermission);
         }
 
         // remove all operators on startup if they're disabled

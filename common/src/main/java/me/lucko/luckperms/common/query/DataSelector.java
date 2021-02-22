@@ -46,7 +46,7 @@ public final class DataSelector {
     private static final DataType[] TRANSIENT = new DataType[]{DataType.TRANSIENT};
     private static final DataType[] NONE = new DataType[0];
 
-    public static DataType[] select(QueryOptions queryOptions, PermissionHolder.Identifier identifier) {
+    public static DataType[] selectOrder(QueryOptions queryOptions, PermissionHolder.Identifier identifier) {
         final DataQueryOrderFunction orderFunc = queryOptions.option(DataQueryOrderFunction.KEY).orElse(null);
         final DataTypeFilterFunction filterFunc = queryOptions.option(DataTypeFilterFunction.KEY).orElse(null);
 

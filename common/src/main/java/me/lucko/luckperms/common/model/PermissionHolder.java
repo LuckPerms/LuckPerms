@@ -247,7 +247,7 @@ public abstract class PermissionHolder {
     }
 
     private DataType[] queryOrder(QueryOptions queryOptions) {
-        return DataSelector.select(queryOptions, getIdentifier());
+        return DataSelector.selectOrder(queryOptions, getIdentifier());
     }
 
     public List<Node> getOwnNodes(QueryOptions queryOptions) {

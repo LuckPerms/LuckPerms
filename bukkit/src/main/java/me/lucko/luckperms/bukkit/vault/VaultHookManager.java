@@ -60,9 +60,9 @@ public class VaultHookManager {
                 this.chat = new LuckPermsVaultChat(this.plugin, this.permission);
             }
 
-            final ServicesManager sm = this.plugin.getBootstrap().getServer().getServicesManager();
-            sm.register(Permission.class, this.permission, this.plugin.getLoader(), ServicePriority.High);
-            sm.register(Chat.class, this.chat, this.plugin.getLoader(), ServicePriority.High);
+            ServicesManager servicesManager = this.plugin.getBootstrap().getServer().getServicesManager();
+            servicesManager.register(Permission.class, this.permission, this.plugin.getLoader(), ServicePriority.High);
+            servicesManager.register(Chat.class, this.chat, this.plugin.getLoader(), ServicePriority.High);
 
         } catch (Exception e) {
             this.plugin.getLogger().severe("Error occurred whilst hooking into Vault.", e);
@@ -73,15 +73,15 @@ public class VaultHookManager {
      * Unregisters the LuckPerms Vault hooks, if present.
      */
     public void unhook() {
-        final ServicesManager sm = this.plugin.getBootstrap().getServer().getServicesManager();
+        ServicesManager servicesManager = this.plugin.getBootstrap().getServer().getServicesManager();
 
         if (this.permission != null) {
-            sm.unregister(Permission.class, this.permission);
+            servicesManager.unregister(Permission.class, this.permission);
             this.permission = null;
         }
 
         if (this.chat != null) {
-            sm.unregister(Chat.class, this.chat);
+            servicesManager.unregister(Chat.class, this.chat);
             this.chat = null;
         }
     }
