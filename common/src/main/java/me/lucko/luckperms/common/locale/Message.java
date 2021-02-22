@@ -47,7 +47,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.model.PermissionHolder.Identifier;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
