@@ -516,6 +516,7 @@ public final class ConfigKeys {
         int maxPoolSize = c.getInteger("data.pool-settings.maximum-pool-size", c.getInteger("data.pool-size", 10));
         int minIdle = c.getInteger("data.pool-settings.minimum-idle", maxPoolSize);
         int maxLifetime = c.getInteger("data.pool-settings.maximum-lifetime", 1800000);
+        int keepAliveTime = c.getInteger("data.pool-settings.keepalive-time", 0);
         int connectionTimeout = c.getInteger("data.pool-settings.connection-timeout", 5000);
         Map<String, String> props = ImmutableMap.copyOf(c.getStringMap("data.pool-settings.properties", ImmutableMap.of()));
 
@@ -524,7 +525,7 @@ public final class ConfigKeys {
                 c.getString("data.database", null),
                 c.getString("data.username", null),
                 c.getString("data.password", null),
-                maxPoolSize, minIdle, maxLifetime, connectionTimeout, props
+                maxPoolSize, minIdle, maxLifetime, keepAliveTime, connectionTimeout, props
         );
     }));
 
