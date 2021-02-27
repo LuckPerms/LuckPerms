@@ -28,6 +28,7 @@ package me.lucko.luckperms.bukkit.listeners;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleInjector;
+import me.lucko.luckperms.bukkit.util.PlayerLocaleUtil;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -179,7 +180,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
                 if (this.detectedCraftBukkitOfflineMode) {
                     printCraftBukkitOfflineModeError();
 
-                    Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR_CB_OFFLINE_MODE.build(), player.getLocale());
+                    Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR_CB_OFFLINE_MODE.build(), PlayerLocaleUtil.getLocale(player));
                     e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
                     return;
                 }
@@ -190,7 +191,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
                         " - denying login.");
             }
 
-            Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLocale());
+            Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), PlayerLocaleUtil.getLocale(player));
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }
@@ -208,7 +209,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             this.plugin.getLogger().warn("Exception thrown when setting up permissions for " +
                     player.getUniqueId() + " - " + player.getName() + " - denying login.", t);
 
-            Component reason = TranslationManager.render(Message.LOADING_SETUP_ERROR.build(), player.getLocale());
+            Component reason = TranslationManager.render(Message.LOADING_SETUP_ERROR.build(), PlayerLocaleUtil.getLocale(player));
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, LegacyComponentSerializer.legacySection().serialize(reason));
             return;
         }
