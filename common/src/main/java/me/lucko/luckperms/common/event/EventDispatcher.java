@@ -88,6 +88,7 @@ import net.luckperms.api.event.user.UserCacheLoadEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.event.user.UserFirstLoginEvent;
 import net.luckperms.api.event.user.UserLoadEvent;
+import net.luckperms.api.event.user.UserUnloadEvent;
 import net.luckperms.api.event.user.track.UserDemoteEvent;
 import net.luckperms.api.event.user.track.UserPromoteEvent;
 import net.luckperms.api.extension.Extension;
@@ -365,6 +366,10 @@ public final class EventDispatcher {
         postAsync(UserLoadEvent.class, user.getApiProxy());
     }
 
+    public boolean dispatchUserUnload(User user) {
+        return postCancellable(UserUnloadEvent.class, false, user.getApiProxy());
+    }
+
     public void dispatchUserDemote(User user, Track track, String from, String to, @Nullable Sender sender) {
         Source source = sender == null ? UnknownSource.INSTANCE : new EntitySourceImpl(new SenderPlatformEntity(sender));
         postAsync(UserDemoteEvent.class, source, track.getApiProxy(), user.getApiProxy(), Optional.ofNullable(from), Optional.ofNullable(to));
@@ -424,6 +429,7 @@ public final class EventDispatcher {
                 UserDataRecalculateEvent.class,
                 UserFirstLoginEvent.class,
                 UserLoadEvent.class,
+                UserUnloadEvent.class,
                 UserDemoteEvent.class,
                 UserPromoteEvent.class
         );
