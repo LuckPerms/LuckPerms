@@ -33,7 +33,9 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
+import java.util.function.Function;
 
 /**
  * Holds cached meta lookup data for a specific set of contexts.
@@ -46,7 +48,37 @@ public interface CachedMetaData extends CachedData {
      * @param key the key
      * @return the value
      */
-    @Nullable String getMetaValue(String key);
+    @Nullable String getMetaValue(@NonNull String key);
+
+    /**
+     * Gets a value for the given meta key, and runs it through the given {@code transformer}.
+     *
+     * <p>If no such meta value exists, an {@link Optional#empty() empty optional} is returned.
+     * (the transformer will never be passed a null argument)</p>
+     *
+     * <p>The transformer is allowed to throw {@link IllegalArgumentException} or return null. This
+     * will also result in an {@link Optional#empty() empty optional} being returned.</p>
+     *
+     * <p>For example, to parse and return an integer meta value, use:</p>
+     * <p><blockquote><pre>
+     *     getMetaValue("my-int-val", Integer::parseInt).orElse(0);
+     * </pre></blockquote>
+     *
+     * @param key the key
+     * @param valueTransformer the transformer used to transform the value
+     * @param <T> the type of the transformed result
+     * @return the meta value
+     * @since 5.3
+     */
+    default <T> @NonNull Optional<T> getMetaValue(@NonNull String key, @NonNull Function<String, ? extends T> valueTransformer) {
+        return Optional.ofNullable(getMetaValue(key)).map(value -> {
+            try {
+                return valueTransformer.apply(value);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        });
+    }
 
     /**
      * Gets the holder's highest priority prefix, or null if the holder has no prefixes

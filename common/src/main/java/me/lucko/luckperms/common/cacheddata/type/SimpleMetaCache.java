@@ -112,7 +112,7 @@ public class SimpleMetaCache extends UsageTracked implements CachedMetaData {
     }
 
     @Override
-    public final String getMetaValue(String key) {
+    public final String getMetaValue(@NonNull String key) {
         return getMetaValue(key, MetaCheckEvent.Origin.LUCKPERMS_API);
     }
 
