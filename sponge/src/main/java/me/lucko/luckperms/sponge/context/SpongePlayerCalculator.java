@@ -55,11 +55,20 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.World;
 
+import java.util.Set;
+
 public class SpongePlayerCalculator implements ContextCalculator<Subject> {
     private final LPSpongePlugin plugin;
 
-    public SpongePlayerCalculator(LPSpongePlugin plugin) {
+    private final boolean gamemode;
+    private final boolean world;
+    private final boolean dimensionType;
+
+    public SpongePlayerCalculator(LPSpongePlugin plugin, Set<String> disabled) {
         this.plugin = plugin;
+        this.gamemode = !disabled.contains(DefaultContextKeys.GAMEMODE_KEY);
+        this.world = !disabled.contains(DefaultContextKeys.WORLD_KEY);
+        this.dimensionType = !disabled.contains(DefaultContextKeys.DIMENSION_TYPE_KEY);
     }
 
     @Override
@@ -71,11 +80,15 @@ public class SpongePlayerCalculator implements ContextCalculator<Subject> {
 
         if (source instanceof Locatable) {
             World world = ((Locatable) source).getWorld();
-            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogTypeName(world.getDimension().getType()));
-            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
+            if (this.dimensionType) {
+                consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogTypeName(world.getDimension().getType()));
+            }
+            if (this.world) {
+                this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
+            }
         }
 
-        if (source instanceof ValueContainer<?>) {
+        if (this.gamemode && source instanceof ValueContainer<?>) {
             ValueContainer<?> valueContainer = (ValueContainer<?>) source;
             valueContainer.get(Keys.GAME_MODE).ifPresent(mode -> consumer.accept(DefaultContextKeys.GAMEMODE_KEY, getCatalogTypeName(mode)));
         }
@@ -86,13 +99,17 @@ public class SpongePlayerCalculator implements ContextCalculator<Subject> {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         Game game = this.plugin.getBootstrap().getGame();
 
-        for (GameMode mode : game.getRegistry().getAllOf(CatalogTypes.GAME_MODE)) {
-            builder.add(DefaultContextKeys.GAMEMODE_KEY, getCatalogTypeName(mode));
+        if (this.gamemode) {
+            for (GameMode mode : game.getRegistry().getAllOf(CatalogTypes.GAME_MODE)) {
+                builder.add(DefaultContextKeys.GAMEMODE_KEY, getCatalogTypeName(mode));
+            }
         }
-        for (DimensionType dim : game.getRegistry().getAllOf(CatalogTypes.DIMENSION_TYPE)) {
-            builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogTypeName(dim));
+        if (this.dimensionType) {
+            for (DimensionType dim : game.getRegistry().getAllOf(CatalogTypes.DIMENSION_TYPE)) {
+                builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogTypeName(dim));
+            }
         }
-        if (game.isServerAvailable()) {
+        if (this.world && game.isServerAvailable()) {
             for (World world : game.getServer().getWorlds()) {
                 String worldName = world.getName();
                 if (Context.isValidValue(worldName)) {
@@ -114,6 +131,10 @@ public class SpongePlayerCalculator implements ContextCalculator<Subject> {
 
     @Listener(order = Order.LAST)
     public void onWorldChange(MoveEntityEvent.Teleport e) {
+        if (!(this.world || this.dimensionType)) {
+            return;
+        }
+
         Entity targetEntity = e.getTargetEntity();
         if (!(targetEntity instanceof Subject)) {
             return;
@@ -129,7 +150,7 @@ public class SpongePlayerCalculator implements ContextCalculator<Subject> {
     @Listener(order = Order.LAST)
     public void onGameModeChange(ChangeGameModeEvent e) {
         Humanoid targetEntity = e.getTargetEntity();
-        if (targetEntity instanceof Subject) {
+        if (this.gamemode && targetEntity instanceof Subject) {
             this.plugin.getContextManager().signalContextUpdate((Subject) targetEntity);
         }
     }

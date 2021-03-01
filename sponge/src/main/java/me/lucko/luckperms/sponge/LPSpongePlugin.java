@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
@@ -155,7 +156,7 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new SpongeContextManager(this);
 
-        SpongePlayerCalculator playerCalculator = new SpongePlayerCalculator(this);
+        SpongePlayerCalculator playerCalculator = new SpongePlayerCalculator(this, getConfiguration().get(ConfigKeys.DISABLED_CONTEXTS));
         this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, playerCalculator);
         this.contextManager.registerCalculator(playerCalculator);
     }

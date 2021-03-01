@@ -131,6 +131,16 @@ public final class ConfigKeys {
     });
 
     /**
+     * A set of disabled contexts
+     */
+    public static final ConfigKey<Set<String>> DISABLED_CONTEXTS = notReloadable(key(c -> {
+        return c.getStringList("disabled-contexts", ImmutableList.of())
+                .stream()
+                .map(String::toLowerCase)
+                .collect(ImmutableCollectors.toSet());
+    }));
+
+    /**
      * # If the servers own UUID cache/lookup facility should be used when there is no record for a player in the LuckPerms cache.
      */
     public static final ConfigKey<Boolean> USE_SERVER_UUID_CACHE = booleanKey("use-server-uuid-cache", false);

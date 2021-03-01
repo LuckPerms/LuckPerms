@@ -51,6 +51,8 @@ import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Set;
+
 public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listener {
     private static final EnumNamer<GameMode> GAMEMODE_NAMER = new EnumNamer<>(
             GameMode.class,
@@ -69,41 +71,58 @@ public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listen
 
     private final LPBukkitPlugin plugin;
 
-    public BukkitPlayerCalculator(LPBukkitPlugin plugin) {
+    private final boolean gamemode;
+    private final boolean world;
+    private final boolean dimensionType;
+
+    public BukkitPlayerCalculator(LPBukkitPlugin plugin, Set<String> disabled) {
         this.plugin = plugin;
+        this.gamemode = !disabled.contains(DefaultContextKeys.GAMEMODE_KEY);
+        this.world = !disabled.contains(DefaultContextKeys.WORLD_KEY);
+        this.dimensionType = !disabled.contains(DefaultContextKeys.DIMENSION_TYPE_KEY);
     }
 
     @SuppressWarnings("ConstantConditions") // bukkit lies
     @Override
     public void calculate(@NonNull Player subject, @NonNull ContextConsumer consumer) {
-        GameMode mode = subject.getGameMode();
-        if (mode != null) {
-            consumer.accept(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
+        if (this.gamemode) {
+            GameMode mode = subject.getGameMode();
+            if (mode != null) {
+                consumer.accept(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
+            }
         }
 
         World world = subject.getWorld();
         if (world != null) {
             Environment environment = world.getEnvironment();
-            if (environment != null) {
+            if (this.dimensionType && environment != null) {
                 consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(environment));
             }
-            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
+            if (this.world) {
+                this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
+            }
         }
     }
 
     @Override
     public ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (GameMode mode : GameMode.values()) {
-            builder.add(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
+        if (this.gamemode) {
+            for (GameMode mode : GameMode.values()) {
+                builder.add(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
+            }
         }
-        for (Environment env : Environment.values()) {
-            builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(env));
+        if (this.dimensionType) {
+            for (Environment env : Environment.values()) {
+                builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, DIMENSION_TYPE_NAMER.name(env));
+            }
         }
-        for (World world : this.plugin.getBootstrap().getServer().getWorlds()) {
-            String worldName = world.getName();
-            if (Context.isValidValue(worldName)) {
-                builder.add(DefaultContextKeys.WORLD_KEY, worldName);
+        if (this.world) {
+            for (World world : this.plugin.getBootstrap().getServer().getWorlds()) {
+                String worldName = world.getName();
+                if (Context.isValidValue(worldName)) {
+                    builder.add(DefaultContextKeys.WORLD_KEY, worldName);
+                }
             }
         }
         return builder.build();
@@ -111,16 +130,22 @@ public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listen
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
-        this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
+        if (this.world || this.dimensionType) {
+            this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoinWorld(PlayerJoinEvent e) {
-        this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
+        if (this.world || this.dimensionType) {
+            this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onGameModeChange(PlayerGameModeChangeEvent e) {
-        this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
+        if (this.gamemode) {
+            this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
+        }
     }
 }

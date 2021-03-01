@@ -27,6 +27,7 @@ package me.lucko.luckperms.fabric;
 
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
@@ -141,7 +142,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new FabricContextManager(this);
 
-        FabricPlayerCalculator playerCalculator = new FabricPlayerCalculator(this);
+        FabricPlayerCalculator playerCalculator = new FabricPlayerCalculator(this, getConfiguration().get(ConfigKeys.DISABLED_CONTEXTS));
         playerCalculator.registerListeners();
         this.contextManager.registerCalculator(playerCalculator);
     }

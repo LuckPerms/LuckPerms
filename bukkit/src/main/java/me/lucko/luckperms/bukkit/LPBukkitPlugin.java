@@ -190,7 +190,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new BukkitContextManager(this);
 
-        BukkitPlayerCalculator playerCalculator = new BukkitPlayerCalculator(this);
+        BukkitPlayerCalculator playerCalculator = new BukkitPlayerCalculator(this, getConfiguration().get(ConfigKeys.DISABLED_CONTEXTS));
         this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap.getLoader());
         this.contextManager.registerCalculator(playerCalculator);
     }

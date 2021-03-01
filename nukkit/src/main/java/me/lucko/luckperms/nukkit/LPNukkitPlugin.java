@@ -148,7 +148,7 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new NukkitContextManager(this);
 
-        NukkitPlayerCalculator playerCalculator = new NukkitPlayerCalculator(this);
+        NukkitPlayerCalculator playerCalculator = new NukkitPlayerCalculator(this, getConfiguration().get(ConfigKeys.DISABLED_CONTEXTS));
         this.bootstrap.getServer().getPluginManager().registerEvents(playerCalculator, this.bootstrap.getLoader());
         this.contextManager.registerCalculator(playerCalculator);
     }
