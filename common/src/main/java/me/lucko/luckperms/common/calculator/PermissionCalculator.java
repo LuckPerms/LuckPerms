@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.calculator;
 
-import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
@@ -37,7 +35,7 @@ import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -53,7 +51,7 @@ public class PermissionCalculator implements Function<String, TristateResult> {
     private final CacheMetadata metadata;
 
     /** The processors which back this calculator */
-    private final ImmutableList<PermissionProcessor> processors;
+    private final PermissionProcessor[] processors;
 
     /** Loading cache for permission checks */
     private final LoadingMap<String, TristateResult> lookupCache = LoadingMap.of(this);
@@ -61,10 +59,10 @@ public class PermissionCalculator implements Function<String, TristateResult> {
     /** The object name passed to the verbose handler when checks are made */
     private final String verboseCheckTarget;
 
-    public PermissionCalculator(LuckPermsPlugin plugin, CacheMetadata metadata, ImmutableList<PermissionProcessor> processors) {
+    public PermissionCalculator(LuckPermsPlugin plugin, CacheMetadata metadata, Collection<PermissionProcessor> processors) {
         this.plugin = plugin;
         this.metadata = metadata;
-        this.processors = processors;
+        this.processors = processors.toArray(new PermissionProcessor[0]);
 
         if (this.metadata.getHolderType() == HolderType.GROUP) {
             this.verboseCheckTarget = "group/" + this.metadata.getObjectName();
@@ -122,10 +120,6 @@ public class PermissionCalculator implements Function<String, TristateResult> {
             processor.setSource(sourceMap);
             processor.refresh();
         }
-    }
-
-    public List<PermissionProcessor> getProcessors() {
-        return this.processors;
     }
 
     public void invalidateCache() {

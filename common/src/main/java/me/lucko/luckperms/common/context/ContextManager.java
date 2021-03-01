@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
@@ -38,9 +39,9 @@ import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,8 +55,7 @@ public abstract class ContextManager<S, P extends S> {
     private final Class<S> subjectClass;
     private final Class<P> playerClass;
 
-    private final List<ContextCalculator<? super S>> calculators = new CopyOnWriteArrayList<>();
-    private final List<StaticContextCalculator> staticCalculators = new CopyOnWriteArrayList<>();
+    private final CalculatorList calculators = new CalculatorList();
 
     // caches static context lookups
     private final StaticLookupCache staticLookupCache = new StaticLookupCache();
@@ -115,49 +115,47 @@ public abstract class ContextManager<S, P extends S> {
     protected abstract void invalidateCache(S subject);
 
     public void registerCalculator(ContextCalculator<? super S> calculator) {
-        // calculators registered first should have priority (and be checked last.)
-        this.calculators.add(0, calculator);
-
-        if (calculator instanceof StaticContextCalculator) {
-            StaticContextCalculator staticCalculator = (StaticContextCalculator) calculator;
-            this.staticCalculators.add(0, staticCalculator);
-        }
+        this.calculators.add(calculator);
     }
 
     public void unregisterCalculator(ContextCalculator<? super S> calculator) {
         this.calculators.remove(calculator);
-        if (calculator instanceof StaticContextCalculator) {
-            this.staticCalculators.remove(calculator);
-        }
     }
 
     protected QueryOptions calculate(S subject) {
         ImmutableContextSet.Builder accumulator = new ImmutableContextSetImpl.BuilderImpl();
-        for (ContextCalculator<? super S> calculator : this.calculators) {
+        ContextConsumer consumer = accumulator::add;
+
+        for (ContextCalculator<? super S> calculator : this.calculators.calculators()) {
             try {
-                calculator.calculate(subject, accumulator::add);
+                calculator.calculate(subject, consumer);
             } catch (Throwable e) {
                 this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject, e);
             }
         }
+
         return formQueryOptions(subject, accumulator.build());
     }
 
     private QueryOptions calculateStatic() {
         ImmutableContextSet.Builder accumulator = new ImmutableContextSetImpl.BuilderImpl();
-        for (StaticContextCalculator calculator : this.staticCalculators) {
+        ContextConsumer consumer = accumulator::add;
+
+        for (StaticContextCalculator calculator : this.calculators.staticCalculators()) {
             try {
-                calculator.calculate(accumulator::add);
+                calculator.calculate(consumer);
             } catch (Throwable e) {
                 this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts", e);
             }
         }
+
         return formQueryOptions(accumulator.build());
     }
 
     public ImmutableContextSet getPotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (ContextCalculator<? super S> calculator : this.calculators) {
+
+        for (ContextCalculator<? super S> calculator : this.calculators.calculators()) {
             ContextSet potentialContexts;
             try {
                 potentialContexts = calculator.estimatePotentialContexts();
@@ -167,6 +165,7 @@ public abstract class ContextManager<S, P extends S> {
             }
             builder.addAll(potentialContexts);
         }
+
         return builder.build();
     }
 
@@ -189,6 +188,59 @@ public abstract class ContextManager<S, P extends S> {
             calculatorClass = calculator.getClass();
         }
         return calculatorClass.getName();
+    }
+
+    private final class CalculatorList {
+        private final List<ContextCalculator<? super S>> calculators;
+        private final List<StaticContextCalculator> staticCalculators;
+
+        private volatile ContextCalculator<? super S>[] calculatorsArray;
+        private volatile StaticContextCalculator[] staticCalculatorsArray;
+
+        CalculatorList() {
+            this.calculators = new ArrayList<>();
+            this.staticCalculators = new ArrayList<>();
+            bake();
+        }
+
+        @SuppressWarnings("unchecked")
+        private void bake() {
+            this.calculatorsArray = this.calculators.toArray(new ContextCalculator[0]);
+            this.staticCalculatorsArray = this.staticCalculators.toArray(new StaticContextCalculator[0]);
+        }
+
+        public void add(ContextCalculator<? super S> calculator) {
+            synchronized (this) {
+                // calculators registered first should have priority (and be checked last.)
+                this.calculators.add(0, calculator);
+
+                if (calculator instanceof StaticContextCalculator) {
+                    StaticContextCalculator staticCalculator = (StaticContextCalculator) calculator;
+                    this.staticCalculators.add(0, staticCalculator);
+                }
+
+                bake();
+            }
+        }
+
+        public void remove(ContextCalculator<? super S> calculator) {
+            synchronized (this) {
+                this.calculators.remove(calculator);
+                if (calculator instanceof StaticContextCalculator) {
+                    this.staticCalculators.remove(calculator);
+                }
+
+                bake();
+            }
+        }
+
+        public ContextCalculator<? super S>[] calculators() {
+            return this.calculatorsArray;
+        }
+
+        public StaticContextCalculator[] staticCalculators() {
+            return this.staticCalculatorsArray;
+        }
     }
 
 }

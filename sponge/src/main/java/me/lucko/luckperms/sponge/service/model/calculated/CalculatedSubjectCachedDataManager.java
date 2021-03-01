@@ -46,6 +46,8 @@ import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.query.QueryOptions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.IntFunction;
 
@@ -97,7 +99,7 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
 
     @Override
     public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
-        ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
+        List<PermissionProcessor> processors = new ArrayList<>(4);
         processors.add(new DirectProcessor());
         processors.add(new SpongeWildcardProcessor());
         processors.add(new WildcardProcessor());
@@ -106,6 +108,6 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
             processors.add(new FixedDefaultsProcessor(this.subject.getService(), queryOptions, this.subject.getDefaults(), true));
         }
 
-        return new PermissionCalculator(getPlugin(), metadata, processors.build());
+        return new PermissionCalculator(getPlugin(), metadata, processors);
     }
 }

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.sponge.calculator;
 
-import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
@@ -41,6 +39,9 @@ import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import net.luckperms.api.query.QueryOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SpongeCalculatorFactory implements CalculatorFactory {
     private final LPSpongePlugin plugin;
 
@@ -50,7 +51,7 @@ public class SpongeCalculatorFactory implements CalculatorFactory {
 
     @Override
     public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
-        ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
+        List<PermissionProcessor> processors = new ArrayList<>(6);
 
         processors.add(new DirectProcessor());
 
@@ -75,6 +76,6 @@ public class SpongeCalculatorFactory implements CalculatorFactory {
             }
         }
 
-        return new PermissionCalculator(this.plugin, metadata, processors.build());
+        return new PermissionCalculator(this.plugin, metadata, processors);
     }
 }

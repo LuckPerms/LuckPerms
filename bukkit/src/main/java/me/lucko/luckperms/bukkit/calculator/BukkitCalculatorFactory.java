@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.bukkit.calculator;
 
-import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
@@ -42,6 +40,9 @@ import me.lucko.luckperms.common.model.HolderType;
 
 import net.luckperms.api.query.QueryOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BukkitCalculatorFactory implements CalculatorFactory {
     private final LPBukkitPlugin plugin;
 
@@ -51,7 +52,7 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
 
     @Override
     public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
-        ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
+        List<PermissionProcessor> processors = new ArrayList<>(7);
 
         processors.add(new DirectProcessor());
 
@@ -81,6 +82,6 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
             processors.add(OpProcessor.INSTANCE);
         }
 
-        return new PermissionCalculator(this.plugin, metadata, processors.build());
+        return new PermissionCalculator(this.plugin, metadata, processors);
     }
 }
