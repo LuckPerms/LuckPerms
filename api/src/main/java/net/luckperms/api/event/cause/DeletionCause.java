@@ -36,6 +36,12 @@ public enum DeletionCause {
     COMMAND,
 
     /**
+     * The deletion was caused by the web editor
+     * @since 5.3
+     */
+    WEB_EDITOR,
+
+    /**
      * The deletion was caused by an API call
      */
     API,

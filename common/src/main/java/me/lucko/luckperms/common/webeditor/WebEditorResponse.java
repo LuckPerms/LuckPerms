@@ -328,7 +328,7 @@ public class WebEditorResponse {
             }
 
             try {
-                this.plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).get();
+                this.plugin.getStorage().deleteGroup(group, DeletionCause.WEB_EDITOR).get();
             } catch (Exception e) {
                 e.printStackTrace();
                 Message.DELETE_ERROR.send(this.sender, group.getFormattedDisplayName());
@@ -358,7 +358,7 @@ public class WebEditorResponse {
             }
 
             try {
-                this.plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).get();
+                this.plugin.getStorage().deleteTrack(track, DeletionCause.WEB_EDITOR).get();
             } catch (Exception e) {
                 e.printStackTrace();
                 Message.DELETE_ERROR.send(this.sender, Component.text(track.getName()));
