@@ -3081,7 +3081,7 @@ public interface Message {
 
     Args2<User, String> USER_PROMOTE_NOT_ON_TRACK = (user, track) -> prefixed(translatable()
             // "&b{}&a isn't in any groups on &b{}&a, so was not promoted."
-            .key("luckperms.command.user.demote.end-of-track-not-removed")
+            .key("luckperms.command.user.promote.not-on-track")
             .color(GREEN)
             .args(
                     text().color(AQUA).append(user.getFormattedDisplayName()),
