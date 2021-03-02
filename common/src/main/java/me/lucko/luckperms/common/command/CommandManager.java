@@ -68,6 +68,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -134,6 +135,7 @@ public class CommandManager {
 
     public CompletableFuture<CommandResult> executeCommand(Sender sender, String label, List<String> args) {
         SchedulerAdapter scheduler = this.plugin.getBootstrap().getScheduler();
+        List<String> argsCopy = new ArrayList<>(args);
 
         // schedule a future to execute the command
         AtomicReference<Thread> thread = new AtomicReference<>();
@@ -156,7 +158,7 @@ public class CommandManager {
         }, scheduler.async());
 
         // catch if the command doesn't complete within a given time
-        scheduler.awaitTimeout(future, 10, TimeUnit.SECONDS, () -> handleCommandTimeout(thread, args));
+        scheduler.awaitTimeout(future, 10, TimeUnit.SECONDS, () -> handleCommandTimeout(thread, argsCopy));
 
         return future;
     }
