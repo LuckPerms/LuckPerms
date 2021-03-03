@@ -30,16 +30,45 @@ import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
  * A factory for creating {@link ContextSet}s.
+ *
+ * <p>Prefer using the static methods on {@link ImmutableContextSet} or {@link MutableContextSet}
+ * instead of this interface.</p>
  */
 @Internal
 public interface ContextSetFactory {
 
+    /**
+     * Prefer using {@link ImmutableContextSet#builder()}.
+     *
+     * @return a immutable context set builder
+     * @see ImmutableContextSet#builder()
+     */
     ImmutableContextSet.@NonNull Builder immutableBuilder();
 
+    /**
+     * Prefer using {@link ImmutableContextSet#of(String, String)}.
+     *
+     * @param key the key
+     * @param value the value
+     * @return an immutable context set
+     * @see ImmutableContextSet#of(String, String)
+     */
     @NonNull ImmutableContextSet immutableOf(@NonNull String key, @NonNull String value);
 
+    /**
+     * Prefer using {@link ImmutableContextSet#empty()}.
+     *
+     * @return an empty immutable context set
+     * @see ImmutableContextSet#empty()
+     */
     @NonNull ImmutableContextSet immutableEmpty();
 
+    /**
+     * Prefer using {@link MutableContextSet#create()}.
+     *
+     * @return a new mutable context set
+     * @see MutableContextSet#create()
+     */
     @NonNull MutableContextSet mutable();
 
 }

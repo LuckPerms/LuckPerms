@@ -47,7 +47,7 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} applicable for the given key.
      *
-     * <p>Prefer using the {@link Node#builder(String)} accessor.</p>
+     * <p>Prefer using the {@link Node#builder(String)} method.</p>
      *
      * @param key the key
      * @return the node builder
@@ -58,7 +58,7 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} for {@link PermissionNode}s.
      *
-     * <p>Prefer using the {@link PermissionNode#builder()} accessor.</p>
+     * <p>Prefer using the {@link PermissionNode#builder()} method.</p>
      *
      * @return the node builder
      * @see PermissionNode#builder()
@@ -68,7 +68,7 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} for {@link RegexPermissionNode}s.
      *
-     * <p>Prefer using the {@link RegexPermissionNode#builder()} accessor.</p>
+     * <p>Prefer using the {@link RegexPermissionNode#builder()} method.</p>
      *
      * @return the node builder
      * @see RegexPermissionNode#builder()
@@ -78,7 +78,7 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} for {@link InheritanceNode}s.
      *
-     * <p>Prefer using the {@link InheritanceNode#builder()} accessor.</p>
+     * <p>Prefer using the {@link InheritanceNode#builder()} method.</p>
      *
      * @return the node builder
      * @see InheritanceNode#builder()
@@ -88,7 +88,7 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} for {@link PrefixNode}s.
      *
-     * <p>Prefer using the {@link PrefixNode#builder()} accessor.</p>
+     * <p>Prefer using the {@link PrefixNode#builder()} method.</p>
      *
      * @return the node builder
      * @see PrefixNode#builder()
@@ -98,7 +98,7 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} for {@link SuffixNode}s.
      *
-     * <p>Prefer using the {@link SuffixNode#builder()} accessor.</p>
+     * <p>Prefer using the {@link SuffixNode#builder()} method.</p>
      *
      * @return the node builder
      * @see SuffixNode#builder()
@@ -108,7 +108,7 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} for {@link MetaNode}s.
      *
-     * <p>Prefer using the {@link MetaNode#builder()} accessor.</p>
+     * <p>Prefer using the {@link MetaNode#builder()} method.</p>
      *
      * @return the node builder
      * @see MetaNode#builder()
@@ -118,7 +118,7 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} for {@link WeightNode}s.
      *
-     * <p>Prefer using the {@link WeightNode#builder()} accessor.</p>
+     * <p>Prefer using the {@link WeightNode#builder()} method.</p>
      *
      * @return the node builder
      * @see WeightNode#builder()
@@ -128,7 +128,7 @@ public interface NodeBuilderRegistry {
     /**
      * Gets a {@link NodeBuilder} for {@link DisplayNameNode}s.
      *
-     * <p>Prefer using the {@link DisplayNameNode#builder()} accessor.</p>
+     * <p>Prefer using the {@link DisplayNameNode#builder()} method.</p>
      *
      * @return the node builder
      * @see DisplayNameNode#builder()

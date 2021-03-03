@@ -16,7 +16,9 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         options.encoding = 'UTF-8'
         options.charSet = 'UTF-8'
         options.links(
-                'https://docs.oracle.com/javase/8/docs/api/'
+                'https://docs.oracle.com/javase/8/docs/api/',
+                'https://checkerframework.org/api/',
+                'https://javadoc.io/static/org.jetbrains/annotations/20.1.0/'
         )
         options.addStringOption('Xdoclint:none', '-quiet')
     }
