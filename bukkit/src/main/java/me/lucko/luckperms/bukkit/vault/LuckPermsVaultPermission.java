@@ -113,15 +113,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
         // are we on the main thread?
         if (!this.plugin.getBootstrap().isServerStarting() && this.plugin.getBootstrap().getServer().isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
-            throw new RuntimeException(
-                    "The operation to lookup a UUID for '" + player + "' was cancelled by LuckPerms. This is NOT a bug. \n" +
-                    "The lookup request was made on the main server thread. It is not safe to execute a request to \n" +
-                    "load username data from the database in this context. \n" +
-                    "If you are a plugin author, please either make your request asynchronously, \n" +
-                    "or provide an 'OfflinePlayer' object with the UUID already populated. \n" +
-                    "Alternatively, server admins can disable this catch by setting 'vault-unsafe-lookups' to true \n" +
-                    "in the LP config, but should consider the consequences (lag) before doing so."
-            );
+            throw new ServerThreadLookupException(player);
         }
 
         // lookup a username from the database
@@ -159,14 +151,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
         // are we on the main thread?
         if (!this.plugin.getBootstrap().isServerStarting() && this.plugin.getBootstrap().getServer().isPrimaryThread() && !this.plugin.getConfiguration().get(ConfigKeys.VAULT_UNSAFE_LOOKUPS)) {
-            throw new RuntimeException(
-                    "The operation to load user data for '" + uuid + "' was cancelled by LuckPerms. This is NOT a bug. \n" +
-                    "The lookup request was made on the main server thread. It is not safe to execute a request to \n" +
-                    "load data for offline players from the database in this context. \n" +
-                    "If you are a plugin author, please consider making your request asynchronously. \n" +
-                    "Alternatively, server admins can disable this catch by setting 'vault-unsafe-lookups' to true \n" +
-                    "in the LP config, but should consider the consequences (lag) before doing so."
-            );
+            throw new ServerThreadLookupException(uuid);
         }
 
         // load an instance from the DB
