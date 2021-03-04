@@ -44,8 +44,9 @@ class ServerThreadLookupException extends RuntimeException {
                 "  a) Ask the author of the plugin making the request to perform Vault calls for\n" +
                 "     offline players \"asynchronously\" (using the scheduler). Additionally, prefer\n" +
                 "     using the methods that accept 'Player' or 'OfflinePlayer' instead of usernames.\n" +
+                "     You should be able to identify the plugin making the request in the trace below.\n" +
                 "  b) As a server admin, you can disable this exception by setting 'vault-unsafe-lookups'\n" +
-                "     to false in the LuckPerms configuration file. However, please use this only as\n" +
+                "     to true in the LuckPerms configuration file. However, please use this only as\n" +
                 "     a last resort.";
     }
 
