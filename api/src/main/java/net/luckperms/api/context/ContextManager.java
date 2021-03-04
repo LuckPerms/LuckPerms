@@ -165,7 +165,7 @@ public interface ContextManager {
      * Invalidates the lookup cache for a given subject
      *
      * @param subject the subject
-     * @deprecated use {@link #signalContextUpdate(Object)}
+     * @deprecated Use {@link #signalContextUpdate(Object)} instead
      */
     @Deprecated
     default void invalidateCache(@NonNull Object subject) {

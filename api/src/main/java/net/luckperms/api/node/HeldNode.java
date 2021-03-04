@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * A relationship between a {@link PermissionHolder} and a {@link Node}.
  *
  * @param <T> the identifier type of the holder
+ * @deprecated The only usages of this interface are also deprecated.
  */
 @Deprecated
 public interface HeldNode<T> {

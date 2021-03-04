@@ -136,7 +136,7 @@ public interface ContextSet extends Iterable<Context> {
      * may not be a true representation of the set.</p>
      *
      * @return an immutable map
-     * @deprecated because the resultant map may not contain all data in the ContextSet
+     * @deprecated Deprecated because the returned map may not contain all data in the ContextSet
      */
     @Deprecated
     @NonNull @Unmodifiable Map<String, String> toFlattenedMap();

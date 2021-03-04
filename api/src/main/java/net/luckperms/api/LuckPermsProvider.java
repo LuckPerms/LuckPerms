@@ -27,41 +27,62 @@ package net.luckperms.api;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import static org.jetbrains.annotations.ApiStatus.Internal;
+
 /**
- * Provides static access to the {@link LuckPerms} service.
+ * Provides static access to the {@link LuckPerms} API.
  *
  * <p>Ideally, the ServiceManager for the platform should be used to obtain an
- * instance, however, this provider can be used if you need static access.</p>
+ * instance, however, this provider can be used if this is not viable.</p>
  */
 public final class LuckPermsProvider {
     private static LuckPerms instance = null;
 
     /**
-     * Gets an instance of the {@link LuckPerms} service,
-     * throwing {@link IllegalStateException} if an instance is not yet loaded.
+     * Gets an instance of the {@link LuckPerms} API,
+     * throwing {@link IllegalStateException} if the API is not loaded yet.
      *
-     * <p>Will never return null.</p>
+     * <p>This method will never return null.</p>
      *
-     * @return an api instance
-     * @throws IllegalStateException if the api is not loaded
+     * @return an instance of the LuckPerms API
+     * @throws IllegalStateException if the API is not loaded yet
      */
     public static @NonNull LuckPerms get() {
         if (instance == null) {
-            throw new IllegalStateException("The LuckPerms API is not loaded.");
+            throw new NotLoadedException();
         }
         return instance;
     }
 
+    @Internal
     static void register(LuckPerms instance) {
         LuckPermsProvider.instance = instance;
     }
 
+    @Internal
     static void unregister() {
         LuckPermsProvider.instance = null;
     }
 
+    @Internal
     private LuckPermsProvider() {
         throw new UnsupportedOperationException("This class cannot be instantiated.");
+    }
+
+    /**
+     * Exception thrown when the API is requested before it has been loaded.
+     */
+    private static final class NotLoadedException extends IllegalStateException {
+        private static final String MESSAGE = "The LuckPerms API isn't loaded yet!\n" +
+                "This could be because:\n" +
+                "  a) the LuckPerms plugin is not installed or it failed to enable\n" +
+                "  b) your plugin does not declare a dependency on LuckPerms\n" +
+                "  c) you are attempting to use the API before plugins reach the 'enable' phase\n" +
+                "     (call the #get method in onEnable, not in your plugin constructor!)\n";
+
+        NotLoadedException() {
+            super(MESSAGE);
+        }
     }
 
 }

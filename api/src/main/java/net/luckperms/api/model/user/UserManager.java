@@ -184,7 +184,7 @@ public interface UserManager {
      * @param permission the permission to search for
      * @return a list of held permissions
      * @throws NullPointerException if the permission is null
-     * @deprecated use {@link #searchAll(NodeMatcher)}
+     * @deprecated Use {@link #searchAll(NodeMatcher)} instead
      */
     @Deprecated
     @NonNull CompletableFuture<@Unmodifiable List<HeldNode<UUID>>> getWithPermission(@NonNull String permission);

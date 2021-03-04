@@ -13,6 +13,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
 
     javadoc {
         title = 'LuckPerms API (v' + project.ext.apiVersion + ')'
+        options.overview = 'javadoc/overview.html'
         options.encoding = 'UTF-8'
         options.charSet = 'UTF-8'
         options.links(

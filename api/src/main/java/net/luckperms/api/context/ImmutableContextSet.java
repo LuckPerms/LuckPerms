@@ -67,7 +67,7 @@ public interface ImmutableContextSet extends ContextSet {
     }
 
     /**
-     * @deprecated Already immutable!
+     * @deprecated This context set is already immutable!
      */
     @Override
     @Deprecated
