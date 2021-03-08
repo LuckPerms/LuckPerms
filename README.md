@@ -34,7 +34,8 @@ cd LuckPerms/
 ./gradlew build
 ```
 
-You can find the output jars in the `build/libs` directories.
+You can find the final jars for Nukkit, BungeeCord, Bukkit and Bukkit Legacy in `[platform]/loader/build/libs`
+The rest (Velocity, Fabric and Sponge) are located in `[platform]/build/libs`
 
 ## Contributing
 #### Pull Requests
