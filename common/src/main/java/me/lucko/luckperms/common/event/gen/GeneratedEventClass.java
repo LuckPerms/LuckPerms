@@ -106,7 +106,8 @@ public class GeneratedEventClass {
 
         // determine a generated class name of the event
         String eventClassSuffix = eventClass.getName().substring(LuckPermsEvent.class.getPackage().getName().length());
-        String generatedClassName = GeneratedEventClass.class.getPackage().getName() + eventClassSuffix;
+        String packageWithName = GeneratedEventClass.class.getName();
+        String generatedClassName = packageWithName.substring(0, packageWithName.lastIndexOf('.')) + eventClassSuffix;
 
         DynamicType.Builder<AbstractEvent> builder = new ByteBuddy(ClassFileVersion.JAVA_V8)
                 // create a subclass of AbstractEvent
