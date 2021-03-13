@@ -82,7 +82,7 @@ public class NukkitPlayerCalculator implements ContextCalculator<Player>, Listen
     }
 
     @Override
-    public ContextSet estimatePotentialContexts() {
+    public @NonNull ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         if (this.gamemode) {
             for (int mode : KNOWN_GAMEMODES) {

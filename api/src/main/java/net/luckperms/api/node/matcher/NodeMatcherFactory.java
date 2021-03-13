@@ -117,6 +117,6 @@ public interface NodeMatcherFactory {
      * @param <T> the node type
      * @return the matcher
      */
-    <T extends Node> @NonNull NodeMatcher<T> type(NodeType<? extends T> type);
+    <T extends Node> @NonNull NodeMatcher<T> type(@NonNull NodeType<? extends T> type);
 
 }

@@ -43,6 +43,7 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class VelocityPlayerCalculator implements ContextCalculator<Player> {
     private final LPVelocityPlugin plugin;
@@ -61,7 +62,7 @@ public class VelocityPlayerCalculator implements ContextCalculator<Player> {
     }
 
     @Override
-    public ContextSet estimatePotentialContexts() {
+    public @NotNull @NonNull ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         for (RegisteredServer server : this.plugin.getBootstrap().getProxy().getAllServers()) {
             builder.add(DefaultContextKeys.WORLD_KEY, server.getServerInfo().getName());

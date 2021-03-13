@@ -54,7 +54,7 @@ public class ConfigurationContextCalculator implements StaticContextCalculator {
     }
 
     @Override
-    public ContextSet estimatePotentialContexts() {
+    public @NonNull ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         calculate(builder::add);
         return builder.build();

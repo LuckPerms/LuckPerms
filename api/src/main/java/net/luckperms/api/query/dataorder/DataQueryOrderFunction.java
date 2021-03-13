@@ -32,6 +32,7 @@ import net.luckperms.api.query.OptionKey;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * A function that generates a {@link DataQueryOrder} comparator for
@@ -52,7 +53,8 @@ public interface DataQueryOrderFunction {
      * @return the data query order function
      * @since 5.2
      */
-    static DataQueryOrderFunction always(Comparator<DataType> comparator) {
+    static @NonNull DataQueryOrderFunction always(@NonNull Comparator<DataType> comparator) {
+        Objects.requireNonNull(comparator, "comparator");
         return id -> comparator;
     }
 

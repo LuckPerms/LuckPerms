@@ -31,6 +31,7 @@ import net.luckperms.api.query.OptionKey;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -53,7 +54,8 @@ public interface DataTypeFilterFunction {
      * @param predicate the predicate
      * @return the data type filter function
      */
-    static DataTypeFilterFunction always(Predicate<DataType> predicate) {
+    static @NonNull DataTypeFilterFunction always(@NonNull Predicate<DataType> predicate) {
+        Objects.requireNonNull(predicate, "predicate");
         return id -> predicate;
     }
 

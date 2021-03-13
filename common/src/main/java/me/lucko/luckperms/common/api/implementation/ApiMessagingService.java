@@ -42,7 +42,7 @@ public class ApiMessagingService implements MessagingService {
     }
 
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return this.handle.getName();
     }
 

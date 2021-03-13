@@ -103,7 +103,7 @@ public interface ContextCalculator<T> {
      *
      * @return a set of potential contexts
      */
-    default ContextSet estimatePotentialContexts() {
+    default @NonNull ContextSet estimatePotentialContexts() {
         return ImmutableContextSet.empty();
     }
 

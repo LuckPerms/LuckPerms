@@ -44,6 +44,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.Set;
@@ -86,7 +87,7 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
     }
 
     @Override
-    public ContextSet estimatePotentialContexts() {
+    public @NotNull @NonNull ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
 
         if (this.gamemode) {

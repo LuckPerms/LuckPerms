@@ -134,7 +134,7 @@ public interface NodeMatcher<T extends Node> extends Predicate<Node> {
      * @param <T> the node type
      * @return the matcher
      */
-    static <T extends Node> @NonNull NodeMatcher<T> type(NodeType<? extends T> type) {
+    static <T extends Node> @NonNull NodeMatcher<T> type(@NonNull NodeType<? extends T> type) {
         return LuckPermsProvider.get().getNodeMatcherFactory().type(type);
     }
 

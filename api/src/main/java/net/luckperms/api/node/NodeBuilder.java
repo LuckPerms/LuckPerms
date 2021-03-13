@@ -109,7 +109,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @param unit     the unit <code>duration</code> is measured in
      * @return the builder
      */
-    default @NonNull B expiry(long duration, TimeUnit unit) {
+    default @NonNull B expiry(long duration, @NonNull TimeUnit unit) {
         if (duration <= 0) {
             throw new IllegalArgumentException("duration must be positive");
         }

@@ -40,7 +40,7 @@ public interface MessagingService {
      *
      * @return the name of this messaging service
      */
-    String getName();
+    @NonNull String getName();
 
     /**
      * Uses the messaging service to inform other servers about a general

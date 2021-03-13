@@ -269,7 +269,7 @@ public class LoggedAction implements Action {
         }
 
         @Override
-        public @NonNull Builder targetType(Action.Target.Type type) {
+        public @NonNull Builder targetType(Target.@NonNull Type type) {
             this.targetType = Objects.requireNonNull(type, "type");
             return this;
         }

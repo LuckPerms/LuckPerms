@@ -105,7 +105,7 @@ public class BukkitPlayerCalculator implements ContextCalculator<Player>, Listen
     }
 
     @Override
-    public ContextSet estimatePotentialContexts() {
+    public @NonNull ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         if (this.gamemode) {
             for (GameMode mode : GameMode.values()) {

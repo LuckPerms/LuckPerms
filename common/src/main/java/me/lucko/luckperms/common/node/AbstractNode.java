@@ -97,7 +97,7 @@ public abstract class AbstractNode<N extends ScopedNode<N, B>, B extends NodeBui
     }
 
     @Override
-    public <T> Optional<T> getMetadata(NodeMetadataKey<T> key) {
+    public <T> Optional<T> getMetadata(@NonNull NodeMetadataKey<T> key) {
         //noinspection unchecked
         T value = (T) this.metadata.get(key);
         return Optional.ofNullable(value);

@@ -170,7 +170,7 @@ public interface Action extends Comparable<Action> {
          * @param type the type
          * @return the builder
          */
-        @NonNull Builder targetType(Action.Target.Type type);
+        @NonNull Builder targetType(Target.@NonNull Type type);
 
         /**
          * Sets the acted object for the entry.

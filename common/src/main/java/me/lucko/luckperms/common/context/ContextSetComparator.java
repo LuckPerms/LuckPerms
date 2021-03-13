@@ -53,8 +53,14 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             return 0;
         }
 
+        // compare presence of any context (non-empty)
+        int result = Boolean.compare(!o1.isEmpty(), !o2.isEmpty());
+        if (result != 0) {
+            return result;
+        }
+
         // compare presence of a server context
-        int result = Boolean.compare(o1.containsKey(DefaultContextKeys.SERVER_KEY), o2.containsKey(DefaultContextKeys.SERVER_KEY));
+        result = Boolean.compare(o1.containsKey(DefaultContextKeys.SERVER_KEY), o2.containsKey(DefaultContextKeys.SERVER_KEY));
         if (result != 0) {
             return result;
         }
@@ -75,13 +81,10 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
         // However, we *have* to maintain transitivity in this comparator (despite how
         // expensive/complex it may be) as it is used in the PermissionHolder nodes treemap.
 
-        // in order to have consistent ordering, we have to compare the content of the context sets
-        // by sorting the contents and then comparing which set is greater.
-        Context[] o1Array = o1 instanceof ImmutableContextSetImpl ? ((ImmutableContextSetImpl) o1).toArray() : o1.toSet().toArray(new Context[0]);
-        Context[] o2Array = o2 instanceof ImmutableContextSetImpl ? ((ImmutableContextSetImpl) o2).toArray() : o2.toSet().toArray(new Context[0]);
-
-        Arrays.sort(o1Array, CONTEXT_COMPARATOR);
-        Arrays.sort(o2Array, CONTEXT_COMPARATOR);
+        // in order to have consistent ordering, we have to compare the content of the context sets.
+        // to do this, obtain sorted array representations of each set, then compare which is greater
+        Context[] o1Array = o1 instanceof ImmutableContextSetImpl ? ((ImmutableContextSetImpl) o1).toArray() : toArray(o1);
+        Context[] o2Array = o2 instanceof ImmutableContextSetImpl ? ((ImmutableContextSetImpl) o2).toArray() : toArray(o2);
 
         for (int i = 0; i < o1Array.length; i++) {
             Context ent1 = o1Array[i];
@@ -96,7 +99,13 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
         throw new AssertionError("sets are equal? " + o1 + " - " + o2);
     }
 
-    private static final Comparator<Context> CONTEXT_COMPARATOR = ContextSetComparator::compareContexts;
+    public static final Comparator<Context> CONTEXT_COMPARATOR = ContextSetComparator::compareContexts;
+
+    private static Context[] toArray(ImmutableContextSet set) {
+        Context[] array = set.toSet().toArray(new Context[0]);
+        Arrays.sort(array, CONTEXT_COMPARATOR);
+        return array;
+    }
 
     private static int compareContexts(Context o1, Context o2) {
         if (o1 == o2) {

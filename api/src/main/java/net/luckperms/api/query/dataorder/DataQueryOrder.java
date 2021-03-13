@@ -93,7 +93,7 @@ public enum DataQueryOrder implements Comparator<DataType> {
      * @param comparator the comparator
      * @return the ordered data types
      */
-    public static List<DataType> order(@NonNull Comparator<? super DataType> comparator) {
+    public static @NonNull List<DataType> order(@NonNull Comparator<? super DataType> comparator) {
         int compare = comparator.compare(DataType.TRANSIENT, DataType.NORMAL);
         if (compare > 0) {
             // transient first

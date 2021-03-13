@@ -95,7 +95,7 @@ public class SpongePlayerCalculator implements ContextCalculator<Subject> {
     }
 
     @Override
-    public ContextSet estimatePotentialContexts() {
+    public @NonNull ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         Game game = this.plugin.getBootstrap().getGame();
 

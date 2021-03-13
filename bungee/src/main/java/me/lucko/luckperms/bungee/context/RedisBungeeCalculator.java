@@ -49,7 +49,7 @@ public class RedisBungeeCalculator implements StaticContextCalculator {
     }
 
     @Override
-    public ContextSet estimatePotentialContexts() {
+    public @NonNull ContextSet estimatePotentialContexts() {
         RedisBungeeAPI redisBungee = RedisBungee.getApi();
         if (redisBungee == null) {
             return ImmutableContextSetImpl.EMPTY;

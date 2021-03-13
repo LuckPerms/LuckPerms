@@ -32,6 +32,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
+import me.lucko.luckperms.common.context.ContextSetComparator;
+
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
@@ -40,6 +42,7 @@ import net.luckperms.api.context.MutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -74,6 +77,8 @@ public final class ImmutableContextSetImpl extends AbstractContextSet implements
         for (Map.Entry<String, String> e : entries) {
             this.array[i++] = new ContextImpl(e.getKey(), e.getValue());
         }
+        // sort the array at construction so the comparator doesn't need to
+        Arrays.sort(this.array, ContextSetComparator.CONTEXT_COMPARATOR);
     }
 
     @Override
