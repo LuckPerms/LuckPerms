@@ -31,16 +31,16 @@ import net.luckperms.api.util.Tristate;
 
 import java.util.UUID;
 
-public abstract class DummySender implements Sender {
+public abstract class DummyConsoleSender implements Sender {
     private final LuckPermsPlugin platform;
 
     private final UUID uniqueId;
     private final String name;
 
-    public DummySender(LuckPermsPlugin plugin, UUID uniqueId, String name) {
+    public DummyConsoleSender(LuckPermsPlugin plugin) {
         this.platform = plugin;
-        this.uniqueId = uniqueId;
-        this.name = name;
+        this.uniqueId = Sender.CONSOLE_UUID;
+        this.name = Sender.CONSOLE_NAME;
     }
 
     @Override
@@ -56,6 +56,11 @@ public abstract class DummySender implements Sender {
     @Override
     public void performCommand(String commandLine) {
 
+    }
+
+    @Override
+    public boolean isConsole() {
+        return true;
     }
 
     @Override

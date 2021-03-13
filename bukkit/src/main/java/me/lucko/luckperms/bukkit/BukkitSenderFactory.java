@@ -95,6 +95,11 @@ public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSe
     }
 
     @Override
+    protected boolean isConsole(CommandSender sender) {
+        return sender instanceof ConsoleCommandSender;
+    }
+
+    @Override
     public void close() {
         super.close();
         this.audiences.close();

@@ -52,6 +52,7 @@ public final class AbstractSender<T> implements Sender {
 
     private final UUID uniqueId;
     private final String name;
+    private final boolean isConsole;
 
     AbstractSender(LuckPermsPlugin plugin, SenderFactory<?, T> factory, T sender) {
         this.plugin = plugin;
@@ -59,6 +60,7 @@ public final class AbstractSender<T> implements Sender {
         this.sender = sender;
         this.uniqueId = factory.getUniqueId(this.sender);
         this.name = factory.getName(this.sender);
+        this.isConsole = this.factory.isConsole(this.sender);
     }
 
     @Override
@@ -100,6 +102,11 @@ public final class AbstractSender<T> implements Sender {
     @Override
     public void performCommand(String commandLine) {
         this.factory.performCommand(this.sender, commandLine);
+    }
+
+    @Override
+    public boolean isConsole() {
+        return this.isConsole;
     }
 
     @Override

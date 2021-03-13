@@ -26,6 +26,7 @@
 package me.lucko.luckperms.velocity;
 
 import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -84,5 +85,10 @@ public class VelocitySenderFactory extends SenderFactory<LPVelocityPlugin, Comma
     @Override
     protected void performCommand(CommandSource source, String command) {
         getPlugin().getBootstrap().getProxy().getCommandManager().executeAsync(source, command).join();
+    }
+
+    @Override
+    protected boolean isConsole(CommandSource sender) {
+        return sender instanceof ConsoleCommandSource;
     }
 }

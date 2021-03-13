@@ -35,6 +35,7 @@ import net.luckperms.api.util.Tristate;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.ConsoleCommandSender;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -92,4 +93,8 @@ public class NukkitSenderFactory extends SenderFactory<LPNukkitPlugin, CommandSe
         getPlugin().getBootstrap().getServer().dispatchCommand(sender, command);
     }
 
+    @Override
+    protected boolean isConsole(CommandSender sender) {
+        return sender instanceof ConsoleCommandSender;
+    }
 }

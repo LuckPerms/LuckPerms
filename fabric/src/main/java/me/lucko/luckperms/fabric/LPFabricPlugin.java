@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.model.manager.group.StandardGroupManager;
 import me.lucko.luckperms.common.model.manager.track.StandardTrackManager;
 import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
-import me.lucko.luckperms.common.sender.DummySender;
+import me.lucko.luckperms.common.sender.DummyConsoleSender;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
@@ -221,7 +221,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     public Sender getConsoleSender() {
         return this.bootstrap.getServer()
                 .map(s -> this.senderFactory.wrap(s.getCommandSource()))
-                .orElseGet(() -> new DummySender(this, Sender.CONSOLE_UUID, Sender.CONSOLE_NAME) {
+                .orElseGet(() -> new DummyConsoleSender(this) {
                     @Override
                     public void sendMessage(Component message) {
                         LPFabricPlugin.this.bootstrap.getPluginLogger().info(PlainComponentSerializer.plain().serialize(TranslationManager.render(message)));

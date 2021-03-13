@@ -35,6 +35,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -87,6 +88,11 @@ public class SpongeSenderFactory extends SenderFactory<LPSpongePlugin, CommandSo
     @Override
     protected void performCommand(CommandSource source, String command) {
         getPlugin().getBootstrap().getGame().getCommandManager().process(source, command);
+    }
+
+    @Override
+    protected boolean isConsole(CommandSource sender) {
+        return sender instanceof ConsoleSource;
     }
 
     public static Text toNativeText(Component component) {

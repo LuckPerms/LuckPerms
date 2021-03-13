@@ -149,9 +149,7 @@ public interface Sender {
      *
      * @return if the sender is the console
      */
-    default boolean isConsole() {
-        return CONSOLE_UUID.equals(getUniqueId());
-    }
+    boolean isConsole();
 
     /**
      * Gets whether this sender is still valid & receiving messages.

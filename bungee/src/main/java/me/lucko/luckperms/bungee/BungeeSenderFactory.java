@@ -82,6 +82,11 @@ public class BungeeSenderFactory extends SenderFactory<LPBungeePlugin, CommandSe
     }
 
     @Override
+    protected boolean isConsole(CommandSender sender) {
+        return !(sender instanceof ProxiedPlayer);
+    }
+
+    @Override
     public void close() {
         super.close();
         this.audiences.close();
