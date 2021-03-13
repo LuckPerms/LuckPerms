@@ -85,7 +85,13 @@ public final class ConfigKeys {
     /**
      * The name of the server
      */
-    public static final ConfigKey<String> SERVER = lowercaseStringKey("server", "global");
+    public static final ConfigKey<String> SERVER = key(c -> {
+        String server = c.getString("server", "global").toLowerCase();
+        if (server.equals("load-from-system-property")) {
+            server = System.getProperty("luckperms.server", "global").toLowerCase();
+        }
+        return server;
+    });
 
     /**
      * How many minutes to wait between syncs. A value <= 0 will disable syncing.
