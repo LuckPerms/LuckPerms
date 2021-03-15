@@ -34,7 +34,7 @@ cd LuckPerms/
 ./gradlew build
 ```
 
-You can find the output jars in the `build/libs` directories.
+You can find the output jars in the `loader/build/libs` or `build/libs` directories.
 
 ## Contributing
 #### Pull Requests
