@@ -96,7 +96,7 @@ public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSe
 
     @Override
     protected boolean isConsole(CommandSender sender) {
-        return sender instanceof ConsoleCommandSender;
+        return sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender;
     }
 
     @Override
