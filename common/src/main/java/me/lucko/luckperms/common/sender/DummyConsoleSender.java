@@ -34,13 +34,8 @@ import java.util.UUID;
 public abstract class DummyConsoleSender implements Sender {
     private final LuckPermsPlugin platform;
 
-    private final UUID uniqueId;
-    private final String name;
-
     public DummyConsoleSender(LuckPermsPlugin plugin) {
         this.platform = plugin;
-        this.uniqueId = Sender.CONSOLE_UUID;
-        this.name = Sender.CONSOLE_NAME;
     }
 
     @Override
@@ -70,11 +65,11 @@ public abstract class DummyConsoleSender implements Sender {
 
     @Override
     public UUID getUniqueId() {
-        return this.uniqueId;
+        return Sender.CONSOLE_UUID;
     }
 
     @Override
     public String getName() {
-        return this.name;
+        return Sender.CONSOLE_NAME;
     }
 }

@@ -31,6 +31,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DurationParserTest {
 
@@ -111,6 +112,17 @@ public class DurationParserTest {
         test(expected, "5y 4mo 3w 2d 1h 6m 7s");
         test(expected, "5y4mo3w2d1h6m7s");
         test(expected, "5 years 4 months 3 weeks 2 days 1 hour 6 minutes 7 seconds");
+
+        test(expected, "5y, 4mo, 3w, 2d, 1h, 6m, 7s");
+        test(expected, "5y,4mo,3w,2d,1h,6m,7s");
+        test(expected, "5 years, 4 months, 3 weeks, 2 days, 1 hour, 6 minutes, 7 seconds");
+    }
+
+    @Test
+    void testFail() {
+        assertThrows(IllegalArgumentException.class, () -> DurationParser.parseDuration("definitely not a duration"));
+        assertThrows(IllegalArgumentException.class, () -> DurationParser.parseDuration("still 1 not a duration"));
+        assertThrows(IllegalArgumentException.class, () -> DurationParser.parseDuration("still 1s not a duration"));
     }
 
 }
