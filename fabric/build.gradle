@@ -2,8 +2,10 @@ import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.1'
-    id 'fabric-loom' version '0.5-SNAPSHOT'
+    id 'fabric-loom' version '0.6-SNAPSHOT'
 }
+
+archivesBaseName = 'luckperms'
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }

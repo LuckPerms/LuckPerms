@@ -27,7 +27,7 @@
     ]
   },
   "mixins": [
-    "mixins.luckperms.json"
+    "luckperms.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.9.0",
