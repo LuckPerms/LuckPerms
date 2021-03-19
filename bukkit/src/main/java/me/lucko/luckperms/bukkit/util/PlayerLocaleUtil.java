@@ -47,7 +47,7 @@ public final class PlayerLocaleUtil {
                 Method legacyMethod = Player.Spigot.class.getMethod("getLocale");
                 function = player -> {
                     try {
-                        return (String) legacyMethod.invoke(player);
+                        return (String) legacyMethod.invoke(player.spigot());
                     } catch (ReflectiveOperationException e) {
                         throw new RuntimeException(e);
                     }
