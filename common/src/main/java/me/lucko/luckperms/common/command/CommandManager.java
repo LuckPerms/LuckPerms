@@ -141,11 +141,11 @@ public class CommandManager {
         AtomicReference<Thread> thread = new AtomicReference<>();
         CompletableFuture<CommandResult> future = CompletableFuture.supplyAsync(() -> {
             thread.set(Thread.currentThread());
-            if (!this.lock.tryLock()) {
+            if (this.lock.isLocked()) {
                 Message.ALREADY_EXECUTING_COMMAND.send(sender);
-                this.lock.lock();
             }
 
+            this.lock.lock();
             try {
                 return execute(sender, label, args);
             } catch (Throwable e) {
