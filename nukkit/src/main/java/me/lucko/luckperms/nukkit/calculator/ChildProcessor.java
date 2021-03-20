@@ -33,8 +33,9 @@ import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import net.luckperms.api.util.Tristate;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Permission Processor for Nukkits "child" permission system.
@@ -43,6 +44,7 @@ public class ChildProcessor extends AbstractPermissionProcessor implements Permi
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(ChildProcessor.class);
 
     private final LPNukkitPlugin plugin;
+    private final AtomicBoolean needsRefresh = new AtomicBoolean(false);
     private Map<String, TristateResult> childPermissions = Collections.emptyMap();
 
     public ChildProcessor(LPNukkitPlugin plugin) {
@@ -51,23 +53,27 @@ public class ChildProcessor extends AbstractPermissionProcessor implements Permi
 
     @Override
     public TristateResult hasPermission(String permission) {
+        if (this.needsRefresh.compareAndSet(true, false)) {
+            refresh();
+        }
         return this.childPermissions.getOrDefault(permission, TristateResult.UNDEFINED);
     }
 
     @Override
     public void refresh() {
-        Map<String, TristateResult> builder = new ConcurrentHashMap<>();
-        for (Map.Entry<String, Boolean> e : this.sourceMap.entrySet()) {
-            Map<String, Boolean> children = this.plugin.getPermissionMap().getChildPermissions(e.getKey(), e.getValue());
-            for (Map.Entry<String, Boolean> child : children.entrySet()) {
-                builder.put(child.getKey(), RESULT_FACTORY.result(Tristate.of(child.getValue()), "parent: " + e.getKey()));
-            }
-        }
-        this.childPermissions = builder;
+        Map<String, TristateResult> childPermissions = new HashMap<>();
+        this.sourceMap.forEach((key, value) -> {
+            Map<String, Boolean> children = this.plugin.getPermissionMap().getChildPermissions(key, value);
+            children.forEach((childKey, childValue) -> {
+                childPermissions.put(childKey, RESULT_FACTORY.result(Tristate.of(childValue), "parent: " + key));
+            });
+        });
+        this.childPermissions = childPermissions;
+        this.needsRefresh.set(false);
     }
 
     @Override
     public void invalidate() {
-        refresh();
+        this.needsRefresh.set(true);
     }
 }
