@@ -21,6 +21,7 @@ include (
         'bungee',
         'bungee:loader',
         'fabric',
+        'krypton',
         'nukkit',
         'nukkit:loader',
         'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7',

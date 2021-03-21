@@ -75,7 +75,8 @@ public interface Platform {
         SPONGE("Sponge"),
         NUKKIT("Nukkit"),
         VELOCITY("Velocity"),
-        FABRIC("Fabric");
+        FABRIC("Fabric"),
+        KRYPTON("Krypton");
 
         private final String friendlyName;
 
