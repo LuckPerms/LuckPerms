@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A scheduler for running tasks using the systems provided by the platform
@@ -97,16 +98,33 @@ public interface SchedulerAdapter {
      * @param unit the unit of timeout
      * @param onTimeout the function to execute when the timeout expires
      */
-    default void awaitTimeout(CompletableFuture<?> future, long timeout, TimeUnit unit, Runnable onTimeout) {
+    default SchedulerTask awaitTimeout(CompletableFuture<?> future, long timeout, TimeUnit unit, Runnable onTimeout) {
+        // a reference to the thread blocking on the future
+        AtomicReference<Thread> thread = new AtomicReference<>();
+
+        // in a new thread, await the completion of the future up to the given timeout
         executeAsync(() -> {
+            thread.set(Thread.currentThread());
             try {
                 future.get(timeout, unit);
             } catch (InterruptedException | ExecutionException e) {
-                // ignore
+                // ignore - this probably means the future completed successfully!
             } catch (TimeoutException e) {
+                // run the timeout task
                 onTimeout.run();
+            } finally {
+                thread.set(null);
             }
         });
+
+        // to cancel the timeout task, just interrupt the thread that is blocking on the future
+        // and it will gracefully stop.
+        return () -> {
+            Thread t;
+            if ((t = thread.get()) != null) {
+                t.interrupt();
+            }
+        };
     }
 
     /**

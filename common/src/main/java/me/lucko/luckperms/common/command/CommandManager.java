@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.command;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
@@ -61,6 +62,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
@@ -75,9 +77,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -87,13 +91,17 @@ import java.util.stream.Collectors;
 public class CommandManager {
 
     private final LuckPermsPlugin plugin;
-    private final ReentrantLock lock;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
+            .setDaemon(true)
+            .setNameFormat("luckperms-command-executor")
+            .build()
+    );
+    private final AtomicBoolean executingCommand = new AtomicBoolean(false);
     private final TabCompletions tabCompletions;
     private final Map<String, Command<?>> mainCommands;
 
     public CommandManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        this.lock = new ReentrantLock(true); // enable fairness
         this.tabCompletions = new TabCompletions(plugin);
         this.mainCommands = ImmutableList.<Command<?>>builder()
                 .add(new UserParentCommand())
@@ -137,28 +145,44 @@ public class CommandManager {
         SchedulerAdapter scheduler = this.plugin.getBootstrap().getScheduler();
         List<String> argsCopy = new ArrayList<>(args);
 
-        // schedule a future to execute the command
-        AtomicReference<Thread> thread = new AtomicReference<>();
-        CompletableFuture<CommandResult> future = CompletableFuture.supplyAsync(() -> {
-            thread.set(Thread.currentThread());
-            if (this.lock.isLocked()) {
-                Message.ALREADY_EXECUTING_COMMAND.send(sender);
-            }
+        // if the executingCommand flag is set, there is another command executing at the moment
+        if (this.executingCommand.get()) {
+            Message.ALREADY_EXECUTING_COMMAND.send(sender);
+        }
 
-            this.lock.lock();
+        // a reference to the thread being used to execute the command
+        AtomicReference<Thread> executorThread = new AtomicReference<>();
+        // a reference to the timeout task scheduled to catch if this command takes too long to execute
+        AtomicReference<SchedulerTask> timeoutTask = new AtomicReference<>();
+
+        // schedule the actual execution of the command using the command executor service
+        CompletableFuture<CommandResult> future = CompletableFuture.supplyAsync(() -> {
+            // set flags
+            executorThread.set(Thread.currentThread());
+            this.executingCommand.set(true);
+
+            // actually try to execute the command
             try {
                 return execute(sender, label, args);
             } catch (Throwable e) {
+                // catch any exception
                 this.plugin.getLogger().severe("Exception whilst executing command: " + args, e);
                 return null;
             } finally {
-                this.lock.unlock();
-                thread.set(null);
-            }
-        }, scheduler.async());
+                // unset flags
+                this.executingCommand.set(false);
+                executorThread.set(null);
 
-        // catch if the command doesn't complete within a given time
-        scheduler.awaitTimeout(future, 10, TimeUnit.SECONDS, () -> handleCommandTimeout(thread, argsCopy));
+                // cancel the timeout task
+                SchedulerTask timeout;
+                if ((timeout = timeoutTask.get()) != null) {
+                    timeout.cancel();
+                }
+            }
+        }, this.executor);
+
+        // schedule another task to catch if the command doesn't complete after 10 seconds
+        timeoutTask.set(scheduler.awaitTimeout(future, 10, TimeUnit.SECONDS, () -> handleCommandTimeout(executorThread, argsCopy)));
 
         return future;
     }
@@ -166,7 +190,7 @@ public class CommandManager {
     private void handleCommandTimeout(AtomicReference<Thread> thread, List<String> args) {
         Thread executorThread = thread.get();
         if (executorThread == null) {
-            this.plugin.getLogger().warn("Command execution " + args + " has not completed - but executor thread is null!");
+            this.plugin.getLogger().warn("Command execution " + args + " has not completed - is another command execution blocking it?");
         } else {
             String stackTrace = Arrays.stream(executorThread.getStackTrace())
                     .map(el -> "  " + el.toString())
