@@ -39,7 +39,7 @@ import java.util.List;
 public class VelocityCommandExecutor extends CommandManager implements RawCommand {
     /* The command aliases */
     private static final String PRIMARY_ALIAS = "luckpermsvelocity";
-    private static final String[] ALIASES = {"lpv", "vperm", "vperms", "vpermission", "vpermissions"};
+    private static final String[] ALIASES = {"lpv"};
 
     /* The command aliases, prefixed with '/' */
     private static final String SLASH_PRIMARY_ALIAS = "/luckpermsvelocity";

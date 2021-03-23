@@ -43,7 +43,7 @@ public class BungeeCommandExecutor extends Command implements TabExecutor {
     private static final String NAME = "luckpermsbungee";
 
     /** The command aliases */
-    private static final String[] ALIASES = {"lpb", "bperm", "bperms", "bpermission", "bpermissions"};
+    private static final String[] ALIASES = {"lpb"};
 
     /** The main command name + aliases, prefixed with '/' */
     private static final String[] SLASH_ALIASES = Stream.concat(
