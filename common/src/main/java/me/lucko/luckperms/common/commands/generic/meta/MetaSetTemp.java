@@ -45,10 +45,10 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
 
 import java.time.Duration;
@@ -80,23 +80,24 @@ public class MetaSetTemp extends GenericChildCommand {
         }
 
         Node node = Meta.builder(key, value).withContext(context).expiry(duration).build();
+        // remove temp meta nodes that have the same key and /different/ value (don't want to remove it if we are accumulating/replacing)
+        target.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key) && !n.getMetaValue().equals(value)), false);
+        DataMutateResult.WithMergedNode result = target.setNode(DataType.NORMAL, node, modifier);
 
-        if (target.hasNode(DataType.NORMAL, node, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
+        if (result.getResult().wasSuccessful()) {
+            duration = result.getMergedNode().getExpiryDuration();
+            Message.SET_META_TEMP_SUCCESS.send(sender, key, value, target, duration, context);
+
+            LoggedAction.build().source(sender).target(target)
+                    .description("meta", "settemp", key, value, duration, context)
+                    .build().submit(plugin, sender);
+
+            StorageAssistant.save(target, sender, plugin);
+            return CommandResult.SUCCESS;
+        } else {
             Message.ALREADY_HAS_TEMP_META.send(sender, target, key, value, context);
             return CommandResult.STATE_ERROR;
         }
-
-        target.removeIf(DataType.NORMAL, context, NodeType.META.predicate(n -> n.hasExpiry() && n.getMetaKey().equalsIgnoreCase(key)), false);
-        duration = target.setNode(DataType.NORMAL, node, modifier).getMergedNode().getExpiryDuration();
-
-        Message.SET_META_TEMP_SUCCESS.send(sender, key, value, target, duration, context);
-
-        LoggedAction.build().source(sender).target(target)
-                .description("meta", "settemp", key, value, duration, context)
-                .build().submit(plugin, sender);
-
-        StorageAssistant.save(target, sender, plugin);
-        return CommandResult.SUCCESS;
     }
 
     @Override
