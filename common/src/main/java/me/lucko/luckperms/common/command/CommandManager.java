@@ -182,7 +182,11 @@ public class CommandManager {
         }, this.executor);
 
         // schedule another task to catch if the command doesn't complete after 10 seconds
-        timeoutTask.set(scheduler.awaitTimeout(future, 10, TimeUnit.SECONDS, () -> handleCommandTimeout(executorThread, argsCopy)));
+        timeoutTask.set(scheduler.asyncLater(() -> {
+            if (!future.isDone()) {
+                handleCommandTimeout(executorThread, argsCopy);
+            }
+        }, 10, TimeUnit.SECONDS));
 
         return future;
     }
