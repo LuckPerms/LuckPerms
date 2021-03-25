@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentException;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.types.DisplayName;
@@ -94,7 +95,7 @@ public class CreateGroup extends SingleCommand {
                 group.setNode(DataType.NORMAL, DisplayName.builder(displayName).build(), false);
             }
 
-            plugin.getStorage().saveGroup(group);
+            StorageAssistant.save(group, sender, plugin);
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst creating group", e);
             Message.CREATE_ERROR.send(sender, Component.text(groupName));
