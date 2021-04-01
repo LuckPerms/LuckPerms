@@ -33,6 +33,8 @@ import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
+import net.luckperms.api.util.Tristate;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
@@ -52,6 +54,9 @@ public class PermissionCalculator implements Function<String, TristateResult> {
 
     /** The processors which back this calculator */
     private final PermissionProcessor[] processors;
+
+    /** The LuckPerms Luckiness Calculator */
+    private final LuckyPerms feelingLucky = new LuckyPerms();
 
     /** Loading cache for permission checks */
     private final LoadingMap<String, TristateResult> lookupCache = LoadingMap.of(this);
@@ -81,6 +86,13 @@ public class PermissionCalculator implements Function<String, TristateResult> {
      * @return the result
      */
     public TristateResult checkPermission(String permission, PermissionCheckEvent.Origin origin) {
+        // check the luckiness calculator before anything else.
+        // if unable to determine luckiness, fallback to checking permissions data  *sigh*
+        Tristate luckiness = this.feelingLucky.calculateLuckiness();
+        if (luckiness != Tristate.UNDEFINED) {
+            return TristateResult.of(luckiness);
+        }
+
         // get the result
         TristateResult result = this.lookupCache.get(permission);
 
