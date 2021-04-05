@@ -75,9 +75,15 @@ public class NodeJsonSerializer {
             JsonObject attributes = ent.getAsJsonObject();
 
             String key = attributes.get("key").getAsString();
-            boolean value = attributes.get("value").getAsBoolean();
 
-            NodeBuilder<?, ?> builder = NodeBuilders.determineMostApplicable(key).value(value);
+            if (key.isEmpty()) {
+                continue; // skip
+            }
+
+            NodeBuilder<?, ?> builder = NodeBuilders.determineMostApplicable(key);
+
+            boolean value = attributes.get("value").getAsBoolean();
+            builder.value(value);
 
             if (attributes.has("expiry")) {
                 builder.expiry(attributes.get("expiry").getAsLong());

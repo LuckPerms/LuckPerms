@@ -69,6 +69,10 @@ public class PermissionUnsetTemp extends GenericChildCommand {
         int fromIndex = duration == null ? 1 : 2;
         MutableContextSet context = args.getContextOrDefault(fromIndex, plugin);
 
+        if (node.isEmpty()) {
+            Message.PERMISSION_INVALID_ENTRY_EMPTY.send(sender);
+        }
+
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, node)) {

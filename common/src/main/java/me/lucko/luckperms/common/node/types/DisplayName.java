@@ -94,13 +94,13 @@ public class DisplayName extends AbstractNode<DisplayNameNode, DisplayNameNode.B
 
         @Override
         public @NonNull Builder displayName(@NonNull String displayName) {
-            this.displayName = displayName;
+            this.displayName = Objects.requireNonNull(displayName, "displayName");
             return this;
         }
 
         @Override
         public @NonNull DisplayName build() {
-            Objects.requireNonNull(this.displayName, "displayName");
+            ensureDefined(this.displayName, "display name");
             return new DisplayName(this.displayName, this.value, this.expireAt, this.context.build(), this.metadata);
         }
     }

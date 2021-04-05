@@ -138,4 +138,10 @@ public abstract class AbstractNodeBuilder<N extends ScopedNode<N, B>, B extends 
         return (B) this;
     }
 
+    protected static void ensureDefined(Object value, String description) {
+        if (value == null) {
+            throw new IllegalStateException(description + " has not been defined");
+        }
+    }
+
 }

@@ -126,7 +126,7 @@ public class Suffix extends AbstractNode<SuffixNode, SuffixNode.Builder> impleme
 
         @Override
         public @NonNull Builder suffix(@NonNull String suffix) {
-            this.suffix = suffix;
+            this.suffix = Objects.requireNonNull(suffix, "suffix");
             return this;
         }
 
@@ -138,8 +138,8 @@ public class Suffix extends AbstractNode<SuffixNode, SuffixNode.Builder> impleme
 
         @Override
         public @NonNull Suffix build() {
-            Objects.requireNonNull(this.suffix, "suffix");
-            Objects.requireNonNull(this.priority, "priority");
+            ensureDefined(this.suffix, "suffix");
+            ensureDefined(this.priority, "priority");
             return new Suffix(this.suffix, this.priority, this.value, this.expireAt, this.context.build(), this.metadata);
         }
     }

@@ -72,6 +72,10 @@ public class PermissionSetTemp extends GenericChildCommand {
         TemporaryNodeMergeStrategy modifier = args.getTemporaryModifierAndRemove(3).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = args.getContextOrDefault(3, plugin);
 
+        if (node.isEmpty()) {
+            Message.PERMISSION_INVALID_ENTRY_EMPTY.send(sender);
+        }
+
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, node)) {

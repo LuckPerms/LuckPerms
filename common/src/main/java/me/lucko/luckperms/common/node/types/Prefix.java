@@ -125,7 +125,7 @@ public class Prefix extends AbstractNode<PrefixNode, PrefixNode.Builder> impleme
 
         @Override
         public @NonNull Builder prefix(@NonNull String prefix) {
-            this.prefix = prefix;
+            this.prefix = Objects.requireNonNull(prefix, "prefix");
             return this;
         }
 
@@ -137,8 +137,8 @@ public class Prefix extends AbstractNode<PrefixNode, PrefixNode.Builder> impleme
 
         @Override
         public @NonNull Prefix build() {
-            Objects.requireNonNull(this.prefix, "prefix");
-            Objects.requireNonNull(this.priority, "priority");
+            ensureDefined(this.prefix, "prefix");
+            ensureDefined(this.priority, "priority");
             return new Prefix(this.prefix, this.priority, this.value, this.expireAt, this.context.build(), this.metadata);
         }
     }

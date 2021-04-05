@@ -66,6 +66,10 @@ public class PermissionUnset extends GenericChildCommand {
         String node = args.get(0);
         MutableContextSet context = args.getContextOrDefault(1, plugin);
 
+        if (node.isEmpty()) {
+            Message.PERMISSION_INVALID_ENTRY_EMPTY.send(sender);
+        }
+
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, node)) {

@@ -108,7 +108,7 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
 
         @Override
         public @NonNull Inheritance build() {
-            Objects.requireNonNull(this.groupName, "groupName");
+            ensureDefined(this.groupName, "group");
             return new Inheritance(this.groupName, this.value, this.expireAt, this.context.build(), this.metadata);
         }
     }

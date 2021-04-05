@@ -46,6 +46,8 @@ import net.luckperms.api.node.types.WeightNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Objects;
+
 public final class NodeBuilders {
     private NodeBuilders() {}
 
@@ -60,6 +62,7 @@ public final class NodeBuilders {
     private static final Parser<?>[] PARSERS = new Parser[]{INHERITANCE, PREFIX, SUFFIX, META, WEIGHT, DISPLAY_NAME, REGEX_PERMISSION};
 
     public static @NonNull NodeBuilder<?, ?> determineMostApplicable(String key) {
+        Objects.requireNonNull(key, "key");
         for (Parser<?> parser : PARSERS) {
             NodeBuilder<?, ?> builder = parser.parse(key);
             if (builder != null) {

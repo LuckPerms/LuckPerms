@@ -36,7 +36,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
-import java.util.Objects;
 
 public class Weight extends AbstractNode<WeightNode, WeightNode.Builder> implements WeightNode {
     public static final String NODE_KEY = "weight";
@@ -105,7 +104,7 @@ public class Weight extends AbstractNode<WeightNode, WeightNode.Builder> impleme
 
         @Override
         public @NonNull Weight build() {
-            Objects.requireNonNull(this.weight, "weight");
+            ensureDefined(this.weight, "weight");
             return new Weight(this.weight, this.value, this.expireAt, this.context.build(), this.metadata);
         }
     }

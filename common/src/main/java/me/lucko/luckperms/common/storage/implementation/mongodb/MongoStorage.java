@@ -605,7 +605,10 @@ public class MongoStorage implements StorageImplementation {
             //noinspection unchecked
             List<Document> permsList = (List<Document>) document.get("permissions");
             for (Document d : permsList) {
-                nodes.add(nodeFromDoc(d));
+                Node node = nodeFromDoc(d);
+                if (node != null) {
+                    nodes.add(node);
+                }
             }
         }
         return nodes;
@@ -643,6 +646,10 @@ public class MongoStorage implements StorageImplementation {
 
     private static Node nodeFromDoc(Document document) {
         String key = document.containsKey("permission") ? document.getString("permission") : document.getString("key");
+
+        if (key == null || key.isEmpty()) {
+            return null;
+        }
 
         NodeBuilder<?, ?> builder = NodeBuilders.determineMostApplicable(key)
                 .value(document.getBoolean("value", true));

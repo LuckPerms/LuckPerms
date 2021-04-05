@@ -410,6 +410,9 @@ public class SqlStorage implements StorageImplementation {
                     while (rs.next()) {
                         UUID holder = UUID.fromString(rs.getString("uuid"));
                         Node node = readNode(rs);
+                        if (node == null) {
+                            continue;
+                        }
 
                         N match = constraint.filterConstraintMatch(node);
                         if (match != null) {
@@ -511,6 +514,9 @@ public class SqlStorage implements StorageImplementation {
                     while (rs.next()) {
                         String holder = rs.getString("name");
                         Node node = readNode(rs);
+                        if (node == null) {
+                            continue;
+                        }
 
                         N match = constraint.filterConstraintMatch(node);
                         if (match != null) {
@@ -721,6 +727,11 @@ public class SqlStorage implements StorageImplementation {
     private static Node readNode(ResultSet rs) throws SQLException {
         long id = rs.getLong("id");
         String permission = rs.getString("permission");
+
+        if (permission == null || permission.isEmpty()) {
+            return null;
+        }
+
         boolean value = rs.getBoolean("value");
         String server = rs.getString("server");
         String world = rs.getString("world");
@@ -829,7 +840,10 @@ public class SqlStorage implements StorageImplementation {
             ps.setString(1, user.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    nodes.add(readNode(rs));
+                    Node node = readNode(rs);
+                    if (node != null) {
+                        nodes.add(readNode(rs));
+                    }
                 }
             }
         }
@@ -906,7 +920,10 @@ public class SqlStorage implements StorageImplementation {
             ps.setString(1, group);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    nodes.add(readNode(rs));
+                    Node node = readNode(rs);
+                    if (node != null) {
+                        nodes.add(node);
+                    }
                 }
             }
         }
@@ -920,7 +937,10 @@ public class SqlStorage implements StorageImplementation {
                     String holder = rs.getString("name");
                     Collection<Node> list = nodes.get(holder);
                     if (list != null) {
-                        list.add(readNode(rs));
+                        Node node = readNode(rs);
+                        if (node != null) {
+                            list.add(readNode(rs));
+                        }
                     }
                 }
             }

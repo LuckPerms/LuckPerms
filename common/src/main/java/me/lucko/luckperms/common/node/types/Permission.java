@@ -87,13 +87,17 @@ public class Permission extends AbstractNode<PermissionNode, PermissionNode.Buil
 
         @Override
         public @NonNull Builder permission(@NonNull String permission) {
-            this.permission = Objects.requireNonNull(permission, "permission");
+            Objects.requireNonNull(permission, "permission");
+            if (permission.isEmpty()) {
+                throw new IllegalArgumentException("permission string is empty");
+            }
+            this.permission = permission;
             return this;
         }
 
         @Override
         public @NonNull Permission build() {
-            Objects.requireNonNull(this.permission, "permission");
+            ensureDefined(this.permission, "permission");
 
             NodeBuilder<?, ?> testBuilder = NodeBuilders.determineMostApplicable(this.permission);
             if (!(testBuilder instanceof Builder)) {

@@ -1959,6 +1959,13 @@ public interface Message {
             .append(FULL_STOP)
     );
 
+    Args0 PERMISSION_INVALID_ENTRY_EMPTY = () -> prefixed(translatable()
+            // "&cThe empty string is not a valid permission."
+            .key("luckperms.command.misc.permission-invalid-empty")
+            .color(RED)
+            .append(FULL_STOP)
+    );
+
     Args3<PermissionHolder, Group, ContextSet> SET_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
             // "&b{}&a now inherits permissions from &b{}&a in context {}&a."
             .key("luckperms.command.generic.parent.add")

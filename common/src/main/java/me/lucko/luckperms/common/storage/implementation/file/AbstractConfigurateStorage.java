@@ -432,7 +432,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
                 String permission = entry.getKey().toString();
                 ConfigurationNode attributes = entry.getValue();
 
-                if (!permission.equals(keyFieldName)) {
+                if (!permission.equals(keyFieldName) && !permission.isEmpty()) {
                     return new NodeEntry(permission, attributes);
                 }
             }
@@ -440,7 +440,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
         // assume 'configNode' is the actual entry.
         String permission = children.get(keyFieldName).getString(null);
-        if (permission == null) {
+        if (permission == null || permission.isEmpty()) {
             return null;
         }
 
@@ -452,7 +452,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
         for (ConfigurationNode appended : data.getNode("permissions").getChildrenList()) {
             String plainValue = appended.getValue(Types::strictAsString);
-            if (plainValue != null) {
+            if (plainValue != null && !plainValue.isEmpty()) {
                 nodes.add(NodeBuilders.determineMostApplicable(plainValue).build());
                 continue;
             }

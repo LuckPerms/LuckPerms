@@ -106,19 +106,22 @@ public class RegexPermission extends AbstractNode<RegexPermissionNode, RegexPerm
 
         @Override
         public @NonNull Builder pattern(@NonNull String pattern) {
-            this.pattern = Objects.requireNonNull(pattern, "pattern");
+            Objects.requireNonNull(pattern, "pattern");
+            if (pattern.isEmpty()) {
+                throw new IllegalArgumentException("pattern is empty");
+            }
+            this.pattern = pattern;
             return this;
         }
 
         @Override
         public @NonNull Builder pattern(@NonNull Pattern pattern) {
-            this.pattern = Objects.requireNonNull(pattern, "pattern").pattern();
-            return this;
+            return pattern(Objects.requireNonNull(pattern, "pattern").pattern());
         }
 
         @Override
         public @NonNull RegexPermission build() {
-            Objects.requireNonNull(this.pattern, "pattern");
+            ensureDefined(this.pattern, "pattern");
             return new RegexPermission(this.pattern, this.value, this.expireAt, this.context.build(), this.metadata);
         }
     }

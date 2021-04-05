@@ -115,7 +115,11 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
 
         @Override
         public @NonNull Builder key(@NonNull String key) {
-            this.metaKey = Objects.requireNonNull(key, "key");
+            Objects.requireNonNull(key, "key");
+            if (key.isEmpty()) {
+                throw new IllegalArgumentException("key is empty");
+            }
+            this.metaKey = key;
             return this;
         }
 
@@ -127,8 +131,8 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
 
         @Override
         public @NonNull Meta build() {
-            Objects.requireNonNull(this.metaKey, "metaKey");
-            Objects.requireNonNull(this.metaValue, "metaValue");
+            ensureDefined(this.metaKey, "meta key");
+            ensureDefined(this.metaValue, "meta value");
             return new Meta(this.metaKey, this.metaValue, this.value, this.expireAt, this.context.build(), this.metadata);
         }
     }
