@@ -110,6 +110,10 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
+        if (this.luckperms$user == null || this.luckperms$queryOptions == null) {
+            // "fake" players will have our mixin, but won't have been initialised.
+            return Tristate.UNDEFINED;
+        }
         return hasPermission(permission, this.luckperms$queryOptions.getQueryOptions());
     }
 
@@ -123,8 +127,9 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
         }
 
         final User user = this.luckperms$user;
-        if (user == null) {
-            throw new IllegalStateException("Permissions have not been initialised for this player yet.");
+        if (user == null || this.luckperms$queryOptions == null) {
+            // "fake" players will have our mixin, but won't have been initialised.
+            return Tristate.UNDEFINED;
         }
 
         PermissionCache data = user.getCachedData().getPermissionData(queryOptions);
