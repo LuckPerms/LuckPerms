@@ -105,7 +105,10 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
                     action.accept(user.getApiProxy());
                     return user;
                 }, this.plugin.getBootstrap().getScheduler().async())
-                .thenCompose(user -> this.plugin.getStorage().saveUser(user));
+                .thenCompose(user -> {
+                    this.plugin.getUserManager().giveDefaultIfNeeded(user);
+                    return this.plugin.getStorage().saveUser(user);
+                });
     }
 
     @Override
