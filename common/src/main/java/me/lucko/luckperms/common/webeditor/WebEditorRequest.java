@@ -255,12 +255,13 @@ public class WebEditorRequest {
         stream.filter(uuid -> !users.containsKey(uuid))
                 .sorted()
                 .limit(MAX_USERS - users.size())
-                .forEach(uuid -> {
-                    User user = plugin.getStorage().loadUser(uuid, null).join();
+                .map(uuid -> plugin.getStorage().loadUser(uuid, null))
+                .forEach(fut -> {
+                    User user = fut.join();
                     if (user != null) {
-                        users.put(uuid, user);
+                        users.put(user.getUniqueId(), user);
+                        plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
                     }
-                    plugin.getUserManager().getHouseKeeper().cleanup(uuid);
                 });
     }
 
