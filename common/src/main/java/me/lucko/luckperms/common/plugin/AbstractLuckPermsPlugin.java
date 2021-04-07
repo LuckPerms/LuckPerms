@@ -270,7 +270,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     protected Path resolveConfig(String fileName) {
-        Path configFile = getBootstrap().getDataDirectory().resolve(fileName);
+        Path configFile = getBootstrap().getConfigDirectory().resolve(fileName);
         if (!Files.exists(configFile)) {
             try {
                 Files.createDirectories(configFile.getParent());
