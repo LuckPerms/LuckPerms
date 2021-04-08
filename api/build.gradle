@@ -17,11 +17,17 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         options.encoding = 'UTF-8'
         options.charSet = 'UTF-8'
         options.links(
-                'https://docs.oracle.com/javase/8/docs/api/',
                 'https://checkerframework.org/api/',
                 'https://javadoc.io/static/org.jetbrains/annotations/20.1.0/'
         )
         options.addStringOption('Xdoclint:none', '-quiet')
+
+        if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
+            options.addBooleanOption('-no-module-directories', true)
+            options.links.add('https://docs.oracle.com/en/java/javase/11/docs/api/')
+        } else {
+            options.links.add('https://docs.oracle.com/javase/8/docs/api/')
+        }
     }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
