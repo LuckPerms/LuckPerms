@@ -660,6 +660,14 @@ debug-logins: false
 #   or less.
 allow-invalid-usernames: false
 
+# If LuckPerms should not require users to confirm bulkupdate operations.
+#
+# - When set to true, operations will be executed immediately.
+# - This is not recommended, as bulkupdate has the potential to irreversibly delete large amounts of
+#   data, and is not designed to be executed automatically.
+# - If automation is needed, users should prefer using the LuckPerms API.
+skip-bulkupdate-confirmation: false
+
 # If LuckPerms should allow a users primary group to be removed with the 'parent remove' command.
 #
 # - When this happens, the plugin will set their primary group back to default.

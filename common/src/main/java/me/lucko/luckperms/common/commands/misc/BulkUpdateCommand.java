@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentException;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -77,20 +78,7 @@ public class BulkUpdateCommand extends SingleCommand {
                 return CommandResult.INVALID_ARGS;
             }
 
-            Message.BULK_UPDATE_STARTING.send(sender);
-            plugin.getStorage().applyBulkUpdate(operation).whenCompleteAsync((v, ex) -> {
-                if (ex == null) {
-                    plugin.getSyncTaskBuffer().requestDirectly();
-                    Message.BULK_UPDATE_SUCCESS.send(sender);
-                    if (operation.isTrackingStatistics()) {
-                        BulkUpdateStatistics stats = operation.getStatistics();
-                        Message.BULK_UPDATE_STATISTICS.send(sender, stats.getAffectedNodes(), stats.getAffectedUsers(), stats.getAffectedGroups());
-                    }
-                } else {
-                    ex.printStackTrace();
-                    Message.BULK_UPDATE_FAILURE.send(sender);
-                }
-            }, plugin.getBootstrap().getScheduler().async());
+            runOperation(operation, plugin, sender);
             return CommandResult.SUCCESS;
         }
 
@@ -155,15 +143,35 @@ public class BulkUpdateCommand extends SingleCommand {
             bulkUpdateBuilder.query(Query.of(field, Constraint.of(comparison, expr)));
         }
 
-        String id = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
-
         BulkUpdate bulkUpdate = bulkUpdateBuilder.build();
 
-        this.pendingOperations.put(id, bulkUpdate);
+        if (plugin.getConfiguration().get(ConfigKeys.SKIP_BULKUPDATE_CONFIRMATION)) {
+            runOperation(bulkUpdate, plugin, sender);
+        } else {
+            String id = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
+            this.pendingOperations.put(id, bulkUpdate);
 
-        Message.BULK_UPDATE_QUEUED.send(sender, bulkUpdate.buildAsSql().toReadableString().replace("{table}", bulkUpdate.getDataType().getName()));
-        Message.BULK_UPDATE_CONFIRM.send(sender, label, id);
+            Message.BULK_UPDATE_QUEUED.send(sender, bulkUpdate.buildAsSql().toReadableString().replace("{table}", bulkUpdate.getDataType().getName()));
+            Message.BULK_UPDATE_CONFIRM.send(sender, label, id);
+        }
 
         return CommandResult.SUCCESS;
+    }
+
+    private static void runOperation(BulkUpdate operation, LuckPermsPlugin plugin, Sender sender) {
+        Message.BULK_UPDATE_STARTING.send(sender);
+        plugin.getStorage().applyBulkUpdate(operation).whenCompleteAsync((v, ex) -> {
+            if (ex == null) {
+                plugin.getSyncTaskBuffer().requestDirectly();
+                Message.BULK_UPDATE_SUCCESS.send(sender);
+                if (operation.isTrackingStatistics()) {
+                    BulkUpdateStatistics stats = operation.getStatistics();
+                    Message.BULK_UPDATE_STATISTICS.send(sender, stats.getAffectedNodes(), stats.getAffectedUsers(), stats.getAffectedGroups());
+                }
+            } else {
+                ex.printStackTrace();
+                Message.BULK_UPDATE_FAILURE.send(sender);
+            }
+        }, plugin.getBootstrap().getScheduler().async());
     }
 }

@@ -157,6 +157,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> ALLOW_INVALID_USERNAMES = booleanKey("allow-invalid-usernames", false);
 
     /**
+     * If LuckPerms should not require users to confirm bulkupdate operations.
+     */
+    public static final ConfigKey<Boolean> SKIP_BULKUPDATE_CONFIRMATION = booleanKey("skip-bulkupdate-confirmation", false);
+
+    /**
      * If LuckPerms should produce extra logging output when it handles logins.
      */
     public static final ConfigKey<Boolean> DEBUG_LOGINS = booleanKey("debug-logins", false);
