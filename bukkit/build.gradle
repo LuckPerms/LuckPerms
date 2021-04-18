@@ -12,7 +12,11 @@ dependencies {
     compileOnly project(':common:loader-utils')
 
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
-    compileOnly 'me.lucko:adventure-platform-bukkit:4.0.0' // re: this artifact - see note in common/build.gradle
+    compileOnly('me.lucko:adventure-platform-bukkit:4.7.0') {
+        exclude(module: 'adventure-bom')
+        exclude(module: 'adventure-api')
+        exclude(module: 'adventure-nbt')
+    }
     compileOnly 'me.lucko:commodore:1.7'
     compileOnly('net.milkbowl.vault:VaultAPI:1.6') {
         exclude(module: 'bukkit')

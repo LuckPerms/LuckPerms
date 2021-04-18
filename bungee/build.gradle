@@ -7,7 +7,11 @@ dependencies {
     compileOnly project(':common:loader-utils')
 
     compileOnly 'net.md-5:bungeecord-api:1.15-SNAPSHOT'
-    compileOnly 'me.lucko:adventure-platform-bungeecord:4.0.0' // re: this artifact - see note in common/build.gradle
+    compileOnly('me.lucko:adventure-platform-bungeecord:4.7.0') {
+        exclude(module: 'adventure-bom')
+        exclude(module: 'adventure-api')
+        exclude(module: 'adventure-nbt')
+    }
     compileOnly 'com.imaginarycode.minecraft:RedisBungee:0.4'
 }
 

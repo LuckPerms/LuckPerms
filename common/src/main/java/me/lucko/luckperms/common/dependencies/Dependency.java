@@ -63,36 +63,29 @@ public enum Dependency {
     ADVENTURE(
             "me{}lucko",
             "adventure-api",
-            "4.0.1",
-            "6dKz0iM9MChLzU5MTLW5HSLFEmmNh/D9Bb6kzJvK/1E=",
+            "4.7.0",
+            "6PddEv3Rpe4LuthaVjgG98feIBl4AQAkaYNLY9lldWA=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM(
             "me{}lucko",
             "adventure-platform-api",
-            "4.0.1",
-            "ie3rz49jg5HU04mWe/f6lXjHt6L+S2SQp/x6YFbhxsc=",
+            "4.7.0",
+            "CyYWxQuoN4vHte/5HuFDZEqrBGMi9Vv7uH3toJW1Z5Y=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM_BUKKIT(
             "me{}lucko",
             "adventure-platform-bukkit",
-            "4.0.1",
-            "dVbYfUJqmde8jeuTvknCL9hbzqxybal00TELTzQgLbk=",
+            "4.7.0",
+            "9H5MHWbJlZAHZR5zqqjW3QBU0GhJ1l9KgLGE4mKHDe8=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM_BUNGEECORD(
             "me{}lucko",
             "adventure-platform-bungeecord",
-            "4.0.1",
-            "4phi0TxNKVj5Lko63nlkrd5snIJcaU+cXUfAWsbCX1U=",
-            Relocation.of("adventure", "net{}kyori{}adventure")
-    ),
-    ADVENTURE_PLATFORM_SPONGEAPI(
-            "me{}lucko",
-            "adventure-platform-spongeapi",
-            "4.0.1",
-            "6fjWuZMeJ6633RKuZh6sIlMyVIzryQoewONeei2nB+4=",
+            "4.7.0",
+            "puM9PtfRzhp1Gq+ZxRAhVZqDblN1P2bb8FUnhLkMVsA=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     EVENT(
