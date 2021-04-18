@@ -17,7 +17,7 @@ dependencies {
         exclude(module: 'adventure-api')
         exclude(module: 'adventure-nbt')
     }
-    compileOnly 'me.lucko:commodore:1.7'
+    compileOnly 'me.lucko:commodore:1.9'
     compileOnly('net.milkbowl.vault:VaultAPI:1.6') {
         exclude(module: 'bukkit')
     }

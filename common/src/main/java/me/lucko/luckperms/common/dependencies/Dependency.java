@@ -44,14 +44,14 @@ public enum Dependency {
     ASM(
             "org.ow2.asm",
             "asm",
-            "7.1",
-            "SrL6K20sycyx6qBeoynEB7R7E+0pFfYvjEuMyWJY1N4="
+            "9.1",
+            "zaTeRV+rSP8Ly3xItGOUR9TehZp6/DCglKmG8JNr66I="
     ),
     ASM_COMMONS(
             "org.ow2.asm",
             "asm-commons",
-            "7.1",
-            "5VkEidjxmE2Fv+q9Oxc3TFnCiuCdSOxKDrvQGVns01g="
+            "9.1",
+            "r8sm3B/BLAxKma2mcJCN2C4Y38SIyvXuklRplrRwwAw="
     ),
     JAR_RELOCATOR(
             "me.lucko",
@@ -63,8 +63,8 @@ public enum Dependency {
     ADVENTURE(
             "me{}lucko",
             "adventure-api",
-            "4.7.0",
-            "6PddEv3Rpe4LuthaVjgG98feIBl4AQAkaYNLY9lldWA=",
+            "4.7.1",
+            "Kp0YN1he11ykhB9vSnUVHRq4/pTuOon+XuklDsSHsQw=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM(
@@ -98,8 +98,8 @@ public enum Dependency {
     CAFFEINE(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
-            "2.8.4",
-            "KV9YN5gQj6b507VJApJpPF5PkCon0DZqAi0T7Ln0lag=",
+            "2.9.0",
+            "VFMotEO3XLbTHfRKfL3m36GlN72E/dzRFH9B5BJiX2o=",
             Relocation.of("caffeine", "com{}github{}benmanes{}caffeine")
     ),
     OKIO(
@@ -112,37 +112,37 @@ public enum Dependency {
     OKHTTP(
             "com{}squareup{}" + RelocationHelper.OKHTTP3_STRING,
             "okhttp",
-            "3.14.7",
-            "Yg1PpDxcal72JXYCBKiHmeHkpl4ceh2NoC4GHEy7gAA=",
+            "3.14.9",
+            "JXD6tVUVy/iB16TO70n8UVSQvAJwV+Zmd2ooMkZa7KA=",
             Relocation.of(RelocationHelper.OKHTTP3_STRING, RelocationHelper.OKHTTP3_STRING),
             Relocation.of(RelocationHelper.OKIO_STRING, RelocationHelper.OKIO_STRING)
     ),
     BYTEBUDDY(
             "net{}bytebuddy",
             "byte-buddy",
-            "1.10.9",
-            "B7nKbi+XDLA/SyVlHfHy/OJx1JG0TgQJgniHeG9pLU0=",
+            "1.10.22",
+            "+TGtxDkxd6+lJExHJXqDlV4n/gR8QJN4xu2gkPsHSoQ=",
             Relocation.of("bytebuddy", "net{}bytebuddy")
     ),
     COMMODORE(
             "me{}lucko",
             "commodore",
-            "1.7",
-            "ncwmvNFfvyZf1Pa0v4fWyMR0Jxe1v1ZgXOiI255IX5Q=",
+            "1.9",
+            "EhaLLqbgPnVYa61RumUc7l3r6wcGg2edDh2+PR8pvHI=",
             Relocation.of("commodore", "me{}lucko{}commodore")
     ),
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.7.0",
-            "ABURDun85Q01kf119r4yjDtl5ju9Fg9uV2nXyU3SEdw=",
+            "2.7.2",
+            "o/Z3bfCELPZefxWFFQEtUwfalJ9mBCKC4e5EdN0Z9Eg=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
             "mysql",
             "mysql-connector-java",
-            "8.0.22",
-            "UBne+9EjFilel6bojyqbB/EYNFpOmCcQu6Iy5JmyL08=",
+            "8.0.23",
+            "/31bQCr9OcEnh0cVBaM6MEEDsjjsG3pE6JNtMynadTU=",
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
@@ -173,8 +173,8 @@ public enum Dependency {
     HIKARI(
             "com{}zaxxer",
             "HikariCP",
-            "4.0.2",
-            "DP9czSdMnMysTbuoBK5cy9w5r2zR6rdaB09L/HfHncU=",
+            "4.0.3",
+            "fAJK7/HBBjV210RTUT+d5kR9jmJNF/jifzCi6XaIxsk=",
             Relocation.of("hikari", "com{}zaxxer{}hikari")
     ),
     SLF4J_SIMPLE(
@@ -192,74 +192,74 @@ public enum Dependency {
     MONGODB_DRIVER(
             "org.mongodb",
             "mongo-java-driver",
-            "3.12.2",
-            "eMxHcEtasb/ubFCv99kE5rVZMPGmBei674ZTdjYe58w=",
+            "3.12.8",
+            "92uqr4qaL3dbw5wrb8sQWQqFxpzr/Y/DhForeyg3taI=",
             Relocation.of("mongodb", "com{}mongodb"),
             Relocation.of("bson", "org{}bson")
     ),
     JEDIS(
             "redis.clients",
             "jedis",
-            "3.3.0",
-            "HuTfz9xW/mi1fwVQ3xgPmd6qwTRMF/3fyMzw2LmOgy4=",
+            "3.5.2",
+            "jX3340YaYjHFQN2sA+GCo33LB4FuIYKgQUPUv2MK/Xo=",
             Relocation.of("jedis", "redis{}clients{}jedis"),
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     RABBITMQ(
             "com{}rabbitmq",
             "amqp-client",
-            "5.10.0",
-            "z9/pvANy1mMAQb+VJtN+COybfxPeg/m9BgcfZRO1jcE=",
+            "5.12.0",
+            "CxliwVWAnPKi5BwxCu1S1SGzx5fbhTk5JCKdBS27P2c=",
             Relocation.of("rabbitmq", "com{}rabbitmq")
     ),
     COMMONS_POOL_2(
             "org.apache.commons",
             "commons-pool2",
-            "2.8.0",
-            "Xvqfu1SlixoSIFpfrFZfaYKr/rD/Rb28MYdI71/To/8=",
+            "2.9.0",
+            "vJGbQmv6+zHsxF1mUqnxN0YkZdhJ+zhz142Qw/jTWwE=",
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
     CONFIGURATE_CORE(
             "org{}spongepowered",
             "configurate-core",
-            "3.7",
-            "V+M3OFm+O0AHsao557kExxa27lYEX7UYE06G/zC/Kyc=",
+            "3.7.2",
+            "XF2LzWLkSV0wyQRDt33I+gDlf3t2WzxH1h8JCZZgPp4=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_GSON(
             "org{}spongepowered",
             "configurate-gson",
-            "3.7",
-            "0JhMGX6mjY8MDCGGc7lrfoHvWbpGiE5R6N3nqJch+SU=",
+            "3.7.2",
+            "9S/mp3Ig9De7NNd6+2kX+L4R90bHnAosSNVbFjrl7sM=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     CONFIGURATE_YAML(
             "org{}spongepowered",
             "configurate-yaml",
-            "3.7",
-            "14L0JiDuAfQovxkNySeaf9Kul3Nkl0OaW49Ow4ReV8E=",
+            "3.7.2",
+            "OBfYn4nSMGZfVf2DoZhZq+G9TF1mODX/C5OOz/mkPmc=",
             Relocation.of("configurate", "ninja{}leaping{}configurate")
     ),
     SNAKEYAML(
             "org.yaml",
             "snakeyaml",
-            "1.23",
-            "EwCfte3jzyvlqNDxYCFVrqoM5e9fk2aJK9JY2NPU0rE=",
+            "1.28",
+            "NURqFCFDXUXkxqwN47U3hSfVzCRGwHGD4kRHcwzh//o=",
             Relocation.of("yaml", "org{}yaml{}snakeyaml")
     ),
     CONFIGURATE_HOCON(
             "org{}spongepowered",
             "configurate-hocon",
-            "3.7",
-            "GYdqieCZVgPmoaIFjYN0YHuSVsHO7IsXZrwLAWqCgZM=",
+            "3.7.2",
+            "GOORZlK1FKLzdIm7dKyyXtBdvk7Z89HARAd2H6NiWSY=",
             Relocation.of("configurate", "ninja{}leaping{}configurate"),
             Relocation.of("hocon", "com{}typesafe{}config")
     ),
     HOCON_CONFIG(
             "com{}typesafe",
             "config",
-            "1.4.0",
-            "qtv9WlJFUb7vENP4kdMFuDuyfVRwPZpN56yioS2YR+I=",
+            "1.4.1",
+            "TAqn4iPHXIhAxB/Bg9TNMRgUCh7lA+PgjOZu0nlMlI8=",
             Relocation.of("hocon", "com{}typesafe{}config")
     ),
     CONFIGURATE_TOML(

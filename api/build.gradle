@@ -2,7 +2,7 @@ group = 'net.luckperms'
 project.version = '5.3'
 
 dependencies {
-    compileOnly 'org.checkerframework:checker-qual:3.8.0'
+    compileOnly 'org.checkerframework:checker-qual:3.12.0'
     compileOnly 'org.jetbrains:annotations:20.1.0'
 }
 

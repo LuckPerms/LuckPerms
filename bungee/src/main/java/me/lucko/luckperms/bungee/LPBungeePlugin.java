@@ -203,7 +203,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
         try {
             Class.forName(className);
             return true;
-        } catch (ClassNotFoundException var1) {
+        } catch (ClassNotFoundException e) {
             return false;
         }
     }
