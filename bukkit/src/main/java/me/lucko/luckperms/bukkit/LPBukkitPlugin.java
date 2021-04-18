@@ -125,6 +125,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         dependencies.add(Dependency.ADVENTURE_PLATFORM_BUKKIT);
         if (isBrigadierSupported()) {
             dependencies.add(Dependency.COMMODORE);
+            dependencies.add(Dependency.COMMODORE_FILE);
         }
         return dependencies;
     }

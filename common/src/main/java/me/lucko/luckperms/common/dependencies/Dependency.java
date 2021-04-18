@@ -131,6 +131,13 @@ public enum Dependency {
             "EhaLLqbgPnVYa61RumUc7l3r6wcGg2edDh2+PR8pvHI=",
             Relocation.of("commodore", "me{}lucko{}commodore")
     ),
+    COMMODORE_FILE(
+            "me{}lucko",
+            "commodore-file",
+            "1.0",
+            "V9++dyp9RbzD4DLO2R9upF8Z8v5SWasyX8ocqYRAMow=",
+            Relocation.of("commodore", "me{}lucko{}commodore")
+    ),
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
