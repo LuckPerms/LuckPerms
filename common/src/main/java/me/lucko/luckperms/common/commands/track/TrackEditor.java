@@ -73,6 +73,11 @@ public class TrackEditor extends ChildCommand<Track> {
         // remove groups which the sender doesn't have perms to view
         groups.removeIf(holder -> ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder) || ArgumentPermissions.checkGroup(plugin, sender, holder, ImmutableContextSetImpl.EMPTY));
 
+        if (groups.isEmpty()) {
+            Message.EDITOR_NO_MATCH.send(sender);
+            return CommandResult.FAILURE;
+        }
+
         // then collect users which are a member of any of those groups
         // (users which are on the track)
         List<PermissionHolder> users = new ArrayList<>();
