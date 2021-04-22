@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -55,10 +54,10 @@ public class ParentInfo extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         int page = args.getIntOrDefault(0, 1);
@@ -74,7 +73,7 @@ public class ParentInfo extends GenericChildCommand {
         // handle empty
         if (nodes.isEmpty()) {
             Message.PARENT_INFO_NO_DATA.send(sender, target);
-            return CommandResult.SUCCESS;
+            return;
         }
 
         // sort the list alphabetically instead
@@ -108,8 +107,6 @@ public class ParentInfo extends GenericChildCommand {
                 Message.PARENT_INFO_NODE_ENTRY.send(sender, node, target, label);
             }
         }
-
-        return CommandResult.SUCCESS;
     }
 
     private static final Comparator<InheritanceNode> ALPHABETICAL_NODE_COMPARATOR = (o1, o2) -> {

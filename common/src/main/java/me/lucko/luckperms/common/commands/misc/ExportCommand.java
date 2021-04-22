@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import me.lucko.luckperms.common.backup.Exporter;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -49,10 +48,10 @@ public class ExportCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         if (this.running.get()) {
             Message.EXPORT_ALREADY_RUNNING.send(sender);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         boolean includeUsers = !args.remove("--without-users");
@@ -63,7 +62,7 @@ public class ExportCommand extends SingleCommand {
         if (upload) {
             if (!this.running.compareAndSet(false, true)) {
                 Message.EXPORT_ALREADY_RUNNING.send(sender);
-                return CommandResult.STATE_ERROR;
+                return;
             }
 
             exporter = new Exporter.WebUpload(plugin, sender, includeUsers, includeGroups, label);
@@ -73,12 +72,12 @@ public class ExportCommand extends SingleCommand {
 
             if (!path.getParent().equals(dataDirectory)) {
                 Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             if (Files.exists(path)) {
                 Message.EXPORT_FILE_ALREADY_EXISTS.send(sender, path.toString());
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             try {
@@ -86,17 +85,17 @@ public class ExportCommand extends SingleCommand {
             } catch (IOException e) {
                 Message.EXPORT_FILE_FAILURE.send(sender);
                 plugin.getLogger().warn("Error whilst writing to the file", e);
-                return CommandResult.FAILURE;
+                return;
             }
 
             if (!Files.isWritable(path)) {
                 Message.EXPORT_FILE_NOT_WRITABLE.send(sender, path.toString());
-                return CommandResult.FAILURE;
+                return;
             }
 
             if (!this.running.compareAndSet(false, true)) {
                 Message.EXPORT_ALREADY_RUNNING.send(sender);
-                return CommandResult.STATE_ERROR;
+                return;
             }
 
             exporter = new Exporter.SaveFile(plugin, sender, path, includeUsers, includeGroups);
@@ -110,8 +109,6 @@ public class ExportCommand extends SingleCommand {
                 this.running.set(false);
             }
         });
-
-        return CommandResult.SUCCESS;
     }
 
 }

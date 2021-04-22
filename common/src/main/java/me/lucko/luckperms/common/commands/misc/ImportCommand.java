@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.commands.misc;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.backup.Importer;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -57,10 +56,10 @@ public class ImportCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         if (this.running.get()) {
             Message.IMPORT_ALREADY_RUNNING.send(sender);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         boolean fromFile = !args.remove("--upload");
@@ -73,7 +72,7 @@ public class ImportCommand extends SingleCommand {
 
             if (!path.getParent().equals(dataDirectory) || path.getFileName().toString().equals("config.yml")) {
                 Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             // try auto adding the '.json.gz' extension
@@ -86,17 +85,17 @@ public class ImportCommand extends SingleCommand {
 
             if (!Files.exists(path)) {
                 Message.IMPORT_FILE_DOESNT_EXIST.send(sender, path.toString());
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             if (!Files.isReadable(path)) {
                 Message.IMPORT_FILE_NOT_READABLE.send(sender, path.toString());
-                return CommandResult.FAILURE;
+                return;
             }
 
             if (!this.running.compareAndSet(false, true)) {
                 Message.IMPORT_ALREADY_RUNNING.send(sender);
-                return CommandResult.STATE_ERROR;
+                return;
             }
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8))) {
@@ -105,30 +104,30 @@ public class ImportCommand extends SingleCommand {
                 plugin.getLogger().warn("Error whilst reading from the import file", e);
                 Message.IMPORT_FILE_READ_FAILURE.send(sender);
                 this.running.set(false);
-                return CommandResult.FAILURE;
+                return;
             }
         } else {
             String code = args.get(0);
 
             if (code.isEmpty()) {
                 Message.IMPORT_WEB_INVALID_CODE.send(sender, code);
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             try {
                 data = plugin.getBytebin().getJsonContent(code).getAsJsonObject();
             } catch (UnsuccessfulRequestException e) {
                 Message.HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
-                return CommandResult.STATE_ERROR;
+                return;
             } catch (IOException e) {
                 plugin.getLogger().severe("Error reading data to bytebin", e);
                 Message.HTTP_UNKNOWN_FAILURE.send(sender);
-                return CommandResult.STATE_ERROR;
+                return;
             }
 
             if (data == null) {
                 Message.IMPORT_UNABLE_TO_READ.send(sender, code);
-                return CommandResult.FAILURE;
+                return;
             }
         }
 
@@ -142,8 +141,6 @@ public class ImportCommand extends SingleCommand {
                 this.running.set(false);
             }
         });
-
-        return CommandResult.SUCCESS;
     }
 
 }

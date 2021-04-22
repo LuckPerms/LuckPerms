@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.log;
 
 import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -85,10 +84,10 @@ public class LogNotify extends ChildCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
         if (sender.isConsole()) {
             Message.LOG_NOTIFY_CONSOLE.send(sender);
-            return CommandResult.SUCCESS;
+            return;
         }
 
         final UUID uuid = sender.getUniqueId();
@@ -97,42 +96,41 @@ public class LogNotify extends ChildCommand<Log> {
                 // toggle on
                 setIgnoring(plugin, uuid, false);
                 Message.LOG_NOTIFY_TOGGLE_ON.send(sender);
-                return CommandResult.SUCCESS;
+                return;
             }
             // toggle off
             setIgnoring(plugin, uuid, true);
             Message.LOG_NOTIFY_TOGGLE_OFF.send(sender);
-            return CommandResult.SUCCESS;
+            return;
         }
 
         if (args.get(0).equalsIgnoreCase("on")) {
             if (!isIgnoring(plugin, uuid)) {
                 // already on
                 Message.LOG_NOTIFY_ALREADY_ON.send(sender);
-                return CommandResult.STATE_ERROR;
+                return;
             }
 
             // toggle on
             setIgnoring(plugin, uuid, false);
             Message.LOG_NOTIFY_TOGGLE_ON.send(sender);
-            return CommandResult.SUCCESS;
+            return;
         }
 
         if (args.get(0).equalsIgnoreCase("off")) {
             if (isIgnoring(plugin, uuid)) {
                 // already off
                 Message.LOG_NOTIFY_ALREADY_OFF.send(sender);
-                return CommandResult.STATE_ERROR;
+                return;
             }
 
             // toggle off
             setIgnoring(plugin, uuid, true);
             Message.LOG_NOTIFY_TOGGLE_OFF.send(sender);
-            return CommandResult.SUCCESS;
+            return;
         }
 
         // not recognised
         Message.LOG_NOTIFY_UNKNOWN.send(sender);
-        return CommandResult.INVALID_ARGS;
     }
 }

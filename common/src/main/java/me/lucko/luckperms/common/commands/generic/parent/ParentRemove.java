@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -61,10 +60,10 @@ public class ParentRemove extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String groupName = args.getLowercase(0, DataConstraints.GROUP_NAME_TEST_ALLOW_SPACE);
@@ -75,7 +74,7 @@ public class ParentRemove extends GenericChildCommand {
                 ArgumentPermissions.checkGroup(plugin, sender, groupName, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, groupName)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         if (target.getType() == HolderType.USER) {
@@ -88,7 +87,7 @@ public class ParentRemove extends GenericChildCommand {
 
             if (shouldPrevent) {
                 Message.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);
-                return CommandResult.STATE_ERROR;
+                return;
             }
         }
 
@@ -105,10 +104,8 @@ public class ParentRemove extends GenericChildCommand {
             }
 
             StorageAssistant.save(target, sender, plugin);
-            return CommandResult.SUCCESS;
         } else {
             Message.DOES_NOT_INHERIT.send(sender, target, Component.text(groupName), context);
-            return CommandResult.STATE_ERROR;
         }
     }
 

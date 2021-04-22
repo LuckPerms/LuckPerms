@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -54,10 +53,10 @@ public class ParentClear extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         int before = target.normalData().size();
@@ -66,7 +65,7 @@ public class ParentClear extends GenericChildCommand {
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) || ArgumentPermissions.checkGroup(plugin, sender, target, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         if (context.isEmpty()) {
@@ -83,7 +82,6 @@ public class ParentClear extends GenericChildCommand {
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(target, sender, plugin);
-        return CommandResult.SUCCESS;
     }
 
     @Override

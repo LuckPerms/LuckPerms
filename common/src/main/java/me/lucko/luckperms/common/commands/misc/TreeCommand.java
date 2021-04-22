@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -50,7 +49,7 @@ public class TreeCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         String selection = ".";
         String player = null;
 
@@ -72,7 +71,7 @@ public class TreeCommand extends SingleCommand {
 
             if (user == null) {
                 Message.USER_NOT_ONLINE.send(sender, player);
-                return CommandResult.STATE_ERROR;
+                return;
             }
         } else {
             user = null;
@@ -81,7 +80,7 @@ public class TreeCommand extends SingleCommand {
         TreeView view = new TreeView(plugin.getPermissionRegistry(), selection);
         if (!view.hasData()) {
             Message.TREE_EMPTY.send(sender);
-            return CommandResult.FAILURE;
+            return;
         }
 
         Message.TREE_UPLOAD_START.send(sender);
@@ -92,15 +91,14 @@ public class TreeCommand extends SingleCommand {
             id = view.uploadPasteData(plugin.getBytebin(), sender, user, permissionData);
         } catch (UnsuccessfulRequestException e) {
             Message.GENERIC_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
-            return CommandResult.STATE_ERROR;
+            return;
         } catch (IOException e) {
             plugin.getLogger().warn("Error uploading data to bytebin", e);
             Message.GENERIC_HTTP_UNKNOWN_FAILURE.send(sender);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         String url = plugin.getConfiguration().get(ConfigKeys.TREE_VIEWER_URL_PATTERN) + id;
         Message.TREE_URL.send(sender, url);
-        return CommandResult.SUCCESS;
     }
 }

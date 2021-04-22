@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.user;
 
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -55,10 +54,10 @@ public class UserInfo extends ChildCommand<User> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, User target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         Message.USER_INFO_GENERAL.send(sender,
@@ -108,6 +107,5 @@ public class UserInfo extends ChildCommand<User> {
         Map<String, List<String>> meta = data.getMeta(MetaCheckEvent.Origin.INTERNAL);
 
         Message.USER_INFO_CONTEXTUAL_DATA.send(sender, active, contextSet, prefix, suffix, primaryGroup, meta);
-        return CommandResult.SUCCESS;
     }
 }

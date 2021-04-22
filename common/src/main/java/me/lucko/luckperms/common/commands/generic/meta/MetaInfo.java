@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -61,10 +60,10 @@ public class MetaInfo extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         SortedSet<Map.Entry<Integer, PrefixNode>> prefixes = new TreeSet<>(MetaComparator.INSTANCE.reversed());
@@ -110,8 +109,6 @@ public class MetaInfo extends GenericChildCommand {
                 Message.META_ENTRY.send(sender, node, target, label);
             }
         }
-
-        return CommandResult.SUCCESS;
     }
 
     private static final class MetaComparator implements Comparator<Map.Entry<Integer, ? extends ChatMetaNode<?, ?>>> {

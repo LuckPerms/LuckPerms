@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -53,10 +52,10 @@ public class GroupInfo extends ChildCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         Message.GROUP_INFO_GENERAL.send(sender, target.getName(), target.getPlainDisplayName(), target.getWeight());
@@ -92,6 +91,5 @@ public class GroupInfo extends ChildCommand<Group> {
         Map<String, List<String>> meta = data.getMeta(MetaCheckEvent.Origin.INTERNAL);
 
         Message.GROUP_INFO_CONTEXTUAL_DATA.send(sender, prefix, suffix, meta);
-        return CommandResult.SUCCESS;
     }
 }

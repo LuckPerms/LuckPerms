@@ -141,7 +141,7 @@ public class CommandManager {
         return this.tabCompletions;
     }
 
-    public CompletableFuture<CommandResult> executeCommand(Sender sender, String label, List<String> args) {
+    public CompletableFuture<Void> executeCommand(Sender sender, String label, List<String> args) {
         SchedulerAdapter scheduler = this.plugin.getBootstrap().getScheduler();
         List<String> argsCopy = new ArrayList<>(args);
 
@@ -156,18 +156,17 @@ public class CommandManager {
         AtomicReference<SchedulerTask> timeoutTask = new AtomicReference<>();
 
         // schedule the actual execution of the command using the command executor service
-        CompletableFuture<CommandResult> future = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             // set flags
             executorThread.set(Thread.currentThread());
             this.executingCommand.set(true);
 
             // actually try to execute the command
             try {
-                return execute(sender, label, args);
+                execute(sender, label, args);
             } catch (Throwable e) {
                 // catch any exception
                 this.plugin.getLogger().severe("Exception whilst executing command: " + args, e);
-                return null;
             } finally {
                 // unset flags
                 this.executingCommand.set(false);
@@ -207,7 +206,7 @@ public class CommandManager {
         return this.mainCommands.values().stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender));
     }
 
-    private CommandResult execute(Sender sender, String label, List<String> arguments) {
+    private void execute(Sender sender, String label, List<String> arguments) {
         applyConvenienceAliases(arguments, true);
 
         // Handle no arguments
@@ -223,7 +222,7 @@ public class CommandManager {
 
             if (hasPermissionForAny(sender)) {
                 Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
-                return CommandResult.SUCCESS;
+                return;
             }
 
             Collection<? extends Group> groups = this.plugin.getGroupManager().getAll().values();
@@ -232,7 +231,7 @@ public class CommandManager {
             } else {
                 Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
             }
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         // Look for the main command.
@@ -241,13 +240,13 @@ public class CommandManager {
         // Main command not found
         if (main == null) {
             sendCommandUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         // Check the Sender has permission to use the main command.
         if (!main.isAuthorized(sender)) {
             sendCommandUsage(sender, label);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         arguments.remove(0); // remove the main command arg.
@@ -255,21 +254,17 @@ public class CommandManager {
         // Check the correct number of args were given for the main command
         if (main.getArgumentCheck().test(arguments.size())) {
             main.sendDetailedUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         // Try to execute the command.
-        CommandResult result;
         try {
-            result = main.execute(this.plugin, sender, null, new ArgumentList(arguments), label);
+            main.execute(this.plugin, sender, null, new ArgumentList(arguments), label);
         } catch (CommandException e) {
-            result = e.handle(sender, label, main);
+            e.handle(sender, label, main);
         } catch (Throwable e) {
             e.printStackTrace();
-            result = CommandResult.FAILURE;
         }
-
-        return result;
     }
 
     public List<String> tabCompleteCommand(Sender sender, List<String> arguments) {

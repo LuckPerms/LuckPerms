@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -53,16 +52,16 @@ public class TrackInsert extends ChildCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String groupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
             sendDetailedUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         int pos;
@@ -70,12 +69,12 @@ public class TrackInsert extends ChildCommand<Track> {
             pos = Integer.parseInt(args.get(1));
         } catch (NumberFormatException e) {
             Message.TRACK_INSERT_ERROR_NUMBER.send(sender, args.get(1));
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         Group group = StorageAssistant.loadGroup(groupName, sender, plugin, false);
         if (group == null) {
-            return CommandResult.LOADING_ERROR;
+            return;
         }
 
         try {
@@ -92,15 +91,12 @@ public class TrackInsert extends ChildCommand<Track> {
                         .build().submit(plugin, sender);
 
                 StorageAssistant.save(target, sender, plugin);
-                return CommandResult.SUCCESS;
             } else {
                 Message.TRACK_ALREADY_CONTAINS.send(sender, target.getName(), group);
-                return CommandResult.STATE_ERROR;
             }
 
         } catch (IndexOutOfBoundsException e) {
             Message.TRACK_INSERT_ERROR_INVALID_POS.send(sender, pos);
-            return CommandResult.INVALID_ARGS;
         }
     }
 

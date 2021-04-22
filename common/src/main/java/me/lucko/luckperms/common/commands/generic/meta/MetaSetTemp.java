@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -60,10 +59,10 @@ public class MetaSetTemp extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String key = args.get(0);
@@ -76,7 +75,7 @@ public class MetaSetTemp extends GenericChildCommand {
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, key)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         Node node = Meta.builder(key, value).withContext(context).expiry(duration).build();
@@ -93,10 +92,8 @@ public class MetaSetTemp extends GenericChildCommand {
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);
-            return CommandResult.SUCCESS;
         } else {
             Message.ALREADY_HAS_TEMP_META.send(sender, target, key, value, context);
-            return CommandResult.STATE_ERROR;
         }
     }
 

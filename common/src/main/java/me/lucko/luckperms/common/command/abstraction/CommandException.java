@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.command.abstraction;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.sender.Sender;
 
 /**
@@ -33,14 +32,14 @@ import me.lucko.luckperms.common.sender.Sender;
  */
 public abstract class CommandException extends Exception {
 
-    protected abstract CommandResult handle(Sender sender);
+    protected abstract void handle(Sender sender);
 
-    public CommandResult handle(Sender sender, String label, Command<?> command) {
-        return handle(sender);
+    public void handle(Sender sender, String label, Command<?> command) {
+        handle(sender);
     }
 
-    public CommandResult handle(Sender sender, GenericChildCommand command) {
-        return handle(sender);
+    public void handle(Sender sender, GenericChildCommand command) {
+        handle(sender);
     }
 
 }

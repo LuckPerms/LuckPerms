@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -52,28 +51,28 @@ public class DeleteGroup extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         if (args.isEmpty()) {
             sendUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         String groupName = args.get(0).toLowerCase();
 
         if (groupName.equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
             Message.DELETE_GROUP_ERROR_DEFAULT.send(sender);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         Group group = plugin.getStorage().loadGroup(groupName).join().orElse(null);
         if (group == null) {
             Message.GROUP_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
+            return;
         }
 
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), group)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         try {
@@ -81,7 +80,7 @@ public class DeleteGroup extends SingleCommand {
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst deleting group", e);
             Message.DELETE_ERROR.send(sender, group.getFormattedDisplayName());
-            return CommandResult.FAILURE;
+            return;
         }
 
         Message.DELETE_SUCCESS.send(sender, group.getFormattedDisplayName());
@@ -91,7 +90,6 @@ public class DeleteGroup extends SingleCommand {
                 .build().submit(plugin, sender);
 
         plugin.getSyncTaskBuffer().request();
-        return CommandResult.SUCCESS;
     }
 
     @Override

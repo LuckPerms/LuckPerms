@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge.commands;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -48,7 +47,7 @@ public class ParentAdd extends ChildCommand<LPSubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
         String collection = args.get(0);
         String name = args.get(1);
         ImmutableContextSet contextSet = args.getContextOrEmpty(2);
@@ -71,6 +70,5 @@ public class ParentAdd extends ChildCommand<LPSubjectData> {
         } else {
             SpongeCommandUtils.sendPrefixed(sender, "Unable to add parent. Does the Subject already have it added?");
         }
-        return CommandResult.SUCCESS;
     }
 }

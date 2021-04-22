@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -53,21 +52,21 @@ public class CreateGroup extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         if (args.isEmpty()) {
             sendUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         String groupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender, groupName);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         if (plugin.getStorage().loadGroup(groupName).join().isPresent()) {
             Message.ALREADY_EXISTS.send(sender, groupName);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         Integer weight = null;
@@ -99,7 +98,7 @@ public class CreateGroup extends SingleCommand {
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst creating group", e);
             Message.CREATE_ERROR.send(sender, Component.text(groupName));
-            return CommandResult.FAILURE;
+            return;
         }
 
         Message.CREATE_SUCCESS.send(sender, Component.text(groupName));
@@ -107,7 +106,5 @@ public class CreateGroup extends SingleCommand {
         LoggedAction.build().source(sender).targetName(groupName).targetType(Action.Target.Type.GROUP)
                 .description("create")
                 .build().submit(plugin, sender);
-
-        return CommandResult.SUCCESS;
     }
 }

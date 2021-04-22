@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -58,10 +57,10 @@ public class PermissionUnsetTemp extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String node = args.get(0);
@@ -77,7 +76,7 @@ public class PermissionUnsetTemp extends GenericChildCommand {
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, node)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         Node builtNode = NodeBuilders.determineMostApplicable(node).expiry(10L).withContext(context).build();
@@ -85,7 +84,7 @@ public class PermissionUnsetTemp extends GenericChildCommand {
         if (builtNode instanceof InheritanceNode) {
             if (ArgumentPermissions.checkGroup(plugin, sender, ((InheritanceNode) builtNode).getGroupName(), context)) {
                 Message.COMMAND_NO_PERMISSION.send(sender);
-                return CommandResult.NO_PERMISSION;
+                return;
             }
         }
 
@@ -108,10 +107,8 @@ public class PermissionUnsetTemp extends GenericChildCommand {
             }
 
             StorageAssistant.save(target, sender, plugin);
-            return CommandResult.SUCCESS;
         } else {
             Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, target, node, context);
-            return CommandResult.STATE_ERROR;
         }
     }
 

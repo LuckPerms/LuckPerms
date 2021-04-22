@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.command.abstraction;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -60,11 +59,11 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void ignored, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Void ignored, ArgumentList args, String label) {
         // check if required argument and/or subcommand is missing
         if (args.size() < this.type.minArgs) {
             sendUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         Command<T> sub = getChildren().stream()
@@ -74,17 +73,17 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
 
         if (sub == null) {
             Message.COMMAND_NOT_RECOGNISED.send(sender);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         if (!sub.isAuthorized(sender)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         if (sub.getArgumentCheck().test(args.size() - this.type.minArgs)) {
             sub.sendDetailedUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         final String targetArgument = args.get(0);
@@ -92,7 +91,7 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
         if (this.type == Type.TAKES_ARGUMENT_FOR_TARGET) {
             targetId = parseTarget(targetArgument, plugin, sender);
             if (targetId == null) {
-                return CommandResult.LOADING_ERROR;
+                return;
             }
         }
 
@@ -101,18 +100,16 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
         try {
             T target = getTarget(targetId, plugin, sender);
             if (target == null) {
-                return CommandResult.LOADING_ERROR;
+                return;
             }
 
-            CommandResult result;
             try {
-                result = sub.execute(plugin, sender, target, args.subList(this.type.minArgs, args.size()), label);
+                sub.execute(plugin, sender, target, args.subList(this.type.minArgs, args.size()), label);
             } catch (CommandException e) {
-                result = e.handle(sender, label, sub);
+                e.handle(sender, label, sub);
             }
 
             cleanup(target, plugin);
-            return result;
         } finally {
             lock.unlock();
         }

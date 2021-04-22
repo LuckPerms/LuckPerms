@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -58,26 +57,26 @@ public class ParentClearTrack extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, trackName);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         Track track = StorageAssistant.loadTrack(trackName, sender, plugin);
         if (track == null) {
-            return CommandResult.LOADING_ERROR;
+            return;
         }
 
         if (track.getSize() <= 1) {
             Message.TRACK_EMPTY.send(sender, track.getName());
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         int before = target.normalData().size();
@@ -88,7 +87,7 @@ public class ParentClearTrack extends GenericChildCommand {
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, track.getName())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         target.removeIf(DataType.NORMAL, context.isEmpty() ? null : context, NodeType.INHERITANCE.predicate(n -> track.containsGroup(n.getGroupName())), false);
@@ -105,7 +104,6 @@ public class ParentClearTrack extends GenericChildCommand {
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(target, sender, plugin);
-        return CommandResult.SUCCESS;
     }
 
     @Override

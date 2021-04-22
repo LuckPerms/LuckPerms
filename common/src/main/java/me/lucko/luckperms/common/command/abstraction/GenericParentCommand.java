@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.command.abstraction;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
@@ -59,10 +58,10 @@ public class GenericParentCommand<T extends PermissionHolder> extends ChildComma
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, T holder, ArgumentList args, String label) {
         if (args.isEmpty()) {
             sendUsageDetailed(sender, label);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         GenericChildCommand sub = this.children.stream()
@@ -72,26 +71,24 @@ public class GenericParentCommand<T extends PermissionHolder> extends ChildComma
 
         if (sub == null) {
             Message.COMMAND_NOT_RECOGNISED.send(sender);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         if (!sub.isAuthorized(sender, this.type)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         if (sub.getArgumentCheck().test(args.size() - 1)) {
             sub.sendDetailedUsage(sender);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
-        CommandResult result;
         try {
-            result = sub.execute(plugin, sender, holder, args.subList(1, args.size()), label, this.type == HolderType.USER ? sub.getUserPermission() : sub.getGroupPermission());
+            sub.execute(plugin, sender, holder, args.subList(1, args.size()), label, this.type == HolderType.USER ? sub.getUserPermission() : sub.getGroupPermission());
         } catch (CommandException e) {
-            result = e.handle(sender, sub);
+            e.handle(sender, sub);
         }
-        return result;
     }
 
     @Override

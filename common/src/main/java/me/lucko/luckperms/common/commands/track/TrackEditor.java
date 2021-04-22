@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.track;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -57,10 +56,10 @@ public class TrackEditor extends ChildCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         // run a sync task
@@ -75,7 +74,7 @@ public class TrackEditor extends ChildCommand<Track> {
 
         if (groups.isEmpty()) {
             Message.EDITOR_NO_MATCH.send(sender);
-            return CommandResult.FAILURE;
+            return;
         }
 
         // then collect users which are a member of any of those groups
@@ -98,7 +97,7 @@ public class TrackEditor extends ChildCommand<Track> {
 
         Message.EDITOR_START.send(sender);
 
-        return WebEditorRequest.generate(holders, Collections.singletonList(target), sender, label, plugin)
+        WebEditorRequest.generate(holders, Collections.singletonList(target), sender, label, plugin)
                 .createSession(plugin, sender);
     }
 

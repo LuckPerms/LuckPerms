@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.track;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -43,16 +42,15 @@ public class ListTracks extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         try {
             plugin.getStorage().loadAllTracks().get();
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst loading tracks", e);
             Message.TRACKS_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
+            return;
         }
 
         Message.TRACKS_LIST.send(sender, plugin.getTrackManager().getAll().keySet().stream().sorted().collect(Collectors.toList()));
-        return CommandResult.SUCCESS;
     }
 }

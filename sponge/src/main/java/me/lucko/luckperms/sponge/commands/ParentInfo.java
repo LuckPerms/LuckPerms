@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.commands;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -49,14 +48,14 @@ public class ParentInfo extends ChildCommand<LPSubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
         ImmutableContextSet contextSet = args.getContextOrEmpty(0);
         if (contextSet.isEmpty()) {
             SpongeCommandUtils.sendPrefixed(sender, "&aShowing parents matching contexts &bANY&a.");
             Map<ImmutableContextSet, ImmutableList<LPSubjectReference>> parents = subjectData.getAllParents();
             if (parents.isEmpty()) {
                 SpongeCommandUtils.sendPrefixed(sender, "That subject does not have any parents defined.");
-                return CommandResult.SUCCESS;
+                return;
             }
 
             for (Map.Entry<ImmutableContextSet, ImmutableList<LPSubjectReference>> e : parents.entrySet()) {
@@ -67,13 +66,11 @@ public class ParentInfo extends ChildCommand<LPSubjectData> {
             List<LPSubjectReference> parents = subjectData.getParents(contextSet);
             if (parents.isEmpty()) {
                 SpongeCommandUtils.sendPrefixed(sender, "That subject does not have any parents defined in those contexts.");
-                return CommandResult.SUCCESS;
+                return;
             }
 
             SpongeCommandUtils.sendPrefixed(sender, "&aShowing parents matching contexts &b" +
                         SpongeCommandUtils.contextToString(contextSet) + "&a.\n" + SpongeCommandUtils.parentsToString(parents));
-
         }
-        return CommandResult.SUCCESS;
     }
 }

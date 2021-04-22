@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -66,10 +65,10 @@ public class PermissionCheck extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String node = args.get(0);
@@ -149,8 +148,6 @@ public class PermissionCheck extends GenericChildCommand {
 
         // send results
         Message.PERMISSION_CHECK_RESULT.send(sender, node, result, processor, cause, context);
-
-        return CommandResult.SUCCESS;
     }
 
     @Override

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -59,10 +58,10 @@ public class ParentRemoveTemp extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String groupName = args.getLowercase(0, DataConstraints.GROUP_NAME_TEST_ALLOW_SPACE);
@@ -75,7 +74,7 @@ public class ParentRemoveTemp extends GenericChildCommand {
                 ArgumentPermissions.checkGroup(plugin, sender, groupName, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, groupName)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         DataMutateResult.WithMergedNode result = target.unsetNode(DataType.NORMAL, Inheritance.builder(groupName).expiry(10L).withContext(context).build(), duration);
@@ -97,10 +96,8 @@ public class ParentRemoveTemp extends GenericChildCommand {
             }
 
             StorageAssistant.save(target, sender, plugin);
-            return CommandResult.SUCCESS;
         } else {
             Message.DOES_NOT_TEMP_INHERIT.send(sender, target, Component.text(groupName), context);
-            return CommandResult.STATE_ERROR;
         }
     }
 

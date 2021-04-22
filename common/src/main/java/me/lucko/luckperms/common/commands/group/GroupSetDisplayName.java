@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -56,10 +55,10 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String name = args.get(0);
@@ -74,18 +73,18 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
 
         if (previousName == null && name.equals(target.getName())) {
             Message.GROUP_SET_DISPLAY_NAME_DOESNT_HAVE.send(sender, target.getName());
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         if (name.equals(previousName)) {
             Message.GROUP_SET_DISPLAY_NAME_ALREADY_HAS.send(sender, target.getName(), name);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         Group existing = plugin.getGroupManager().getByDisplayName(name);
         if (existing != null && !target.equals(existing)) {
             Message.GROUP_SET_DISPLAY_NAME_ALREADY_IN_USE.send(sender, name, existing.getName());
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         target.removeIf(DataType.NORMAL, context, NodeType.DISPLAY_NAME::matches, false);
@@ -98,7 +97,7 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);
-            return CommandResult.SUCCESS;
+            return;
         }
 
         target.setNode(DataType.NORMAL, DisplayName.builder(name).withContext(context).build(), true);
@@ -110,7 +109,6 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(target, sender, plugin);
-        return CommandResult.SUCCESS;
     }
 
     @Override

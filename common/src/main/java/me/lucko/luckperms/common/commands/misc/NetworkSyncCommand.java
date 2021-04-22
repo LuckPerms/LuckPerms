@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -44,7 +43,7 @@ public class NetworkSyncCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Message.UPDATE_TASK_REQUEST.send(sender);
         plugin.getSyncTaskBuffer().request().join();
         Message.UPDATE_TASK_COMPLETE_NETWORK.send(sender);
@@ -52,17 +51,15 @@ public class NetworkSyncCommand extends SingleCommand {
         Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
         if (!messagingService.isPresent()) {
             Message.UPDATE_TASK_PUSH_FAILURE_NOT_SETUP.send(sender);
-            return CommandResult.FAILURE;
+            return;
         }
 
         try {
             messagingService.get().pushUpdate();
             Message.UPDATE_TASK_PUSH_SUCCESS.send(sender, messagingService.get().getName());
-            return CommandResult.SUCCESS;
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst pushing changes to other servers", e);
             Message.UPDATE_TASK_PUSH_FAILURE.send(sender);
-            return CommandResult.FAILURE;
         }
     }
 }

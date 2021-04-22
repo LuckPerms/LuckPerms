@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.command.abstraction;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.Argument;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -148,7 +147,7 @@ public abstract class Command<T> {
     }
 
     // Main execution method for the command.
-    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, T target, ArgumentList args, String label) throws CommandException;
+    public abstract void execute(LuckPermsPlugin plugin, Sender sender, T target, ArgumentList args, String label) throws CommandException;
 
     // Tab completion method - default implementation is provided as some commands do not provide tab completions.
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {

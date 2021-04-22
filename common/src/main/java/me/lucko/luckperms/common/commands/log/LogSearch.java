@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.log;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -48,7 +47,7 @@ public class LogSearch extends ChildCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
         int page = Integer.MIN_VALUE;
         if (args.size() > 1) {
             try {
@@ -63,17 +62,17 @@ public class LogSearch extends ChildCommand<Log> {
         Paginated<LoggedAction> content = new Paginated<>(log.getSearch(query));
 
         if (page != Integer.MIN_VALUE) {
-            return showLog(page, query, sender, content);
+            showLog(page, query, sender, content);
         } else {
-            return showLog(content.getMaxPages(ENTRIES_PER_PAGE), query, sender, content);
+            showLog(content.getMaxPages(ENTRIES_PER_PAGE), query, sender, content);
         }
     }
 
-    private static CommandResult showLog(int page, String query, Sender sender, Paginated<LoggedAction> log) {
+    private static void showLog(int page, String query, Sender sender, Paginated<LoggedAction> log) {
         int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         if (page == Integer.MIN_VALUE) {
@@ -82,7 +81,7 @@ public class LogSearch extends ChildCommand<Log> {
 
         if (page < 1 || page > maxPage) {
             Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         List<Paginated.Entry<LoggedAction>> entries = log.getPage(page, ENTRIES_PER_PAGE);
@@ -91,7 +90,5 @@ public class LogSearch extends ChildCommand<Log> {
         for (Paginated.Entry<LoggedAction> e : entries) {
             Message.LOG_ENTRY.send(sender, e.position(), e.value());
         }
-
-        return CommandResult.SUCCESS;
     }
 }

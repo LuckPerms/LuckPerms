@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.command.utils;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
@@ -36,28 +35,25 @@ public abstract class ArgumentException extends CommandException {
 
     public static class DetailedUsage extends ArgumentException {
         @Override
-        protected CommandResult handle(Sender sender) {
+        protected void handle(Sender sender) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CommandResult handle(Sender sender, String label, Command<?> command) {
+        public void handle(Sender sender, String label, Command<?> command) {
             command.sendDetailedUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
         }
 
         @Override
-        public CommandResult handle(Sender sender, GenericChildCommand command) {
+        public void handle(Sender sender, GenericChildCommand command) {
             command.sendDetailedUsage(sender);
-            return CommandResult.INVALID_ARGS;
         }
     }
 
     public static class PastDate extends ArgumentException {
         @Override
-        protected CommandResult handle(Sender sender) {
+        protected void handle(Sender sender) {
             Message.PAST_DATE_ERROR.send(sender);
-            return CommandResult.INVALID_ARGS;
         }
     }
 
@@ -69,9 +65,8 @@ public abstract class ArgumentException extends CommandException {
         }
 
         @Override
-        protected CommandResult handle(Sender sender) {
+        protected void handle(Sender sender) {
             Message.ILLEGAL_DATE_ERROR.send(sender, this.invalidDate);
-            return CommandResult.INVALID_ARGS;
         }
     }
 
@@ -83,9 +78,8 @@ public abstract class ArgumentException extends CommandException {
         }
 
         @Override
-        public CommandResult handle(Sender sender) {
+        public void handle(Sender sender) {
             Message.META_INVALID_PRIORITY.send(sender, this.invalidPriority);
-            return CommandResult.INVALID_ARGS;
         }
     }
 }
