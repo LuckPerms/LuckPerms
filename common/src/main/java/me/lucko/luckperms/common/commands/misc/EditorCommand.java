@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -53,7 +52,7 @@ public class EditorCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Type type = Type.ALL;
         String filter = null;
 
@@ -92,7 +91,7 @@ public class EditorCommand extends SingleCommand {
 
         if (holders.isEmpty()) {
             Message.EDITOR_NO_MATCH.send(sender);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         // remove holders which the sender doesn't have perms to view
@@ -102,12 +101,12 @@ public class EditorCommand extends SingleCommand {
         // they don't have perms to view any of them
         if (holders.isEmpty() && tracks.isEmpty()) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         Message.EDITOR_START.send(sender);
 
-        return WebEditorRequest.generate(holders, tracks, sender, label, plugin)
+        WebEditorRequest.generate(holders, tracks, sender, label, plugin)
                 .createSession(plugin, sender);
     }
 

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -59,7 +58,7 @@ public class UserSwitchPrimaryGroup extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) {
         // cast to user
         // although this command is build as a sharedsubcommand,
         // it is only added to the listings for users.
@@ -67,7 +66,7 @@ public class UserSwitchPrimaryGroup extends GenericChildCommand {
 
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, user)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String opt = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD);
@@ -78,7 +77,7 @@ public class UserSwitchPrimaryGroup extends GenericChildCommand {
         Group group = plugin.getGroupManager().getIfLoaded(args.get(0).toLowerCase());
         if (group == null) {
             Message.DOES_NOT_EXIST.send(sender, args.get(0).toLowerCase());
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, ImmutableContextSetImpl.EMPTY) ||
@@ -86,12 +85,12 @@ public class UserSwitchPrimaryGroup extends GenericChildCommand {
                 ArgumentPermissions.checkGroup(plugin, sender, group, ImmutableContextSetImpl.EMPTY) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, group.getName())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         if (user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME).equalsIgnoreCase(group.getName())) {
             Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user, group);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         Node node = Inheritance.builder(group.getName()).build();
@@ -108,7 +107,6 @@ public class UserSwitchPrimaryGroup extends GenericChildCommand {
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(user, sender, plugin);
-        return CommandResult.SUCCESS;
     }
 
     @Override

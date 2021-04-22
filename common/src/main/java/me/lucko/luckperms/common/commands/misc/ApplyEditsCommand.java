@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.misc;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -47,12 +46,12 @@ public class ApplyEditsCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         String code = args.get(0);
 
         if (code.isEmpty()) {
             Message.APPLY_EDITS_INVALID_CODE.send(sender, code);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         JsonObject data;
@@ -60,20 +59,19 @@ public class ApplyEditsCommand extends SingleCommand {
             data = plugin.getBytebin().getJsonContent(code).getAsJsonObject();
         } catch (UnsuccessfulRequestException e) {
             Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
-            return CommandResult.STATE_ERROR;
+            return;
         } catch (IOException e) {
             plugin.getLogger().warn("Error reading data from bytebin", e);
             Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         if (data == null) {
             Message.APPLY_EDITS_UNABLE_TO_READ.send(sender, code);
-            return CommandResult.FAILURE;
+            return;
         }
 
         new WebEditorResponse(data).apply(plugin, sender);
-        return CommandResult.SUCCESS;
     }
 
     @Override

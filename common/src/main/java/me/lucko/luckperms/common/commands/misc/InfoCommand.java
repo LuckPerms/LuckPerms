@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -45,10 +44,9 @@ public class InfoCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Map<Component, Component> storageMeta = plugin.getStorage().getMeta();
         Message.INFO.send(sender, plugin, storageMeta);
-        return CommandResult.SUCCESS;
     }
 
 }

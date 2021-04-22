@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -52,22 +51,22 @@ public class DeleteTrack extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         if (args.isEmpty()) {
             sendUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         String trackName = args.get(0).toLowerCase();
         Track track = plugin.getStorage().loadTrack(trackName).join().orElse(null);
         if (track == null) {
             Message.TRACK_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
+            return;
         }
 
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), track)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         try {
@@ -75,7 +74,7 @@ public class DeleteTrack extends SingleCommand {
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst deleting track", e);
             Message.DELETE_ERROR.send(sender, Component.text(track.getName()));
-            return CommandResult.FAILURE;
+            return;
         }
 
         Message.DELETE_SUCCESS.send(sender, Component.text(trackName));
@@ -83,8 +82,6 @@ public class DeleteTrack extends SingleCommand {
         LoggedAction.build().source(sender).targetName(trackName).targetType(Action.Target.Type.TRACK)
                 .description("delete")
                 .build().submit(plugin, sender);
-
-        return CommandResult.SUCCESS;
     }
 
     @Override

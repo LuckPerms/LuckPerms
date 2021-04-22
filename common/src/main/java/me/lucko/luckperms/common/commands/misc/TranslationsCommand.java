@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -52,7 +51,7 @@ public class TranslationsCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Message.TRANSLATIONS_SEARCHING.send(sender);
 
         List<LanguageInfo> availableTranslations;
@@ -61,14 +60,14 @@ public class TranslationsCommand extends SingleCommand {
         } catch (IOException | UnsuccessfulRequestException e) {
             Message.TRANSLATIONS_SEARCHING_ERROR.send(sender);
             plugin.getLogger().warn("Unable to obtain a list of available translations", e);
-            return CommandResult.FAILURE;
+            return;
         }
 
         if (args.size() >= 1 && args.get(0).equalsIgnoreCase("install")) {
             Message.TRANSLATIONS_INSTALLING.send(sender);
             plugin.getTranslationRepository().downloadAndInstallTranslations(availableTranslations, sender, true);
             Message.TRANSLATIONS_INSTALL_COMPLETE.send(sender);
-            return CommandResult.SUCCESS;
+            return;
         }
 
         Message.INSTALLED_TRANSLATIONS.send(sender, plugin.getTranslationManager().getInstalledLocales().stream().map(Locale::toString).collect(Collectors.toList()));
@@ -79,7 +78,6 @@ public class TranslationsCommand extends SingleCommand {
         }
         sender.sendMessage(Message.prefixed(Component.empty()));
         Message.TRANSLATIONS_DOWNLOAD_PROMPT.send(sender, label);
-        return CommandResult.SUCCESS;
     }
 
 }

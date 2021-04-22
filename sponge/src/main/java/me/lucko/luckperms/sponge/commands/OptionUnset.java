@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge.commands;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -43,7 +42,7 @@ public class OptionUnset extends ChildCommand<LPSubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
         String key = args.get(0);
         ImmutableContextSet contextSet = args.getContextOrEmpty(1);
 
@@ -52,6 +51,5 @@ public class OptionUnset extends ChildCommand<LPSubjectData> {
         } else {
             SpongeCommandUtils.sendPrefixed(sender, "Unable to unset option. Are you sure the Subject has it set?");
         }
-        return CommandResult.SUCCESS;
     }
 }

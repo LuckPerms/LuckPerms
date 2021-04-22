@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -82,10 +81,10 @@ public class MetaAddTempChatMeta extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         int priority = args.getPriority(0);
@@ -97,7 +96,7 @@ public class MetaAddTempChatMeta extends GenericChildCommand {
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, target, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         DataMutateResult.WithMergedNode result = target.setNode(DataType.NORMAL, this.type.builder(meta, priority).expiry(duration).withContext(context).build(), modifier);
@@ -112,10 +111,8 @@ public class MetaAddTempChatMeta extends GenericChildCommand {
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);
-            return CommandResult.SUCCESS;
         } else {
             Message.ALREADY_HAS_TEMP_CHAT_META.send(sender, target, this.type, meta, priority, context);
-            return CommandResult.STATE_ERROR;
         }
     }
 

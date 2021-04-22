@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -41,10 +40,9 @@ public class SyncCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Message.UPDATE_TASK_REQUEST.send(sender);
         plugin.getSyncTaskBuffer().request().join();
         Message.UPDATE_TASK_COMPLETE.send(sender);
-        return CommandResult.SUCCESS;
     }
 }

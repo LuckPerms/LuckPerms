@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge.commands;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -45,7 +44,7 @@ public class PermissionSet extends ChildCommand<LPSubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) throws CommandException {
         String node = args.get(0);
         Tristate tristate = SpongeCommandUtils.parseTristate(1, args);
         ImmutableContextSet contextSet = args.getContextOrEmpty(2);
@@ -55,7 +54,5 @@ public class PermissionSet extends ChildCommand<LPSubjectData> {
         } else {
             SpongeCommandUtils.sendPrefixed(sender, "Unable to set permission. Does the Subject already have it set?");
         }
-
-        return CommandResult.SUCCESS;
     }
 }

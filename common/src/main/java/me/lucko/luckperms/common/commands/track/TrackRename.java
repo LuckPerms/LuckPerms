@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -50,21 +49,21 @@ public class TrackRename extends ChildCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String newTrackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(newTrackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, newTrackName);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         if (plugin.getStorage().loadTrack(newTrackName).join().isPresent()) {
             Message.ALREADY_EXISTS.send(sender, newTrackName);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         Track newTrack;
@@ -73,7 +72,7 @@ public class TrackRename extends ChildCommand<Track> {
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst creating track", e);
             Message.CREATE_ERROR.send(sender, Component.text(newTrackName));
-            return CommandResult.FAILURE;
+            return;
         }
 
         try {
@@ -81,7 +80,7 @@ public class TrackRename extends ChildCommand<Track> {
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst deleting track", e);
             Message.DELETE_ERROR.send(sender, Component.text(target.getName()));
-            return CommandResult.FAILURE;
+            return;
         }
 
         newTrack.setGroups(target.getGroups());
@@ -93,6 +92,5 @@ public class TrackRename extends ChildCommand<Track> {
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(newTrack, sender, plugin);
-        return CommandResult.SUCCESS;
     }
 }

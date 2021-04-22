@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.webeditor;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
@@ -169,23 +168,22 @@ public class WebEditorRequest {
      * @param sender the sender creating the session
      * @return the command result
      */
-    public CommandResult createSession(LuckPermsPlugin plugin, Sender sender) {
+    public void createSession(LuckPermsPlugin plugin, Sender sender) {
         String pasteId;
         try {
             pasteId = plugin.getBytebin().postContent(encode(), AbstractHttpClient.JSON_TYPE).key();
         } catch (UnsuccessfulRequestException e) {
             Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
-            return CommandResult.STATE_ERROR;
+            return;
         } catch (IOException e) {
             new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
             Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         // form a url for the editor
         String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + pasteId;
         Message.EDITOR_URL.send(sender, url);
-        return CommandResult.SUCCESS;
     }
 
     public static void includeMatchingGroups(List<? super Group> holders, Predicate<? super Group> filter, LuckPermsPlugin plugin) {

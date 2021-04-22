@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.command.abstraction;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.Argument;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -77,7 +76,7 @@ public abstract class GenericChildCommand {
         this.argumentCheck = argumentCheck;
     }
 
-    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException;
+    public abstract void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException;
 
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return Collections.emptyList();

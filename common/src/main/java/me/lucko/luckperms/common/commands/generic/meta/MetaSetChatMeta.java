@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -83,10 +82,10 @@ public class MetaSetChatMeta extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         int priority = args.getIntOrDefault(0, Integer.MIN_VALUE);
@@ -101,7 +100,7 @@ public class MetaSetChatMeta extends GenericChildCommand {
             // priority was defined, meta should be at index 1, contexts at index 2
             if (args.size() <= 1) {
                 sendDetailedUsage(sender);
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             meta = args.get(1);
@@ -111,7 +110,7 @@ public class MetaSetChatMeta extends GenericChildCommand {
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, target, context)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         // remove all other prefixes/suffixes set in these contexts
@@ -139,10 +138,8 @@ public class MetaSetChatMeta extends GenericChildCommand {
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);
-            return CommandResult.SUCCESS;
         } else {
             Message.ALREADY_HAS_CHAT_META.send(sender, target, this.type, meta, priority, context);
-            return CommandResult.STATE_ERROR;
         }
     }
 

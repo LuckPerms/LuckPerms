@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.log;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -49,32 +48,32 @@ public class LogUserHistory extends ChildCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
         UUID uuid = args.getUserTarget(0, plugin, sender);
         if (uuid == null) {
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         Paginated<LoggedAction> content = new Paginated<>(log.getUserHistory(uuid));
 
         int page = args.getIntOrDefault(1, Integer.MIN_VALUE);
         if (page != Integer.MIN_VALUE) {
-            return showLog(page, sender, content);
+            showLog(page, sender, content);
         } else {
-            return showLog(content.getMaxPages(ENTRIES_PER_PAGE), sender, content);
+            showLog(content.getMaxPages(ENTRIES_PER_PAGE), sender, content);
         }
     }
 
-    private static CommandResult showLog(int page, Sender sender, Paginated<LoggedAction> log) {
+    private static void showLog(int page, Sender sender, Paginated<LoggedAction> log) {
         int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
-            return CommandResult.STATE_ERROR;
+            return;
         }
 
         if (page < 1 || page > maxPage) {
             Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         List<Paginated.Entry<LoggedAction>> entries = log.getPage(page, ENTRIES_PER_PAGE);
@@ -84,7 +83,5 @@ public class LogUserHistory extends ChildCommand<Log> {
         for (Paginated.Entry<LoggedAction> e : entries) {
             Message.LOG_ENTRY.send(sender, e.position(), e.value());
         }
-
-        return CommandResult.SUCCESS;
     }
 }

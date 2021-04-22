@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -57,10 +56,10 @@ public class ParentAdd extends GenericChildCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, ArgumentList args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         String groupName = args.getLowercase(0, DataConstraints.GROUP_NAME_TEST);
@@ -68,7 +67,7 @@ public class ParentAdd extends GenericChildCommand {
 
         Group group = StorageAssistant.loadGroup(groupName, sender, plugin, false);
         if (group == null) {
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
@@ -76,7 +75,7 @@ public class ParentAdd extends GenericChildCommand {
                 ArgumentPermissions.checkGroup(plugin, sender, group, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, group.getName())) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         DataMutateResult result = target.setNode(DataType.NORMAL, Inheritance.builder(group.getName()).withContext(context).build(), true);
@@ -89,10 +88,8 @@ public class ParentAdd extends GenericChildCommand {
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);
-            return CommandResult.SUCCESS;
         } else {
             Message.ALREADY_INHERITS.send(sender, target, group, context);
-            return CommandResult.STATE_ERROR;
         }
     }
 

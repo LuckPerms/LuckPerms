@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.bulkupdate.query.Query;
 import me.lucko.luckperms.common.bulkupdate.query.QueryField;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -63,10 +62,10 @@ public class BulkUpdateCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) throws CommandException {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) throws CommandException {
         if (!sender.isConsole()) {
             Message.BULK_UPDATE_MUST_USE_CONSOLE.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         if (args.size() == 2 && args.get(0).equalsIgnoreCase("confirm")) {
@@ -75,11 +74,11 @@ public class BulkUpdateCommand extends SingleCommand {
 
             if (operation == null) {
                 Message.BULK_UPDATE_UNKNOWN_ID.send(sender, id);
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             runOperation(operation, plugin, sender);
-            return CommandResult.SUCCESS;
+            return;
         }
 
         if (args.size() < 2) {
@@ -94,7 +93,7 @@ public class BulkUpdateCommand extends SingleCommand {
             bulkUpdateBuilder.dataType(DataType.valueOf(args.remove(0).toUpperCase()));
         } catch (IllegalArgumentException e) {
             Message.BULK_UPDATE_INVALID_DATA_TYPE.send(sender);
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         String action = args.remove(0).toLowerCase();
@@ -124,19 +123,19 @@ public class BulkUpdateCommand extends SingleCommand {
             String[] parts = constraint.split(" ");
             if (parts.length != 3) {
                 Message.BULK_UPDATE_INVALID_CONSTRAINT.send(sender, constraint);
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             QueryField field = QueryField.of(parts[0]);
             if (field == null) {
                 Message.BULK_UPDATE_INVALID_CONSTRAINT.send(sender, constraint);
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             Comparison comparison = StandardComparison.parseComparison(parts[1]);
             if (comparison == null) {
                 Message.BULK_UPDATE_INVALID_COMPARISON.send(sender, parts[1]);
-                return CommandResult.INVALID_ARGS;
+                return;
             }
 
             String expr = parts[2];
@@ -154,8 +153,6 @@ public class BulkUpdateCommand extends SingleCommand {
             Message.BULK_UPDATE_QUEUED.send(sender, bulkUpdate.buildAsSql().toReadableString().replace("{table}", bulkUpdate.getDataType().getName()));
             Message.BULK_UPDATE_CONFIRM.send(sender, label, id);
         }
-
-        return CommandResult.SUCCESS;
     }
 
     private static void runOperation(BulkUpdate operation, LuckPermsPlugin plugin, Sender sender) {

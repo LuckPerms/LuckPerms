@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.sponge.commands;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -43,7 +42,7 @@ public class PermissionClear extends ChildCommand<LPSubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, ArgumentList args, String label) {
         ImmutableContextSet contextSet = args.getContextOrEmpty(0);
         if (contextSet.isEmpty()) {
             subjectData.clearPermissions();
@@ -52,6 +51,5 @@ public class PermissionClear extends ChildCommand<LPSubjectData> {
             subjectData.clearPermissions(contextSet);
             SpongeCommandUtils.sendPrefixed(sender, "&aCleared permissions matching contexts &b" + SpongeCommandUtils.contextToString(contextSet));
         }
-        return CommandResult.SUCCESS;
     }
 }

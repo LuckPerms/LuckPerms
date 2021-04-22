@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.group;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -45,13 +44,13 @@ public class ListGroups extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         try {
             plugin.getStorage().loadAllGroups().get();
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst loading groups", e);
             Message.GROUPS_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
+            return;
         }
 
         Message.GROUPS_LIST.send(sender);
@@ -64,7 +63,5 @@ public class ListGroups extends SingleCommand {
                     List<String> tracks = plugin.getTrackManager().getAll().values().stream().filter(t -> t.containsGroup(group)).map(Track::getName).collect(Collectors.toList());
                     Message.GROUPS_LIST_ENTRY.send(sender, group, group.getWeight().orElse(0), tracks);
                 });
-
-        return CommandResult.SUCCESS;
     }
 }

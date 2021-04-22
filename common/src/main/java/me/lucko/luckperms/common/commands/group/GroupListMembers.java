@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.commands.group;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -64,10 +63,10 @@ public class GroupListMembers extends ChildCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         InheritanceNode node = Inheritance.builder(target.getName()).build();
@@ -110,8 +109,6 @@ public class GroupListMembers extends ChildCommand<Group> {
         if (!matchedGroups.isEmpty()) {
             sendResult(sender, matchedGroups, Function.identity(), Message.SEARCH_SHOWING_GROUPS, HolderType.GROUP, label, page);
         }
-
-        return CommandResult.SUCCESS;
     }
 
     private static <T extends Comparable<T>> void sendResult(Sender sender, List<NodeEntry<T, InheritanceNode>> results, Function<T, String> lookupFunction, Message.Args3<Integer, Integer, Integer> headerMessage, HolderType holderType, String label, int page) {

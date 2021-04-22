@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.generic.other;
 
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -58,10 +57,10 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, T target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         try {
@@ -69,7 +68,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst loading tracks", e);
             Message.TRACKS_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
+            return;
         }
 
         List<Map.Entry<Track, Component>> lines = new ArrayList<>();
@@ -111,13 +110,12 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
 
         if (lines.isEmpty()) {
             Message.LIST_TRACKS_EMPTY.send(sender, target);
-            return CommandResult.SUCCESS;
+            return;
         }
 
         Message.LIST_TRACKS.send(sender, target);
         for (Map.Entry<Track, Component> line : lines) {
             Message.LIST_TRACKS_ENTRY.send(sender, line.getKey().getName(), line.getValue());
         }
-        return CommandResult.SUCCESS;
     }
 }

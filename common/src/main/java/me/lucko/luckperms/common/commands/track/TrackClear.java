@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -45,10 +44,10 @@ public class TrackClear extends ChildCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Track target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         target.clearGroups();
@@ -59,6 +58,5 @@ public class TrackClear extends ChildCommand<Track> {
                 .build().submit(plugin, sender);
 
         StorageAssistant.save(target, sender, plugin);
-        return CommandResult.SUCCESS;
     }
 }

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.user;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -49,26 +48,26 @@ public class UserClone extends ChildCommand<User> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, User target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         UUID uuid = args.getUserTarget(0, plugin, sender);
         if (uuid == null) {
-            return CommandResult.INVALID_ARGS;
+            return;
         }
 
         User otherUser = plugin.getStorage().loadUser(uuid, null).join();
         if (otherUser == null) {
             Message.USER_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
+            return;
         }
 
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), otherUser)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         otherUser.setNodes(DataType.NORMAL, target.normalData().asList(), false);
@@ -81,6 +80,5 @@ public class UserClone extends ChildCommand<User> {
 
         StorageAssistant.save(otherUser, sender, plugin);
         plugin.getUserManager().getHouseKeeper().cleanup(otherUser.getUniqueId());
-        return CommandResult.SUCCESS;
     }
 }

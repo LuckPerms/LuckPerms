@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.bulkupdate.comparison.Comparison;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -64,7 +63,7 @@ public class SearchCommand extends SingleCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
         Comparison comparison = StandardComparison.parseComparison(args.get(0));
         if (comparison == null) {
             comparison = StandardComparison.EQUAL;
@@ -92,8 +91,6 @@ public class SearchCommand extends SingleCommand {
         if (!matchedGroups.isEmpty()) {
             sendResult(sender, matchedGroups, Function.identity(), Message.SEARCH_SHOWING_GROUPS, HolderType.GROUP, label, page, comparison);
         }
-
-        return CommandResult.SUCCESS;
     }
 
     @Override

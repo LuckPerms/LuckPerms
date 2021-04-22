@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.generic.other;
 
-import me.lucko.luckperms.common.command.CommandResult;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -56,10 +55,10 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, T target, ArgumentList args, String label) {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target) || ArgumentPermissions.checkGroup(plugin, sender, target, ImmutableContextSetImpl.EMPTY)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         List<PermissionHolder> holders = new ArrayList<>();
@@ -80,12 +79,12 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
         // they don't have perms to view any of them
         if (holders.isEmpty()) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return CommandResult.NO_PERMISSION;
+            return;
         }
 
         Message.EDITOR_START.send(sender);
 
-        return WebEditorRequest.generate(holders, Collections.emptyList(), sender, label, plugin)
+        WebEditorRequest.generate(holders, Collections.emptyList(), sender, label, plugin)
                 .createSession(plugin, sender);
     }
 
