@@ -48,6 +48,7 @@ public final class LuckPermsProvider {
      * @throws IllegalStateException if the API is not loaded yet
      */
     public static @NonNull LuckPerms get() {
+        LuckPerms instance = LuckPermsProvider.instance;
         if (instance == null) {
             throw new NotLoadedException();
         }
