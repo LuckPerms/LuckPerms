@@ -28,6 +28,7 @@ package me.lucko.luckperms.minestom;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.luckperms.api.util.Tristate;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
@@ -61,7 +62,7 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Comma
 
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
-        sender.sendMessage(message);
+        sender.sendMessage(PlainComponentSerializer.plain().serialize(message));
     }
 
     @Override
