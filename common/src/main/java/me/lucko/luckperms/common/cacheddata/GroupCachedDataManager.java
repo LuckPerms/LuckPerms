@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.cacheddata;
 
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
+import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.query.QueryOptions;
@@ -42,7 +43,7 @@ public class GroupCachedDataManager extends HolderCachedDataManager<Group> imple
 
     @Override
     protected CacheMetadata getMetadataForQueryOptions(QueryOptions queryOptions) {
-        return new CacheMetadata(HolderType.GROUP, this.holder.getPlainDisplayName(), queryOptions);
+        return new CacheMetadata(HolderType.GROUP, VerboseCheckTarget.group(this.holder), queryOptions);
     }
 
 }

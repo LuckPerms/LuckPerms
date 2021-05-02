@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.cacheddata;
 
 import me.lucko.luckperms.common.model.HolderType;
+import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 
 import net.luckperms.api.cacheddata.CachedData;
 import net.luckperms.api.query.QueryOptions;
@@ -41,18 +42,18 @@ public class CacheMetadata {
     private final HolderType holderType;
 
     /**
-     * The name of the object which owns the cache
+     * The information about the holder for verbose checks
      */
-    private final String objectName;
+    private final VerboseCheckTarget verboseCheckInfo;
 
     /**
      * The query options
      */
     private final QueryOptions queryOptions;
 
-    public CacheMetadata(HolderType holderType, String objectName, QueryOptions queryOptions) {
+    public CacheMetadata(HolderType holderType, VerboseCheckTarget verboseCheckInfo, QueryOptions queryOptions) {
         this.holderType = holderType;
-        this.objectName = objectName;
+        this.verboseCheckInfo = verboseCheckInfo;
         this.queryOptions = queryOptions;
     }
 
@@ -60,8 +61,8 @@ public class CacheMetadata {
         return this.holderType;
     }
 
-    public String getObjectName() {
-        return this.objectName;
+    public VerboseCheckTarget getVerboseCheckInfo() {
+        return this.verboseCheckInfo;
     }
 
     public QueryOptions getQueryOptions() {

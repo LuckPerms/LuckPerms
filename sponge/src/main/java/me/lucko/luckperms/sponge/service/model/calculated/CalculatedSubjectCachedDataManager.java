@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.sponge.calculator.FixedDefaultsProcessor;
 
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
@@ -67,7 +68,8 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
 
     @Override
     protected CacheMetadata getMetadataForQueryOptions(QueryOptions queryOptions) {
-        return new CacheMetadata(null, this.subject.getParentCollection().getIdentifier() + "/" + this.subject.getIdentifier(), queryOptions);
+        VerboseCheckTarget target = VerboseCheckTarget.of(this.subject.getParentCollection().getIdentifier(), this.subject.getIdentifier());
+        return new CacheMetadata(null, target, queryOptions);
     }
 
     @Override

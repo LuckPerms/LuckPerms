@@ -28,6 +28,8 @@ package me.lucko.luckperms.fabric.listeners;
 import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
+import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
+import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent.Origin;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.model.MixinUser;
 
@@ -79,7 +81,9 @@ public class PermissionCheckListener {
     private TriState onOtherPermissionCheck(CommandSource source, String permission) {
         if (source instanceof ServerCommandSource) {
             String name = ((ServerCommandSource) source).getName();
-            this.plugin.getVerboseHandler().offerPermissionCheckEvent(me.lucko.luckperms.common.verbose.event.PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, name, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.UNDEFINED);
+            VerboseCheckTarget target = VerboseCheckTarget.internal(name);
+
+            this.plugin.getVerboseHandler().offerPermissionCheckEvent(Origin.PLATFORM_PERMISSION_CHECK, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.UNDEFINED);
             this.plugin.getPermissionRegistry().offer(permission);
         }
 
