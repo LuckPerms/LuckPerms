@@ -25,10 +25,7 @@
 
 package me.lucko.luckperms.bukkit.inject.server;
 
-import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
@@ -40,10 +37,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.function.Function;
 
 /**
  * A replacement map for the 'permSubs' instance in Bukkit's SimplePluginManager.
@@ -67,15 +62,17 @@ import java.util.function.Function;
  *
  * Injected by {@link InjectorSubscriptionMap}.
  */
-public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissible, Boolean>> {
+public final class LuckPermsSubscriptionMap implements Map<String, Map<Permissible, Boolean>> {
 
     // the plugin instance
     final LPBukkitPlugin plugin;
 
+    private final Map<Permissible, Set<String>> subscriptions = Collections.synchronizedMap(new WeakHashMap<>());
+
     public LuckPermsSubscriptionMap(LPBukkitPlugin plugin, Map<String, Map<Permissible, Boolean>> existingData) {
         this.plugin = plugin;
         for (Entry<String, Map<Permissible, Boolean>> entry : existingData.entrySet()) {
-            super.put(entry.getKey(), new LPSubscriptionValueMap(entry.getKey(), entry.getValue()));
+            entry.getValue().keySet().forEach(permissible -> subscribe(permissible, entry.getKey()));
         }
     }
 
@@ -84,61 +81,55 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
      * we override it to always return a value - which means the null check in
      * subscribeToDefaultPerms always fails - soo, we don't have to worry too much
      * about implementing #put.
-     *
-     * we also ensure all returns are LPSubscriptionValueMaps. this extension
-     * will also delegate checks to online players - meaning we don't ever
-     * have to register their subscriptions with the plugin manager.
      */
     @Override
     public Map<Permissible, Boolean> get(Object key) {
-        if (key == null || !(key instanceof String)) {
-            return null;
+        return new ValueMap((String) key);
+    }
+
+    public void subscribe(Permissible permissible, String permission) {
+        // don't allow players to be put into this map
+        if (permissible instanceof Player) {
+            return;
         }
 
-        String permission = (String) key;
+        Set<String> perms = this.subscriptions.computeIfAbsent(permissible, x -> Collections.synchronizedSet(new HashSet<>()));
+        perms.add(permission);
+    }
 
-        LPSubscriptionValueMap result = (LPSubscriptionValueMap) super.get(key);
-        if (result == null) {
-            // calculate a new map - always!
-            result = new LPSubscriptionValueMap(permission);
-            super.put(permission, result);
+    public boolean unsubscribe(Permissible permissible, String permission) {
+        if (permissible instanceof Player) {
+            return false; // ignore calls for players
         }
 
-        return result;
-    }
+        Set<String> perms = this.subscriptions.get(permissible);
 
-    @Override
-    public Map<Permissible, Boolean> put(String key, Map<Permissible, Boolean> value) {
-        if (value == null) {
-            throw new NullPointerException("Map value cannot be null");
+        if (perms == null) {
+            return false;
         }
 
-        // ensure values are LP subscription maps
-        if (!(value instanceof LPSubscriptionValueMap)) {
-            value = new LPSubscriptionValueMap(key, value);
+        return perms.remove(permission);
+    }
+
+    public @NonNull Set<Permissible> subscribers(String permission) {
+        Collection<? extends Player> onlinePlayers = this.plugin.getBootstrap().getServer().getOnlinePlayers();
+        Set<Permissible> set = new HashSet<>(onlinePlayers.size() + this.subscriptions.size());
+
+        // add permissibles from the subscriptions map
+        this.subscriptions.forEach((permissible, perms) -> {
+            if (perms.contains(permission)) {
+                set.add(permissible);
+            }
+        });
+
+        // add any online players who meet requirements
+        for (Player player : onlinePlayers) {
+            if (player.hasPermission(permission) || player.isPermissionSet(permission)) {
+                set.add(player);
+            }
         }
-        return super.put(key, value);
-    }
 
-    @Override
-    public void putAll(Map<? extends String, ? extends Map<Permissible, Boolean>> m) {
-        m.forEach(this::put);
-    }
-
-    @Override
-    public Map<Permissible, Boolean> putIfAbsent(String key, Map<Permissible, Boolean> value) {
-        return get(key);
-    }
-
-    @Override
-    public Map<Permissible, Boolean> computeIfAbsent(String key, Function<? super String, ? extends Map<Permissible, Boolean>> mappingFunction) {
-        return get(key);
-    }
-
-    // if the key isn't null and is a string, #get will always return a value for it
-    @Override
-    public boolean containsKey(Object key) {
-        return key != null && key instanceof String;
+        return set;
     }
 
     /**
@@ -148,109 +139,53 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
      */
     public Map<String, Map<Permissible, Boolean>> detach() {
         Map<String, Map<Permissible, Boolean>> map = new HashMap<>();
-        for (Map.Entry<String, Map<Permissible, Boolean>> ent : entrySet()) {
-            map.put(ent.getKey(), new WeakHashMap<>(((LPSubscriptionValueMap) ent.getValue()).backing));
-        }
+        this.subscriptions.forEach((permissible, perms) -> {
+            for (String perm : perms) {
+                map.computeIfAbsent(perm, x -> new WeakHashMap<>()).put(permissible, true);
+            }
+        });
         return map;
     }
+
+    @Override public Map<Permissible, Boolean> put(String key, Map<Permissible, Boolean> value) { throw new UnsupportedOperationException(); }
+    @Override public Map<Permissible, Boolean> remove(Object key) { throw new UnsupportedOperationException(); }
+    @Override public void putAll(Map<? extends String, ? extends Map<Permissible, Boolean>> m) { throw new UnsupportedOperationException(); }
+    @Override public void clear() { throw new UnsupportedOperationException(); }
+    @Override public Set<String> keySet() { throw new UnsupportedOperationException(); }
+    @Override public Collection<Map<Permissible, Boolean>> values() { throw new UnsupportedOperationException(); }
+    @Override public Set<Entry<String, Map<Permissible, Boolean>>> entrySet() { throw new UnsupportedOperationException(); }
+    @Override public int size() { throw new UnsupportedOperationException(); }
+    @Override public boolean isEmpty() { throw new UnsupportedOperationException(); }
+    @Override public boolean containsKey(Object key) { throw new UnsupportedOperationException(); }
+    @Override public boolean containsValue(Object value) { throw new UnsupportedOperationException(); }
 
     /**
      * Value map extension which includes LP objects in Permissible related queries.
      */
-    public final class LPSubscriptionValueMap implements Map<Permissible, Boolean> {
+    public final class ValueMap implements Map<Permissible, Boolean> {
 
         // the permission being mapped to this value map
         private final String permission;
 
-        // the backing map
-        private final Map<Permissible, Boolean> backing;
-
-        private LPSubscriptionValueMap(String permission, Map<Permissible, Boolean> backing) {
+        public ValueMap(String permission) {
             this.permission = permission;
-            this.backing = Collections.synchronizedMap(new WeakHashMap<>(backing));
-
-            // remove all players from the map
-            this.backing.keySet().removeIf(p -> p instanceof Player);
-        }
-
-        public LPSubscriptionValueMap(String permission) {
-            this.permission = permission;
-            this.backing = Collections.synchronizedMap(new WeakHashMap<>());
-        }
-
-        @Override
-        public Boolean get(Object key) {
-            boolean isPlayer = key instanceof Player;
-
-            // if the key is a player, check their LPPermissible first
-            if (isPlayer) {
-                Permissible p = (Permissible) key;
-                if (p.hasPermission(this.permission)) {
-                    return true;
-                }
-            }
-
-            // then try the map
-            Boolean result = this.backing.get(key);
-            if (result != null) {
-                return result;
-            }
-
-            // then try the permissible, if we haven't already
-            if (!isPlayer && key instanceof Permissible) {
-                Permissible p = (Permissible) key;
-                if (p.hasPermission(this.permission)) {
-                    return true;
-                }
-            }
-
-            // no result
-            return null;
         }
 
         @Override
         public Boolean put(Permissible key, Boolean value) {
-            // don't allow players to be put into this map
-            if (key instanceof Player) {
-                return true;
-            }
-
-            return this.backing.put(key, value);
+            subscribe(key, this.permission);
+            return null;
         }
 
         @Override
-        public boolean containsKey(Object key) {
-            // delegate through the get method
-            return get(key) != null;
+        public Boolean remove(Object k) {
+            Permissible key = (Permissible) k;
+            return unsubscribe(key, this.permission) ? true : null;
         }
 
         @Override
         public @NonNull Set<Permissible> keySet() {
-            // start with the backing set
-            Set<Permissible> set;
-            synchronized (this.backing) {
-                set = new HashSet<>(this.backing.keySet());
-            }
-
-            // add any online players who meet requirements
-            for (Player player : LuckPermsSubscriptionMap.this.plugin.getBootstrap().getServer().getOnlinePlayers()) {
-                if (player.hasPermission(this.permission) || player.isPermissionSet(this.permission)) {
-                    set.add(player);
-                }
-            }
-
-            return set;
-        }
-
-        @Override
-        public @NonNull Set<Entry<Permissible, Boolean>> entrySet() {
-            return keySet().stream()
-                    .map(key -> {
-                        Boolean value = get(key);
-                        return value != null ? Maps.immutableEntry(key, value) : null;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(ImmutableCollectors.toSet());
+            return subscribers(this.permission);
         }
 
         @Override
@@ -262,34 +197,15 @@ public final class LuckPermsSubscriptionMap extends HashMap<String, Map<Permissi
 
         @Override
         public int size() {
-            return Math.max(1, this.backing.size());
+            return 1;
         }
 
-        // just delegate to the backing map
-
-        @Override
-        public Boolean remove(Object key) {
-            return this.backing.remove(key);
-        }
-
-        @Override
-        public boolean containsValue(Object value) {
-            return this.backing.containsValue(value);
-        }
-
-        @Override
-        public void putAll(@NonNull Map<? extends Permissible, ? extends Boolean> m) {
-            this.backing.putAll(m);
-        }
-
-        @Override
-        public void clear() {
-            this.backing.clear();
-        }
-
-        @Override
-        public @NonNull Collection<Boolean> values() {
-            return this.backing.values();
-        }
+        @Override public void putAll(Map<? extends Permissible, ? extends Boolean> m) { throw new UnsupportedOperationException(); }
+        @Override public void clear() { throw new UnsupportedOperationException(); }
+        @Override public Collection<Boolean> values() { throw new UnsupportedOperationException(); }
+        @Override public Set<Entry<Permissible, Boolean>> entrySet() { throw new UnsupportedOperationException(); }
+        @Override public boolean containsKey(Object key) { throw new UnsupportedOperationException(); }
+        @Override public boolean containsValue(Object value) { throw new UnsupportedOperationException(); }
+        @Override public Boolean get(Object key) { throw new UnsupportedOperationException(); }
     }
 }
