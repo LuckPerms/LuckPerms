@@ -203,7 +203,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             LuckPermsPermissible lpPermissible = new LuckPermsPermissible(player, user, this.plugin);
 
             // Inject into the player
-            PermissibleInjector.inject(player, lpPermissible);
+            PermissibleInjector.inject(player, lpPermissible, this.plugin.getLogger());
 
         } catch (Throwable t) {
             this.plugin.getLogger().warn("Exception thrown when setting up permissions for " +
@@ -230,6 +230,8 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
                 e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "");
             }
         }
+
+        PermissibleInjector.checkInjected(e.getPlayer(), this.plugin.getLogger());
     }
 
     // Wait until the last priority to unload, so plugins can still perform permission checks on this event

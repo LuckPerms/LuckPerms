@@ -305,7 +305,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
                         this.bootstrap.getScheduler().executeSync(() -> {
                             try {
                                 LuckPermsPermissible lpPermissible = new LuckPermsPermissible(player, user, this);
-                                PermissibleInjector.inject(player, lpPermissible);
+                                PermissibleInjector.inject(player, lpPermissible, getLogger());
                             } catch (Throwable t) {
                                 getLogger().severe("Exception thrown when setting up permissions for " +
                                         player.getUniqueId() + " - " + player.getName(), t);
