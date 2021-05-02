@@ -26,6 +26,7 @@
 package me.lucko.luckperms.bukkit.inject.permissible;
 
 import me.lucko.luckperms.bukkit.util.CraftBukkitImplementation;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissibleBase;
@@ -84,9 +85,10 @@ public final class PermissibleInjector {
      *
      * @param player the player to inject into
      * @param newPermissible the permissible to inject
+     * @param logger the plugin logger
      * @throws Exception propagates any exceptions which were thrown during injection
      */
-    public static void inject(Player player, LuckPermsPermissible newPermissible) throws Exception {
+    public static void inject(Player player, LuckPermsPermissible newPermissible, PluginLogger logger) throws Exception {
 
         // get the existing PermissibleBase held by the player
         PermissibleBase oldPermissible = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
@@ -94,6 +96,15 @@ public final class PermissibleInjector {
         // seems we have already injected into this player.
         if (oldPermissible instanceof LuckPermsPermissible) {
             throw new IllegalStateException("LPPermissible already injected into player " + player.toString());
+        }
+
+        Class<? extends PermissibleBase> oldClass = oldPermissible.getClass();
+        if (!PermissibleBase.class.equals(oldClass)) {
+            logger.warn("Player " + player.getName() + " already has a custom permissible (" + oldClass.getName() + ")!\n" +
+                    "This is probably because you have multiple permission plugins installed.\n" +
+                    "Please make sure that LuckPerms is the only permission plugin installed on your server!\n" +
+                    "(unless you're performing a migration, in which case, just remember to remove your old " +
+                    "permission plugin once you're done!)");
         }
 
         // Move attachments over from the old permissible
@@ -149,6 +160,26 @@ public final class PermissibleInjector {
                 HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, newPb);
             }
         }
+    }
+
+    public static void checkInjected(Player player, PluginLogger logger) {
+        PermissibleBase permissibleBase;
+        try {
+            permissibleBase = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
+        } catch (IllegalAccessException e) {
+            return; // ignore
+        }
+
+        if (permissibleBase instanceof LuckPermsPermissible) {
+            return; // all gucci
+        }
+
+        Class<? extends PermissibleBase> clazz = permissibleBase.getClass();
+        logger.warn("Player " + player.getName() + " has a non-LuckPerms permissible (" + clazz.getName() + ")!\n" +
+                "This is probably because you have multiple permission plugins installed.\n" +
+                "Please make sure that LuckPerms is the only permission plugin installed on your server!\n" +
+                "(unless you're performing a migration, in which case, just remember to remove your old " +
+                "permission plugin once you're done!)");
     }
 
 }
