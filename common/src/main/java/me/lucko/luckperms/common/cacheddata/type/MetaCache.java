@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.cacheddata.type;
 import com.google.common.collect.ForwardingMap;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
-import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -53,39 +52,30 @@ public class MetaCache extends SimpleMetaCache implements CachedMetaData {
     /** The metadata for this cache */
     private final CacheMetadata metadata;
 
-    /** The object name passed to the verbose handler when checks are made */
-    private final String verboseCheckTarget;
-
     public MetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions, CacheMetadata metadata, MetaAccumulator sourceMeta) {
         super(plugin, queryOptions, sourceMeta);
         this.plugin = plugin;
         this.metadata = metadata;
-
-        if (this.metadata.getHolderType() == HolderType.GROUP) {
-            this.verboseCheckTarget = "group/" + this.metadata.getObjectName();
-        } else {
-            this.verboseCheckTarget = this.metadata.getObjectName();
-        }
     }
 
     @Override
     public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
         String value = super.getMetaValue(key, origin);
-        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), key, String.valueOf(value));
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), key, String.valueOf(value));
         return value;
     }
 
     @Override
     public String getPrefix(MetaCheckEvent.Origin origin) {
         String value = super.getPrefix(origin);
-        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), Prefix.NODE_KEY, String.valueOf(value));
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), Prefix.NODE_KEY, String.valueOf(value));
         return value;
     }
 
     @Override
     public String getSuffix(MetaCheckEvent.Origin origin) {
         String value = super.getSuffix(origin);
-        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), Suffix.NODE_KEY, String.valueOf(value));
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), Suffix.NODE_KEY, String.valueOf(value));
         return value;
     }
 
@@ -97,14 +87,14 @@ public class MetaCache extends SimpleMetaCache implements CachedMetaData {
     @Override
     public int getWeight(MetaCheckEvent.Origin origin) {
         int value = super.getWeight(origin);
-        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), "weight", String.valueOf(value));
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), "weight", String.valueOf(value));
         return value;
     }
 
     @Override
     public @Nullable String getPrimaryGroup(MetaCheckEvent.Origin origin) {
         String value = super.getPrimaryGroup(origin);
-        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.verboseCheckTarget, this.metadata.getQueryOptions(), "primarygroup", String.valueOf(value));
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), "primarygroup", String.valueOf(value));
         return value;
     }
 
@@ -130,7 +120,7 @@ public class MetaCache extends SimpleMetaCache implements CachedMetaData {
 
             String key = (String) k;
             List<String> values = super.get(key);
-            MetaCache.this.plugin.getVerboseHandler().offerMetaCheckEvent(this.origin, MetaCache.this.verboseCheckTarget, MetaCache.this.metadata.getQueryOptions(), key, String.valueOf(values));
+            MetaCache.this.plugin.getVerboseHandler().offerMetaCheckEvent(this.origin, MetaCache.this.metadata.getVerboseCheckInfo(), MetaCache.this.metadata.getQueryOptions(), key, String.valueOf(values));
             return values;
         }
     }

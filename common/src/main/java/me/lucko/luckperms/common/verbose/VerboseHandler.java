@@ -74,7 +74,7 @@ public class VerboseHandler implements AutoCloseable {
      * @param permission the permission which was checked for
      * @param result the result of the permission check
      */
-    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, String checkTarget, QueryOptions checkQueryOptions, String permission, TristateResult result) {
+    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, String permission, TristateResult result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;
@@ -100,7 +100,7 @@ public class VerboseHandler implements AutoCloseable {
      * @param key the meta key which was checked for
      * @param result the result of the meta check
      */
-    public void offerMetaCheckEvent(MetaCheckEvent.Origin origin, String checkTarget, QueryOptions checkQueryOptions, String key, String result) {
+    public void offerMetaCheckEvent(MetaCheckEvent.Origin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, String key, String result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;

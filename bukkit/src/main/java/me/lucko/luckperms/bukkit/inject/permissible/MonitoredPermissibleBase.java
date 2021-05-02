@@ -28,6 +28,7 @@ package me.lucko.luckperms.bukkit.inject.permissible;
 import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
+import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
@@ -51,7 +52,7 @@ import java.util.Set;
 public class MonitoredPermissibleBase extends PermissibleBase {
     final LuckPermsPlugin plugin;
     private final PermissibleBase delegate;
-    private final String name;
+    private final VerboseCheckTarget verboseCheckTarget;
 
     // remains false until the object has been constructed
     // necessary to catch the superclass call to #recalculatePermissions on init
@@ -64,12 +65,12 @@ public class MonitoredPermissibleBase extends PermissibleBase {
 
         this.plugin = plugin;
         this.delegate = delegate;
-        this.name = name;
+        this.verboseCheckTarget = VerboseCheckTarget.internal(name);
         this.initialised = true;
     }
 
     private void logCheck(PermissionCheckEvent.Origin origin, String permission, boolean result) {
-        this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.name, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.of(Tristate.of(result)));
+        this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.verboseCheckTarget, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.of(Tristate.of(result)));
         this.plugin.getPermissionRegistry().offer(permission);
     }
 

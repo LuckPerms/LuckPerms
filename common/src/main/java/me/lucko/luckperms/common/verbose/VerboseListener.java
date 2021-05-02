@@ -155,14 +155,14 @@ public class VerboseListener {
             if (event instanceof PermissionCheckEvent) {
                 PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
                 Message.VERBOSE_LOG_PERMISSION.send(this.notifiedSender,
-                        permissionEvent.getCheckTarget(),
+                        permissionEvent.getCheckTarget().describe(),
                         permissionEvent.getPermission(),
                         permissionEvent.getResult().result()
                 );
             } else if (event instanceof MetaCheckEvent) {
                 MetaCheckEvent metaEvent = (MetaCheckEvent) event;
                 Message.VERBOSE_LOG_META.send(this.notifiedSender,
-                        metaEvent.getCheckTarget(),
+                        metaEvent.getCheckTarget().describe(),
                         metaEvent.getKey(),
                         metaEvent.getResult()
                 );
@@ -177,14 +177,14 @@ public class VerboseListener {
         if (event instanceof PermissionCheckEvent) {
             PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
             component = Message.VERBOSE_LOG_PERMISSION.build(
-                    permissionEvent.getCheckTarget(),
+                    permissionEvent.getCheckTarget().describe(),
                     permissionEvent.getPermission(),
                     permissionEvent.getResult().result()
             );
         } else if (event instanceof MetaCheckEvent) {
             MetaCheckEvent metaEvent = (MetaCheckEvent) event;
             component = Message.VERBOSE_LOG_META.build(
-                    metaEvent.getCheckTarget(),
+                    metaEvent.getCheckTarget().describe(),
                     metaEvent.getKey(),
                     metaEvent.getResult()
             );
