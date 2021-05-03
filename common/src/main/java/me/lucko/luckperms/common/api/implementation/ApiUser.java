@@ -79,7 +79,7 @@ public class ApiUser extends ApiPermissionHolder implements net.luckperms.api.mo
     @Override
     public @NonNull DataMutateResult setPrimaryGroup(@NonNull String group) {
         Objects.requireNonNull(group, "group");
-        if (getPrimaryGroup().equalsIgnoreCase(group)) {
+        if (group.equalsIgnoreCase(this.handle.getPrimaryGroup().getStoredValue().orElse(null))) {
             return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
