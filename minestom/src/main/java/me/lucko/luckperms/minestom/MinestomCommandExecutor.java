@@ -25,65 +25,51 @@
 
 package me.lucko.luckperms.minestom;
 
+import java.util.Arrays;
 import me.lucko.luckperms.common.command.CommandManager;
-import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
-import me.lucko.luckperms.common.sender.Sender;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandProcessor;
 import net.minestom.server.command.CommandSender;
-import net.minestom.server.entity.Player;
+import net.minestom.server.command.builder.SimpleCommand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
-@SuppressWarnings("deprecation") // todo check that we can't make it something else
-public class MinestomCommandExecutor extends CommandManager implements CommandProcessor {
-    private static final String[] COMMAND_ALIASES = new String[] {"lp", "perm", "perms", "permission", "permissions"};
-
+// todo tab completion support
+public class MinestomCommandExecutor extends CommandManager {
+    private final LuckPermsCommand command;
     private final LPMinestomPlugin plugin;
 
     public MinestomCommandExecutor(LPMinestomPlugin plugin) {
         super(plugin);
         this.plugin = plugin;
+        this.command = new LuckPermsCommand(this);
     }
 
     public void register() {
-        MinecraftServer.getCommandManager().register(this);
+        MinecraftServer.getCommandManager().register(this.command);
     }
 
-    @Override
-    public @NotNull String getCommandName() {
-        return "luckperms";
+    public void unregister() {
+        MinecraftServer.getCommandManager().unregister(this.command);
     }
 
-    @Override
-    public @Nullable String[] getAliases() {
-        return COMMAND_ALIASES;
-    }
+    private static class LuckPermsCommand extends SimpleCommand {
+        private final MinestomCommandExecutor commandExecutor;
 
-    @Override
-    public boolean process(@NotNull CommandSender sender, @NotNull String command, @NotNull String[] args) {
-        Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(args);
-        executeCommand(wrapped, command, arguments);
-        return true;
-    }
+        public LuckPermsCommand(@NotNull MinestomCommandExecutor commandExecutor) {
+            super("luckperms", "lp", "perm", "perms", "permission", "permissions");
+            this.commandExecutor = commandExecutor;
+        }
 
-    @Override
-    public String[] onWrite(@NotNull CommandSender sender, String text) {
-        Sender wrapped = this.plugin.getSenderFactory().wrap(sender);
-        List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(text);
-        return tabCompleteCommand(wrapped, arguments).toArray(new String[0]);
-    }
+        @Override
+        public boolean process(@NotNull CommandSender sender, @NotNull String command, @NotNull String[] args) {
+            this.commandExecutor.executeCommand(this.commandExecutor.plugin.getSenderFactory().wrap(sender), command, Arrays.asList(args));
+            return true;
+        }
 
-    @Override
-    public boolean enableWritingTracking() {
-        return true;
-    }
-
-    @Override
-    public boolean hasAccess(@NotNull Player player) {
-        return false;
+        @Override
+        public boolean hasAccess(@NotNull CommandSender sender, @Nullable String commandString) {
+            // todo proper perms support
+            return sender.isConsole();
+        }
     }
 }

@@ -15,7 +15,7 @@ repositories {
 dependencies {
     compile project(':common')
 
-    compileOnly 'com.github.minestom:Minestom:75da093475'
+    compileOnly 'com.github.minestom:Minestom:2fdfce703d'
 }
 
 processResources {
