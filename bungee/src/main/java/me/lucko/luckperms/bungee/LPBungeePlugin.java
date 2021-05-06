@@ -150,7 +150,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
             this.contextManager.registerCalculator(playerCalculator);
         }
 
-        if (!disabledContexts.contains("proxy") && this.bootstrap.getProxy().getPluginManager().getPlugin("RedisBungee") != null && isRedisBungeeLoaded()) {
+        if (!disabledContexts.contains("proxy") && this.bootstrap.getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
             this.contextManager.registerCalculator(new RedisBungeeCalculator());
         }
     }
@@ -197,19 +197,6 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         return this.senderFactory.wrap(this.bootstrap.getProxy().getConsole());
-    }
-
-    private static boolean classExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    private static boolean isRedisBungeeLoaded() {
-        return classExists("com.imaginarycode.minecraft.redisbungee.RedisBungee");
     }
 
     public BungeeSenderFactory getSenderFactory() {
