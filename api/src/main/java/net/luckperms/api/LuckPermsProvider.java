@@ -77,9 +77,9 @@ public final class LuckPermsProvider {
         private static final String MESSAGE = "The LuckPerms API isn't loaded yet!\n" +
                 "This could be because:\n" +
                 "  a) the LuckPerms plugin is not installed or it failed to enable\n" +
-                "  b) your plugin does not declare a dependency on LuckPerms\n" +
-                "  c) you are attempting to use the API before plugins reach the 'enable' phase\n" +
-                "     (call the #get method in onEnable, not in your plugin constructor!)\n";
+                "  b) the plugin in the stacktrace does not declare a dependency on LuckPerms\n" +
+                "  c) the plugin in the stacktrace is retrieving the API before the plugin 'enable' phase\n" +
+                "     (call the #get method in onEnable, not the constructor!)\n";
 
         NotLoadedException() {
             super(MESSAGE);
