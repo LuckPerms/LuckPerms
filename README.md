@@ -1,4 +1,4 @@
-![](https://i.imgur.com/ToguFkQ.png "Banner")
+![](https://raw.githubusercontent.com/LuckPerms/branding/master/banner/banner.png "Banner")
 # LuckPerms
 [![Build Status](https://ci.lucko.me/job/LuckPerms/badge/icon)](https://ci.lucko.me/job/LuckPerms/)
 [![javadoc](https://javadoc.io/badge2/net.luckperms/api/javadoc.svg)](https://javadoc.io/doc/net.luckperms/api)
