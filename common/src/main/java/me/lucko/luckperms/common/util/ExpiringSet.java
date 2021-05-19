@@ -26,10 +26,7 @@
 package me.lucko.luckperms.common.util;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import com.google.common.collect.ForwardingSet;
 
-import java.util.Collections;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,16 +34,27 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <E> element type
  */
-public class ExpiringSet<E> extends ForwardingSet<E> {
-    private final Set<E> setView;
+public class ExpiringSet<E> {
+    private final Cache<E, Long> cache;
+    private final long lifetime;
 
     public ExpiringSet(long duration, TimeUnit unit) {
-        Cache<E, Boolean> cache = CaffeineFactory.newBuilder().expireAfterAccess(duration, unit).build();
-        this.setView = Collections.newSetFromMap(cache.asMap());
+        this.cache = CaffeineFactory.newBuilder().expireAfterWrite(duration, unit).build();
+        this.lifetime = unit.toMillis(duration);
     }
 
-    @Override
-    protected Set<E> delegate() {
-        return this.setView;
+    public boolean add(E item) {
+        boolean present = contains(item);
+        this.cache.put(item, System.currentTimeMillis() + this.lifetime);
+        return !present;
+    }
+
+    public boolean contains(E item) {
+        Long timeout = this.cache.getIfPresent(item);
+        return timeout != null && timeout > System.currentTimeMillis();
+    }
+
+    public void remove(E item) {
+        this.cache.invalidate(item);
     }
 }
