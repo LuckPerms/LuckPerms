@@ -33,6 +33,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 /**
@@ -62,6 +63,20 @@ public class JarInJarClassLoader extends URLClassLoader {
 
     public void addJarToClasspath(URL url) {
         addURL(url);
+    }
+
+    public void deleteJarResource() {
+        URL[] urls = getURLs();
+        if (urls.length == 0) {
+            return;
+        }
+
+        try {
+            Path path = Paths.get(urls[0].toURI());
+            Files.deleteIfExists(path);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
     /**

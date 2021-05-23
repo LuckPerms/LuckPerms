@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.plugin.classpath;
 
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 
@@ -46,6 +47,16 @@ public class JarInJarClassPathAppender implements ClassPathAppender {
             this.classLoader.addJarToClasspath(file.toUri().toURL());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void close() {
+        this.classLoader.deleteJarResource();
+        try {
+            this.classLoader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

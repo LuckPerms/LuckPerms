@@ -255,6 +255,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // shutdown async executor pool
         getBootstrap().getScheduler().shutdownExecutor();
 
+        // close classpath appender
+        getBootstrap().getClassPathAppender().close();
+
         getLogger().info("Goodbye!");
     }
 
