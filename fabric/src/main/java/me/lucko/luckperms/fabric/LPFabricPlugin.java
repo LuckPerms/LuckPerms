@@ -40,8 +40,6 @@ import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.sender.DummyConsoleSender;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
-import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 import me.lucko.luckperms.fabric.context.FabricPlayerCalculator;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
@@ -57,7 +55,6 @@ import net.minecraft.server.MinecraftServer;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class LPFabricPlugin extends AbstractLuckPermsPlugin {
@@ -158,12 +155,6 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerApiOnPlatform(LuckPerms api) {
-    }
-
-    @Override
-    protected void registerHousekeepingTasks() {
-        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
-        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
     }
 
     @Override
