@@ -122,6 +122,7 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
     private void onWorldChange(ServerWorld origin, ServerWorld destination, ServerPlayerEntity player) {
         if (this.world) {
             this.plugin.getContextManager().invalidateCache(player);
+            this.plugin.getContextManager().signalContextUpdate(player);
         }
     }
 
