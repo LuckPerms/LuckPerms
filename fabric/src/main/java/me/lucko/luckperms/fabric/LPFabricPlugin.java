@@ -44,6 +44,7 @@ import me.lucko.luckperms.fabric.context.FabricContextManager;
 import me.lucko.luckperms.fabric.context.FabricPlayerCalculator;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.PermissionCheckListener;
+import me.lucko.luckperms.fabric.listeners.FabricCommandListUpdater;
 import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
 
 import net.fabricmc.loader.api.ModContainer;
@@ -159,6 +160,10 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void performFinalSetup() {
+        // register fabric command list updater
+        if (getConfiguration().get(ConfigKeys.UPDATE_CLIENT_COMMAND_LIST)) {
+            getApiProvider().getEventBus().subscribe(new FabricCommandListUpdater(this));
+        }
     }
 
     public FabricSenderFactory getSenderFactory() {
