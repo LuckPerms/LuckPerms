@@ -96,7 +96,6 @@ public class FabricCommandListUpdater implements LuckPermsEventListener {
                     .ifPresent(player -> this.plugin.getBootstrap().getServer()
                         .ifPresent(server -> {
                             server.getPlayerManager().sendCommandTree(player);
-                            this.plugin.getLogger().info("Sent command list to " + uniqueId);
                         })
                     )
                 );
