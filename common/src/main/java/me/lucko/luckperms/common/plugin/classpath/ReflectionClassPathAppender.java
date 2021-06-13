@@ -43,16 +43,32 @@ public class ReflectionClassPathAppender implements ClassPathAppender {
         try {
             openUrlClassLoaderModule();
         } catch (Throwable e) {
-            // ignore exception - will throw on Java 8 since the Module classes don't exist
+            // ignore
         }
 
-        // Get the protected 'addURL' method on URLClassLoader and set it to accessible.
         try {
             ADD_URL_METHOD = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            ADD_URL_METHOD.setAccessible(true);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+
+        try {
+            ADD_URL_METHOD.setAccessible(true);
+        } catch (Throwable e) {
+            new RuntimeException("LuckPerms is unable to access the URLClassLoader#addURL method using reflection. \n" +
+                    "You may be able to fix this problem by adding the following command-line argument " +
+                    "directly after the 'java' command in your start script: \n'--add-opens java.base/java.lang=ALL-UNNAMED'", e).printStackTrace();
+        }
+    }
+
+    /**
+     * Adds the given {@link URL} to the class loader.
+     *
+     * @param classLoader the class loader
+     * @param url the url to add
+     */
+    public static void addUrl(URLClassLoader classLoader, URL url) throws ReflectiveOperationException {
+        ADD_URL_METHOD.invoke(classLoader, url);
     }
 
     private final URLClassLoader classLoader;
@@ -69,13 +85,12 @@ public class ReflectionClassPathAppender implements ClassPathAppender {
     @Override
     public void addJarToClasspath(Path file) {
         try {
-            ADD_URL_METHOD.invoke(this.classLoader, file.toUri().toURL());
+            addUrl(this.classLoader, file.toUri().toURL());
         } catch (ReflectiveOperationException | MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @SuppressWarnings("JavaReflectionMemberAccess")
     private static void openUrlClassLoaderModule() throws Exception {
         // This is effectively calling:
         //
