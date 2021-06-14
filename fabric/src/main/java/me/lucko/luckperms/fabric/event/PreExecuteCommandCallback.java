@@ -29,15 +29,15 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.command.ServerCommandSource;
 
-public interface ExecuteCommandCallback {
-    Event<ExecuteCommandCallback> EVENT = EventFactory.createArrayBacked(ExecuteCommandCallback.class, listeners -> (source, input) -> {
-        for (ExecuteCommandCallback listener : listeners) {
-            if (!listener.onExecuteCommand(source, input)) {
+public interface PreExecuteCommandCallback {
+    Event<PreExecuteCommandCallback> EVENT = EventFactory.createArrayBacked(PreExecuteCommandCallback.class, listeners -> (source, input) -> {
+        for (PreExecuteCommandCallback listener : listeners) {
+            if (!listener.onPreExecuteCommand(source, input)) {
                 return false;
             }
         }
         return true;
     });
 
-    boolean onExecuteCommand(ServerCommandSource source, String input);
+    boolean onPreExecuteCommand(ServerCommandSource source, String input);
 }

@@ -34,7 +34,6 @@ import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.query.QueryOptions;
-
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.Map;

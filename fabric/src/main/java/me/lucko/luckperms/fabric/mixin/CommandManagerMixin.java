@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.fabric.mixin;
 
-import me.lucko.luckperms.fabric.event.ExecuteCommandCallback;
+import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
 
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class CommandManagerMixin {
     @Inject(at = @At("HEAD"), method = "execute", cancellable = true)
     private void commandExecuteCallback(ServerCommandSource source, String input, CallbackInfoReturnable<Integer> info) {
-        if (!ExecuteCommandCallback.EVENT.invoker().onExecuteCommand(source, input)) {
+        if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(source, input)) {
             info.setReturnValue(0);
         }
     }

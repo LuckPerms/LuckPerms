@@ -28,7 +28,7 @@ package me.lucko.luckperms.fabric.listeners;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
-import me.lucko.luckperms.fabric.event.ExecuteCommandCallback;
+import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
 
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -44,10 +44,10 @@ public class FabricOtherListeners {
     }
 
     public void registerListeners() {
-        ExecuteCommandCallback.EVENT.register(this::onExecuteCommand);
+        PreExecuteCommandCallback.EVENT.register(this::onPreExecuteCommand);
     }
 
-    private boolean onExecuteCommand(ServerCommandSource source, String input) {
+    private boolean onPreExecuteCommand(ServerCommandSource source, String input) {
         if (input.isEmpty()) {
             return true;
         }
