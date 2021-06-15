@@ -24,7 +24,7 @@
  */
 
 /**
- * {@link net.luckperms.api.bulkupdate.BulkUpdateDefinition BulkUpdate} API, to perform 'update'
+ * {@link net.luckperms.api.bulkupdate.BulkOperationDefinition BulkUpdate} API, to perform 'update'
  * and 'delete' bulk operations.
  */
 package net.luckperms.api.bulkupdate;

@@ -28,14 +28,13 @@ package net.luckperms.api.bulkupdate.action;
 import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.function.UnaryOperator;
+import java.util.Optional;
 
 /**
  *
  */
-public interface Action /*extends UnaryOperator<Node>*/ {
+public interface Action {
 
     /**
      *
@@ -44,17 +43,12 @@ public interface Action /*extends UnaryOperator<Node>*/ {
     @NonNull Type getType();
 
     /**
-     *
-     * @return
-     */
-    @NonNull String getName();
-
-    /**
+     * Applies this action to the given node and returns the result.
      *
      * @param node
      * @return
      */
-    @Nullable Node apply(@NonNull Node node);
+    @NonNull Optional<Node> apply(@NonNull Node node);
 
     enum Type {
         UPDATE,

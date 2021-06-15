@@ -26,7 +26,7 @@
 package net.luckperms.api;
 
 import net.luckperms.api.actionlog.ActionLogger;
-import net.luckperms.api.bulkupdate.BulkUpdateFactory;
+import net.luckperms.api.bulkupdate.BulkOperationFactory;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextManager;
 import net.luckperms.api.event.EventBus;
@@ -258,11 +258,11 @@ public interface LuckPerms {
     @NonNull NodeMatcherFactory getNodeMatcherFactory();
 
     /**
-     * Gets the {@link BulkUpdateFactory}.
+     * Gets the {@link BulkOperationFactory}.
      *
      * @return the bulk update factory
      * @since 5.4
      */
     @Internal
-    @NonNull BulkUpdateFactory getBulkUpdateFactory();
+    @NonNull BulkOperationFactory getBulkUpdateFactory();
 }

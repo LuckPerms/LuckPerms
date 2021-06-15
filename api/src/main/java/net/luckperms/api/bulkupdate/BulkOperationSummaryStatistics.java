@@ -28,6 +28,6 @@ package net.luckperms.api.bulkupdate;
 /**
  *
  */
-public interface OperationSummaryStatistics {
+public interface BulkOperationSummaryStatistics {
 
 }

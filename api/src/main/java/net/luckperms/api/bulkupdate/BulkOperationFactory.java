@@ -30,10 +30,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  *
  */
-public interface BulkUpdateFactory {
+public interface BulkOperationFactory {
 
     /**
      * @return
      */
-    BulkUpdateDefinition.@NonNull Builder builder();
+    BulkOperationDefinition.@NonNull Builder builder();
 }

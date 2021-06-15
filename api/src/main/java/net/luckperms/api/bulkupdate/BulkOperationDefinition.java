@@ -30,7 +30,7 @@ import net.luckperms.api.bulkupdate.action.Action;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public interface BulkUpdateDefinition {
+public interface BulkOperationDefinition {
 
     static Builder builder() {
         return LuckPermsProvider.get().getBulkUpdateFactory().builder();
@@ -40,6 +40,6 @@ public interface BulkUpdateDefinition {
 
     interface Builder {
 
-        @NonNull BulkUpdateDefinition build();
+        @NonNull BulkOperationDefinition build();
     }
 }

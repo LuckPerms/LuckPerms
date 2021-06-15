@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.nodemap.MutateResult;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
@@ -213,7 +214,10 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
         @Override
         public void addAll(@NonNull Iterable<? extends Node> nodes) {
             Objects.requireNonNull(nodes, "nodes");
-            ApiPermissionHolder.this.handle.mergeNodes(this.dataType, nodes);
+            MutateResult result = ApiPermissionHolder.this.handle.mergeNodes(this.dataType, nodes, true);
+            if (!result.isEmpty()) {
+                onNodeChange();
+            }
         }
 
         @Override

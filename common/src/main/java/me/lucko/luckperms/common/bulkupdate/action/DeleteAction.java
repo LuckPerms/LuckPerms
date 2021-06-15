@@ -30,7 +30,8 @@ import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import net.luckperms.api.bulkupdate.action.DeletingAction;
 import net.luckperms.api.node.Node;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 public class DeleteAction implements Action, DeletingAction {
 
@@ -47,8 +48,8 @@ public class DeleteAction implements Action, DeletingAction {
     }
 
     @Override
-    public @Nullable Node apply(@NonNull Node from) {
-        return null; // this action just deletes nodes, so return null
+    public @NonNull Optional<Node> apply(@NonNull Node from) {
+        return Optional.empty(); // this action just deletes nodes, so return nothing
     }
 
     @Override

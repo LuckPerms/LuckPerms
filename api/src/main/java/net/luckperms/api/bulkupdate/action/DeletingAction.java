@@ -28,7 +28,8 @@ package net.luckperms.api.bulkupdate.action;
 import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 /**
  *
@@ -40,8 +41,17 @@ public interface DeletingAction extends Action {
         return Type.DELETE;
     }
 
+    /**
+     * Applies the.
+     *
+     * <p>A deleting action results in the node being removed, therefore this method returns
+     * an empty value. </p>
+     *
+     * @param node the node to process.
+     * @return an optional, always empty.
+     */
     @Override
-    default @Nullable Node apply(@NonNull Node node) {
-        return null;
+    default @NonNull Optional<Node> apply(@NonNull Node node) {
+        return Optional.empty();
     }
 }
