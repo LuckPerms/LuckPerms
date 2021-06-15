@@ -28,18 +28,20 @@ package me.lucko.luckperms.common.bulkupdate.action;
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 
 import net.luckperms.api.node.Node;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents an action to be applied to a given node.
  */
-public interface Action {
+public interface Action extends net.luckperms.api.bulkupdate.action.Action {
 
     /**
      * Gets the name of this action
      *
      * @return the name of the action
      */
-    String getName();
+    @NonNull String getName();
 
     /**
      * Applies this action to the given NodeModel, and returns the result.
@@ -47,7 +49,7 @@ public interface Action {
      * @param from the node to base changes from
      * @return the new nodemodel instance, or null if the node should be deleted.
      */
-    Node apply(Node from);
+    @Nullable Node apply(@NonNull Node from);
 
     /**
      * Gets this action in SQL form.

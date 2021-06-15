@@ -23,36 +23,41 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.action;
+package net.luckperms.api.bulkupdate.action;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-
-import net.luckperms.api.bulkupdate.action.DeletingAction;
 import net.luckperms.api.node.Node;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class DeleteAction implements Action, DeletingAction {
+import java.util.function.UnaryOperator;
 
-    public static DeleteAction create() {
-        return new DeleteAction();
-    }
+/**
+ *
+ */
+public interface Action /*extends UnaryOperator<Node>*/ {
 
-    private DeleteAction() {
-    }
+    /**
+     *
+     * @return
+     */
+    @NonNull Type getType();
 
-    @Override
-    public @NonNull String getName() {
-        return "delete";
-    }
+    /**
+     *
+     * @return
+     */
+    @NonNull String getName();
 
-    @Override
-    public @Nullable Node apply(@NonNull Node from) {
-        return null; // this action just deletes nodes, so return null
-    }
+    /**
+     *
+     * @param node
+     * @return
+     */
+    @Nullable Node apply(@NonNull Node node);
 
-    @Override
-    public void appendSql(PreparedStatementBuilder builder) {
-        builder.append("DELETE FROM {table}");
+    enum Type {
+        UPDATE,
+        DELETE
     }
 }

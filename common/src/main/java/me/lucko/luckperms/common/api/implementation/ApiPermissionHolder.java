@@ -211,6 +211,17 @@ public class ApiPermissionHolder implements net.luckperms.api.model.PermissionHo
         }
 
         @Override
+        public void addAll(@NonNull Iterable<? extends Node> nodes) {
+            Objects.requireNonNull(nodes, "nodes");
+            ApiPermissionHolder.this.handle.mergeNodes(this.dataType, nodes);
+        }
+
+        @Override
+        public void addAll(@NonNull NodeMap nodeMap) {
+            addAll(Objects.requireNonNull(nodeMap, "nodeMap").toCollection());
+        }
+
+        @Override
         public @NonNull DataMutateResult remove(@NonNull Node node) {
             Objects.requireNonNull(node, "node");
             DataMutateResult result = ApiPermissionHolder.this.handle.unsetNode(this.dataType, node);
