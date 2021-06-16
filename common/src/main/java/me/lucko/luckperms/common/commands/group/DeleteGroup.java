@@ -107,11 +107,11 @@ public class DeleteGroup extends SingleCommand {
         } else {
             // the group is now deleted, proceed to remove its representing inheritance nodes
             BulkUpdate operation = BulkUpdateBuilder.create()
-                                    .trackStatistics(false)
-                                    .dataType(DataType.ALL)
-                                    .action(DeleteAction.create())
-                                    .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.EQUAL, Inheritance.key(groupName))))
-                                    .build();
+                    .trackStatistics(false)
+                    .dataType(DataType.ALL)
+                    .action(DeleteAction.create())
+                    .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.EQUAL, Inheritance.key(groupName))))
+                    .build();
             plugin.getStorage().applyBulkUpdate(operation).whenCompleteAsync((v, ex) -> {
                 if (ex != null) {
                     ex.printStackTrace();
