@@ -42,7 +42,6 @@ import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
