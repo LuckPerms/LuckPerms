@@ -41,9 +41,7 @@ import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -57,7 +55,6 @@ import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
-import java.util.Optional;
 
 public class GroupRename extends ChildCommand<Group> {
     public GroupRename() {
@@ -107,9 +104,9 @@ public class GroupRename extends ChildCommand<Group> {
                 .description("rename", newGroup.getName())
                 .build().submit(plugin, sender);
 
-        StorageAssistant.save(newGroup, sender, plugin);
-
-        if (args.remove("--update-parent-lists")) {
+        if (!args.remove("--update-parent-lists")) {
+            StorageAssistant.save(newGroup, sender, plugin);
+        } else {
             // the group is now renamed, proceed to update its representing inheritance nodes
             BulkUpdate operation = BulkUpdateBuilder.create()
                     .trackStatistics(false)
@@ -118,16 +115,12 @@ public class GroupRename extends ChildCommand<Group> {
                     .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.EQUAL, Inheritance.key(target.getName()))))
                     .build();
             plugin.getStorage().applyBulkUpdate(operation).whenCompleteAsync((v, ex) -> {
+                plugin.getSyncTaskBuffer().requestDirectly();
                 if (ex != null) {
                     ex.printStackTrace();
                 }
-
-                plugin.getSyncTaskBuffer().requestDirectly();
-                Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
-                if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-                    messagingService.get().getUpdateBuffer().request();
-                }
-            }, plugin.getBootstrap().getScheduler().async());
+            }, plugin.getBootstrap().getScheduler().async())
+                    .thenRunAsync(() -> StorageAssistant.save(newGroup, sender, plugin));
         }
     }
 
