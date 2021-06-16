@@ -62,7 +62,9 @@ luckperms {
     }
   }
   deletegroup {
-    name brigadier:string single_word;
+    name brigadier:string single_word {
+      flags brigadier:string greedy_phrase;
+    }
   }
   listgroups;
   createtrack {
@@ -546,7 +548,9 @@ luckperms {
         context brigadier:string greedy_phrase;
       }
       rename {
-        newname brigadier:string single_word;
+        newname brigadier:string single_word {
+          flags brigadier:string greedy_phrase;
+        }
       }
       clone {
         newname brigadier:string single_word;
