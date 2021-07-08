@@ -313,8 +313,13 @@ public enum Dependency {
         return s.replace("{}", ".");
     }
 
-    public String getFileName() {
-        return name().toLowerCase().replace('_', '-') + "-" + this.version;
+    public String getFileName(String classifier) {
+        String name = name().toLowerCase().replace('_', '-');
+        String extra = classifier == null || classifier.isEmpty()
+                ? ""
+                : "-" + classifier;
+
+        return name + "-" + this.version + extra + ".jar";
     }
 
     String getMavenRepoPath() {

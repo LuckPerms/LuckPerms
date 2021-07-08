@@ -155,7 +155,7 @@ public class DependencyManager {
     }
 
     private Path downloadDependency(Dependency dependency) throws DependencyDownloadException {
-        Path file = this.cacheDirectory.resolve(dependency.getFileName() + ".jar");
+        Path file = this.cacheDirectory.resolve(dependency.getFileName(null));
 
         // if the file already exists, don't attempt to re-download it.
         if (Files.exists(file)) {
@@ -185,7 +185,7 @@ public class DependencyManager {
             return normalFile;
         }
 
-        Path remappedFile = this.cacheDirectory.resolve(dependency.getFileName() + "-remapped.jar");
+        Path remappedFile = this.cacheDirectory.resolve(dependency.getFileName(DependencyRegistry.isGsonRelocated() ? "remapped-legacy" : "remapped"));
 
         // if the remapped source exists already, just use that.
         if (Files.exists(remappedFile)) {
