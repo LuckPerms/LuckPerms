@@ -40,24 +40,27 @@ import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.sender.DummyConsoleSender;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
-import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 import me.lucko.luckperms.fabric.context.FabricPlayerCalculator;
+import me.lucko.luckperms.fabric.listeners.FabricAutoOpListener;
+import me.lucko.luckperms.fabric.listeners.FabricCommandListUpdater;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
+import me.lucko.luckperms.fabric.listeners.FabricOtherListeners;
 import me.lucko.luckperms.fabric.listeners.PermissionCheckListener;
 import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.ModContainer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.OperatorList;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class LPFabricPlugin extends AbstractLuckPermsPlugin {
@@ -90,6 +93,8 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
         // Command registration also need to occur early, and will persist across game states as well.
         this.commandManager = new FabricCommandExecutor(this);
         this.commandManager.register();
+
+        new FabricOtherListeners(this).registerListeners();
     }
 
     @Override
@@ -161,13 +166,29 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected void registerHousekeepingTasks() {
-        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
-        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
-    }
-
-    @Override
     protected void performFinalSetup() {
+        // remove all operators on startup if they're disabled
+        if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
+            ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+                OperatorList operatorList = server.getPlayerManager().getOpList();
+                operatorList.values().clear();
+                try {
+                    operatorList.save();
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
+            });
+        }
+
+        // register autoop listener
+        if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
+            getApiProvider().getEventBus().subscribe(new FabricAutoOpListener(this));
+        }
+
+        // register fabric command list updater
+        if (getConfiguration().get(ConfigKeys.UPDATE_CLIENT_COMMAND_LIST)) {
+            getApiProvider().getEventBus().subscribe(new FabricCommandListUpdater(this));
+        }
     }
 
     public FabricSenderFactory getSenderFactory() {

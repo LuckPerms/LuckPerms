@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.extension;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.classpath.ReflectionClassPathAppender;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.luckperms.api.LuckPerms;
@@ -42,8 +43,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -98,7 +97,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
                 if (path.getFileName().toString().endsWith(".jar")) {
                     try {
                         loadExtension(path);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         this.plugin.getLogger().warn("Exception loading extension from " + path, e);
                     }
                 }
@@ -146,7 +145,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
         if (useParentClassLoader && isJarInJar()) {
             try {
                 addJarToParentClasspath(path);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 throw new RuntimeException("Exception whilst classloading extension", e);
             }
         } else {
@@ -200,16 +199,14 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
         return thisClassLoaderName.equals("me.lucko.luckperms.common.loader.JarInJarClassLoader");
     }
 
+    @Deprecated
     private static void addJarToParentClasspath(Path path) throws Exception {
         ClassLoader parentClassLoader = SimpleExtensionManager.class.getClassLoader().getParent();
         if (!(parentClassLoader instanceof URLClassLoader)) {
             throw new RuntimeException("useParentClassLoader is true but parent is not a URLClassLoader");
         }
 
-        Method addUrlMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-        addUrlMethod.setAccessible(true);
-
-        addUrlMethod.invoke(parentClassLoader, path.toUri().toURL());
+        ReflectionClassPathAppender.addUrl(((URLClassLoader) parentClassLoader), path.toUri().toURL());
     }
 
     private static final class LoadedExtension {

@@ -127,8 +127,8 @@ public enum Dependency {
     COMMODORE(
             "me{}lucko",
             "commodore",
-            "1.9",
-            "EhaLLqbgPnVYa61RumUc7l3r6wcGg2edDh2+PR8pvHI=",
+            "1.10",
+            "DJi8ZLaSwhoU49UBrIFzVBksaVAj8bthtVCnhuBPRz4=",
             Relocation.of("commodore", "me{}lucko{}commodore")
     ),
     COMMODORE_FILE(
@@ -313,8 +313,13 @@ public enum Dependency {
         return s.replace("{}", ".");
     }
 
-    public String getFileName() {
-        return name().toLowerCase().replace('_', '-') + "-" + this.version;
+    public String getFileName(String classifier) {
+        String name = name().toLowerCase().replace('_', '-');
+        String extra = classifier == null || classifier.isEmpty()
+                ? ""
+                : "-" + classifier;
+
+        return name + "-" + this.version + extra + ".jar";
     }
 
     String getMavenRepoPath() {

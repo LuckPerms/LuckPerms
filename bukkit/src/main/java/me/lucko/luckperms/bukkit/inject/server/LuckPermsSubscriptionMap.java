@@ -154,7 +154,7 @@ public final class LuckPermsSubscriptionMap implements Map<String, Map<Permissib
     @Override public Set<String> keySet() { throw new UnsupportedOperationException(); }
     @Override public Collection<Map<Permissible, Boolean>> values() { throw new UnsupportedOperationException(); }
     @Override public Set<Entry<String, Map<Permissible, Boolean>>> entrySet() { throw new UnsupportedOperationException(); }
-    @Override public int size() { throw new UnsupportedOperationException(); }
+    @Override public int size() { return 0; }
     @Override public boolean isEmpty() { throw new UnsupportedOperationException(); }
     @Override public boolean containsKey(Object key) { throw new UnsupportedOperationException(); }
     @Override public boolean containsValue(Object value) { throw new UnsupportedOperationException(); }

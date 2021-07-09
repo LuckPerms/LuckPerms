@@ -75,7 +75,8 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
     @Override
     public void calculate(@NonNull ServerPlayerEntity target, @NonNull ContextConsumer consumer) {
         GameMode mode = target.interactionManager.getGameMode();
-        if (this.gamemode && mode != null && mode != GameMode.NOT_SET) {
+        final int GAME_MODE_NOT_SET = -1; // GameMode.NOT_SET with ID -1 was removed in 1.17
+        if (this.gamemode && mode != null && mode.getId() != GAME_MODE_NOT_SET) {
             consumer.accept(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
         }
 
@@ -122,6 +123,7 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
     private void onWorldChange(ServerWorld origin, ServerWorld destination, ServerPlayerEntity player) {
         if (this.world) {
             this.plugin.getContextManager().invalidateCache(player);
+            this.plugin.getContextManager().signalContextUpdate(player);
         }
     }
 

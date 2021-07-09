@@ -42,6 +42,7 @@ import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import cn.nukkit.Player;
 import cn.nukkit.permission.PermissibleBase;
@@ -223,32 +224,27 @@ public class LuckPermsPermissible extends PermissibleBase {
     }
 
     @Override
-    public LuckPermsPermissionAttachment addAttachment(Plugin plugin) {
+    public PermissionAttachment addAttachment(Plugin plugin) {
+        return addAttachment(plugin, null, null);
+    }
+
+    @Override
+    public PermissionAttachment addAttachment(Plugin plugin, @Nullable String permission) {
+        return addAttachment(plugin, permission, null);
+    }
+
+    @Override
+    public PermissionAttachment addAttachment(Plugin plugin, @Nullable String permission, @Nullable Boolean value) {
         Objects.requireNonNull(plugin, "plugin");
 
         LuckPermsPermissionAttachment attachment = new LuckPermsPermissionAttachment(this, plugin);
         attachment.hook();
-        return attachment;
-    }
 
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String permission) {
-        Objects.requireNonNull(plugin, "plugin");
-        Objects.requireNonNull(permission, "permission");
+        if (permission != null) { // ffs nukkit, why
+            boolean val = value == null || value;
+            attachment.setPermission(permission, val);
+        }
 
-        PermissionAttachment attachment = addAttachment(plugin);
-        attachment.setPermission(permission, true);
-        return attachment;
-    }
-
-    @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String permission, Boolean value) {
-        Objects.requireNonNull(plugin, "plugin");
-        Objects.requireNonNull(permission, "permission");
-        Objects.requireNonNull(value, "value");
-
-        PermissionAttachment attachment = addAttachment(plugin);
-        attachment.setPermission(permission, value);
         return attachment;
     }
 

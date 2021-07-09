@@ -93,6 +93,8 @@ public class PermissionRegistry implements AutoCloseable {
     }
 
     private void doInsert(String permission) {
+        permission = permission.toLowerCase();
+
         // split the permission up into parts
         Iterable<String> parts = DOT_SPLIT.split(permission);
 

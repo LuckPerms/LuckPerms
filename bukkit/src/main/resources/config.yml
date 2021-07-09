@@ -154,15 +154,25 @@ data:
       #verifyServerCertificate: false
 
   # The prefix for all LuckPerms SQL tables.
+  #
+  # - This only applies for remote SQL storage types (MySQL, MariaDB, etc).
   # - Change this if you want to use different tables for different servers.
   table-prefix: 'luckperms_'
 
-  # The prefix to use for all LuckPerms collections. Change this if you want to use different
-  # collections for different servers. The default is no prefix.
+  # The prefix to use for all LuckPerms MongoDB collections.
+  #
+  # - This only applies for the MongoDB storage type.
+  # - Change this if you want to use different collections for different servers. The default is no
+  # prefix.
   mongodb-collection-prefix: ''
 
-  # MongoDB ClientConnectionURI for use with replica sets and custom connection options
-  # - See https://docs.mongodb.com/manual/reference/connection-string/
+  # The connection string URI to use to connect to the MongoDB instance.
+  #
+  # - When configured, this setting will override anything defined in the address, database,
+  #   username or password fields above.
+  # - If you have a connection string that starts with 'mongodb://' or 'mongodb+srv://', enter it
+  #   below.
+  # - For more information, please see https://docs.mongodb.com/manual/reference/connection-string/
   mongodb-connection-uri: ''
 
 # Define settings for a "split" storage setup.

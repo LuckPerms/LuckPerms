@@ -23,40 +23,23 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.fabric.mixin;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
-
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
-
-    @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+@Mixin(CommandManager.class)
+public class CommandManagerMixin {
+    @Inject(at = @At("HEAD"), method = "execute", cancellable = true)
+    private void commandExecuteCallback(ServerCommandSource source, String input, CallbackInfoReturnable<Integer> info) {
+        if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(source, input)) {
+            info.setReturnValue(0);
         }
     }
 }

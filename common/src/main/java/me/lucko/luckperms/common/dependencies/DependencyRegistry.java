@@ -99,7 +99,7 @@ public class DependencyRegistry {
         Platform.Type type = this.plugin.getBootstrap().getType();
 
         // support for LuckPerms legacy (bukkit 1.7.10)
-        if (!RelocationHandler.DEPENDENCIES.contains(dependency) && JsonElement.class.getName().startsWith("me.lucko")) {
+        if (!RelocationHandler.DEPENDENCIES.contains(dependency) && isGsonRelocated()) {
             relocations.add(Relocation.of("guava", "com{}google{}common"));
             relocations.add(Relocation.of("gson", "com{}google{}gson"));
         }
@@ -123,6 +123,11 @@ public class DependencyRegistry {
             default:
                 return true;
         }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static boolean isGsonRelocated() {
+        return JsonElement.class.getName().startsWith("me.lucko");
     }
 
     private static boolean classExists(String className) {

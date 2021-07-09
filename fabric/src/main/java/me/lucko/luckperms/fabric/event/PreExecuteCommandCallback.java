@@ -23,40 +23,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.fabric.event;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.server.command.ServerCommandSource;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
-
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
+public interface PreExecuteCommandCallback {
+    Event<PreExecuteCommandCallback> EVENT = EventFactory.createArrayBacked(PreExecuteCommandCallback.class, listeners -> (source, input) -> {
+        for (PreExecuteCommandCallback listener : listeners) {
+            if (!listener.onPreExecuteCommand(source, input)) {
+                return false;
+            }
         }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
+        return true;
+    });
 
-    @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    boolean onPreExecuteCommand(ServerCommandSource source, String input);
 }

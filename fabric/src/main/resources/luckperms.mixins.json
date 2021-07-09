@@ -5,7 +5,8 @@
   "mixins": [
     "ClientSettingsC2SPacketAccessor",
     "ServerLoginNetworkHandlerAccessor",
-    "ServerPlayerEntityMixin"
+    "ServerPlayerEntityMixin",
+    "CommandManagerMixin"
   ],
   "client": [
   ],

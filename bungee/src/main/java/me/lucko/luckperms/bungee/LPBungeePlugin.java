@@ -47,8 +47,6 @@ import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
-import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.context.DefaultContextKeys;
@@ -57,7 +55,6 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
@@ -150,7 +147,7 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
             this.contextManager.registerCalculator(playerCalculator);
         }
 
-        if (!disabledContexts.contains("proxy") && this.bootstrap.getProxy().getPluginManager().getPlugin("RedisBungee") != null && isRedisBungeeLoaded()) {
+        if (!disabledContexts.contains("proxy") && this.bootstrap.getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
             this.contextManager.registerCalculator(new RedisBungeeCalculator());
         }
     }
@@ -168,12 +165,6 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerApiOnPlatform(LuckPerms api) {
         // BungeeCord doesn't have a services manager
-    }
-
-    @Override
-    protected void registerHousekeepingTasks() {
-        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
-        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
     }
 
     @Override
@@ -197,19 +188,6 @@ public class LPBungeePlugin extends AbstractLuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         return this.senderFactory.wrap(this.bootstrap.getProxy().getConsole());
-    }
-
-    private static boolean classExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    private static boolean isRedisBungeeLoaded() {
-        return classExists("com.imaginarycode.minecraft.redisbungee.RedisBungee");
     }
 
     public BungeeSenderFactory getSenderFactory() {

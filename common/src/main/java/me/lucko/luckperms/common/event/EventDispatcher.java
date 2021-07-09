@@ -115,13 +115,23 @@ public final class EventDispatcher {
         return this.eventBus;
     }
 
-    private <T extends LuckPermsEvent> void postAsync(Class<T> eventClass, Object... params) {
-        // check against common mistakes - events with any sort of result shouldn't be posted async
-        if (Cancellable.class.isAssignableFrom(eventClass)) {
-            throw new RuntimeException("Cancellable event cannot be posted async (" + eventClass + ")");
+    private LuckPermsEvent generate(Class<? extends LuckPermsEvent> eventClass, Object... params) {
+        try {
+            return GeneratedEventClass.generate(eventClass).newInstance(this.eventBus.getApiProvider(), params);
+        } catch (Throwable e) {
+            throw new RuntimeException("Exception occurred whilst generating event instance", e);
         }
-        if (ResultEvent.class.isAssignableFrom(eventClass)) {
-            throw new RuntimeException("ResultEvent event cannot be posted async (" + eventClass + ")");
+    }
+
+    private void post(Class<? extends LuckPermsEvent> eventClass, Object... params) {
+        LuckPermsEvent event = generate(eventClass, params);
+        this.eventBus.post(event);
+    }
+
+    private void postAsync(Class<? extends LuckPermsEvent> eventClass, Object... params) {
+        // check against common mistakes - events with any sort of result shouldn't be posted async
+        if (Cancellable.class.isAssignableFrom(eventClass) || ResultEvent.class.isAssignableFrom(eventClass)) {
+            throw new RuntimeException("Event cannot be posted async (" + eventClass.getName() + ")");
         }
 
         // if there aren't any handlers registered for the event, don't bother trying to post it
@@ -130,24 +140,24 @@ public final class EventDispatcher {
         }
 
         // async: generate an event class and post it
-        this.eventBus.getPlugin().getBootstrap().getScheduler().executeAsync(() -> {
-            T event = generate(eventClass, params);
-            this.eventBus.post(event);
-        });
+        this.eventBus.getPlugin().getBootstrap().getScheduler().executeAsync(() -> post(eventClass, params));
     }
 
-    private <T extends LuckPermsEvent> void postSync(Class<T> eventClass, Object... params) {
+    private void postSync(Class<? extends LuckPermsEvent> eventClass, Object... params) {
         // if there aren't any handlers registered for our event, don't bother trying to post it
         if (!this.eventBus.shouldPost(eventClass)) {
             return;
         }
 
         // generate an event class and post it
-        T event = generate(eventClass, params);
-        this.eventBus.post(event);
+        post(eventClass, params);
     }
 
-    private <T extends LuckPermsEvent & Cancellable> boolean postCancellable(Class<T> eventClass, Object... params) {
+    private boolean postCancellable(Class<? extends LuckPermsEvent> eventClass, Object... params) {
+        if (!Cancellable.class.isAssignableFrom(eventClass)) {
+            throw new RuntimeException("Event is not cancellable: " + eventClass.getName());
+        }
+
         // extract the initial state from the first parameter
         boolean initialState = (boolean) params[0];
 
@@ -159,22 +169,13 @@ public final class EventDispatcher {
         // otherwise:
         // - initialise an AtomicBoolean for the result with the initial state
         // - replace the boolean with the AtomicBoolean in the params array
-        // - post the event
+        // - generate an event class and post it
         AtomicBoolean cancel = new AtomicBoolean(initialState);
         params[0] = cancel;
-        postSync(eventClass, params);
+        post(eventClass, params);
 
         // return the final status
         return cancel.get();
-    }
-    
-    @SuppressWarnings("unchecked")
-    private <T extends LuckPermsEvent> T generate(Class<T> eventClass, Object... params) {
-        try {
-            return (T) GeneratedEventClass.generate(eventClass).newInstance(this.eventBus.getApiProvider(), params);
-        } catch (Throwable e) {
-            throw new RuntimeException("Exception occurred whilst generating event instance", e);
-        }
     }
 
     public void dispatchContextUpdate(Object subject) {
@@ -390,8 +391,9 @@ public final class EventDispatcher {
         }
     }
 
-    public static List<Class<? extends LuckPermsEvent>> getKnownEventTypes() {
-        return ImmutableList.of(
+    @SuppressWarnings("unchecked")
+    public static Class<? extends LuckPermsEvent>[] getKnownEventTypes() {
+        return new Class[]{
                 ContextUpdateEvent.class,
                 ExtensionLoadEvent.class,
                 GroupCacheLoadEvent.class,
@@ -432,7 +434,7 @@ public final class EventDispatcher {
                 UserUnloadEvent.class,
                 UserDemoteEvent.class,
                 UserPromoteEvent.class
-        );
+        };
     }
 
 }

@@ -26,14 +26,24 @@
 package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateBuilder;
+import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
+import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
+import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
+import me.lucko.luckperms.common.bulkupdate.query.Query;
+import me.lucko.luckperms.common.bulkupdate.query.QueryField;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
+import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
@@ -44,9 +54,11 @@ import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.data.DataType;
 
+import java.util.List;
+
 public class GroupRename extends ChildCommand<Group> {
     public GroupRename() {
-        super(CommandSpec.GROUP_RENAME, "rename", CommandPermission.GROUP_RENAME, Predicates.not(1));
+        super(CommandSpec.GROUP_RENAME, "rename", CommandPermission.GROUP_RENAME, Predicates.notInRange(1, 2));
     }
 
     @Override
@@ -92,6 +104,30 @@ public class GroupRename extends ChildCommand<Group> {
                 .description("rename", newGroup.getName())
                 .build().submit(plugin, sender);
 
-        StorageAssistant.save(newGroup, sender, plugin);
+        if (!args.remove("--update-parent-lists")) {
+            StorageAssistant.save(newGroup, sender, plugin);
+        } else {
+            // the group is now renamed, proceed to update its representing inheritance nodes
+            BulkUpdate operation = BulkUpdateBuilder.create()
+                    .trackStatistics(false)
+                    .dataType(me.lucko.luckperms.common.bulkupdate.DataType.ALL)
+                    .action(UpdateAction.of(QueryField.PERMISSION, Inheritance.key(newGroupName)))
+                    .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.EQUAL, Inheritance.key(target.getName()))))
+                    .build();
+            plugin.getStorage().applyBulkUpdate(operation).whenCompleteAsync((v, ex) -> {
+                plugin.getSyncTaskBuffer().requestDirectly();
+                if (ex != null) {
+                    ex.printStackTrace();
+                }
+            }, plugin.getBootstrap().getScheduler().async())
+                    .thenRunAsync(() -> StorageAssistant.save(newGroup, sender, plugin));
+        }
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
+        return TabCompleter.create()
+                .at(1, CompletionSupplier.startsWith("--update-parent-lists"))
+                .complete(args);
     }
 }

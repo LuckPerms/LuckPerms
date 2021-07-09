@@ -87,7 +87,7 @@ public class BulkUpdateCommand extends SingleCommand {
 
         BulkUpdateBuilder bulkUpdateBuilder = BulkUpdateBuilder.create();
 
-        bulkUpdateBuilder.trackStatistics(!args.remove("--silent"));
+        bulkUpdateBuilder.trackStatistics(!args.remove("-s"));
 
         try {
             bulkUpdateBuilder.dataType(DataType.valueOf(args.remove(0).toUpperCase()));

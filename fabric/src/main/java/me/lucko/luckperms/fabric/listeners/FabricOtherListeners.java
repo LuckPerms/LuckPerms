@@ -23,40 +23,44 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.fabric.listeners;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.fabric.LPFabricPlugin;
+import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+import net.minecraft.server.command.ServerCommandSource;
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
+import java.util.regex.Pattern;
 
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
+public class FabricOtherListeners {
+    private static final Pattern OP_COMMAND_PATTERN = Pattern.compile("^/?(deop|op)( .*)?$");
+
+    private LPFabricPlugin plugin;
+
+    public FabricOtherListeners(LPFabricPlugin plugin) {
+        this.plugin = plugin;
     }
 
-    @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+    public void registerListeners() {
+        PreExecuteCommandCallback.EVENT.register(this::onPreExecuteCommand);
     }
 
-    @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private boolean onPreExecuteCommand(ServerCommandSource source, String input) {
+        if (input.isEmpty()) {
+            return true;
         }
+
+        if (this.plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
+            return true;
+        }
+
+        if (OP_COMMAND_PATTERN.matcher(input).matches()) {
+            Message.OP_DISABLED.send(this.plugin.getSenderFactory().wrap(source));
+            return false;
+        }
+
+        return true;
     }
 }

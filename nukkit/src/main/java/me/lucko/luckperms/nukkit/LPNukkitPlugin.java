@@ -39,8 +39,6 @@ import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
-import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.nukkit.calculator.NukkitCalculatorFactory;
 import me.lucko.luckperms.nukkit.context.NukkitContextManager;
 import me.lucko.luckperms.nukkit.context.NukkitPlayerCalculator;
@@ -70,7 +68,6 @@ import cn.nukkit.plugin.service.ServicePriority;
 import cn.nukkit.utils.Config;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
@@ -180,12 +177,6 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerApiOnPlatform(LuckPerms api) {
         this.bootstrap.getServer().getServiceManager().register(LuckPerms.class, api, this.bootstrap.getLoader(), ServicePriority.NORMAL);
-    }
-
-    @Override
-    protected void registerHousekeepingTasks() {
-        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
-        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
     }
 
     @Override

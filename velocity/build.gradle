@@ -4,14 +4,14 @@ plugins {
 }
 
 repositories {
-    maven { url 'https://repo.velocitypowered.com/snapshots/' }
+    maven { url 'https://repo.velocitypowered.com/releases/' }
 }
 
 dependencies {
     compile project(':common')
 
-    compileOnly 'com.velocitypowered:velocity-api:1.1.0-SNAPSHOT'
-    annotationProcessor 'com.velocitypowered:velocity-api:1.1.0-SNAPSHOT'
+    compileOnly 'com.velocitypowered:velocity-api:1.1.5'
+    annotationProcessor 'com.velocitypowered:velocity-api:1.1.5'
 }
 
 blossom {
