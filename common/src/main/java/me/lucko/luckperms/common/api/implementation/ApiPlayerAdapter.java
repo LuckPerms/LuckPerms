@@ -57,7 +57,9 @@ public class ApiPlayerAdapter<S, P extends S> implements PlayerAdapter<P> {
     public @NonNull User getUser(@NonNull P player) {
         Objects.requireNonNull(player, "player");
         me.lucko.luckperms.common.model.User user = this.userManager.getIfLoaded(this.contextManager.getUniqueId(checkType(player)));
-        Objects.requireNonNull(user, "user");
+        if (user == null) {
+            throw new IllegalStateException("Unable to get a user for " + player);
+        }
         return user.getApiProxy();
     }
 
