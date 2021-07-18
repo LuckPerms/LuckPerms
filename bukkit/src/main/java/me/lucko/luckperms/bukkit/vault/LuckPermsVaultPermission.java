@@ -254,6 +254,9 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         QueryOptions queryOptions = getQueryOptions(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
         String value = metaData.getPrimaryGroup(MetaCheckEvent.Origin.THIRD_PARTY_API);
+        if (value == null) {
+            return null;
+        }
 
         Group group = getGroup(value);
         return group != null ? groupName(group) : value;
