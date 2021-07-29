@@ -230,13 +230,13 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        return getServer().map(MinecraftServer::getUserCache).map(c -> c.findByName(username)).map(GameProfile::getId);
+        return getServer().map(MinecraftServer::getUserCache).map(c -> c.findByName(username)).map(d -> d.get().getId());
 
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        return getServer().map(MinecraftServer::getUserCache).map(c -> c.getByUuid(uniqueId)).map(GameProfile::getName);
+        return getServer().map(MinecraftServer::getUserCache).map(c -> c.getByUuid(uniqueId)).map(d -> d.get().getName());
     }
 
     @Override

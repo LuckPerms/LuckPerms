@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "luckperms",
-  "version": "${version}",
+  "version": "@version@",
   "name": "LuckPerms",
   "icon": "assets/luckperms/icon.png",
   "description": "A permissions plugin (mod)",
@@ -30,7 +30,7 @@
     "luckperms.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.9.0",
+    "fabricloader": ">=0.11.6",
     "fabric-api-base": "*",
     "fabric-command-api-v1": "*",
     "fabric-lifecycle-events-v1": "*",

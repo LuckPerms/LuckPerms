@@ -1,8 +1,7 @@
-import net.fabricmc.loom.task.RemapJarTask
-
 plugins {
-    id 'com.github.johnrengelman.shadow' version '4.0.1'
-    id 'fabric-loom' version '0.6-SNAPSHOT'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'fabric-loom' version '0.8-SNAPSHOT'
+    id 'maven-publish'
 }
 
 archivesBaseName = 'luckperms'
@@ -12,10 +11,10 @@ repositories {
     mavenLocal()
 }
 
-def minecraftVersion = '1.16.4'
-def yarnBuild = 7
-def loaderVersion = '0.10.8'
-def fabricApiVersion = '0.28.4+1.16'
+def minecraftVersion = '1.17.1'
+def yarnBuild = 14
+def loaderVersion = '0.11.6'
+def fabricApiVersion = '0.37.0+1.17'
 
 dependencies {
     // Fabric Stuff, We don't specifically target only a single version but yarn mappings require a version to be specified.
@@ -36,24 +35,29 @@ dependencies {
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.1-SNAPSHOT'))
 
-    compile project(':common')
+    implementation project(':common')
 }
+
+import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
     inputs.property 'version', project.ext.fullVersion
+    filter(ReplaceTokens, tokens: ['version': project.ext.fullVersion])
+}
 
-    from(sourceSets.main.resources.srcDirs) {
-        include 'fabric.mod.json'
-        expand 'version': project.ext.fullVersion
-    }
+tasks.withType(JavaCompile).configureEach {
+    // ensure that the encoding is set to UTF-8, no matter what the system default is
+    // this fixes some edge cases with special characters not displaying correctly
+    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+    // If Javadoc is generated, this must be specified in that task too.
+    it.options.encoding = "UTF-8"
 
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'fabric.mod.json'
-    }
+    // Minecraft 1.17 (21w19a) upwards uses Java 16.
+    it.options.release = 16
 }
 
 shadowJar {
-    archiveName = "luckpermsfabric-${project.ext.fullVersion}-dev.jar"
+    archiveFileName = "luckpermsfabric-${project.ext.fullVersion}-dev.jar"
 
     dependencies {
         exclude('net.fabricmc:.*')
@@ -82,6 +86,7 @@ shadowJar {
     relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
 }
 
+import net.fabricmc.loom.task.RemapJarTask
 task remappedShadowJar(type: RemapJarTask) {
     dependsOn tasks.shadowJar
     input = tasks.shadowJar.archivePath
