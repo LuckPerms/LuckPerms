@@ -16,7 +16,7 @@ processResources {
 }
 
 shadowJar {
-    archiveName "LuckPerms-Bungee-${project.ext.fullVersion}.jar"
+    archiveFileName = "LuckPerms-Bungee-${project.ext.fullVersion}.jar"
 
     from {
         project(':bungee').tasks.shadowJar.archiveFile

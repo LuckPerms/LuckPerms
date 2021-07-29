@@ -15,7 +15,7 @@ dependencies {
 }
 
 shadowJar {
-    archiveName 'luckperms-nukkit.jarinjar'
+    archiveFileName = 'luckperms-nukkit.jarinjar'
 
     dependencies {
         include(dependency('me.lucko.luckperms:.*'))

@@ -21,7 +21,7 @@ processResources {
 }
 
 shadowJar {
-    archiveName "LuckPerms-Nukkit-${project.ext.fullVersion}.jar"
+    archiveFileName = "LuckPerms-Nukkit-${project.ext.fullVersion}.jar"
 
     from {
         project(':nukkit').tasks.shadowJar.archiveFile

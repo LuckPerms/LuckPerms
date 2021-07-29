@@ -20,7 +20,7 @@ blossom {
 }
 
 shadowJar {
-    archiveName "LuckPerms-Velocity-${project.ext.fullVersion}.jar"
+    archiveFileName = "LuckPerms-Velocity-${project.ext.fullVersion}.jar"
 
     dependencies {
         include(dependency('net.luckperms:.*'))

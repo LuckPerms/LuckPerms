@@ -33,7 +33,7 @@ blossom {
 }
 
 shadowJar {
-    archiveName "LuckPerms-Sponge-${project.ext.fullVersion}.jar"
+    archiveFileName = "LuckPerms-Sponge-${project.ext.fullVersion}.jar"
 
     dependencies {
         include(dependency('net.luckperms:.*'))
