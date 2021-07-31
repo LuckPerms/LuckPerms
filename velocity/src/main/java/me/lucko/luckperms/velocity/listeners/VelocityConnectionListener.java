@@ -68,6 +68,7 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
            Offline mode. */
 
         if (!(e.getSubject() instanceof Player)) {
+            continuation.resume();
             return;
         }
 
