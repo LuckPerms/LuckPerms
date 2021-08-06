@@ -12,7 +12,7 @@ dependencies {
     compileOnly project(':common:loader-utils')
 
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
-    compileOnly('me.lucko:adventure-platform-bukkit:4.7.0') {
+    compileOnly('me.lucko:adventure-platform-bukkit:4.8.1') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
         exclude(module: 'adventure-nbt')

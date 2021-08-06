@@ -16,24 +16,24 @@ dependencies {
     compileOnly 'org.slf4j:slf4j-api:1.7.30'
     compileOnly 'org.apache.logging.log4j:log4j-api:2.14.0'
 
-    compile('net.kyori:adventure-api:4.7.0') {
+    compile('net.kyori:adventure-api:4.8.1') {
         exclude(module: 'adventure-bom')
         exclude(module: 'checker-qual')
         exclude(module: 'annotations')
     }
 
-    compile('net.kyori:adventure-text-serializer-gson:4.7.0') {
+    compile('net.kyori:adventure-text-serializer-gson:4.8.1') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
         exclude(module: 'gson')
     }
 
-    compile('net.kyori:adventure-text-serializer-legacy:4.7.0') {
+    compile('net.kyori:adventure-text-serializer-legacy:4.8.1') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
     }
 
-    compile('net.kyori:adventure-text-serializer-plain:4.7.0') {
+    compile('net.kyori:adventure-text-serializer-plain:4.8.1') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
     }
