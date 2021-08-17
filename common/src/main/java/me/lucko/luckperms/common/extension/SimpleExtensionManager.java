@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.extension;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.plugin.classpath.ReflectionClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.URLClassLoaderAccess;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.luckperms.api.LuckPerms;
@@ -206,7 +206,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             throw new RuntimeException("useParentClassLoader is true but parent is not a URLClassLoader");
         }
 
-        ReflectionClassPathAppender.addUrl(((URLClassLoader) parentClassLoader), path.toUri().toURL());
+        URLClassLoaderAccess.create(((URLClassLoader) parentClassLoader)).addURL(path.toUri().toURL());
     }
 
     private static final class LoadedExtension {
