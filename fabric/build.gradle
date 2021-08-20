@@ -1,7 +1,7 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '4.0.1'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
     id 'fabric-loom' version '0.6-SNAPSHOT'
 }
 
@@ -36,24 +36,18 @@ dependencies {
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.1-SNAPSHOT'))
 
-    compile project(':common')
+    implementation project(':common')
 }
 
 processResources {
     inputs.property 'version', project.ext.fullVersion
-
-    from(sourceSets.main.resources.srcDirs) {
-        include 'fabric.mod.json'
+    filesMatching('fabric-mod.json') {
         expand 'version': project.ext.fullVersion
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'fabric.mod.json'
     }
 }
 
 shadowJar {
-    archiveName = "luckpermsfabric-${project.ext.fullVersion}-dev.jar"
+    archiveFileName = "luckpermsfabric-${project.ext.fullVersion}-dev.jar"
 
     dependencies {
         exclude('net.fabricmc:.*')
@@ -84,9 +78,9 @@ shadowJar {
 
 task remappedShadowJar(type: RemapJarTask) {
     dependsOn tasks.shadowJar
-    input = tasks.shadowJar.archivePath
-    addNestedDependencies = true
-    archiveName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
+    input.set(tasks.shadowJar.archiveFile)
+    addNestedDependencies.set(true)
+    archiveFileName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
 }
 
 tasks.assemble.dependsOn tasks.remappedShadowJar
