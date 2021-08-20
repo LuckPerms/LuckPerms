@@ -1,5 +1,4 @@
 import net.fabricmc.loom.task.RemapJarTask
-import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0'
@@ -42,7 +41,9 @@ dependencies {
 
 processResources {
     inputs.property 'version', project.ext.fullVersion
-    filter ReplaceTokens, tokens: ['version': project.ext.fullVersion]
+    filesMatching('fabric-mod.json') {
+        expand 'version': project.ext.fullVersion
+    }
 }
 
 shadowJar {
@@ -77,9 +78,9 @@ shadowJar {
 
 task remappedShadowJar(type: RemapJarTask) {
     dependsOn tasks.shadowJar
-    input = tasks.shadowJar.archivePath
-    addNestedDependencies = true
-    archiveName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
+    input.set(tasks.shadowJar.archiveFile)
+    addNestedDependencies.set(true)
+    archiveFileName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
 }
 
 tasks.assemble.dependsOn tasks.remappedShadowJar
