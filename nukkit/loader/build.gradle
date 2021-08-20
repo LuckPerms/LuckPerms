@@ -16,7 +16,7 @@ dependencies {
 
 processResources {
     filesMatching('plugin.yml') {
-        expand 'version': project.ext.fullVersion
+        expand 'pluginVersion': project.ext.fullVersion
     }
 }
 
