@@ -38,6 +38,7 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class BukkitPlatformListener implements Listener {
@@ -51,17 +52,17 @@ public class BukkitPlatformListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
-        handleCommand(e.getPlayer(), e.getMessage().toLowerCase(), e);
+        handleCommand(e.getPlayer(), e.getMessage().toLowerCase(Locale.ROOT), e);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onServerCommand(ServerCommandEvent e) {
-        handleCommand(e.getSender(), e.getCommand().toLowerCase(), e);
+        handleCommand(e.getSender(), e.getCommand().toLowerCase(Locale.ROOT), e);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onRemoteServerCommand(RemoteServerCommandEvent e) {
-        handleCommand(e.getSender(), e.getCommand().toLowerCase(), e);
+        handleCommand(e.getSender(), e.getCommand().toLowerCase(Locale.ROOT), e);
     }
 
     private void handleCommand(CommandSender sender, String cmdLine, Cancellable event) {

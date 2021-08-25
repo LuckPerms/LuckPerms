@@ -35,6 +35,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The dependencies used by LuckPerms.
@@ -314,7 +315,7 @@ public enum Dependency {
     }
 
     public String getFileName(String classifier) {
-        String name = name().toLowerCase().replace('_', '-');
+        String name = name().toLowerCase(Locale.ROOT).replace('_', '-');
         String extra = classifier == null || classifier.isEmpty()
                 ? ""
                 : "-" + classifier;

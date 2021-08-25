@@ -54,6 +54,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -120,12 +121,12 @@ public class LuckPermsService implements LPPermissionService {
 
         // load known collections
         for (String identifier : this.storage.getSavedCollections()) {
-            if (this.collections.containsKey(identifier.toLowerCase())) {
+            if (this.collections.containsKey(identifier.toLowerCase(Locale.ROOT))) {
                 continue;
             }
 
             // load data
-            PersistedCollection collection = new PersistedCollection(this, identifier.toLowerCase());
+            PersistedCollection collection = new PersistedCollection(this, identifier.toLowerCase(Locale.ROOT));
             collection.loadAll();
 
             // cache in this instance
@@ -185,7 +186,7 @@ public class LuckPermsService implements LPPermissionService {
     @Override
     public LPSubjectCollection getCollection(String s) {
         Objects.requireNonNull(s);
-        return this.collections.get(s.toLowerCase());
+        return this.collections.get(s.toLowerCase(Locale.ROOT));
     }
 
     @Override

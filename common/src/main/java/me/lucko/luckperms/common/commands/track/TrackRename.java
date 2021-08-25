@@ -43,6 +43,8 @@ import net.kyori.adventure.text.Component;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 
+import java.util.Locale;
+
 public class TrackRename extends ChildCommand<Track> {
     public TrackRename() {
         super(CommandSpec.TRACK_RENAME, "rename", CommandPermission.TRACK_RENAME, Predicates.not(1));
@@ -55,7 +57,7 @@ public class TrackRename extends ChildCommand<Track> {
             return;
         }
 
-        String newTrackName = args.get(0).toLowerCase();
+        String newTrackName = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.TRACK_NAME_TEST.test(newTrackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, newTrackName);
             return;

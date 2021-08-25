@@ -45,6 +45,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
@@ -108,7 +109,7 @@ public class SimpleMetaCache extends UsageTracked implements CachedMetaData {
 
     public String getMetaValue(String key, MetaCheckEvent.Origin origin) {
         Objects.requireNonNull(key, "key");
-        return this.flattenedMeta.get(key.toLowerCase());
+        return this.flattenedMeta.get(key.toLowerCase(Locale.ROOT));
     }
 
     @Override
@@ -205,7 +206,7 @@ public class SimpleMetaCache extends UsageTracked implements CachedMetaData {
             }
 
             String key = (String) k;
-            return super.get(key.toLowerCase());
+            return super.get(key.toLowerCase(Locale.ROOT));
         }
     }
 

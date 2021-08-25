@@ -43,6 +43,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -140,7 +141,7 @@ public final class LuckPermsDefaultsMap implements Map<Boolean, Set<Permission>>
         protected @NonNull Map<String, Boolean> supply() {
             Map<String, Boolean> builder = new HashMap<>();
             for (Permission perm : LuckPermsDefaultsMap.this.get(this.op)) {
-                String name = perm.getName().toLowerCase();
+                String name = perm.getName().toLowerCase(Locale.ROOT);
                 builder.put(name, true);
                 for (Map.Entry<String, Boolean> child : LuckPermsDefaultsMap.this.plugin.getPermissionMap().getChildPermissions(name, true).entrySet()) {
                     builder.putIfAbsent(child.getKey(), child.getValue());

@@ -45,6 +45,7 @@ import net.luckperms.api.util.Tristate;
 
 import org.spongepowered.api.service.permission.SubjectCollection;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -88,7 +89,7 @@ public class PersistedCollection implements LPSubjectCollection {
     public void loadAll() {
         Map<String, SubjectDataContainer> holders = this.service.getStorage().loadAllFromFile(this.identifier);
         for (Map.Entry<String, SubjectDataContainer> e : holders.entrySet()) {
-            PersistedSubject subject = this.subjects.get(e.getKey().toLowerCase());
+            PersistedSubject subject = this.subjects.get(e.getKey().toLowerCase(Locale.ROOT));
             if (subject != null) {
                 subject.loadData(e.getValue());
             }
@@ -121,7 +122,7 @@ public class PersistedCollection implements LPSubjectCollection {
     }
 
     public LPSubject obtainSubject(String identifier) {
-        return this.subjects.get(identifier.toLowerCase());
+        return this.subjects.get(identifier.toLowerCase(Locale.ROOT));
     }
 
     @Override
@@ -138,14 +139,14 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public CompletableFuture<Boolean> hasRegistered(String identifier) {
-        return CompletableFuture.completedFuture(this.subjects.containsKey(identifier.toLowerCase()));
+        return CompletableFuture.completedFuture(this.subjects.containsKey(identifier.toLowerCase(Locale.ROOT)));
     }
 
     @Override
     public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers) {
         ImmutableSet.Builder<LPSubject> subjects = ImmutableSet.builder();
         for (String id : identifiers) {
-            subjects.add(Objects.requireNonNull(this.subjects.get(id.toLowerCase())));
+            subjects.add(Objects.requireNonNull(this.subjects.get(id.toLowerCase(Locale.ROOT))));
         }
         return CompletableFuture.completedFuture(subjects.build());
     }

@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.command.utils;
 
+import java.util.Locale;
+
 public enum SortType {
 
     PRIORITY,
@@ -32,6 +34,6 @@ public enum SortType {
 
     @Override
     public String toString() {
-        return name().toLowerCase();
+        return name().toLowerCase(Locale.ROOT);
     }
 }

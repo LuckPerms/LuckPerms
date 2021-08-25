@@ -38,6 +38,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -116,8 +117,8 @@ public final class SubjectReferenceFactory {
         private final int hashCode;
 
         private SubjectReferenceAttributes(String collectionId, String id) {
-            this.collectionId = collectionId.toLowerCase();
-            this.id = id.toLowerCase();
+            this.collectionId = collectionId.toLowerCase(Locale.ROOT);
+            this.id = id.toLowerCase(Locale.ROOT);
             this.hashCode = calculateHashCode();
         }
 

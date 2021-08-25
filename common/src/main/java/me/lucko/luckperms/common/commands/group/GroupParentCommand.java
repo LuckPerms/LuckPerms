@@ -46,6 +46,7 @@ import me.lucko.luckperms.common.util.CaffeineFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -83,7 +84,7 @@ public class GroupParentCommand extends ParentCommand<Group, String> {
         if (group != null) {
             return group.getName();
         } else {
-            return target.toLowerCase();
+            return target.toLowerCase(Locale.ROOT);
         }
     }
 

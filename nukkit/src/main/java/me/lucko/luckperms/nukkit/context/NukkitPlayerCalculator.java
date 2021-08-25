@@ -47,6 +47,7 @@ import cn.nukkit.event.entity.EntityLevelChangeEvent;
 import cn.nukkit.event.player.PlayerGameModeChangeEvent;
 import cn.nukkit.level.Level;
 
+import java.util.Locale;
 import java.util.Set;
 
 public class NukkitPlayerCalculator implements ContextCalculator<Player>, Listener {
@@ -111,7 +112,7 @@ public class NukkitPlayerCalculator implements ContextCalculator<Player>, Listen
             case Player.CREATIVE: return "creative";
             case Player.ADVENTURE: return "adventure";
             case Player.SPECTATOR: return "spectator";
-            default: return Server.getGamemodeString(mode, true).toLowerCase();
+            default: return Server.getGamemodeString(mode, true).toLowerCase(Locale.ROOT);
         }
     }
 

@@ -38,6 +38,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -123,7 +124,7 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
                         .at(0, CompletionSupplier.startsWith(() -> getTargets(plugin).stream()))
                         .at(1, CompletionSupplier.startsWith(() -> getChildren().stream()
                                 .filter(s -> s.isAuthorized(sender))
-                                .map(s -> s.getName().toLowerCase())
+                                .map(s -> s.getName().toLowerCase(Locale.ROOT))
                         ))
                         .from(2, partial -> getChildren().stream()
                                 .filter(s -> s.isAuthorized(sender))
@@ -137,7 +138,7 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
                 return TabCompleter.create()
                         .at(0, CompletionSupplier.startsWith(() -> getChildren().stream()
                                 .filter(s -> s.isAuthorized(sender))
-                                .map(s -> s.getName().toLowerCase())
+                                .map(s -> s.getName().toLowerCase(Locale.ROOT))
                         ))
                         .from(1, partial -> getChildren().stream()
                                 .filter(s -> s.isAuthorized(sender))

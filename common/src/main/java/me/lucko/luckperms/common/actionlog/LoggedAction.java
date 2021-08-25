@@ -47,6 +47,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -126,10 +127,10 @@ public class LoggedAction implements Action {
     }
 
     public boolean matchesSearch(String query) {
-        query = Objects.requireNonNull(query, "query").toLowerCase();
-        return this.source.name.toLowerCase().contains(query) ||
-                this.target.name.toLowerCase().contains(query) ||
-                this.description.toLowerCase().contains(query);
+        query = Objects.requireNonNull(query, "query").toLowerCase(Locale.ROOT);
+        return this.source.name.toLowerCase(Locale.ROOT).contains(query) ||
+                this.target.name.toLowerCase(Locale.ROOT).contains(query) ||
+                this.description.toLowerCase(Locale.ROOT).contains(query);
     }
 
     public void submit(LuckPermsPlugin plugin, Sender sender) {

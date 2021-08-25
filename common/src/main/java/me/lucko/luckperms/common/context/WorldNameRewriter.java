@@ -32,6 +32,7 @@ import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.DefaultContextKeys;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -69,7 +70,7 @@ public interface WorldNameRewriter {
         @Override
         public void rewriteAndSubmit(String worldName, ContextConsumer consumer) {
             Set<String> seen = new HashSet<>();
-            worldName = worldName.toLowerCase();
+            worldName = worldName.toLowerCase(Locale.ROOT);
 
             while (Context.isValidValue(worldName) && seen.add(worldName)) {
                 consumer.accept(DefaultContextKeys.WORLD_KEY, worldName);

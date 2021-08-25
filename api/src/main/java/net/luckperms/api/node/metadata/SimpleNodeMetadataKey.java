@@ -27,6 +27,7 @@ package net.luckperms.api.node.metadata;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
 import java.util.Objects;
 
 final class SimpleNodeMetadataKey<T> implements NodeMetadataKey<T> {
@@ -34,7 +35,7 @@ final class SimpleNodeMetadataKey<T> implements NodeMetadataKey<T> {
     private final Class<T> type;
 
     SimpleNodeMetadataKey(String name, Class<T> type) {
-        this.name = name.toLowerCase();
+        this.name = name.toLowerCase(Locale.ROOT);
         this.type = type;
     }
 

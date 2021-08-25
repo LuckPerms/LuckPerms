@@ -51,6 +51,7 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 
 import java.util.List;
+import java.util.Locale;
 
 public class UserSwitchPrimaryGroup extends GenericChildCommand {
     public UserSwitchPrimaryGroup() {
@@ -74,9 +75,9 @@ public class UserSwitchPrimaryGroup extends GenericChildCommand {
             Message.USER_PRIMARYGROUP_WARN_OPTION.send(sender, opt);
         }
 
-        Group group = plugin.getGroupManager().getIfLoaded(args.get(0).toLowerCase());
+        Group group = plugin.getGroupManager().getIfLoaded(args.get(0).toLowerCase(Locale.ROOT));
         if (group == null) {
-            Message.DOES_NOT_EXIST.send(sender, args.get(0).toLowerCase());
+            Message.DOES_NOT_EXIST.send(sender, args.get(0).toLowerCase(Locale.ROOT));
             return;
         }
 

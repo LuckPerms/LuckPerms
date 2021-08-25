@@ -71,6 +71,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -336,7 +337,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
         // get a result from the DB cache
-        UUID uniqueId = getStorage().getPlayerUniqueId(username.toLowerCase()).join();
+        UUID uniqueId = getStorage().getPlayerUniqueId(username.toLowerCase(Locale.ROOT)).join();
 
         // fire the event
         uniqueId = getEventDispatcher().dispatchUniqueIdLookup(username, uniqueId);

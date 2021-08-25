@@ -27,6 +27,7 @@ package net.luckperms.api.query;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
 import java.util.Objects;
 
 final class SimpleOptionKey<T> implements OptionKey<T> {
@@ -35,7 +36,7 @@ final class SimpleOptionKey<T> implements OptionKey<T> {
     private final int hashCode;
 
     SimpleOptionKey(String name, Class<T> type) {
-        this.name = name.toLowerCase();
+        this.name = name.toLowerCase(Locale.ROOT);
         this.type = type;
         this.hashCode = Objects.hash(this.name, this.type); // cache hashcode
     }

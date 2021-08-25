@@ -36,6 +36,7 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.util.Tristate;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 
 public final class SpongeCommandUtils {
@@ -46,7 +47,7 @@ public final class SpongeCommandUtils {
     }
 
     public static Tristate parseTristate(int index, ArgumentList args) throws ArgumentException {
-        String s = args.get(index).toLowerCase();
+        String s = args.get(index).toLowerCase(Locale.ROOT);
         switch (s) {
             case "1":
             case "true":

@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -167,7 +168,7 @@ public class Importer implements Runnable {
         for (JsonElement holderElement : holdersArray) {
             JsonObject jsonData = holderElement.getAsJsonObject();
 
-            HolderType type = HolderType.valueOf(jsonData.get("type").getAsString().toUpperCase());
+            HolderType type = HolderType.valueOf(jsonData.get("type").getAsString().toUpperCase(Locale.ROOT));
             String id = jsonData.get("id").getAsString();
 
             if (type == HolderType.GROUP) {

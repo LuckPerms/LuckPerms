@@ -55,6 +55,7 @@ import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 public class GroupRename extends ChildCommand<Group> {
@@ -69,7 +70,7 @@ public class GroupRename extends ChildCommand<Group> {
             return;
         }
 
-        String newGroupName = args.get(0).toLowerCase();
+        String newGroupName = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender, newGroupName);
             return;

@@ -42,6 +42,8 @@ import net.luckperms.api.messenger.MessengerProvider;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
+
 public class MessagingFactory<P extends LuckPermsPlugin> {
     private final P plugin;
 
@@ -82,7 +84,7 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             return null;
         }
 
-        this.plugin.getLogger().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
+        this.plugin.getLogger().info("Loading messaging service... [" + messagingType.toUpperCase(Locale.ROOT) + "]");
 
         InternalMessagingService service = getServiceFor(messagingType);
         if (service != null) {

@@ -75,6 +75,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -130,7 +131,7 @@ public class CommandManager {
                 .add(new ListTracks())
                 .build()
                 .stream()
-                .collect(ImmutableCollectors.toMap(c -> c.getName().toLowerCase(), Function.identity()));
+                .collect(ImmutableCollectors.toMap(c -> c.getName().toLowerCase(Locale.ROOT), Function.identity()));
     }
 
     public LuckPermsPlugin getPlugin() {
@@ -235,7 +236,7 @@ public class CommandManager {
         }
 
         // Look for the main command.
-        Command<?> main = this.mainCommands.get(arguments.get(0).toLowerCase());
+        Command<?> main = this.mainCommands.get(arguments.get(0).toLowerCase(Locale.ROOT));
 
         // Main command not found
         if (main == null) {
@@ -276,7 +277,7 @@ public class CommandManager {
                 .collect(Collectors.toList());
 
         return TabCompleter.create()
-                .at(0, CompletionSupplier.startsWith(() -> mains.stream().map(c -> c.getName().toLowerCase())))
+                .at(0, CompletionSupplier.startsWith(() -> mains.stream().map(c -> c.getName().toLowerCase(Locale.ROOT))))
                 .from(1, partial -> mains.stream()
                         .filter(m -> m.getName().equalsIgnoreCase(arguments.get(0)))
                         .findFirst()
@@ -333,7 +334,7 @@ public class CommandManager {
         // '/lp user Luck p set --> /lp user Luck permission set' etc
         //                ^                       ^^^^^^^^^^
         if (args.size() >= 3 && (rewriteLastArgument || args.size() >= 4)) {
-            String arg0 = args.get(0).toLowerCase();
+            String arg0 = args.get(0).toLowerCase(Locale.ROOT);
             if (arg0.equals("user") || arg0.equals("group")) {
                 replaceArgs(args, 2, arg -> {
                     switch (arg) {
@@ -353,7 +354,7 @@ public class CommandManager {
                 // '/lp user Luck permission i' --> '/lp user Luck permission info' etc
                 //                           ^                                ^^^^
                 if (args.size() >= 4 && (rewriteLastArgument || args.size() >= 5)) {
-                    String arg2 = args.get(2).toLowerCase();
+                    String arg2 = args.get(2).toLowerCase(Locale.ROOT);
                     if (arg2.equals("permission") || arg2.equals("parent") || arg2.equals("meta")) {
                         replaceArgs(args, 3, arg -> arg.equals("i") ? "info" : null);
                     }
@@ -363,7 +364,7 @@ public class CommandManager {
     }
 
     private static void replaceArgs(List<String> args, int i, Function<String, String> rewrites) {
-        String arg = args.get(i).toLowerCase();
+        String arg = args.get(i).toLowerCase(Locale.ROOT);
         String rewrite = rewrites.apply(arg);
         if (rewrite != null) {
             args.remove(i);

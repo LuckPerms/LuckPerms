@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -112,7 +113,7 @@ public class TabCompleter {
             if (string.length() < substring.length()) {
                 return false;
             }
-            return string.toLowerCase().contains(substring.toLowerCase());
+            return string.toLowerCase(Locale.ROOT).contains(substring.toLowerCase(Locale.ROOT));
         };
     }
 

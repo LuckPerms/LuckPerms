@@ -25,12 +25,14 @@
 
 package me.lucko.luckperms.common.model;
 
+import java.util.Locale;
+
 public enum HolderType {
     USER,
     GROUP;
 
     @Override
     public String toString() {
-        return name().toLowerCase();
+        return name().toLowerCase(Locale.ROOT);
     }
 }

@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 
+import java.util.Locale;
 import java.util.function.Predicate;
 
 public final class ApiUtils {
@@ -55,7 +56,7 @@ public final class ApiUtils {
         }
 
         Preconditions.checkArgument(DataConstraints.GROUP_NAME_TEST.test(s), "Invalid name entry: " + s);
-        return s.toLowerCase();
+        return s.toLowerCase(Locale.ROOT);
     }
 
 }

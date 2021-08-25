@@ -50,6 +50,7 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.ChatMetaType;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.OptionalInt;
 
 public class MetaSetChatMeta extends GenericChildCommand {
@@ -134,7 +135,7 @@ public class MetaSetChatMeta extends GenericChildCommand {
             Message.ADD_CHATMETA_SUCCESS.send(sender, target, this.type, meta, priority, context);
 
             LoggedAction.build().source(sender).target(target)
-                    .description("meta" , "set" + this.type.name().toLowerCase(), priority, meta, context)
+                    .description("meta" , "set" + this.type.name().toLowerCase(Locale.ROOT), priority, meta, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);

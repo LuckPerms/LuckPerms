@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.bulkupdate.query;
 
+import java.util.Locale;
+
 /**
  * Represents a field being used in an update
  */
@@ -38,7 +40,7 @@ public enum QueryField {
 
     public static QueryField of(String s) {
         try {
-            return valueOf(s.toUpperCase());
+            return valueOf(s.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return null;
         }

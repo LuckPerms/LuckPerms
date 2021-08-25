@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
 import java.util.List;
+import java.util.Locale;
 
 public class LogTrackHistory extends ChildCommand<Log> {
     private static final int ENTRIES_PER_PAGE = 10;
@@ -51,7 +52,7 @@ public class LogTrackHistory extends ChildCommand<Log> {
 
     @Override
     public void execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
-        String track = args.get(0).toLowerCase();
+        String track = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.TRACK_NAME_TEST.test(track)) {
             Message.TRACK_INVALID_ENTRY.send(sender, track);
             return;

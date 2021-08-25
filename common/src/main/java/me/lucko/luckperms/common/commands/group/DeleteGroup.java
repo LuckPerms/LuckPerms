@@ -56,6 +56,7 @@ import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.DeletionCause;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class DeleteGroup extends SingleCommand {
@@ -70,7 +71,7 @@ public class DeleteGroup extends SingleCommand {
             return;
         }
 
-        String groupName = args.get(0).toLowerCase();
+        String groupName = args.get(0).toLowerCase(Locale.ROOT);
 
         if (groupName.equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
             Message.DELETE_GROUP_ERROR_DEFAULT.send(sender);

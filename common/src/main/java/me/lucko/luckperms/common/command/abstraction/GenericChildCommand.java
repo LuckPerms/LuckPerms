@@ -41,6 +41,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -106,7 +107,7 @@ public abstract class GenericChildCommand {
         TextComponent.Builder builder = Component.text()
                 .append(Component.text('>', NamedTextColor.DARK_AQUA))
                 .append(Component.space())
-                .append(Component.text(getName().toLowerCase(), NamedTextColor.GREEN));
+                .append(Component.text(getName().toLowerCase(Locale.ROOT), NamedTextColor.GREEN));
 
         if (getArgs() != null) {
             List<Component> argUsages = getArgs().stream()

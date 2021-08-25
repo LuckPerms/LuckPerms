@@ -31,6 +31,8 @@ import net.luckperms.api.node.types.SuffixNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
+
 /**
  * Represents a type of chat meta
  */
@@ -70,7 +72,7 @@ public enum ChatMetaType {
     private final NodeType<? extends ChatMetaNode<?, ?>> nodeType;
 
     ChatMetaType(NodeType<? extends ChatMetaNode<?, ?>> nodeType) {
-        this.name = nodeType.name().toLowerCase();
+        this.name = nodeType.name().toLowerCase(Locale.ROOT);
         this.nodeType = nodeType;
     }
 

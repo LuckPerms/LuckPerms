@@ -46,6 +46,8 @@ import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
 
+import java.util.Locale;
+
 public class CreateGroup extends SingleCommand {
     public CreateGroup() {
         super(CommandSpec.CREATE_GROUP, "CreateGroup", CommandPermission.CREATE_GROUP, Predicates.notInRange(1, 3));
@@ -58,7 +60,7 @@ public class CreateGroup extends SingleCommand {
             return;
         }
 
-        String groupName = args.get(0).toLowerCase();
+        String groupName = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender, groupName);
             return;

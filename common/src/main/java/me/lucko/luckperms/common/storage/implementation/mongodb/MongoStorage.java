@@ -75,6 +75,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -521,7 +522,7 @@ public class MongoStorage implements StorageImplementation {
 
     @Override
     public PlayerSaveResult savePlayerData(UUID uniqueId, String username) {
-        username = username.toLowerCase();
+        username = username.toLowerCase(Locale.ROOT);
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
 
         // find any existing mapping
@@ -560,7 +561,7 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public UUID getPlayerUniqueId(String username) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
-        Document doc = c.find(new Document("name", username.toLowerCase())).first();
+        Document doc = c.find(new Document("name", username.toLowerCase(Locale.ROOT))).first();
         if (doc != null) {
             return getDocumentId(doc);
         }

@@ -42,6 +42,8 @@ import me.lucko.luckperms.common.util.Predicates;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
 
+import java.util.Locale;
+
 public class GroupClone extends ChildCommand<Group> {
     public GroupClone() {
         super(CommandSpec.GROUP_CLONE, "clone", CommandPermission.GROUP_CLONE, Predicates.not(1));
@@ -54,7 +56,7 @@ public class GroupClone extends ChildCommand<Group> {
             return;
         }
 
-        String newGroupName = args.get(0).toLowerCase();
+        String newGroupName = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender, newGroupName);
             return;

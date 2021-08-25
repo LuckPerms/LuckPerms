@@ -36,6 +36,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,7 +58,7 @@ public final class TabCompletions {
         this.permissions = partial -> {
             PermissionRegistry cache = plugin.getPermissionRegistry();
 
-            String start = partial.toLowerCase();
+            String start = partial.toLowerCase(Locale.ROOT);
             List<String> parts = new ArrayList<>(Splitter.on('.').splitToList(start));
             TreeNode root = cache.getRootNode();
 

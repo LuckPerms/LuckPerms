@@ -38,6 +38,7 @@ import net.luckperms.api.node.NodeEqualityPredicate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -83,11 +84,11 @@ public class ApiUser extends ApiPermissionHolder implements net.luckperms.api.mo
             return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
-        if (!this.handle.hasNode(DataType.NORMAL, Inheritance.builder(group.toLowerCase()).build(), NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
+        if (!this.handle.hasNode(DataType.NORMAL, Inheritance.builder(group.toLowerCase(Locale.ROOT)).build(), NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE).asBoolean()) {
             return DataMutateResult.FAIL;
         }
 
-        this.handle.getPrimaryGroup().setStoredValue(group.toLowerCase());
+        this.handle.getPrimaryGroup().setStoredValue(group.toLowerCase(Locale.ROOT));
         return DataMutateResult.SUCCESS;
     }
 

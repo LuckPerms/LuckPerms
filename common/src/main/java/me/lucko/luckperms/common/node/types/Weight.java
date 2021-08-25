@@ -35,6 +35,7 @@ import net.luckperms.api.node.types.WeightNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Locale;
 import java.util.Map;
 
 public class Weight extends AbstractNode<WeightNode, WeightNode.Builder> implements WeightNode {
@@ -71,7 +72,7 @@ public class Weight extends AbstractNode<WeightNode, WeightNode.Builder> impleme
     }
 
     public static @Nullable Builder parse(String key) {
-        if (!key.toLowerCase().startsWith(NODE_MARKER)) {
+        if (!key.toLowerCase(Locale.ROOT).startsWith(NODE_MARKER)) {
             return null;
         }
 
