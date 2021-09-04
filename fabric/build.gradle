@@ -36,7 +36,7 @@ dependencies {
 
 processResources {
     inputs.property 'version', project.ext.fullVersion
-    filesMatching('fabric-mod.json') {
+    filesMatching('**/fabric.mod.json') {
         expand 'version': project.ext.fullVersion
     }
 }
