@@ -439,11 +439,12 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
         }
 
         // assume 'configNode' is the actual entry.
-        String permission = children.get(keyFieldName).getString(null);
-        if (permission == null || permission.isEmpty()) {
+        ConfigurationNode appended = children.get(keyFieldName);
+        if (appended == null) {
             return null;
         }
 
+        String permission = appended.getString("");
         return new NodeEntry(permission, configNode);
     }
 
@@ -458,7 +459,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             }
 
             NodeEntry entry = parseNode(appended, "permission");
-            if (entry == null) {
+            if (entry == null || entry.key.isEmpty()) {
                 continue;
             }
 
@@ -476,7 +477,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             }
 
             NodeEntry entry = parseNode(appended, "group");
-            if (entry == null) {
+            if (entry == null || entry.key.isEmpty()) {
                 continue;
             }
 
@@ -512,7 +513,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
         for (ConfigurationNode appended : data.getNode("meta").getChildrenList()) {
             NodeEntry entry = parseNode(appended, "key");
-            if (entry == null) {
+            if (entry == null || entry.key.isEmpty()) {
                 continue;
             }
 
@@ -545,7 +546,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
     private void appendNode(ConfigurationNode base, String key, ConfigurationNode attributes, String keyFieldName) {
         ConfigurationNode appended = base.appendListNode();
-        if (this.loader instanceof YamlLoader) {
+        if (this.loader instanceof YamlLoader && !key.isEmpty()) {
             // create a map node with a single entry of key --> attributes
             appended.getNode(key).setValue(attributes);
         } else {
