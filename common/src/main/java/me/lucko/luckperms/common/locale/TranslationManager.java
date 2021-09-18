@@ -123,9 +123,10 @@ public class TranslationManager {
         for (Path translationFile : translationFiles) {
             try {
                 Map.Entry<Locale, ResourceBundle> result = loadCustomTranslationFile(translationFile);
-                if (result != null) {
-                    loaded.put(result.getKey(), result.getValue());
-                }
+                loaded.put(result.getKey(), result.getValue());
+            } catch (IllegalArgumentException e) {
+                // common error is from adventure "java.lang.IllegalArgumentException: Invalid key" -- don't print the whole stack trace.
+                this.plugin.getLogger().warn("Error loading locale file: " + translationFile.getFileName() + " - " + e);
             } catch (Exception e) {
                 this.plugin.getLogger().warn("Error loading locale file: " + translationFile.getFileName(), e);
             }
@@ -135,27 +136,27 @@ public class TranslationManager {
         loaded.forEach((locale, bundle) -> {
             Locale localeWithoutCountry = new Locale(locale.getLanguage());
             if (!locale.equals(localeWithoutCountry) && !localeWithoutCountry.equals(DEFAULT_LOCALE) && this.installed.add(localeWithoutCountry)) {
-                this.registry.registerAll(localeWithoutCountry, bundle, false);
+                try {
+                    this.registry.registerAll(localeWithoutCountry, bundle, false);
+                } catch (IllegalArgumentException e) {
+                    // ignore "IllegalArgumentException: Invalid key" from adventure TranslationRegistry
+                }
             }
         });
     }
 
-    private Map.Entry<Locale, ResourceBundle> loadCustomTranslationFile(Path translationFile) {
+    private Map.Entry<Locale, ResourceBundle> loadCustomTranslationFile(Path translationFile) throws IOException {
         String fileName = translationFile.getFileName().toString();
         String localeString = fileName.substring(0, fileName.length() - ".properties".length());
         Locale locale = parseLocale(localeString);
 
         if (locale == null) {
-            this.plugin.getLogger().warn("Unknown locale '" + localeString + "' - unable to register.");
-            return null;
+            throw new IllegalStateException("Unknown locale '" + localeString + "' - unable to register.");
         }
 
         PropertyResourceBundle bundle;
         try (BufferedReader reader = Files.newBufferedReader(translationFile, StandardCharsets.UTF_8)) {
             bundle = new PropertyResourceBundle(reader);
-        } catch(IOException e) {
-            this.plugin.getLogger().warn("Error loading locale file: " + localeString, e);
-            return null;
         }
 
         this.registry.registerAll(locale, bundle, false);
