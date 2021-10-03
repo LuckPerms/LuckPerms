@@ -585,7 +585,8 @@ group-weight:
 # Controls whether server operators should exist at all.
 #
 # - When set to 'false', all players will be de-opped, and the /op and /deop commands will be
-#   disabled.
+#   disabled. Note that vanilla features like the spawn-protection require an operator on the
+#   server to work.
 enable-ops: true
 
 # Enables or disables a special permission based system in LuckPerms for controlling OP status.
