@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -59,6 +58,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 public class TranslationRepository {
     private static final String TRANSLATIONS_INFO_ENDPOINT = "https://metadata.luckperms.net/data/translations";
@@ -92,6 +92,9 @@ public class TranslationRepository {
         }
 
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+            // cleanup old translation files
+            clearDirectory(this.plugin.getTranslationManager().getTranslationsDirectory(), Files::isRegularFile);
+
             try {
                 refresh();
             } catch (Exception e) {
@@ -101,40 +104,36 @@ public class TranslationRepository {
     }
 
     private void refresh() throws Exception {
-        Path translationsDirectory = this.plugin.getTranslationManager().getTranslationsDirectory();
-        try {
-            MoreFiles.createDirectoriesIfNotExists(translationsDirectory);
-        } catch (IOException e) {
-            // ignore
-        }
-
-        long lastRefresh = 0L;
-
-        Path repoStatusFile = translationsDirectory.resolve("repository.json");
-        if (Files.exists(repoStatusFile)) {
-            try (BufferedReader reader = Files.newBufferedReader(repoStatusFile, StandardCharsets.UTF_8)) {
-                JsonObject status = GsonProvider.normal().fromJson(reader, JsonObject.class);
-                if (status.has("lastRefresh")) {
-                    lastRefresh = status.get("lastRefresh").getAsLong();
-                }
-            } catch (Exception e) {
-                // ignore
-            }
-        }
-
+        long lastRefresh = readLastRefreshTime();
         long timeSinceLastRefresh = System.currentTimeMillis() - lastRefresh;
+
         if (timeSinceLastRefresh <= CACHE_MAX_AGE) {
             return;
         }
 
         MetadataResponse metadata = getTranslationsMetadata();
-
         if (timeSinceLastRefresh <= metadata.cacheMaxAge) {
             return;
         }
 
         // perform a refresh!
         downloadAndInstallTranslations(metadata.languages, null, true);
+    }
+
+    private void clearDirectory(Path directory, Predicate<Path> predicate) {
+        try {
+            Files.list(directory)
+                    .filter(predicate)
+                    .forEach(p -> {
+                        try {
+                            Files.delete(p);
+                        } catch (IOException e) {
+                            // ignore
+                        }
+                    });
+        } catch (IOException e) {
+            // ignore
+        }
     }
 
     /**
@@ -146,13 +145,10 @@ public class TranslationRepository {
      */
     public void downloadAndInstallTranslations(List<LanguageInfo> languages, @Nullable Sender sender, boolean updateStatus) {
         TranslationManager manager = this.plugin.getTranslationManager();
-        Path translationsDirectory = manager.getTranslationsDirectory();
+        Path translationsDirectory = manager.getRepositoryTranslationsDirectory();
 
-        try {
-            MoreFiles.createDirectoriesIfNotExists(translationsDirectory);
-        } catch (IOException e) {
-            // ignore
-        }
+        // clear existing translations
+        clearDirectory(translationsDirectory, TranslationManager::isTranslationFile);
 
         for (LanguageInfo language : languages) {
             if (sender != null) {
@@ -185,18 +181,39 @@ public class TranslationRepository {
         }
 
         if (updateStatus) {
-            // update status file
-            Path repoStatusFile = translationsDirectory.resolve("repository.json");
-            try (BufferedWriter writer = Files.newBufferedWriter(repoStatusFile, StandardCharsets.UTF_8)) {
-                JsonObject status = new JsonObject();
-                status.add("lastRefresh", new JsonPrimitive(System.currentTimeMillis()));
-                GsonProvider.prettyPrinting().toJson(status, writer);
-            } catch (IOException e) {
+            writeLastRefreshTime();
+        }
+
+        manager.reload();
+    }
+
+    private void writeLastRefreshTime() {
+        Path statusFile = this.plugin.getTranslationManager().getRepositoryStatusFile();
+
+        try (BufferedWriter writer = Files.newBufferedWriter(statusFile, StandardCharsets.UTF_8)) {
+            JsonObject status = new JsonObject();
+            status.add("lastRefresh", new JsonPrimitive(System.currentTimeMillis()));
+            GsonProvider.prettyPrinting().toJson(status, writer);
+        } catch (IOException e) {
+            // ignore
+        }
+    }
+
+    private long readLastRefreshTime() {
+        Path statusFile = this.plugin.getTranslationManager().getRepositoryStatusFile();
+
+        if (Files.exists(statusFile)) {
+            try (BufferedReader reader = Files.newBufferedReader(statusFile, StandardCharsets.UTF_8)) {
+                JsonObject status = GsonProvider.normal().fromJson(reader, JsonObject.class);
+                if (status.has("lastRefresh")) {
+                    return status.get("lastRefresh").getAsLong();
+                }
+            } catch (Exception e) {
                 // ignore
             }
         }
 
-        this.plugin.getTranslationManager().reload();
+        return 0L;
     }
 
     private MetadataResponse getTranslationsMetadata() throws IOException, UnsuccessfulRequestException {

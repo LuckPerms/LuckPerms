@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.locale;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.MoreFiles;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -60,17 +61,37 @@ public class TranslationManager {
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
     private final LuckPermsPlugin plugin;
-    private final Path translationsDirectory;
     private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
     private TranslationRegistry registry;
+
+    private final Path translationsDirectory;
+    private final Path repositoryTranslationsDirectory;
+    private final Path customTranslationsDirectory;
 
     public TranslationManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
         this.translationsDirectory = this.plugin.getBootstrap().getConfigDirectory().resolve("translations");
+        this.repositoryTranslationsDirectory = this.translationsDirectory.resolve("repository");
+        this.customTranslationsDirectory = this.translationsDirectory.resolve("custom");
+
+        try {
+            MoreFiles.createDirectoriesIfNotExists(this.repositoryTranslationsDirectory);
+            MoreFiles.createDirectoriesIfNotExists(this.customTranslationsDirectory);
+        } catch (IOException e) {
+            // ignore
+        }
     }
 
     public Path getTranslationsDirectory() {
         return this.translationsDirectory;
+    }
+
+    public Path getRepositoryTranslationsDirectory() {
+        return this.repositoryTranslationsDirectory;
+    }
+
+    public Path getRepositoryStatusFile() {
+        return this.repositoryTranslationsDirectory.resolve("status.json");
     }
 
     public Set<Locale> getInstalledLocales() {
@@ -89,8 +110,9 @@ public class TranslationManager {
         this.registry.defaultLocale(DEFAULT_LOCALE);
 
         // load custom translations first, then the base (built-in) translations after.
-        loadCustom();
-        loadBase();
+        loadFromFileSystem(this.customTranslationsDirectory, false);
+        loadFromFileSystem(this.repositoryTranslationsDirectory, true);
+        loadFromResourceBundle();
 
         // register it to the global source, so our translations can be picked up by adventure-platform
         GlobalTranslator.get().addSource(this.registry);
@@ -99,36 +121,45 @@ public class TranslationManager {
     /**
      * Loads the base (English) translations from the jar file.
      */
-    private void loadBase() {
+    private void loadFromResourceBundle() {
         ResourceBundle bundle = ResourceBundle.getBundle("luckperms", DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
         try {
             this.registry.registerAll(DEFAULT_LOCALE, bundle, false);
         } catch (IllegalArgumentException e) {
-            this.plugin.getLogger().warn("Error loading default locale file", e);
+            if (!isAdventureDuplicatesException(e)) {
+                this.plugin.getLogger().warn("Error loading default locale file", e);
+            }
         }
+    }
+
+    public static boolean isTranslationFile(Path path) {
+        return path.getFileName().toString().endsWith(".properties");
     }
 
     /**
      * Loads custom translations (in any language) from the plugin configuration folder.
      */
-    public void loadCustom() {
+    public void loadFromFileSystem(Path directory, boolean suppressDuplicatesError) {
         List<Path> translationFiles;
-        try (Stream<Path> stream = Files.list(this.translationsDirectory)) {
-            translationFiles = stream.filter(path -> path.getFileName().toString().endsWith(".properties")).collect(Collectors.toList());
+        try (Stream<Path> stream = Files.list(directory)) {
+            translationFiles = stream.filter(TranslationManager::isTranslationFile).collect(Collectors.toList());
         } catch (IOException e) {
             translationFiles = Collections.emptyList();
+        }
+
+        if (translationFiles.isEmpty()) {
+            return;
         }
 
         Map<Locale, ResourceBundle> loaded = new HashMap<>();
         for (Path translationFile : translationFiles) {
             try {
-                Map.Entry<Locale, ResourceBundle> result = loadCustomTranslationFile(translationFile);
+                Map.Entry<Locale, ResourceBundle> result = loadTranslationFile(translationFile);
                 loaded.put(result.getKey(), result.getValue());
-            } catch (IllegalArgumentException e) {
-                // common error is from adventure "java.lang.IllegalArgumentException: Invalid key" -- don't print the whole stack trace.
-                this.plugin.getLogger().warn("Error loading locale file: " + translationFile.getFileName() + " - " + e);
             } catch (Exception e) {
-                this.plugin.getLogger().warn("Error loading locale file: " + translationFile.getFileName(), e);
+                if (!suppressDuplicatesError || !isAdventureDuplicatesException(e)) {
+                    this.plugin.getLogger().warn("Error loading locale file: " + translationFile.getFileName(), e);
+                }
             }
         }
 
@@ -139,13 +170,13 @@ public class TranslationManager {
                 try {
                     this.registry.registerAll(localeWithoutCountry, bundle, false);
                 } catch (IllegalArgumentException e) {
-                    // ignore "IllegalArgumentException: Invalid key" from adventure TranslationRegistry
+                    // ignore
                 }
             }
         });
     }
 
-    private Map.Entry<Locale, ResourceBundle> loadCustomTranslationFile(Path translationFile) throws IOException {
+    private Map.Entry<Locale, ResourceBundle> loadTranslationFile(Path translationFile) throws IOException {
         String fileName = translationFile.getFileName().toString();
         String localeString = fileName.substring(0, fileName.length() - ".properties".length());
         Locale locale = parseLocale(localeString);
@@ -162,6 +193,11 @@ public class TranslationManager {
         this.registry.registerAll(locale, bundle, false);
         this.installed.add(locale);
         return Maps.immutableEntry(locale, bundle);
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private static boolean isAdventureDuplicatesException(Exception e) {
+        return e instanceof IllegalArgumentException && (e.getMessage().startsWith("Invalid key") || e.getMessage().startsWith("Translation already exists"));
     }
 
     public static Component render(Component component) {
