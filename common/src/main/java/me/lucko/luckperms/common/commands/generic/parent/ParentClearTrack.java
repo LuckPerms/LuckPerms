@@ -50,6 +50,7 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeType;
 
 import java.util.List;
+import java.util.Locale;
 
 public class ParentClearTrack extends GenericChildCommand {
     public ParentClearTrack() {
@@ -63,7 +64,7 @@ public class ParentClearTrack extends GenericChildCommand {
             return;
         }
 
-        final String trackName = args.get(0).toLowerCase();
+        final String trackName = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return;

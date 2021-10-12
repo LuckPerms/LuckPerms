@@ -36,6 +36,7 @@ import net.luckperms.api.node.types.InheritanceNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,7 +45,7 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
     private static final String NODE_MARKER = NODE_KEY + ".";
 
     public static String key(String groupName) {
-        return NODE_MARKER + groupName.toLowerCase();
+        return NODE_MARKER + groupName.toLowerCase(Locale.ROOT);
     }
 
     public static Builder builder() {
@@ -59,7 +60,7 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
 
     public Inheritance(String groupName, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(key(groupName), value, expireAt, contexts, metadata);
-        this.groupName = groupName.toLowerCase();
+        this.groupName = groupName.toLowerCase(Locale.ROOT);
     }
 
     @Override
@@ -73,7 +74,7 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
     }
 
     public static @Nullable Builder parse(String key) {
-        key = key.toLowerCase();
+        key = key.toLowerCase(Locale.ROOT);
         if (!key.startsWith(NODE_MARKER)) {
             return null;
         }

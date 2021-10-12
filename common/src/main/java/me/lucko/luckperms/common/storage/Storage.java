@@ -49,6 +49,7 @@ import net.luckperms.api.node.Node;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -171,7 +172,7 @@ public class Storage {
 
     public CompletableFuture<Group> createAndLoadGroup(String name, CreationCause cause) {
         return future(() -> {
-            Group group = this.implementation.createAndLoadGroup(name.toLowerCase());
+            Group group = this.implementation.createAndLoadGroup(name.toLowerCase(Locale.ROOT));
             if (group != null) {
                 this.plugin.getEventDispatcher().dispatchGroupCreate(group, cause);
             }
@@ -181,7 +182,7 @@ public class Storage {
 
     public CompletableFuture<Optional<Group>> loadGroup(String name) {
         return future(() -> {
-            Optional<Group> group = this.implementation.loadGroup(name.toLowerCase());
+            Optional<Group> group = this.implementation.loadGroup(name.toLowerCase(Locale.ROOT));
             if (group.isPresent()) {
                 this.plugin.getEventDispatcher().dispatchGroupLoad(group.get());
             }
@@ -217,7 +218,7 @@ public class Storage {
 
     public CompletableFuture<Track> createAndLoadTrack(String name, CreationCause cause) {
         return future(() -> {
-            Track track = this.implementation.createAndLoadTrack(name.toLowerCase());
+            Track track = this.implementation.createAndLoadTrack(name.toLowerCase(Locale.ROOT));
             if (track != null) {
                 this.plugin.getEventDispatcher().dispatchTrackCreate(track, cause);
             }
@@ -227,7 +228,7 @@ public class Storage {
 
     public CompletableFuture<Optional<Track>> loadTrack(String name) {
         return future(() -> {
-            Optional<Track> track = this.implementation.loadTrack(name.toLowerCase());
+            Optional<Track> track = this.implementation.loadTrack(name.toLowerCase(Locale.ROOT));
             if (track.isPresent()) {
                 this.plugin.getEventDispatcher().dispatchTrackLoad(track.get());
             }

@@ -34,6 +34,7 @@ import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 
 /**
  * Formats durations to a readable form
@@ -115,7 +116,7 @@ public class DurationFormatter {
 
     private TranslatableComponent formatPart(long amount, ChronoUnit unit) {
         String format = this.concise ? "short" : amount == 1 ? "singular" : "plural";
-        String translationKey = "luckperms.duration.unit." + unit.name().toLowerCase() + "." + format;
+        String translationKey = "luckperms.duration.unit." + unit.name().toLowerCase(Locale.ROOT) + "." + format;
         return Component.translatable(translationKey, Component.text(amount));
     }
 

@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.util.Predicates;
 import net.luckperms.api.model.data.DataMutateResult;
 
 import java.util.List;
+import java.util.Locale;
 
 public class TrackInsert extends ChildCommand<Track> {
     public TrackInsert() {
@@ -58,7 +59,7 @@ public class TrackInsert extends ChildCommand<Track> {
             return;
         }
 
-        String groupName = args.get(0).toLowerCase();
+        String groupName = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
             sendDetailedUsage(sender, label);
             return;

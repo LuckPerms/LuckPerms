@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.util;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -35,7 +36,7 @@ import java.util.function.Function;
  * @param <E> the enum type
  */
 public class EnumNamer<E extends Enum<E>> {
-    public static final Function<Enum<?>, String> LOWER_CASE_NAME = value -> value.name().toLowerCase();
+    public static final Function<Enum<?>, String> LOWER_CASE_NAME = value -> value.name().toLowerCase(Locale.ROOT);
 
     private final String[] names;
     private final Function<? super E, String> namingFunction;

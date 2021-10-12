@@ -59,6 +59,7 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -254,6 +255,9 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         QueryOptions queryOptions = getQueryOptions(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
         String value = metaData.getPrimaryGroup(MetaCheckEvent.Origin.THIRD_PARTY_API);
+        if (value == null) {
+            return null;
+        }
 
         Group group = getGroup(value);
         return group != null ? groupName(group) : value;
@@ -345,7 +349,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             // remove already accumulated worlds
             context.removeAll(DefaultContextKeys.WORLD_KEY);
             // add the vault world
-            context.add(DefaultContextKeys.WORLD_KEY, world.toLowerCase());
+            context.add(DefaultContextKeys.WORLD_KEY, world.toLowerCase(Locale.ROOT));
         }
 
         // if we're using a special vault server

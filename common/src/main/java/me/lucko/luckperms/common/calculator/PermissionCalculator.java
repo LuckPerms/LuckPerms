@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -85,7 +86,7 @@ public class PermissionCalculator implements Function<String, TristateResult> {
     public TristateResult apply(@NonNull String permission) {
         // convert the permission to lowercase, as all values in the backing map are also lowercase.
         // this allows fast case insensitive lookups
-        permission = permission.toLowerCase();
+        permission = permission.toLowerCase(Locale.ROOT);
 
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter

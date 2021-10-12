@@ -28,10 +28,12 @@ package me.lucko.luckperms.common.model.manager.track;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.manager.AbstractManager;
 
+import java.util.Locale;
+
 public abstract class AbstractTrackManager<T extends Track> extends AbstractManager<String, Track, T> implements TrackManager<T> {
 
     @Override
     protected String sanitizeIdentifier(String s) {
-        return s.toLowerCase();
+        return s.toLowerCase(Locale.ROOT);
     }
 }

@@ -32,6 +32,8 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.command.SendCommandEvent;
 
+import java.util.Locale;
+
 public class SpongePlatformListener {
     private final LPSpongePlugin plugin;
 
@@ -44,7 +46,7 @@ public class SpongePlatformListener {
         CommandSource source = e.getCause().first(CommandSource.class).orElse(null);
         if (source == null) return;
 
-        final String name = e.getCommand().toLowerCase();
+        final String name = e.getCommand().toLowerCase(Locale.ROOT);
         if ((name.equals("op") || name.equals("minecraft:op")) && source.hasPermission("minecraft.command.op") || (name.equals("deop") || name.equals("minecraft:deop")) && source.hasPermission("minecraft.command.deop")) {
             Message.OP_DISABLED_SPONGE.send(this.plugin.getSenderFactory().wrap(source));
         }

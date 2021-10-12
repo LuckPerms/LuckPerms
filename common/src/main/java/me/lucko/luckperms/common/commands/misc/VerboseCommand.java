@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.verbose.VerboseListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class VerboseCommand extends SingleCommand {
     public VerboseCommand() {
@@ -59,7 +60,7 @@ public class VerboseCommand extends SingleCommand {
         }
 
         VerboseHandler verboseHandler = plugin.getVerboseHandler();
-        String mode = args.get(0).toLowerCase();
+        String mode = args.get(0).toLowerCase(Locale.ROOT);
 
         if (mode.equals("command") || mode.equals("cmd")) {
             if (args.size() < 3) {

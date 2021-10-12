@@ -39,6 +39,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -48,7 +49,7 @@ public final class StandardStackElements {
     private StandardStackElements() {}
 
     public static MetaStackElement parseFromString(LuckPermsPlugin plugin, String s) {
-        s = s.toLowerCase();
+        s = s.toLowerCase(Locale.ROOT);
 
         // static
         if (s.equals("highest")) return HIGHEST;

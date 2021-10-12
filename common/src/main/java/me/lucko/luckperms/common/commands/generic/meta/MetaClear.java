@@ -46,6 +46,7 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeType;
 
 import java.util.List;
+import java.util.Locale;
 
 public class MetaClear extends GenericChildCommand {
     public MetaClear() {
@@ -61,7 +62,7 @@ public class MetaClear extends GenericChildCommand {
 
         NodeType<?> type = null;
         if (!args.isEmpty()) {
-            String typeId = args.get(0).toLowerCase();
+            String typeId = args.get(0).toLowerCase(Locale.ROOT);
             if (typeId.equals("any") || typeId.equals("all") || typeId.equals("*")) {
                 type = NodeType.META_OR_CHAT_META;
             }
@@ -104,7 +105,7 @@ public class MetaClear extends GenericChildCommand {
         }
 
         int changed = before - target.normalData().size();
-        Message.META_CLEAR_SUCCESS.send(sender, target, type.name().toLowerCase(), context, changed);
+        Message.META_CLEAR_SUCCESS.send(sender, target, type.name().toLowerCase(Locale.ROOT), context, changed);
 
         LoggedAction.build().source(sender).target(target)
                 .description("meta", "clear", context)

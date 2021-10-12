@@ -72,6 +72,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -173,7 +174,7 @@ public class SqlStorage implements StorageImplementation {
     private void applySchema() throws IOException, SQLException {
         List<String> statements;
 
-        String schemaFileName = "me/lucko/luckperms/schema/" + this.connectionFactory.getImplementationName().toLowerCase() + ".sql";
+        String schemaFileName = "me/lucko/luckperms/schema/" + this.connectionFactory.getImplementationName().toLowerCase(Locale.ROOT) + ".sql";
         try (InputStream is = this.plugin.getBootstrap().getResourceStream(schemaFileName)) {
             if (is == null) {
                 throw new IOException("Couldn't locate schema file for " + this.connectionFactory.getImplementationName());
@@ -375,7 +376,7 @@ public class SqlStorage implements StorageImplementation {
             updateUserPermissions(c, user.getUniqueId(), changes.getAdded(), changes.getRemoved());
             insertPlayerData(c, user.getUniqueId(), new SqlPlayerData(
                     user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME),
-                    user.getUsername().orElse("null").toLowerCase()
+                    user.getUsername().orElse("null").toLowerCase(Locale.ROOT)
             ));
         }
     }
@@ -605,7 +606,7 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public PlayerSaveResult savePlayerData(UUID uniqueId, String username) throws SQLException {
-        username = username.toLowerCase();
+        username = username.toLowerCase(Locale.ROOT);
 
         // find any existing mapping
         String oldUsername = getPlayerName(uniqueId);
@@ -672,7 +673,7 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public UUID getPlayerUniqueId(String username) throws SQLException {
-        username = username.toLowerCase();
+        username = username.toLowerCase(Locale.ROOT);
         try (Connection c = this.connectionFactory.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_UUID_BY_USERNAME))) {
                 ps.setString(1, username);
@@ -907,7 +908,7 @@ public class SqlStorage implements StorageImplementation {
         try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_SELECT_ALL))) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    groups.add(rs.getString("name").toLowerCase());
+                    groups.add(rs.getString("name").toLowerCase(Locale.ROOT));
                 }
             }
         }
@@ -992,7 +993,7 @@ public class SqlStorage implements StorageImplementation {
         try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_SELECT_ALL))) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    tracks.add(rs.getString("name").toLowerCase());
+                    tracks.add(rs.getString("name").toLowerCase(Locale.ROOT));
                 }
             }
         }

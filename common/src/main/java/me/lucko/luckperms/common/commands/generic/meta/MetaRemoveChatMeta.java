@@ -47,6 +47,7 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.ChatMetaType;
 
 import java.util.List;
+import java.util.Locale;
 
 public class MetaRemoveChatMeta extends GenericChildCommand {
 
@@ -100,7 +101,7 @@ public class MetaRemoveChatMeta extends GenericChildCommand {
             Message.BULK_REMOVE_CHATMETA_SUCCESS.send(sender, target, this.type, priority, context);
 
             LoggedAction.build().source(sender).target(target)
-                    .description("meta" , "remove" + this.type.name().toLowerCase(), priority, "*", context)
+                    .description("meta" , "remove" + this.type.name().toLowerCase(Locale.ROOT), priority, "*", context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);
@@ -113,7 +114,7 @@ public class MetaRemoveChatMeta extends GenericChildCommand {
             Message.REMOVE_CHATMETA_SUCCESS.send(sender, target, this.type, meta, priority, context);
 
             LoggedAction.build().source(sender).target(target)
-                    .description("meta" , "remove" + this.type.name().toLowerCase(), priority, meta, context)
+                    .description("meta" , "remove" + this.type.name().toLowerCase(Locale.ROOT), priority, meta, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);

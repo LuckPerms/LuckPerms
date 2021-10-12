@@ -37,6 +37,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -45,7 +46,7 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
     private static final String NODE_MARKER = NODE_KEY + ".";
 
     public static String key(String key, String value) {
-        return NODE_MARKER + Delimiters.escapeCharacters(key).toLowerCase() + AbstractNode.NODE_SEPARATOR + Delimiters.escapeCharacters(value);
+        return NODE_MARKER + Delimiters.escapeCharacters(key).toLowerCase(Locale.ROOT) + AbstractNode.NODE_SEPARATOR + Delimiters.escapeCharacters(value);
     }
 
     public static Builder builder() {
@@ -61,7 +62,7 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
 
     public Meta(String metaKey, String metaValue, boolean value, long expireAt, ImmutableContextSet contexts, Map<NodeMetadataKey<?>, Object> metadata) {
         super(key(metaKey, metaValue), value, expireAt, contexts, metadata);
-        this.metaKey = metaKey.toLowerCase();
+        this.metaKey = metaKey.toLowerCase(Locale.ROOT);
         this.metaValue = metaValue;
     }
 
@@ -81,7 +82,7 @@ public class Meta extends AbstractNode<MetaNode, MetaNode.Builder> implements Me
     }
 
     public static @Nullable Builder parse(String key) {
-        if (!key.toLowerCase().startsWith(NODE_MARKER)) {
+        if (!key.toLowerCase(Locale.ROOT).startsWith(NODE_MARKER)) {
             return null;
         }
 

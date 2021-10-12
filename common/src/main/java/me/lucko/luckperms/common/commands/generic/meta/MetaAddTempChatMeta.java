@@ -50,6 +50,7 @@ import net.luckperms.api.node.ChatMetaType;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 
 public class MetaAddTempChatMeta extends GenericChildCommand {
 
@@ -107,7 +108,7 @@ public class MetaAddTempChatMeta extends GenericChildCommand {
             Message.ADD_TEMP_CHATMETA_SUCCESS.send(sender, target, this.type, meta, priority, duration, context);
 
             LoggedAction.build().source(sender).target(target)
-                    .description("meta" , "addtemp" + this.type.name().toLowerCase(), priority, meta, duration, context)
+                    .description("meta" , "addtemp" + this.type.name().toLowerCase(Locale.ROOT), priority, meta, duration, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);

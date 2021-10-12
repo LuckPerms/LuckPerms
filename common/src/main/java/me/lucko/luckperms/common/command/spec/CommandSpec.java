@@ -31,6 +31,7 @@ import net.kyori.adventure.text.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * An enumeration of the command defintion/usage messages used in the plugin.
@@ -437,7 +438,7 @@ public enum CommandSpec {
     }
 
     public String key() {
-        return name().toLowerCase().replace('_', '-');
+        return name().toLowerCase(Locale.ROOT).replace('_', '-');
     }
 
     private static PartialArgument arg(String id, String name, boolean required) {

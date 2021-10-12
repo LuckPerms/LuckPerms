@@ -45,6 +45,7 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -131,12 +132,12 @@ public class SpongeParentCommand extends Command<Void> {
         }
 
         boolean persistent = true;
-        if (args.get(2).toLowerCase().startsWith("-t")) {
+        if (args.get(2).toLowerCase(Locale.ROOT).startsWith("-t")) {
             persistent = false;
             args.remove(2);
         }
 
-        String type = args.get(2).toLowerCase();
+        String type = args.get(2).toLowerCase(Locale.ROOT);
         if (!type.equals("permission") && !type.equals("parent") && !type.equals("option")) {
             sendDetailedUsage(sender, label);
             return;
@@ -187,7 +188,7 @@ public class SpongeParentCommand extends Command<Void> {
     public void sendDetailedUsage(Sender sender, String label) {
         SpongeCommandUtils.sendPrefixed(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s sponge <collection> <subject> [-transient]", label) + " ...)");
         for (String s : Arrays.asList("Permission", "Parent", "Option")) {
-            List<Command<?>> subs = this.children.get(s.toLowerCase()).stream()
+            List<Command<?>> subs = this.children.get(s.toLowerCase(Locale.ROOT)).stream()
                     .filter(sub -> sub.isAuthorized(sender))
                     .collect(Collectors.toList());
 

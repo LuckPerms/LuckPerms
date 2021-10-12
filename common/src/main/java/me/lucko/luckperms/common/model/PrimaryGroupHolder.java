@@ -32,6 +32,7 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -90,7 +91,7 @@ public interface PrimaryGroupHolder {
             if (value == null || value.isEmpty()) {
                 this.value = null;
             } else {
-                this.value = value.toLowerCase();
+                this.value = value.toLowerCase(Locale.ROOT);
             }
         }
     }

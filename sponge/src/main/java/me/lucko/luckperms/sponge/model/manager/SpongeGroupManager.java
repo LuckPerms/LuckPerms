@@ -55,6 +55,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -132,12 +133,12 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
             throw new IllegalArgumentException("Illegal subject identifier");
         }
 
-        LPSubject present = this.subjectLoadingCache.getIfPresent(identifier.toLowerCase());
+        LPSubject present = this.subjectLoadingCache.getIfPresent(identifier.toLowerCase(Locale.ROOT));
         if (present != null) {
             return CompletableFuture.completedFuture(present);
         }
 
-        return CompletableFuture.supplyAsync(() -> this.subjectLoadingCache.get(identifier.toLowerCase()), this.plugin.getBootstrap().getScheduler().async());
+        return CompletableFuture.supplyAsync(() -> this.subjectLoadingCache.get(identifier.toLowerCase(Locale.ROOT)), this.plugin.getBootstrap().getScheduler().async());
     }
 
     @Override
@@ -146,7 +147,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
             return Optional.empty();
         }
 
-        return Optional.ofNullable(getIfLoaded(identifier.toLowerCase())).map(SpongeGroup::sponge);
+        return Optional.ofNullable(getIfLoaded(identifier.toLowerCase(Locale.ROOT))).map(SpongeGroup::sponge);
     }
 
     @Override
@@ -155,7 +156,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
             return CompletableFuture.completedFuture(false);
         }
 
-        return CompletableFuture.completedFuture(isLoaded(identifier.toLowerCase()));
+        return CompletableFuture.completedFuture(isLoaded(identifier.toLowerCase(Locale.ROOT)));
     }
 
     @Override
@@ -166,7 +167,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
                 if (!DataConstraints.GROUP_NAME_TEST.test(id)) {
                     continue;
                 }
-                subjects.add(loadSubject(id.toLowerCase()).join());
+                subjects.add(loadSubject(id.toLowerCase(Locale.ROOT)).join());
             }
 
             return subjects.build();

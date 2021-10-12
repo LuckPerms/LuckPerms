@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -93,7 +94,7 @@ public class PermissionRegistry implements AutoCloseable {
     }
 
     private void doInsert(String permission) {
-        permission = permission.toLowerCase();
+        permission = permission.toLowerCase(Locale.ROOT);
 
         // split the permission up into parts
         Iterable<String> parts = DOT_SPLIT.split(permission);

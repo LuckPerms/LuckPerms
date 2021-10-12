@@ -30,6 +30,7 @@ import net.luckperms.api.query.meta.MetaValueSelector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class SimpleMetaValueSelector implements MetaValueSelector {
@@ -81,7 +82,7 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
 
         public static Strategy parse(String s) {
             try {
-                return Strategy.valueOf(s.replace('-', '_').toUpperCase());
+                return Strategy.valueOf(s.replace('-', '_').toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
                 return null;
             }

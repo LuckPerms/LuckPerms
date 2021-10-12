@@ -51,6 +51,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.Predicates;
 
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -90,13 +91,13 @@ public class BulkUpdateCommand extends SingleCommand {
         bulkUpdateBuilder.trackStatistics(!args.remove("-s"));
 
         try {
-            bulkUpdateBuilder.dataType(DataType.valueOf(args.remove(0).toUpperCase()));
+            bulkUpdateBuilder.dataType(DataType.valueOf(args.remove(0).toUpperCase(Locale.ROOT)));
         } catch (IllegalArgumentException e) {
             Message.BULK_UPDATE_INVALID_DATA_TYPE.send(sender);
             return;
         }
 
-        String action = args.remove(0).toLowerCase();
+        String action = args.remove(0).toLowerCase(Locale.ROOT);
         switch (action) {
             case "delete":
                 bulkUpdateBuilder.action(DeleteAction.create());

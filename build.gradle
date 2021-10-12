@@ -1,19 +1,13 @@
-buildscript {
-    repositories {
-        maven { url 'https://plugins.gradle.org/m2' }
-    }
-
-    dependencies {
-        classpath 'gradle.plugin.net.minecrell:licenser:0.4.1'
-    }
+plugins {
+    id 'org.cadixdev.licenser' version '0.6.1' apply false
 }
 
 defaultTasks 'licenseFormat', 'build'
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven'
-    apply plugin: 'net.minecrell.licenser'
+    apply plugin: 'maven-publish'
+    apply plugin: 'org.cadixdev.licenser'
 
     group = 'me.lucko.luckperms'
     version = '5.3-SNAPSHOT'

@@ -27,7 +27,7 @@ package me.lucko.luckperms.velocity.context;
 
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.player.ServerConnectedEvent;
+import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -71,7 +71,7 @@ public class VelocityPlayerCalculator implements ContextCalculator<Player> {
     }
 
     @Subscribe(order = PostOrder.FIRST)
-    public void onServerConnect(ServerConnectedEvent e) {
+    public void onServerConnect(ServerPostConnectEvent e) {
         this.plugin.getContextManager().signalContextUpdate(e.getPlayer());
     }
 }

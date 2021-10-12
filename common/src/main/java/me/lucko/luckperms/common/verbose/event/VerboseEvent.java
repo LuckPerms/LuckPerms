@@ -37,6 +37,7 @@ import net.luckperms.api.context.Context;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -113,7 +114,7 @@ public abstract class VerboseEvent implements VariableEvaluator {
                             }
                         })
                 )
-                .add("queryMode", this.checkQueryOptions.mode().name().toLowerCase())
+                .add("queryMode", this.checkQueryOptions.mode().name().toLowerCase(Locale.ROOT))
                 .consume(obj -> {
                     if (this.checkQueryOptions.mode() == QueryMode.CONTEXTUAL) {
                         obj.add("context", new JArray()

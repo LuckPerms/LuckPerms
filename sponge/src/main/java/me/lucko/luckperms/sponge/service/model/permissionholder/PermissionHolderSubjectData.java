@@ -61,6 +61,7 @@ import org.spongepowered.api.service.permission.SubjectData;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -297,7 +298,7 @@ public class PermissionHolderSubjectData implements LPSubjectData {
         Node node;
         if (key.equalsIgnoreCase(Prefix.NODE_KEY) || key.equalsIgnoreCase(Suffix.NODE_KEY)) {
             // special handling.
-            ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
+            ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase(Locale.ROOT));
 
             // remove all prefixes/suffixes from the user
             this.holder.removeIf(this.type, contexts, type.nodeType()::matches, false);

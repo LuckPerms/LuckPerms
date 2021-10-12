@@ -62,8 +62,11 @@ import java.util.concurrent.CountDownLatch;
 public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedServerModInitializer {
 
     private static final String MODID = "luckperms";
-    private static final ModContainer MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MODID)
-            .orElseThrow(() -> new RuntimeException("Could not get the LuckPerms mod container."));
+
+    /**
+     * The mod container
+     */
+    private final ModContainer modContainer;
 
     /**
      * The plugin logger
@@ -100,6 +103,8 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
     private MinecraftServer server;
     
     public LPFabricBootstrap() {
+        this.modContainer = FabricLoader.getInstance().getModContainer(MODID)
+                .orElseThrow(() -> new RuntimeException("Could not get the LuckPerms mod container."));
         this.logger = new Log4jPluginLogger(LogManager.getLogger(MODID));
         this.schedulerAdapter = new FabricSchedulerAdapter(this);
         this.classPathAppender = new FabricClassPathAppender();
@@ -171,7 +176,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
 
     @Override
     public String getVersion() {
-        return MOD_CONTAINER.getMetadata().getVersion().getFriendlyString();
+        return this.modContainer.getMetadata().getVersion().getFriendlyString();
     }
 
     @Override
@@ -217,7 +222,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
     @Override
     public InputStream getResourceStream(String path) {
         try {
-            return Files.newInputStream(LPFabricBootstrap.MOD_CONTAINER.getPath(path));
+            return Files.newInputStream(this.modContainer.getPath(path));
         } catch (IOException e) {
             return null;
         }
@@ -230,13 +235,13 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        return getServer().map(MinecraftServer::getUserCache).map(c -> c.findByName(username)).map(GameProfile::getId);
+        return getServer().map(MinecraftServer::getUserCache).flatMap(c -> c.findByName(username)).map(GameProfile::getId);
 
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        return getServer().map(MinecraftServer::getUserCache).map(c -> c.getByUuid(uniqueId)).map(GameProfile::getName);
+        return getServer().map(MinecraftServer::getUserCache).flatMap(c -> c.getByUuid(uniqueId)).map(GameProfile::getName);
     }
 
     @Override

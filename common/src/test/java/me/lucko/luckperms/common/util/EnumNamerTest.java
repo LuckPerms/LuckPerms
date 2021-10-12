@@ -29,6 +29,8 @@ import com.google.common.collect.ImmutableMap;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EnumNamerTest {
@@ -38,7 +40,7 @@ public class EnumNamerTest {
         EnumNamer<TestEnum> namer = new EnumNamer<>(
                 TestEnum.class,
                 ImmutableMap.of(TestEnum.THING, "hi"),
-                v -> v.name().toLowerCase().replace('_', '-')
+                v -> v.name().toLowerCase(Locale.ROOT).replace('_', '-')
         );
 
         assertEquals("test", namer.name(TestEnum.TEST));

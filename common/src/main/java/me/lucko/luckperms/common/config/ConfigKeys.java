@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -86,9 +87,9 @@ public final class ConfigKeys {
      * The name of the server
      */
     public static final ConfigKey<String> SERVER = key(c -> {
-        String server = c.getString("server", "global").toLowerCase();
+        String server = c.getString("server", "global").toLowerCase(Locale.ROOT);
         if (server.equals("load-from-system-property")) {
-            server = System.getProperty("luckperms.server", "global").toLowerCase();
+            server = System.getProperty("luckperms.server", "global").toLowerCase(Locale.ROOT);
         }
         return server;
     });
@@ -191,7 +192,7 @@ public final class ConfigKeys {
      */
     public static final ConfigKey<TemporaryNodeMergeStrategy> TEMPORARY_ADD_BEHAVIOUR = key(c -> {
         String value = c.getString("temporary-add-behaviour", "deny");
-        switch (value.toLowerCase()) {
+        switch (value.toLowerCase(Locale.ROOT)) {
             case "accumulate":
                 return TemporaryNodeMergeStrategy.ADD_NEW_DURATION_TO_EXISTING;
             case "replace":
@@ -205,7 +206,7 @@ public final class ConfigKeys {
      * How primary groups should be calculated.
      */
     public static final ConfigKey<String> PRIMARY_GROUP_CALCULATION_METHOD = notReloadable(key(c -> {
-        String option = c.getString("primary-group-calculation", "stored").toLowerCase();
+        String option = c.getString("primary-group-calculation", "stored").toLowerCase(Locale.ROOT);
         if (!option.equals("stored") && !option.equals("parents-by-weight") && !option.equals("all-parents-by-weight")) {
             option = "stored";
         }
@@ -318,7 +319,7 @@ public final class ConfigKeys {
      */
     public static final ConfigKey<TraversalAlgorithm> INHERITANCE_TRAVERSAL_ALGORITHM = key(c -> {
         String value = c.getString("inheritance-traversal-algorithm", "depth-first-pre-order");
-        switch (value.toLowerCase()) {
+        switch (value.toLowerCase(Locale.ROOT)) {
             case "breadth-first":
                 return TraversalAlgorithm.BREADTH_FIRST;
             case "depth-first-post-order":
@@ -355,7 +356,7 @@ public final class ConfigKeys {
      */
     public static final ConfigKey<Map<String, Integer>> GROUP_WEIGHTS = key(c -> {
         return c.getStringMap("group-weight", ImmutableMap.of()).entrySet().stream().collect(ImmutableCollectors.toMap(
-                e -> e.getKey().toLowerCase(),
+                e -> e.getKey().toLowerCase(Locale.ROOT),
                 e -> {
                     try {
                         return Integer.parseInt(e.getValue());
@@ -378,7 +379,7 @@ public final class ConfigKeys {
         String middleSpacer = l.getString("meta-formatting.prefix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.prefix.end-spacer", "");
         DuplicateRemovalFunction duplicateRemovalFunction;
-        switch (l.getString("meta-formatting.prefix.duplicates", "").toLowerCase()) {
+        switch (l.getString("meta-formatting.prefix.duplicates", "").toLowerCase(Locale.ROOT)) {
             case "first-only":
                 duplicateRemovalFunction = DuplicateRemovalFunction.FIRST_ONLY;
                 break;
@@ -405,7 +406,7 @@ public final class ConfigKeys {
         String middleSpacer = l.getString("meta-formatting.suffix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.suffix.end-spacer", "");
         DuplicateRemovalFunction duplicateRemovalFunction;
-        switch (l.getString("meta-formatting.prefix.duplicates", "").toLowerCase()) {
+        switch (l.getString("meta-formatting.prefix.duplicates", "").toLowerCase(Locale.ROOT)) {
             case "first-only":
                 duplicateRemovalFunction = DuplicateRemovalFunction.FIRST_ONLY;
                 break;
@@ -493,7 +494,7 @@ public final class ConfigKeys {
     public static final ConfigKey<String> VAULT_SERVER = key(c -> {
         // default to true for backwards compatibility
         if (USE_VAULT_SERVER.get(c)) {
-            return c.getString("vault-server", "global").toLowerCase();
+            return c.getString("vault-server", "global").toLowerCase(Locale.ROOT);
         } else {
             return SERVER.get(c);
         }
@@ -520,8 +521,8 @@ public final class ConfigKeys {
     public static final ConfigKey<WorldNameRewriter> WORLD_REWRITES = key(c -> {
         return WorldNameRewriter.of(c.getStringMap("world-rewrite", ImmutableMap.of()).entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> e.getKey().toLowerCase(),
-                        e -> e.getValue().toLowerCase()
+                        e -> e.getKey().toLowerCase(Locale.ROOT),
+                        e -> e.getValue().toLowerCase(Locale.ROOT)
                 )));
     });
 

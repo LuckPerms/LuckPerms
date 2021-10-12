@@ -47,6 +47,7 @@ import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.track.PromotionResult;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -77,7 +78,7 @@ public class UserPromote extends ChildCommand<User> {
             }
         }
 
-        final String trackName = args.get(0).toLowerCase();
+        final String trackName = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return;

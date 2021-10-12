@@ -48,6 +48,7 @@ import org.spongepowered.api.service.permission.SubjectData;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -160,10 +161,10 @@ public class CalculatedSubjectData implements LPSubjectData {
         boolean b;
         if (value == Tristate.UNDEFINED) {
             Map<String, Boolean> perms = this.permissions.get(contexts);
-            b = perms != null && perms.remove(permission.toLowerCase()) != null;
+            b = perms != null && perms.remove(permission.toLowerCase(Locale.ROOT)) != null;
         } else {
             Map<String, Boolean> perms = this.permissions.computeIfAbsent(contexts, c -> new ConcurrentHashMap<>());
-            b = !Objects.equals(perms.put(permission.toLowerCase(), value.asBoolean()), value.asBoolean());
+            b = !Objects.equals(perms.put(permission.toLowerCase(Locale.ROOT), value.asBoolean()), value.asBoolean());
         }
         if (b) {
             this.service.invalidateAllCaches();
@@ -312,7 +313,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> setOption(ImmutableContextSet contexts, String key, String value) {
         Map<String, String> options = this.options.computeIfAbsent(contexts, c -> new ConcurrentHashMap<>());
-        boolean b = !stringEquals(options.put(key.toLowerCase(), value), value);
+        boolean b = !stringEquals(options.put(key.toLowerCase(Locale.ROOT), value), value);
         if (b) {
             this.service.invalidateAllCaches();
         }
@@ -322,7 +323,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> unsetOption(ImmutableContextSet contexts, String key) {
         Map<String, String> options = this.options.get(contexts);
-        boolean b = options != null && options.remove(key.toLowerCase()) != null;
+        boolean b = options != null && options.remove(key.toLowerCase(Locale.ROOT)) != null;
         if (b) {
             this.service.invalidateAllCaches();
         }

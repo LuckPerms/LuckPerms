@@ -44,6 +44,7 @@ import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.DeletionCause;
 
 import java.util.List;
+import java.util.Locale;
 
 public class DeleteTrack extends SingleCommand {
     public DeleteTrack() {
@@ -57,7 +58,7 @@ public class DeleteTrack extends SingleCommand {
             return;
         }
 
-        String trackName = args.get(0).toLowerCase();
+        String trackName = args.get(0).toLowerCase(Locale.ROOT);
         Track track = plugin.getStorage().loadTrack(trackName).join().orElse(null);
         if (track == null) {
             Message.TRACK_LOAD_ERROR.send(sender);

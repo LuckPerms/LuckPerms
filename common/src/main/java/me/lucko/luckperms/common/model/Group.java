@@ -40,6 +40,7 @@ import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -68,7 +69,7 @@ public class Group extends PermissionHolder {
 
     public Group(String name, LuckPermsPlugin plugin) {
         super(plugin);
-        this.name = name.toLowerCase();
+        this.name = name.toLowerCase(Locale.ROOT);
 
         this.cachedData = new GroupCachedDataManager(this);
         getPlugin().getEventDispatcher().dispatchGroupCacheLoad(this, this.cachedData);

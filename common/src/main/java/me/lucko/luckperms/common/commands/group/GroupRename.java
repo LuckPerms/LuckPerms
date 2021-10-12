@@ -55,6 +55,8 @@ import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.data.DataType;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 public class GroupRename extends ChildCommand<Group> {
     public GroupRename() {
@@ -68,7 +70,7 @@ public class GroupRename extends ChildCommand<Group> {
             return;
         }
 
-        String newGroupName = args.get(0).toLowerCase();
+        String newGroupName = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender, newGroupName);
             return;
@@ -104,24 +106,27 @@ public class GroupRename extends ChildCommand<Group> {
                 .description("rename", newGroup.getName())
                 .build().submit(plugin, sender);
 
-        if (!args.remove("--update-parent-lists")) {
-            StorageAssistant.save(newGroup, sender, plugin);
-        } else {
-            // the group is now renamed, proceed to update its representing inheritance nodes
-            BulkUpdate operation = BulkUpdateBuilder.create()
-                    .trackStatistics(false)
-                    .dataType(me.lucko.luckperms.common.bulkupdate.DataType.ALL)
-                    .action(UpdateAction.of(QueryField.PERMISSION, Inheritance.key(newGroupName)))
-                    .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.EQUAL, Inheritance.key(target.getName()))))
-                    .build();
-            plugin.getStorage().applyBulkUpdate(operation).whenCompleteAsync((v, ex) -> {
-                plugin.getSyncTaskBuffer().requestDirectly();
-                if (ex != null) {
-                    ex.printStackTrace();
-                }
-            }, plugin.getBootstrap().getScheduler().async())
-                    .thenRunAsync(() -> StorageAssistant.save(newGroup, sender, plugin));
-        }
+        StorageAssistant.save(newGroup, sender, plugin)
+                .thenCompose((v) -> {
+                    if (args.remove("--update-parent-lists")) {
+                        // the group is now renamed, proceed to update its representing inheritance nodes
+                        BulkUpdate operation = BulkUpdateBuilder.create()
+                                .trackStatistics(false)
+                                .dataType(me.lucko.luckperms.common.bulkupdate.DataType.ALL)
+                                .action(UpdateAction.of(QueryField.PERMISSION, Inheritance.key(newGroupName)))
+                                .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.EQUAL, Inheritance.key(target.getName()))))
+                                .build();
+                        return plugin.getStorage().applyBulkUpdate(operation);
+                    } else {
+                        return CompletableFuture.completedFuture(v);
+                    }
+        }).whenCompleteAsync((v, ex) -> {
+            if (ex != null) {
+                ex.printStackTrace();
+            }
+
+            plugin.getSyncTaskBuffer().requestDirectly();
+        }, plugin.getBootstrap().getScheduler().async());
     }
 
     @Override

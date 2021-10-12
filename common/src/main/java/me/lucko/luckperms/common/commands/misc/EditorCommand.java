@@ -45,6 +45,7 @@ import net.luckperms.api.node.Node;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class EditorCommand extends SingleCommand {
     public EditorCommand() {
@@ -60,7 +61,7 @@ public class EditorCommand extends SingleCommand {
         String arg0 = args.getOrDefault(0, null);
         if (arg0 != null) {
             try {
-                type = Type.valueOf(arg0.toUpperCase());
+                type = Type.valueOf(arg0.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
                 // assume they meant it as a filter
                 filter = arg0;

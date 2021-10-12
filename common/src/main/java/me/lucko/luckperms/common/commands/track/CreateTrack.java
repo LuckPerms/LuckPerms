@@ -40,6 +40,8 @@ import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
 
+import java.util.Locale;
+
 public class CreateTrack extends SingleCommand {
     public CreateTrack() {
         super(CommandSpec.CREATE_TRACK, "CreateTrack", CommandPermission.CREATE_TRACK, Predicates.not(1));
@@ -52,7 +54,7 @@ public class CreateTrack extends SingleCommand {
             return;
         }
 
-        String trackName = args.get(0).toLowerCase();
+        String trackName = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return;

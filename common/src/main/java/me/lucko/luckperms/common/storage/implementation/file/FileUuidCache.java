@@ -46,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -200,11 +201,11 @@ public class FileUuidCache {
             // existing might be null
             if (!value.equalsIgnoreCase(existing)) {
                 if (existing != null) {
-                    this.reverse.remove(existing.toLowerCase(), key);
+                    this.reverse.remove(existing.toLowerCase(Locale.ROOT), key);
                 }
             }
 
-            this.reverse.put(value.toLowerCase(), key);
+            this.reverse.put(value.toLowerCase(Locale.ROOT), key);
             return existing;
         }
 
@@ -213,7 +214,7 @@ public class FileUuidCache {
             UUID key = (UUID) k;
             String username = super.remove(key);
             if (username != null) {
-                this.reverse.remove(username.toLowerCase(), key);
+                this.reverse.remove(username.toLowerCase(Locale.ROOT), key);
             }
             return username;
         }
@@ -223,7 +224,7 @@ public class FileUuidCache {
         }
 
         public Set<UUID> lookupUuid(String name) {
-            return this.reverse.get(name.toLowerCase());
+            return this.reverse.get(name.toLowerCase(Locale.ROOT));
         }
     }
 

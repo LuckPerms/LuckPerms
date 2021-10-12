@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.SortedSet;
@@ -363,7 +364,7 @@ public abstract class PermissionHolder {
     private static void processExportedPermissions(Map<String, Boolean> accumulator, List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
         for (Node node : entries) {
             if (convertToLowercase) {
-                accumulator.putIfAbsent(node.getKey().toLowerCase(), node.getValue());
+                accumulator.putIfAbsent(node.getKey().toLowerCase(Locale.ROOT), node.getValue());
             } else {
                 accumulator.putIfAbsent(node.getKey(), node.getValue());
             }
@@ -374,7 +375,7 @@ public abstract class PermissionHolder {
                 Collection<String> shorthand = node.resolveShorthand();
                 for (String s : shorthand) {
                     if (convertToLowercase) {
-                        accumulator.putIfAbsent(s.toLowerCase(), node.getValue());
+                        accumulator.putIfAbsent(s.toLowerCase(Locale.ROOT), node.getValue());
                     } else {
                         accumulator.putIfAbsent(s, node.getValue());
                     }

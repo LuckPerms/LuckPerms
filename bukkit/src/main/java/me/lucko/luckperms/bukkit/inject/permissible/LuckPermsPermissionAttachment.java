@@ -46,6 +46,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -239,7 +240,7 @@ public class LuckPermsPermissionAttachment extends PermissionAttachment {
         Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
-        String permission = name.toLowerCase();
+        String permission = name.toLowerCase(Locale.ROOT);
 
         Boolean previous = this.perms.put(permission, value);
         if (previous != null && previous == value) {
@@ -264,7 +265,7 @@ public class LuckPermsPermissionAttachment extends PermissionAttachment {
         Objects.requireNonNull(name, "name is null");
         Preconditions.checkArgument(!name.isEmpty(), "name is empty");
 
-        String permission = name.toLowerCase();
+        String permission = name.toLowerCase(Locale.ROOT);
 
         Boolean previous = this.perms.remove(permission);
         if (previous == null) {

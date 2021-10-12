@@ -41,6 +41,7 @@ import cn.nukkit.plugin.PluginManager;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -180,7 +181,7 @@ public final class LuckPermsPermissionMap extends ForwardingMap<String, Permissi
                 continue;
             }
 
-            String key = e.getKey().toLowerCase();
+            String key = e.getKey().toLowerCase(Locale.ROOT);
 
             if (accumulator.containsKey(key)) {
                 continue; // Prevent infinite loops

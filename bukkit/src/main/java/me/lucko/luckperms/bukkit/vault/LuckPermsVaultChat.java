@@ -49,6 +49,7 @@ import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.milkbowl.vault.chat.Chat;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -254,7 +255,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
 
     private void setMeta(PermissionHolder holder, String key, Object value, String world) {
         if (key.equalsIgnoreCase(Prefix.NODE_KEY) || key.equalsIgnoreCase(Suffix.NODE_KEY)) {
-            setChatMeta(holder, ChatMetaType.valueOf(key.toUpperCase()), value == null ? null : value.toString(), world);
+            setChatMeta(holder, ChatMetaType.valueOf(key.toUpperCase(Locale.ROOT)), value == null ? null : value.toString(), world);
             return;
         }
 
@@ -277,7 +278,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     private QueryOptions createQueryOptionsForWorldSet(String world) {
         ImmutableContextSet.Builder context = new ImmutableContextSetImpl.BuilderImpl();
         if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
-            context.add(DefaultContextKeys.WORLD_KEY, world.toLowerCase());
+            context.add(DefaultContextKeys.WORLD_KEY, world.toLowerCase(Locale.ROOT));
         }
         context.add(DefaultContextKeys.SERVER_KEY, this.vaultPermission.getVaultServer());
 

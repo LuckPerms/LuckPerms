@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.util.Predicates;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -96,7 +97,7 @@ public class GenericParentCommand<T extends PermissionHolder> extends ChildComma
         return TabCompleter.create()
                 .at(0, CompletionSupplier.startsWith(() -> this.children.stream()
                         .filter(s -> s.isAuthorized(sender, this.type))
-                        .map(s -> s.getName().toLowerCase())
+                        .map(s -> s.getName().toLowerCase(Locale.ROOT))
                 ))
                 .from(1, partial -> this.children.stream()
                         .filter(s -> s.isAuthorized(sender, this.type))
@@ -121,10 +122,10 @@ public class GenericParentCommand<T extends PermissionHolder> extends ChildComma
         if (!subs.isEmpty()) {
             switch (this.type) {
                 case USER:
-                    Message.MAIN_COMMAND_USAGE_HEADER.send(sender, getName(), String.format("/%s user <user> " + getName().toLowerCase(), label));
+                    Message.MAIN_COMMAND_USAGE_HEADER.send(sender, getName(), String.format("/%s user <user> " + getName().toLowerCase(Locale.ROOT), label));
                     break;
                 case GROUP:
-                    Message.MAIN_COMMAND_USAGE_HEADER.send(sender, getName(), String.format("/%s group <group> " + getName().toLowerCase(), label));
+                    Message.MAIN_COMMAND_USAGE_HEADER.send(sender, getName(), String.format("/%s group <group> " + getName().toLowerCase(Locale.ROOT), label));
                     break;
                 default:
                     throw new AssertionError(this.type);

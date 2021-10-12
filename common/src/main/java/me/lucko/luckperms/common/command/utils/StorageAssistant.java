@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Utility methods for saving users, groups and tracks.
@@ -88,40 +89,28 @@ public final class StorageAssistant {
         }
     }
 
-    public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
+    public static CompletableFuture<Void> save(Group group, Sender sender, LuckPermsPlugin plugin) {
         try {
             plugin.getStorage().saveGroup(group).get();
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst saving group", e);
             Message.GROUP_SAVE_ERROR.send(sender, group);
-            return;
+            return failedFuture(e);
         }
 
-        plugin.getGroupManager().invalidateAllGroupCaches();
-        plugin.getUserManager().invalidateAllUserCaches();
-
-        Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
-        if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-            messagingService.get().getUpdateBuffer().request();
-        }
+        return invalidateCachesAndPushUpdates(plugin);
     }
 
-    public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
+    public static CompletableFuture<Void> save(Track track, Sender sender, LuckPermsPlugin plugin) {
         try {
             plugin.getStorage().saveTrack(track).get();
         } catch (Exception e) {
             plugin.getLogger().warn("Error whilst saving track", e);
             Message.TRACK_SAVE_ERROR.send(sender, track.getName());
-            return;
+            return failedFuture(e);
         }
 
-        plugin.getGroupManager().invalidateAllGroupCaches();
-        plugin.getUserManager().invalidateAllUserCaches();
-
-        Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
-        if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-            messagingService.get().getUpdateBuffer().request();
-        }
+        return invalidateCachesAndPushUpdates(plugin);
     }
 
     public static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {
@@ -136,4 +125,21 @@ public final class StorageAssistant {
         }
     }
 
+    public static CompletableFuture<Void> invalidateCachesAndPushUpdates(LuckPermsPlugin plugin) {
+        plugin.getGroupManager().invalidateAllGroupCaches();
+        plugin.getUserManager().invalidateAllUserCaches();
+
+        Optional<InternalMessagingService> messagingService = plugin.getMessagingService();
+        if (messagingService.isPresent() && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+            return messagingService.get().getUpdateBuffer().request();
+        } else {
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    private static <T> CompletableFuture<T> failedFuture(Throwable ex) {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        future.completeExceptionally(ex);
+        return future;
+    }
 }

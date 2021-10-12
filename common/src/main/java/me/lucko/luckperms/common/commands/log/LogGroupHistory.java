@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
 import java.util.List;
+import java.util.Locale;
 
 public class LogGroupHistory extends ChildCommand<Log> {
     private static final int ENTRIES_PER_PAGE = 10;
@@ -51,7 +52,7 @@ public class LogGroupHistory extends ChildCommand<Log> {
 
     @Override
     public void execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
-        String group = args.get(0).toLowerCase();
+        String group = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.GROUP_NAME_TEST.test(group)) {
             Message.GROUP_INVALID_ENTRY.send(sender, group);
             return;

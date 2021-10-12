@@ -63,17 +63,20 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
         return internal == null ? null : internal.getApiProxy();
     }
 
+    private net.luckperms.api.model.user.User proxyAndRegisterUsage(User internal) {
+        if (internal != null) {
+            this.plugin.getUserManager().getHouseKeeper().registerApiUsage(internal.getUniqueId());
+        }
+        return proxy(internal);
+    }
+
     @Override
     public @NonNull CompletableFuture<net.luckperms.api.model.user.User> loadUser(@NonNull UUID uniqueId, @Nullable String username) {
         Objects.requireNonNull(uniqueId, "uuid");
         ApiUtils.checkUsername(username, this.plugin);
 
-        if (this.plugin.getUserManager().getIfLoaded(uniqueId) == null) {
-            this.plugin.getUserManager().getHouseKeeper().registerApiUsage(uniqueId);
-        }
-
         return this.plugin.getStorage().loadUser(uniqueId, username)
-                .thenApply(this::proxy);
+                .thenApply(this::proxyAndRegisterUsage);
     }
 
     @Override
@@ -154,13 +157,13 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     @Override
     public net.luckperms.api.model.user.User getUser(@NonNull UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uuid");
-        return proxy(this.handle.getIfLoaded(uniqueId));
+        return proxyAndRegisterUsage(this.handle.getIfLoaded(uniqueId));
     }
 
     @Override
     public net.luckperms.api.model.user.User getUser(@NonNull String username) {
         Objects.requireNonNull(username, "name");
-        return proxy(this.handle.getByUsername(username));
+        return proxyAndRegisterUsage(this.handle.getByUsername(username));
     }
 
     @Override

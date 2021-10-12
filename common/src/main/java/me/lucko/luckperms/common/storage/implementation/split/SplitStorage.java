@@ -46,6 +46,7 @@ import net.luckperms.api.node.Node;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -114,7 +115,7 @@ public class SplitStorage implements StorageImplementation {
         meta.put(
                 Component.translatable("luckperms.command.info.storage.meta.split-types-key"),
                 Message.formatStringList(this.types.entrySet().stream()
-                        .map(e -> e.getKey().toString().toLowerCase() + "->" + e.getValue().getName().toLowerCase())
+                        .map(e -> e.getKey().toString().toLowerCase(Locale.ROOT) + "->" + e.getValue().getName().toLowerCase(Locale.ROOT))
                         .collect(Collectors.toList()))
         );
         for (StorageImplementation backing : this.implementations.values()) {

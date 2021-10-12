@@ -44,6 +44,7 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -85,12 +86,12 @@ public final class PermissionServiceProxy implements PermissionService, ProxiedS
 
     @Override
     public @NonNull Optional<SubjectCollection> getCollection(String s) {
-        return Optional.ofNullable(this.handle.getLoadedCollections().get(s.toLowerCase())).map(LPSubjectCollection::sponge);
+        return Optional.ofNullable(this.handle.getLoadedCollections().get(s.toLowerCase(Locale.ROOT))).map(LPSubjectCollection::sponge);
     }
 
     @Override
     public CompletableFuture<Boolean> hasCollection(String s) {
-        return CompletableFuture.completedFuture(this.handle.getLoadedCollections().containsKey(s.toLowerCase()));
+        return CompletableFuture.completedFuture(this.handle.getLoadedCollections().containsKey(s.toLowerCase(Locale.ROOT)));
     }
 
     @Override
@@ -113,7 +114,7 @@ public final class PermissionServiceProxy implements PermissionService, ProxiedS
         Objects.requireNonNull(subjectIdentifier, "subjectIdentifier");
 
         // test the identifiers
-        String collection = collectionIdentifier.toLowerCase();
+        String collection = collectionIdentifier.toLowerCase(Locale.ROOT);
         if (collection.equals("user") && !this.handle.getUserSubjects().getIdentifierValidityPredicate().test(subjectIdentifier)) {
             throw new IllegalArgumentException("Subject identifier '" + subjectIdentifier + "' does not pass the validity predicate for the user subject collection");
         } else if (collection.equals("group") && !this.handle.getGroupSubjects().getIdentifierValidityPredicate().test(subjectIdentifier)) {

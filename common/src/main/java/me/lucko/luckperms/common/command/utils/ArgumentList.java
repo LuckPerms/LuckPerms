@@ -47,6 +47,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -101,7 +102,7 @@ public class ArgumentList extends ForwardingList<String> {
     }
 
     public String getLowercase(int index, Predicate<? super String> test) throws ArgumentException.DetailedUsage {
-        String arg = get(index).toLowerCase();
+        String arg = get(index).toLowerCase(Locale.ROOT);
         if (!test.test(arg)) {
             throw new ArgumentException.DetailedUsage();
         }
@@ -188,7 +189,7 @@ public class ArgumentList extends ForwardingList<String> {
     }
 
     private static TemporaryNodeMergeStrategy parseTemporaryModifier(String s) {
-        switch (s.toLowerCase()) {
+        switch (s.toLowerCase(Locale.ROOT)) {
             case "accumulate":
                 return TemporaryNodeMergeStrategy.ADD_NEW_DURATION_TO_EXISTING;
             case "replace":

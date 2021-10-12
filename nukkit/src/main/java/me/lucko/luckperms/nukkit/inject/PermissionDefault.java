@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import cn.nukkit.permission.Permission;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -84,7 +85,7 @@ public enum PermissionDefault {
      * @return Specified value, or null if not found
      */
     public static @Nullable PermissionDefault getByName(String name) {
-        return LOOKUP.get(name.toLowerCase().replaceAll("[^a-z!]", ""));
+        return LOOKUP.get(name.toLowerCase(Locale.ROOT).replaceAll("[^a-z!]", ""));
     }
 
     public static @Nullable PermissionDefault fromPermission(@Nullable Permission permission) {

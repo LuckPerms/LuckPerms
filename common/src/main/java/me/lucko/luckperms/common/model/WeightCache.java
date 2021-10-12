@@ -34,6 +34,7 @@ import net.luckperms.api.node.types.WeightNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.OptionalInt;
 
@@ -62,7 +63,7 @@ public class WeightCache extends Cache<OptionalInt> {
 
         if (!seen) {
             Map<String, Integer> configWeights = this.group.getPlugin().getConfiguration().get(ConfigKeys.GROUP_WEIGHTS);
-            Integer value = configWeights.get(this.group.getObjectName().toLowerCase());
+            Integer value = configWeights.get(this.group.getObjectName().toLowerCase(Locale.ROOT));
             if (value != null) {
                 seen = true;
                 weight = value;
