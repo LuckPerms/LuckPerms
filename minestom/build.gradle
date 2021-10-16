@@ -13,15 +13,14 @@ repositories {
 
 
 dependencies {
-    compile project(':common')
+    implementation project(':common')
 
-    compileOnly 'com.github.minestom:Minestom:2fdfce703d'
+    compileOnly 'com.github.minestom:Minestom:0f4698bed7'
 }
 
 processResources {
-    from(sourceSets.main.resources.srcDirs) {
+    filesMatching("extension.json") {
         expand 'pluginVersion': project.ext.fullVersion
-        include 'extension.json'
     }
 }
 
