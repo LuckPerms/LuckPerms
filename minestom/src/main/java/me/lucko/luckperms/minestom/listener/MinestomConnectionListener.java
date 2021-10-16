@@ -50,8 +50,8 @@ public class MinestomConnectionListener extends AbstractConnectionListener {
     public void registerListeners() {
         GlobalEventHandler eventManager = MinecraftServer.getGlobalEventHandler();
 
-        eventManager.addEventCallback(AsyncPlayerPreLoginEvent.class, (this::asyncPreLoginHandler));
-        eventManager.addEventCallback(PlayerLoginEvent.class, (this::loginEventHandler));
+        eventManager.addListener(AsyncPlayerPreLoginEvent.class, (this::asyncPreLoginHandler));
+        eventManager.addListener(PlayerLoginEvent.class, (this::loginEventHandler));
     }
 
     private void asyncPreLoginHandler(AsyncPlayerPreLoginEvent event) {

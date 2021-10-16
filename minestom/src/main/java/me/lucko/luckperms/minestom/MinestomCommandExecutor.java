@@ -25,11 +25,19 @@
 
 package me.lucko.luckperms.minestom;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 import me.lucko.luckperms.common.command.CommandManager;
+import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
+import me.lucko.luckperms.common.sender.Sender;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.SimpleCommand;
+import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,23 +60,34 @@ public class MinestomCommandExecutor extends CommandManager {
         MinecraftServer.getCommandManager().unregister(this.command);
     }
 
-    private static class LuckPermsCommand extends SimpleCommand {
+    private class LuckPermsCommand extends Command {
         private final MinestomCommandExecutor commandExecutor;
 
         public LuckPermsCommand(@NotNull MinestomCommandExecutor commandExecutor) {
             super("luckperms", "lp", "perm", "perms", "permission", "permissions");
             this.commandExecutor = commandExecutor;
+
+            final var params = ArgumentType.StringArray("params");
+
+            params.setSuggestionCallback((sender, context, suggestion) -> {
+                Sender wrapped = this.commandExecutor.plugin.getSenderFactory().wrap(sender);
+                List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(context.get(params));
+                tabCompleteCommand(wrapped, arguments).stream().map(SuggestionEntry::new).forEach(suggestion::addEntry);
+            });
+
+            setDefaultExecutor((sender, context) -> {
+                process(sender, context.getCommandName(), new String[0]);
+            });
+
+            addSyntax((sender, context) -> {
+                process(sender, context.getCommandName(), context.get(params));
+            }, params);
         }
 
-        @Override
-        public boolean process(@NotNull CommandSender sender, @NotNull String command, @NotNull String[] args) {
+        public void process(@NotNull CommandSender sender, @NotNull String command, @NotNull String[] args) {
             this.commandExecutor.executeCommand(this.commandExecutor.plugin.getSenderFactory().wrap(sender), command, Arrays.asList(args));
-            return true;
         }
 
-        @Override
-        public boolean hasAccess(@NotNull CommandSender sender, @Nullable String commandString) {
-            return true;
-        }
+
     }
 }

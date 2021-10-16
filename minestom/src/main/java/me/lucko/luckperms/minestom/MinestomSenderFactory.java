@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.util.Tristate;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
@@ -69,7 +70,7 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Comma
             locale = Locale.forLanguageTag(((Player) sender).getSettings().getLocale());
         }
         Component rendered = TranslationManager.render(message, locale);
-        sender.sendMessage(PlainComponentSerializer.plain().serialize(rendered));
+        sender.sendMessage(PlainTextComponentSerializer.plainText().serialize(rendered));
     }
 
     @Override
