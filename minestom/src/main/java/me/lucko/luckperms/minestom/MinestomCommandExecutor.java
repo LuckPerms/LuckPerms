@@ -68,8 +68,7 @@ public class MinestomCommandExecutor extends CommandManager {
 
         @Override
         public boolean hasAccess(@NotNull CommandSender sender, @Nullable String commandString) {
-            // todo proper perms support
-            return sender.isConsole();
+            return true;
         }
     }
 }

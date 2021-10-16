@@ -30,7 +30,7 @@ java {
 }
 
 shadowJar {
-    archiveName = "LuckPerms-Minestom-${project.ext.fullVersion}-dev.jar"
+    archiveName = "LuckPerms-Minestom-${project.ext.fullVersion}.jar"
 
     dependencies {
         exclude('net.minestom:.*')
