@@ -394,7 +394,7 @@ public abstract class PermissionHolder {
             // accumulate nodes
             for (DataType dataType : holder.queryOrder(queryOptions)) {
                 holder.getData(dataType).forEach(queryOptions, node -> {
-                    if (node.getValue() && NodeType.META_OR_CHAT_META.matches(node)) {
+                    if (NodeType.META_OR_CHAT_META.matches(node)) {
                         accumulator.accumulateNode(node);
                     }
                 });

@@ -40,8 +40,10 @@ import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -78,6 +80,8 @@ public class MetaAccumulator {
     private final SortedMap<Integer, String> suffixes;
     private int weight = 0;
     private String primaryGroup;
+
+    private Set<String> seenNodeKeys = new HashSet<>();
 
     private final MetaStackDefinition prefixDefinition;
     private final MetaStackDefinition suffixDefinition;
@@ -120,6 +124,7 @@ public class MetaAccumulator {
         if (this.primaryGroup != null && !this.meta.containsKey("primarygroup")) {
             this.meta.put("primarygroup", this.primaryGroup);
         }
+        this.seenNodeKeys = null; // free up for GC
 
         this.state.set(State.COMPLETE);
     }
@@ -128,6 +133,16 @@ public class MetaAccumulator {
 
     public void accumulateNode(Node n) {
         ensureState(State.ACCUMULATING);
+
+        // only process distinct nodes once, allows inheritance to be
+        // "cancelled out" by assigning a false copy.
+        if (!this.seenNodeKeys.add(n.getKey())) {
+            return;
+        }
+
+        if (!n.getValue()) {
+            return;
+        }
 
         if (n instanceof MetaNode) {
             MetaNode mn = (MetaNode) n;
