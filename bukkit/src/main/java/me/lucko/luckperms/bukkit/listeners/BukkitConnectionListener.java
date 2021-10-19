@@ -237,7 +237,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
     // Wait until the last priority to unload, so plugins can still perform permission checks on this event
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent e) {
-        final Player player = e.getPlayer();
+        final Player player = Bukkt.getPlayerExact(e.getPlayer()); // tem que ser exact pra pegar o player exato
         handleDisconnect(player.getUniqueId());
 
         // perform unhooking from bukkit objects 1 tick later.
@@ -252,9 +252,9 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             }
 
             // Handle auto op
-            if (this.plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) {
-                player.setOp(false);
-            }
+//            if (this.plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) { DESNECESSÁRIO
+//                player.setOp(false);
+//            }
 
             // remove their contexts cache
             this.plugin.getContextManager().onPlayerQuit(player);
