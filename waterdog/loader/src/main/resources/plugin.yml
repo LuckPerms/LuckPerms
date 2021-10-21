@@ -1,0 +1,5 @@
+name: LuckPerms
+version: ${pluginVersion}
+description: A permissions plugin
+author: Luck
+main: me.lucko.luckperms.waterdog.loader.WaterdogLoaderPlugin

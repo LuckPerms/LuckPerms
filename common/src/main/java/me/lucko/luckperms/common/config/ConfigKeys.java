@@ -310,6 +310,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> APPLY_BUNGEE_CONFIG_PERMISSIONS = notReloadable(booleanKey("apply-bungee-config-permissions", false));
 
     /**
+     * If Waterdog configured permissions are being applied. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<Boolean> APPLY_WATERDOG_CONFIG_PERMISSIONS = notReloadable(booleanKey("apply-waterdog-config-permissions", false));
+
+    /**
      * If Sponge default subjects should be applied
      */
     public static final ConfigKey<Boolean> APPLY_SPONGE_DEFAULT_SUBJECTS = notReloadable(booleanKey("apply-sponge-default-subjects", true));
