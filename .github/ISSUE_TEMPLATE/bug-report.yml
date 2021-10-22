@@ -51,7 +51,7 @@ body:
     attributes:
       label: Optional Pastebins
       description: IIf you think it would be helpful, please also include a pastebin of any relevant config files or log output. You should use https://gist.github.com/ to upload, then include the link below. 
-      placeholder: v5.3.70
+      placeholder: https://bytebin.lucko.com/ThisIsAVeryUsefulLogOutput
     validations:
       required: false
   - type: textarea
