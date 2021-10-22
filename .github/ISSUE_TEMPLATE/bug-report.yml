@@ -46,12 +46,12 @@ body:
       placeholder: v5.3.70
     validations:
       required: true
-  - type: input
-    id: pastebins
+  - type: textarea
+    id: logs
     attributes:
-      label: Optional Pastebins
+      label: Logs and Configs
       description: If you think it would be helpful, please also include a pastebin of any relevant config files or log output. You should use https://gist.github.com/ to upload, then include the link below. 
-      placeholder: https://bytebin.lucko.com/ThisIsAVeryUsefulLogOutput
+      placeholder: https://gist.github.com/HelpfulBugReporter/ThisIsAVeryUsefulLogOutput
     validations:
       required: false
   - type: textarea
