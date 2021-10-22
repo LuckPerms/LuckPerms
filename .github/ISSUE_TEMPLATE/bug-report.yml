@@ -45,7 +45,7 @@ body:
       description: Please provide the specific, precise version number of LuckPerms you are using to reproduce this bug.
       placeholder: v5.3.70
     validations:
-    required: true
+      required: true
   - type: input
     id: pastebins
     attributes:
