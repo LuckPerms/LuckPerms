@@ -1,6 +1,6 @@
-name: Bug Report
+name: 🐛 ​ Bug report
 description: Report an issue or problem with the way LuckPerms is functioning.
-title: "Bug Report: "
+title: ""
 labels: ["type: issue"]
 body:
   - type: markdown

@@ -1,6 +1,6 @@
-name: Suggestion
+name: 💡 ​ Suggestion
 description: Suggest an idea for an improvement or change to LuckPerms.
-title: "Suggestion: "
+title: ""
 labels: ["type: suggestion"]
 body:
   - type: markdown
