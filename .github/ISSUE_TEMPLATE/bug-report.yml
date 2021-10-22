@@ -35,7 +35,7 @@ body:
     attributes:
       label: Server Details
       description: Please provide a description of the server details, including type and specific version number.
-      placeholder: git-Paper-124 (MC: 1.17.1)
+      placeholder: 'git-Paper-124 (MC: 1.17.1)'
     validations:
       required: true
   - type: input
