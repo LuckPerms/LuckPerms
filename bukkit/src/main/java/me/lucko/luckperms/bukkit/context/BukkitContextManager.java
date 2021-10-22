@@ -82,9 +82,8 @@ public class BukkitContextManager extends ContextManager<Player, Player> {
 
         if (subject.isOnline()) {
             return this.onlineSubjectCaches.get(subject);
-        } else {
-            return this.offlineSubjectCaches.get(subject);
         }
+        return this.offlineSubjectCaches.get(subject);
     }
 
     @Override
