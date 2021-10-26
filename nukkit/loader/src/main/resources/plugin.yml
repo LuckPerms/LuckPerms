@@ -12,3 +12,8 @@ commands:
   luckperms:
     description: Manage permissions
     aliases: [lp, perm, perms, permission, permissions]
+    permission: luckperms.do
+
+permissions:
+  luckperms.do:
+    default: op
