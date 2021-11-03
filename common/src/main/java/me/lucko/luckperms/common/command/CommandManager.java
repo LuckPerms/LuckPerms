@@ -319,7 +319,7 @@ public class CommandManager {
     private static void applyConvenienceAliases(List<String> args, boolean rewriteLastArgument) {
         // '/lp u' --> '/lp user' etc
         //      ^           ^^^^
-        if (args.size() >= 1 && (rewriteLastArgument || args.size() >= 2)) {
+        if (!args.isEmpty() && (rewriteLastArgument || args.size() >= 2)) {
             replaceArgs(args, 0, arg -> {
                 switch (arg) {
                     case "u": return "user";
