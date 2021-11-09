@@ -140,13 +140,17 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
             LuckPermsConfiguration config = getPlugin().getConfiguration();
             String address = config.get(ConfigKeys.REDIS_ADDRESS);
+            String username = config.get(ConfigKeys.REDIS_USERNAME);
             String password = config.get(ConfigKeys.REDIS_PASSWORD);
             if (password.isEmpty()) {
                 password = null;
             }
+            if (username.isEmpty()) {
+                username = null;
+            }
             boolean ssl = config.get(ConfigKeys.REDIS_SSL);
 
-            redis.init(address, password, ssl);
+            redis.init(address, username, password, ssl);
             return redis;
         }
     }

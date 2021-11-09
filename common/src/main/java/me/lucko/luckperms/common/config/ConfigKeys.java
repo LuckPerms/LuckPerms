@@ -631,7 +631,12 @@ public final class ConfigKeys {
      * The address of the redis server
      */
     public static final ConfigKey<String> REDIS_ADDRESS = notReloadable(stringKey("redis.address", null));
-
+    
+    /**
+     * The username to connect with, or an empty string if it should use default
+     */
+    public static final ConfigKey<String> REDIS_USERNAME = notReloadable(stringKey("redis.username", ""));
+    
     /**
      * The password in use by the redis server, or an empty string if there is no password
      */
