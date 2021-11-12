@@ -26,11 +26,18 @@
 package me.lucko.luckperms.common.messaging.redis;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
-import redis.clients.jedis.*;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.Protocol;
 
 /**
  * An implementation of {@link Messenger} using Redis.

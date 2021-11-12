@@ -35,9 +35,11 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
+
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;
