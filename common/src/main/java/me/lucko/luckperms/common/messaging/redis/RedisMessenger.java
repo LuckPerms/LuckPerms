@@ -36,35 +36,34 @@ import redis.clients.jedis.*;
  * An implementation of {@link Messenger} using Redis.
  */
 public class RedisMessenger implements Messenger {
-    
     private static final String CHANNEL = "luckperms:update";
-    
+
     private final LuckPermsPlugin plugin;
     private final IncomingMessageConsumer consumer;
-    
+
     private JedisPool jedisPool;
     private Subscription sub;
-    
+
     public RedisMessenger(LuckPermsPlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
         this.consumer = consumer;
     }
-    
+
     public void init(String address, String username, String password, boolean ssl) {
         String[] addressSplit = address.split(":");
         String host = addressSplit[0];
         int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
-        
+
         if (username == null) {
             this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password, ssl);
         } else {
             this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, username, password, ssl);
         }
-        
+
         this.sub = new Subscription();
         this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
     }
-    
+
     @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         try (Jedis jedis = this.jedisPool.getResource()) {
@@ -73,15 +72,15 @@ public class RedisMessenger implements Messenger {
             e.printStackTrace();
         }
     }
-    
+
     @Override
     public void close() {
         this.sub.unsubscribe();
         this.jedisPool.destroy();
     }
-    
+
     private class Subscription extends JedisPubSub implements Runnable {
-        
+
         @Override
         public void run() {
             boolean wasBroken = false;
@@ -98,9 +97,9 @@ public class RedisMessenger implements Messenger {
                     try {
                         unsubscribe();
                     } catch (Exception ignored) {
-                    
+
                     }
-                    
+
                     // Sleep for 5 seconds to prevent massive spam in console
                     try {
                         Thread.sleep(5000);
@@ -110,7 +109,7 @@ public class RedisMessenger implements Messenger {
                 }
             }
         }
-        
+
         @Override
         public void onMessage(String channel, String msg) {
             if (!channel.equals(CHANNEL)) {
@@ -119,5 +118,5 @@ public class RedisMessenger implements Messenger {
             RedisMessenger.this.consumer.consumeIncomingMessageAsString(msg);
         }
     }
-    
+
 }
