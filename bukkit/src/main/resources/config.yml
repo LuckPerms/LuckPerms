@@ -262,6 +262,7 @@ broadcast-received-log-entries: true
 redis:
   enabled: false
   address: localhost
+  username: ''
   password: ''
 
 # Settings for RabbitMQ.

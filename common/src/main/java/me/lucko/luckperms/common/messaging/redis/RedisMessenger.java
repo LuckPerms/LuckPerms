@@ -56,12 +56,16 @@ public class RedisMessenger implements Messenger {
         this.consumer = consumer;
     }
 
-    public void init(String address, String password, boolean ssl) {
+    public void init(String address, String username, String password, boolean ssl) {
         String[] addressSplit = address.split(":");
         String host = addressSplit[0];
         int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
 
-        this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password, ssl);
+        if (username == null) {
+            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password, ssl);
+        } else {
+            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, username, password, ssl);
+        }
 
         this.sub = new Subscription();
         this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
