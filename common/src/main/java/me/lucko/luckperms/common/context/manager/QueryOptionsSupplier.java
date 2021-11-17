@@ -23,40 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.context;
+package me.lucko.luckperms.common.context.manager;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-
-import net.luckperms.api.context.ContextConsumer;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.context.StaticContextCalculator;
+import net.luckperms.api.query.QueryOptions;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+/**
+ * Supplies contexts for a given subject.
+ */
+public interface QueryOptionsSupplier {
 
-public class ConfigurationContextCalculator implements StaticContextCalculator {
-    private final LuckPermsConfiguration config;
+    QueryOptions getQueryOptions();
 
-    public ConfigurationContextCalculator(LuckPermsConfiguration config) {
-        this.config = config;
+    default ImmutableContextSet getContextSet() {
+        return getQueryOptions().context();
     }
 
-    @Override
-    public void calculate(@NonNull ContextConsumer consumer) {
-        String server = this.config.get(ConfigKeys.SERVER);
-        if (!server.equals("global")) {
-            consumer.accept(DefaultContextKeys.SERVER_KEY, server);
-        }
-        consumer.accept(this.config.getContextsFile().getStaticContexts());
-    }
-
-    @Override
-    public @NonNull ContextSet estimatePotentialContexts() {
-        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        calculate(builder::add);
-        return builder.build();
-    }
 }

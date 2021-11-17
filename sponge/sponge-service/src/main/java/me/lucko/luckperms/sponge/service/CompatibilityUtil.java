@@ -27,8 +27,8 @@ package me.lucko.luckperms.sponge.service;
 
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.common.context.contextset.ContextImpl;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ContextImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.sponge.service.context.ForwardingContextSet;
 import me.lucko.luckperms.sponge.service.context.ForwardingImmutableContextSet;
 

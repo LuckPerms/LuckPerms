@@ -23,11 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.context.contextset;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.SetMultimap;
+package me.lucko.luckperms.common.context;
 
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSatisfyMode;
@@ -36,35 +32,10 @@ import net.luckperms.api.context.DefaultContextKeys;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
-import java.util.Spliterator;
 
 public abstract class AbstractContextSet implements ContextSet {
-
-    protected abstract SetMultimap<String, String> backing();
-
-    protected abstract void copyTo(SetMultimap<String, String> other);
-
-    @Override
-    public boolean containsKey(@NonNull String key) {
-        return backing().containsKey(sanitizeKey(key));
-    }
-
-    @Override
-    public @NonNull Set<String> getValues(@NonNull String key) {
-        Collection<String> values = backing().asMap().get(sanitizeKey(key));
-        return values != null ? ImmutableSet.copyOf(values) : ImmutableSet.of();
-    }
-
-    @Override
-    public boolean contains(@NonNull String key, @NonNull String value) {
-        return backing().containsEntry(sanitizeKey(key), sanitizeValue(value));
-    }
 
     @Override
     public boolean isSatisfiedBy(@NonNull ContextSet other, @NonNull ContextSatisfyMode mode) {
@@ -95,33 +66,6 @@ public abstract class AbstractContextSet implements ContextSet {
     }
 
     protected abstract boolean otherContainsAll(ContextSet other, ContextSatisfyMode mode);
-
-    public abstract Context[] toArray();
-
-    @Override
-    public @NonNull Iterator<Context> iterator() {
-        return Iterators.forArray(toArray());
-    }
-
-    @Override
-    public Spliterator<Context> spliterator() {
-        return Arrays.spliterator(toArray());
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return backing().isEmpty();
-    }
-
-    @Override
-    public int size() {
-        return backing().size();
-    }
-
-    @Override
-    public int hashCode() {
-        return backing().hashCode();
-    }
 
     static String sanitizeKey(String key) {
         Objects.requireNonNull(key, "key is null");

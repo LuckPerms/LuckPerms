@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.context.ContextManager;
+import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.manager.SpongeGroupManager;

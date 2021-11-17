@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.sponge.service.proxy.api6;
 
-import me.lucko.luckperms.common.context.QueryOptionsSupplier;
+import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;

@@ -23,9 +23,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.context;
+package me.lucko.luckperms.common.context.comparator;
 
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.DefaultContextKeys;
@@ -90,7 +90,7 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             Context ent1 = o1Array[i];
             Context ent2 = o2Array[i];
 
-            result = compareContexts(ent1, ent2);
+            result = ContextComparator.INSTANCE.compare(ent1, ent2);
             if (result != 0) {
                 return result;
             }
@@ -99,29 +99,10 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
         throw new AssertionError("sets are equal? " + o1 + " - " + o2);
     }
 
-    public static final Comparator<Context> CONTEXT_COMPARATOR = ContextSetComparator::compareContexts;
-
     private static Context[] toArray(ImmutableContextSet set) {
         Context[] array = set.toSet().toArray(new Context[0]);
-        Arrays.sort(array, CONTEXT_COMPARATOR);
+        Arrays.sort(array, ContextComparator.INSTANCE);
         return array;
     }
 
-    private static int compareContexts(Context o1, Context o2) {
-        if (o1 == o2) {
-            return 0;
-        }
-
-        int i = compareStringsFast(o1.getKey(), o2.getKey());
-        if (i != 0) {
-            return i;
-        }
-
-        return compareStringsFast(o1.getValue(), o2.getValue());
-    }
-
-    @SuppressWarnings("StringEquality")
-    private static int compareStringsFast(String o1, String o2) {
-        return o1 == o2 ? 0 : o1.compareTo(o2);
-    }
 }

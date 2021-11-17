@@ -23,40 +23,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.context.contextset;
+package me.lucko.luckperms.common.context.calculator;
 
-import net.luckperms.api.context.Context;
+import net.luckperms.api.context.ContextCalculator;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+/**
+ * Represents a {@link ContextCalculator} which delegates calls to another object.
+ */
+public interface ForwardingContextCalculator<T> extends ContextCalculator<T> {
 
-public final class ContextImpl implements Context {
-    private final String key;
-    private final String value;
+    Object delegate();
 
-    public ContextImpl(String key, String value) {
-        this.key = key;
-        this.value = value;
-    }
-
-    @Override
-    public @NonNull String getKey() {
-        return this.key;
-    }
-
-    @Override
-    public @NonNull String getValue() {
-        return this.value;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Context)) return false;
-        Context that = (Context) obj;
-        return this.key.equals(that.getKey()) && this.value.equals(that.getValue());
-    }
-
-    @Override
-    public int hashCode() {
-        return this.key.hashCode() ^ this.value.hashCode();
-    }
 }

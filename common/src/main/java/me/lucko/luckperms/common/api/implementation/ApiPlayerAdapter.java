@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.common.context.ContextManager;
+import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.model.manager.user.UserManager;
 
 import net.luckperms.api.context.ImmutableContextSet;

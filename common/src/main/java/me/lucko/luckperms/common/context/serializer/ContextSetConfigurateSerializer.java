@@ -23,12 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.context;
+package me.lucko.luckperms.common.context.serializer;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.MutableContextSetImpl;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.MutableContextSet;

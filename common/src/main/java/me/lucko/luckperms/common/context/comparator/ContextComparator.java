@@ -23,42 +23,53 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bungee.context;
+package me.lucko.luckperms.common.context.comparator;
 
-import com.imaginarycode.minecraft.redisbungee.RedisBungee;
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import net.luckperms.api.context.Context;
 
-import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
+import java.util.Comparator;
 
-import net.luckperms.api.context.ContextConsumer;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.context.StaticContextCalculator;
+public class ContextComparator implements Comparator<Context> {
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+    public static final ContextComparator INSTANCE = new ContextComparator(false);
 
-public class RedisBungeeCalculator implements StaticContextCalculator {
-    private static final String PROXY_KEY = "proxy";
+    public static final ContextComparator ONLY_KEY = new ContextComparator(true);
 
-    @Override
-    public void calculate(@NonNull ContextConsumer consumer) {
-        RedisBungeeAPI redisBungee = RedisBungee.getApi();
-        if (redisBungee != null) {
-            consumer.accept(PROXY_KEY, redisBungee.getServerId());
-        }
+    private final boolean onlyKeys;
+
+    public ContextComparator(boolean onlyKeys) {
+        this.onlyKeys = onlyKeys;
     }
 
     @Override
-    public @NonNull ContextSet estimatePotentialContexts() {
-        RedisBungeeAPI redisBungee = RedisBungee.getApi();
-        if (redisBungee == null) {
-            return ImmutableContextSetImpl.EMPTY;
+    public int compare(Context o1, Context o2) {
+        if (o1 == o2) {
+            return 0;
         }
 
-        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-        for (String server : redisBungee.getAllServers()) {
-            builder.add(PROXY_KEY, server);
+        int i = compareStringsFast(o1.getKey(), o2.getKey());
+        if (i != 0) {
+            return i;
         }
-        return builder.build();
+
+        if (this.onlyKeys) {
+            return 0;
+        }
+
+        return compareStringsFast(o1.getValue(), o2.getValue());
+    }
+
+    public int compare(Context o1, String o2Key, String o2Value) {
+        int i = compareStringsFast(o1.getKey(), o2Key);
+        if (i != 0) {
+            return i;
+        }
+
+        return compareStringsFast(o1.getValue(), o2Value);
+    }
+
+    @SuppressWarnings("StringEquality")
+    private static int compareStringsFast(String o1, String o2) {
+        return o1 == o2 ? 0 : o1.compareTo(o2);
     }
 }

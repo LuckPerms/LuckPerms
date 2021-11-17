@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.model.nodemap;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.ContextSetComparator;
+import me.lucko.luckperms.common.context.comparator.ContextSetComparator;
 import me.lucko.luckperms.common.model.InheritanceOrigin;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.nodemap.MutateResult.ChangeType;

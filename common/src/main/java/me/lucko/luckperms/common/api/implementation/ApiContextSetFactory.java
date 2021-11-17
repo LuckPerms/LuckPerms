@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.MutableContextSetImpl;
 
 import net.luckperms.api.context.ContextSetFactory;
 import net.luckperms.api.context.ImmutableContextSet;

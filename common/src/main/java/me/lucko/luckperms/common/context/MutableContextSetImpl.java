@@ -23,13 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.context.contextset;
+package me.lucko.luckperms.common.context;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 
@@ -41,12 +40,15 @@ import net.luckperms.api.context.MutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Spliterator;
 
-public final class MutableContextSetImpl extends AbstractContextSet implements MutableContextSet {
+public final class MutableContextSetImpl extends AbstractContextSet implements MutableContextSet, ContextSet {
     private final SetMultimap<String, String> map;
 
     public MutableContextSetImpl() {
@@ -55,18 +57,6 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
 
     MutableContextSetImpl(SetMultimap<String, String> other) {
         this.map = Multimaps.synchronizedSetMultimap(HashMultimap.create(other));
-    }
-
-    @Override
-    protected SetMultimap<String, String> backing() {
-        return this.map;
-    }
-
-    @Override
-    protected void copyTo(SetMultimap<String, String> other) {
-        synchronized (this.map) {
-            other.putAll(this.map);
-        }
     }
 
     @Override
@@ -80,9 +70,10 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
         if (this.map.isEmpty()) {
             return ImmutableContextSetImpl.EMPTY;
         }
-        synchronized (this.map) {
-            return new ImmutableContextSetImpl(ImmutableSetMultimap.copyOf(this.map));
-        }
+
+        Context[] arr = toArray();
+        Arrays.sort(arr);
+        return new ImmutableContextSetImpl(arr);
     }
 
     @Override
@@ -129,11 +120,10 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
         return builder.build();
     }
 
-    @Override
     public Context[] toArray() {
-        Set<Map.Entry<String, String>> entries = this.map.entries();
         Context[] array;
         synchronized (this.map) {
+            Set<Map.Entry<String, String>> entries = this.map.entries();
             array = new Context[entries.size()];
             int i = 0;
             for (Map.Entry<String, String> e : entries) {
@@ -141,6 +131,42 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
             }
         }
         return array;
+    }
+
+    @Override
+    public boolean containsKey(@NonNull String key) {
+        return this.map.containsKey(sanitizeKey(key));
+    }
+
+    @Override
+    public @NonNull Set<String> getValues(@NonNull String key) {
+        Collection<String> values = this.map.asMap().get(sanitizeKey(key));
+        return values != null ? ImmutableSet.copyOf(values) : ImmutableSet.of();
+    }
+
+    @Override
+    public boolean contains(@NonNull String key, @NonNull String value) {
+        return this.map.containsEntry(sanitizeKey(key), sanitizeValue(value));
+    }
+
+    @Override
+    public @NonNull Iterator<Context> iterator() {
+        return Iterators.forArray(toArray());
+    }
+
+    @Override
+    public Spliterator<Context> spliterator() {
+        return Arrays.spliterator(toArray());
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.map.isEmpty();
+    }
+
+    @Override
+    public int size() {
+        return this.map.size();
     }
 
     @Override
@@ -159,12 +185,7 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
     @Override
     public void addAll(@NonNull ContextSet contextSet) {
         Objects.requireNonNull(contextSet, "contextSet");
-        if (contextSet instanceof AbstractContextSet) {
-            AbstractContextSet other = (AbstractContextSet) contextSet;
-            other.copyTo(this.map);
-        } else {
-            addAll(contextSet.toSet());
-        }
+        addAll(contextSet.toSet());
     }
 
     @Override
@@ -221,23 +242,16 @@ public final class MutableContextSetImpl extends AbstractContextSet implements M
         if (!(o instanceof ContextSet)) return false;
         final ContextSet that = (ContextSet) o;
 
-        final Multimap<String, String> thatBacking;
-        if (that instanceof AbstractContextSet) {
-            thatBacking = ((AbstractContextSet) that).backing();
-        } else {
-            Map<String, Set<String>> thatMap = that.toMap();
-            ImmutableSetMultimap.Builder<String, String> thatBuilder = ImmutableSetMultimap.builder();
-            for (Map.Entry<String, Set<String>> e : thatMap.entrySet()) {
-                thatBuilder.putAll(e.getKey(), e.getValue());
-            }
-            thatBacking = thatBuilder.build();
-        }
+        return this.size() == that.size() && otherContainsAll(that, ContextSatisfyMode.ALL_VALUES_PER_KEY);
+    }
 
-        return backing().equals(thatBacking);
+    @Override
+    public int hashCode() {
+        return this.map.hashCode();
     }
 
     @Override
     public String toString() {
-        return "MutableContextSet(contexts=" + this.map + ")";
+        return "MutableContextSet(" + this.map + ")";
     }
 }

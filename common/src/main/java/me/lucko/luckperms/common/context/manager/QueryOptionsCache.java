@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.context;
+package me.lucko.luckperms.common.context.manager;
 
 import me.lucko.luckperms.common.cache.ExpiringCache;
 

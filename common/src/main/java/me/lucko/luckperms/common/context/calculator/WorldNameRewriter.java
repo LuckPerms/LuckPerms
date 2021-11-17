@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.context;
+package me.lucko.luckperms.common.context.calculator;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 
