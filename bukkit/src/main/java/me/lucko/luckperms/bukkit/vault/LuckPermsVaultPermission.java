@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 
+import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataType;
@@ -332,13 +333,13 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
     // utility method for getting a contexts instance for a given vault lookup.
     QueryOptions getQueryOptions(@Nullable UUID uuid, @Nullable String world) {
-        MutableContextSet context;
+        ContextSet context;
 
         Player player = Optional.ofNullable(uuid).flatMap(u -> this.plugin.getBootstrap().getPlayer(u)).orElse(null);
         if (player != null) {
-            context = this.plugin.getContextManager().getContext(player).mutableCopy();
+            context = this.plugin.getContextManager().getContext(player);
         } else {
-            context = this.plugin.getContextManager().getStaticContext().mutableCopy();
+            context = this.plugin.getContextManager().getStaticContext();
         }
 
         String playerWorld = player == null ? null : player.getWorld().getName();
@@ -346,20 +347,26 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         // if world is null, we want to do a lookup in the players current context
         // if world is not null, we want to do a lookup in that specific world
         if (world != null && !world.isEmpty() && !world.equalsIgnoreCase(playerWorld)) {
+            MutableContextSet mutContext = context.mutableCopy();
+            context = mutContext;
+
             // remove already accumulated worlds
-            context.removeAll(DefaultContextKeys.WORLD_KEY);
+            mutContext.removeAll(DefaultContextKeys.WORLD_KEY);
             // add the vault world
-            context.add(DefaultContextKeys.WORLD_KEY, world.toLowerCase(Locale.ROOT));
+            mutContext.add(DefaultContextKeys.WORLD_KEY, world.toLowerCase(Locale.ROOT));
         }
 
         // if we're using a special vault server
         if (useVaultServer()) {
+            MutableContextSet mutContext = context instanceof MutableContextSet ? (MutableContextSet) context : context.mutableCopy();
+            context = mutContext;
+
             // remove the normal server context from the set
-            context.remove(DefaultContextKeys.SERVER_KEY, getServer());
+            mutContext.remove(DefaultContextKeys.SERVER_KEY, getServer());
 
             // add the vault specific server
             if (!getVaultServer().equals("global")) {
-                context.add(DefaultContextKeys.SERVER_KEY, getVaultServer());
+                mutContext.add(DefaultContextKeys.SERVER_KEY, getVaultServer());
             }
         }
 

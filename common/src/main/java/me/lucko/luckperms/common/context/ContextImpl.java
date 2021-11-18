@@ -57,6 +57,7 @@ public final class ContextImpl implements Context, Comparable<Context> {
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) return true;
         if (!(obj instanceof Context)) return false;
         Context that = (Context) obj;
         return this.key.equals(that.getKey()) && this.value.equals(that.getValue());
@@ -65,5 +66,10 @@ public final class ContextImpl implements Context, Comparable<Context> {
     @Override
     public int hashCode() {
         return this.key.hashCode() ^ this.value.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return this.key + '=' + this.value;
     }
 }
