@@ -907,6 +907,8 @@ public class SqlStorage implements StorageImplementation {
                 ps.setString(1, user.toString());
                 ps.setString(2, data.username);
                 ps.setString(3, data.primaryGroup);
+                ps.setString(4, data.username);
+                ps.setString(5, data.primaryGroup);
                 ps.execute();
             }
         }
