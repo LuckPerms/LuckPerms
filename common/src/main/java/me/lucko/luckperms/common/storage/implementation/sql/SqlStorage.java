@@ -694,7 +694,10 @@ public class SqlStorage implements StorageImplementation {
                 ps.setString(1, uniqueId.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getString("username");
+                        String username = rs.getString("username");
+                        if (username != null && !username.equals("null")) {
+                            return username;
+                        }
                     }
                 }
             }

@@ -573,7 +573,10 @@ public class MongoStorage implements StorageImplementation {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
         Document doc = c.find(new Document("_id", uniqueId)).first();
         if (doc != null) {
-            return doc.get("name", String.class);
+            String username = doc.get("name", String.class);
+            if (username != null && !username.equals("null")) {
+                return username;
+            }
         }
         return null;
     }
