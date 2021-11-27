@@ -29,9 +29,7 @@ import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.function.Predicate;
 
 /**
  * Utility for computing tab completion results
@@ -97,24 +95,6 @@ public class TabCompleter {
         }
 
         return this.suppliers.getOrDefault(position, CompletionSupplier.EMPTY).supplyCompletions(partial);
-    }
-
-    static Predicate<String> startsWithIgnoreCase(String prefix) {
-        return string -> {
-            if (string.length() < prefix.length()) {
-                return false;
-            }
-            return string.regionMatches(true, 0, prefix, 0, prefix.length());
-        };
-    }
-
-    static Predicate<String> containsIgnoreCase(String substring) {
-        return string -> {
-            if (string.length() < substring.length()) {
-                return false;
-            }
-            return string.toLowerCase(Locale.ROOT).contains(substring.toLowerCase(Locale.ROOT));
-        };
     }
 
 }

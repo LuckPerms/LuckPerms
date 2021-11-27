@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
+import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
@@ -64,6 +65,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -514,6 +516,16 @@ public final class ConfigKeys {
      * If the owner of an integrated server should automatically bypasses all permission checks. On fabric, this only applies on an Integrated Server.
      */
     public static final ConfigKey<Boolean> FABRIC_INTEGRATED_SERVER_OWNER_BYPASSES_CHECKS = booleanKey("integrated-server-owner-bypasses-checks", true);
+
+    /**
+     * Disabled context calculators
+     */
+    public static final ConfigKey<Set<Predicate<String>>> DISABLED_CONTEXT_CALCULATORS = key(c -> {
+        return c.getStringList("disabled-context-calculators", ImmutableList.of())
+                .stream()
+                .map(Predicates::startsWithIgnoreCase)
+                .collect(ImmutableCollectors.toSet());
+    });
 
     /**
      * The world rewrites map

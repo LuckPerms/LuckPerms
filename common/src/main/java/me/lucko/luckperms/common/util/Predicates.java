@@ -29,6 +29,7 @@ import com.google.common.collect.Range;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
 import java.util.function.Predicate;
 
 /**
@@ -84,6 +85,24 @@ public final class Predicates {
 
     public static <T> Predicate<T> is(T t) {
         return t::equals;
+    }
+
+    public static Predicate<String> startsWithIgnoreCase(String prefix) {
+        return string -> {
+            if (string.length() < prefix.length()) {
+                return false;
+            }
+            return string.regionMatches(true, 0, prefix, 0, prefix.length());
+        };
+    }
+
+    public static Predicate<String> containsIgnoreCase(String substring) {
+        return string -> {
+            if (string.length() < substring.length()) {
+                return false;
+            }
+            return string.toLowerCase(Locale.ROOT).contains(substring.toLowerCase(Locale.ROOT));
+        };
     }
 
 }

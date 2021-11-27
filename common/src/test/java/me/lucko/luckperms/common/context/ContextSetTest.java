@@ -114,18 +114,18 @@ public class ContextSetTest {
     @Test
     public void testImmutableContainsAll() {
         ImmutableContextSetImpl set = (ImmutableContextSetImpl) new ImmutableContextSetImpl.BuilderImpl()
-                .add("test", "a")
-                .add("test", "b")
-                .add("test", "c")
-                .add("other", "a")
-                .add("other", "b")
+                .add("aaa", "a")
+                .add("aaa", "b")
+                .add("aaa", "c")
+                .add("bbb", "a")
+                .add("bbb", "b")
                 .build();
 
         List<Consumer<ImmutableContextSet.Builder>> trueTests = ImmutableList.of(
-                builder -> builder.add("test", "a").add("other", "a"),
-                builder -> builder.add("test", "b").add("other", "a"),
-                builder -> builder.add("test", "c").add("other", "a"),
-                builder -> builder.add("test", "c").add("other", "b")
+                builder -> builder.add("aaa", "a").add("bbb", "a"),
+                builder -> builder.add("aaa", "b").add("bbb", "a"),
+                builder -> builder.add("aaa", "c").add("bbb", "a"),
+                builder -> builder.add("aaa", "c").add("bbb", "b")
         );
 
         for (Consumer<ImmutableContextSet.Builder> test : trueTests) {
@@ -138,10 +138,10 @@ public class ContextSetTest {
         }
 
         List<Consumer<ImmutableContextSet.Builder>> falseTests = ImmutableList.of(
-                builder -> builder.add("test", "a").add("other", "z"),
-                builder -> builder.add("test", "b").add("other", "z"),
-                builder -> builder.add("test", "b"),
-                builder -> builder.add("test", "c"),
+                builder -> builder.add("aaa", "a").add("bbb", "z"),
+                builder -> builder.add("aaa", "b").add("bbb", "z"),
+                builder -> builder.add("aaa", "b"),
+                builder -> builder.add("aaa", "c"),
                 builder -> {}
         );
 
