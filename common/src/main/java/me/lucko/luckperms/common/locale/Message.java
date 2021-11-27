@@ -844,6 +844,42 @@ public interface Message {
             })
             .build();
 
+    Args2<String, String> APPLY_EDITS_SESSION_UNKNOWN = (code, label) -> join(newline(),
+            // "&4The changes received from the web editor were not made in a session started on this server!"
+            // "&cAre you sure you're running the /lp applyedits command in the right place?"
+            // "&cTo ignore this warning and apply the changes anyway, run: &4/lp applyedits <code> --force"
+            prefixed(translatable()
+                    .key("luckperms.command.editor.apply-edits.unknown-session")
+                    .color(DARK_RED)),
+            prefixed(translatable()
+                    .key("luckperms.command.editor.apply-edits.right-server-question")
+                    .color(RED)
+                    .args(text("/" + label + " applyedits"))),
+            prefixed(translatable()
+                    .key("luckperms.command.editor.apply-edits.bypass-warning")
+                    .color(RED)
+                    .append(text(": "))
+                    .append(text("/" + label + " applyedits " + code + " --force", DARK_RED)))
+    );
+
+    Args2<String, String> APPLY_EDITS_SESSION_APPLIED_ALREADY = (code, label) -> join(newline(),
+            // "&4The changes received from the web editor are based on an initial session which has already been applied!"
+            // "&cTo avoid conflicts, you should never re-use the same editor session after the changes from it have been applied once already."
+            // "&cTo ignore this warning and apply the changes anyway, run: /lp applyedits <code> --force"
+            prefixed(translatable()
+                    .key("luckperms.command.editor.apply-edits.already-applied")
+                    .color(DARK_RED)),
+            prefixed(translatable()
+                    .key("luckperms.command.editor.apply-edits.how-to-avoid-conflicts")
+                    .color(RED)
+                    .append(FULL_STOP)),
+            prefixed(translatable()
+                    .key("luckperms.command.editor.apply-edits.bypass-warning")
+                    .color(RED)
+                    .append(text(": "))
+                    .append(text("/" + label + " applyedits " + code + " --force")))
+    );
+
     Args1<String> APPLY_EDITS_INVALID_CODE = code -> prefixed(text()
             // "&cInvalid code. &7({})"
             .color(RED)

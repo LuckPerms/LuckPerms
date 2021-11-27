@@ -57,6 +57,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
+import me.lucko.luckperms.common.webeditor.WebEditorSessionStore;
 
 import net.luckperms.api.LuckPerms;
 
@@ -89,6 +90,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
     private BytebinClient bytebin;
+    private WebEditorSessionStore webEditorSessionStore;
     private TranslationRepository translationRepository;
     private FileWatcher fileWatcher = null;
     private Storage storage;
@@ -134,6 +136,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 .build();
 
         this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+        this.webEditorSessionStore = new WebEditorSessionStore();
 
         // init translation repo and update bundle files
         this.translationRepository = new TranslationRepository(this);
@@ -414,6 +417,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public BytebinClient getBytebin() {
         return this.bytebin;
+    }
+
+    @Override
+    public WebEditorSessionStore getWebEditorSessionStore() {
+        return this.webEditorSessionStore;
     }
 
     @Override
