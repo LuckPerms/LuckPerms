@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.file.H2ConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.util.Uuids;
@@ -95,6 +96,7 @@ public class SqlStorage implements StorageImplementation {
     private static final String PLAYER_SELECT_USERNAME_BY_UUID = "SELECT username FROM '{prefix}players' WHERE uuid=? LIMIT 1";
     private static final String PLAYER_UPDATE_USERNAME_FOR_UUID = "UPDATE '{prefix}players' SET username=? WHERE uuid=?";
     private static final Map<String, String> PLAYER_INSERT = ImmutableMap.of(
+            "H2", "MERGE INTO '{prefix}players' (uuid, username, primary_group) VALUES(?, ?, ?)",
             "PostgreSQL", "INSERT INTO '{prefix}players' (uuid, username, primary_group) VALUES(?, ?, ?) ON CONFLICT DO UPDATE SET username=?, primary_group=?"
     );
     private static final String PLAYER_INSERT_DEFAULT = "INSERT INTO '{prefix}players' (uuid, username, primary_group) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE username=?, primary_group=?";
@@ -628,8 +630,13 @@ public class SqlStorage implements StorageImplementation {
                         ps.setString(1, uniqueId.toString());
                         ps.setString(2, username);
                         ps.setString(3, GroupManager.DEFAULT_GROUP_NAME);
-                        ps.setString(4, username);
-                        ps.setString(5, GroupManager.DEFAULT_GROUP_NAME);
+
+                        // h2 statement only has 3 parameters
+                        if (!(this.connectionFactory instanceof H2ConnectionFactory)) {
+                            ps.setString(4, username);
+                            ps.setString(5, GroupManager.DEFAULT_GROUP_NAME);
+                        }
+
                         ps.execute();
                     }
                 }
@@ -906,8 +913,12 @@ public class SqlStorage implements StorageImplementation {
                 ps.setString(1, user.toString());
                 ps.setString(2, data.username);
                 ps.setString(3, data.primaryGroup);
-                ps.setString(4, data.username);
-                ps.setString(5, data.primaryGroup);
+
+                if (!(this.connectionFactory instanceof H2ConnectionFactory)) {
+                    ps.setString(4, data.username);
+                    ps.setString(5, data.primaryGroup);
+                }
+
                 ps.execute();
             }
         }
