@@ -45,7 +45,6 @@ import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
-import me.lucko.luckperms.common.storage.implementation.sql.connection.file.H2ConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.util.Uuids;
@@ -95,15 +94,11 @@ public class SqlStorage implements StorageImplementation {
     private static final String PLAYER_SELECT_UUID_BY_USERNAME = "SELECT uuid FROM '{prefix}players' WHERE username=? LIMIT 1";
     private static final String PLAYER_SELECT_USERNAME_BY_UUID = "SELECT username FROM '{prefix}players' WHERE uuid=? LIMIT 1";
     private static final String PLAYER_UPDATE_USERNAME_FOR_UUID = "UPDATE '{prefix}players' SET username=? WHERE uuid=?";
-    private static final Map<String, String> PLAYER_INSERT = ImmutableMap.of(
-            "H2", "MERGE INTO '{prefix}players' (uuid, username, primary_group) VALUES(?, ?, ?)",
-            "PostgreSQL", "INSERT INTO '{prefix}players' (uuid, username, primary_group) VALUES(?, ?, ?) ON CONFLICT DO UPDATE SET username=?, primary_group=?"
-    );
-    private static final String PLAYER_INSERT_DEFAULT = "INSERT INTO '{prefix}players' (uuid, username, primary_group) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE username=?, primary_group=?";
+    private static final String PLAYER_INSERT = "INSERT INTO '{prefix}players' (uuid, username, primary_group) VALUES(?, ?, ?)";
     private static final String PLAYER_DELETE = "DELETE FROM '{prefix}players' WHERE uuid=?";
     private static final String PLAYER_SELECT_ALL_UUIDS_BY_USERNAME = "SELECT uuid FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
     private static final String PLAYER_DELETE_ALL_UUIDS_BY_USERNAME = "DELETE FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
-    private static final String PLAYER_SELECT_BY_UUID = "SELECT username, primary_group FROM '{prefix}players' WHERE uuid=?";
+    private static final String PLAYER_SELECT_BY_UUID = "SELECT username, primary_group FROM '{prefix}players' WHERE uuid=? LIMIT 1";
     private static final String PLAYER_SELECT_PRIMARY_GROUP_BY_UUID = "SELECT primary_group FROM '{prefix}players' WHERE uuid=? LIMIT 1";
     private static final String PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID = "UPDATE '{prefix}players' SET primary_group=? WHERE uuid=?";
 
@@ -612,31 +607,23 @@ public class SqlStorage implements StorageImplementation {
     @Override
     public PlayerSaveResult savePlayerData(UUID uniqueId, String username) throws SQLException {
         username = username.toLowerCase(Locale.ROOT);
+        String oldUsername = null;
 
-        // find any existing mapping
-        String oldUsername = getPlayerName(uniqueId);
-
-        // do the insert
-        if (!username.equals(oldUsername)) {
-            try (Connection c = this.connectionFactory.getConnection()) {
-                if (oldUsername != null) {
+        try (Connection c = this.connectionFactory.getConnection()) {
+            SqlPlayerData existingPlayerData = selectPlayerData(c, uniqueId);
+            if (existingPlayerData == null) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
+                    ps.setString(1, uniqueId.toString());
+                    ps.setString(2, username);
+                    ps.setString(3, GroupManager.DEFAULT_GROUP_NAME);
+                    ps.execute();
+                }
+            } else {
+                oldUsername = existingPlayerData.username;
+                if (!username.equals(oldUsername)) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_USERNAME_FOR_UUID))) {
                         ps.setString(1, username);
                         ps.setString(2, uniqueId.toString());
-                        ps.execute();
-                    }
-                } else {
-                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT.getOrDefault(this.connectionFactory.getImplementationName(), PLAYER_INSERT_DEFAULT)))) {
-                        ps.setString(1, uniqueId.toString());
-                        ps.setString(2, username);
-                        ps.setString(3, GroupManager.DEFAULT_GROUP_NAME);
-
-                        // h2 statement only has 3 parameters
-                        if (!(this.connectionFactory instanceof H2ConnectionFactory)) {
-                            ps.setString(4, username);
-                            ps.setString(5, GroupManager.DEFAULT_GROUP_NAME);
-                        }
-
                         ps.execute();
                     }
                 }
@@ -909,16 +896,10 @@ public class SqlStorage implements StorageImplementation {
             }
         } else {
             // insert
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT.getOrDefault(this.connectionFactory.getImplementationName(), PLAYER_INSERT_DEFAULT)))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
                 ps.setString(1, user.toString());
                 ps.setString(2, data.username);
                 ps.setString(3, data.primaryGroup);
-
-                if (!(this.connectionFactory instanceof H2ConnectionFactory)) {
-                    ps.setString(4, data.username);
-                    ps.setString(5, data.primaryGroup);
-                }
-
                 ps.execute();
             }
         }
