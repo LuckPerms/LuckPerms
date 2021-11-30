@@ -70,7 +70,7 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     private Locale luckperms$locale;
 
     // Used by PlayerChangeWorldCallback hook below.
-    @Shadow public abstract ServerWorld getServerWorld();
+    @Shadow public abstract ServerWorld getWorld();
 
     @Override
     public User getLuckPermsUser() {
@@ -148,12 +148,12 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
 
     @Inject(at = @At("HEAD"), method = "setClientSettings")
     private void luckperms_setClientSettings(ClientSettingsC2SPacket information, CallbackInfo ci) {
-        String language = ((ClientSettingsC2SPacketAccessor) information).getLanguage();
+        String language = information.language();
         this.luckperms$locale = TranslationManager.parseLocale(language);
     }
 
     @Inject(at = @At("TAIL"), method = "worldChanged")
     private void luckperms_onChangeDimension(ServerWorld targetWorld, CallbackInfo ci) {
-        PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getServerWorld(), targetWorld, (ServerPlayerEntity) (Object) this);
+        PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getWorld(), targetWorld, (ServerPlayerEntity) (Object) this);
     }
 }
