@@ -37,9 +37,9 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ListGroups extends SingleCommand {
     public ListGroups() {
@@ -64,7 +64,7 @@ public class ListGroups extends SingleCommand {
                     return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
                 }).collect(Collectors.toList());
 
-        List<List<Group>> pages = Iterators.divideIterable(groups, 13);
+        List<List<Group>> pages = Iterators.divideIterable(groups, 8);
 
         if (pageIndex < 0 || pageIndex >= pages.size()) {
             page = 1;
@@ -74,10 +74,10 @@ public class ListGroups extends SingleCommand {
         Message.SEARCH_SHOWING_GROUPS.send(sender, page, pages.size(), groups.size());
         Message.GROUPS_LIST.send(sender);
 
-        Stream<? extends Track> allTracks = plugin.getTrackManager().getAll().values().stream();
+        Collection<? extends Track> allTracks = plugin.getTrackManager().getAll().values();
 
         for (Group group : pages.get(pageIndex)) {
-            List<String> tracks = allTracks.filter(t -> t.containsGroup(group)).map(Track::getName).collect(Collectors.toList());
+            List<String> tracks = allTracks.stream().filter(t -> t.containsGroup(group)).map(Track::getName).collect(Collectors.toList());
             Message.GROUPS_LIST_ENTRY.send(sender, group, group.getWeight().orElse(0), tracks);
         }
     }
