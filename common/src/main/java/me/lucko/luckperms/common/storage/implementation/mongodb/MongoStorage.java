@@ -667,7 +667,7 @@ public class MongoStorage implements StorageImplementation {
         }
 
         if (document.containsKey("expiry")) {
-            builder.expiry(document.getLong("expiry"));
+            builder.expiry((long) document.get("expiry"));
         }
 
         if (document.containsKey("context") && document.get("context") instanceof List) {
