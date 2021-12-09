@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
+import me.lucko.luckperms.common.util.CompletableFutures;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
@@ -193,7 +194,7 @@ public abstract class Exporter implements Runnable {
         }
 
         // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
-        CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        CompletableFuture<Void> overallFuture = CompletableFutures.allOf(futures);
 
         while (true) {
             try {

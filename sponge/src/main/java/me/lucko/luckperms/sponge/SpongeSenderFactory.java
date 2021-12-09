@@ -30,50 +30,61 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
 
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.ConsoleSource;
+import org.spongepowered.api.SystemSubject;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.service.permission.Subject;
 
+import java.util.Locale;
 import java.util.UUID;
 
-public class SpongeSenderFactory extends SenderFactory<LPSpongePlugin, CommandSource> {
+public class SpongeSenderFactory extends SenderFactory<LPSpongePlugin, Audience> {
     public SpongeSenderFactory(LPSpongePlugin plugin) {
         super(plugin);
     }
 
     @Override
-    protected String getName(CommandSource source) {
+    protected String getName(Audience source) {
         if (source instanceof Player) {
-            return source.getName();
+            return ((Player) source).name();
         }
         return Sender.CONSOLE_NAME;
     }
 
     @Override
-    protected UUID getUniqueId(CommandSource source) {
+    protected UUID getUniqueId(Audience source) {
         if (source instanceof Player) {
-            return ((Player) source).getUniqueId();
+            return ((Player) source).uniqueId();
         }
         return Sender.CONSOLE_UUID;
     }
 
     @Override
-    protected void sendMessage(CommandSource source, Component message) {
-        source.sendMessage(toNativeText(TranslationManager.render(message, source.getLocale())));
+    protected void sendMessage(Audience source, Component message) {
+        Locale locale = null;
+        if (source instanceof Player) {
+            locale = ((Player) source).locale();
+        }
+        Component rendered = TranslationManager.render(message, locale);
+
+        source.sendMessage(rendered);
     }
 
     @Override
-    protected Tristate getPermissionValue(CommandSource source, String node) {
-        Tristate result = CompatibilityUtil.convertTristate(source.getPermissionValue(source.getActiveContexts(), node));
+    protected Tristate getPermissionValue(Audience source, String node) {
+        if (!(source instanceof Subject)) {
+            throw new IllegalStateException("Source is not a subject");
+        }
+
+        final Subject subject = (Subject) source;
+        Tristate result = CompatibilityUtil.convertTristate(subject.permissionValue(node));
 
         // check the permdefault
-        if (result == Tristate.UNDEFINED && source.hasPermission(node)) {
+        if (result == Tristate.UNDEFINED && subject.hasPermission(node)) {
             result = Tristate.TRUE;
         }
 
@@ -81,22 +92,30 @@ public class SpongeSenderFactory extends SenderFactory<LPSpongePlugin, CommandSo
     }
 
     @Override
-    protected boolean hasPermission(CommandSource source, String node) {
-        return source.hasPermission(node);
+    protected boolean hasPermission(Audience source, String node) {
+        if (!(source instanceof Subject)) {
+            throw new IllegalStateException("Source is not a subject");
+        }
+
+        final Subject subject = (Subject) source;
+        return subject.hasPermission(node);
     }
 
     @Override
-    protected void performCommand(CommandSource source, String command) {
-        getPlugin().getBootstrap().getGame().getCommandManager().process(source, command);
+    protected void performCommand(Audience source, String command) {
+        if (!(source instanceof Subject)) {
+            throw new IllegalStateException("Source is not a subject");
+        }
+
+        try {
+            getPlugin().getBootstrap().getGame().server().commandManager().process(((Subject) source), source, command);
+        } catch (CommandException e) {
+            // ignore
+        }
     }
 
     @Override
-    protected boolean isConsole(CommandSource sender) {
-        return sender instanceof ConsoleSource;
+    protected boolean isConsole(Audience sender) {
+        return sender instanceof SystemSubject;
     }
-
-    public static Text toNativeText(Component component) {
-        return TextSerializers.JSON.deserialize(GsonComponentSerializer.gson().serialize(component));
-    }
-
 }

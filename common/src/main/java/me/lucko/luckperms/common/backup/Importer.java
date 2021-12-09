@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.CompletableFutures;
 import me.lucko.luckperms.common.util.Uuids;
 
 import net.luckperms.api.event.cause.CreationCause;
@@ -260,7 +261,7 @@ public class Importer implements Runnable {
         }
 
         // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
-        CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        CompletableFuture<Void> overallFuture = CompletableFutures.allOf(futures);
 
         this.notify.forEach(s -> Message.IMPORT_INFO.send(s, "All data entries have been processed and scheduled for import - now waiting for the execution to complete."));
 

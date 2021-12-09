@@ -39,19 +39,25 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.model.SimplePermissionDescription;
+import me.lucko.luckperms.sponge.service.model.SubjectDataUpdateEventImpl;
+import me.lucko.luckperms.sponge.service.model.TemporaryCauseHolderSubject;
 import me.lucko.luckperms.sponge.service.model.persisted.DefaultsCollection;
 import me.lucko.luckperms.sponge.service.model.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.model.persisted.SubjectStorage;
 import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.plugin.PluginContainer;
+import net.kyori.adventure.text.Component;
+import net.luckperms.api.context.ImmutableContextSet;
+
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.permission.SubjectDataUpdateEvent;
 import org.spongepowered.api.service.context.ContextCalculator;
-import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -74,7 +80,7 @@ public class LuckPermsService implements LPPermissionService {
     /**
      * A cached proxy of this instance
      */
-    private final PermissionService spongeProxy;
+    private final PermissionAndContextService spongeProxy;
 
     /**
      * Reference factory, used to obtain {@link LPSubjectReference}s.
@@ -135,7 +141,7 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public PermissionService sponge() {
+    public PermissionAndContextService sponge() {
         return this.spongeProxy;
     }
 
@@ -145,7 +151,7 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public ContextManager<Subject, Player> getContextManager() {
+    public ContextManager<Subject, ServerPlayer> getContextManager() {
         return this.plugin.getContextManager();
     }
 
@@ -195,7 +201,7 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner) {
+    public LPPermissionDescription registerPermissionDescription(String id, Component description, PluginContainer owner) {
         Objects.requireNonNull(id, "id");
         SimplePermissionDescription desc = new SimplePermissionDescription(this, id, description, owner);
         this.permissionDescriptions.put(id, desc);
@@ -225,9 +231,28 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public void registerContextCalculator(ContextCalculator<Subject> calculator) {
+    public void registerContextCalculator(ContextCalculator calculator) {
         Objects.requireNonNull(calculator);
         this.plugin.getContextManager().registerCalculator(new ContextCalculatorProxy(calculator));
+    }
+
+    @Override
+    public ImmutableContextSet getContextsForCause(Cause cause) {
+        Objects.requireNonNull(cause, "cause");
+        return this.plugin.getContextManager().getContext(new TemporaryCauseHolderSubject(cause));
+    }
+
+    @Override
+    public ImmutableContextSet getContextsForCurrentCause() {
+        return getContextsForCause(this.plugin.getBootstrap().getGame().server().causeStackManager().currentCause());
+    }
+
+    @Override
+    public void fireUpdateEvent(LPSubjectData subjectData) {
+        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+            SubjectDataUpdateEvent event = new SubjectDataUpdateEventImpl(this.plugin, subjectData);
+            this.plugin.getBootstrap().getGame().eventManager().post(event);
+        });
     }
 
     @Override

@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.CaffeineFactory;
+import me.lucko.luckperms.common.util.CompletableFutures;
 
 import net.luckperms.api.cacheddata.CachedData;
 import net.luckperms.api.cacheddata.CachedDataManager;
@@ -240,7 +241,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         @Override
         public @NonNull CompletableFuture<Void> reload() {
             Set<QueryOptions> keys = this.cache.keySet();
-            return CompletableFuture.allOf(keys.stream().map(this::reload).toArray(CompletableFuture[]::new));
+            return CompletableFutures.allOf(keys.stream().map(this::reload));
         }
 
         @Override

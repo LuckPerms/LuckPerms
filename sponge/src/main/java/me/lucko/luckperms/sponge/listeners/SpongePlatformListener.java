@@ -28,9 +28,9 @@ package me.lucko.luckperms.sponge.listeners;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.command.SendCommandEvent;
+import org.spongepowered.api.event.command.ExecuteCommandEvent;
 
 import java.util.Locale;
 
@@ -42,13 +42,12 @@ public class SpongePlatformListener {
     }
 
     @Listener
-    public void onSendCommand(SendCommandEvent e) {
-        CommandSource source = e.getCause().first(CommandSource.class).orElse(null);
-        if (source == null) return;
+    public void onSendCommand(ExecuteCommandEvent e) {
+        CommandCause source = e.commandCause();
 
-        final String name = e.getCommand().toLowerCase(Locale.ROOT);
-        if ((name.equals("op") || name.equals("minecraft:op")) && source.hasPermission("minecraft.command.op") || (name.equals("deop") || name.equals("minecraft:deop")) && source.hasPermission("minecraft.command.deop")) {
-            Message.OP_DISABLED_SPONGE.send(this.plugin.getSenderFactory().wrap(source));
+        final String name = e.command().toLowerCase(Locale.ROOT);
+        if (((name.equals("op") || name.equals("minecraft:op")) && source.hasPermission("minecraft.command.op")) || ((name.equals("deop") || name.equals("minecraft:deop")) && source.hasPermission("minecraft.command.deop"))) {
+            Message.OP_DISABLED_SPONGE.send(this.plugin.getSenderFactory().wrap(source.audience()));
         }
     }
 }

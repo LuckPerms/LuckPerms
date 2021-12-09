@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.model.manager.AbstractManager;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.CompletableFutures;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 
 import net.luckperms.api.model.data.DataType;
@@ -165,11 +166,9 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
         Set<UUID> ids = new HashSet<>(getAll().keySet());
         ids.addAll(this.plugin.getBootstrap().getOnlinePlayers());
 
-        CompletableFuture<?>[] loadTasks = ids.stream()
+        return ids.stream()
                 .map(id -> this.plugin.getStorage().loadUser(id, null))
-                .toArray(CompletableFuture[]::new);
-
-        return CompletableFuture.allOf(loadTasks);
+                .collect(CompletableFutures.collector());
     }
 
     @Override

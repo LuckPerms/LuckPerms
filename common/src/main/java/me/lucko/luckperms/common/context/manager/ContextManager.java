@@ -135,16 +135,28 @@ public abstract class ContextManager<S, P extends S> {
         this.calculators.remove(calculator);
     }
 
+    protected void callContextCalculator(ContextCalculator<? super S> calculator, S subject, ContextConsumer consumer) {
+        try {
+            calculator.calculate(subject, consumer);
+        } catch (Throwable e) {
+            this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject, e);
+        }
+    }
+
+    protected void callStaticContextCalculator(StaticContextCalculator calculator, ContextConsumer consumer) {
+        try {
+            calculator.calculate(consumer);
+        } catch (Throwable e) {
+            this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts", e);
+        }
+    }
+
     protected QueryOptions calculate(S subject) {
         ImmutableContextSet.Builder accumulator = new ImmutableContextSetImpl.BuilderImpl();
         ContextConsumer consumer = accumulator::add;
 
         for (ContextCalculator<? super S> calculator : this.calculators.calculators()) {
-            try {
-                calculator.calculate(subject, consumer);
-            } catch (Throwable e) {
-                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating the context of subject " + subject, e);
-            }
+            callContextCalculator(calculator, subject, consumer);
         }
 
         return formQueryOptions(subject, accumulator.build());
@@ -155,11 +167,7 @@ public abstract class ContextManager<S, P extends S> {
         ContextConsumer consumer = accumulator::add;
 
         for (StaticContextCalculator calculator : this.calculators.staticCalculators()) {
-            try {
-                calculator.calculate(consumer);
-            } catch (Throwable e) {
-                this.plugin.getLogger().warn("An exception was thrown by " + getCalculatorClass(calculator) + " whilst calculating static contexts", e);
-            }
+            callStaticContextCalculator(calculator, consumer);
         }
 
         return formQueryOptions(accumulator.build());

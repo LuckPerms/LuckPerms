@@ -30,9 +30,9 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
+import me.lucko.luckperms.sponge.service.model.LPProxiedSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
-import me.lucko.luckperms.sponge.service.model.ProxiedSubject;
 
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
@@ -86,11 +86,11 @@ public final class SubjectReferenceFactory {
 
     public LPSubjectReference obtain(Subject subject) {
         Objects.requireNonNull(subject, "subject");
-        if (subject instanceof ProxiedSubject) {
-            return ((ProxiedSubject) subject).asSubjectReference();
+        if (subject instanceof LPProxiedSubject) {
+            return ((LPProxiedSubject) subject).asSubjectReference();
         }
 
-        return obtain(subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
+        return obtain(subject.containingCollection().identifier(), subject.identifier());
     }
 
     public LPSubjectReference obtain(SubjectReference reference) {
@@ -98,7 +98,7 @@ public final class SubjectReferenceFactory {
         if (reference instanceof LPSubjectReference) {
             return (LPSubjectReference) reference;
         } else {
-            return obtain(reference.getCollectionIdentifier(), reference.getSubjectIdentifier());
+            return obtain(reference.collectionIdentifier(), reference.subjectIdentifier());
         }
     }
 
@@ -119,23 +119,15 @@ public final class SubjectReferenceFactory {
         private SubjectReferenceAttributes(String collectionId, String id) {
             this.collectionId = collectionId.toLowerCase(Locale.ROOT);
             this.id = id.toLowerCase(Locale.ROOT);
-            this.hashCode = calculateHashCode();
+            this.hashCode = Objects.hash(this.collectionId, this.id);
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == this) return true;
             if (!(o instanceof SubjectReferenceAttributes)) return false;
-            final SubjectReferenceAttributes other = (SubjectReferenceAttributes) o;
-            return this.collectionId.equals(other.collectionId) && this.id.equals(other.id);
-        }
-
-        private int calculateHashCode() {
-            final int PRIME = 59;
-            int result = 1;
-            result = result * PRIME + this.collectionId.hashCode();
-            result = result * PRIME + this.id.hashCode();
-            return result;
+            final SubjectReferenceAttributes that = (SubjectReferenceAttributes) o;
+            return this.collectionId.equals(that.collectionId) && this.id.equals(that.id);
         }
 
         @Override

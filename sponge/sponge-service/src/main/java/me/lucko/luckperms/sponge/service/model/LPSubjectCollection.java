@@ -35,7 +35,6 @@ import net.luckperms.api.query.dataorder.DataQueryOrder;
 import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -71,7 +70,7 @@ public interface LPSubjectCollection {
 
     CompletableFuture<Boolean> hasRegistered(String identifier);
 
-    CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers);
+    CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Iterable<String> identifiers);
 
     ImmutableCollection<LPSubject> getLoadedSubjects();
 

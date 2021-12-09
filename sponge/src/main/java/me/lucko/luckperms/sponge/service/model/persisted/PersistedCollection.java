@@ -49,7 +49,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -143,7 +142,7 @@ public class PersistedCollection implements LPSubjectCollection {
     }
 
     @Override
-    public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers) {
+    public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Iterable<String> identifiers) {
         ImmutableSet.Builder<LPSubject> subjects = ImmutableSet.builder();
         for (String id : identifiers) {
             subjects.add(Objects.requireNonNull(this.subjects.get(id.toLowerCase(Locale.ROOT))));
