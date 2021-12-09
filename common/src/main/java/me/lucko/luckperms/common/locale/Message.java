@@ -2662,6 +2662,13 @@ public interface Message {
             .append(FULL_STOP)
     );
 
+    Args0 BULK_UPDATE_DISABLED = () -> prefixed(translatable()
+            // "&cBulk update functionality is disabled in the configuration file."
+            .key("luckperms.command.bulkupdate.disabled")
+            .color(RED)
+            .append(FULL_STOP)
+    );
+
     Args0 BULK_UPDATE_MUST_USE_CONSOLE = () -> prefixed(translatable()
             // "&cThe bulk update command can only be used from the console."
             .key("luckperms.command.bulkupdate.must-use-console")

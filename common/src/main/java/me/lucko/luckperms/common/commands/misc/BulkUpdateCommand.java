@@ -64,6 +64,11 @@ public class BulkUpdateCommand extends SingleCommand {
 
     @Override
     public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) throws CommandException {
+        if (plugin.getConfiguration().get(ConfigKeys.DISABLE_BULKUPDATE)) {
+            Message.BULK_UPDATE_DISABLED.send(sender);
+            return;
+        }
+
         if (!sender.isConsole()) {
             Message.BULK_UPDATE_MUST_USE_CONSOLE.send(sender);
             return;

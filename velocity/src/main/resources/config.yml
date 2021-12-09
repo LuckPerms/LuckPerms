@@ -575,6 +575,12 @@ allow-invalid-usernames: false
 # - If automation is needed, users should prefer using the LuckPerms API.
 skip-bulkupdate-confirmation: false
 
+# If LuckPerms should prevent bulkupdate operations.
+#
+# - When set to true, bulkupdate operations (the /lp bulkupdate command) will not work.
+# - When set to false, bulkupdate operations will be allowed via the console.
+disable-bulkupdate: false
+
 # If LuckPerms should allow a users primary group to be removed with the 'parent remove' command.
 #
 # - When this happens, the plugin will set their primary group back to default.
