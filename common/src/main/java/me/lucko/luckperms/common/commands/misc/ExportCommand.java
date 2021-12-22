@@ -72,7 +72,7 @@ public class ExportCommand extends SingleCommand {
         } else {
             Path dataDirectory = plugin.getBootstrap().getDataDirectory();
             Path path;
-            DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ssz")
+            DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss-z")
               .withZone(ZoneId.systemDefault());
 
             if (args.get(0).isEmpty()) {
