@@ -73,8 +73,8 @@ public class ExportCommand extends SingleCommand {
             Path dataDirectory = plugin.getBootstrap().getDataDirectory();
             Path path;
 
-            if (args.get(0).isEmpty()) {
-                DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss-z")
+            if (args.isEmpty()) {
+                DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss-z")
                   .withZone(ZoneId.systemDefault());
 
                 path = dataDirectory.resolve("luckperms-" + DATE_FORMAT.format(Instant.now()) + ".json.gz");
