@@ -53,6 +53,10 @@ public abstract class AbstractJavaScheduler implements SchedulerAdapter {
     private final ForkJoinPool worker;
 
     public AbstractJavaScheduler(LuckPermsBootstrap bootstrap) {
+        this(bootstrap, new WorkerThreadFactory());
+    }
+
+    protected AbstractJavaScheduler(LuckPermsBootstrap bootstrap, ForkJoinPool.ForkJoinWorkerThreadFactory factory) {
         this.bootstrap = bootstrap;
 
         this.scheduler = new ScheduledThreadPoolExecutor(1, r -> {
@@ -62,7 +66,7 @@ public abstract class AbstractJavaScheduler implements SchedulerAdapter {
         });
         this.scheduler.setRemoveOnCancelPolicy(true);
         this.scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-        this.worker = new ForkJoinPool(PARALLELISM, new WorkerThreadFactory(), new ExceptionHandler(), false);
+        this.worker = new ForkJoinPool(PARALLELISM, factory, new ExceptionHandler(), false);
     }
 
     @Override
