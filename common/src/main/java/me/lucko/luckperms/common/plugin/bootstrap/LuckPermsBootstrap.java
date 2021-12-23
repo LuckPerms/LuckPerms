@@ -136,9 +136,11 @@ public interface LuckPermsBootstrap {
      * Gets the plugins main data storage directory
      *
      * <p>Bukkit: /root/plugins/LuckPerms</p>
-     * <p>Bungee: /root/plugins/LuckPerms</p>
+     * <p>BungeeCord: /root/plugins/LuckPerms</p>
      * <p>Sponge: /root/luckperms/</p>
+     * <p>Velocity: /root/plugins/luckperms</p>
      * <p>Fabric: /root/mods/LuckPerms</p>
+     * <p>Forge: /root/luckperms</p>
      *
      * @return the platforms data folder
      */
