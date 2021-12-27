@@ -47,7 +47,7 @@ public class ExportCommand extends SingleCommand {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public ExportCommand() {
-        super(CommandSpec.EXPORT, "Export", CommandPermission.EXPORT, Predicates.notInRange(1, 2));
+        super(CommandSpec.EXPORT, "Export", CommandPermission.EXPORT, Predicates.alwaysFalse());
     }
 
     @Override
