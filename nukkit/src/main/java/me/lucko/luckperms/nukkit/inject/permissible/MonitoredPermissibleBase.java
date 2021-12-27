@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.nukkit.inject.permissible;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.util.Tristate;
 
@@ -68,8 +68,8 @@ public class MonitoredPermissibleBase extends PermissibleBase {
         this.initialised = true;
     }
 
-    private void logCheck(PermissionCheckEvent.Origin origin, String permission, boolean result) {
-        this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.verboseCheckTarget, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.of(Tristate.of(result)));
+    private void logCheck(CheckOrigin origin, String permission, boolean result) {
+        this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.verboseCheckTarget, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.forMonitoredResult(Tristate.of(result)));
         this.plugin.getPermissionRegistry().offer(permission);
     }
 
@@ -84,7 +84,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
         }
 
         final boolean result = this.delegate.isPermissionSet(permission);
-        logCheck(PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK, permission, result);
+        logCheck(CheckOrigin.PLATFORM_API_HAS_PERMISSION_SET, permission, result);
         return result;
     }
 
@@ -95,7 +95,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
         }
 
         final boolean result = this.delegate.isPermissionSet(permission);
-        logCheck(PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK, permission.getName(), result);
+        logCheck(CheckOrigin.PLATFORM_API_HAS_PERMISSION_SET, permission.getName(), result);
         return result;
     }
 
@@ -106,7 +106,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
         }
 
         final boolean result = this.delegate.hasPermission(permission);
-        logCheck(PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, permission, result);
+        logCheck(CheckOrigin.PLATFORM_API_HAS_PERMISSION, permission, result);
         return result;
     }
 
@@ -117,7 +117,7 @@ public class MonitoredPermissibleBase extends PermissibleBase {
         }
 
         final boolean result = this.delegate.hasPermission(permission);
-        logCheck(PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, permission.getName(), result);
+        logCheck(CheckOrigin.PLATFORM_API_HAS_PERMISSION, permission.getName(), result);
         return result;
     }
 

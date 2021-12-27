@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.common.calculator.processor;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.node.AbstractNode;
 
-import net.luckperms.api.util.Tristate;
+import net.luckperms.api.node.Node;
 
-public class SpongeWildcardProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+public class SpongeWildcardProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(SpongeWildcardProcessor.class);
 
     @Override
@@ -45,9 +45,9 @@ public class SpongeWildcardProcessor extends AbstractPermissionProcessor impleme
 
             node = node.substring(0, endIndex);
             if (!node.isEmpty()) {
-                Tristate t = Tristate.of(this.sourceMap.get(node));
-                if (t != Tristate.UNDEFINED) {
-                    return RESULT_FACTORY.result(t, "match: " + node);
+                Node n = this.sourceMap.get(node);
+                if (n != null) {
+                    return RESULT_FACTORY.result(n);
                 }
             }
         }

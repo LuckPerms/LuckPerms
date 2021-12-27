@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.cacheddata.type;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import me.lucko.luckperms.common.cacheddata.result.StringResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.node.types.Weight;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -35,6 +36,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
@@ -75,9 +77,9 @@ public class MetaAccumulator {
 
     private final AtomicReference<State> state = new AtomicReference<>(State.ACCUMULATING);
 
-    private final ListMultimap<String, String> meta;
-    private final SortedMap<Integer, String> prefixes;
-    private final SortedMap<Integer, String> suffixes;
+    private final ListMultimap<String, StringResult<MetaNode>> meta;
+    private final SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> prefixes;
+    private final SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> suffixes;
     private int weight = 0;
     private String primaryGroup;
 
@@ -119,10 +121,10 @@ public class MetaAccumulator {
 
         // perform final changes
         if (!this.meta.containsKey(Weight.NODE_KEY) && this.weight != 0) {
-            this.meta.put(Weight.NODE_KEY, String.valueOf(this.weight));
+            this.meta.put(Weight.NODE_KEY, StringResult.of(String.valueOf(this.weight)));
         }
         if (this.primaryGroup != null && !this.meta.containsKey("primarygroup")) {
-            this.meta.put("primarygroup", this.primaryGroup);
+            this.meta.put("primarygroup", StringResult.of(this.primaryGroup));
         }
         this.seenNodeKeys = null; // free up for GC
 
@@ -146,25 +148,20 @@ public class MetaAccumulator {
 
         if (n instanceof MetaNode) {
             MetaNode mn = (MetaNode) n;
-            this.meta.put(mn.getMetaKey(), mn.getMetaValue());
+            this.meta.put(mn.getMetaKey(), StringResult.of(mn));
         }
 
         if (n instanceof PrefixNode) {
             PrefixNode pn = (PrefixNode) n;
-            this.prefixes.putIfAbsent(pn.getPriority(), pn.getMetaValue());
+            this.prefixes.putIfAbsent(pn.getPriority(), StringResult.of(pn));
             this.prefixAccumulator.offer(pn);
         }
 
         if (n instanceof SuffixNode) {
             SuffixNode pn = (SuffixNode) n;
-            this.suffixes.putIfAbsent(pn.getPriority(), pn.getMetaValue());
+            this.suffixes.putIfAbsent(pn.getPriority(), StringResult.of(pn));
             this.suffixAccumulator.offer(pn);
         }
-    }
-
-    public void accumulateMeta(String key, String value) {
-        ensureState(State.ACCUMULATING);
-        this.meta.put(key, value);
     }
 
     public void accumulateWeight(int weight) {
@@ -179,22 +176,22 @@ public class MetaAccumulator {
 
     // read methods
 
-    public ListMultimap<String, String> getMeta() {
+    public ListMultimap<String, StringResult<MetaNode>> getMeta() {
         ensureState(State.COMPLETE);
         return this.meta;
     }
 
-    public Map<Integer, String> getChatMeta(ChatMetaType type) {
+    public Map<Integer, StringResult<ChatMetaNode<?, ?>>> getChatMeta(ChatMetaType type) {
         ensureState(State.COMPLETE);
         return type == ChatMetaType.PREFIX ? this.prefixes : this.suffixes;
     }
 
-    public SortedMap<Integer, String> getPrefixes() {
+    public SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> getPrefixes() {
         ensureState(State.COMPLETE);
         return this.prefixes;
     }
 
-    public SortedMap<Integer, String> getSuffixes() {
+    public SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> getSuffixes() {
         ensureState(State.COMPLETE);
         return this.suffixes;
     }
@@ -219,14 +216,14 @@ public class MetaAccumulator {
         return this.suffixDefinition;
     }
 
-    public String getPrefix() {
+    public StringResult<ChatMetaNode<?, ?>> getPrefix() {
         ensureState(State.COMPLETE);
-        return this.prefixAccumulator.toFormattedString();
+        return this.prefixAccumulator.toResult();
     }
 
-    public String getSuffix() {
+    public StringResult<ChatMetaNode<?, ?>> getSuffix() {
         ensureState(State.COMPLETE);
-        return this.suffixAccumulator.toFormattedString();
+        return this.suffixAccumulator.toResult();
     }
 
     @Override

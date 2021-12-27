@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.cacheddata.type;
 
+import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.query.meta.MetaValueSelector;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -43,7 +44,7 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
     }
 
     @Override
-    public @NonNull String selectValue(@NonNull String key, @NonNull List<String> values) {
+    public @NonNull MetaNode selectValue(@NonNull String key, @NonNull List<MetaNode> values) {
         switch (values.size()) {
             case 0:
                 throw new IllegalArgumentException("values is empty");
@@ -57,7 +58,7 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
     public enum Strategy {
         INHERITANCE {
             @Override
-            public String select(List<String> values) {
+            public MetaNode select(List<MetaNode> values) {
                 return values.get(0);
             }
         },
@@ -65,7 +66,7 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
             private final DoubleSelectionPredicate selection = (value, current) -> value > current;
 
             @Override
-            public String select(List<String> values) {
+            public MetaNode select(List<MetaNode> values) {
                 return selectNumber(values, this.selection);
             }
         },
@@ -73,12 +74,12 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
             private final DoubleSelectionPredicate selection = (value, current) -> value < current;
 
             @Override
-            public String select(List<String> values) {
+            public MetaNode select(List<MetaNode> values) {
                 return selectNumber(values, this.selection);
             }
         };
 
-        public abstract String select(List<String> values);
+        public abstract MetaNode select(List<MetaNode> values);
 
         public static Strategy parse(String s) {
             try {
@@ -94,15 +95,16 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
         boolean shouldSelect(double value, double current);
     }
 
-    private static String selectNumber(List<String> values, DoubleSelectionPredicate selection) {
+    private static MetaNode selectNumber(List<MetaNode> values, DoubleSelectionPredicate selection) {
         double current = 0;
-        String selected = null;
+        MetaNode selected = null;
 
-        for (String value : values) {
+        for (MetaNode node : values) {
+            String value = node.getMetaValue();
             try {
                 double parse = Double.parseDouble(value);
                 if (selected == null || selection.shouldSelect(parse, current)) {
-                    selected = value;
+                    selected = node;
                     current = parse;
                 }
             } catch (NumberFormatException e) {

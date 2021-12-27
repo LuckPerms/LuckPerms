@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.Map;
@@ -75,7 +76,7 @@ public abstract class HolderCachedDataManager<T extends PermissionHolder> extend
     }
 
     @Override
-    protected <M extends Map<String, Boolean>> M resolvePermissions(IntFunction<M> mapFactory, QueryOptions queryOptions) {
+    protected <M extends Map<String, Node>> M resolvePermissions(IntFunction<M> mapFactory, QueryOptions queryOptions) {
         return this.holder.exportPermissions(mapFactory, queryOptions, true, getPlugin().getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND));
     }
 

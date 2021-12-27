@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
 import me.lucko.luckperms.fabric.model.MixinUser;
@@ -133,7 +133,7 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
         }
 
         PermissionCache data = user.getCachedData().getPermissionData(queryOptions);
-        return data.checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
+        return data.checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
     }
 
 

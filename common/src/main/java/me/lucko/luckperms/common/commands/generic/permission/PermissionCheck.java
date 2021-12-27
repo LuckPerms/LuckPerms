@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.commands.generic.permission;
 
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -123,28 +123,12 @@ public class PermissionCheck extends GenericChildCommand {
 
         // perform a "real" check
         QueryOptions queryOptions = target.getQueryOptions();
-        TristateResult checkResult = target.getCachedData().getPermissionData(queryOptions).checkPermission(node, PermissionCheckEvent.Origin.INTERNAL);
+        TristateResult checkResult = target.getCachedData().getPermissionData(queryOptions).checkPermission(node, CheckOrigin.INTERNAL);
 
         Tristate result = checkResult.result();
-        String processor;
-        String cause;
+        String processor = checkResult.processorClassFriendly();
+        Node cause = checkResult.node();
         ImmutableContextSet context = queryOptions.context();
-
-        if (result != Tristate.UNDEFINED) {
-            Class<?> processorClass = checkResult.processorClass();
-            if (processorClass.getName().startsWith("me.lucko.luckperms.")) {
-                String simpleName = processorClass.getSimpleName();
-                String platform = processorClass.getName().split("\\.")[3];
-                processor = platform + "." + simpleName;
-            } else {
-                processor = processorClass.getName();
-            }
-
-            cause = checkResult.cause();
-        } else {
-            processor = null;
-            cause = null;
-        }
 
         // send results
         Message.PERMISSION_CHECK_RESULT.send(sender, node, result, processor, cause, context);

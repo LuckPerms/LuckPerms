@@ -110,7 +110,7 @@ public class SubjectStorage {
      * @throws IOException if the write fails
      */
     public void saveToFile(PersistedSubject subject) throws IOException {
-        Path subjectFile = resolveFile(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
+        Path subjectFile = resolveFile(subject.getParentCollection().getIdentifier(), subject.getIdentifier().getName());
         saveToFile(SubjectDataContainer.copyOf(subject.getSubjectData()), subjectFile);
     }
 

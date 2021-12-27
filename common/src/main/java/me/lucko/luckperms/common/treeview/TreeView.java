@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JObject;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -161,7 +161,7 @@ public class TreeView {
             checks = new JObject();
             for (Map.Entry<Integer, String> node : this.view.getNodeEndings()) {
                 String permission = prefix + node.getValue();
-                checks.add(permission, checker.checkPermission(permission, PermissionCheckEvent.Origin.INTERNAL).result().name().toLowerCase(Locale.ROOT));
+                checks.add(permission, checker.checkPermission(permission, CheckOrigin.INTERNAL).result().name().toLowerCase(Locale.ROOT));
             }
         } else {
             checks = null;

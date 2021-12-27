@@ -354,19 +354,19 @@ public abstract class PermissionHolder {
         return (List) inheritanceTree;
     }
 
-    public <M extends Map<String, Boolean>> M exportPermissions(IntFunction<M> mapFactory, QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
+    public <M extends Map<String, Node>> M exportPermissions(IntFunction<M> mapFactory, QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
         List<Node> entries = resolveInheritedNodes(queryOptions);
         M map = mapFactory.apply(entries.size());
         processExportedPermissions(map, entries, convertToLowercase, resolveShorthand);
         return map;
     }
 
-    private static void processExportedPermissions(Map<String, Boolean> accumulator, List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
+    private static void processExportedPermissions(Map<String, Node> accumulator, List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
         for (Node node : entries) {
             if (convertToLowercase) {
-                accumulator.putIfAbsent(node.getKey().toLowerCase(Locale.ROOT), node.getValue());
+                accumulator.putIfAbsent(node.getKey().toLowerCase(Locale.ROOT), node);
             } else {
-                accumulator.putIfAbsent(node.getKey(), node.getValue());
+                accumulator.putIfAbsent(node.getKey(), node);
             }
         }
 
@@ -375,9 +375,9 @@ public abstract class PermissionHolder {
                 Collection<String> shorthand = node.resolveShorthand();
                 for (String s : shorthand) {
                     if (convertToLowercase) {
-                        accumulator.putIfAbsent(s.toLowerCase(Locale.ROOT), node.getValue());
+                        accumulator.putIfAbsent(s.toLowerCase(Locale.ROOT), node);
                     } else {
-                        accumulator.putIfAbsent(s, node.getValue());
+                        accumulator.putIfAbsent(s, node);
                     }
                 }
             }

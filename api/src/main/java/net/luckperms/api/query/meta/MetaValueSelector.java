@@ -54,6 +54,6 @@ public interface MetaValueSelector {
      * @param values the values, in the order in which they were accumulated.
      * @return the selected value
      */
-    @NonNull String selectValue(@NonNull String key, @NonNull List<String> values);
+    @NonNull MetaNode selectValue(@NonNull String key, @NonNull List<MetaNode> values);
 
 }

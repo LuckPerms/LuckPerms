@@ -23,23 +23,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.calculator;
+package me.lucko.luckperms.nukkit.calculator;
 
-import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
+import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
-import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 
-public class FixedDefaultsProcessor extends DefaultsProcessor {
-    private final LPSubject defaultsSubject;
+/**
+ * Permission Processor for Nukkits "default" permission system.
+ */
+public class DefaultPermissionMapProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+    private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(DefaultPermissionMapProcessor.class);
 
-    public FixedDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions, LPSubject defaultsSubject, boolean overrideWildcards) {
-        super(service, queryOptions, overrideWildcards);
-        this.defaultsSubject = defaultsSubject;
+    private final LPNukkitPlugin plugin;
+    private final boolean isOp;
+
+    public DefaultPermissionMapProcessor(LPNukkitPlugin plugin, boolean isOp) {
+        this.plugin = plugin;
+        this.isOp = isOp;
     }
 
     @Override
-    protected LPSubject getTypeDefaults() {
-        return this.defaultsSubject;
+    public TristateResult hasPermission(String permission) {
+        Tristate t = this.plugin.getDefaultPermissionMap().lookupDefaultPermission(permission, this.isOp);
+        if (t != Tristate.UNDEFINED) {
+            return RESULT_FACTORY.result(t);
+        }
+
+        return TristateResult.UNDEFINED;
     }
 }

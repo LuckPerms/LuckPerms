@@ -27,7 +27,8 @@ package me.lucko.luckperms.common.verbose;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.Result;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.http.AbstractHttpClient;
 import me.lucko.luckperms.common.http.BytebinClient;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
@@ -38,6 +39,7 @@ import me.lucko.luckperms.common.util.StackTracePrinter;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
@@ -45,7 +47,8 @@ import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.query.QueryMode;
 
 import java.io.ByteArrayOutputStream;
@@ -150,28 +153,6 @@ public class VerboseListener {
     }
 
     private void sendNotification(VerboseEvent event) {
-        if (this.notifiedSender.isConsole()) {
-            // just send as a raw message
-            if (event instanceof PermissionCheckEvent) {
-                PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
-                Message.VERBOSE_LOG_PERMISSION.send(this.notifiedSender,
-                        permissionEvent.getCheckTarget().describe(),
-                        permissionEvent.getPermission(),
-                        permissionEvent.getResult().result()
-                );
-            } else if (event instanceof MetaCheckEvent) {
-                MetaCheckEvent metaEvent = (MetaCheckEvent) event;
-                Message.VERBOSE_LOG_META.send(this.notifiedSender,
-                        metaEvent.getCheckTarget().describe(),
-                        metaEvent.getKey(),
-                        metaEvent.getResult()
-                );
-            } else {
-                throw new IllegalArgumentException("Unknown event type: " + event);
-            }
-            return;
-        }
-
         // form a text component from the check trace
         Component component;
         if (event instanceof PermissionCheckEvent) {
@@ -186,69 +167,52 @@ public class VerboseListener {
             component = Message.VERBOSE_LOG_META.build(
                     metaEvent.getCheckTarget().describe(),
                     metaEvent.getKey(),
-                    metaEvent.getResult()
+                    String.valueOf(metaEvent.getResult().result())
             );
         } else {
             throw new IllegalArgumentException("Unknown event type: " + event);
         }
 
+        // just send as a raw message
+        if (this.notifiedSender.isConsole()) {
+            this.notifiedSender.sendMessage(component);
+            return;
+        }
+
         // build the hover text
         List<ComponentLike> hover = new ArrayList<>();
 
-        if (event instanceof PermissionCheckEvent) {
-            PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
-            hover.add(Component.text()
-                    .append(Component.text("Type: ", NamedTextColor.GREEN))
-                    .append(Component.text("permission", NamedTextColor.DARK_GREEN))
-            );
-            hover.add(Component.text()
-                    .append(Component.text("Origin: ", NamedTextColor.AQUA))
-                    .append(Component.text(permissionEvent.getOrigin().name(), NamedTextColor.DARK_GREEN))
-            );
+        hover.add(Message.VERBOSE_LOG_HOVER_TYPE.build(event.getType().toString()));
+        hover.add(Message.VERBOSE_LOG_HOVER_ORIGIN.build(event.getOrigin().name()));
 
-            TristateResult result = permissionEvent.getResult();
-            if (result.processorClass() != null) {
-                hover.add(Component.text()
-                        .append(Component.text("Processor: ", NamedTextColor.AQUA))
-                        .append(Component.text(result.processorClass().getName(), NamedTextColor.DARK_GREEN))
-                );
-            }
-            if (result.cause() != null) {
-                hover.add(Component.text()
-                        .append(Component.text("Cause: ", NamedTextColor.AQUA))
-                        .append(Component.text(result.cause(), NamedTextColor.DARK_GREEN))
-                );
+        Result<?, ?> result = event.getResult();
+
+        if (result instanceof TristateResult) {
+            TristateResult tristateResult = (TristateResult) result;
+
+            if (tristateResult.processorClass() != null) {
+                hover.add(Message.VERBOSE_LOG_HOVER_PROCESSOR.build(tristateResult.processorClassFriendly()));
             }
         }
-        if (event instanceof MetaCheckEvent) {
-            MetaCheckEvent metaEvent = (MetaCheckEvent) event;
-            hover.add(Component.text()
-                    .append(Component.text("Type: ", NamedTextColor.GREEN))
-                    .append(Component.text("meta", NamedTextColor.DARK_GREEN))
-            );
-            hover.add(Component.text()
-                    .append(Component.text("Origin: ", NamedTextColor.AQUA))
-                    .append(Component.text(metaEvent.getOrigin().name(), NamedTextColor.DARK_GREEN))
-            );
+
+        Node node = result.node();
+        if (node != null) {
+            if (node instanceof MetaNode) {
+                hover.add(Message.VERBOSE_LOG_HOVER_CAUSE_META.build((MetaNode) node));
+            } else {
+                hover.add(Message.VERBOSE_LOG_HOVER_CAUSE.build(node));
+            }
         }
 
         if (event.getCheckQueryOptions().mode() == QueryMode.CONTEXTUAL) {
-            hover.add(Component.text()
-                    .append(Component.text("Context: ", NamedTextColor.AQUA))
-                    .append(Message.formatContextSet(event.getCheckQueryOptions().context()))
-            );
+            hover.add(Message.VERBOSE_LOG_HOVER_CONTEXT.build(event.getCheckQueryOptions().context()));
         }
 
-        hover.add(Component.text()
-                .append(Component.text("Thread: ", NamedTextColor.AQUA))
-                .append(Component.text(event.getCheckThread(), NamedTextColor.WHITE))
-        );
+        hover.add(Message.VERBOSE_LOG_HOVER_THREAD.build(event.getCheckThread()));
 
-        hover.add(Component.text()
-                .append(Component.text("Trace: ", NamedTextColor.AQUA))
-        );
+        hover.add(Message.VERBOSE_LOG_HOVER_TRACE_TITLE.build());
 
-        Consumer<StackTraceElement> printer = StackTracePrinter.elementToString(str -> hover.add(Component.text(str, NamedTextColor.GRAY)));
+        Consumer<StackTraceElement> printer = StackTracePrinter.elementToString(str -> hover.add(Message.VERBOSE_LOG_HOVER_TRACE_CONTENT.build(str)));
         int overflow;
         if (shouldFilterStackTrace(event)) {
             overflow = CHAT_FILTERED_PRINTER.process(event.getCheckTrace(), printer);
@@ -256,7 +220,7 @@ public class VerboseListener {
             overflow = CHAT_UNFILTERED_PRINTER.process(event.getCheckTrace(), printer);
         }
         if (overflow != 0) {
-            hover.add(Component.text("... and " + overflow + " more", NamedTextColor.WHITE));
+            hover.add(Message.VERBOSE_LOG_HOVER_TRACE_OVERFLOW.build(overflow));
         }
 
         // send the message
@@ -267,8 +231,8 @@ public class VerboseListener {
     private static boolean shouldFilterStackTrace(VerboseEvent event) {
         if (event instanceof PermissionCheckEvent) {
             PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
-            return permissionEvent.getOrigin() == PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK ||
-                    permissionEvent.getOrigin() == PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK;
+            return permissionEvent.getOrigin() == CheckOrigin.PLATFORM_API_HAS_PERMISSION_SET ||
+                    permissionEvent.getOrigin() == CheckOrigin.PLATFORM_API_HAS_PERMISSION;
         }
         return false;
     }
@@ -302,8 +266,8 @@ public class VerboseListener {
                 .add("truncated", truncated);
 
         JArray data = new JArray();
-        for (VerboseEvent events : this.results) {
-            data.add(events.toJson(shouldFilterStackTrace(events) ? WEB_FILTERED_PRINTER : WEB_UNFILTERED_PRINTER));
+        for (VerboseEvent event : this.results) {
+            data.add(event.toJson(shouldFilterStackTrace(event) ? WEB_FILTERED_PRINTER : WEB_UNFILTERED_PRINTER));
         }
         this.results.clear();
 

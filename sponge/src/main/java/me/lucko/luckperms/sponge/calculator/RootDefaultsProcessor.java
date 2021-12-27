@@ -25,19 +25,33 @@
 
 package me.lucko.luckperms.sponge.calculator;
 
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.calculator.processor.AbstractOverrideWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.model.LPSubject;
 
 import net.luckperms.api.query.QueryOptions;
+import net.luckperms.api.util.Tristate;
 
-public class UserDefaultsProcessor extends DefaultsProcessor implements PermissionProcessor {
-    public UserDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions, boolean overrideWildcards) {
-        super(service, queryOptions, overrideWildcards);
+public class RootDefaultsProcessor extends AbstractOverrideWildcardProcessor implements PermissionProcessor {
+    private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(RootDefaultsProcessor.class);
+
+    protected final LPPermissionService service;
+    private final QueryOptions queryOptions;
+
+    public RootDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions, boolean overrideWildcards) {
+        super(overrideWildcards);
+        this.service = service;
+        this.queryOptions = queryOptions;
     }
 
     @Override
-    protected LPSubject getTypeDefaults() {
-        return this.service.getUserSubjects().getDefaults();
+    public TristateResult hasPermission(String permission) {
+        Tristate t = this.service.getRootDefaults().getPermissionValue(this.queryOptions, permission);
+        if (t != Tristate.UNDEFINED) {
+            return RESULT_FACTORY.result(t);
+        }
+
+        return TristateResult.UNDEFINED;
     }
 }

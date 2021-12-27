@@ -52,7 +52,7 @@ public class NukkitCalculatorFactory implements CalculatorFactory {
 
     @Override
     public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
-        List<PermissionProcessor> processors = new ArrayList<>(7);
+        List<PermissionProcessor> processors = new ArrayList<>(8);
 
         processors.add(new DirectProcessor());
 
@@ -75,7 +75,8 @@ public class NukkitCalculatorFactory implements CalculatorFactory {
         boolean op = queryOptions.option(NukkitContextManager.OP_OPTION).orElse(false);
         if (metadata.getHolderType() == HolderType.USER && this.plugin.getConfiguration().get(ConfigKeys.APPLY_NUKKIT_DEFAULT_PERMISSIONS)) {
             boolean overrideWildcards = this.plugin.getConfiguration().get(ConfigKeys.APPLY_DEFAULT_NEGATIONS_BEFORE_WILDCARDS);
-            processors.add(new DefaultsProcessor(this.plugin, overrideWildcards, op));
+            processors.add(new DefaultPermissionMapProcessor(this.plugin, op));
+            processors.add(new PermissionMapProcessor(this.plugin, overrideWildcards, op));
         }
 
         if (op) {

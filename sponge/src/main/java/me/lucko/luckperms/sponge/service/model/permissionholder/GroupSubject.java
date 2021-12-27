@@ -30,6 +30,8 @@ import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
+import net.luckperms.api.model.PermissionHolder;
+
 import org.spongepowered.api.command.CommandSource;
 
 import java.util.Optional;
@@ -43,8 +45,8 @@ public class GroupSubject extends PermissionHolderSubject<SpongeGroup> implement
     }
 
     @Override
-    public String getIdentifier() {
-        return this.parent.getObjectName();
+    public PermissionHolder.Identifier getIdentifier() {
+        return this.parent.getIdentifier();
     }
 
     @Override

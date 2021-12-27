@@ -25,16 +25,14 @@
 
 package me.lucko.luckperms.common.calculator.processor;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 
-import net.luckperms.api.util.Tristate;
-
-public class DirectProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+public class DirectProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(DirectProcessor.class);
 
     @Override
     public TristateResult hasPermission(String permission) {
-        return RESULT_FACTORY.result(Tristate.of(this.sourceMap.get(permission)));
+        return RESULT_FACTORY.result(this.sourceMap.get(permission));
     }
 
 }

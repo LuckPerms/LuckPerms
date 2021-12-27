@@ -25,8 +25,10 @@
 
 package me.lucko.luckperms.common.calculator.processor;
 
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+
+import net.luckperms.api.node.Node;
 
 import java.util.Map;
 
@@ -52,7 +54,7 @@ public interface PermissionProcessor {
      *
      * @param sourceMap the source map
      */
-    default void setSource(Map<String, Boolean> sourceMap) {
+    default void setSource(Map<String, Node> sourceMap) {
 
     }
 

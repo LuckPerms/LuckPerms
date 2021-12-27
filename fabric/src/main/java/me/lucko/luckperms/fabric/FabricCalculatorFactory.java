@@ -69,7 +69,7 @@ public class FabricCalculatorFactory implements CalculatorFactory {
 
         boolean integratedOwner = queryOptions.option(FabricContextManager.INTEGRATED_SERVER_OWNER).orElse(false);
         if (integratedOwner && this.plugin.getConfiguration().get(ConfigKeys.FABRIC_INTEGRATED_SERVER_OWNER_BYPASSES_CHECKS)) {
-            processors.add(new ServerOwnerProcessor());
+            processors.add(ServerOwnerProcessor.INSTANCE);
         }
 
         return new PermissionCalculator(this.plugin, metadata, processors);

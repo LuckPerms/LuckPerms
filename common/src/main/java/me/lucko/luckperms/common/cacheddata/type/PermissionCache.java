@@ -25,14 +25,17 @@
 
 package me.lucko.luckperms.common.cacheddata.type;
 
+import com.google.common.collect.Maps;
+
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.cacheddata.UsageTracked;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.cacheddata.CachedPermissionData;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
@@ -55,12 +58,12 @@ public class PermissionCache extends UsageTracked implements CachedPermissionDat
     /**
      * The raw set of permission strings.
      */
-    private final Map<String, Boolean> permissions;
+    private final Map<String, Node> permissions;
 
     /**
-     * An immutable copy of {@link #permissions}
+     * A string->boolean view of {@link #permissions}
      */
-    private final Map<String, Boolean> permissionsUnmodifiable;
+    private final Map<String, Boolean> permissionsView;
 
     /**
      * The calculator instance responsible for resolving the raw permission strings in the permission map.
@@ -69,10 +72,10 @@ public class PermissionCache extends UsageTracked implements CachedPermissionDat
      */
     private final PermissionCalculator calculator;
 
-    public PermissionCache(QueryOptions queryOptions, CacheMetadata metadata, CalculatorFactory calculatorFactory, ConcurrentHashMap<String, Boolean> sourcePermissions) {
+    public PermissionCache(QueryOptions queryOptions, CacheMetadata metadata, CalculatorFactory calculatorFactory, ConcurrentHashMap<String, Node> sourcePermissions) {
         this.queryOptions = queryOptions;
         this.permissions = sourcePermissions;
-        this.permissionsUnmodifiable = Collections.unmodifiableMap(this.permissions);
+        this.permissionsView = Collections.unmodifiableMap(Maps.transformValues(this.permissions, Node::getValue));
 
         this.calculator = calculatorFactory.build(queryOptions, metadata);
         this.calculator.setSourcePermissions(this.permissions);
@@ -89,10 +92,10 @@ public class PermissionCache extends UsageTracked implements CachedPermissionDat
 
     @Override
     public @NonNull Map<String, Boolean> getPermissionMap() {
-        return this.permissionsUnmodifiable;
+        return this.permissionsView;
     }
 
-    public TristateResult checkPermission(String permission, PermissionCheckEvent.Origin origin) {
+    public TristateResult checkPermission(String permission, CheckOrigin origin) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -101,7 +104,7 @@ public class PermissionCache extends UsageTracked implements CachedPermissionDat
 
     @Override
     public @NonNull Tristate checkPermission(@NonNull String permission) {
-        return checkPermission(permission, PermissionCheckEvent.Origin.LUCKPERMS_API).result();
+        return checkPermission(permission, CheckOrigin.LUCKPERMS_API).result();
     }
 
     @Override
