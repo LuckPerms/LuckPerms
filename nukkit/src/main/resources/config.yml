@@ -236,6 +236,8 @@ watch-files: true
 #                below.
 #   => rabbitmq  Uses RabbitMQ pub-sub to push changes. Your server connection info must be
 #                configured below.
+#   => custom    Forces the messaging-service to use a service that has been implemented through
+#                the LuckPerms API.
 #   => auto      Attempts to automatically setup a messaging service using redis or sql.
 messaging-service: auto
 
