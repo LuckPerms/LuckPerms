@@ -27,13 +27,13 @@ package me.lucko.luckperms.common.verbose.event;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.cacheddata.result.Result;
 import me.lucko.luckperms.common.util.StackTracePrinter;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.expression.BooleanExpressionCompiler.VariableEvaluator;
 
+import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;

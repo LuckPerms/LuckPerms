@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.MetaNode;
@@ -92,12 +93,12 @@ public class MetaCache extends UsageTracked implements CachedMetaData {
                 continue;
             }
 
-            MetaNode selected = metaValueSelector.selectValue(e.getKey(), Lists.transform(e.getValue(), StringResult::node));
+            Result<String, MetaNode> selected = metaValueSelector.selectValue(e.getKey(), e.getValue());
             if (selected == null) {
                 throw new NullPointerException(metaValueSelector + " returned null");
             }
 
-            builder.put(e.getKey(), StringResult.of(selected));
+            builder.put(e.getKey(), (StringResult<MetaNode>) selected);
         }
         this.flattenedMeta = builder.build();
         this.meta = new LowerCaseMetaMap(meta);

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.cacheddata.result;
+package net.luckperms.api.cacheddata;
 
 import net.luckperms.api.node.Node;
 
@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Represents the result of a cached data lookup
  *
  * @param <T> the result type
+ * @since 5.4
  */
 public interface Result<T, N extends Node> {
 

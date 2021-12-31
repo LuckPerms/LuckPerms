@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.cacheddata.type;
 
+import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.query.meta.MetaValueSelector;
 
@@ -44,7 +45,7 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
     }
 
     @Override
-    public @NonNull MetaNode selectValue(@NonNull String key, @NonNull List<MetaNode> values) {
+    public @NonNull Result<String, MetaNode> selectValue(@NonNull String key, @NonNull List<? extends Result<String, MetaNode>> values) {
         switch (values.size()) {
             case 0:
                 throw new IllegalArgumentException("values is empty");
@@ -58,7 +59,7 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
     public enum Strategy {
         INHERITANCE {
             @Override
-            public MetaNode select(List<MetaNode> values) {
+            public Result<String, MetaNode> select(List<? extends Result<String, MetaNode>> values) {
                 return values.get(0);
             }
         },
@@ -66,7 +67,7 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
             private final DoubleSelectionPredicate selection = (value, current) -> value > current;
 
             @Override
-            public MetaNode select(List<MetaNode> values) {
+            public Result<String, MetaNode> select(List<? extends Result<String, MetaNode>> values) {
                 return selectNumber(values, this.selection);
             }
         },
@@ -74,12 +75,12 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
             private final DoubleSelectionPredicate selection = (value, current) -> value < current;
 
             @Override
-            public MetaNode select(List<MetaNode> values) {
+            public Result<String, MetaNode> select(List<? extends Result<String, MetaNode>> values) {
                 return selectNumber(values, this.selection);
             }
         };
 
-        public abstract MetaNode select(List<MetaNode> values);
+        public abstract Result<String, MetaNode> select(List<? extends Result<String, MetaNode>> values);
 
         public static Strategy parse(String s) {
             try {
@@ -95,16 +96,15 @@ public class SimpleMetaValueSelector implements MetaValueSelector {
         boolean shouldSelect(double value, double current);
     }
 
-    private static MetaNode selectNumber(List<MetaNode> values, DoubleSelectionPredicate selection) {
+    private static Result<String, MetaNode> selectNumber(List<? extends Result<String, MetaNode>> values, DoubleSelectionPredicate selection) {
         double current = 0;
-        MetaNode selected = null;
+        Result<String, MetaNode> selected = null;
 
-        for (MetaNode node : values) {
-            String value = node.getMetaValue();
+        for (Result<String, MetaNode> result : values) {
             try {
-                double parse = Double.parseDouble(value);
+                double parse = Double.parseDouble(result.result());
                 if (selected == null || selection.shouldSelect(parse, current)) {
-                    selected = node;
+                    selected = result;
                     current = parse;
                 }
             } catch (NumberFormatException e) {

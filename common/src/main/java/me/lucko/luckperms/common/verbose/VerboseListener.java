@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.verbose;
 
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.cacheddata.result.Result;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.http.AbstractHttpClient;
 import me.lucko.luckperms.common.http.BytebinClient;
@@ -47,6 +46,7 @@ import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.query.QueryMode;
