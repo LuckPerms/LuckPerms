@@ -79,6 +79,8 @@ public abstract class AbstractVaultPermission extends Permission {
     public abstract boolean userHasPermission(String world, UUID uuid, String permission);
     public abstract boolean userAddPermission(String world, UUID uuid, String permission);
     public abstract boolean userRemovePermission(String world, UUID uuid, String permission);
+    public abstract boolean userAddTransient(String world, UUID uuid, String permission);
+    public abstract boolean userRemoveTransient(String world, UUID uuid, String permission);
     public abstract boolean userInGroup(String world, UUID uuid, String group);
     public abstract boolean userAddGroup(String world, UUID uuid, String group);
     public abstract boolean userRemoveGroup(String world, UUID uuid, String group);
@@ -210,6 +212,48 @@ public abstract class AbstractVaultPermission extends Permission {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
         return userRemovePermission(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), permission);
+    }
+
+    @Override
+    public final boolean playerAddTransient(Player player, String permission){
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(permission, "permission");
+        return userAddTransient(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), permission);
+    }
+    
+    @Override
+    public final boolean playerAddTransient(String world, OfflinePlayer player, String permission){
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(permission, "permission");
+        return userAddTransient(convertWorld(world), ((OfflinePlayer) player).getUniqueId(), permission);
+    }
+
+    @Override
+    public final boolean playerAddTransient(String world, Player player, String permission){
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(permission, "permission");
+        return userAddTransient(convertWorld(world), ((OfflinePlayer) player).getUniqueId(), permission);
+    }
+    
+    @Override
+    public final boolean playerRemoveTransient(Player player, String permission){
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(permission, "permission");
+        return userRemoveTransient(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), permission);
+    }
+    
+    @Override
+    public final boolean playerRemoveTransient(String world, OfflinePlayer player, String permission){
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(permission, "permission");
+        return userRemoveTransient(convertWorld(world), ((OfflinePlayer) player).getUniqueId(), permission);
+    }
+
+    @Override
+    public final boolean playerRemoveTransient(String world, Player player, String permission){
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(permission, "permission");
+        return userRemoveTransient(convertWorld(world), ((OfflinePlayer) player).getUniqueId(), permission);
     }
 
     @Override

@@ -187,7 +187,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         if (user instanceof Group) {
             throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
         }
-        return holderAddPermission(user, permission, world);
+        return holderAddPermission(user, permission, world, DataType.NORMAL);
     }
 
     @Override
@@ -199,7 +199,31 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         if (user instanceof Group) {
             throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
         }
-        return holderRemovePermission(user, permission, world);
+        return holderRemovePermission(user, permission, world, DataType.NORMAL);
+    }
+
+    @Override
+    public boolean userAddTransient(String world, UUID uuid, String permission) {
+        Objects.requireNonNull(uuid, "uuid");
+        Objects.requireNonNull(permission, "permission");
+
+        PermissionHolder user = lookupUser(uuid);
+        if (user instanceof Group) {
+            throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
+        }
+        return holderAddPermission(user, permission, world, DataType.TRANSIENT);
+    }
+
+    @Override
+    public boolean userRemoveTransient(String world, UUID uuid, String permission) {
+        Objects.requireNonNull(uuid, "uuid");
+        Objects.requireNonNull(permission, "permission");
+
+        PermissionHolder user = lookupUser(uuid);
+        if (user instanceof Group) {
+            throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
+        }
+        return holderRemovePermission(user, permission, world, DataType.TRANSIENT);
     }
 
     @Override
@@ -289,7 +313,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             return false;
         }
 
-        return holderAddPermission(group, permission, world);
+        return holderAddPermission(group, permission, world, DataType.NORMAL);
     }
 
     @Override
@@ -302,7 +326,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             return false;
         }
 
-        return holderRemovePermission(group, permission, world);
+        return holderRemovePermission(group, permission, world, DataType.NORMAL);
     }
 
     // utility methods for getting user and group instances
@@ -388,7 +412,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
     // utility methods for modifying the state of PermissionHolders
 
-    private boolean holderAddPermission(PermissionHolder holder, String permission, String world) {
+    private boolean holderAddPermission(PermissionHolder holder, String permission, String world, DataType type) {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
@@ -397,13 +421,13 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
                 .withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world)
                 .build();
 
-        if (holder.setNode(DataType.NORMAL, node, true).wasSuccessful()) {
+        if (holder.setNode(type, node, true).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
     }
 
-    private boolean holderRemovePermission(PermissionHolder holder, String permission, String world) {
+    private boolean holderRemovePermission(PermissionHolder holder, String permission, String world, DataType type) {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
@@ -412,7 +436,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
                 .withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world)
                 .build();
 
-        if (holder.unsetNode(DataType.NORMAL, node).wasSuccessful()) {
+        if (holder.unsetNode(type, node).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
@@ -461,4 +485,5 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     private boolean useVaultServer() {
         return this.plugin.getConfiguration().get(ConfigKeys.USE_VAULT_SERVER);
     }
+
 }
