@@ -183,7 +183,7 @@ public abstract class AbstractVaultPermission extends Permission {
     public final boolean playerAdd(Player player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userAddPermission(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userAddPermission(convertWorld(player), player.getUniqueId(), permission);
     }
 
     @Override
@@ -211,49 +211,49 @@ public abstract class AbstractVaultPermission extends Permission {
     public final boolean playerRemove(Player player, String permission) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userRemovePermission(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userRemovePermission(convertWorld(player), player.getUniqueId(), permission);
     }
 
     @Override
     public final boolean playerAddTransient(Player player, String permission){
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userAddTransient(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userAddTransient(convertWorld(player), player.getUniqueId(), permission);
     }
     
     @Override
     public final boolean playerAddTransient(String world, OfflinePlayer player, String permission){
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userAddTransient(convertWorld(world), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userAddTransient(convertWorld(world), player.getUniqueId(), permission);
     }
 
     @Override
     public final boolean playerAddTransient(String world, Player player, String permission){
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userAddTransient(convertWorld(world), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userAddTransient(convertWorld(world), player.getUniqueId(), permission);
     }
     
     @Override
     public final boolean playerRemoveTransient(Player player, String permission){
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userRemoveTransient(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userRemoveTransient(convertWorld(player), player.getUniqueId(), permission);
     }
     
     @Override
     public final boolean playerRemoveTransient(String world, OfflinePlayer player, String permission){
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userRemoveTransient(convertWorld(world), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userRemoveTransient(convertWorld(world), player.getUniqueId(), permission);
     }
 
     @Override
     public final boolean playerRemoveTransient(String world, Player player, String permission){
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(permission, "permission");
-        return userRemoveTransient(convertWorld(world), ((OfflinePlayer) player).getUniqueId(), permission);
+        return userRemoveTransient(convertWorld(world), player.getUniqueId(), permission);
     }
 
     @Override
@@ -323,7 +323,7 @@ public abstract class AbstractVaultPermission extends Permission {
     public final boolean playerInGroup(Player player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userInGroup(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), group);
+        return userInGroup(convertWorld(player), player.getUniqueId(), group);
     }
 
     @Override
@@ -351,7 +351,7 @@ public abstract class AbstractVaultPermission extends Permission {
     public final boolean playerAddGroup(Player player, String group) {
         Objects.requireNonNull(player, "player");
         Objects.requireNonNull(group, "group");
-        return userAddGroup(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), group);
+        return userAddGroup(convertWorld(player), player.getUniqueId(), group);
     }
 
     @Override
@@ -378,7 +378,7 @@ public abstract class AbstractVaultPermission extends Permission {
     @Override
     public final boolean playerRemoveGroup(Player player, String group) {
         Objects.requireNonNull(player, "player");
-        return userRemoveGroup(convertWorld(player), ((OfflinePlayer) player).getUniqueId(), group);
+        return userRemoveGroup(convertWorld(player), player.getUniqueId(), group);
     }
 
     @Override
@@ -402,7 +402,7 @@ public abstract class AbstractVaultPermission extends Permission {
     @Override
     public final String[] getPlayerGroups(Player player) {
         Objects.requireNonNull(player, "player");
-        return userGetGroups(convertWorld(player), ((OfflinePlayer) player).getUniqueId());
+        return userGetGroups(convertWorld(player), player.getUniqueId());
     }
 
     @Override
@@ -426,7 +426,7 @@ public abstract class AbstractVaultPermission extends Permission {
     @Override
     public final String getPrimaryGroup(Player player) {
         Objects.requireNonNull(player, "player");
-        return userGetPrimaryGroup(convertWorld(player), ((OfflinePlayer) player).getUniqueId());
+        return userGetPrimaryGroup(convertWorld(player), player.getUniqueId());
     }
 
 }
