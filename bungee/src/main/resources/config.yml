@@ -239,6 +239,7 @@ watch-files: true
 #                    the RedisBungee plugin installed.
 #   => rabbitmq      Uses RabbitMQ pub-sub to push changes. Your server connection info must be
 #                    configured below.
+#   => custom        Uses a messaging service provided using the LuckPerms API.
 #   => auto          Attempts to automatically setup a messaging service using redis or sql.
 messaging-service: auto
 
