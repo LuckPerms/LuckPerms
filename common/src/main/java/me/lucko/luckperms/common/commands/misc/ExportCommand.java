@@ -44,6 +44,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ExportCommand extends SingleCommand {
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm")
+            .withZone(ZoneId.systemDefault());
+
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public ExportCommand() {
@@ -72,11 +75,7 @@ public class ExportCommand extends SingleCommand {
         } else {
             Path dataDirectory = plugin.getBootstrap().getDataDirectory();
             Path path;
-
             if (args.isEmpty()) {
-                DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss-z")
-                  .withZone(ZoneId.systemDefault());
-
                 path = dataDirectory.resolve("luckperms-" + DATE_FORMAT.format(Instant.now()) + ".json.gz");
             } else {
                 path = dataDirectory.resolve(args.get(0) + ".json.gz");
