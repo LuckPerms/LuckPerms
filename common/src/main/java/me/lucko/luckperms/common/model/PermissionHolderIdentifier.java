@@ -40,6 +40,11 @@ public final class PermissionHolderIdentifier implements Identifier {
         this.name = name;
     }
 
+    public PermissionHolderIdentifier(String type, String name) {
+        this.type = type;
+        this.name = name;
+    }
+
     @Override
     public @NonNull String getName() {
         return this.name;

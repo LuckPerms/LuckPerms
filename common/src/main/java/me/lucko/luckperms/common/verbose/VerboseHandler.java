@@ -25,10 +25,12 @@
 
 package me.lucko.luckperms.common.verbose;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.StringResult;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
@@ -74,7 +76,7 @@ public class VerboseHandler implements AutoCloseable {
      * @param permission the permission which was checked for
      * @param result the result of the permission check
      */
-    public void offerPermissionCheckEvent(PermissionCheckEvent.Origin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, String permission, TristateResult result) {
+    public void offerPermissionCheckEvent(CheckOrigin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, String permission, TristateResult result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;
@@ -100,7 +102,7 @@ public class VerboseHandler implements AutoCloseable {
      * @param key the meta key which was checked for
      * @param result the result of the meta check
      */
-    public void offerMetaCheckEvent(MetaCheckEvent.Origin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, String key, String result) {
+    public void offerMetaCheckEvent(CheckOrigin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, String key, StringResult<?> result) {
         // don't bother even processing the check if there are no listeners registered
         if (!this.listening) {
             return;

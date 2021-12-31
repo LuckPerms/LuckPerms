@@ -23,21 +23,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.calculator;
+package me.lucko.luckperms.common.verbose.event;
 
-import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.model.LPSubject;
+import java.util.Locale;
 
-import net.luckperms.api.query.QueryOptions;
+public enum VerboseEventType {
 
-public class GroupDefaultsProcessor extends DefaultsProcessor implements PermissionProcessor {
-    public GroupDefaultsProcessor(LPPermissionService service, QueryOptions queryOptions, boolean overrideWildcards) {
-        super(service, queryOptions, overrideWildcards);
-    }
+    /**
+     * {@link PermissionCheckEvent}
+     */
+    PERMISSION,
+
+    /**
+     * {@link MetaCheckEvent}
+     */
+    META;
 
     @Override
-    protected LPSubject getTypeDefaults() {
-        return this.service.getGroupSubjects().getDefaults();
+    public String toString() {
+        return name().toLowerCase(Locale.ROOT);
     }
 }

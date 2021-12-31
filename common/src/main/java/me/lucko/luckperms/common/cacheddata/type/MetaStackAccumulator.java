@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.cacheddata.type;
 
+import me.lucko.luckperms.common.cacheddata.result.StringResult;
+
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.metastacking.MetaStackElement;
 import net.luckperms.api.node.ChatMetaType;
@@ -36,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class MetaStackAccumulator {
     private final MetaStackDefinition definition;
@@ -55,6 +59,13 @@ public class MetaStackAccumulator {
         for (Entry entry : this.entries) {
             entry.offer(node);
         }
+    }
+
+    public List<ChatMetaNode<?, ?>> getElements() {
+        return this.entries.stream()
+                .map(Entry::getNode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public String toFormattedString() {
@@ -92,6 +103,35 @@ public class MetaStackAccumulator {
         sb.append(this.definition.getEndSpacer());
 
         return sb.toString();
+    }
+
+    public StringResult<ChatMetaNode<?, ?>> toResult() {
+        String formatted = toFormattedString();
+        if (formatted == null) {
+            return StringResult.nullResult();
+        }
+
+        List<ChatMetaNode<?, ?>> elements = getElements();
+
+        switch (elements.size()) {
+            case 0:
+                throw new AssertionError();
+            case 1:
+                return StringResult.of(formatted, elements.get(0));
+            default: {
+                Iterator<ChatMetaNode<?, ?>> it = elements.iterator();
+                StringResult<ChatMetaNode<?, ?>> result = StringResult.of(formatted, it.next());
+
+                StringResult<ChatMetaNode<?, ?>> root = result;
+                while (it.hasNext()) {
+                    StringResult<ChatMetaNode<?, ?>> nested = StringResult.of(it.next());
+                    root.setOverriddenResult(nested);
+                    root = nested;
+                }
+
+                return result;
+            }
+        }
     }
 
     private static final class Entry {

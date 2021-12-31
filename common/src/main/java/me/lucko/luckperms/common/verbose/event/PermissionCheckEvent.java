@@ -25,7 +25,10 @@
 
 package me.lucko.luckperms.common.verbose.event;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import com.google.gson.JsonArray;
+
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 
@@ -34,11 +37,6 @@ import net.luckperms.api.query.QueryOptions;
 import java.util.Locale;
 
 public class PermissionCheckEvent extends VerboseEvent {
-
-    /**
-     * The origin of the check
-     */
-    private final Origin origin;
 
     /**
      * The permission which was checked for
@@ -50,43 +48,60 @@ public class PermissionCheckEvent extends VerboseEvent {
      */
     private final TristateResult result;
 
-    public PermissionCheckEvent(Origin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, long checkTime, Throwable checkTrace, String checkThread, String permission, TristateResult result) {
-        super(checkTarget, checkQueryOptions, checkTime, checkTrace, checkThread);
-        this.origin = origin;
+    public PermissionCheckEvent(CheckOrigin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, long checkTime, Throwable checkTrace, String checkThread, String permission, TristateResult result) {
+        super(origin, checkTarget, checkQueryOptions, checkTime, checkTrace, checkThread);
         this.permission = permission;
         this.result = result;
-    }
-
-    public Origin getOrigin() {
-        return this.origin;
     }
 
     public String getPermission() {
         return this.permission;
     }
 
+    @Override
     public TristateResult getResult() {
         return this.result;
     }
 
     @Override
+    public VerboseEventType getType() {
+        return VerboseEventType.PERMISSION;
+    }
+
+    @Override
     protected void serializeTo(JObject object) {
-        object.add("type", "permission");
         object.add("permission", this.permission);
 
         object.add("result", this.result.result().name().toLowerCase(Locale.ROOT));
-        if (this.result.processorClass() != null || this.result.cause() != null) {
-            JObject resultInfo = new JObject();
-            if (this.result.processorClass() != null) {
-                resultInfo.add("processorClass", this.result.processorClass().getName());
-            }
-            if (this.result.cause() != null) {
-                resultInfo.add("cause", this.result.cause());
-            }
-            object.add("resultInfo", resultInfo);
+        if (this.result != TristateResult.UNDEFINED) {
+            object.add("resultInfo", serializeResult(this.result));
+        }
+    }
+
+    private static JObject serializeResult(TristateResult result) {
+        JObject object = new JObject();
+        object.add("result", result.result().name().toLowerCase(Locale.ROOT));
+
+        if (result.processorClass() != null) {
+            object.add("processorClass", result.processorClass().getName());
+        }
+        if (result.node() != null) {
+            object.add("node", NodeJsonSerializer.serializeNode(result.node(), true));
         }
 
-        object.add("origin", this.origin.name().toLowerCase(Locale.ROOT));
+        if (result.overriddenResult() != null) {
+            JsonArray overridden = new JsonArray();
+
+            TristateResult next = result.overriddenResult();
+            while (next != null) {
+                overridden.add(serializeResult(next).toJson());
+                next = next.overriddenResult();
+            }
+
+            object.add("overridden", overridden);
+        }
+
+        return object;
     }
 
     @Override
@@ -97,35 +112,4 @@ public class PermissionCheckEvent extends VerboseEvent {
                 getResult().result().name().equalsIgnoreCase(variable);
     }
 
-    /**
-     * Represents the origin of a permission check
-     */
-    public enum Origin {
-
-        /**
-         * Indicates the check was caused by a 'hasPermission' check on the platform
-         */
-        PLATFORM_PERMISSION_CHECK,
-
-        /**
-         * Indicates the check was caused by a 'hasPermissionSet' type check on the platform
-         */
-        PLATFORM_LOOKUP_CHECK,
-
-        /**
-         * Indicates the check was caused by a 3rd party API call
-         */
-        THIRD_PARTY_API,
-
-        /**
-         * Indicates the check was caused by an LuckPerms API call
-         */
-        LUCKPERMS_API,
-
-        /**
-         * Indicates the check was caused by a LuckPerms internal
-         */
-        INTERNAL
-
-    }
 }

@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.model.manager.AbstractManager;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
@@ -86,7 +86,7 @@ public abstract class AbstractUserManager<T extends User> extends AbstractManage
 
         // check that they are actually a member of their primary group, otherwise remove it
         if (this.plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored")) {
-            String primaryGroup = user.getCachedData().getMetaData(this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS)).getPrimaryGroup(MetaCheckEvent.Origin.INTERNAL);
+            String primaryGroup = user.getCachedData().getMetaData(this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS)).getPrimaryGroup(CheckOrigin.INTERNAL);
             boolean memberOfPrimaryGroup = false;
 
             for (InheritanceNode node : globalGroups) {

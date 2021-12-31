@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.user;
 
-import me.lucko.luckperms.common.cacheddata.type.MetaCache;
+import me.lucko.luckperms.common.cacheddata.type.MonitoredMetaCache;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -37,7 +37,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.UniqueIdType;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.node.Node;
@@ -100,11 +100,11 @@ public class UserInfo extends ChildCommand<User> {
         }
 
         ContextSet contextSet = queryOptions.context();
-        MetaCache data = target.getCachedData().getMetaData(queryOptions);
-        String prefix = data.getPrefix(MetaCheckEvent.Origin.INTERNAL);
-        String suffix = data.getSuffix(MetaCheckEvent.Origin.INTERNAL);
-        String primaryGroup = data.getPrimaryGroup(MetaCheckEvent.Origin.INTERNAL);
-        Map<String, List<String>> meta = data.getMeta(MetaCheckEvent.Origin.INTERNAL);
+        MonitoredMetaCache data = target.getCachedData().getMetaData(queryOptions);
+        String prefix = data.getPrefix(CheckOrigin.INTERNAL).result();
+        String suffix = data.getSuffix(CheckOrigin.INTERNAL).result();
+        String primaryGroup = data.getPrimaryGroup(CheckOrigin.INTERNAL);
+        Map<String, List<String>> meta = data.getMeta(CheckOrigin.INTERNAL);
 
         Message.USER_INFO_CONTEXTUAL_DATA.send(sender, active, contextSet, prefix, suffix, primaryGroup, meta);
     }

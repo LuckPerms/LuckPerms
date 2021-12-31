@@ -29,10 +29,10 @@ import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
-import me.lucko.luckperms.common.cacheddata.type.MetaCache;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.type.MonitoredMetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -44,8 +44,7 @@ import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.util.UniqueIdType;
 import me.lucko.luckperms.common.util.Uuids;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
@@ -175,7 +174,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionHolder user = lookupUser(uuid);
         QueryOptions queryOptions = getQueryOptions(uuid, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
-        return permissionData.checkPermission(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result().asBoolean();
+        return permissionData.checkPermission(permission, CheckOrigin.THIRD_PARTY_API).result().asBoolean();
     }
 
     @Override
@@ -211,7 +210,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         QueryOptions queryOptions = getQueryOptions(uuid, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
 
-        TristateResult result = permissionData.checkPermission(Inheritance.key(rewriteGroupName(group)), PermissionCheckEvent.Origin.THIRD_PARTY_API);
+        TristateResult result = permissionData.checkPermission(Inheritance.key(rewriteGroupName(group)), CheckOrigin.THIRD_PARTY_API);
         return result.processorClass() == DirectProcessor.class && result.result().asBoolean();
     }
 
@@ -254,8 +253,8 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         }
 
         QueryOptions queryOptions = getQueryOptions(uuid, world);
-        MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
-        String value = metaData.getPrimaryGroup(MetaCheckEvent.Origin.THIRD_PARTY_API);
+        MonitoredMetaCache metaData = user.getCachedData().getMetaData(queryOptions);
+        String value = metaData.getPrimaryGroup(CheckOrigin.THIRD_PARTY_API);
         if (value == null) {
             return null;
         }
@@ -276,7 +275,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
         QueryOptions queryOptions = getQueryOptions(null, world);
         PermissionCache permissionData = group.getCachedData().getPermissionData(queryOptions);
-        return permissionData.checkPermission(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result().asBoolean();
+        return permissionData.checkPermission(permission, CheckOrigin.THIRD_PARTY_API).result().asBoolean();
     }
 
     @Override

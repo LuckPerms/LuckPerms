@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.nukkit.calculator;
 
-import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.calculator.processor.AbstractSourceBasedProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import net.luckperms.api.util.Tristate;
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Permission Processor for Nukkits "child" permission system.
  */
-public class ChildProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+public class ChildProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(ChildProcessor.class);
 
     private final LPNukkitPlugin plugin;
@@ -62,10 +62,10 @@ public class ChildProcessor extends AbstractPermissionProcessor implements Permi
     @Override
     public void refresh() {
         Map<String, TristateResult> childPermissions = new HashMap<>();
-        this.sourceMap.forEach((key, value) -> {
-            Map<String, Boolean> children = this.plugin.getPermissionMap().getChildPermissions(key, value);
+        this.sourceMap.forEach((key, node) -> {
+            Map<String, Boolean> children = this.plugin.getPermissionMap().getChildPermissions(key, node.getValue());
             children.forEach((childKey, childValue) -> {
-                childPermissions.put(childKey, RESULT_FACTORY.result(Tristate.of(childValue), "parent: " + key));
+                childPermissions.put(childKey, RESULT_FACTORY.resultWithOverride(node, Tristate.of(childValue)));
             });
         });
         this.childPermissions = childPermissions;

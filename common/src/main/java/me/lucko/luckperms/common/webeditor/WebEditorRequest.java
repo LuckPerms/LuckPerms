@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
@@ -233,7 +233,7 @@ public class WebEditorRequest {
         users.values().stream()
                 .sorted(Comparator
                         // sort firstly by the users relative weight (depends on the groups they inherit)
-                        .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL)).reversed()
+                        .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(CheckOrigin.INTERNAL)).reversed()
                         // then, prioritise users we actually have a username for
                         .thenComparing(u -> u.getUsername().isPresent(), ((Comparator<Boolean>) Boolean::compare).reversed())
                         // then sort according to their username

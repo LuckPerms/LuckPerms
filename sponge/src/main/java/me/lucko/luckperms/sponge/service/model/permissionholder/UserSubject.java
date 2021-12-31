@@ -30,6 +30,8 @@ import me.lucko.luckperms.sponge.model.SpongeUser;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
+import net.luckperms.api.model.PermissionHolder;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 
@@ -46,8 +48,8 @@ public final class UserSubject extends PermissionHolderSubject<SpongeUser> imple
     }
 
     @Override
-    public String getIdentifier() {
-        return this.parent.getUniqueId().toString();
+    public PermissionHolder.Identifier getIdentifier() {
+        return this.parent.getIdentifier();
     }
 
     @Override
