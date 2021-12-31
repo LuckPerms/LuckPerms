@@ -134,11 +134,17 @@ public final class TristateResult implements Result<Tristate, Node> {
             }
         }
 
-        public TristateResult result(@NonNull Node node) {
+        public TristateResult result(@Nullable Node node) {
+            if (node == null) {
+                return UNDEFINED;
+            }
             return new TristateResult(Tristate.of(node.getValue()), node, this.processorClass);
         }
 
-        public TristateResult resultWithOverride(@NonNull Node node, Tristate result) {
+        public TristateResult resultWithOverride(@Nullable Node node, @NonNull Tristate result) {
+            if (result == Tristate.UNDEFINED) {
+                return UNDEFINED;
+            }
             return new TristateResult(result, node, this.processorClass);
         }
     }
