@@ -42,8 +42,9 @@ import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.metastacking.MetaStackDefinition;
-import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.query.meta.MetaValueSelector;
 
@@ -69,14 +70,14 @@ public class MetaCache extends UsageTracked implements CachedMetaData {
     /* The data */
     private final Map<String, List<StringResult<MetaNode>>> meta;
     private final Map<String, StringResult<MetaNode>> flattenedMeta;
-    private final SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> prefixes;
-    private final SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> suffixes;
+    private final SortedMap<Integer, StringResult<PrefixNode>> prefixes;
+    private final SortedMap<Integer, StringResult<SuffixNode>> suffixes;
     private final int weight;
     private final String primaryGroup;
     private final MetaStackDefinition prefixDefinition;
     private final MetaStackDefinition suffixDefinition;
-    private final StringResult<ChatMetaNode<?, ?>> prefix;
-    private final StringResult<ChatMetaNode<?, ?>> suffix;
+    private final StringResult<PrefixNode> prefix;
+    private final StringResult<SuffixNode> suffix;
 
     public MetaCache(LuckPermsPlugin plugin, QueryOptions queryOptions, MetaAccumulator sourceMeta) {
         this.plugin = plugin;
@@ -119,12 +120,22 @@ public class MetaCache extends UsageTracked implements CachedMetaData {
     }
 
     @Override
+    public final @NonNull Result<String, MetaNode> queryMetaValue(@NonNull String key) {
+        return getMetaValue(key, CheckOrigin.LUCKPERMS_API);
+    }
+
+    @Override
     public final @Nullable String getMetaValue(@NonNull String key) {
         return getMetaValue(key, CheckOrigin.LUCKPERMS_API).result();
     }
 
-    public @NonNull StringResult<ChatMetaNode<?,?>> getPrefix(CheckOrigin origin) {
+    public @NonNull StringResult<PrefixNode> getPrefix(CheckOrigin origin) {
         return this.prefix;
+    }
+
+    @Override
+    public final @NonNull Result<String, PrefixNode> queryPrefix() {
+        return getPrefix(CheckOrigin.LUCKPERMS_API);
     }
 
     @Override
@@ -132,8 +143,13 @@ public class MetaCache extends UsageTracked implements CachedMetaData {
         return getPrefix(CheckOrigin.LUCKPERMS_API).result();
     }
 
-    public @NonNull StringResult<ChatMetaNode<?,?>> getSuffix(CheckOrigin origin) {
+    public @NonNull StringResult<SuffixNode> getSuffix(CheckOrigin origin) {
         return this.suffix;
+    }
+
+    @Override
+    public final @NonNull Result<String, SuffixNode> querySuffix() {
+        return getSuffix(CheckOrigin.LUCKPERMS_API);
     }
 
     @Override

@@ -78,8 +78,8 @@ public class MetaAccumulator {
     private final AtomicReference<State> state = new AtomicReference<>(State.ACCUMULATING);
 
     private final ListMultimap<String, StringResult<MetaNode>> meta;
-    private final SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> prefixes;
-    private final SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> suffixes;
+    private final SortedMap<Integer, StringResult<PrefixNode>> prefixes;
+    private final SortedMap<Integer, StringResult<SuffixNode>> suffixes;
     private int weight = 0;
     private String primaryGroup;
 
@@ -87,8 +87,8 @@ public class MetaAccumulator {
 
     private final MetaStackDefinition prefixDefinition;
     private final MetaStackDefinition suffixDefinition;
-    private final MetaStackAccumulator prefixAccumulator;
-    private final MetaStackAccumulator suffixAccumulator;
+    private final MetaStackAccumulator<PrefixNode> prefixAccumulator;
+    private final MetaStackAccumulator<SuffixNode> suffixAccumulator;
 
     public MetaAccumulator(MetaStackDefinition prefixDefinition, MetaStackDefinition suffixDefinition) {
         Objects.requireNonNull(prefixDefinition, "prefixDefinition");
@@ -98,8 +98,8 @@ public class MetaAccumulator {
         this.suffixes = new TreeMap<>(Comparator.reverseOrder());
         this.prefixDefinition = prefixDefinition;
         this.suffixDefinition = suffixDefinition;
-        this.prefixAccumulator = new MetaStackAccumulator(this.prefixDefinition, ChatMetaType.PREFIX);
-        this.suffixAccumulator = new MetaStackAccumulator(this.suffixDefinition, ChatMetaType.SUFFIX);
+        this.prefixAccumulator = new MetaStackAccumulator<>(this.prefixDefinition, ChatMetaType.PREFIX);
+        this.suffixAccumulator = new MetaStackAccumulator<>(this.suffixDefinition, ChatMetaType.SUFFIX);
     }
 
     private void ensureState(State state) {
@@ -181,17 +181,17 @@ public class MetaAccumulator {
         return this.meta;
     }
 
-    public Map<Integer, StringResult<ChatMetaNode<?, ?>>> getChatMeta(ChatMetaType type) {
+    public Map<Integer, ? extends StringResult<? extends ChatMetaNode<?, ?>>> getChatMeta(ChatMetaType type) {
         ensureState(State.COMPLETE);
         return type == ChatMetaType.PREFIX ? this.prefixes : this.suffixes;
     }
 
-    public SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> getPrefixes() {
+    public SortedMap<Integer, StringResult<PrefixNode>> getPrefixes() {
         ensureState(State.COMPLETE);
         return this.prefixes;
     }
 
-    public SortedMap<Integer, StringResult<ChatMetaNode<?, ?>>> getSuffixes() {
+    public SortedMap<Integer, StringResult<SuffixNode>> getSuffixes() {
         ensureState(State.COMPLETE);
         return this.suffixes;
     }
@@ -216,12 +216,12 @@ public class MetaAccumulator {
         return this.suffixDefinition;
     }
 
-    public StringResult<ChatMetaNode<?, ?>> getPrefix() {
+    public StringResult<PrefixNode> getPrefix() {
         ensureState(State.COMPLETE);
         return this.prefixAccumulator.toResult();
     }
 
-    public StringResult<ChatMetaNode<?, ?>> getSuffix() {
+    public StringResult<SuffixNode> getSuffix() {
         ensureState(State.COMPLETE);
         return this.suffixAccumulator.toResult();
     }

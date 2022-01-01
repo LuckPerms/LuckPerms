@@ -62,7 +62,6 @@ public final class StringResult<N extends Node> implements Result<String, N> {
         return this.node;
     }
 
-    @Override
     public @Nullable StringResult<N> overriddenResult() {
         return this.overriddenResult;
     }
@@ -86,23 +85,24 @@ public final class StringResult<N extends Node> implements Result<String, N> {
     private static final StringResult<?> NULL_RESULT = new StringResult<>(null, null, null);
 
     @SuppressWarnings("unchecked")
-    public static <T extends Node> StringResult<T> nullResult() {
-        return (StringResult<T>) NULL_RESULT;
+    public static <N extends Node> StringResult<N> nullResult() {
+        return (StringResult<N>) NULL_RESULT;
     }
 
-    public static <T extends Node> StringResult<T> of(String result) {
+    public static <N extends Node> StringResult<N> of(String result) {
         return new StringResult<>(result, null, null);
+    }
+
+    public static <N extends Node> StringResult<N> of(String result, N node) {
+        return new StringResult<>(result, node, null);
     }
 
     public static StringResult<MetaNode> of(MetaNode node) {
         return new StringResult<>(node.getMetaValue(), node, null);
     }
 
-    public static StringResult<ChatMetaNode<?, ?>> of(ChatMetaNode<?, ?> node) {
+    public static <N extends ChatMetaNode<?, ?>> StringResult<N> of(N node) {
         return new StringResult<>(node.getMetaValue(), node, null);
     }
 
-    public static StringResult<ChatMetaNode<?, ?>> of(String result, ChatMetaNode<?, ?> node) {
-        return new StringResult<>(result, node, null);
-    }
 }

@@ -30,9 +30,37 @@ import net.luckperms.api.node.Node;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Represents the result of a cached data lookup
+ * Represents the result of a cached data lookup.
+ *
+ * <p>You can find "the holder that has the node that caused this result"
+ * using the following code:</p>
+ * <p></p>
+ * <blockquote>
+ * <pre>
+ * public static {@link net.luckperms.api.model.PermissionHolder.Identifier} holderThatHasTheNodeThatCausedTheResult(Result&lt;?, ?&gt; result) {
+ *     {@link Node} node = result.node();
+ *     if (node == null) {
+ *         return null;
+ *     }
+ *     {@link net.luckperms.api.node.metadata.types.InheritanceOriginMetadata} origin = node.getMetadata(InheritanceOriginMetadata.KEY).orElse(null);
+ *     if (origin == null) {
+ *         return null;
+ *     }
+ *     return origin.getOrigin();
+ * }
+ * </pre>
+ *
+ * <p>Combined with the node itself, this is all the information needed to determine
+ * the root cause of the result.</p>
+ * </blockquote>
+ *
+ * <p>The nullability of {@link #result()} is purposely undefined to allow the
+ * flexibility for methods using {@link Result} to declare it. In general, if the {@code T} type
+ * has a nullable/undefined value, then the return of {@link #result()} will be non-null,
+ * and if not, it will be nullable.</p>
  *
  * @param <T> the result type
+ * @param <N> the node type
  * @since 5.4
  */
 public interface Result<T, N extends Node> {
@@ -50,12 +78,5 @@ public interface Result<T, N extends Node> {
      * @return the causing node
      */
     @Nullable N node();
-
-    /**
-     * Gets the result that this result overrides, if applicable.
-     *
-     * @return the overridden result
-     */
-    @Nullable Result<T, N> overriddenResult();
 
 }

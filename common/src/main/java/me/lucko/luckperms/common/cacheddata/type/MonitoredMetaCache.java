@@ -35,8 +35,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.cacheddata.CachedMetaData;
-import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -73,16 +74,16 @@ public class MonitoredMetaCache extends MetaCache implements CachedMetaData {
 
     @Override
     @NonNull
-    public StringResult<ChatMetaNode<?, ?>> getPrefix(CheckOrigin origin) {
-        StringResult<ChatMetaNode<?, ?>> value = super.getPrefix(origin);
+    public StringResult<PrefixNode> getPrefix(CheckOrigin origin) {
+        StringResult<PrefixNode> value = super.getPrefix(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), Prefix.NODE_KEY, value);
         return value;
     }
 
     @Override
     @NonNull
-    public StringResult<ChatMetaNode<?, ?>> getSuffix(CheckOrigin origin) {
-        StringResult<ChatMetaNode<?, ?>> value = super.getSuffix(origin);
+    public StringResult<SuffixNode> getSuffix(CheckOrigin origin) {
+        StringResult<SuffixNode> value = super.getSuffix(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), Suffix.NODE_KEY, value);
         return value;
     }

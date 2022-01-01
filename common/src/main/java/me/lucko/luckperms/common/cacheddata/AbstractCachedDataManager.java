@@ -255,24 +255,11 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
             this.cache.clear();
         }
     }
-
-    private MetaStackDefinition getMetaStackDefinition(QueryOptions queryOptions, ChatMetaType type) {
-        MetaStackDefinition stack = queryOptions.option(type == ChatMetaType.PREFIX ?
-                MetaStackDefinition.PREFIX_STACK_KEY :
-                MetaStackDefinition.SUFFIX_STACK_KEY
-        ).orElse(null);
-
-        if (stack == null) {
-            stack = getDefaultMetaStackDefinition(type);
-        }
-
-        return stack;
-    }
     
     private MetaAccumulator newAccumulator(QueryOptions queryOptions) {
         return new MetaAccumulator(
-                getMetaStackDefinition(queryOptions, ChatMetaType.PREFIX),
-                getMetaStackDefinition(queryOptions, ChatMetaType.SUFFIX)
+                queryOptions.option(MetaStackDefinition.PREFIX_STACK_KEY).orElseGet(() -> getDefaultMetaStackDefinition(ChatMetaType.PREFIX)),
+                queryOptions.option(MetaStackDefinition.SUFFIX_STACK_KEY).orElseGet(() -> getDefaultMetaStackDefinition(ChatMetaType.SUFFIX))
         );
     }
 

@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.cacheddata.CachedPermissionData;
+import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
@@ -100,6 +101,11 @@ public class PermissionCache extends UsageTracked implements CachedPermissionDat
             throw new NullPointerException("permission");
         }
         return this.calculator.checkPermission(permission, origin);
+    }
+
+    @Override
+    public @NonNull Result<Tristate, Node> queryPermission(@NonNull String permission) {
+        return checkPermission(permission, CheckOrigin.LUCKPERMS_API);
     }
 
     @Override

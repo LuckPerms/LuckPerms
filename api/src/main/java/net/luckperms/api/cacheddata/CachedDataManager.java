@@ -39,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
  * Holds cached permission and meta lookup data for a {@link PermissionHolder}.
  *
  * <p>All calls will account for inheritance, as well as any default data
- * provided by the platform. This calls are heavily cached and are therefore
+ * provided by the platform. These calls are heavily cached and are therefore
  * fast.</p>
  */
 public interface CachedDataManager {
@@ -81,11 +81,10 @@ public interface CachedDataManager {
      * <p>For {@link User}s, the most appropriate query options will be their
      * {@link ContextManager#getQueryOptions(User) current active query options} if the
      * corresponding player is online, and otherwise, will fallback to
-     * {@link ContextManager#getStaticQueryOptions() the current static query options}
-     * if they are offline.</p>
+     * {@link ContextManager#getStaticQueryOptions() the current static query options}.</p>
      *
      * <p>For {@link Group}s, the most appropriate query options will always be
-     * {@link ContextManager#getStaticQueryOptions()} the current static query options.</p>
+     * {@link ContextManager#getStaticQueryOptions() the current static query options}.</p>
      *
      * @return a permission data instance
      * @since 5.1
@@ -99,11 +98,10 @@ public interface CachedDataManager {
      * <p>For {@link User}s, the most appropriate query options will be their
      * {@link ContextManager#getQueryOptions(User) current active query options} if the
      * corresponding player is online, and otherwise, will fallback to
-     * {@link ContextManager#getStaticQueryOptions() the current static query options}
-     * if they are offline.</p>
+     * {@link ContextManager#getStaticQueryOptions() the current static query options}.</p>
      *
      * <p>For {@link Group}s, the most appropriate query options will always be
-     * {@link ContextManager#getStaticQueryOptions()} the current static query options.</p>
+     * {@link ContextManager#getStaticQueryOptions() the current static query options}.</p>
      *
      * @return a meta data instance
      * @since 5.1
@@ -118,7 +116,7 @@ public interface CachedDataManager {
     void invalidate();
 
     /**
-     * Invalidates all of the underlying Permission calculators.
+     * Invalidates all underlying permission calculators.
      *
      * <p>Can be called to allow for an update in defaults.</p>
      */

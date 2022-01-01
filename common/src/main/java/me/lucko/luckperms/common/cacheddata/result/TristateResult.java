@@ -81,7 +81,6 @@ public final class TristateResult implements Result<Tristate, Node> {
         }
     }
 
-    @Override
     public @Nullable TristateResult overriddenResult() {
         return this.overriddenResult;
     }
