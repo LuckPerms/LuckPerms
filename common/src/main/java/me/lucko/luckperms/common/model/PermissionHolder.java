@@ -111,7 +111,7 @@ public abstract class PermissionHolder {
      *
      * @see #normalData()
      */
-    private final RecordedNodeMap normalNodes = new RecordedNodeMap(new NodeMapMutable(this));
+    private final RecordedNodeMap normalNodes = new RecordedNodeMap(new NodeMapMutable(this, DataType.NORMAL));
 
     /**
      * The holders transient nodes.
@@ -123,7 +123,7 @@ public abstract class PermissionHolder {
      *
      * @see #transientData()
      */
-    private final NodeMap transientNodes = new NodeMapMutable(this);
+    private final NodeMap transientNodes = new NodeMapMutable(this, DataType.TRANSIENT);
 
     /**
      * Comparator used to ordering groups when calculating inheritance

@@ -155,7 +155,7 @@ public class CalculatedSubjectData implements LPSubjectData {
                         .permission(key)
                         .value(value)
                         .context(entry.getKey())
-                        .withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.parentSubject.getIdentifier()))
+                        .withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.parentSubject.getIdentifier(), this.type))
                         .build();
                 nodeMap.put(key, node);
             });
@@ -320,7 +320,7 @@ public class CalculatedSubjectData implements LPSubjectData {
                         .key(key)
                         .value(value)
                         .context(entry.getKey())
-                        .withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.parentSubject.getIdentifier()))
+                        .withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.parentSubject.getIdentifier(), this.type))
                         .build();
                 nodeMap.put(key, node);
             });

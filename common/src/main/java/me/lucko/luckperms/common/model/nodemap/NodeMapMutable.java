@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.node.comparator.NodeComparator;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
@@ -89,9 +90,11 @@ public class NodeMapMutable extends NodeMapBase {
     private final Lock lock = new ReentrantLock();
 
     protected final PermissionHolder holder;
+    private final DataType type;
 
-    public NodeMapMutable(PermissionHolder holder) {
+    public NodeMapMutable(PermissionHolder holder, DataType type) {
         this.holder = holder;
+        this.type = type;
     }
 
     @Override
@@ -115,7 +118,7 @@ public class NodeMapMutable extends NodeMapBase {
             return node;
         }
 
-        return node.toBuilder().withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.holder.getIdentifier())).build();
+        return node.toBuilder().withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.holder.getIdentifier(), this.type)).build();
     }
 
     @Override

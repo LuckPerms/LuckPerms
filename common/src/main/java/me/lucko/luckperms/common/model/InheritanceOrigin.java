@@ -26,19 +26,27 @@
 package me.lucko.luckperms.common.model;
 
 import net.luckperms.api.model.PermissionHolder;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class InheritanceOrigin implements InheritanceOriginMetadata {
     private final PermissionHolder.Identifier location;
+    private final DataType dataType;
 
-    public InheritanceOrigin(PermissionHolder.Identifier location) {
+    public InheritanceOrigin(PermissionHolder.Identifier location, DataType dataType) {
         this.location = location;
+        this.dataType = dataType;
     }
 
     @Override
     public PermissionHolder.@NonNull Identifier getOrigin() {
         return this.location;
+    }
+
+    @Override
+    public @NonNull DataType getDataType() {
+        return this.dataType;
     }
 }
