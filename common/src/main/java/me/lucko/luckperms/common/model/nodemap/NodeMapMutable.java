@@ -90,11 +90,11 @@ public class NodeMapMutable extends NodeMapBase {
     private final Lock lock = new ReentrantLock();
 
     protected final PermissionHolder holder;
-    private final DataType type;
+    private final InheritanceOrigin inheritanceOrigin;
 
     public NodeMapMutable(PermissionHolder holder, DataType type) {
         this.holder = holder;
-        this.type = type;
+        this.inheritanceOrigin = new InheritanceOrigin(holder.getIdentifier(), type);
     }
 
     @Override
@@ -113,12 +113,12 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     private Node addInheritanceOrigin(Node node) {
-        Optional<InheritanceOriginMetadata> metadata = node.getMetadata(InheritanceOriginMetadata.KEY);
-        if (metadata.isPresent() && metadata.get().getOrigin().equals(this.holder.getIdentifier())) {
+        Optional<InheritanceOriginMetadata> existing = node.getMetadata(InheritanceOriginMetadata.KEY);
+        if (existing.isPresent() && existing.get().equals(this.inheritanceOrigin)) {
             return node;
         }
 
-        return node.toBuilder().withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.holder.getIdentifier(), this.type)).build();
+        return node.toBuilder().withMetadata(InheritanceOriginMetadata.KEY, this.inheritanceOrigin).build();
     }
 
     @Override

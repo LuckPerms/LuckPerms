@@ -36,7 +36,9 @@ public final class PermissionHolderIdentifier implements Identifier {
     private final String name;
 
     public PermissionHolderIdentifier(HolderType type, String name) {
-        this.type = type == HolderType.USER ? Identifier.USER_TYPE : Identifier.GROUP_TYPE;
+        this.type = type == HolderType.USER
+                ? Identifier.USER_TYPE
+                : Identifier.GROUP_TYPE;
         this.name = name;
     }
 
@@ -46,13 +48,13 @@ public final class PermissionHolderIdentifier implements Identifier {
     }
 
     @Override
-    public @NonNull String getName() {
-        return this.name;
+    public @NonNull String getType() {
+        return this.type;
     }
 
     @Override
-    public @NonNull String getType() {
-        return this.type;
+    public @NonNull String getName() {
+        return this.name;
     }
 
     @Override
@@ -60,12 +62,16 @@ public final class PermissionHolderIdentifier implements Identifier {
         if (this == o) return true;
         if (!(o instanceof Identifier)) return false;
         Identifier that = (Identifier) o;
-        return getType().equals(that.getType()) &&
-                getName().equals(that.getName());
+        return this.type.equals(that.getType()) && this.name.equals(that.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getType(), getName());
+        return Objects.hash(this.type, this.name);
+    }
+
+    @Override
+    public String toString() {
+        return this.type + '/' + this.name;
     }
 }

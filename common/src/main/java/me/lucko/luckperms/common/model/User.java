@@ -62,7 +62,7 @@ public class User extends PermissionHolder {
     private final UserCachedDataManager cachedData;
 
     public User(UUID uniqueId, LuckPermsPlugin plugin) {
-        super(plugin);
+        super(plugin, uniqueId.toString());
         this.uniqueId = uniqueId;
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
         this.cachedData = new UserCachedDataManager(this);
@@ -75,11 +75,6 @@ public class User extends PermissionHolder {
 
     public Optional<String> getUsername() {
         return Optional.ofNullable(this.username);
-    }
-
-    @Override
-    public String getObjectName() {
-        return this.uniqueId.toString();
     }
 
     @Override

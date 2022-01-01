@@ -83,7 +83,7 @@ public class ParentAddTemp extends GenericChildCommand {
             return;
         }
 
-        if (group.getName().equalsIgnoreCase(target.getObjectName())) {
+        if (group.getName().equalsIgnoreCase(target.getIdentifier().getName())) {
             Message.ALREADY_TEMP_INHERITS.send(sender, target, group, context);
             return;
         }

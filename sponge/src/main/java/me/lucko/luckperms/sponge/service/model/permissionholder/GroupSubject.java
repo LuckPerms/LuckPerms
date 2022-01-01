@@ -25,12 +25,11 @@
 
 package me.lucko.luckperms.sponge.service.model.permissionholder;
 
+import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-
-import net.luckperms.api.model.PermissionHolder;
 
 import org.spongepowered.api.command.CommandSource;
 
@@ -45,7 +44,7 @@ public class GroupSubject extends PermissionHolderSubject<SpongeGroup> implement
     }
 
     @Override
-    public PermissionHolder.Identifier getIdentifier() {
+    public PermissionHolderIdentifier getIdentifier() {
         return this.parent.getIdentifier();
     }
 

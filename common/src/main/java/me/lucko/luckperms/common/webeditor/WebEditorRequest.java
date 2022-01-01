@@ -139,7 +139,7 @@ public class WebEditorRequest {
     private static JObject formPermissionHolder(PermissionHolder holder) {
         return new JObject()
                 .add("type", holder.getType().toString())
-                .add("id", holder.getObjectName())
+                .add("id", holder.getIdentifier().getName())
                 .add("displayName", holder.getPlainDisplayName())
                 .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().asList()));
     }

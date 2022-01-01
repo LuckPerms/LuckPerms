@@ -70,6 +70,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CalculatedSubjectData implements LPSubjectData {
     private final LPSubject parentSubject;
     private final DataType type;
+    private final InheritanceOrigin inheritanceOrigin;
     private final LPPermissionService service;
 
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
@@ -79,6 +80,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     public CalculatedSubjectData(LPSubject parentSubject, DataType type, LPPermissionService service) {
         this.parentSubject = parentSubject;
         this.type = type;
+        this.inheritanceOrigin = new InheritanceOrigin(this.parentSubject.getIdentifier(), this.type);
         this.service = service;
     }
 
@@ -155,7 +157,7 @@ public class CalculatedSubjectData implements LPSubjectData {
                         .permission(key)
                         .value(value)
                         .context(entry.getKey())
-                        .withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.parentSubject.getIdentifier(), this.type))
+                        .withMetadata(InheritanceOriginMetadata.KEY, this.inheritanceOrigin)
                         .build();
                 nodeMap.put(key, node);
             });
@@ -320,7 +322,7 @@ public class CalculatedSubjectData implements LPSubjectData {
                         .key(key)
                         .value(value)
                         .context(entry.getKey())
-                        .withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.parentSubject.getIdentifier(), this.type))
+                        .withMetadata(InheritanceOriginMetadata.KEY, this.inheritanceOrigin)
                         .build();
                 nodeMap.put(key, node);
             });

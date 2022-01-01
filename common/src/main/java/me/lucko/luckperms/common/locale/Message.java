@@ -1671,7 +1671,7 @@ public interface Message {
             .append(space())
             .append(formatContextSetBracketed(node.getContexts(), empty()))
             .apply(builder -> {
-                String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                String holderName = holder.getType() == HolderType.GROUP ? holder.getIdentifier().getName() : holder.getPlainDisplayName();
                 boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                 Component hover = join(newline(),
@@ -1701,7 +1701,7 @@ public interface Message {
                     .append(space())
                     .append(formatContextSetBracketed(node.getContexts(), empty()))
                     .apply(builder -> {
-                        String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                        String holderName = holder.getType() == HolderType.GROUP ? holder.getIdentifier().getName() : holder.getPlainDisplayName();
                         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                         Component hover = join(newline(),
@@ -1771,7 +1771,7 @@ public interface Message {
                     .content(node.getGroupName())
                     .color(GREEN)
                     .apply(builder -> {
-                        String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                        String holderName = holder.getType() == HolderType.GROUP ? holder.getIdentifier().getName() : holder.getPlainDisplayName();
                         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                         Component hover = join(newline(),
@@ -1804,7 +1804,7 @@ public interface Message {
                             .content(node.getGroupName())
                             .color(GREEN)
                             .apply(builder -> {
-                                String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                                String holderName = holder.getType() == HolderType.GROUP ? holder.getIdentifier().getName() : holder.getPlainDisplayName();
                                 boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                                 Component hover = join(newline(),

@@ -53,7 +53,6 @@ import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -102,7 +101,7 @@ public abstract class PermissionHolder {
     /**
      * The holders identifier
      */
-    private @MonotonicNonNull PermissionHolderIdentifier identifier;
+    private final PermissionHolderIdentifier identifier;
 
     /**
      * The holders persistent nodes.
@@ -135,8 +134,9 @@ public abstract class PermissionHolder {
      *
      * @param plugin the plugin instance
      */
-    protected PermissionHolder(LuckPermsPlugin plugin) {
+    protected PermissionHolder(LuckPermsPlugin plugin, String objectName) {
         this.plugin = plugin;
+        this.identifier = new PermissionHolderIdentifier(getType(), objectName);
     }
 
     // getters
@@ -169,21 +169,8 @@ public abstract class PermissionHolder {
     }
 
     public PermissionHolderIdentifier getIdentifier() {
-        if (this.identifier == null) {
-            this.identifier = new PermissionHolderIdentifier(getType(), getObjectName());
-        }
         return this.identifier;
     }
-
-    /**
-     * Gets the unique name of this holder object.
-     *
-     * <p>Used as a base for identifying permission holding objects. Also acts
-     * as a method for preventing circular inheritance issues.</p>
-     *
-     * @return the object name
-     */
-    public abstract String getObjectName();
 
     /**
      * Gets the formatted display name of this permission holder
@@ -439,7 +426,7 @@ public abstract class PermissionHolder {
     }
 
     public Tristate hasNode(DataType type, Node node, NodeEqualityPredicate equalityPredicate) {
-        if (this.getType() == HolderType.GROUP && node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(getObjectName())) {
+        if (this.getType() == HolderType.GROUP && node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(getIdentifier().getName())) {
             return Tristate.TRUE;
         }
 

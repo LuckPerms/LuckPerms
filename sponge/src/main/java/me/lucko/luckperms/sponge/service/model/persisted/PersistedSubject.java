@@ -38,7 +38,6 @@ import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.calculated.MonitoredSubjectData;
 
-import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.model.data.DataType;
 
 import org.spongepowered.api.command.CommandSource;
@@ -158,7 +157,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
     }
 
     @Override
-    public PermissionHolder.Identifier getIdentifier() {
+    public PermissionHolderIdentifier getIdentifier() {
         return this.identifier;
     }
 
