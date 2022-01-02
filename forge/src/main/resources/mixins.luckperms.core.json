@@ -1,0 +1,21 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "me.lucko.luckperms.forge.mixin.core",
+  "refmap": "mixins.luckperms.refmap.json",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "commands.CommandsMixin"
+  ],
+  "server": [
+    "server.level.ServerPlayerMixin",
+    "server.network.ServerLoginPacketListenerImplMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "conformVisibility": true
+  }
+}
