@@ -110,7 +110,7 @@ public abstract class PermissionHolder {
      *
      * @see #normalData()
      */
-    private final RecordedNodeMap normalNodes = new RecordedNodeMap(new NodeMapMutable(this, DataType.NORMAL));
+    private final RecordedNodeMap normalNodes;
 
     /**
      * The holders transient nodes.
@@ -122,12 +122,12 @@ public abstract class PermissionHolder {
      *
      * @see #transientData()
      */
-    private final NodeMap transientNodes = new NodeMapMutable(this, DataType.TRANSIENT);
+    private final NodeMap transientNodes;
 
     /**
      * Comparator used to ordering groups when calculating inheritance
      */
-    private final Comparator<? super PermissionHolder> inheritanceComparator = InheritanceComparator.getFor(this);
+    private final Comparator<? super PermissionHolder> inheritanceComparator;
 
     /**
      * Creates a new instance
@@ -137,6 +137,9 @@ public abstract class PermissionHolder {
     protected PermissionHolder(LuckPermsPlugin plugin, String objectName) {
         this.plugin = plugin;
         this.identifier = new PermissionHolderIdentifier(getType(), objectName);
+        this.normalNodes = new RecordedNodeMap(new NodeMapMutable(this, DataType.NORMAL));
+        this.transientNodes = new NodeMapMutable(this, DataType.TRANSIENT);
+        this.inheritanceComparator = InheritanceComparator.getFor(this);
     }
 
     // getters

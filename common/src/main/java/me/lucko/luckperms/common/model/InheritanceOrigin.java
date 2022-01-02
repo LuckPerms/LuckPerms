@@ -37,8 +37,8 @@ public class InheritanceOrigin implements InheritanceOriginMetadata {
     private final DataType dataType;
 
     public InheritanceOrigin(PermissionHolderIdentifier origin, DataType dataType) {
-        this.origin = origin;
-        this.dataType = dataType;
+        this.origin = Objects.requireNonNull(origin, "origin");
+        this.dataType = Objects.requireNonNull(dataType, "dataType");
     }
 
     @Override

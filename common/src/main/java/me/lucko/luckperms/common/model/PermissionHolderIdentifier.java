@@ -36,15 +36,15 @@ public final class PermissionHolderIdentifier implements Identifier {
     private final String name;
 
     public PermissionHolderIdentifier(HolderType type, String name) {
-        this.type = type == HolderType.USER
+        this.type = Objects.requireNonNull(type, "type") == HolderType.USER
                 ? Identifier.USER_TYPE
                 : Identifier.GROUP_TYPE;
-        this.name = name;
+        this.name = Objects.requireNonNull(name, "name");
     }
 
     public PermissionHolderIdentifier(String type, String name) {
-        this.type = type;
-        this.name = name;
+        this.type = Objects.requireNonNull(type, "type");
+        this.name = Objects.requireNonNull(name, "name");
     }
 
     @Override
