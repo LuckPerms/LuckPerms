@@ -38,15 +38,22 @@ import net.luckperms.api.node.types.ChatMetaNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Contains the standard {@link MetaStackElement}s provided by LuckPerms.
  */
 public final class StandardStackElements {
     private StandardStackElements() {}
+
+    private static final Pattern HIGHEST_N_PATTERN = Pattern.compile("highest\\[([1-9]\\d*)]");
+    private static final Pattern LOWEST_N_PATTERN = Pattern.compile("lowest\\[([1-9]\\d*)]");
 
     public static MetaStackElement parseFromString(LuckPermsPlugin plugin, String s) {
         s = s.toLowerCase(Locale.ROOT);
@@ -61,23 +68,33 @@ public final class StandardStackElements {
 
         // dynamic
         String p;
-        if ((p = parseParam(s, "highest_on_track_")) != null) return highestFromGroupOnTrack(plugin, p);
-        if ((p = parseParam(s, "lowest_on_track_")) != null) return lowestFromGroupOnTrack(plugin, p);
-        if ((p = parseParam(s, "highest_not_on_track_")) != null) return highestNotFromGroupOnTrack(plugin, p);
-        if ((p = parseParam(s, "lowest_not_on_track_")) != null) return lowestNotFromGroupOnTrack(plugin, p);
-        if ((p = parseParam(s, "highest_from_group_")) != null) return highestFromGroup(p);
-        if ((p = parseParam(s, "lowest_from_group_")) != null) return lowestFromGroup(p);
-        if ((p = parseParam(s, "highest_not_from_group_")) != null) return highestNotFromGroup(p);
-        if ((p = parseParam(s, "lowest_not_from_group_")) != null) return lowestNotFromGroup(p);
+        if ((p = parseSuffixParam(s, "highest_on_track_")) != null) return highestFromGroupOnTrack(plugin, p);
+        if ((p = parseSuffixParam(s, "lowest_on_track_")) != null) return lowestFromGroupOnTrack(plugin, p);
+        if ((p = parseSuffixParam(s, "highest_not_on_track_")) != null) return highestNotFromGroupOnTrack(plugin, p);
+        if ((p = parseSuffixParam(s, "lowest_not_on_track_")) != null) return lowestNotFromGroupOnTrack(plugin, p);
+        if ((p = parseSuffixParam(s, "highest_from_group_")) != null) return highestFromGroup(p);
+        if ((p = parseSuffixParam(s, "lowest_from_group_")) != null) return lowestFromGroup(p);
+        if ((p = parseSuffixParam(s, "highest_not_from_group_")) != null) return highestNotFromGroup(p);
+        if ((p = parseSuffixParam(s, "lowest_not_from_group_")) != null) return lowestNotFromGroup(p);
+        if ((p = parseRegexParam(s, HIGHEST_N_PATTERN)) != null) return highestN(p);
+        if ((p = parseRegexParam(s, LOWEST_N_PATTERN)) != null) return lowestN(p);
 
         return null;
     }
 
-    private static String parseParam(String s, String prefix) {
+    private static String parseSuffixParam(String s, String prefix) {
         if (s.startsWith(prefix) && s.length() > prefix.length()) {
             return s.substring(prefix.length());
         }
         return null;
+    }
+
+    private static String parseRegexParam(String s, Pattern pattern) {
+        Matcher matcher = pattern.matcher(s);
+        if (!matcher.matches()) {
+            return null;
+        }
+        return matcher.group(1);
     }
 
     public static List<MetaStackElement> parseList(LuckPermsPlugin plugin, List<String> strings) {
@@ -157,6 +174,15 @@ public final class StandardStackElements {
                 .build();
     }
 
+    public static MetaStackElement highestN(String nString) {
+        int n = Integer.parseInt(nString);
+        return FluentMetaStackElement.builder("HighestN")
+                .param("n", Integer.toString(n))
+                .with(TYPE_CHECK)
+                .with(CompareTakeNCheck.highest(n))
+                .build();
+    }
+
     public static final MetaStackElement LOWEST = FluentMetaStackElement.builder("LowestPriority")
             .with(TYPE_CHECK)
             .with(LOWEST_CHECK)
@@ -208,6 +234,62 @@ public final class StandardStackElements {
                 .with(LOWEST_CHECK)
                 .with(new NotFromGroupCheck(groupName))
                 .build();
+    }
+
+    public static MetaStackElement lowestN(String nString) {
+        int n = Integer.parseInt(nString);
+        return FluentMetaStackElement.builder("LowestN")
+                .param("n", Integer.toString(n))
+                .with(TYPE_CHECK)
+                .with(CompareTakeNCheck.lowest(n))
+                .build();
+    }
+
+    private static final class CompareTakeNCheck implements DynamicMetaStackElement {
+        private static final Comparator<? super ChatMetaNode<?, ?>> LOWEST = Comparator.comparingInt(ChatMetaNode::getPriority);
+        private static final Comparator<? super ChatMetaNode<?, ?>> HIGHEST = LOWEST.reversed();
+
+        static CompareTakeNCheck lowest(int n) {
+            return new CompareTakeNCheck(n, LOWEST);
+        }
+
+        static CompareTakeNCheck highest(int n) {
+            return new CompareTakeNCheck(n, HIGHEST);
+        }
+
+        private final int n;
+        private final Comparator<? super ChatMetaNode<?, ?>> comparator;
+
+        CompareTakeNCheck(int n, Comparator<? super ChatMetaNode<?, ?>> comparator) {
+            this.n = n - 1; // n is 1-indexed, convert it to zero-indexed
+            this.comparator = comparator;
+        }
+
+        @Override
+        public <N extends ChatMetaNode<?, ?>> ElementAccumulator<N> newAccumulator(ChatMetaType type) {
+            return new Accumulator<>();
+        }
+
+        private final class Accumulator<N extends ChatMetaNode<?, ?>> implements ElementAccumulator<N> {
+            private final List<N> nodes = new ArrayList<>();
+
+            @Override
+            public void offer(@NonNull N node) {
+                this.nodes.add(node);
+            }
+
+            @Override
+            public @Nullable N result() {
+                // sort by priority
+                this.nodes.sort(CompareTakeNCheck.this.comparator);
+
+                // return nodes[n]
+                if (this.nodes.size() <= CompareTakeNCheck.this.n) {
+                    return null;
+                }
+                return this.nodes.get(CompareTakeNCheck.this.n);
+            }
+        }
     }
 
     private static final class FromGroupOnTrackCheck implements MetaStackElement {
