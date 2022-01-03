@@ -38,6 +38,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -49,7 +50,7 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
 
     @Override
     protected UUID getUniqueId(CommandSourceStack commandSource) {
-        if (commandSource.getEntity() != null) {
+        if (commandSource.getEntity() instanceof Player) {
             return commandSource.getEntity().getUUID();
         }
         return Sender.CONSOLE_UUID;
@@ -57,11 +58,10 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
 
     @Override
     protected String getName(CommandSourceStack commandSource) {
-        String name = commandSource.getTextName();
-        if (commandSource.getEntity() != null && name.equals("Server")) {
-            return Sender.CONSOLE_NAME;
+        if (commandSource.getEntity() instanceof Player) {
+            return commandSource.getTextName();
         }
-        return name;
+        return Sender.CONSOLE_NAME;
     }
 
     @Override
@@ -100,7 +100,7 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
 
     @Override
     protected boolean isConsole(CommandSourceStack sender) {
-        return sender.getEntity() == null;
+        return !(sender.getEntity() instanceof Player);
     }
 
     public static net.minecraft.network.chat.Component toNativeText(Component component) {
