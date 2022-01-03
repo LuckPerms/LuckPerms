@@ -38,36 +38,19 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class ForgeClassPathAppender extends URLClassLoader implements ClassPathAppender {
     private final PluginLogger logger;
-    private final Set<String> invalidClasses;
     private final Map<String, ClassLoader> parentLoaders;
 
     public ForgeClassPathAppender(PluginLogger logger) {
         super(new URL[0], (ModuleClassLoader) Launcher.class.getClassLoader());
         this.logger = logger;
-        this.invalidClasses = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.parentLoaders = getParentLoaders((TransformingClassLoader) Thread.currentThread().getContextClassLoader());
-    }
-
-    @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
-        if (invalidClasses.contains(name)) {
-            throw new ClassNotFoundException(name);
-        }
-
-        invalidClasses.add(name);
-        Class<?> validClass = super.findClass(name);
-        invalidClasses.remove(name);
-        return validClass;
     }
 
     @Override

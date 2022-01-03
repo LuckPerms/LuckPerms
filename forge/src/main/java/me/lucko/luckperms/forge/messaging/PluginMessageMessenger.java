@@ -69,11 +69,6 @@ public class PluginMessageMessenger implements Messenger {
     }
 
     @Override
-    public void close() {
-        // no-op
-    }
-
-    @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
         AtomicReference<SchedulerTask> taskRef = new AtomicReference<>();
         SchedulerTask task = this.plugin.getBootstrap().getScheduler().asyncRepeating(() -> {
