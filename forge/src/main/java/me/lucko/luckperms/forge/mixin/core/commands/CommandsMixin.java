@@ -48,6 +48,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Mixin into {@link Commands} to add permission checks for commands.
+ */
 @Mixin(value = Commands.class)
 public abstract class CommandsMixin {
 

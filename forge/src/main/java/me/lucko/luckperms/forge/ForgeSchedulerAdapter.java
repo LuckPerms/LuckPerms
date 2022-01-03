@@ -56,6 +56,9 @@ public class ForgeSchedulerAdapter extends AbstractJavaScheduler {
 
         private WorkerThread(ForkJoinPool pool) {
             super(pool);
+            // By default, the ContextClassLoader is set to the SystemClassLoader, This causes ClassNotFoundExceptions
+            // due to modlauncher loading LuckPerms on its TransformingClassLoader,
+            // we must replace the ContextClassLoader with the current one to ensure the correct ClassLoader is used.
             setContextClassLoader(Thread.currentThread().getContextClassLoader());
         }
     }

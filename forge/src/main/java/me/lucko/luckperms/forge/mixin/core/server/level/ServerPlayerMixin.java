@@ -42,6 +42,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Locale;
 
+/**
+ * Mixin into {@link ServerPlayer} to store LuckPerms caches and implement {@link ServerPlayerBridge}.
+ */
 @Mixin(value = ServerPlayer.class)
 public abstract class ServerPlayerMixin implements ServerPlayerBridge {
 

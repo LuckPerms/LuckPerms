@@ -39,6 +39,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
 
+/**
+ * Mixin into {@link ServerLoginPacketListenerImpl} for posting {@link ConnectionEvent}
+ */
 @Mixin(value = ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin {
 
