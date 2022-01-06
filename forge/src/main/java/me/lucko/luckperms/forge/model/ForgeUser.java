@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.forge.model;
 
+import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -35,6 +36,7 @@ import net.luckperms.api.util.Tristate;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Locale;
+import java.util.function.Function;
 
 public class ForgeUser {
 
@@ -67,6 +69,43 @@ public class ForgeUser {
 
         PermissionCache cache = this.user.getCachedData().getPermissionData(queryOptions);
         return cache.checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
+    }
+
+    public String getMetaValue(String key) {
+        if (key == null) {
+            throw new NullPointerException("key");
+        }
+
+        return getMetaValue(key, value -> value);
+    }
+
+    public <T> T getMetaValue(String key, Function<String, T> valueTransform) {
+        if (key == null) {
+            throw new NullPointerException("key");
+        }
+
+        if (valueTransform == null) {
+            throw new NullPointerException("valueTransform");
+        }
+
+        return getMetaValue(key, valueTransform, this.queryOptionsCache.getQueryOptions());
+    }
+
+    public <T> T getMetaValue(String key, Function<String, T> valueTransform, QueryOptions queryOptions) {
+        if (key == null) {
+            throw new NullPointerException("key");
+        }
+
+        if (valueTransform == null) {
+            throw new NullPointerException("valueTransform");
+        }
+
+        if (queryOptions == null) {
+            throw new NullPointerException("queryOptions");
+        }
+
+        MetaCache cache = this.user.getCachedData().getMetaData(queryOptions);
+        return cache.getMetaValue(key, valueTransform).orElse(null);
     }
 
     public User getUser() {

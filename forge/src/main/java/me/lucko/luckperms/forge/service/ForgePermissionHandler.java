@@ -72,6 +72,20 @@ public class ForgePermissionHandler implements IPermissionHandler {
             return (T) (Boolean) value.asBoolean();
         }
 
+        if (node.getType() == PermissionTypes.INTEGER) {
+            Integer value = user.getMetaValue(node.getNodeName(), Integer::parseInt);
+            if (value != null) {
+                return (T) value;
+            }
+        }
+
+        if (node.getType() == PermissionTypes.STRING) {
+            String value = user.getMetaValue(node.getNodeName());
+            if (value != null) {
+                return (T) value;
+            }
+        }
+
         return node.getDefaultResolver().resolve(player, player.getUUID(), context);
     }
 
