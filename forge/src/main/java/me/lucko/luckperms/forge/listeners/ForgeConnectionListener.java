@@ -27,14 +27,12 @@ package me.lucko.luckperms.forge.listeners;
 
 import com.mojang.authlib.GameProfile;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.forge.ForgeSenderFactory;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.bridge.server.level.ServerPlayerBridge;
 import me.lucko.luckperms.forge.event.ConnectionEvent;
 import net.kyori.adventure.text.Component;
 import net.minecraft.Util;
@@ -96,7 +94,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
     }
 
     @SubscribeEvent
-    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+    public void onPlayerLoadFromFile(PlayerEvent.LoadFromFile event) {
         ServerPlayer player = (ServerPlayer) event.getPlayer();
         GameProfile profile = player.getGameProfile();
 
@@ -105,7 +103,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
         }
 
         try {
-            CompletableFuture<Boolean> future = this.pendingConnections.get(player.getGameProfile().getId());
+            CompletableFuture<Boolean> future = this.pendingConnections.get(profile.getId());
             if (future.get() != Boolean.TRUE) {
                 Component component = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build(), player.getLanguage());
                 player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
@@ -138,10 +136,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
             }
         }
 
-        ((ServerPlayerBridge) player).bridge$setUser(user);
-        ((ServerPlayerBridge) player).bridge$setQueryOptionsCache(new QueryOptionsCache<>(player, this.plugin.getContextManager()));
-
-        this.plugin.getContextManager().signalContextUpdate(player);
+        this.plugin.getContextManager().register(player);
     }
 
     @SubscribeEvent
@@ -157,7 +152,10 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        handleDisconnect(event.getPlayer().getGameProfile().getId());
+        ServerPlayer player = (ServerPlayer) event.getPlayer();
+
+        this.plugin.getContextManager().unregister(player);
+        handleDisconnect(player.getGameProfile().getId());
     }
 
 }

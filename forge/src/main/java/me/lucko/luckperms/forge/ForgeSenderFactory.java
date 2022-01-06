@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-import me.lucko.luckperms.forge.bridge.server.level.ServerPlayerBridge;
+import me.lucko.luckperms.forge.model.ForgeUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
@@ -68,7 +68,9 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
     protected void sendMessage(CommandSourceStack sender, Component message) {
         Locale locale;
         if (sender.getEntity() instanceof ServerPlayer) {
-            locale = ((ServerPlayerBridge) sender.getEntity()).bridge$getLocale();
+            ServerPlayer player = (ServerPlayer) sender.getEntity();
+            ForgeUser user = getPlugin().getContextManager().getUser(player);
+            locale = user.getLocale(player);
         } else {
             locale = null;
         }
@@ -79,7 +81,9 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
     @Override
     protected Tristate getPermissionValue(CommandSourceStack commandSource, String node) {
         if (commandSource.getEntity() instanceof ServerPlayer) {
-            return ((ServerPlayerBridge) commandSource.getEntity()).bridge$hasPermission(node);
+            ServerPlayer player = (ServerPlayer) commandSource.getEntity();
+            ForgeUser user = getPlugin().getContextManager().getUser(player);
+            return user.checkPermission(node);
         }
 
         VerboseCheckTarget target = VerboseCheckTarget.internal(commandSource.getTextName());

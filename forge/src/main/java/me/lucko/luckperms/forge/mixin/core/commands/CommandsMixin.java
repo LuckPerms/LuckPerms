@@ -25,133 +25,47 @@
 
 package me.lucko.luckperms.forge.mixin.core.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.context.ParsedCommandNode;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
-import me.lucko.luckperms.forge.bridge.server.level.ServerPlayerBridge;
-import net.luckperms.api.util.Tristate;
+import com.mojang.brigadier.tree.RootCommandNode;
+import me.lucko.luckperms.forge.event.SuggestCommandsEvent;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.server.level.ServerPlayer;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
- * Mixin into {@link Commands} to add permission checks for commands.
+ * Mixin into {@link Commands} for posting {@link SuggestCommandsEvent}
  */
 @Mixin(value = Commands.class)
 public abstract class CommandsMixin {
 
     @Shadow
-    @Final
-    private CommandDispatcher<CommandSourceStack> dispatcher;
-
-    private Map<CommandNode<CommandSourceStack>, String> luckperms$permissions;
-
-    @Inject(
-            method = "<init>",
-            at = @At(
-                    value = "RETURN"
-            )
-    )
-    private void onInit(Commands.CommandSelection commandSelection, CallbackInfo callbackInfo) {
-        this.luckperms$permissions = new HashMap<>();
-        luckperms$getPermissions(this.dispatcher.getRoot()).forEach((key, value) -> this.luckperms$permissions.put(key, "command." + value));
-    }
+    protected abstract void fillUsableCommands(CommandNode<CommandSourceStack> p_82113_, CommandNode<SharedSuggestionProvider> p_82114_, CommandSourceStack p_82115_, Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> p_82116_);
 
     @Redirect(
-            method = "performCommand",
+            method = "sendCommands",
             at = @At(
                     value = "INVOKE",
-                    target = "Lcom/mojang/brigadier/CommandDispatcher;parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/ParseResults;",
-                    remap = false
+                    target = "Lnet/minecraft/commands/Commands;fillUsableCommands(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Lnet/minecraft/commands/CommandSourceStack;Ljava/util/Map;)V"
             )
     )
-    private ParseResults<CommandSourceStack> onPerformCommand(CommandDispatcher<CommandSourceStack> instance, StringReader command, Object object) throws Exception {
-        CommandSourceStack source = (CommandSourceStack) object;
-        if (!(source.getEntity() instanceof ServerPlayer)) {
-            return instance.parse(command, source);
-        }
+    private void onFillUsableCommands(Commands commands, CommandNode<CommandSourceStack> commandNode, CommandNode<SharedSuggestionProvider> suggestionNode, CommandSourceStack source, Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> map) {
+        SuggestCommandsEvent event = new SuggestCommandsEvent(source, (RootCommandNode<CommandSourceStack>) commandNode);
+        MinecraftForge.EVENT_BUS.post(event);
 
-        ParseResults<CommandSourceStack> parseResults = instance.parse(command, source.withPermission(4));
-        for (ParsedCommandNode<CommandSourceStack> parsedNode : parseResults.getContext().getNodes()) {
-            if (!luckperms$hasPermission(source, parsedNode.getNode())) {
-                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parseResults.getReader());
-            }
-        }
+        // This map will be populated with the original root node, so we must clear it
+        map.clear();
 
-        return parseResults;
-    }
+        // Insert the root node as it may have been replaced during the event
+        map.put(event.getNode(), suggestionNode);
 
-    @Redirect(
-            method = "fillUsableCommands",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lcom/mojang/brigadier/tree/CommandNode;canUse(Ljava/lang/Object;)Z",
-                    remap = false
-            )
-    )
-    private boolean onCanUse(CommandNode<CommandSourceStack> node, Object object) {
-        CommandSourceStack source = (CommandSourceStack) object;
-        if (!(source.getEntity() instanceof ServerPlayer)) {
-            return node.canUse(source);
-        }
-
-        // If the node cannot be used with the max permission level then there is most likely an unmet requirement,
-        // as a permission will not resolve this requirement we can just ignore the node.
-        if (!node.canUse(source.withPermission(4))) {
-            return false;
-        }
-
-        return luckperms$hasPermission(source, node);
-    }
-
-    private boolean luckperms$hasPermission(CommandSourceStack source, CommandNode<CommandSourceStack> node) {
-        if (!(source.getEntity() instanceof ServerPlayer)) {
-            return node.canUse(source);
-        }
-
-        String permission = this.luckperms$permissions.get(node);
-        if (permission != null) {
-            Tristate state = ((ServerPlayerBridge) source.getEntity()).bridge$hasPermission(permission);
-            if (state != Tristate.UNDEFINED) {
-                return state.asBoolean();
-            }
-        }
-
-        return node.canUse(source);
-    }
-
-    private <T> Map<CommandNode<T>, String> luckperms$getPermissions(CommandNode<T> node) {
-        Map<CommandNode<T>, String> permissions = new HashMap<>();
-        for (CommandNode<T> childNode : node.getChildren()) {
-            String name = childNode.getName().toLowerCase(Locale.ROOT)
-                    .replace("=", "eq")
-                    .replace("<", "lt")
-                    .replace("<=", "le")
-                    .replace(">", "gt")
-                    .replace(">=", "ge")
-                    .replace("*", "all");
-            permissions.putIfAbsent(childNode, name);
-
-            if (!childNode.getChildren().isEmpty()) {
-                luckperms$getPermissions(childNode).forEach((key, value) -> permissions.putIfAbsent(key, name + "." + value));
-            }
-        }
-
-        return permissions;
+        fillUsableCommands(event.getNode(), suggestionNode, source.withPermission(4), map);
     }
 
 }

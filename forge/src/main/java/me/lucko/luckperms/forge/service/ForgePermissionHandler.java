@@ -26,7 +26,8 @@
 package me.lucko.luckperms.forge.service;
 
 import me.lucko.luckperms.forge.LPForgeBootstrap;
-import me.lucko.luckperms.forge.bridge.server.level.ServerPlayerBridge;
+import me.lucko.luckperms.forge.LPForgePlugin;
+import me.lucko.luckperms.forge.model.ForgeUser;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,9 +44,12 @@ import java.util.UUID;
 
 public class ForgePermissionHandler implements IPermissionHandler {
     public static final ResourceLocation IDENTIFIER = new ResourceLocation(LPForgeBootstrap.ID, "permission_handler");
+
+    private final LPForgePlugin plugin;
     private final Set<PermissionNode<?>> permissionNodes;
 
-    public ForgePermissionHandler(Collection<PermissionNode<?>> permissionNodes) {
+    public ForgePermissionHandler(LPForgePlugin plugin, Collection<PermissionNode<?>> permissionNodes) {
+        this.plugin = plugin;
         this.permissionNodes = Collections.unmodifiableSet(new HashSet<>(permissionNodes));
     }
 
@@ -62,9 +66,10 @@ public class ForgePermissionHandler implements IPermissionHandler {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getPermission(ServerPlayer player, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
-        Tristate state = ((ServerPlayerBridge) player).bridge$hasPermission(node.getNodeName());
+        ForgeUser user = this.plugin.getContextManager().getUser(player);
         if (node.getType() == PermissionTypes.BOOLEAN) {
-            return (T) (Boolean) state.asBoolean();
+            Tristate value = user.checkPermission(node.getNodeName());
+            return (T) (Boolean) value.asBoolean();
         }
 
         return node.getDefaultResolver().resolve(player, player.getUUID(), context);

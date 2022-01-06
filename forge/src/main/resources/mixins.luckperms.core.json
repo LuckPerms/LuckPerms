@@ -7,7 +7,6 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "commands.CommandsMixin",
-    "server.level.ServerPlayerMixin",
     "server.network.ServerLoginPacketListenerImplMixin"
   ],
   "injectors": {

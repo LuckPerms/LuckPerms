@@ -23,30 +23,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.forge.bridge.server.level;
+package me.lucko.luckperms.forge.event;
 
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
-import me.lucko.luckperms.common.model.User;
-import net.luckperms.api.query.QueryOptions;
-import net.luckperms.api.util.Tristate;
-import net.minecraft.server.level.ServerPlayer;
+import com.mojang.brigadier.tree.RootCommandNode;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraftforge.eventbus.api.Event;
 
-import java.util.Locale;
+public class SuggestCommandsEvent extends Event {
 
-public interface ServerPlayerBridge {
+    private final CommandSourceStack source;
+    private RootCommandNode<CommandSourceStack> node;
 
-    Tristate bridge$hasPermission(String permission);
+    public SuggestCommandsEvent(CommandSourceStack source, RootCommandNode<CommandSourceStack> node) {
+        this.source = source;
+        this.node = node;
+    }
 
-    Tristate bridge$hasPermission(String permission, QueryOptions queryOptions);
+    public CommandSourceStack getSource() {
+        return source;
+    }
 
-    Locale bridge$getLocale();
+    public RootCommandNode<CommandSourceStack> getNode() {
+        return node;
+    }
 
-    QueryOptionsCache<ServerPlayer> bridge$getQueryOptionsCache();
-
-    void bridge$setQueryOptionsCache(QueryOptionsCache<ServerPlayer> queryOptionsCache);
-
-    User bridge$getUser();
-
-    void bridge$setUser(User user);
+    public void setNode(RootCommandNode<CommandSourceStack> node) {
+        this.node = node;
+    }
 
 }
