@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.http.BytebinClient;
+import me.lucko.luckperms.common.http.BytesocksClient;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -90,6 +91,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
     private BytebinClient bytebin;
+    private BytesocksClient bytesocks;
     private WebEditorSessionStore webEditorSessionStore;
     private TranslationRepository translationRepository;
     private FileWatcher fileWatcher = null;
@@ -136,6 +138,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 .build();
 
         this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+        this.bytesocks = new BytesocksClient(httpClient, getConfiguration().get(ConfigKeys.BYTESOCKS_URL), "luckperms");
         this.webEditorSessionStore = new WebEditorSessionStore();
 
         // init translation repo and update bundle files
@@ -417,6 +420,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public BytebinClient getBytebin() {
         return this.bytebin;
+    }
+
+    @Override
+    public BytesocksClient getBytesocks() {
+        return this.bytesocks;
     }
 
     @Override

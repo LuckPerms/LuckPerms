@@ -64,6 +64,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
@@ -74,6 +75,42 @@ import java.util.zip.GZIPOutputStream;
 public class WebEditorRequest {
 
     public static final int MAX_USERS = 500;
+
+    /**
+     * The encoded json object this payload is made up of
+     */
+    private final JsonObject payload;
+
+    private final List<PermissionHolder> holders;
+    private final List<Track> tracks;
+
+    private WebEditorRequest(JsonObject payload, List<PermissionHolder> holders, List<Track> tracks) {
+        this.payload = payload;
+        this.holders = holders;
+        this.tracks = tracks;
+    }
+
+    public JsonObject getPayload() {
+        return this.payload;
+    }
+
+    public byte[] encode() {
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
+            GsonProvider.normal().toJson(this.payload, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bytesOut.toByteArray();
+    }
+
+    public List<PermissionHolder> getHolders() {
+        return this.holders;
+    }
+
+    public List<Track> getTracks() {
+        return this.tracks;
+    }
 
     /**
      * Generates a web editor request payload.
@@ -95,16 +132,13 @@ public class WebEditorRequest {
         }
 
         // form the payload data
-        return new WebEditorRequest(holders, tracks, sender, cmdLabel, potentialContexts.build(), plugin);
+
+        JsonObject json = form(holders, tracks, sender, cmdLabel, potentialContexts.build(), plugin).toJson();
+        return new WebEditorRequest(json, holders, tracks);
     }
 
-    /**
-     * The encoded json object this payload is made up of
-     */
-    private final JsonObject payload;
-
-    private WebEditorRequest(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, ImmutableContextSet potentialContexts, LuckPermsPlugin plugin) {
-        this.payload = new JObject()
+    private static JObject form(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, ImmutableContextSet potentialContexts, LuckPermsPlugin plugin) {
+        return new JObject()
                 .add("metadata", formMetadata(sender, cmdLabel, plugin.getBootstrap().getVersion()))
                 .add("permissionHolders", new JArray()
                         .consume(arr -> {
@@ -121,8 +155,7 @@ public class WebEditorRequest {
                         })
                 )
                 .add("knownPermissions", new JArray().addAll(plugin.getPermissionRegistry().rootAsList()))
-                .add("potentialContexts", ContextSetJsonSerializer.serialize(potentialContexts))
-                .toJson();
+                .add("potentialContexts", ContextSetJsonSerializer.serialize(potentialContexts));
     }
 
     private static JObject formMetadata(Sender sender, String cmdLabel, String pluginVersion) {
@@ -149,43 +182,6 @@ public class WebEditorRequest {
                 .add("type", "track")
                 .add("id", track.getName())
                 .add("groups", new JArray().addAll(track.getGroups()));
-    }
-
-    public byte[] encode() {
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
-            GsonProvider.normal().toJson(this.payload, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return bytesOut.toByteArray();
-    }
-
-    /**
-     * Creates a web editor session, and sends the URL to the sender.
-     *
-     * @param plugin the plugin
-     * @param sender the sender creating the session
-     * @return the command result
-     */
-    public void createSession(LuckPermsPlugin plugin, Sender sender) {
-        String pasteId;
-        try {
-            pasteId = plugin.getBytebin().postContent(encode(), AbstractHttpClient.JSON_TYPE).key();
-        } catch (UnsuccessfulRequestException e) {
-            Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
-            return;
-        } catch (IOException e) {
-            new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
-            Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
-            return;
-        }
-
-        plugin.getWebEditorSessionStore().addNewSession(pasteId);
-
-        // form a url for the editor
-        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + pasteId;
-        Message.EDITOR_URL.send(sender, url);
     }
 
     public static void includeMatchingGroups(List<? super Group> holders, Predicate<? super Group> filter, LuckPermsPlugin plugin) {

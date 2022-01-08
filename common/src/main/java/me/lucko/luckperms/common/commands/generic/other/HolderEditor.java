@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.webeditor.WebEditorRequest;
+import me.lucko.luckperms.common.webeditor.WebEditorSession;
 
 import net.luckperms.api.node.Node;
 
@@ -84,8 +85,7 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
 
         Message.EDITOR_START.send(sender);
 
-        WebEditorRequest.generate(holders, Collections.emptyList(), sender, label, plugin)
-                .createSession(plugin, sender);
+        WebEditorSession.createAndOpen(holders, Collections.emptyList(), sender, label, plugin);
     }
 
 }

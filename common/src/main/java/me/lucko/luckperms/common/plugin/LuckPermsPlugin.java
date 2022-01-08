@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.http.BytebinClient;
+import me.lucko.luckperms.common.http.BytesocksClient;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.locale.TranslationRepository;
@@ -248,6 +249,13 @@ public interface LuckPermsPlugin {
      * @return the bytebin instance
      */
     BytebinClient getBytebin();
+
+    /**
+     * Gets the bytesocks instance in use by platform.
+     *
+     * @return the bytesocks instance
+     */
+    BytesocksClient getBytesocks();
 
     /**
      * Gets the web editor session store

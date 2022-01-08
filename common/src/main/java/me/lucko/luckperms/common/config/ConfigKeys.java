@@ -692,7 +692,12 @@ public final class ConfigKeys {
     /**
      * The URL of the bytebin instance used to upload data
      */
-    public static final ConfigKey<String> BYTEBIN_URL = stringKey("bytebin-url", "https://bytebin.lucko.me/");
+    public static final ConfigKey<String> BYTEBIN_URL = stringKey("bytebin-url", "https://usercontent.luckperms.net/");
+
+    /**
+     * The URL of the bytesocks instance used to communicate with
+     */
+    public static final ConfigKey<String> BYTESOCKS_URL = stringKey("bytesocks-url", "https://usersockets.luckperms.net/");
 
     /**
      * The URL of the web editor

@@ -1159,6 +1159,13 @@ public interface Message {
                     .clickEvent(ClickEvent.openUrl(url))
     );
 
+    Args0 EDITOR_SOCKET_CONNECTED = () -> prefixed(translatable()
+            // "&7Editor window connected successfully."
+            .color(GRAY)
+            .key("luckperms.command.editor.socket-connected")
+            .append(FULL_STOP)
+    );
+
     Args2<Integer, String> EDITOR_HTTP_REQUEST_FAILURE = (code, message) -> prefixed(text()
             // "&cUnable to communicate with the editor. (response code &4{}&c, message='{}')"
             .color(RED)
