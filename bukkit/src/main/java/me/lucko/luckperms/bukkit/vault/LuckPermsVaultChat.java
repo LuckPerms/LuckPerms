@@ -30,6 +30,7 @@ import com.google.common.base.Strings;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
+import me.lucko.luckperms.common.cacheddata.type.MonitoredMetaCache;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -37,7 +38,7 @@ import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -97,7 +98,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         PermissionHolder user = this.vaultPermission.lookupUser(uuid);
         QueryOptions queryOptions = this.vaultPermission.getQueryOptions(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
-        return Strings.nullToEmpty(metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API));
+        return Strings.nullToEmpty(metaData.getPrefix(CheckOrigin.THIRD_PARTY_API).result());
     }
 
     @Override
@@ -107,7 +108,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         PermissionHolder user = this.vaultPermission.lookupUser(uuid);
         QueryOptions queryOptions = this.vaultPermission.getQueryOptions(uuid, world);
         MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
-        return Strings.nullToEmpty(metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API));
+        return Strings.nullToEmpty(metaData.getSuffix(CheckOrigin.THIRD_PARTY_API).result());
     }
 
     @Override
@@ -139,8 +140,8 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
 
         PermissionHolder user = this.vaultPermission.lookupUser(uuid);
         QueryOptions queryOptions = this.vaultPermission.getQueryOptions(uuid, world);
-        MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
-        return metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
+        MonitoredMetaCache metaData = user.getCachedData().getMetaData(queryOptions);
+        return metaData.getMetaValue(key, CheckOrigin.THIRD_PARTY_API).result();
     }
 
     @Override
@@ -158,21 +159,21 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     @Override
     public String getGroupChatPrefix(String world, String name) {
         Objects.requireNonNull(name, "name");
-        MetaCache metaData = getGroupMetaCache(name, world);
+        MonitoredMetaCache metaData = getGroupMetaCache(name, world);
         if (metaData == null) {
             return null;
         }
-        return Strings.nullToEmpty(metaData.getPrefix(MetaCheckEvent.Origin.THIRD_PARTY_API));
+        return Strings.nullToEmpty(metaData.getPrefix(CheckOrigin.THIRD_PARTY_API).result());
     }
 
     @Override
     public String getGroupChatSuffix(String world, String name) {
         Objects.requireNonNull(name, "name");
-        MetaCache metaData = getGroupMetaCache(name, world);
+        MonitoredMetaCache metaData = getGroupMetaCache(name, world);
         if (metaData == null) {
             return null;
         }
-        return Strings.nullToEmpty(metaData.getSuffix(MetaCheckEvent.Origin.THIRD_PARTY_API));
+        return Strings.nullToEmpty(metaData.getSuffix(CheckOrigin.THIRD_PARTY_API).result());
     }
 
     @Override
@@ -199,11 +200,11 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
     public String getGroupMeta(String world, String name, String key) {
         Objects.requireNonNull(name, "name");
         Objects.requireNonNull(key, "key");
-        MetaCache metaData = getGroupMetaCache(name, world);
+        MonitoredMetaCache metaData = getGroupMetaCache(name, world);
         if (metaData == null) {
             return null;
         }
-        return metaData.getMetaValue(key, MetaCheckEvent.Origin.THIRD_PARTY_API);
+        return metaData.getMetaValue(key, CheckOrigin.THIRD_PARTY_API).result();
     }
 
     @Override
@@ -223,7 +224,7 @@ public class LuckPermsVaultChat extends AbstractVaultChat {
         return this.plugin.getGroupManager().getByDisplayName(name);
     }
 
-    private MetaCache getGroupMetaCache(String name, String world) {
+    private MonitoredMetaCache getGroupMetaCache(String name, String world) {
         Group group = getGroup(name);
         if (group == null) {
             return null;

@@ -57,6 +57,22 @@ public interface UniqueIdDetermineTypeEvent extends LuckPermsEvent, ResultEvent<
     String TYPE_UNAUTHENTICATED = "unauthenticated";
 
     /**
+     * The players UUID most likely belongs to a NPC (non-player character).
+     *
+     * <p>Usually indicated by the UUID being {@link UUID#version() version} 2.</p>
+     *
+     * @since 5.4
+     */
+    String TYPE_NPC = "npc";
+
+    /**
+     * Unknown UUID type.
+     *
+     * @since 5.4
+     */
+    String TYPE_UNKNOWN = "unknown";
+
+    /**
      * Gets the {@link UUID unique id} being queried.
      *
      * @return the unique id

@@ -38,13 +38,19 @@ import me.lucko.luckperms.common.util.Predicates;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ExportCommand extends SingleCommand {
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm")
+            .withZone(ZoneId.systemDefault());
+
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public ExportCommand() {
-        super(CommandSpec.EXPORT, "Export", CommandPermission.EXPORT, Predicates.notInRange(1, 2));
+        super(CommandSpec.EXPORT, "Export", CommandPermission.EXPORT, Predicates.alwaysFalse());
     }
 
     @Override
@@ -68,7 +74,12 @@ public class ExportCommand extends SingleCommand {
             exporter = new Exporter.WebUpload(plugin, sender, includeUsers, includeGroups, label);
         } else {
             Path dataDirectory = plugin.getBootstrap().getDataDirectory();
-            Path path = dataDirectory.resolve(args.get(0) + ".json.gz");
+            Path path;
+            if (args.isEmpty()) {
+                path = dataDirectory.resolve("luckperms-" + DATE_FORMAT.format(Instant.now()) + ".json.gz");
+            } else {
+                path = dataDirectory.resolve(args.get(0) + ".json.gz");
+            }
 
             if (!path.getParent().equals(dataDirectory)) {
                 Message.FILE_NOT_WITHIN_DIRECTORY.send(sender, path.toString());

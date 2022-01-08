@@ -35,8 +35,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -112,7 +111,7 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
 
     @Override
     public Tristate getPermissionValue(QueryOptions options, String permission) {
-        return this.parent.getCachedData().getPermissionData(options).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK).result();
+        return this.parent.getCachedData().getPermissionData(options).checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION_SET).result();
     }
 
     @Override
@@ -147,20 +146,20 @@ public abstract class PermissionHolderSubject<T extends PermissionHolder> implem
     public Optional<String> getOption(ImmutableContextSet contexts, String s) {
         MetaCache data = this.parent.getCachedData().getMetaData(this.plugin.getContextManager().formQueryOptions(contexts));
         if (s.equalsIgnoreCase(Prefix.NODE_KEY)) {
-            String prefix = data.getPrefix(MetaCheckEvent.Origin.PLATFORM_API);
+            String prefix = data.getPrefix(CheckOrigin.PLATFORM_API).result();
             if (prefix != null) {
                 return Optional.of(prefix);
             }
         }
 
         if (s.equalsIgnoreCase(Suffix.NODE_KEY)) {
-            String suffix = data.getSuffix(MetaCheckEvent.Origin.PLATFORM_API);
+            String suffix = data.getSuffix(CheckOrigin.PLATFORM_API).result();
             if (suffix != null) {
                 return Optional.of(suffix);
             }
         }
 
-        String val = data.getMetaValue(s, MetaCheckEvent.Origin.PLATFORM_API);
+        String val = data.getMetaValue(s, CheckOrigin.PLATFORM_API).result();
         if (val != null) {
             return Optional.of(val);
         }

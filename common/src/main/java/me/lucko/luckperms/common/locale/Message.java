@@ -338,6 +338,108 @@ public interface Message {
             .append(text(result, GRAY))
     );
 
+    Args1<String> VERBOSE_LOG_HOVER_TYPE = type -> translatable()
+            // "&aType: &2{}"
+            .key("luckperms.logs.verbose.hover.type-key")
+            .color(GREEN)
+            .append(text(": "))
+            .append(text(type, DARK_GREEN))
+            .build();
+
+    Args1<String> VERBOSE_LOG_HOVER_ORIGIN = origin -> translatable()
+            // "&bOrigin: &2{}"
+            .key("luckperms.logs.verbose.hover.origin-key")
+            .color(AQUA)
+            .append(text(": "))
+            .append(text(origin, DARK_GREEN))
+            .build();
+
+    Args1<Node> VERBOSE_LOG_HOVER_CAUSE = causeNode -> translatable()
+            // "&bCause: {}"
+            .key("luckperms.logs.verbose.hover.cause-key")
+            .color(AQUA)
+            .append(text(": "))
+            .apply(builder -> {
+                String origin = causeNode.getMetadata(InheritanceOriginMetadata.KEY)
+                        .map(o -> o.getOrigin().getName()).orElse("?");
+
+                builder.append(translatable()
+                        .key("luckperms.command.generic.permission.check.info.directly")
+                        .color(GRAY)
+                        .args(
+                                text().color(AQUA).content(origin),
+                                text(causeNode.getKey(), AQUA),
+                                formatBoolean(causeNode.getValue()),
+                                formatContextSet(causeNode.getContexts())
+                        )
+                );
+            })
+            .build();
+
+    Args1<MetaNode> VERBOSE_LOG_HOVER_CAUSE_META = causeNode -> translatable()
+            // "&bCause: {}"
+            .key("luckperms.logs.verbose.hover.cause-key")
+            .color(AQUA)
+            .append(text(": "))
+            .apply(builder -> {
+                String origin = causeNode.getMetadata(InheritanceOriginMetadata.KEY)
+                        .map(o -> o.getOrigin().getName()).orElse("?");
+
+                builder.append(translatable()
+                        .key("luckperms.command.generic.permission.check.info.directly")
+                        .color(GRAY)
+                        .args(
+                                text().color(AQUA).content(origin),
+                                text(causeNode.getMetaKey(), AQUA),
+                                formatColoredValue(causeNode.getMetaValue()),
+                                formatContextSet(causeNode.getContexts())
+                        )
+                );
+            })
+            .build();
+
+    Args1<ContextSet> VERBOSE_LOG_HOVER_CONTEXT = set -> translatable()
+            // "&bContext: {}"
+            .key("luckperms.logs.verbose.hover.context-key")
+            .color(AQUA)
+            .append(text(": "))
+            .append(formatContextSet(set))
+            .build();
+
+    Args1<String> VERBOSE_LOG_HOVER_THREAD = threadName -> translatable()
+            // "&bThread: &f{}"
+            .key("luckperms.logs.verbose.hover.thread-key")
+            .color(AQUA)
+            .append(text(": "))
+            .append(text(threadName, WHITE))
+            .build();
+
+    Args0 VERBOSE_LOG_HOVER_TRACE_TITLE = () -> translatable()
+            // "&bTrace:"
+            .key("luckperms.logs.verbose.hover.trace-key")
+            .color(AQUA)
+            .append(text(':'))
+            .build();
+
+    Args1<String> VERBOSE_LOG_HOVER_TRACE_CONTENT = content -> text(content, GRAY);
+
+    Args1<Integer> VERBOSE_LOG_HOVER_TRACE_OVERFLOW = overflow -> text()
+            // "&f... and {} more"
+            .color(WHITE)
+            .content("... ")
+            .append(translatable()
+                    .key("luckperms.logs.verbose.hover.overflow")
+                    .args(text(overflow))
+            )
+            .build();
+
+    Args1<String> VERBOSE_LOG_HOVER_PROCESSOR = processor -> translatable()
+            .key("luckperms.logs.verbose.hover.processor-key")
+            .color(AQUA)
+            .append(text(": "))
+            .append(text(processor, DARK_GREEN))
+            .build();
+
     Args1<String> EXPORT_LOG = msg -> prefixed(text()
             // "&3EXPORT &3&l> &f{}"
             .append(translatable("luckperms.logs.export-prefix", DARK_AQUA))
@@ -1569,7 +1671,7 @@ public interface Message {
             .append(space())
             .append(formatContextSetBracketed(node.getContexts(), empty()))
             .apply(builder -> {
-                String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                String holderName = holder.getType() == HolderType.GROUP ? holder.getIdentifier().getName() : holder.getPlainDisplayName();
                 boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                 Component hover = join(newline(),
@@ -1599,7 +1701,7 @@ public interface Message {
                     .append(space())
                     .append(formatContextSetBracketed(node.getContexts(), empty()))
                     .apply(builder -> {
-                        String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                        String holderName = holder.getType() == HolderType.GROUP ? holder.getIdentifier().getName() : holder.getPlainDisplayName();
                         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                         Component hover = join(newline(),
@@ -1669,7 +1771,7 @@ public interface Message {
                     .content(node.getGroupName())
                     .color(GREEN)
                     .apply(builder -> {
-                        String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                        String holderName = holder.getType() == HolderType.GROUP ? holder.getIdentifier().getName() : holder.getPlainDisplayName();
                         boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                         Component hover = join(newline(),
@@ -1702,7 +1804,7 @@ public interface Message {
                             .content(node.getGroupName())
                             .color(GREEN)
                             .apply(builder -> {
-                                String holderName = holder.getType() == HolderType.GROUP ? holder.getObjectName() : holder.getPlainDisplayName();
+                                String holderName = holder.getType() == HolderType.GROUP ? holder.getIdentifier().getName() : holder.getPlainDisplayName();
                                 boolean explicitGlobalContext = !holder.getPlugin().getConfiguration().getContextsFile().getDefaultContexts().isEmpty();
 
                                 Component hover = join(newline(),
@@ -1832,7 +1934,7 @@ public interface Message {
             )
     );
 
-    Args5<String, Tristate, String, String, ContextSet> PERMISSION_CHECK_RESULT = (permission, result, processor, cause, context) -> join(newline(),
+    Args5<String, Tristate, String, Node, ContextSet> PERMISSION_CHECK_RESULT = (permission, result, processor, causeNode, context) -> join(newline(),
             // &aPermission check for &b{}&a:
             //     &3Result: {}
             //     &3Processor: &f{}
@@ -1867,10 +1969,22 @@ public interface Message {
                     .append(translatable("luckperms.command.generic.permission.check.result.cause-key"))
                     .append(text(": "))
                     .apply(builder -> {
-                        if (cause == null) {
+                        if (causeNode == null) {
                             builder.append(translatable("luckperms.command.misc.none", AQUA));
                         } else {
-                            builder.append(text(cause, WHITE));
+                            String origin = causeNode.getMetadata(InheritanceOriginMetadata.KEY)
+                                    .map(o -> o.getOrigin().getName()).orElse("?");
+
+                            builder.append(translatable()
+                                    .key("luckperms.command.generic.permission.check.info.directly")
+                                    .color(GRAY)
+                                    .args(
+                                            text().color(AQUA).content(origin),
+                                            text(causeNode.getKey(), AQUA),
+                                            formatBoolean(causeNode.getValue()),
+                                            formatContextSet(causeNode.getContexts())
+                                    )
+                            );
                         }
                     })),
             prefixed(text()

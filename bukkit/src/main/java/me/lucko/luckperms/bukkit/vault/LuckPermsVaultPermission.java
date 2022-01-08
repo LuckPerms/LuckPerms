@@ -29,10 +29,10 @@ import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
-import me.lucko.luckperms.common.cacheddata.type.MetaCache;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.type.MonitoredMetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -44,8 +44,7 @@ import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.util.UniqueIdType;
 import me.lucko.luckperms.common.util.Uuids;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
@@ -175,7 +174,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         PermissionHolder user = lookupUser(uuid);
         QueryOptions queryOptions = getQueryOptions(uuid, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
-        return permissionData.checkPermission(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result().asBoolean();
+        return permissionData.checkPermission(permission, CheckOrigin.THIRD_PARTY_API).result().asBoolean();
     }
 
     @Override
@@ -187,7 +186,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         if (user instanceof Group) {
             throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
         }
-        return holderAddPermission(user, permission, world);
+        return holderAddPermission(user, permission, world, DataType.NORMAL);
     }
 
     @Override
@@ -199,7 +198,31 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         if (user instanceof Group) {
             throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
         }
-        return holderRemovePermission(user, permission, world);
+        return holderRemovePermission(user, permission, world, DataType.NORMAL);
+    }
+
+    @Override
+    public boolean userAddTransient(String world, UUID uuid, String permission) {
+        Objects.requireNonNull(uuid, "uuid");
+        Objects.requireNonNull(permission, "permission");
+
+        PermissionHolder user = lookupUser(uuid);
+        if (user instanceof Group) {
+            throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
+        }
+        return holderAddPermission(user, permission, world, DataType.TRANSIENT);
+    }
+
+    @Override
+    public boolean userRemoveTransient(String world, UUID uuid, String permission) {
+        Objects.requireNonNull(uuid, "uuid");
+        Objects.requireNonNull(permission, "permission");
+
+        PermissionHolder user = lookupUser(uuid);
+        if (user instanceof Group) {
+            throw new UnsupportedOperationException("Unable to modify the permissions of NPC players");
+        }
+        return holderRemovePermission(user, permission, world, DataType.TRANSIENT);
     }
 
     @Override
@@ -211,7 +234,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         QueryOptions queryOptions = getQueryOptions(uuid, world);
         PermissionCache permissionData = user.getCachedData().getPermissionData(queryOptions);
 
-        TristateResult result = permissionData.checkPermission(Inheritance.key(rewriteGroupName(group)), PermissionCheckEvent.Origin.THIRD_PARTY_API);
+        TristateResult result = permissionData.checkPermission(Inheritance.key(rewriteGroupName(group)), CheckOrigin.THIRD_PARTY_API);
         return result.processorClass() == DirectProcessor.class && result.result().asBoolean();
     }
 
@@ -254,8 +277,8 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
         }
 
         QueryOptions queryOptions = getQueryOptions(uuid, world);
-        MetaCache metaData = user.getCachedData().getMetaData(queryOptions);
-        String value = metaData.getPrimaryGroup(MetaCheckEvent.Origin.THIRD_PARTY_API);
+        MonitoredMetaCache metaData = user.getCachedData().getMetaData(queryOptions);
+        String value = metaData.getPrimaryGroup(CheckOrigin.THIRD_PARTY_API);
         if (value == null) {
             return null;
         }
@@ -276,7 +299,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
         QueryOptions queryOptions = getQueryOptions(null, world);
         PermissionCache permissionData = group.getCachedData().getPermissionData(queryOptions);
-        return permissionData.checkPermission(permission, PermissionCheckEvent.Origin.THIRD_PARTY_API).result().asBoolean();
+        return permissionData.checkPermission(permission, CheckOrigin.THIRD_PARTY_API).result().asBoolean();
     }
 
     @Override
@@ -289,7 +312,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             return false;
         }
 
-        return holderAddPermission(group, permission, world);
+        return holderAddPermission(group, permission, world, DataType.NORMAL);
     }
 
     @Override
@@ -302,7 +325,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
             return false;
         }
 
-        return holderRemovePermission(group, permission, world);
+        return holderRemovePermission(group, permission, world, DataType.NORMAL);
     }
 
     // utility methods for getting user and group instances
@@ -388,7 +411,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
 
     // utility methods for modifying the state of PermissionHolders
 
-    private boolean holderAddPermission(PermissionHolder holder, String permission, String world) {
+    private boolean holderAddPermission(PermissionHolder holder, String permission, String world, DataType type) {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
@@ -397,13 +420,13 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
                 .withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world)
                 .build();
 
-        if (holder.setNode(DataType.NORMAL, node, true).wasSuccessful()) {
+        if (holder.setNode(type, node, true).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
     }
 
-    private boolean holderRemovePermission(PermissionHolder holder, String permission, String world) {
+    private boolean holderRemovePermission(PermissionHolder holder, String permission, String world, DataType type) {
         Objects.requireNonNull(permission, "permission is null");
         Preconditions.checkArgument(!permission.isEmpty(), "permission is an empty string");
 
@@ -412,7 +435,7 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
                 .withContext(DefaultContextKeys.WORLD_KEY, world == null ? "global" : world)
                 .build();
 
-        if (holder.unsetNode(DataType.NORMAL, node).wasSuccessful()) {
+        if (holder.unsetNode(type, node).wasSuccessful()) {
             return holderSave(holder);
         }
         return false;
@@ -461,4 +484,5 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     private boolean useVaultServer() {
         return this.plugin.getConfiguration().get(ConfigKeys.USE_VAULT_SERVER);
     }
+
 }

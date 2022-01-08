@@ -26,6 +26,7 @@
 package me.lucko.luckperms.sponge.service.model.persisted;
 
 import me.lucko.luckperms.common.cache.BufferedRequest;
+import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
@@ -49,7 +50,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
     /**
      * The subjects identifier
      */
-    private final String identifier;
+    private final PermissionHolderIdentifier identifier;
 
     /**
      * The parent collection
@@ -76,7 +77,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
         super(service.getPlugin());
         this.service = service;
         this.parentCollection = parentCollection;
-        this.identifier = identifier;
+        this.identifier = new PermissionHolderIdentifier(parentCollection.getIdentifier(), identifier);
 
         this.subjectData = new PersistedSubjectData(this, DataType.NORMAL, service) {
             @Override
@@ -142,7 +143,7 @@ public class PersistedSubject extends CalculatedSubject implements LPSubject {
     }
 
     @Override
-    public String getIdentifier() {
+    public PermissionHolderIdentifier getIdentifier() {
         return this.identifier;
     }
 

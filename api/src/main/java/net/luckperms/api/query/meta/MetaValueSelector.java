@@ -25,6 +25,7 @@
 
 package net.luckperms.api.query.meta;
 
+import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.query.OptionKey;
 
@@ -54,6 +55,6 @@ public interface MetaValueSelector {
      * @param values the values, in the order in which they were accumulated.
      * @return the selected value
      */
-    @NonNull String selectValue(@NonNull String key, @NonNull List<String> values);
+    @NonNull Result<String, MetaNode> selectValue(@NonNull String key, @NonNull List<? extends Result<String, MetaNode>> values);
 
 }

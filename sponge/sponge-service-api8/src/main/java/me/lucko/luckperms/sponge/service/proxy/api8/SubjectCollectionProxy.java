@@ -79,7 +79,7 @@ public final class SubjectCollectionProxy implements SubjectCollection, LPProxie
 
     @Override
     public @NonNull CompletableFuture<Map<String, Subject>> loadSubjects(@NonNull Iterable<String> set) {
-        return this.handle.loadSubjects(set).thenApply(subs -> subs.stream().collect(ImmutableCollectors.toMap(LPSubject::getIdentifier, LPSubject::sponge)));
+        return this.handle.loadSubjects(set).thenApply(subs -> subs.stream().collect(ImmutableCollectors.toMap(lpSubject -> lpSubject.getIdentifier().getName(), LPSubject::sponge)));
     }
 
     @Override

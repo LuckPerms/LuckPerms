@@ -30,7 +30,7 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.types.Inheritance;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -72,7 +72,7 @@ public class ApiUser extends ApiPermissionHolder implements net.luckperms.api.mo
 
     @Override
     public @NonNull String getPrimaryGroup() {
-        String value = this.handle.getCachedData().getMetaData(this.handle.getQueryOptions()).getPrimaryGroup(MetaCheckEvent.Origin.LUCKPERMS_API);
+        String value = this.handle.getCachedData().getMetaData(this.handle.getQueryOptions()).getPrimaryGroup(CheckOrigin.LUCKPERMS_API);
         Objects.requireNonNull(value, "value"); // assert nonnull
         return value;
     }

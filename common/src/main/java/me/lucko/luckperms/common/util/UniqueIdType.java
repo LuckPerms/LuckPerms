@@ -28,7 +28,9 @@ package me.lucko.luckperms.common.util;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.luckperms.api.event.player.lookup.UniqueIdDetermineTypeEvent;
 
 import java.util.UUID;
@@ -40,16 +42,31 @@ public final class UniqueIdType {
 
     public static final UniqueIdType AUTHENTICATED = new UniqueIdType(
             UniqueIdDetermineTypeEvent.TYPE_AUTHENTICATED,
-            Component.translatable("luckperms.command.user.info.uuid-type.mojang", NamedTextColor.DARK_GREEN)
+            NamedTextColor.DARK_GREEN,
+            "luckperms.command.user.info.uuid-type.mojang",
+            "luckperms.command.user.info.uuid-type.desc.mojang"
     );
 
     public static final UniqueIdType UNAUTHENTICATED = new UniqueIdType(
             UniqueIdDetermineTypeEvent.TYPE_UNAUTHENTICATED,
-            Component.translatable("luckperms.command.user.info.uuid-type.not-mojang", NamedTextColor.DARK_GRAY)
+            NamedTextColor.DARK_GRAY,
+            "luckperms.command.user.info.uuid-type.not-mojang",
+            "luckperms.command.user.info.uuid-type.desc.not-mojang"
     );
 
-    private static final String TYPE_NPC = "npc";
-    public static final UniqueIdType NPC = new UniqueIdType(TYPE_NPC);
+    public static final UniqueIdType NPC = new UniqueIdType(
+            UniqueIdDetermineTypeEvent.TYPE_NPC,
+            NamedTextColor.GOLD,
+            "luckperms.command.user.info.uuid-type.npc",
+            "luckperms.command.user.info.uuid-type.desc.npc"
+    );
+
+    public static final UniqueIdType UNKNOWN = new UniqueIdType(
+            UniqueIdDetermineTypeEvent.TYPE_UNKNOWN,
+            NamedTextColor.RED,
+            "luckperms.command.user.info.uuid-type.unknown",
+            "luckperms.command.user.info.uuid-type.desc.unknown"
+    );
 
     public static UniqueIdType determineType(UUID uniqueId, LuckPermsPlugin plugin) {
         // determine initial type based on the uuid version
@@ -65,10 +82,10 @@ public final class UniqueIdType {
                 // if the uuid is version 2, assume it is an NPC
                 // see: https://github.com/lucko/LuckPerms/issues/1470
                 // and https://github.com/lucko/LuckPerms/issues/1470#issuecomment-475403162
-                type = TYPE_NPC;
+                type = UniqueIdDetermineTypeEvent.TYPE_NPC;
                 break;
             default:
-                type = "unknown";
+                type = UniqueIdDetermineTypeEvent.TYPE_UNKNOWN;
                 break;
         }
 
@@ -80,8 +97,10 @@ public final class UniqueIdType {
                 return AUTHENTICATED;
             case UniqueIdDetermineTypeEvent.TYPE_UNAUTHENTICATED:
                 return UNAUTHENTICATED;
-            case TYPE_NPC:
+            case UniqueIdDetermineTypeEvent.TYPE_NPC:
                 return NPC;
+            case UniqueIdDetermineTypeEvent.TYPE_UNKNOWN:
+                return UNKNOWN;
             default:
                 return new UniqueIdType(type);
         }
@@ -90,13 +109,30 @@ public final class UniqueIdType {
     private final String type;
     private final Component component;
 
-    private UniqueIdType(String type) {
-        this(type, Component.text(type, NamedTextColor.GOLD));
+    // constructor used for built-in types
+    private UniqueIdType(String type, TextColor displayColor, String translationKey, String translationKeyHover) {
+        this.type = type;
+        this.component = Component.translatable()
+                .key(translationKey)
+                .color(displayColor)
+                .hoverEvent(HoverEvent.showText(Component.translatable(
+                        translationKeyHover,
+                        NamedTextColor.DARK_GRAY
+                )))
+                .build();
     }
 
-    private UniqueIdType(String type, Component component) {
+    // constructor used for types provided via the API
+    private UniqueIdType(String type) {
         this.type = type;
-        this.component = component;
+        this.component = Component.text()
+                .content(type)
+                .color(NamedTextColor.GOLD)
+                .hoverEvent(HoverEvent.showText(Component.translatable(
+                        "luckperms.command.user.info.uuid-type.desc.api",
+                        NamedTextColor.GRAY
+                )))
+                .build();
     }
 
     public String getType() {

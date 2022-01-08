@@ -64,7 +64,7 @@ public class ParentRemove extends ChildCommand<LPSubjectData> {
 
         if (subjectData.removeParent(contextSet, subject.toReference()).join()) {
             SpongeCommandUtils.sendPrefixed(sender, "&aRemoved parent &b" + subject.getParentCollection().getIdentifier() +
-                        "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
+                        "&a/&b" + subject.getIdentifier().getName() + "&a in context " + SpongeCommandUtils.contextToString(contextSet));
         } else {
             SpongeCommandUtils.sendPrefixed(sender, "Unable to remove parent. Are you sure the Subject has it added?");
         }

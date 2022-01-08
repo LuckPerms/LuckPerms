@@ -26,6 +26,9 @@
 package net.luckperms.api.cacheddata;
 
 import net.luckperms.api.metastacking.MetaStackDefinition;
+import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.SuffixNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,16 +42,40 @@ import java.util.function.Function;
 
 /**
  * Holds cached meta lookup data for a specific set of contexts.
+ * 
+ * <p>Meta data refers to {@link PrefixNode prefixes}, {@link SuffixNode suffixes} and
+ * {@link MetaNode meta (options)} held by a permission holder.</p>
+ *
+ * <p>All calls will account for inheritance, as well as any default data
+ * provided by the platform. These calls are heavily cached and are therefore
+ * fast.</p>
  */
 public interface CachedMetaData extends CachedData {
 
     /**
+     * Query a meta value for the given {@code key}.
+     * 
+     * <p>This method will always return a {@link Result}, but the
+     * {@link Result#result() inner result} {@link String} will be null if a value
+     * for the given key was not found.</p>
+     *
+     * @param key the key
+     * @return a result containing the value
+     * @since 5.4
+     */
+    @NonNull Result<String, MetaNode> queryMetaValue(@NonNull String key);
+
+    /**
      * Gets a value for the given meta key.
+     * 
+     * <p>If no such meta value exists for the given key, {@code null} is returned.</p>
      *
      * @param key the key
      * @return the value
      */
-    @Nullable String getMetaValue(@NonNull String key);
+    default @Nullable String getMetaValue(@NonNull String key) {
+        return queryMetaValue(key).result();
+    }
 
     /**
      * Gets a value for the given meta key, and runs it through the given {@code transformer}.
@@ -81,37 +108,97 @@ public interface CachedMetaData extends CachedData {
     }
 
     /**
-     * Gets the holder's highest priority prefix, or null if the holder has no prefixes
+     * Query for a prefix.
+     * 
+     * <p>This method uses the rules defined by the {@link #getPrefixStackDefinition() prefix stack}
+     * to produce a {@link String} output.</p>
+     * 
+     * <p>Assuming the default configuration is used, this will usually be the value of the
+     * holder's highest priority prefix node.</p>
+     * 
+     * <p>This method will always return a {@link Result}, but the
+     * {@link Result#result() inner result} {@link String} will be null if
+     * a the resultant prefix stack contained no elements.</p>
+     *
+     * @return a result containing the prefix
+     * @since 5.4
+     */
+    @NonNull Result<String, PrefixNode> queryPrefix();
+
+    /**
+     * Gets the prefix.
+     * 
+     * <p>This method uses the rules defined by the {@link #getPrefixStackDefinition() prefix stack}
+     * to produce a {@link String} output.</p>
+     * 
+     * <p>Assuming the default configuration is used, this will usually be the value of the
+     * holder's highest priority prefix node.</p>
+     * 
+     * <p>If the resultant prefix stack contained no elements, {@code null} is returned.</p>
      *
      * @return a prefix string, or null
      */
-    @Nullable String getPrefix();
+    default @Nullable String getPrefix() {
+        return queryPrefix().result();
+    }
 
     /**
-     * Gets the holder's highest priority suffix, or null if the holder has no suffixes
+     * Query for a suffix.
+     *
+     * <p>This method uses the rules defined by the {@link #getSuffixStackDefinition() suffix stack}
+     * to produce a {@link String} output.</p>
+     *
+     * <p>Assuming the default configuration is used, this will usually be the value of the
+     * holder's highest priority suffix node.</p>
+     *
+     * <p>This method will always return a {@link Result}, but the
+     * {@link Result#result() inner result} {@link String} will be null if
+     * a the resultant suffix stack contained no elements.</p>
+     *
+     * @return a result containing the suffix
+     * @since 5.4
+     */
+    @NonNull Result<String, SuffixNode> querySuffix();
+
+    /**
+     * Gets the suffix.
+     *
+     * <p>This method uses the rules defined by the {@link #getSuffixStackDefinition() suffix stack}
+     * to produce a {@link String} output.</p>
+     *
+     * <p>Assuming the default configuration is used, this will usually be the value of the
+     * holder's highest priority suffix node.</p>
+     *
+     * <p>If the resultant suffix stack contained no elements, {@code null} is returned.</p>
      *
      * @return a suffix string, or null
      */
-    @Nullable String getSuffix();
+    default @Nullable String getSuffix() {
+        return querySuffix().result();
+    }
 
     /**
-     * Gets an immutable copy of the meta this holder has.
+     * Gets a map of all accumulated {@link MetaNode meta}.
      *
-     * @return an immutable map of meta
+     * <p>Prefer using the {@link #getMetaValue(String)} method for querying values.</p>
+     *
+     * @return a map of meta
      */
     @NonNull @Unmodifiable Map<String, List<String>> getMeta();
 
     /**
-     * Gets an immutable sorted map of all of the prefixes the holder has, whereby the first
-     * value is the highest priority prefix.
+     * Gets a sorted map of all accumulated {@link PrefixNode prefixes}.
+     *
+     * <p>Prefer using the {@link #getPrefix()} method for querying.</p>
      *
      * @return a sorted map of prefixes
      */
     @NonNull @Unmodifiable SortedMap<Integer, String> getPrefixes();
 
     /**
-     * Gets an immutable sorted map of all of the suffixes the holder has, whereby the first
-     * value is the highest priority suffix.
+     * Gets a sorted map of all accumulated {@link SuffixNode suffixes}.
+     *
+     * <p>Prefer using the {@link #getSuffix()} method for querying.</p>
      *
      * @return a sorted map of suffixes
      */
@@ -128,14 +215,14 @@ public interface CachedMetaData extends CachedData {
     @Nullable String getPrimaryGroup();
 
     /**
-     * Gets the definition used for the prefix stack
+     * Gets the definition used for the prefix stack.
      *
      * @return the definition used for the prefix stack
      */
     @NonNull MetaStackDefinition getPrefixStackDefinition();
 
     /**
-     * Gets the definition used for the suffix stack
+     * Gets the definition used for the suffix stack.
      *
      * @return the definition used for the suffix stack
      */

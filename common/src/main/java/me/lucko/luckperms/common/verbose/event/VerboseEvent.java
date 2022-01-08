@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.expression.BooleanExpressionCompiler.VariableEvaluator;
 
+import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
@@ -45,6 +46,11 @@ import java.util.UUID;
  * Represents a verbose event.
  */
 public abstract class VerboseEvent implements VariableEvaluator {
+
+    /**
+     * The origin of the check
+     */
+    private final CheckOrigin origin;
 
     /**
      * The name of the entity which was checked
@@ -71,7 +77,8 @@ public abstract class VerboseEvent implements VariableEvaluator {
      */
     private final String checkThread;
 
-    protected VerboseEvent(VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, long checkTime, Throwable checkTrace, String checkThread) {
+    protected VerboseEvent(CheckOrigin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, long checkTime, Throwable checkTrace, String checkThread) {
+        this.origin = origin;
         this.checkTarget = checkTarget;
         this.checkQueryOptions = checkQueryOptions;
         this.checkTime = checkTime;
@@ -79,9 +86,15 @@ public abstract class VerboseEvent implements VariableEvaluator {
         this.checkThread = checkThread;
     }
 
+    public CheckOrigin getOrigin() {
+        return this.origin;
+    }
+
     public VerboseCheckTarget getCheckTarget() {
         return this.checkTarget;
     }
+
+    public abstract Result<?, ?> getResult();
 
     public QueryOptions getCheckQueryOptions() {
         return this.checkQueryOptions;
@@ -99,10 +112,14 @@ public abstract class VerboseEvent implements VariableEvaluator {
         return this.checkThread;
     }
 
+    public abstract VerboseEventType getType();
+
     protected abstract void serializeTo(JObject object);
 
     public JsonObject toJson(StackTracePrinter tracePrinter) {
         return new JObject()
+                .add("type", getType().toString())
+                .add("origin", this.origin.name().toLowerCase(Locale.ROOT))
                 .add("who", new JObject()
                         .add("identifier", this.checkTarget.describe())
                         .add("type", this.checkTarget.getType())

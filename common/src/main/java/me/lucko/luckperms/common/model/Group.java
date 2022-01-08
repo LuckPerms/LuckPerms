@@ -68,8 +68,8 @@ public class Group extends PermissionHolder {
     private final GroupCachedDataManager cachedData;
 
     public Group(String name, LuckPermsPlugin plugin) {
-        super(plugin);
-        this.name = name.toLowerCase(Locale.ROOT);
+        super(plugin, name.toLowerCase(Locale.ROOT));
+        this.name = getIdentifier().getName();
 
         this.cachedData = new GroupCachedDataManager(this);
         getPlugin().getEventDispatcher().dispatchGroupCacheLoad(this, this.cachedData);
@@ -86,11 +86,6 @@ public class Group extends PermissionHolder {
 
     // name getters
     public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public String getObjectName() {
         return this.name;
     }
 

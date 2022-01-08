@@ -25,26 +25,28 @@
 
 package me.lucko.luckperms.common.calculator.processor;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 
-import java.util.Collections;
-import java.util.Map;
-
+/**
+ * Abstract implementation of {@link PermissionProcessor} that splits behaviour for normal
+ * permission checks and override checks into two separate methods.
+ */
 public abstract class AbstractPermissionProcessor implements PermissionProcessor {
-    protected Map<String, Boolean> sourceMap = Collections.emptyMap();
 
     @Override
-    public void setSource(Map<String, Boolean> sourceMap) {
-        this.sourceMap = sourceMap;
-    }
-
-    @Override
-    public TristateResult hasPermission(TristateResult prev, String permission) {
+    public final TristateResult hasPermission(TristateResult prev, String permission) {
         if (prev != TristateResult.UNDEFINED) {
-            return prev;
+            return hasPermissionOverride(prev, permission);
         }
         return hasPermission(permission);
     }
 
-    public abstract TristateResult hasPermission(String permission);
+    // Performs a regular permission check
+    protected abstract TristateResult hasPermission(String permission);
+
+    // Performs an override permission check
+    protected TristateResult hasPermissionOverride(TristateResult prev, String permission) {
+        return prev;
+    }
+
 }

@@ -33,10 +33,10 @@ import com.velocitypowered.api.permission.PermissionProvider;
 import com.velocitypowered.api.permission.PermissionSubject;
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
 
@@ -91,7 +91,7 @@ public class MonitoringPermissionCheckListener {
             // report result
             Tristate result = CompatibilityUtil.convertTristate(setting);
 
-            MonitoringPermissionCheckListener.this.plugin.getVerboseHandler().offerPermissionCheckEvent(PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK, this.verboseCheckTarget, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.of(result));
+            MonitoringPermissionCheckListener.this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION_SET, this.verboseCheckTarget, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.forMonitoredResult(result));
             MonitoringPermissionCheckListener.this.plugin.getPermissionRegistry().offer(permission);
 
             return setting;

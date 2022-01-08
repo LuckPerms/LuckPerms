@@ -25,6 +25,10 @@
 
 package me.lucko.luckperms.common.verbose.event;
 
+import com.google.gson.JsonArray;
+
+import me.lucko.luckperms.common.cacheddata.result.StringResult;
+import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 
@@ -35,11 +39,6 @@ import java.util.Locale;
 public class MetaCheckEvent extends VerboseEvent {
 
     /**
-     * The origin of the check
-     */
-    private final Origin origin;
-
-    /**
      * The meta key which was checked for
      */
     private final String key;
@@ -47,33 +46,59 @@ public class MetaCheckEvent extends VerboseEvent {
     /**
      * The result of the meta check
      */
-    private final String result;
+    private final StringResult<?> result;
 
-    public MetaCheckEvent(Origin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, long checkTime, Throwable checkTrace, String checkThread, String key, String result) {
-        super(checkTarget, checkQueryOptions, checkTime, checkTrace, checkThread);
-        this.origin = origin;
+    public MetaCheckEvent(CheckOrigin origin, VerboseCheckTarget checkTarget, QueryOptions checkQueryOptions, long checkTime, Throwable checkTrace, String checkThread, String key, StringResult<?> result) {
+        super(origin, checkTarget, checkQueryOptions, checkTime, checkTrace, checkThread);
         this.key = key;
         this.result = result;
-    }
-
-    public Origin getOrigin() {
-        return this.origin;
     }
 
     public String getKey() {
         return this.key;
     }
 
-    public String getResult() {
+    @Override
+    public StringResult<?> getResult() {
         return this.result;
     }
 
     @Override
+    public VerboseEventType getType() {
+        return VerboseEventType.META;
+    }
+
+    @Override
     protected void serializeTo(JObject object) {
-        object.add("type", "meta")
-                .add("key", this.key)
-                .add("result", this.result)
-                .add("origin", this.origin.name().toLowerCase(Locale.ROOT));
+        object.add("key", this.key);
+
+        object.add("result", String.valueOf(this.result.result()));
+        if (this.result != StringResult.nullResult()) {
+            object.add("resultInfo", serializeResult(this.result));
+        }
+    }
+
+    private static JObject serializeResult(StringResult<?> result) {
+        JObject object = new JObject();
+        object.add("result", String.valueOf(result.result()));
+
+        if (result.node() != null) {
+            object.add("node", NodeJsonSerializer.serializeNode(result.node(), true));
+        }
+
+        if (result.overriddenResult() != null) {
+            JsonArray overridden = new JsonArray();
+
+            StringResult<?> next = result.overriddenResult();
+            while (next != null) {
+                overridden.add(serializeResult(next).toJson());
+                next = next.overriddenResult();
+            }
+
+            object.add("overridden", overridden);
+        }
+
+        return object;
     }
 
     @Override
@@ -81,33 +106,7 @@ public class MetaCheckEvent extends VerboseEvent {
         return variable.equals("meta") ||
                 getCheckTarget().describe().equalsIgnoreCase(variable) ||
                 getKey().toLowerCase(Locale.ROOT).startsWith(variable.toLowerCase(Locale.ROOT)) ||
-                getResult().equalsIgnoreCase(variable);
+                String.valueOf(getResult().result()).equalsIgnoreCase(variable);
     }
 
-    /**
-     * Represents the origin of a meta check
-     */
-    public enum Origin {
-
-        /**
-         * Indicates the check was caused by a lookup in a platform API
-         */
-        PLATFORM_API,
-
-        /**
-         * Indicates the check was caused by a 3rd party API call
-         */
-        THIRD_PARTY_API,
-
-        /**
-         * Indicates the check was caused by a LuckPerms API call
-         */
-        LUCKPERMS_API,
-
-        /**
-         * Indicates the check was caused by a LuckPerms internal
-         */
-        INTERNAL
-
-    }
 }

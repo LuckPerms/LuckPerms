@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.node.comparator.NodeComparator;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
@@ -89,9 +90,11 @@ public class NodeMapMutable extends NodeMapBase {
     private final Lock lock = new ReentrantLock();
 
     protected final PermissionHolder holder;
+    private final InheritanceOrigin inheritanceOrigin;
 
-    public NodeMapMutable(PermissionHolder holder) {
+    public NodeMapMutable(PermissionHolder holder, DataType type) {
         this.holder = holder;
+        this.inheritanceOrigin = new InheritanceOrigin(holder.getIdentifier(), type);
     }
 
     @Override
@@ -110,12 +113,12 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     private Node addInheritanceOrigin(Node node) {
-        Optional<InheritanceOriginMetadata> metadata = node.getMetadata(InheritanceOriginMetadata.KEY);
-        if (metadata.isPresent() && metadata.get().getOrigin().equals(this.holder.getIdentifier())) {
+        Optional<InheritanceOriginMetadata> existing = node.getMetadata(InheritanceOriginMetadata.KEY);
+        if (existing.isPresent() && existing.get().equals(this.inheritanceOrigin)) {
             return node;
         }
 
-        return node.toBuilder().withMetadata(InheritanceOriginMetadata.KEY, new InheritanceOrigin(this.holder.getIdentifier())).build();
+        return node.toBuilder().withMetadata(InheritanceOriginMetadata.KEY, this.inheritanceOrigin).build();
     }
 
     @Override

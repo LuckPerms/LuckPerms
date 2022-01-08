@@ -34,7 +34,7 @@ import com.velocitypowered.api.proxy.Player;
 
 import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -57,6 +57,6 @@ public class PlayerPermissionProvider implements PermissionProvider, PermissionF
 
     @Override
     public @NonNull Tristate getPermissionValue(@NonNull String permission) {
-        return CompatibilityUtil.convertTristate(this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result());
+        return CompatibilityUtil.convertTristate(this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result());
     }
 }

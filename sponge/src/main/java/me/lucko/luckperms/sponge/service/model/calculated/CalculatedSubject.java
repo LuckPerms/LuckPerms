@@ -28,16 +28,18 @@ package me.lucko.luckperms.sponge.service.model.calculated;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
+import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.inheritance.SubjectInheritanceGraph;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 
 import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
@@ -67,9 +69,9 @@ public abstract class CalculatedSubject implements LPSubject {
     @Override
     public abstract CalculatedSubjectData getTransientSubjectData();
 
-    public Map<String, Boolean> getCombinedPermissions(QueryOptions filter) {
-        Map<String, Boolean> permissions;
-        Map<String, Boolean> merging;
+    public Map<String, Node> getCombinedPermissions(QueryOptions filter) {
+        Map<String, Node> permissions;
+        Map<String, Node> merging;
         switch (getParentCollection().getResolutionOrder()) {
             case TRANSIENT_FIRST:
                 permissions = getTransientSubjectData().resolvePermissions(filter);
@@ -83,18 +85,18 @@ public abstract class CalculatedSubject implements LPSubject {
                 throw new AssertionError();
         }
 
-        for (Map.Entry<String, Boolean> entry : merging.entrySet()) {
+        for (Map.Entry<String, Node> entry : merging.entrySet()) {
             permissions.putIfAbsent(entry.getKey(), entry.getValue());
         }
         return permissions;
     }
 
-    public void resolveAllPermissions(Map<String, Boolean> accumulator, QueryOptions filter) {
+    public void resolveAllPermissions(Map<String, Node> accumulator, QueryOptions filter) {
         SubjectInheritanceGraph graph = new SubjectInheritanceGraph(filter);
 
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
         for (CalculatedSubject subject : traversal) {
-            for (Map.Entry<String, Boolean> entry : subject.getCombinedPermissions(filter).entrySet()) {
+            for (Map.Entry<String, Node> entry : subject.getCombinedPermissions(filter).entrySet()) {
                 accumulator.putIfAbsent(entry.getKey(), entry.getValue());
             }
         }
@@ -132,9 +134,9 @@ public abstract class CalculatedSubject implements LPSubject {
         return result;
     }
 
-    public Map<String, String> getCombinedOptions(QueryOptions filter) {
-        Map<String, String> options;
-        Map<String, String> merging;
+    public Map<String, MetaNode> getCombinedOptions(QueryOptions filter) {
+        Map<String, MetaNode> options;
+        Map<String, MetaNode> merging;
         switch (getParentCollection().getResolutionOrder()) {
             case TRANSIENT_FIRST:
                 options = getTransientSubjectData().resolveOptions(filter);
@@ -148,7 +150,7 @@ public abstract class CalculatedSubject implements LPSubject {
                 throw new AssertionError();
         }
 
-        for (Map.Entry<String, String> entry : merging.entrySet()) {
+        for (Map.Entry<String, MetaNode> entry : merging.entrySet()) {
             options.putIfAbsent(entry.getKey(), entry.getValue());
         }
         return options;
@@ -160,8 +162,8 @@ public abstract class CalculatedSubject implements LPSubject {
 
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
         for (CalculatedSubject subject : traversal) {
-            for (Map.Entry<String, String> entry : subject.getCombinedOptions(filter).entrySet()) {
-                result.putIfAbsent(entry.getKey(), entry.getValue());
+            for (MetaNode entry : subject.getCombinedOptions(filter).values()) {
+                result.putIfAbsent(entry.getMetaKey(), entry.getMetaValue());
             }
         }
 
@@ -170,18 +172,20 @@ public abstract class CalculatedSubject implements LPSubject {
 
     public void resolveAllOptions(MetaAccumulator accumulator, QueryOptions filter) {
         SubjectInheritanceGraph graph = new SubjectInheritanceGraph(filter);
+
         Iterable<CalculatedSubject> traversal = graph.traverse(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER, this);
         for (CalculatedSubject subject : traversal) {
-            for (Map.Entry<String, String> entry : subject.getCombinedOptions(filter).entrySet()) {
-                accumulator.accumulateMeta(entry.getKey(), entry.getValue());
+            for (MetaNode entry : subject.getCombinedOptions(filter).values()) {
+                accumulator.accumulateNode(entry);
             }
         }
+
         accumulator.complete();
     }
 
     @Override
     public Tristate getPermissionValue(QueryOptions options, String permission) {
-        return this.cachedData.getPermissionData(options).checkPermission(permission, PermissionCheckEvent.Origin.INTERNAL).result();
+        return this.cachedData.getPermissionData(options).checkPermission(permission, CheckOrigin.INTERNAL).result();
     }
 
     @Override
@@ -201,7 +205,7 @@ public abstract class CalculatedSubject implements LPSubject {
 
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
-        return Optional.ofNullable(this.cachedData.getMetaData(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(contexts).build()).getMetaValue(key, MetaCheckEvent.Origin.PLATFORM_API));
+        return Optional.ofNullable(((MetaCache) this.cachedData.getMetaData(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(contexts).build())).getMetaValue(key, CheckOrigin.PLATFORM_API).result());
     }
 
     @Override

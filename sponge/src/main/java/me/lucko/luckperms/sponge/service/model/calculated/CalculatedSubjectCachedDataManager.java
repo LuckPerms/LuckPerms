@@ -40,11 +40,13 @@ import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
-import me.lucko.luckperms.sponge.calculator.FixedDefaultsProcessor;
+import me.lucko.luckperms.sponge.calculator.FixedTypeDefaultsProcessor;
+import me.lucko.luckperms.sponge.calculator.RootDefaultsProcessor;
 
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
@@ -68,7 +70,7 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
 
     @Override
     protected CacheMetadata getMetadataForQueryOptions(QueryOptions queryOptions) {
-        VerboseCheckTarget target = VerboseCheckTarget.of(this.subject.getParentCollection().getIdentifier(), this.subject.getIdentifier());
+        VerboseCheckTarget target = VerboseCheckTarget.of(this.subject.getParentCollection().getIdentifier(), this.subject.getIdentifier().getName());
         return new CacheMetadata(null, target, queryOptions);
     }
 
@@ -88,7 +90,7 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
     }
 
     @Override
-    protected <M extends Map<String, Boolean>> M resolvePermissions(IntFunction<M> mapFactory, QueryOptions queryOptions) {
+    protected <M extends Map<String, Node>> M resolvePermissions(IntFunction<M> mapFactory, QueryOptions queryOptions) {
         M map = mapFactory.apply(16);
         this.subject.resolveAllPermissions(map, queryOptions);
         return map;
@@ -101,13 +103,14 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
 
     @Override
     public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
-        List<PermissionProcessor> processors = new ArrayList<>(4);
+        List<PermissionProcessor> processors = new ArrayList<>(5);
         processors.add(new DirectProcessor());
         processors.add(new SpongeWildcardProcessor());
         processors.add(new WildcardProcessor());
 
         if (!this.subject.getParentCollection().isDefaultsCollection()) {
-            processors.add(new FixedDefaultsProcessor(this.subject.getService(), queryOptions, this.subject.getDefaults(), true));
+            processors.add(new FixedTypeDefaultsProcessor(this.subject.getService(), queryOptions, this.subject.getDefaults(), true));
+            processors.add(new RootDefaultsProcessor(this.subject.getService(), queryOptions, true));
         }
 
         return new PermissionCalculator(getPlugin(), metadata, processors);

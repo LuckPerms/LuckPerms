@@ -27,6 +27,8 @@ package me.lucko.luckperms.sponge.service.model;
 
 import com.google.common.collect.ImmutableList;
 
+import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
+
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
@@ -44,7 +46,7 @@ public interface LPSubject {
 
     LPPermissionService getService();
 
-    String getIdentifier();
+    PermissionHolderIdentifier getIdentifier();
 
     default LPSubjectReference toReference() {
         return getService().getReferenceFactory().obtain(this);
