@@ -86,9 +86,6 @@ public class WebEditorSocket extends WebSocketListener {
     /** The time the socket was created */
     private final long creationTime = System.currentTimeMillis();
 
-    /** The current state of this listener */
-    private State state = State.WAITING_FOR_EDITOR_TO_CONNECT;
-
     /** The websocket backing the connection */
     private BytesocksClient.Socket socket;
     /** The auth secret that must be sent during initial handshake */
@@ -182,48 +179,84 @@ public class WebEditorSocket extends WebSocketListener {
      * using the public key to check the signature is valid. Any other clients snooping on the
      * channel/connection cannot spoof messages because they do not have the private key.</p>
      *
-     * @param msg the message
+     * @param stringMsg the message
      * @throws Exception catch all
      */
-    private void handleMessageFrame(String msg) throws Exception {
+    private void handleMessageFrame(String stringMsg) throws Exception {
         if (this.authSecret == null) {
             throw new IllegalStateException("Auth secret is null");
         }
 
-        JsonObject frame = GsonProvider.parser().parse(msg).getAsJsonObject();
+        JsonObject frame = GsonProvider.parser().parse(stringMsg).getAsJsonObject();
 
-        if (this.state == State.WAITING_FOR_EDITOR_TO_CONNECT) {
-            String type = frame.get("type").getAsString();
-            if (!MESSAGE_FRAME_HELLO.equals(type)) {
-                throw new IllegalStateException("Unexpected message type: " + type);
+        String innerMsg = frame.get("msg").getAsString();
+        String signature = frame.get("signature").getAsString();
+
+        if (innerMsg == null || innerMsg.isEmpty() || signature == null || signature.isEmpty()) {
+            throw new IllegalArgumentException("Incomplete message");
+        }
+
+        boolean verified = true;
+
+        if (this.remotePublicKey != null) {
+            // check signature to ensure the message is from the connected editor
+            try {
+                Signature sign = Signature.getInstance("SHA256withRSA");
+                sign.initVerify(this.remotePublicKey);
+                sign.update(innerMsg.getBytes(StandardCharsets.UTF_8));
+
+                byte[] signatureBytes = Base64.getDecoder().decode(signature);
+                verified = sign.verify(signatureBytes);
+            } catch (Exception e) {
+                verified = false;
             }
+        }
 
-            String authSecret = frame.get("auth").getAsString();
-            if (!MessageDigest.isEqual(authSecret.getBytes(StandardCharsets.UTF_8), this.authSecret.getBytes(StandardCharsets.UTF_8))) {
-                throw new IllegalStateException("Invalid auth secret");
-            }
+        // parse the inner message
+        JsonObject msg = GsonProvider.parser().parse(innerMsg).getAsJsonObject();
+        String type = msg.get("type").getAsString();
 
-            // parse public key + update state
-            this.remotePublicKey = parsePublicKey(frame.get("publicKey").getAsString());
-            this.state = State.WAITING_FOR_CHANGES;
+        if (type.equals(MESSAGE_FRAME_HELLO)) {
+            handleHelloMessage(msg);
+            return;
+        }
 
-            // send a reply back to the editor to say we accept
-            String nonce = frame.get("nonce").getAsString();
+        if (!verified) {
+            throw new IllegalStateException("Signature not accepted");
+        }
+
+        if (type.equals(MESSAGE_TYPE_APPLY_CHANGE)) {
+            handleApplyChangeMessage(msg);
+        } else {
+            throw new IllegalStateException("Invalid message type: " + type);
+        }
+    }
+
+    private void handleHelloMessage(JsonObject msg) {
+        String authSecret = msg.get("auth").getAsString();
+        String nonce = msg.get("nonce").getAsString();
+
+        if (!MessageDigest.isEqual(authSecret.getBytes(StandardCharsets.UTF_8), this.authSecret.getBytes(StandardCharsets.UTF_8))) {
             send(new JObject()
-                    .add("type", MESSAGE_TYPE_HELLO_REPLY)
+                    .add("type", "hello-reply")
                     .add("nonce", nonce)
-                    .add("accepted", true)
+                    .add("accepted", false)
                     .toJson()
             );
+            throw new IllegalStateException("Invalid auth secret");
+        }
 
-            Message.EDITOR_SOCKET_CONNECTED.send(this.sender);
+        // parse public key
+        PublicKey remotePublicKey = parsePublicKey(msg.get("publicKey").getAsString());
+        boolean reconnected = false;
 
-        } else if (this.state == State.WAITING_FOR_CHANGES) {
-            String type = frame.get("type").getAsString();
-            if (MESSAGE_FRAME_HELLO.equals(type)) {
-                // could happen if duplicate editor windows are opened
-                // send a reply back to the editor to say we don't accept
-                String nonce = frame.get("nonce").getAsString();
+        // if the public key has already been set (if a session has already connected),
+        // don't accept a new connection unless the public keys match
+        // i.e. this allows the same editor to re-connect, but prevents new connections
+        if (this.remotePublicKey != null) {
+            reconnected = true;
+
+            if (!this.remotePublicKey.equals(remotePublicKey)) {
                 send(new JObject()
                         .add("type", "hello-reply")
                         .add("nonce", nonce)
@@ -232,42 +265,26 @@ public class WebEditorSocket extends WebSocketListener {
                 );
                 return;
             }
-
-            if (!MESSAGE_FRAME_MSG.equals(type)) {
-                throw new IllegalStateException("Unexpected message type: " + type);
-            }
-
-            String innerMsg = frame.get("msg").getAsString();
-            String signature = frame.get("signature").getAsString();
-
-            if (innerMsg == null || innerMsg.isEmpty() || signature == null || signature.isEmpty()) {
-                throw new IllegalArgumentException("Incomplete message");
-            }
-
-            // check signature to ensure the message is from the connected editor
-            Signature sign = Signature.getInstance("SHA256withRSA");
-            sign.initVerify(this.remotePublicKey);
-            sign.update(innerMsg.getBytes(StandardCharsets.UTF_8));
-
-            byte[] signatureBytes = Base64.getDecoder().decode(signature);
-            if (!sign.verify(signatureBytes)) {
-                throw new IllegalStateException("Could not verify message using signature");
-            }
-
-            // parse the inner message
-            JsonObject parsed = GsonProvider.parser().parse(innerMsg).getAsJsonObject();
-            handleMessage(parsed);
         } else {
-            throw new AssertionError(this.state);
+            this.remotePublicKey = remotePublicKey;
+        }
+
+        // send a reply back to the editor to say we accept
+        send(new JObject()
+                .add("type", MESSAGE_TYPE_HELLO_REPLY)
+                .add("nonce", nonce)
+                .add("accepted", true)
+                .toJson()
+        );
+
+        if (reconnected) {
+            Message.EDITOR_SOCKET_RECONNECTED.send(this.sender);
+        } else {
+            Message.EDITOR_SOCKET_CONNECTED.send(this.sender);
         }
     }
 
-    private void handleMessage(JsonObject msg) throws Exception {
-        String type = msg.get("type").getAsString();
-        if (!MESSAGE_TYPE_APPLY_CHANGE.equals(type)) {
-            throw new IllegalStateException("Invalid message type: " + type);
-        }
-
+    private void handleApplyChangeMessage(JsonObject msg) {
         // get the bytebin code containing the editor data
         String code = msg.get("code").getAsString();
         if (code == null || code.isEmpty()) {
@@ -328,7 +345,7 @@ public class WebEditorSocket extends WebSocketListener {
      */
     public void scheduleCleanupIfUnused() {
         this.plugin.getBootstrap().getScheduler().asyncLater(() -> {
-            if (!this.closed && this.state == State.WAITING_FOR_EDITOR_TO_CONNECT) {
+            if (!this.closed && this.remotePublicKey == null) {
                 this.socket.socket().close(1000, "Normal");
                 this.closed = true;
             }
