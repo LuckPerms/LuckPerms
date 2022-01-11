@@ -695,9 +695,9 @@ public final class ConfigKeys {
     public static final ConfigKey<String> BYTEBIN_URL = stringKey("bytebin-url", "https://usercontent.luckperms.net/");
 
     /**
-     * The URL of the bytesocks instance used to communicate with
+     * The host of the bytesocks instance used to communicate with
      */
-    public static final ConfigKey<String> BYTESOCKS_URL = stringKey("bytesocks-url", "https://usersockets.luckperms.net/");
+    public static final ConfigKey<String> BYTESOCKS_HOST = stringKey("bytesocks-host", "usersockets.luckperms.net");
 
     /**
      * The URL of the web editor

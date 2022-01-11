@@ -36,48 +36,66 @@ import java.util.Objects;
 
 public class BytesocksClient extends AbstractHttpClient {
 
-    /** The bytesocks URL */
-    private final String url;
+    /* The bytesocks urls */
+    private final String httpUrl;
+    private final String wsUrl;
+
     /** The client user agent */
     private final String userAgent;
 
     /**
-     * Creates a new bytebin instance
+     * Creates a new bytesocks instance
      *
-     * @param url the bytebin url
+     * @param host the bytesocks host
      * @param userAgent the client user agent string
      */
-    public BytesocksClient(OkHttpClient okHttpClient, String url, String userAgent) {
+    public BytesocksClient(OkHttpClient okHttpClient, String host, String userAgent) {
         super(okHttpClient);
-        if (url.endsWith("/")) {
-            this.url = url;
-        } else {
-            this.url = url + "/";
-        }
+
+        this.httpUrl = "https://" + host + "/";
+        this.wsUrl = "wss://" + host + "/";
         this.userAgent = userAgent;
     }
 
-    public WebSocket createSocket(WebSocketListener listener) throws IOException, UnsuccessfulRequestException {
+    public Socket createSocket(WebSocketListener listener) throws IOException, UnsuccessfulRequestException {
         Request createRequest = new Request.Builder()
-                .url(this.url + "create")
+                .url(this.httpUrl + "create")
                 .header("User-Agent", this.userAgent)
                 .build();
 
-        String webSocketUrl;
+        String id;
         try (Response response = makeHttpRequest(createRequest)) {
             if (response.code() != 201) {
                 throw new UnsuccessfulRequestException(response);
             }
 
-            webSocketUrl = Objects.requireNonNull(response.header("Location"));
+            id = Objects.requireNonNull(response.header("Location"));
         }
 
         Request socketRequest = new Request.Builder()
-                .url(webSocketUrl)
+                .url(this.wsUrl + id)
                 .header("User-Agent", this.userAgent)
                 .build();
 
-        return this.okHttp.newWebSocket(socketRequest, listener);
+        return new Socket(id, this.okHttp.newWebSocket(socketRequest, listener));
+    }
+
+    public static final class Socket {
+        private final String channelId;
+        private final WebSocket socket;
+
+        public Socket(String channelId, WebSocket socket) {
+            this.channelId = channelId;
+            this.socket = socket;
+        }
+
+        public String channelId() {
+            return this.channelId;
+        }
+
+        public WebSocket socket() {
+            return this.socket;
+        }
     }
 
 }

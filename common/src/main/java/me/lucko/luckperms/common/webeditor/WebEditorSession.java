@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -110,7 +109,7 @@ public class WebEditorSession {
         // form a url for the editor
         String url = this.plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + id;
         if (this.socket != null) {
-            url += "?authSecret=" + this.socket.getAuthSecret();
+            url += "?secret=" + this.socket.getAuthSecret();
         }
 
         Message.EDITOR_URL.send(this.sender, url);

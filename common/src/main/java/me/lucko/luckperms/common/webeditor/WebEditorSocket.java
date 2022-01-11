@@ -63,7 +63,7 @@ public class WebEditorSocket extends WebSocketListener {
 
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final String AUTH_SECRET_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private static final int AUTH_SECRET_LENGTH = 15;
+    private static final int AUTH_SECRET_LENGTH = 5;
 
     /** editor first contact with the plugin - no signatures established yet (editor -> plugin) */
     private static final String MESSAGE_FRAME_HELLO = "hello";
@@ -90,7 +90,7 @@ public class WebEditorSocket extends WebSocketListener {
     private State state = State.WAITING_FOR_EDITOR_TO_CONNECT;
 
     /** The websocket backing the connection */
-    private WebSocket socket;
+    private BytesocksClient.Socket socket;
     /** The auth secret that must be sent during initial handshake */
     private String authSecret;
     /** The public and private keys used to sign messages sent by the plugin */
@@ -142,8 +142,8 @@ public class WebEditorSocket extends WebSocketListener {
     public void appendDetailToRequest(WebEditorRequest request) {
         JsonObject payload = request.getPayload();
 
-        String socketUrl = this.socket.request().url().toString();
-        payload.addProperty("socketUrl", socketUrl);
+        String channelId = this.socket.channelId();
+        payload.addProperty("socketChannelId", channelId);
 
         String publicKey = Base64.getEncoder().encodeToString(this.localKeys.getPublic().getEncoded());
         payload.addProperty("publicKey", publicKey);
@@ -169,7 +169,7 @@ public class WebEditorSocket extends WebSocketListener {
                 .add("signature", signature)
                 .toJson();
 
-        this.socket.send(GsonProvider.normal().toJson(frame));
+        this.socket.socket().send(GsonProvider.normal().toJson(frame));
     }
 
     /**
@@ -223,7 +223,7 @@ public class WebEditorSocket extends WebSocketListener {
             if (MESSAGE_FRAME_HELLO.equals(type)) {
                 // could happen if duplicate editor windows are opened
                 // send a reply back to the editor to say we don't accept
-                String nonce = frame.get("id").getAsString();
+                String nonce = frame.get("nonce").getAsString();
                 send(new JObject()
                         .add("type", "hello-reply")
                         .add("nonce", nonce)
@@ -314,7 +314,7 @@ public class WebEditorSocket extends WebSocketListener {
         }
 
         if (!this.sender.isValid() || (System.currentTimeMillis() - this.creationTime) > TimeUnit.MINUTES.toMillis(20)) {
-            this.socket.close(1000, "Normal");
+            this.socket.socket().close(1000, "Normal");
             this.closed = true;
             return true;
         }
@@ -329,7 +329,7 @@ public class WebEditorSocket extends WebSocketListener {
     public void scheduleCleanupIfUnused() {
         this.plugin.getBootstrap().getScheduler().asyncLater(() -> {
             if (!this.closed && this.state == State.WAITING_FOR_EDITOR_TO_CONNECT) {
-                this.socket.close(1000, "Normal");
+                this.socket.socket().close(1000, "Normal");
                 this.closed = true;
             }
         }, 30, TimeUnit.SECONDS);
