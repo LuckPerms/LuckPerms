@@ -23,24 +23,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.forge;
+package me.lucko.luckperms.common.plugin.scheduler;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
-import me.lucko.luckperms.common.plugin.scheduler.WorkerThreadFactory;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 
-import java.util.concurrent.Executor;
-
-public class ForgeSchedulerAdapter extends AbstractJavaScheduler {
-    private final Executor sync;
-
-    public ForgeSchedulerAdapter(LPForgeBootstrap bootstrap) {
-        super(new WorkerThreadFactory());
-        this.sync = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).executeBlocking(r);
-    }
+public final class WorkerThreadFactory implements ForkJoinPool.ForkJoinWorkerThreadFactory {
 
     @Override
-    public Executor sync() {
-        return this.sync;
+    public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+        return new WorkerThread(pool);
+    }
+
+    private static final class WorkerThread extends ForkJoinWorkerThread {
+
+        private WorkerThread(ForkJoinPool pool) {
+            super(pool);
+            // By default, the ContextClassLoader is set to the SystemClassLoader, This causes ClassNotFoundExceptions
+            // due to modlauncher loading LuckPerms on its TransformingClassLoader,
+            // we must replace the ContextClassLoader with the current one to ensure the correct ClassLoader is used.
+            setContextClassLoader(Thread.currentThread().getContextClassLoader());
+        }
     }
 
 }
