@@ -43,6 +43,7 @@ public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
     private final LuckPermsPlugin plugin;
     private final Path path;
     private ConfigurationNode root;
+    private static final boolean SHOULD_READ_ENV = Boolean.getBoolean("luckperms.read-env");
 
     public ConfigurateConfigAdapter(LuckPermsPlugin plugin, Path path) {
         this.plugin = plugin;
@@ -72,17 +73,32 @@ public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
 
     @Override
     public String getString(String path, String def) {
-        return resolvePath(path).getString(def);
+        String value = resolvePath(path).getString(def);
+
+        if (SHOULD_READ_ENV) {
+            return getEnvOrRead(path, value);
+        }
+        return value;
     }
 
     @Override
     public int getInteger(String path, int def) {
-        return resolvePath(path).getInt(def);
+        int value = resolvePath(path).getInt(def);
+
+        if (SHOULD_READ_ENV) {
+            return Integer.parseInt(getEnvOrRead(path, value));
+        }
+        return value;
     }
 
     @Override
     public boolean getBoolean(String path, boolean def) {
-        return resolvePath(path).getBoolean(def);
+        boolean value = resolvePath(path).getBoolean(def);
+
+        if (SHOULD_READ_ENV) {
+            return Boolean.parseBoolean(getEnvOrRead(path, value));
+        }
+        return value;
     }
 
     @Override
@@ -120,5 +136,9 @@ public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
     @Override
     public LuckPermsPlugin getPlugin() {
         return this.plugin;
+    }
+
+    public String getEnvOrRead(String path, Object read) {
+        return System.getenv().getOrDefault(path, String.valueOf(read));
     }
 }
