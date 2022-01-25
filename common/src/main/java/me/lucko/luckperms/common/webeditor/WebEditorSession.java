@@ -88,6 +88,7 @@ public class WebEditorSession {
             socket.waitForConnect(5, TimeUnit.SECONDS);
 
             this.socket = socket;
+            this.plugin.getWebEditorStore().sockets().putSocket(this.sender, this.socket);
         } catch (Exception e) {
             this.plugin.getLogger().warn("Unable to establish socket connection", e);
         }
@@ -108,10 +109,6 @@ public class WebEditorSession {
 
         // form a url for the editor
         String url = this.plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + id;
-        if (this.socket != null) {
-            url += "?secret=" + this.socket.getAuthSecret();
-        }
-
         Message.EDITOR_URL.send(this.sender, url);
 
         // schedule socket close
@@ -146,6 +143,10 @@ public class WebEditorSession {
         return uploadRequestData(WebEditorRequest.generate(holders, tracks, this.sender, this.cmdLabel, this.plugin));
     }
 
+    public String getCommandLabel() {
+        return this.cmdLabel;
+    }
+
     private String uploadRequestData(WebEditorRequest request) {
         byte[] requestBuf = request.encode();
 
@@ -161,7 +162,7 @@ public class WebEditorSession {
             return null;
         }
 
-        this.plugin.getWebEditorSessionStore().addNewSession(pasteId);
+        this.plugin.getWebEditorStore().sessions().addNewSession(pasteId);
         return pasteId;
     }
 

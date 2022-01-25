@@ -90,9 +90,9 @@ public class WebEditorResponse {
         JsonElement sessionIdJson = this.payload.get("sessionId");
         if (sessionIdJson != null) {
             String sessionId = sessionIdJson.getAsString();
-            WebEditorSessionStore sessionStore = plugin.getWebEditorSessionStore();
+            WebEditorStore sessionStore = plugin.getWebEditorStore();
 
-            SessionState state = sessionStore.getSessionState(sessionId);
+            SessionState state = sessionStore.sessions().getSessionState(sessionId);
             switch (state) {
                 case COMPLETED:
                     if (!ignoreSessionWarning) {
@@ -107,7 +107,7 @@ public class WebEditorResponse {
                     }
                     break;
                 case IN_PROGRESS:
-                    sessionStore.markSessionCompleted(sessionId);
+                    sessionStore.sessions().markSessionCompleted(sessionId);
                     break;
                 default:
                     throw new AssertionError(state);

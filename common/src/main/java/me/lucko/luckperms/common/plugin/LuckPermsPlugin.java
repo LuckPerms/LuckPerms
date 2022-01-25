@@ -56,7 +56,7 @@ import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.webeditor.WebEditorSessionStore;
+import me.lucko.luckperms.common.webeditor.WebEditorStore;
 
 import net.luckperms.api.query.QueryOptions;
 
@@ -258,11 +258,11 @@ public interface LuckPermsPlugin {
     BytesocksClient getBytesocks();
 
     /**
-     * Gets the web editor session store
+     * Gets the web editor store
      *
-     * @return the web editor session store
+     * @return the web editor store
      */
-    WebEditorSessionStore getWebEditorSessionStore();
+    WebEditorStore getWebEditorStore();
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.

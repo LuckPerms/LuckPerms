@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.webeditor;
 
 import com.google.gson.JsonObject;
 
+import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.http.BytesocksClient;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.Message;
@@ -46,12 +47,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -65,16 +67,12 @@ public class WebEditorSocket extends WebSocketListener {
     private static final String AUTH_SECRET_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int AUTH_SECRET_LENGTH = 5;
 
-    /** editor first contact with the plugin - no signatures established yet (editor -> plugin) */
-    private static final String MESSAGE_FRAME_HELLO = "hello";
-    /** editor message to plugin in the form {"msg":"...", "signature":"..."} (editor -> plugin) */
-    private static final String MESSAGE_FRAME_MSG = "msg";
-
-    // messages sent from the plugin to the editor are not signed
+    // message types
     private static final String MESSAGE_TYPE_HELLO_REPLY = "hello-reply"; // plugin -> editor
     private static final String MESSAGE_TYPE_CHANGE_ACCEPTED = "change-accepted"; // plugin -> editor
     private static final String MESSAGE_TYPE_NEW_SESSION_DATA = "new-session-data"; // plugin -> editor
-
+    private static final String MESSAGE_TYPE_HELLO = "hello"; // editor -> plugin
+    private static final String MESSAGE_TYPE_TRUSTED_REPLY = "trusted-reply"; // editor -> plugin
     private static final String MESSAGE_TYPE_APPLY_CHANGE = "apply-change"; // editor -> plugin
 
     /** The plugin */
@@ -88,10 +86,10 @@ public class WebEditorSocket extends WebSocketListener {
 
     /** The websocket backing the connection */
     private BytesocksClient.Socket socket;
-    /** The auth secret that must be sent during initial handshake */
-    private String authSecret;
     /** The public and private keys used to sign messages sent by the plugin */
     private KeyPair localKeys;
+    /** A list of attempted connections (connections that have been attempted with an untrusted public key) */
+    private final Map<String, PublicKey> attemptedConnections = new HashMap<>();
     /** The public key used by the editor to sign messages */
     private PublicKey remotePublicKey;
     /** If the connection is closed */
@@ -117,7 +115,6 @@ public class WebEditorSocket extends WebSocketListener {
      */
     public void initialize(BytesocksClient client) throws UnsuccessfulRequestException, IOException {
         this.socket = client.createSocket(this);
-        this.authSecret = generateAuthSecret();
         this.localKeys = generateKeyPair();
     }
 
@@ -161,7 +158,6 @@ public class WebEditorSocket extends WebSocketListener {
         }
 
         JsonObject frame = new JObject()
-                .add("type", MESSAGE_FRAME_MSG)
                 .add("msg", encoded)
                 .add("signature", signature)
                 .toJson();
@@ -183,10 +179,6 @@ public class WebEditorSocket extends WebSocketListener {
      * @throws Exception catch all
      */
     private void handleMessageFrame(String stringMsg) throws Exception {
-        if (this.authSecret == null) {
-            throw new IllegalStateException("Auth secret is null");
-        }
-
         JsonObject frame = GsonProvider.parser().parse(stringMsg).getAsJsonObject();
 
         String innerMsg = frame.get("msg").getAsString();
@@ -216,7 +208,7 @@ public class WebEditorSocket extends WebSocketListener {
         JsonObject msg = GsonProvider.parser().parse(innerMsg).getAsJsonObject();
         String type = msg.get("type").getAsString();
 
-        if (type.equals(MESSAGE_FRAME_HELLO)) {
+        if (type.equals(MESSAGE_TYPE_HELLO)) {
             handleHelloMessage(msg);
             return;
         }
@@ -227,23 +219,17 @@ public class WebEditorSocket extends WebSocketListener {
 
         if (type.equals(MESSAGE_TYPE_APPLY_CHANGE)) {
             handleApplyChangeMessage(msg);
+        } else if (type.equals(MESSAGE_TYPE_TRUSTED_REPLY)) {
+            handleTrustedReplyMessage();
         } else {
             throw new IllegalStateException("Invalid message type: " + type);
         }
     }
 
     private void handleHelloMessage(JsonObject msg) {
-        String authSecret = msg.get("auth").getAsString();
         String nonce = msg.get("nonce").getAsString();
-
-        if (!MessageDigest.isEqual(authSecret.getBytes(StandardCharsets.UTF_8), this.authSecret.getBytes(StandardCharsets.UTF_8))) {
-            send(new JObject()
-                    .add("type", "hello-reply")
-                    .add("nonce", nonce)
-                    .add("accepted", false)
-                    .toJson()
-            );
-            throw new IllegalStateException("Invalid auth secret");
+        if (nonce == null || nonce.isEmpty()) {
+            throw new IllegalStateException("Invalid nonce");
         }
 
         // parse public key
@@ -254,26 +240,44 @@ public class WebEditorSocket extends WebSocketListener {
         // don't accept a new connection unless the public keys match
         // i.e. this allows the same editor to re-connect, but prevents new connections
         if (this.remotePublicKey != null) {
-            reconnected = true;
-
             if (!this.remotePublicKey.equals(remotePublicKey)) {
                 send(new JObject()
                         .add("type", "hello-reply")
                         .add("nonce", nonce)
-                        .add("accepted", false)
+                        .add("state", "rejected")
                         .toJson()
                 );
                 return;
             }
-        } else {
-            this.remotePublicKey = remotePublicKey;
+
+            reconnected = true;
         }
+
+        // check if the public key is trusted
+        if (!this.plugin.getWebEditorStore().keystore().isTrusted(this.sender, remotePublicKey.getEncoded())) {
+            // prompt the user to trust the key
+            send(new JObject()
+                    .add("type", MESSAGE_TYPE_HELLO_REPLY)
+                    .add("nonce", nonce)
+                    .add("state", "untrusted")
+                    .toJson()
+            );
+
+            String browser = msg.get("browser").getAsString();
+
+            Message.EDITOR_SOCKET_UNTRUSTED.send(this.sender, nonce, browser, this.session.getCommandLabel(), this.sender.isConsole());
+            this.attemptedConnections.put(nonce, remotePublicKey);
+            return;
+        }
+
+        // public key is already trusted! woo
+        this.remotePublicKey = remotePublicKey;
 
         // send a reply back to the editor to say we accept
         send(new JObject()
                 .add("type", MESSAGE_TYPE_HELLO_REPLY)
                 .add("nonce", nonce)
-                .add("accepted", true)
+                .add("state", "accepted")
                 .toJson()
         );
 
@@ -284,7 +288,40 @@ public class WebEditorSocket extends WebSocketListener {
         }
     }
 
+    public boolean trustConnection(String nonce) {
+        if (shouldIgnoreMessages()) {
+            return false;
+        }
+
+        if (this.remotePublicKey != null) {
+            return false;
+        }
+
+        PublicKey publicKey = this.attemptedConnections.get(nonce);
+        if (publicKey == null) {
+            return false;
+        }
+
+        this.remotePublicKey = publicKey;
+
+        // save the key in the keystore
+        this.plugin.getWebEditorStore().keystore().trust(this.sender, this.remotePublicKey.getEncoded());
+
+        // send a reply back to the editor to say that it is now trusted
+        send(new JObject()
+                .add("type", MESSAGE_TYPE_HELLO_REPLY)
+                .add("nonce", nonce)
+                .add("state", "trusted")
+                .toJson()
+        );
+        return true;
+    }
+
     private void handleApplyChangeMessage(JsonObject msg) {
+        if (!this.sender.hasPermission(CommandPermission.APPLY_EDITS)) {
+            throw new IllegalStateException("Sender does not have applyedits permission");
+        }
+
         // get the bytebin code containing the editor data
         String code = msg.get("code").getAsString();
         if (code == null || code.isEmpty()) {
@@ -320,6 +357,10 @@ public class WebEditorSocket extends WebSocketListener {
         );
     }
 
+    private void handleTrustedReplyMessage() {
+        Message.EDITOR_SOCKET_CONNECTED.send(this.sender);
+    }
+
     /**
      * Checks if incoming messages should be ignored.
      *
@@ -340,25 +381,16 @@ public class WebEditorSocket extends WebSocketListener {
     }
 
     /**
-     * If the editor hasn't made an initial connection after 30 seconds,
+     * If the editor hasn't made an initial connection after 1 minute,
      * then close + stop listening to the socket.
      */
     public void scheduleCleanupIfUnused() {
         this.plugin.getBootstrap().getScheduler().asyncLater(() -> {
-            if (!this.closed && this.remotePublicKey == null) {
+            if (!this.closed && this.remotePublicKey == null && this.attemptedConnections.isEmpty()) {
                 this.socket.socket().close(1000, "Normal");
                 this.closed = true;
             }
-        }, 30, TimeUnit.SECONDS);
-    }
-
-    /**
-     * Gets the auth secret.
-     *
-     * @return the auth secret
-     */
-    public String getAuthSecret() {
-        return this.authSecret;
+        }, 1, TimeUnit.MINUTES);
     }
 
     @Override
@@ -369,27 +401,19 @@ public class WebEditorSocket extends WebSocketListener {
     @Override
     public void onMessage(@NonNull WebSocket webSocket, @NonNull String msg) {
         this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+            this.lock.lock();
             try {
-                this.lock.lock();
-
                 if (shouldIgnoreMessages()) {
                     return;
                 }
 
-                try {
-                    handleMessageFrame(msg);
-                } finally {
-                    this.lock.unlock();
-                }
+                handleMessageFrame(msg);
             } catch (Exception e) {
                 this.plugin.getLogger().warn("Exception occurred handling message from socket", e);
+            } finally {
+                this.lock.unlock();
             }
         });
-    }
-
-    private enum State {
-        WAITING_FOR_EDITOR_TO_CONNECT,
-        WAITING_FOR_CHANGES
     }
 
     private static String generateAuthSecret() {
