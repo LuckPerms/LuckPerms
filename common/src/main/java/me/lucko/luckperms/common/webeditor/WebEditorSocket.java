@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.http.BytesocksClient;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JObject;
@@ -48,7 +49,6 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -63,17 +63,15 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class WebEditorSocket extends WebSocketListener {
 
-    private static final SecureRandom RANDOM = new SecureRandom();
-    private static final String AUTH_SECRET_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private static final int AUTH_SECRET_LENGTH = 5;
-
-    // message types
+    // message type ids
     private static final String MESSAGE_TYPE_HELLO_REPLY = "hello-reply"; // plugin -> editor
     private static final String MESSAGE_TYPE_CHANGE_ACCEPTED = "change-accepted"; // plugin -> editor
     private static final String MESSAGE_TYPE_NEW_SESSION_DATA = "new-session-data"; // plugin -> editor
     private static final String MESSAGE_TYPE_HELLO = "hello"; // editor -> plugin
     private static final String MESSAGE_TYPE_TRUSTED_REPLY = "trusted-reply"; // editor -> plugin
     private static final String MESSAGE_TYPE_APPLY_CHANGE = "apply-change"; // editor -> plugin
+    private static final String MESSAGE_TYPE_PING = "ping"; // editor -> plugin
+    private static final String MESSAGE_TYPE_PONG = "pong"; // plugin -> editor
 
     /** The plugin */
     private final LuckPermsPlugin plugin;
@@ -81,8 +79,10 @@ public class WebEditorSocket extends WebSocketListener {
     private final Sender sender;
     /** The web editor session */
     private final WebEditorSession session;
-    /** The time the socket was created */
-    private final long creationTime = System.currentTimeMillis();
+    /** The time a ping was last received */
+    private long lastPing = 0;
+    /** A task to check if the socket is still active */
+    private SchedulerTask keepaliveTask;
 
     /** The websocket backing the connection */
     private BytesocksClient.Socket socket;
@@ -133,6 +133,12 @@ public class WebEditorSocket extends WebSocketListener {
         }
     }
 
+    /**
+     * Adds detail about the socket channel and the plugin public key to
+     * the editor request payload that gets sent via bytebin to the viewer.
+     *
+     * @param request the request
+     */
     public void appendDetailToRequest(WebEditorRequest request) {
         JsonObject payload = request.getPayload();
 
@@ -143,6 +149,14 @@ public class WebEditorSocket extends WebSocketListener {
         payload.addProperty("publicKey", publicKey);
     }
 
+    /**
+     * Send a message to the socket.
+     *
+     * <p>The message will be encoded as JSON and
+     * signed using the public public key.</p>
+     *
+     * @param msg the message
+     */
     private void send(JsonObject msg) {
         String encoded = GsonProvider.normal().toJson(msg);
         String signature;
@@ -168,7 +182,7 @@ public class WebEditorSocket extends WebSocketListener {
     /**
      * Handles a message "frame" sent from the editor.
      *
-     * <p>Initially, the socket waits for an initial connection from the editor.
+     * <p>Initially, the plugin handler waits for an initial connection from the editor.
      * When the editor makes first contact, it will share a public key that all future message
      * frames will be signed with.
      * All subsequent messages can be verified as originating from the same editor instance by
@@ -217,12 +231,18 @@ public class WebEditorSocket extends WebSocketListener {
             throw new IllegalStateException("Signature not accepted");
         }
 
-        if (type.equals(MESSAGE_TYPE_APPLY_CHANGE)) {
-            handleApplyChangeMessage(msg);
-        } else if (type.equals(MESSAGE_TYPE_TRUSTED_REPLY)) {
-            handleTrustedReplyMessage();
-        } else {
-            throw new IllegalStateException("Invalid message type: " + type);
+        switch (type) {
+            case MESSAGE_TYPE_APPLY_CHANGE:
+                handleApplyChangeMessage(msg);
+                break;
+            case MESSAGE_TYPE_TRUSTED_REPLY:
+                handleTrustedReplyMessage();
+                break;
+            case MESSAGE_TYPE_PING:
+                handlePing();
+                break;
+            default:
+                throw new IllegalStateException("Invalid message type: " + type);
         }
     }
 
@@ -242,7 +262,7 @@ public class WebEditorSocket extends WebSocketListener {
         if (this.remotePublicKey != null) {
             if (!this.remotePublicKey.equals(remotePublicKey)) {
                 send(new JObject()
-                        .add("type", "hello-reply")
+                        .add("type", MESSAGE_TYPE_HELLO_REPLY)
                         .add("nonce", nonce)
                         .add("state", "rejected")
                         .toJson()
@@ -361,6 +381,70 @@ public class WebEditorSocket extends WebSocketListener {
         Message.EDITOR_SOCKET_CONNECTED.send(this.sender);
     }
 
+    private void handlePing() {
+        this.lastPing = System.currentTimeMillis();
+        send(new JObject()
+                .add("type", MESSAGE_TYPE_PONG)
+                .add("ok", true)
+                .toJson()
+        );
+    }
+
+    private void closeSocket() {
+        new Exception().printStackTrace();
+        this.socket.socket().close(1000, "Normal");
+        this.closed = true;
+    }
+
+    private void cancelKeepalive() {
+        new Exception().printStackTrace();
+        if (this.keepaliveTask != null) {
+            this.keepaliveTask.cancel();
+            this.keepaliveTask = null;
+        }
+    }
+
+    public void scheduleCleanupIfUnused() {
+        this.plugin.getBootstrap().getScheduler().asyncLater(this::afterOpenFor1Minute, 1, TimeUnit.MINUTES);
+    }
+
+    private void afterOpenFor1Minute() {
+        if (!this.closed && this.remotePublicKey == null && this.attemptedConnections.isEmpty()) {
+            // If the editor hasn't made an initial connection after 1 minute,
+            // then close + stop listening to the socket.
+            closeSocket();
+        } else {
+            // Otherwise, setup a keepalive monitoring task
+            this.keepaliveTask = this.plugin.getBootstrap().getScheduler().asyncRepeating(this::keepalive, 10, TimeUnit.SECONDS);
+        }
+    }
+
+    /**
+     * The keepalive tasks checks to see when the last ping from the editor was. If the editor
+     * hasn't sent anything for 1 minute, then close the connection
+     */
+    private void keepalive() {
+        if (System.currentTimeMillis() - this.lastPing > TimeUnit.MINUTES.toMillis(1)) {
+            cancelKeepalive();
+            closeSocket();
+        }
+    }
+
+    private void close() {
+        try {
+            send(new JObject()
+                    .add("type", MESSAGE_TYPE_PONG)
+                    .add("ok", false)
+                    .toJson()
+            );
+        } catch (Exception e) {
+            // ignore
+        }
+
+        cancelKeepalive();
+        closeSocket();
+    }
+
     /**
      * Checks if incoming messages should be ignored.
      *
@@ -371,26 +455,12 @@ public class WebEditorSocket extends WebSocketListener {
             return true;
         }
 
-        if (!this.sender.isValid() || (System.currentTimeMillis() - this.creationTime) > TimeUnit.MINUTES.toMillis(20)) {
-            this.socket.socket().close(1000, "Normal");
-            this.closed = true;
+        if (!this.sender.isValid()) {
+            close();
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * If the editor hasn't made an initial connection after 1 minute,
-     * then close + stop listening to the socket.
-     */
-    public void scheduleCleanupIfUnused() {
-        this.plugin.getBootstrap().getScheduler().asyncLater(() -> {
-            if (!this.closed && this.remotePublicKey == null && this.attemptedConnections.isEmpty()) {
-                this.socket.socket().close(1000, "Normal");
-                this.closed = true;
-            }
-        }, 1, TimeUnit.MINUTES);
     }
 
     @Override
@@ -414,14 +484,6 @@ public class WebEditorSocket extends WebSocketListener {
                 this.lock.unlock();
             }
         });
-    }
-
-    private static String generateAuthSecret() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < AUTH_SECRET_LENGTH; i++) {
-            sb.append(AUTH_SECRET_CHARACTERS.charAt(RANDOM.nextInt(AUTH_SECRET_CHARACTERS.length())));
-        }
-        return sb.toString();
     }
 
     private static PublicKey parsePublicKey(String base64String) {
