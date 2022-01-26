@@ -139,6 +139,6 @@ public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
     }
 
     public String getEnvOrRead(String path, Object read) {
-        return System.getenv().getOrDefault(path, String.valueOf(read));
+        return System.getenv().getOrDefault("LP_" + path.toUpperCase().replace(".", "_"), String.valueOf(read));
     }
 }
