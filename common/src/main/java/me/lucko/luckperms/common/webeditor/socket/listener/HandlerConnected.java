@@ -23,47 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.misc;
+package me.lucko.luckperms.common.webeditor.socket.listener;
 
-import me.lucko.luckperms.common.command.abstraction.SingleCommand;
-import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.spec.CommandSpec;
-import me.lucko.luckperms.common.command.utils.ArgumentList;
+import com.google.gson.JsonObject;
+
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.webeditor.socket.SocketMessageType;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 
-public class TrustEditorCommand extends SingleCommand {
-    public TrustEditorCommand() {
-        super(CommandSpec.TRUST_EDITOR, "TrustEditor", CommandPermission.TRUST_EDITOR, Predicates.not(1));
+/**
+ * Handler for {@link SocketMessageType#CONNECTED}
+ */
+public class HandlerConnected implements Handler {
+
+    /** The socket */
+    private final WebEditorSocket socket;
+
+    public HandlerConnected(WebEditorSocket socket) {
+        this.socket = socket;
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
-        String id = args.get(0);
-
-        if (id.isEmpty()) {
-            Message.APPLY_EDITS_INVALID_CODE.send(sender, id);
-            return;
-        }
-
-        WebEditorSocket socket = plugin.getWebEditorStore().sockets().getSocket(sender);
-        if (socket == null) {
-            Message.EDITOR_SOCKET_TRUST_FAILURE.send(sender);
-            return;
-        }
-
-        if (socket.trustConnection(id)) {
-            Message.EDITOR_SOCKET_TRUST_SUCCESS.send(sender);
-        } else {
-            Message.EDITOR_SOCKET_TRUST_FAILURE.send(sender);
-        }
-    }
-
-    @Override
-    public boolean shouldDisplay() {
-        return false;
+    public void handle(JsonObject msg) {
+        Message.EDITOR_SOCKET_CONNECTED.send(this.socket.getSender());
     }
 }

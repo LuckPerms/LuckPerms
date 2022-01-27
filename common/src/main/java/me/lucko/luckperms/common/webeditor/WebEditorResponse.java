@@ -45,6 +45,8 @@ import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Uuids;
+import me.lucko.luckperms.common.webeditor.store.SessionState;
+import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
 
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;

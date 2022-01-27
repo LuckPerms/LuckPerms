@@ -58,7 +58,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.webeditor.WebEditorStore;
+import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
 
 import net.luckperms.api.LuckPerms;
 

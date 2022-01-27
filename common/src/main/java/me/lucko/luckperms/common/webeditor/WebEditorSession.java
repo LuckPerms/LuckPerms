@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 
 import java.io.IOException;
 import java.util.List;

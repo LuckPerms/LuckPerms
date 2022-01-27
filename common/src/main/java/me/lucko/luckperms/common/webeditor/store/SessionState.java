@@ -23,12 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.webeditor;
+package me.lucko.luckperms.common.webeditor.store;
 
 /**
  * Represents the state of a web editor session
  */
-enum SessionState {
+public enum SessionState {
 
     /**
      * The session is not known to this server.
