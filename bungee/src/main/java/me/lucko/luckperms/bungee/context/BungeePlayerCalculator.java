@@ -27,7 +27,7 @@ package me.lucko.luckperms.bungee.context;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;

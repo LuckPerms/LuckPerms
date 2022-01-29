@@ -27,12 +27,12 @@ package me.lucko.luckperms.bungee.listeners;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.bungee.event.TristateCheckEvent;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent.Origin;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
@@ -72,7 +72,7 @@ public class BungeePermissionCheckListener implements Listener {
         }
 
         QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
-        Tristate result = user.getCachedData().getPermissionData(queryOptions).checkPermission(e.getPermission(), Origin.PLATFORM_PERMISSION_CHECK).result();
+        Tristate result = user.getCachedData().getPermissionData(queryOptions).checkPermission(e.getPermission(), CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
         if (result == Tristate.UNDEFINED && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
         }
@@ -101,7 +101,7 @@ public class BungeePermissionCheckListener implements Listener {
         }
 
         QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
-        Tristate result = user.getCachedData().getPermissionData(queryOptions).checkPermission(e.getPermission(), Origin.PLATFORM_LOOKUP_CHECK).result();
+        Tristate result = user.getCachedData().getPermissionData(queryOptions).checkPermission(e.getPermission(), CheckOrigin.PLATFORM_API_HAS_PERMISSION_SET).result();
         if (result == Tristate.UNDEFINED && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
         }
@@ -122,7 +122,7 @@ public class BungeePermissionCheckListener implements Listener {
         Tristate result = Tristate.of(e.hasPermission());
         VerboseCheckTarget target = VerboseCheckTarget.internal(e.getSender().getName());
 
-        this.plugin.getVerboseHandler().offerPermissionCheckEvent(Origin.PLATFORM_PERMISSION_CHECK, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.of(result));
+        this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.forMonitoredResult(result));
         this.plugin.getPermissionRegistry().offer(permission);
     }
 
@@ -139,7 +139,7 @@ public class BungeePermissionCheckListener implements Listener {
         Tristate result = e.getResult();
         VerboseCheckTarget target = VerboseCheckTarget.internal(e.getSender().getName());
 
-        this.plugin.getVerboseHandler().offerPermissionCheckEvent(Origin.PLATFORM_LOOKUP_CHECK, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.of(result));
+        this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION_SET, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.forMonitoredResult(result));
         this.plugin.getPermissionRegistry().offer(permission);
     }
 }

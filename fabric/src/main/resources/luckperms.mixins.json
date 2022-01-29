@@ -3,10 +3,9 @@
   "package": "me.lucko.luckperms.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ClientSettingsC2SPacketAccessor",
+    "CommandManagerMixin",
     "ServerLoginNetworkHandlerAccessor",
-    "ServerPlayerEntityMixin",
-    "CommandManagerMixin"
+    "ServerPlayerEntityMixin"
   ],
   "client": [
   ],

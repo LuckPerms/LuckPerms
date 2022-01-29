@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.command.tabcomplete;
 
+import me.lucko.luckperms.common.util.Predicates;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,7 +48,7 @@ public interface CompletionSupplier {
     }
 
     static CompletionSupplier startsWith(Supplier<Stream<String>> stringsSupplier) {
-        return partial -> stringsSupplier.get().filter(TabCompleter.startsWithIgnoreCase(partial)).collect(Collectors.toList());
+        return partial -> stringsSupplier.get().filter(Predicates.startsWithIgnoreCase(partial)).collect(Collectors.toList());
     }
 
     static CompletionSupplier contains(String... strings) {
@@ -58,7 +60,7 @@ public interface CompletionSupplier {
     }
 
     static CompletionSupplier contains(Supplier<Stream<String>> stringsSupplier) {
-        return partial -> stringsSupplier.get().filter(TabCompleter.containsIgnoreCase(partial)).collect(Collectors.toList());
+        return partial -> stringsSupplier.get().filter(Predicates.containsIgnoreCase(partial)).collect(Collectors.toList());
     }
 
     List<String> supplyCompletions(String partial);

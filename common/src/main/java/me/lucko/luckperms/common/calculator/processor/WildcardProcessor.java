@@ -27,15 +27,16 @@ package me.lucko.luckperms.common.calculator.processor;
 
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.node.AbstractNode;
 
+import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
 
 import java.util.Collections;
 import java.util.Map;
 
-public class WildcardProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+public class WildcardProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(WildcardProcessor.class);
 
     public static final String WILDCARD_SUFFIX = ".*";
@@ -78,22 +79,22 @@ public class WildcardProcessor extends AbstractPermissionProcessor implements Pe
     @Override
     public void refresh() {
         ImmutableMap.Builder<String, TristateResult> builder = ImmutableMap.builder();
-        for (Map.Entry<String, Boolean> e : this.sourceMap.entrySet()) {
+        for (Map.Entry<String, Node> e : this.sourceMap.entrySet()) {
             String key = e.getKey();
             if (!key.endsWith(WILDCARD_SUFFIX) || key.length() <= 2) {
                 continue;
             }
             key = key.substring(0, key.length() - 2);
 
-            TristateResult value = RESULT_FACTORY.result(Tristate.of(e.getValue()), "match: " + key);
+            TristateResult value = RESULT_FACTORY.result(e.getValue());
             builder.put(key, value);
         }
         this.wildcardPermissions = builder.build();
 
-        Tristate state = Tristate.of(this.sourceMap.get(ROOT_WILDCARD));
-        if (state == Tristate.UNDEFINED) {
-            state = Tristate.of(this.sourceMap.get(ROOT_WILDCARD_WITH_QUOTES));
+        Node rootWildcard = this.sourceMap.get(ROOT_WILDCARD);
+        if (rootWildcard == null) {
+            rootWildcard = this.sourceMap.get(ROOT_WILDCARD_WITH_QUOTES);
         }
-        this.rootWildcardState = RESULT_FACTORY.result(state, "root");
+        this.rootWildcardState = rootWildcard == null ? TristateResult.UNDEFINED : RESULT_FACTORY.result(rootWildcard);
     }
 }

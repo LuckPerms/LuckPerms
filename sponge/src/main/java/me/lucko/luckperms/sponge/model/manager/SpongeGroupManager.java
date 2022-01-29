@@ -32,7 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.manager.group.AbstractGroupManager;
 import me.lucko.luckperms.common.node.matcher.StandardNodeMatchers;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;

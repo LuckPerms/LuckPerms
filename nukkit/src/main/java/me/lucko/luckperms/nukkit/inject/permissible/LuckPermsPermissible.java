@@ -28,14 +28,14 @@ package me.lucko.luckperms.nukkit.inject.permissible;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.common.calculator.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-import me.lucko.luckperms.nukkit.calculator.DefaultsProcessor;
 import me.lucko.luckperms.nukkit.calculator.OpProcessor;
+import me.lucko.luckperms.nukkit.calculator.PermissionMapProcessor;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
 
 import net.luckperms.api.query.QueryOptions;
@@ -144,13 +144,13 @@ public class LuckPermsPermissible extends PermissibleBase {
         }
 
         QueryOptions queryOptions = this.queryOptionsSupplier.getQueryOptions();
-        TristateResult result = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK);
+        TristateResult result = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION_SET);
         if (result.result() == Tristate.UNDEFINED) {
             return false;
         }
 
         // ignore matches made from looking up in the permission map (replicate nukkit behaviour)
-        if (result.processorClass() == DefaultsProcessor.class && "permission map".equals(result.cause())) {
+        if (result.processorClass() == PermissionMapProcessor.class) {
             return false;
         }
 
@@ -174,7 +174,7 @@ public class LuckPermsPermissible extends PermissibleBase {
         }
 
         QueryOptions queryOptions = this.queryOptionsSupplier.getQueryOptions();
-        return this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result().asBoolean();
+        return this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result().asBoolean();
     }
 
     @Override
@@ -184,7 +184,7 @@ public class LuckPermsPermissible extends PermissibleBase {
         }
 
         QueryOptions queryOptions = this.queryOptionsSupplier.getQueryOptions();
-        TristateResult result = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission.getName(), PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK);
+        TristateResult result = this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission.getName(), CheckOrigin.PLATFORM_API_HAS_PERMISSION);
 
         // override default op handling using the Permission class we have
         if (result.processorClass() == OpProcessor.class && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {

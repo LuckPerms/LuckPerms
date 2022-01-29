@@ -94,7 +94,7 @@ public interface MutableContextSet extends ContextSet {
     }
 
     /**
-     * Adds of of the contexts in another {@link ContextSet} to this set.
+     * Adds all the contexts in another {@link ContextSet} to this set.
      *
      * @param contextSet the set to add from
      * @throws NullPointerException if the contextSet is null

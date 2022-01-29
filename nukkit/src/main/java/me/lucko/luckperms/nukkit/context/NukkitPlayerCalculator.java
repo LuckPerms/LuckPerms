@@ -26,7 +26,7 @@
 package me.lucko.luckperms.nukkit.context;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import net.luckperms.api.context.Context;

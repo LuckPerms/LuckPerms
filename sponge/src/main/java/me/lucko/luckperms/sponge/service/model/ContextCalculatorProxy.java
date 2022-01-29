@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.sponge.service.model;
 
-import me.lucko.luckperms.common.context.ForwardingContextCalculator;
+import me.lucko.luckperms.common.context.calculator.ForwardingContextCalculator;
 
 import net.luckperms.api.context.ContextConsumer;
 

@@ -47,6 +47,8 @@ public class ApplyEditsCommand extends SingleCommand {
 
     @Override
     public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
+        boolean ignoreSessionWarning = args.remove("--force");
+
         String code = args.get(0);
 
         if (code.isEmpty()) {
@@ -71,7 +73,7 @@ public class ApplyEditsCommand extends SingleCommand {
             return;
         }
 
-        new WebEditorResponse(data).apply(plugin, sender);
+        new WebEditorResponse(code, data).apply(plugin, sender, label, ignoreSessionWarning);
     }
 
     @Override

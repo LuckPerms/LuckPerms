@@ -26,10 +26,10 @@
 package me.lucko.luckperms.fabric.mixin;
 
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
-import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
 import me.lucko.luckperms.fabric.model.MixinUser;
@@ -70,7 +70,7 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     private Locale luckperms$locale;
 
     // Used by PlayerChangeWorldCallback hook below.
-    @Shadow public abstract ServerWorld getServerWorld();
+    @Shadow public abstract ServerWorld getWorld();
 
     @Override
     public User getLuckPermsUser() {
@@ -133,7 +133,7 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
         }
 
         PermissionCache data = user.getCachedData().getPermissionData(queryOptions);
-        return data.checkPermission(permission, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK).result();
+        return data.checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
     }
 
 
@@ -148,12 +148,12 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
 
     @Inject(at = @At("HEAD"), method = "setClientSettings")
     private void luckperms_setClientSettings(ClientSettingsC2SPacket information, CallbackInfo ci) {
-        String language = ((ClientSettingsC2SPacketAccessor) information).getLanguage();
+        String language = information.language();
         this.luckperms$locale = TranslationManager.parseLocale(language);
     }
 
     @Inject(at = @At("TAIL"), method = "worldChanged")
     private void luckperms_onChangeDimension(ServerWorld targetWorld, CallbackInfo ci) {
-        PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getServerWorld(), targetWorld, (ServerPlayerEntity) (Object) this);
+        PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getWorld(), targetWorld, (ServerPlayerEntity) (Object) this);
     }
 }

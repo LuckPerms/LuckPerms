@@ -54,6 +54,9 @@ luckperms {
   translations {
     install;
   }
+  applyedits {
+    code brigadier:string single_word;
+  }
   creategroup {
     name brigadier:string single_word {
       weight brigadier:integer {
@@ -66,7 +69,9 @@ luckperms {
       flags brigadier:string greedy_phrase;
     }
   }
-  listgroups;
+  listgroups {
+    page brigadier:integer;
+  }
   createtrack {
     name brigadier:string single_word;
   }

@@ -30,7 +30,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.ContextSetComparator;
+import me.lucko.luckperms.common.context.comparator.ContextSetComparator;
+import me.lucko.luckperms.common.model.InheritanceOrigin;
+import me.lucko.luckperms.common.node.types.Meta;
+import me.lucko.luckperms.common.node.types.Permission;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -40,6 +43,10 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
+import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PermissionNode;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
@@ -63,6 +70,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CalculatedSubjectData implements LPSubjectData {
     private final LPSubject parentSubject;
     private final DataType type;
+    private final InheritanceOrigin inheritanceOrigin;
     private final LPPermissionService service;
 
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
@@ -72,6 +80,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     public CalculatedSubjectData(LPSubject parentSubject, DataType type, LPPermissionService service) {
         this.parentSubject = parentSubject;
         this.type = type;
+        this.inheritanceOrigin = new InheritanceOrigin(this.parentSubject.getIdentifier(), this.type);
         this.service = service;
     }
 
@@ -134,21 +143,32 @@ public class CalculatedSubjectData implements LPSubjectData {
         return ImmutableMap.copyOf(this.permissions.getOrDefault(contexts, ImmutableMap.of()));
     }
 
-    public Map<String, Boolean> resolvePermissions(QueryOptions filter) {
+    public Map<String, Node> resolvePermissions(QueryOptions filter) {
         // get relevant entries
-        SortedMap<ImmutableContextSet, Map<String, Boolean>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        SortedMap<ImmutableContextSet, Map<String, Node>> sorted = new TreeMap<>(ContextSetComparator.reverse());
         for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> entry : this.permissions.entrySet()) {
             if (!filter.satisfies(entry.getKey(), defaultSatisfyMode())) {
                 continue;
             }
 
-            sorted.put(entry.getKey(), entry.getValue());
+            Map<String, Node> nodeMap = new HashMap<>();
+            entry.getValue().forEach((key, value) -> {
+                PermissionNode node = Permission.builder()
+                        .permission(key)
+                        .value(value)
+                        .context(entry.getKey())
+                        .withMetadata(InheritanceOriginMetadata.KEY, this.inheritanceOrigin)
+                        .build();
+                nodeMap.put(key, node);
+            });
+
+            sorted.put(entry.getKey(), nodeMap);
         }
 
         // flatten
-        Map<String, Boolean> result = new HashMap<>();
-        for (Map<String, Boolean> map : sorted.values()) {
-            for (Map.Entry<String, Boolean> e : map.entrySet()) {
+        Map<String, Node> result = new HashMap<>();
+        for (Map<String, Node> map : sorted.values()) {
+            for (Map.Entry<String, Node> e : map.entrySet()) {
                 result.putIfAbsent(e.getKey(), e.getValue());
             }
         }
@@ -288,21 +308,32 @@ public class CalculatedSubjectData implements LPSubjectData {
         return ImmutableMap.copyOf(this.options.getOrDefault(contexts, ImmutableMap.of()));
     }
 
-    public Map<String, String> resolveOptions(QueryOptions filter) {
+    public Map<String, MetaNode> resolveOptions(QueryOptions filter) {
         // get relevant entries
-        SortedMap<ImmutableContextSet, Map<String, String>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        SortedMap<ImmutableContextSet, Map<String, MetaNode>> sorted = new TreeMap<>(ContextSetComparator.reverse());
         for (Map.Entry<ImmutableContextSet, Map<String, String>> entry : this.options.entrySet()) {
             if (!filter.satisfies(entry.getKey(), defaultSatisfyMode())) {
                 continue;
             }
 
-            sorted.put(entry.getKey(), entry.getValue());
+            Map<String, MetaNode> nodeMap = new HashMap<>();
+            entry.getValue().forEach((key, value) -> {
+                MetaNode node = Meta.builder()
+                        .key(key)
+                        .value(value)
+                        .context(entry.getKey())
+                        .withMetadata(InheritanceOriginMetadata.KEY, this.inheritanceOrigin)
+                        .build();
+                nodeMap.put(key, node);
+            });
+
+            sorted.put(entry.getKey(), nodeMap);
         }
 
         // flatten
-        Map<String, String> result = new HashMap<>();
-        for (Map<String, String> map : sorted.values()) {
-            for (Map.Entry<String, String> e : map.entrySet()) {
+        Map<String, MetaNode> result = new HashMap<>();
+        for (Map<String, MetaNode> map : sorted.values()) {
+            for (Map.Entry<String, MetaNode> e : map.entrySet()) {
                 result.putIfAbsent(e.getKey(), e.getValue());
             }
         }

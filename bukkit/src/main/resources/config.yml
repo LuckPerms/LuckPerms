@@ -241,6 +241,7 @@ watch-files: true
 #                below.
 #   => rabbitmq  Uses RabbitMQ pub-sub to push changes. Your server connection info must be
 #                configured below.
+#   => custom    Uses a messaging service provided using the LuckPerms API.
 #   => auto      Attempts to automatically setup a messaging service using redis or sql.
 messaging-service: auto
 
@@ -262,6 +263,7 @@ broadcast-received-log-entries: true
 redis:
   enabled: false
   address: localhost
+  username: ''
   password: ''
 
 # Settings for RabbitMQ.
@@ -550,6 +552,13 @@ apply-bukkit-attachment-permissions: true
 # | Extra settings                                                                               | #
 # +----------------------------------------------------------------------------------------------+ #
 
+# A list of context calculators which will be skipped when calculating contexts.
+#
+# - You can disable context calculators by either:
+#   => specifying the Java class name used by the calculator (e.g. com.example.ExampleCalculator)
+#   => specifying a sub-section of the Java package used by the calculator (e.g. com.example)
+disabled-context-calculators: []
+
 # Allows you to set "aliases" for the worlds sent forward for context calculation.
 #
 # - These aliases are provided in addition to the real world name. Applied recursively.
@@ -678,6 +687,12 @@ allow-invalid-usernames: false
 #   data, and is not designed to be executed automatically.
 # - If automation is needed, users should prefer using the LuckPerms API.
 skip-bulkupdate-confirmation: false
+
+# If LuckPerms should prevent bulkupdate operations.
+#
+# - When set to true, bulkupdate operations (the /lp bulkupdate command) will not work.
+# - When set to false, bulkupdate operations will be allowed via the console.
+disable-bulkupdate: false
 
 # If LuckPerms should allow a users primary group to be removed with the 'parent remove' command.
 #

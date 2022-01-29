@@ -99,8 +99,9 @@ public enum CommandSpec {
     DELETE_GROUP("/%s deletegroup <group>",
                  arg("name", true)
     ),
-    LIST_GROUPS("/%s listgroups"),
-
+    LIST_GROUPS("/%s listgroups",
+            arg("page", false)
+    ),
     CREATE_TRACK("/%s createtrack <track>",
             arg("name", true)
     ),

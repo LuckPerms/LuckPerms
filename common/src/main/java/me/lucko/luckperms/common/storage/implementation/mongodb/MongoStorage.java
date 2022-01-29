@@ -40,7 +40,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+import me.lucko.luckperms.common.context.MutableContextSetImpl;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -573,7 +573,10 @@ public class MongoStorage implements StorageImplementation {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
         Document doc = c.find(new Document("_id", uniqueId)).first();
         if (doc != null) {
-            return doc.get("name", String.class);
+            String username = doc.get("name", String.class);
+            if (username != null && !username.equals("null")) {
+                return username;
+            }
         }
         return null;
     }
@@ -664,7 +667,7 @@ public class MongoStorage implements StorageImplementation {
         }
 
         if (document.containsKey("expiry")) {
-            builder.expiry(document.getLong("expiry"));
+            builder.expiry((long) document.get("expiry"));
         }
 
         if (document.containsKey("context") && document.get("context") instanceof List) {

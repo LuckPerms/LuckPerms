@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.cacheddata;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
-import me.lucko.luckperms.common.cacheddata.type.MetaCache;
+import me.lucko.luckperms.common.cacheddata.type.MonitoredMetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
@@ -40,6 +40,7 @@ import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.cacheddata.CachedPermissionData;
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -59,7 +60,7 @@ import java.util.function.IntFunction;
 public abstract class AbstractCachedDataManager implements CachedDataManager {
     private final LuckPermsPlugin plugin;
     private final AbstractContainer<PermissionCache, CachedPermissionData> permission;
-    private final AbstractContainer<MetaCache, CachedMetaData> meta;
+    private final AbstractContainer<MonitoredMetaCache, CachedMetaData> meta;
 
     protected AbstractCachedDataManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
@@ -87,7 +88,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
     }
 
     @Override
-    public @NonNull MetaCache getMetaData(@NonNull QueryOptions queryOptions) {
+    public @NonNull MonitoredMetaCache getMetaData(@NonNull QueryOptions queryOptions) {
         return this.meta.get(queryOptions);
     }
 
@@ -97,7 +98,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
     }
 
     @Override
-    public @NonNull MetaCache getMetaData() {
+    public @NonNull MonitoredMetaCache getMetaData() {
         return getMetaData(getQueryOptions());
     }
 
@@ -139,7 +140,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
      * @param <M> the map type
      * @return the resolved permissions
      */
-    protected abstract <M extends Map<String, Boolean>> M resolvePermissions(IntFunction<M> mapFactory, QueryOptions queryOptions);
+    protected abstract <M extends Map<String, Node>> M resolvePermissions(IntFunction<M> mapFactory, QueryOptions queryOptions);
 
     /**
      * Resolves the owners meta data for the given {@link QueryOptions}.
@@ -153,18 +154,18 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         Objects.requireNonNull(queryOptions, "queryOptions");
         CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
 
-        ConcurrentHashMap<String, Boolean> sourcePermissions = resolvePermissions(ConcurrentHashMap::new, queryOptions);
+        ConcurrentHashMap<String, Node> sourcePermissions = resolvePermissions(ConcurrentHashMap::new, queryOptions);
         return new PermissionCache(queryOptions, metadata, getCalculatorFactory(), sourcePermissions);
     }
     
-    private MetaCache calculateMeta(QueryOptions queryOptions) {
+    private MonitoredMetaCache calculateMeta(QueryOptions queryOptions) {
         Objects.requireNonNull(queryOptions, "queryOptions");
         CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
 
         MetaAccumulator accumulator = newAccumulator(queryOptions);
         resolveMeta(accumulator, queryOptions);
 
-        return new MetaCache(this.plugin, queryOptions, metadata, accumulator);
+        return new MonitoredMetaCache(this.plugin, queryOptions, metadata, accumulator);
     }
 
     @Override
@@ -254,24 +255,11 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
             this.cache.clear();
         }
     }
-
-    private MetaStackDefinition getMetaStackDefinition(QueryOptions queryOptions, ChatMetaType type) {
-        MetaStackDefinition stack = queryOptions.option(type == ChatMetaType.PREFIX ?
-                MetaStackDefinition.PREFIX_STACK_KEY :
-                MetaStackDefinition.SUFFIX_STACK_KEY
-        ).orElse(null);
-
-        if (stack == null) {
-            stack = getDefaultMetaStackDefinition(type);
-        }
-
-        return stack;
-    }
     
     private MetaAccumulator newAccumulator(QueryOptions queryOptions) {
         return new MetaAccumulator(
-                getMetaStackDefinition(queryOptions, ChatMetaType.PREFIX),
-                getMetaStackDefinition(queryOptions, ChatMetaType.SUFFIX)
+                queryOptions.option(MetaStackDefinition.PREFIX_STACK_KEY).orElseGet(() -> getDefaultMetaStackDefinition(ChatMetaType.PREFIX)),
+                queryOptions.option(MetaStackDefinition.SUFFIX_STACK_KEY).orElseGet(() -> getDefaultMetaStackDefinition(ChatMetaType.SUFFIX))
         );
     }
 

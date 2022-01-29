@@ -25,6 +25,7 @@
 
 package net.luckperms.api.cacheddata;
 
+import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -34,17 +35,39 @@ import java.util.Map;
 
 /**
  * Holds cached permission lookup data for a specific set of contexts.
+ *
+ * <p>All calls will account for inheritance, as well as any default data
+ * provided by the platform. These calls are heavily cached and are therefore
+ * fast.</p>
  */
 public interface CachedPermissionData extends CachedData {
 
     /**
-     * Gets a permission check result for the given permission node.
+     * Performs a permission check for the given {@code permission} node.
+     *
+     * <p>This check is equivalent to the "hasPermission" method call on most platforms.
+     * You can use {@link Tristate#asBoolean()} if you need a truthy result.</p>
+     *
+     * @param permission the permission node
+     * @return a result containing the tristate
+     * @throws NullPointerException if permission is null
+     * @since 5.4
+     */
+    @NonNull Result<Tristate, Node> queryPermission(@NonNull String permission);
+
+    /**
+     * Performs a permission check for the given {@code permission} node.
+     *
+     * <p>This check is equivalent to the "hasPermission" method call on most platforms.
+     * You can use {@link Tristate#asBoolean()} if you need a truthy result.</p>
      *
      * @param permission the permission node
      * @return a tristate result
      * @throws NullPointerException if permission is null
      */
-    @NonNull Tristate checkPermission(@NonNull String permission);
+    default @NonNull Tristate checkPermission(@NonNull String permission) {
+        return queryPermission(permission).result();
+    }
 
     /**
      * Invalidates the underlying permission calculator cache.

@@ -30,6 +30,7 @@ import com.google.common.base.Splitter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.treeview.TreeNode;
+import me.lucko.luckperms.common.util.Predicates;
 
 import net.luckperms.api.context.ImmutableContextSet;
 
@@ -90,7 +91,7 @@ public final class TabCompletions {
             }
 
             return root.getChildren().get().keySet().stream()
-                    .filter(TabCompleter.startsWithIgnoreCase(incomplete))
+                    .filter(Predicates.startsWithIgnoreCase(incomplete))
                     .map(s -> String.join(".", parts) + "." + s)
                     .collect(Collectors.toList());
         };
@@ -112,7 +113,7 @@ public final class TabCompletions {
             String value = partial.substring(index + 1).trim();
             Set<String> potentialValues = potentialContexts.getValues(key);
             return potentialValues.stream()
-                    .filter(TabCompleter.startsWithIgnoreCase(value))
+                    .filter(Predicates.startsWithIgnoreCase(value))
                     .map(s -> key + "=" + s)
                     .collect(Collectors.toList());
         };

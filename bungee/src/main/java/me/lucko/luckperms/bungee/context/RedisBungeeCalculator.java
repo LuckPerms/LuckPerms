@@ -28,7 +28,7 @@ package me.lucko.luckperms.bungee.context;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;

@@ -26,7 +26,7 @@
 package me.lucko.luckperms.fabric.context;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.EnumNamer;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
@@ -81,7 +81,7 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
         }
 
         // TODO: figure out dimension type context too
-        ServerWorld world = target.getServerWorld();
+        ServerWorld world = target.getWorld();
         if (this.world) {
             this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(getContextKey(world.getRegistryKey().getValue()), consumer);
         }

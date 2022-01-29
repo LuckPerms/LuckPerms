@@ -26,8 +26,8 @@
 package me.lucko.luckperms.fabric.context;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.ContextManager;
-import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.ContextManager;
+import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.fabric.model.MixinUser;
 

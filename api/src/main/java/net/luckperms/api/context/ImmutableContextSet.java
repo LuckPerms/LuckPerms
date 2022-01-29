@@ -119,7 +119,7 @@ public interface ImmutableContextSet extends ContextSet {
         }
 
         /**
-         * Adds of of the contexts in another {@link ContextSet} to the set.
+         * Adds all the contexts in another {@link ContextSet} to the set.
          *
          * @param contextSet the set to add from
          * @return the builder

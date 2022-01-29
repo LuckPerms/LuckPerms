@@ -29,8 +29,8 @@ import com.google.common.collect.ForwardingList;
 
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.commands.user.UserParentCommand;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.context.contextset.MutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.MutableContextSetImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationParser;

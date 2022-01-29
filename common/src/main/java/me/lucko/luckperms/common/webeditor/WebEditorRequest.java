@@ -29,8 +29,8 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.http.AbstractHttpClient;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.Message;
@@ -46,7 +46,7 @@ import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
-import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
@@ -139,7 +139,7 @@ public class WebEditorRequest {
     private static JObject formPermissionHolder(PermissionHolder holder) {
         return new JObject()
                 .add("type", holder.getType().toString())
-                .add("id", holder.getObjectName())
+                .add("id", holder.getIdentifier().getName())
                 .add("displayName", holder.getPlainDisplayName())
                 .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().asList()));
     }
@@ -180,6 +180,8 @@ public class WebEditorRequest {
             Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
             return;
         }
+
+        plugin.getWebEditorSessionStore().addNewSession(pasteId);
 
         // form a url for the editor
         String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + pasteId;
@@ -231,7 +233,7 @@ public class WebEditorRequest {
         users.values().stream()
                 .sorted(Comparator
                         // sort firstly by the users relative weight (depends on the groups they inherit)
-                        .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(MetaCheckEvent.Origin.INTERNAL)).reversed()
+                        .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(CheckOrigin.INTERNAL)).reversed()
                         // then, prioritise users we actually have a username for
                         .thenComparing(u -> u.getUsername().isPresent(), ((Comparator<Boolean>) Boolean::compare).reversed())
                         // then sort according to their username

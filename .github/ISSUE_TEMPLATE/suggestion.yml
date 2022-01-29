@@ -1,0 +1,31 @@
+name: 💡 ​ Suggestion
+description: Suggest an idea for an improvement or change to LuckPerms.
+labels: ["type: suggestion"]
+body:
+  - type: markdown
+    attributes:
+      value: "Before going any further, please check to see if your suggestion has already been added by checking the [wiki](https://luckperms.net/wiki/Home). The latest development builds can be obtained from https://luckperms.net/download"
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please provide a short description of your suggestion in the space below.
+      placeholder: Hello, perhaps you should...
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-behaviour
+    attributes:
+      label: Proposed Behaviour
+      description: Please provide a short explanation of how the feature should work / be changed, and how this will affect the project.
+      placeholder: It would...
+    validations:
+      required: true
+  - type: textarea
+    id: extra-info
+    attributes:
+      label: Extra Details
+      description: Please include any other relevant details in the space below.
+      placeholder: I think this should only function at the end of a rainbow.
+    validations:
+      required: false

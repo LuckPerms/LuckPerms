@@ -28,9 +28,9 @@ package me.lucko.luckperms.velocity.context;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.velocitypowered.api.proxy.Player;
 
-import me.lucko.luckperms.common.context.ContextManager;
-import me.lucko.luckperms.common.context.QueryOptionsCache;
-import me.lucko.luckperms.common.context.QueryOptionsSupplier;
+import me.lucko.luckperms.common.context.manager.ContextManager;
+import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 

@@ -63,7 +63,7 @@ public class WeightCache extends Cache<OptionalInt> {
 
         if (!seen) {
             Map<String, Integer> configWeights = this.group.getPlugin().getConfiguration().get(ConfigKeys.GROUP_WEIGHTS);
-            Integer value = configWeights.get(this.group.getObjectName().toLowerCase(Locale.ROOT));
+            Integer value = configWeights.get(this.group.getIdentifier().getName().toLowerCase(Locale.ROOT));
             if (value != null) {
                 seen = true;
                 weight = value;

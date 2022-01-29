@@ -12,12 +12,12 @@ dependencies {
     compileOnly project(':common:loader-utils')
 
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
-    compileOnly('me.lucko:adventure-platform-bukkit:4.8.1') {
+    compileOnly('me.lucko:adventure-platform-bukkit:4.9.4') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
         exclude(module: 'adventure-nbt')
     }
-    compileOnly 'me.lucko:commodore:1.10'
+    compileOnly 'me.lucko:commodore:1.11'
     compileOnly('net.milkbowl.vault:VaultAPI:1.7') {
         exclude(module: 'bukkit')
     }

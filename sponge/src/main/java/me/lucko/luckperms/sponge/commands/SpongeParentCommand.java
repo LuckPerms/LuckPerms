@@ -111,7 +111,7 @@ public class SpongeParentCommand extends Command<Void> {
 
         if (args.size() < 2) {
             List<String> subjects = collection.getLoadedSubjects().stream()
-                    .map(LPSubject::getIdentifier)
+                    .map(lpSubject -> lpSubject.getIdentifier().getName())
                     .collect(Collectors.toList());
 
             if (subjects.size() > 50) {

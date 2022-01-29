@@ -27,10 +27,12 @@ package me.lucko.luckperms.common.calculator;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
+
+import net.luckperms.api.node.Node;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -71,7 +73,7 @@ public class PermissionCalculator implements Function<String, TristateResult> {
      * @param origin marks where this check originated from
      * @return the result
      */
-    public TristateResult checkPermission(String permission, PermissionCheckEvent.Origin origin) {
+    public TristateResult checkPermission(String permission, CheckOrigin origin) {
         // get the result
         TristateResult result = this.lookupCache.get(permission);
 
@@ -106,7 +108,7 @@ public class PermissionCalculator implements Function<String, TristateResult> {
      *
      * @param sourceMap the source map
      */
-    public synchronized void setSourcePermissions(Map<String, Boolean> sourceMap) {
+    public synchronized void setSourcePermissions(Map<String, Node> sourceMap) {
         for (PermissionProcessor processor : this.processors) {
             processor.setSource(sourceMap);
             processor.refresh();

@@ -1,0 +1,63 @@
+name: 🐛 ​ Bug report
+description: Report an issue or problem with the way LuckPerms is functioning.
+labels: ["type: issue"]
+body:
+  - type: markdown
+    attributes:
+      value: "Before going any further, please check to see if your problem is fixed by updating to a newer version. The latest development builds can be obtained from https://luckperms.net/download"
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please provide a short description of the issue in the space below.
+      placeholder: Description goes here!
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Reproduction Steps
+      description: Please provide a clear list of steps we should follow in order to reproduce your issue in the space below.
+      placeholder: List reproduction steps here, please!
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behaviour
+    attributes:
+      label: Expected Behaviour
+      description: Please provide a description of what you expected to happen.
+      placeholder: Describe what you expected to happen here.
+    validations:
+      required: true
+  - type: input
+    id: server-info
+    attributes:
+      label: Server Details
+      description: Please provide a description of the server details, including type and specific version number.
+      placeholder: 'git-Paper-124 (MC: 1.17.1)'
+    validations:
+      required: true
+  - type: input
+    id: luckperms-version
+    attributes:
+      label: LuckPerms Version
+      description: Please provide the specific, precise version number of LuckPerms you are using to reproduce this bug.
+      placeholder: v5.3.70
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and Configs
+      description: If you think it would be helpful, please also include a pastebin of any relevant config files or log output. You should use https://gist.github.com/ to upload, then include the link below. 
+      placeholder: https://gist.github.com/HelpfulBugReporter/ThisIsAVeryUsefulLogOutput
+    validations:
+      required: false
+  - type: textarea
+    id: extra-info
+    attributes:
+      label: Extra Details
+      description: Please include any other relevant details in the space below.
+      placeholder: I was able to reproduce this only at the end of a rainbow.
+    validations:
+      required: false

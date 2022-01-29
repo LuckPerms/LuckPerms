@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.EnumNamer;
 
 import net.luckperms.api.context.Context;

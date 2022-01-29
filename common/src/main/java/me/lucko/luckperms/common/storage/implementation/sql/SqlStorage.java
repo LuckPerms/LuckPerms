@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-import me.lucko.luckperms.common.context.ContextSetJsonSerializer;
+import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -98,7 +98,7 @@ public class SqlStorage implements StorageImplementation {
     private static final String PLAYER_DELETE = "DELETE FROM '{prefix}players' WHERE uuid=?";
     private static final String PLAYER_SELECT_ALL_UUIDS_BY_USERNAME = "SELECT uuid FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
     private static final String PLAYER_DELETE_ALL_UUIDS_BY_USERNAME = "DELETE FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
-    private static final String PLAYER_SELECT_BY_UUID = "SELECT username, primary_group FROM '{prefix}players' WHERE uuid=?";
+    private static final String PLAYER_SELECT_BY_UUID = "SELECT username, primary_group FROM '{prefix}players' WHERE uuid=? LIMIT 1";
     private static final String PLAYER_SELECT_PRIMARY_GROUP_BY_UUID = "SELECT primary_group FROM '{prefix}players' WHERE uuid=? LIMIT 1";
     private static final String PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID = "UPDATE '{prefix}players' SET primary_group=? WHERE uuid=?";
 
@@ -607,24 +607,23 @@ public class SqlStorage implements StorageImplementation {
     @Override
     public PlayerSaveResult savePlayerData(UUID uniqueId, String username) throws SQLException {
         username = username.toLowerCase(Locale.ROOT);
+        String oldUsername = null;
 
-        // find any existing mapping
-        String oldUsername = getPlayerName(uniqueId);
-
-        // do the insert
-        if (!username.equals(oldUsername)) {
-            try (Connection c = this.connectionFactory.getConnection()) {
-                if (oldUsername != null) {
+        try (Connection c = this.connectionFactory.getConnection()) {
+            SqlPlayerData existingPlayerData = selectPlayerData(c, uniqueId);
+            if (existingPlayerData == null) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
+                    ps.setString(1, uniqueId.toString());
+                    ps.setString(2, username);
+                    ps.setString(3, GroupManager.DEFAULT_GROUP_NAME);
+                    ps.execute();
+                }
+            } else {
+                oldUsername = existingPlayerData.username;
+                if (!username.equals(oldUsername)) {
                     try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_USERNAME_FOR_UUID))) {
                         ps.setString(1, username);
                         ps.setString(2, uniqueId.toString());
-                        ps.execute();
-                    }
-                } else {
-                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
-                        ps.setString(1, uniqueId.toString());
-                        ps.setString(2, username);
-                        ps.setString(3, GroupManager.DEFAULT_GROUP_NAME);
                         ps.execute();
                     }
                 }
@@ -694,7 +693,10 @@ public class SqlStorage implements StorageImplementation {
                 ps.setString(1, uniqueId.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getString("username");
+                        String username = rs.getString("username");
+                        if (username != null && !username.equals("null")) {
+                            return username;
+                        }
                     }
                 }
             }

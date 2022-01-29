@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.sponge.service.LuckPermsService;

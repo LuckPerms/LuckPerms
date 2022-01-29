@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -66,11 +66,17 @@ import java.util.UUID;
 public class WebEditorResponse {
 
     /**
+     * The id of the response payload
+     */
+    private final String id;
+
+    /**
      * The encoded json object this payload is made up of
      */
     private final JsonObject payload;
 
-    public WebEditorResponse(JsonObject payload) {
+    public WebEditorResponse(String id, JsonObject payload) {
+        this.id = id;
         this.payload = payload;
     }
 
@@ -80,7 +86,34 @@ public class WebEditorResponse {
      * @param plugin the plugin
      * @param sender the sender who is applying the session
      */
-    public void apply(LuckPermsPlugin plugin, Sender sender) {
+    public void apply(LuckPermsPlugin plugin, Sender sender, String commandLabel, boolean ignoreSessionWarning) {
+        JsonElement sessionIdJson = this.payload.get("sessionId");
+        if (sessionIdJson != null) {
+            String sessionId = sessionIdJson.getAsString();
+            WebEditorSessionStore sessionStore = plugin.getWebEditorSessionStore();
+
+            SessionState state = sessionStore.getSessionState(sessionId);
+            switch (state) {
+                case COMPLETED:
+                    if (!ignoreSessionWarning) {
+                        Message.APPLY_EDITS_SESSION_APPLIED_ALREADY.send(sender, this.id, commandLabel);
+                        return;
+                    }
+                    break;
+                case NOT_KNOWN:
+                    if (!ignoreSessionWarning) {
+                        Message.APPLY_EDITS_SESSION_UNKNOWN.send(sender, this.id, commandLabel);
+                        return;
+                    }
+                    break;
+                case IN_PROGRESS:
+                    sessionStore.markSessionCompleted(sessionId);
+                    break;
+                default:
+                    throw new AssertionError(state);
+            }
+        }
+
         Session session = new Session(plugin, sender);
         boolean work = false;
 

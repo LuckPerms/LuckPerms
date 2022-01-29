@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.types.Permission;

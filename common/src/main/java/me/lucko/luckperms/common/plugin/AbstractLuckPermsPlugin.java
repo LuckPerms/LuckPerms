@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.context.ConfigurationContextCalculator;
+import me.lucko.luckperms.common.context.calculator.ConfigurationContextCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.AbstractEventBus;
@@ -58,6 +58,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
+import me.lucko.luckperms.common.webeditor.WebEditorSessionStore;
 
 import net.luckperms.api.LuckPerms;
 
@@ -90,6 +91,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
     private BytebinClient bytebin;
+    private WebEditorSessionStore webEditorSessionStore;
     private TranslationRepository translationRepository;
     private FileWatcher fileWatcher = null;
     private Storage storage;
@@ -135,6 +137,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 .build();
 
         this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+        this.webEditorSessionStore = new WebEditorSessionStore();
 
         // init translation repo and update bundle files
         this.translationRepository = new TranslationRepository(this);
@@ -415,6 +418,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public BytebinClient getBytebin() {
         return this.bytebin;
+    }
+
+    @Override
+    public WebEditorSessionStore getWebEditorSessionStore() {
+        return this.webEditorSessionStore;
     }
 
     @Override

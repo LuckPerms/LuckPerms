@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.bukkit.calculator;
 
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-import me.lucko.luckperms.common.calculator.result.TristateResult;
 
 import net.luckperms.api.util.Tristate;
 
@@ -34,7 +35,7 @@ import net.luckperms.api.util.Tristate;
  * Permission Processor which is added for opped users, to simply return true if
  * no other processors match.
  */
-public final class OpProcessor implements PermissionProcessor {
+public final class OpProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     private static final TristateResult TRUE_RESULT = new TristateResult.Factory(OpProcessor.class).result(Tristate.TRUE);
 
     public static final OpProcessor INSTANCE = new OpProcessor();
@@ -44,10 +45,7 @@ public final class OpProcessor implements PermissionProcessor {
     }
 
     @Override
-    public TristateResult hasPermission(TristateResult prev, String permission) {
-        if (prev != TristateResult.UNDEFINED) {
-            return prev;
-        }
+    public TristateResult hasPermission(String permission) {
         return TRUE_RESULT;
     }
 }

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.fabric.model;
 
-import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 

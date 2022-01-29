@@ -31,6 +31,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Holds cached lookup data for a given set of query options.
+ *
+ * <p>All calls will account for inheritance, as well as any default data
+ * provided by the platform. These calls are heavily cached and are therefore
+ * fast.</p>
  */
 public interface CachedData {
 

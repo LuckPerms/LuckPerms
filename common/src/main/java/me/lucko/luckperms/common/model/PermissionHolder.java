@@ -53,7 +53,6 @@ import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -102,7 +101,7 @@ public abstract class PermissionHolder {
     /**
      * The holders identifier
      */
-    private @MonotonicNonNull PermissionHolderIdentifier identifier;
+    private final PermissionHolderIdentifier identifier;
 
     /**
      * The holders persistent nodes.
@@ -111,7 +110,7 @@ public abstract class PermissionHolder {
      *
      * @see #normalData()
      */
-    private final RecordedNodeMap normalNodes = new RecordedNodeMap(new NodeMapMutable(this));
+    private final RecordedNodeMap normalNodes;
 
     /**
      * The holders transient nodes.
@@ -123,20 +122,24 @@ public abstract class PermissionHolder {
      *
      * @see #transientData()
      */
-    private final NodeMap transientNodes = new NodeMapMutable(this);
+    private final NodeMap transientNodes;
 
     /**
      * Comparator used to ordering groups when calculating inheritance
      */
-    private final Comparator<? super PermissionHolder> inheritanceComparator = InheritanceComparator.getFor(this);
+    private final Comparator<? super PermissionHolder> inheritanceComparator;
 
     /**
      * Creates a new instance
      *
      * @param plugin the plugin instance
      */
-    protected PermissionHolder(LuckPermsPlugin plugin) {
+    protected PermissionHolder(LuckPermsPlugin plugin, String objectName) {
         this.plugin = plugin;
+        this.identifier = new PermissionHolderIdentifier(getType(), objectName);
+        this.normalNodes = new RecordedNodeMap(new NodeMapMutable(this, DataType.NORMAL));
+        this.transientNodes = new NodeMapMutable(this, DataType.TRANSIENT);
+        this.inheritanceComparator = InheritanceComparator.getFor(this);
     }
 
     // getters
@@ -169,21 +172,8 @@ public abstract class PermissionHolder {
     }
 
     public PermissionHolderIdentifier getIdentifier() {
-        if (this.identifier == null) {
-            this.identifier = new PermissionHolderIdentifier(getType(), getObjectName());
-        }
         return this.identifier;
     }
-
-    /**
-     * Gets the unique name of this holder object.
-     *
-     * <p>Used as a base for identifying permission holding objects. Also acts
-     * as a method for preventing circular inheritance issues.</p>
-     *
-     * @return the object name
-     */
-    public abstract String getObjectName();
 
     /**
      * Gets the formatted display name of this permission holder
@@ -354,19 +344,19 @@ public abstract class PermissionHolder {
         return (List) inheritanceTree;
     }
 
-    public <M extends Map<String, Boolean>> M exportPermissions(IntFunction<M> mapFactory, QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
+    public <M extends Map<String, Node>> M exportPermissions(IntFunction<M> mapFactory, QueryOptions queryOptions, boolean convertToLowercase, boolean resolveShorthand) {
         List<Node> entries = resolveInheritedNodes(queryOptions);
         M map = mapFactory.apply(entries.size());
         processExportedPermissions(map, entries, convertToLowercase, resolveShorthand);
         return map;
     }
 
-    private static void processExportedPermissions(Map<String, Boolean> accumulator, List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
+    private static void processExportedPermissions(Map<String, Node> accumulator, List<Node> entries, boolean convertToLowercase, boolean resolveShorthand) {
         for (Node node : entries) {
             if (convertToLowercase) {
-                accumulator.putIfAbsent(node.getKey().toLowerCase(Locale.ROOT), node.getValue());
+                accumulator.putIfAbsent(node.getKey().toLowerCase(Locale.ROOT), node);
             } else {
-                accumulator.putIfAbsent(node.getKey(), node.getValue());
+                accumulator.putIfAbsent(node.getKey(), node);
             }
         }
 
@@ -375,9 +365,9 @@ public abstract class PermissionHolder {
                 Collection<String> shorthand = node.resolveShorthand();
                 for (String s : shorthand) {
                     if (convertToLowercase) {
-                        accumulator.putIfAbsent(s.toLowerCase(Locale.ROOT), node.getValue());
+                        accumulator.putIfAbsent(s.toLowerCase(Locale.ROOT), node);
                     } else {
-                        accumulator.putIfAbsent(s, node.getValue());
+                        accumulator.putIfAbsent(s, node);
                     }
                 }
             }
@@ -394,7 +384,7 @@ public abstract class PermissionHolder {
             // accumulate nodes
             for (DataType dataType : holder.queryOrder(queryOptions)) {
                 holder.getData(dataType).forEach(queryOptions, node -> {
-                    if (node.getValue() && NodeType.META_OR_CHAT_META.matches(node)) {
+                    if (NodeType.META_OR_CHAT_META.matches(node)) {
                         accumulator.accumulateNode(node);
                     }
                 });
@@ -439,7 +429,7 @@ public abstract class PermissionHolder {
     }
 
     public Tristate hasNode(DataType type, Node node, NodeEqualityPredicate equalityPredicate) {
-        if (this.getType() == HolderType.GROUP && node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(getObjectName())) {
+        if (this.getType() == HolderType.GROUP && node instanceof InheritanceNode && ((InheritanceNode) node).getGroupName().equalsIgnoreCase(getIdentifier().getName())) {
             return Tristate.TRUE;
         }
 

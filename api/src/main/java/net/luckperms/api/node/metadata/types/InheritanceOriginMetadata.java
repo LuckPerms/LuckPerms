@@ -26,6 +26,7 @@
 package net.luckperms.api.node.metadata.types;
 
 import net.luckperms.api.model.PermissionHolder;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 
@@ -55,6 +56,15 @@ public interface InheritanceOriginMetadata {
      * @return where the node was inherited from.
      */
     PermissionHolder.@NonNull Identifier getOrigin();
+
+    /**
+     * Gets the {@link DataType type} of the {@link net.luckperms.api.model.data.NodeMap}
+     * the node was inherited from.
+     *
+     * @return the type of the NodeMap the node was inherited from.
+     * @since 5.4
+     */
+    @NonNull DataType getDataType();
 
     /**
      * Gets whether the associated node was inherited from another holder.

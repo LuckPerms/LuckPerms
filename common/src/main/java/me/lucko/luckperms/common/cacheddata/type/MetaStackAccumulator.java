@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.cacheddata.type;
 
+import me.lucko.luckperms.common.cacheddata.result.StringResult;
+
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.metastacking.MetaStackElement;
 import net.luckperms.api.node.ChatMetaType;
@@ -36,10 +38,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-public class MetaStackAccumulator {
+public class MetaStackAccumulator<N extends ChatMetaNode<N, ?>> {
     private final MetaStackDefinition definition;
-    private final List<Entry> entries;
+    private final List<Entry<N>> entries;
 
     public MetaStackAccumulator(MetaStackDefinition definition, ChatMetaType targetType) {
         this.definition = definition;
@@ -47,20 +51,27 @@ public class MetaStackAccumulator {
         List<MetaStackElement> elements = definition.getElements();
         this.entries = new ArrayList<>(elements.size());
         for (MetaStackElement element : elements) {
-            this.entries.add(new Entry(element, targetType));
+            this.entries.add(new Entry<>(element, targetType));
         }
     }
 
-    public void offer(ChatMetaNode<?, ?> node) {
-        for (Entry entry : this.entries) {
+    public void offer(N node) {
+        for (Entry<N> entry : this.entries) {
             entry.offer(node);
         }
     }
 
+    public List<N> getElements() {
+        return this.entries.stream()
+                .map(Entry::getNode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
     public String toFormattedString() {
         List<String> elements = new LinkedList<>();
-        for (Entry entry : this.entries) {
-            ChatMetaNode<?, ?> node = entry.getNode();
+        for (Entry<N> entry : this.entries) {
+            N node = entry.getNode();
             if (node != null) {
                 elements.add(node.getMetaValue());
             }
@@ -94,22 +105,51 @@ public class MetaStackAccumulator {
         return sb.toString();
     }
 
-    private static final class Entry {
+    public StringResult<N> toResult() {
+        String formatted = toFormattedString();
+        if (formatted == null) {
+            return StringResult.nullResult();
+        }
+
+        List<N> elements = getElements();
+
+        switch (elements.size()) {
+            case 0:
+                throw new AssertionError();
+            case 1:
+                return StringResult.of(formatted, elements.get(0));
+            default: {
+                Iterator<N> it = elements.iterator();
+                StringResult<N> result = StringResult.of(formatted, it.next());
+
+                StringResult<N> root = result;
+                while (it.hasNext()) {
+                    StringResult<N> nested = StringResult.of(it.next());
+                    root.setOverriddenResult(nested);
+                    root = nested;
+                }
+
+                return result;
+            }
+        }
+    }
+
+    private static final class Entry<N extends ChatMetaNode<?, ?>> {
         private final MetaStackElement element;
         private final ChatMetaType type;
 
-        private @Nullable ChatMetaNode<?, ?> current = null;
+        private @Nullable N current = null;
 
         Entry(MetaStackElement element, ChatMetaType type) {
             this.element = element;
             this.type = type;
         }
 
-        public ChatMetaNode<?, ?> getNode() {
+        public N getNode() {
             return this.current;
         }
 
-        public boolean offer(ChatMetaNode<?, ?> node) {
+        public boolean offer(N node) {
             if (this.element.shouldAccumulate(this.type, node, this.current)) {
                 this.current = node;
                 return true;
