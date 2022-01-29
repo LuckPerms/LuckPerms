@@ -22,6 +22,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+processResources {
+    filesMatching("extension.json") {
+        expand 'pluginVersion': project.ext.fullVersion
+    }
+}
+
 shadowJar {
     archiveFileName = "LuckPerms-Minestom-${project.ext.fullVersion}.jar"
 

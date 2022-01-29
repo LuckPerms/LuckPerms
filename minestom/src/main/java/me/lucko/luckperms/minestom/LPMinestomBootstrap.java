@@ -65,7 +65,7 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
      */
     private final LPMinestomPlugin plugin;
     private final MinestomSchedulerAdapter schedulerAdapter;
-    private final ClassPathAppender classPathAppender;
+    private final MinestomClassPathAppender classPathAppender;
 
     private Instant startupTime;
 
@@ -95,15 +95,6 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
         } finally {
             this.enableLatch.countDown();
         }
-
-        // remove this
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, (event) -> {
-            event.getPlayer().addPermission(new Permission("biglad"));
-
-            event.getPlayer().getAllPermissions().forEach((it) -> {
-                event.getPlayer().sendMessage(it.getPermissionName());
-            });
-        });
     }
 
     @Override

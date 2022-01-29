@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.plugin;
 
+import java.util.HashSet;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;

@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.calculator.processor.*;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.minestom.LPMinestomPlugin;
 import net.luckperms.api.query.QueryOptions;
-
 import java.util.ArrayList;
 import java.util.List;
 
