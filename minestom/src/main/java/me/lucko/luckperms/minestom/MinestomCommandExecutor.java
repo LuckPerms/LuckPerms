@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.minestom;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import me.lucko.luckperms.common.command.CommandManager;
@@ -35,11 +33,9 @@ import me.lucko.luckperms.common.sender.Sender;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
-import net.minestom.server.command.builder.SimpleCommand;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 // todo tab completion support
 public class MinestomCommandExecutor extends CommandManager {
@@ -85,7 +81,9 @@ public class MinestomCommandExecutor extends CommandManager {
         }
 
         public void process(@NotNull CommandSender sender, @NotNull String command, @NotNull String[] args) {
-            this.commandExecutor.executeCommand(this.commandExecutor.plugin.getSenderFactory().wrap(sender), command, Arrays.asList(args));
+            List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(args);
+
+            this.commandExecutor.executeCommand(this.commandExecutor.plugin.getSenderFactory().wrap(sender), command, arguments);
         }
 
 

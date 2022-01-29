@@ -27,3 +27,5 @@ include (
         'velocity',
         'minestom'
 )
+include 'minestom'
+

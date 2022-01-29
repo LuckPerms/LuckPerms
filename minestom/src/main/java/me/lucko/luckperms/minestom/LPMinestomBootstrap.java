@@ -29,13 +29,18 @@ import java.util.EnumSet;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import net.luckperms.api.platform.Platform;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extensions.Extension;
+import net.minestom.server.extensions.ExtensionManager;
+import net.minestom.server.permission.Permission;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -67,7 +72,7 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
     public LPMinestomBootstrap() {
         this.plugin = new LPMinestomPlugin(this);
         this.schedulerAdapter = new MinestomSchedulerAdapter();
-        this.classPathAppender = new MinestomClassPathAppender();
+        this.classPathAppender = new MinestomClassPathAppender(this);
     }
 
     @Override

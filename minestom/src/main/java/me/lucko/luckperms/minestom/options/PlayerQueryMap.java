@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.minestom.options;
 
-import me.lucko.luckperms.common.context.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.minestom.context.MinestomContextManager;
 import net.minestom.server.entity.Player;

@@ -24,8 +24,7 @@
  */
 
 package me.lucko.luckperms.minestom.context;
-
-import me.lucko.luckperms.common.context.contextset.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import net.luckperms.api.context.*;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;

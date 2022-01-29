@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '4.0.2'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 repositories {
@@ -11,11 +11,15 @@ repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
-
 dependencies {
     implementation project(':common')
 
-    compileOnly 'com.github.minestom:Minestom:0f4698bed7'
+    compileOnly 'com.github.Minestom:Minestom:bcc652ede8'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 processResources {
@@ -24,18 +28,14 @@ processResources {
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
 shadowJar {
-    archiveName = "LuckPerms-Minestom-${project.ext.fullVersion}.jar"
+    archiveFileName = "LuckPerms-Minestom-${project.ext.fullVersion}.jar"
 
     dependencies {
         exclude('net.minestom:.*')
         include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
+        include(dependency("com.google.guava:guava:19.0"))
         // We don't want to include the mappings in the jar do we?
         exclude '/mappings/*'
     }
@@ -57,7 +57,6 @@ shadowJar {
     relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
     relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
 }
-
 
 artifacts {
     archives shadowJar

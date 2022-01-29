@@ -25,19 +25,24 @@
 
 package me.lucko.luckperms.minestom;
 
-import java.nio.file.Path;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
-import net.minestom.server.extras.selfmodification.MinestomRootClassLoader;
+
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 
 public class MinestomClassPathAppender implements ClassPathAppender {
-    private final MinestomRootClassLoader classLoader = MinestomRootClassLoader.getInstance();
+    private final LPMinestomBootstrap bootstrap;
+
+    public MinestomClassPathAppender(LPMinestomBootstrap bootstrap) {
+        this.bootstrap = bootstrap;
+    }
 
     @Override
     public void addJarToClasspath(Path file) {
         try {
-            classLoader.addURL(file.toUri().toURL());
-        } catch (Exception exception) {
-            exception.printStackTrace();
+            this.bootstrap.getOrigin().getClassLoader().addURL(file.toUri().toURL());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
     }
 }
