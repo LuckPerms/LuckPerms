@@ -29,6 +29,7 @@ import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.webeditor.WebEditorResponse;
 import me.lucko.luckperms.common.webeditor.socket.SocketMessageType;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
@@ -83,7 +84,14 @@ public class HandlerChangeRequest implements Handler {
         }
 
         // apply changes
-        new WebEditorResponse(code, data).apply(this.socket.getPlugin(), this.socket.getSender(), "lp", false);
+        Message.EDITOR_SOCKET_CHANGES_RECEIVED.send(this.socket.getSender());
+        new WebEditorResponse(code, data).apply(
+                this.socket.getPlugin(),
+                this.socket.getSender(),
+                this.socket.getSession(),
+                "lp",
+                false
+        );
 
         // create a new session
         String newSessionCode = this.socket.getSession().createFollowUpSession();

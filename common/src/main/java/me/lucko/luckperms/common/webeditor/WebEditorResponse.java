@@ -88,7 +88,7 @@ public class WebEditorResponse {
      * @param plugin the plugin
      * @param sender the sender who is applying the session
      */
-    public void apply(LuckPermsPlugin plugin, Sender sender, String commandLabel, boolean ignoreSessionWarning) {
+    public void apply(LuckPermsPlugin plugin, Sender sender, WebEditorSession editorSession, String commandLabel, boolean ignoreSessionWarning) {
         JsonElement sessionIdJson = this.payload.get("sessionId");
         if (sessionIdJson != null) {
             String sessionId = sessionIdJson.getAsString();
@@ -116,7 +116,7 @@ public class WebEditorResponse {
             }
         }
 
-        Session session = new Session(plugin, sender);
+        Session session = new Session(plugin, sender, editorSession);
         boolean work = false;
 
         if (this.payload.has("changes")) {
@@ -163,10 +163,12 @@ public class WebEditorResponse {
     private static class Session {
         private final LuckPermsPlugin plugin;
         private final Sender sender;
+        private final WebEditorSession session;
 
-        Session(LuckPermsPlugin plugin, Sender sender) {
+        Session(LuckPermsPlugin plugin, Sender sender, WebEditorSession session) {
             this.plugin = plugin;
             this.sender = sender;
+            this.session = session;
         }
 
         private boolean applyChange(JsonObject changeInfo) {
@@ -204,6 +206,9 @@ public class WebEditorResponse {
                 holder = this.plugin.getStorage().loadGroup(id).join().orElse(null);
                 if (holder == null) {
                     holder = this.plugin.getStorage().createAndLoadGroup(id, CreationCause.WEB_EDITOR).join();
+                    if (this.session != null) {
+                        this.session.includeCreatedGroup((Group) holder);
+                    }
                 }
             }
 
@@ -251,6 +256,9 @@ public class WebEditorResponse {
             Track track = this.plugin.getStorage().loadTrack(id).join().orElse(null);
             if (track == null) {
                 track = this.plugin.getStorage().createAndLoadTrack(id, CreationCause.WEB_EDITOR).join();
+                if (this.session != null) {
+                    this.session.includeCreatedTrack(track);
+                }
             }
 
             if (ArgumentPermissions.checkModifyPerms(this.plugin, this.sender, CommandPermission.APPLY_EDITS, track)) {
@@ -341,6 +349,10 @@ public class WebEditorResponse {
                     .description("webeditor", "delete")
                     .build().submit(this.plugin, this.sender);
 
+            if (this.session != null) {
+                this.session.excludeDeletedUser(user);
+            }
+
             return true;
         }
 
@@ -376,6 +388,10 @@ public class WebEditorResponse {
                     .description("webeditor", "delete")
                     .build().submit(this.plugin, this.sender);
 
+            if (this.session != null) {
+                this.session.excludeDeletedGroup(group);
+            }
+
             return true;
         }
 
@@ -405,6 +421,10 @@ public class WebEditorResponse {
             LoggedAction.build().source(this.sender).target(track)
                     .description("webeditor", "delete")
                     .build().submit(this.plugin, this.sender);
+
+            if (this.session != null) {
+                this.session.excludeDeletedTrack(track);
+            }
 
             return true;
         }

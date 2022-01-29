@@ -176,7 +176,11 @@ public class WebEditorSocket {
     }
 
     private void afterOpenFor1Minute() {
-        if (!this.closed && this.remotePublicKey == null && !this.listener.helloHandler().hasAttemptedConnection()) {
+        if (this.closed) {
+            return;
+        }
+
+        if (this.remotePublicKey == null && !this.listener.helloHandler().hasAttemptedConnection()) {
             // If the editor hasn't made an initial connection after 1 minute,
             // then close + stop listening to the socket.
             closeSocket();

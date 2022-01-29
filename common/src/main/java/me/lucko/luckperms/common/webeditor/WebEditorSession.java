@@ -29,9 +29,11 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.http.AbstractHttpClient;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
 import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
@@ -39,6 +41,7 @@ import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -61,8 +64,8 @@ public class WebEditorSession {
     private final Sender sender;
     private final String cmdLabel;
 
-    private final List<PermissionHolderIdentifier> holders;
-    private final List<String> tracks;
+    private final Set<PermissionHolderIdentifier> holders;
+    private final Set<String> tracks;
 
     private WebEditorSocket socket = null;
 
@@ -72,8 +75,8 @@ public class WebEditorSession {
         this.sender = sender;
         this.cmdLabel = cmdLabel;
 
-        this.holders = initialRequest.getHolders().stream().map(PermissionHolder::getIdentifier).collect(Collectors.toList());
-        this.tracks = initialRequest.getTracks().stream().map(Track::getName).collect(Collectors.toList());
+        this.holders = initialRequest.getHolders().stream().map(PermissionHolder::getIdentifier).collect(Collectors.toSet());
+        this.tracks = initialRequest.getTracks().stream().map(Track::getName).collect(Collectors.toSet());
     }
 
     public void open() {
@@ -96,6 +99,8 @@ public class WebEditorSession {
     }
 
     private void createInitialSession() {
+        Objects.requireNonNull(this.initialRequest);
+
         WebEditorRequest request = this.initialRequest;
         this.initialRequest = null;
 
@@ -116,6 +121,26 @@ public class WebEditorSession {
         if (this.socket != null) {
             this.socket.scheduleCleanupIfUnused();
         }
+    }
+
+    public void includeCreatedGroup(Group group) {
+        this.holders.add(group.getIdentifier());
+    }
+
+    public void includeCreatedTrack(Track track) {
+        this.tracks.add(track.getName());
+    }
+
+    public void excludeDeletedUser(User user) {
+        this.holders.remove(user.getIdentifier());
+    }
+
+    public void excludeDeletedGroup(Group group) {
+        this.holders.remove(group.getIdentifier());
+    }
+
+    public void excludeDeletedTrack(Track track) {
+        this.tracks.remove(track.getName());
     }
 
     public String createFollowUpSession() {

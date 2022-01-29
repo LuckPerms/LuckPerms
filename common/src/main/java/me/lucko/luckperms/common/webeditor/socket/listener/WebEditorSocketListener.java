@@ -73,6 +73,11 @@ public class WebEditorSocketListener extends WebSocketListener {
     }
 
     @Override
+    public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable e, Response response) {
+        this.socket.getPlugin().getLogger().warn("Exception occurred in web socket", e);
+    }
+
+    @Override
     public void onMessage(@NonNull WebSocket webSocket, @NonNull String msg) {
         this.socket.getPlugin().getBootstrap().getScheduler().executeAsync(() -> {
             this.lock.lock();
