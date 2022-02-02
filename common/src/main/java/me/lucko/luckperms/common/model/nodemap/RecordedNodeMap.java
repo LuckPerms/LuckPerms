@@ -149,6 +149,11 @@ public class RecordedNodeMap implements NodeMap {
     }
 
     @Override
+    public MutateResult applyChanges(MutateResult changes) {
+        return record(this.delegate.applyChanges(changes));
+    }
+
+    @Override
     public MutateResult addAll(Iterable<? extends Node> set) {
         return record(this.delegate.addAll(set));
     }

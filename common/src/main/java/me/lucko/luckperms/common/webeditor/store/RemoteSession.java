@@ -25,24 +25,27 @@
 
 package me.lucko.luckperms.common.webeditor.store;
 
-/**
- * Represents the state of a web editor session
- */
-public enum SessionState {
+import me.lucko.luckperms.common.webeditor.WebEditorRequest;
 
-    /**
-     * The session is not known to this server.
-     */
-    NOT_KNOWN,
+public final class RemoteSession {
+    private WebEditorRequest request;
+    private boolean completed;
 
-    /**
-     * The session is in progress - it has been created, but updates have not been applied.
-     */
-    IN_PROGRESS,
+    public RemoteSession(WebEditorRequest request) {
+        this.request = request;
+        this.completed = false;
+    }
 
-    /**
-     * The session is complete - updates have been applied.
-     */
-    COMPLETED
+    public WebEditorRequest request() {
+        return this.request;
+    }
 
+    public boolean isCompleted() {
+        return this.completed;
+    }
+
+    public void complete() {
+        this.completed = true;
+        this.request = null;
+    }
 }

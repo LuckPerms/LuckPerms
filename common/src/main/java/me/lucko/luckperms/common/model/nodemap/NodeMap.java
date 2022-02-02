@@ -154,6 +154,8 @@ public interface NodeMap {
 
     MutateResult setContent(Stream<? extends Node> stream);
 
+    MutateResult applyChanges(MutateResult changes);
+
     MutateResult addAll(Iterable<? extends Node> set);
 
     MutateResult addAll(Stream<? extends Node> stream);

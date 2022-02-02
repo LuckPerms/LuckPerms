@@ -28,14 +28,11 @@ package me.lucko.luckperms.common.webeditor;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
-import me.lucko.luckperms.common.http.AbstractHttpClient;
-import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
-import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
@@ -43,6 +40,7 @@ import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
@@ -64,7 +62,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
@@ -81,13 +79,19 @@ public class WebEditorRequest {
      */
     private final JsonObject payload;
 
-    private final List<PermissionHolder> holders;
-    private final List<Track> tracks;
+    private final Map<PermissionHolderIdentifier, List<Node>> holders;
+    private final Map<String, List<String>> tracks;
 
-    private WebEditorRequest(JsonObject payload, List<PermissionHolder> holders, List<Track> tracks) {
+    private WebEditorRequest(JsonObject payload, Map<PermissionHolder, List<Node>> holders, Map<Track, List<String>> tracks) {
         this.payload = payload;
-        this.holders = holders;
-        this.tracks = tracks;
+        this.holders = holders.entrySet().stream().collect(ImmutableCollectors.toMap(
+                e -> e.getKey().getIdentifier(),
+                Map.Entry::getValue
+        ));
+        this.tracks = tracks.entrySet().stream().collect(ImmutableCollectors.toMap(
+                e -> e.getKey().getName(),
+                Map.Entry::getValue
+        ));
     }
 
     public JsonObject getPayload() {
@@ -104,11 +108,11 @@ public class WebEditorRequest {
         return bytesOut.toByteArray();
     }
 
-    public List<PermissionHolder> getHolders() {
+    public Map<PermissionHolderIdentifier, List<Node>> getHolders() {
         return this.holders;
     }
 
-    public List<Track> getTracks() {
+    public Map<String, List<String>> getTracks() {
         return this.tracks;
     }
 
@@ -132,28 +136,33 @@ public class WebEditorRequest {
         }
 
         // form the payload data
+        Map<PermissionHolder, List<Node>> holdersMap = holders.stream().collect(ImmutableCollectors.toMap(
+                Function.identity(),
+                holder -> holder.normalData().asList()
+        ));
 
-        JsonObject json = form(holders, tracks, sender, cmdLabel, potentialContexts.build(), plugin).toJson();
-        return new WebEditorRequest(json, holders, tracks);
+        Map<Track, List<String>> tracksMap = tracks.stream().collect(ImmutableCollectors.toMap(
+                Function.identity(),
+                Track::getGroups
+        ));
+
+        JsonObject json = createJsonPayload(holdersMap, tracksMap, sender, cmdLabel, potentialContexts.build(), plugin).toJson();
+        return new WebEditorRequest(json, holdersMap, tracksMap);
     }
 
-    private static JObject form(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, ImmutableContextSet potentialContexts, LuckPermsPlugin plugin) {
+    private static JObject createJsonPayload(Map<PermissionHolder, List<Node>> holders, Map<Track, List<String>> tracks, Sender sender, String cmdLabel, ImmutableContextSet potentialContexts, LuckPermsPlugin plugin) {
         return new JObject()
                 .add("metadata", formMetadata(sender, cmdLabel, plugin.getBootstrap().getVersion()))
-                .add("permissionHolders", new JArray()
-                        .consume(arr -> {
-                            for (PermissionHolder holder : holders) {
-                                arr.add(formPermissionHolder(holder));
-                            }
-                        })
-                )
-                .add("tracks", new JArray()
-                        .consume(arr -> {
-                            for (Track track : tracks) {
-                                arr.add(formTrack(track));
-                            }
-                        })
-                )
+                .add("permissionHolders", new JArray().consume(arr ->
+                        holders.forEach((holder, data) ->
+                                arr.add(formPermissionHolder(holder, data))
+                        )
+                ))
+                .add("tracks", new JArray().consume(arr ->
+                        tracks.forEach((track, data) ->
+                                arr.add(formTrack(track, data))
+                        )
+                ))
                 .add("knownPermissions", new JArray().addAll(plugin.getPermissionRegistry().rootAsList()))
                 .add("potentialContexts", ContextSetJsonSerializer.serialize(potentialContexts));
     }
@@ -169,19 +178,19 @@ public class WebEditorRequest {
                 .add("pluginVersion", pluginVersion);
     }
 
-    private static JObject formPermissionHolder(PermissionHolder holder) {
+    private static JObject formPermissionHolder(PermissionHolder holder, List<Node> data) {
         return new JObject()
                 .add("type", holder.getType().toString())
                 .add("id", holder.getIdentifier().getName())
                 .add("displayName", holder.getPlainDisplayName())
-                .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().asList()));
+                .add("nodes", NodeJsonSerializer.serializeNodes(data));
     }
 
-    private static JObject formTrack(Track track) {
+    private static JObject formTrack(Track track, List<String> data) {
         return new JObject()
                 .add("type", "track")
                 .add("id", track.getName())
-                .add("groups", new JArray().addAll(track.getGroups()));
+                .add("groups", new JArray().addAll(data));
     }
 
     public static void includeMatchingGroups(List<? super Group> holders, Predicate<? super Group> filter, LuckPermsPlugin plugin) {

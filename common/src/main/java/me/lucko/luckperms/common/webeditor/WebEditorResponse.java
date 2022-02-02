@@ -45,8 +45,7 @@ import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Uuids;
-import me.lucko.luckperms.common.webeditor.store.SessionState;
-import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
+import me.lucko.luckperms.common.webeditor.store.RemoteSession;
 
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
@@ -89,40 +88,30 @@ public class WebEditorResponse {
      * @param sender the sender who is applying the session
      */
     public void apply(LuckPermsPlugin plugin, Sender sender, WebEditorSession editorSession, String commandLabel, boolean ignoreSessionWarning) {
-        JsonElement sessionIdJson = this.payload.get("sessionId");
-        if (sessionIdJson != null) {
-            String sessionId = sessionIdJson.getAsString();
-            WebEditorStore sessionStore = plugin.getWebEditorStore();
+        String sessionId = this.payload.get("sessionId").getAsString();
+        RemoteSession remoteSession = plugin.getWebEditorStore().sessions().getSession(sessionId);
 
-            SessionState state = sessionStore.sessions().getSessionState(sessionId);
-            switch (state) {
-                case COMPLETED:
-                    if (!ignoreSessionWarning) {
-                        Message.APPLY_EDITS_SESSION_APPLIED_ALREADY.send(sender, this.id, commandLabel);
-                        return;
-                    }
-                    break;
-                case NOT_KNOWN:
-                    if (!ignoreSessionWarning) {
-                        Message.APPLY_EDITS_SESSION_UNKNOWN.send(sender, this.id, commandLabel);
-                        return;
-                    }
-                    break;
-                case IN_PROGRESS:
-                    sessionStore.sessions().markSessionCompleted(sessionId);
-                    break;
-                default:
-                    throw new AssertionError(state);
+        if (remoteSession == null) {
+            // session is unknown
+            if (!ignoreSessionWarning) {
+                Message.APPLY_EDITS_SESSION_UNKNOWN.send(sender, this.id, commandLabel);
+                return;
+            }
+        } else if (remoteSession.isCompleted()) {
+            // session has been completed already
+            if (!ignoreSessionWarning) {
+                Message.APPLY_EDITS_SESSION_APPLIED_ALREADY.send(sender, this.id, commandLabel);
+                return;
             }
         }
 
-        Session session = new Session(plugin, sender, editorSession);
+        ChangeApplier changeApplier = new ChangeApplier(plugin, sender, editorSession, remoteSession);
         boolean work = false;
 
         if (this.payload.has("changes")) {
             JsonArray changes = this.payload.get("changes").getAsJsonArray();
             for (JsonElement change : changes) {
-                if (session.applyChange(change.getAsJsonObject())) {
+                if (changeApplier.applyChange(change.getAsJsonObject())) {
                     work = true;
                 }
             }
@@ -130,7 +119,7 @@ public class WebEditorResponse {
         if (this.payload.has("userDeletions")) {
             JsonArray userDeletions = this.payload.get("userDeletions").getAsJsonArray();
             for (JsonElement userDeletion : userDeletions) {
-                if (session.applyUserDelete(userDeletion)) {
+                if (changeApplier.applyUserDelete(userDeletion)) {
                     work = true;
                 }
             }
@@ -138,7 +127,7 @@ public class WebEditorResponse {
         if (this.payload.has("groupDeletions")) {
             JsonArray groupDeletions = this.payload.get("groupDeletions").getAsJsonArray();
             for (JsonElement groupDeletion : groupDeletions) {
-                if (session.applyGroupDelete(groupDeletion)) {
+                if (changeApplier.applyGroupDelete(groupDeletion)) {
                     work = true;
                 }
             }
@@ -146,10 +135,14 @@ public class WebEditorResponse {
         if (this.payload.has("trackDeletions")) {
             JsonArray trackDeletions = this.payload.get("trackDeletions").getAsJsonArray();
             for (JsonElement trackDeletion : trackDeletions) {
-                if (session.applyTrackDelete(trackDeletion)) {
+                if (changeApplier.applyTrackDelete(trackDeletion)) {
                     work = true;
                 }
             }
+        }
+
+        if (remoteSession != null) {
+            remoteSession.complete();
         }
 
         if (!work) {
@@ -160,15 +153,17 @@ public class WebEditorResponse {
     /**
      * Represents the application of a given editor session on this platform.
      */
-    private static class Session {
+    private static class ChangeApplier {
         private final LuckPermsPlugin plugin;
         private final Sender sender;
         private final WebEditorSession session;
+        private final RemoteSession remoteSession;
 
-        Session(LuckPermsPlugin plugin, Sender sender, WebEditorSession session) {
+        ChangeApplier(LuckPermsPlugin plugin, Sender sender, WebEditorSession session, RemoteSession remoteSession) {
             this.plugin = plugin;
             this.sender = sender;
             this.session = session;
+            this.remoteSession = remoteSession;
         }
 
         private boolean applyChange(JsonObject changeInfo) {
@@ -218,7 +213,7 @@ public class WebEditorResponse {
             }
 
             Set<Node> nodes = NodeJsonSerializer.deserializeNodes(changeInfo.getAsJsonArray("nodes"));
-            MutateResult res = holder.setNodes(DataType.NORMAL, nodes, true);
+            MutateResult res = applyNodeChanges(holder, nodes);
 
             if (res.isEmpty()) {
                 return false;
@@ -240,14 +235,40 @@ public class WebEditorResponse {
 
             Message.APPLY_EDITS_SUCCESS.send(this.sender, type, holder.getFormattedDisplayName());
             Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, added.size(), removed.size());
+
             for (Node n : added) {
                 Message.APPLY_EDITS_DIFF_ADDED.send(this.sender, n);
             }
             for (Node n : removed) {
                 Message.APPLY_EDITS_DIFF_REMOVED.send(this.sender, n);
             }
+
             StorageAssistant.save(holder, this.sender, this.plugin);
             return true;
+        }
+
+        private MutateResult applyNodeChanges(PermissionHolder holder, Set<Node> nodes) {
+            if (this.remoteSession != null) {
+
+                WebEditorRequest request = this.remoteSession.request();
+                if (request != null) {
+
+                    List<Node> nodesBefore = request.getHolders().get(holder.getIdentifier());
+                    if (nodesBefore != null) {
+
+                        // if the initial data sent to the remote session is still known
+                        // use that to calculate a diff of the changes made to avoid overriding
+                        // modified/added/removed nodes since the editor session was created
+                        MutateResult diff = new MutateResult();
+                        diff.recordChanges(MutateResult.ChangeType.REMOVE, nodesBefore);
+                        diff.recordChanges(MutateResult.ChangeType.ADD, nodes);
+
+                        return holder.setNodes(DataType.NORMAL, diff, true);
+                    }
+                }
+            }
+
+            return holder.setNodes(DataType.NORMAL, nodes, true);
         }
 
         private boolean applyTrackChange(JsonObject changeInfo) {

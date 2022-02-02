@@ -48,7 +48,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Encapsulates a request to the web editor.
+ * Encapsulates a session with the web editor.
+ *
+ * <p>A session is tied to a specific user, and can comprise of multiple requests to and
+ * responses from the web editor.</p>
  */
 public class WebEditorSession {
 
@@ -75,8 +78,8 @@ public class WebEditorSession {
         this.sender = sender;
         this.cmdLabel = cmdLabel;
 
-        this.holders = initialRequest.getHolders().stream().map(PermissionHolder::getIdentifier).collect(Collectors.toSet());
-        this.tracks = initialRequest.getTracks().stream().map(Track::getName).collect(Collectors.toSet());
+        this.holders = initialRequest.getHolders().keySet();
+        this.tracks = initialRequest.getTracks().keySet();
     }
 
     public void open() {
@@ -188,7 +191,7 @@ public class WebEditorSession {
             return null;
         }
 
-        this.plugin.getWebEditorStore().sessions().addNewSession(pasteId);
+        this.plugin.getWebEditorStore().sessions().addNewSession(pasteId, request);
         return pasteId;
     }
 

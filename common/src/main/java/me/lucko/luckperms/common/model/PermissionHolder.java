@@ -232,6 +232,15 @@ public abstract class PermissionHolder {
         return res;
     }
 
+    public MutateResult setNodes(DataType type, MutateResult changes, boolean callEvent) {
+        MutateResult res = getData(type).applyChanges(changes);
+        invalidateCache();
+        if (callEvent) {
+            getPlugin().getEventDispatcher().dispatchNodeChanges(this, type, res);
+        }
+        return res;
+    }
+
     public void mergeNodes(DataType type, Iterable<? extends Node> set) {
         getData(type).addAll(set);
         invalidateCache();

@@ -385,6 +385,25 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
+    public MutateResult applyChanges(MutateResult changes) {
+        MutateResult result = new MutateResult();
+
+        this.lock.lock();
+        try {
+            for (Node n : changes.getAdded()) {
+                result.mergeFrom(add(n));
+            }
+            for (Node n : changes.getRemoved()) {
+                result.mergeFrom(removeExact(n));
+            }
+        } finally {
+            this.lock.unlock();
+        }
+
+        return result;
+    }
+
+    @Override
     public MutateResult addAll(Iterable<? extends Node> set) {
         MutateResult result = new MutateResult();
 

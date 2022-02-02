@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.webeditor.socket.CryptographyUtils;
 import me.lucko.luckperms.common.webeditor.socket.SocketMessageType;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
-import me.lucko.luckperms.common.webeditor.store.SessionState;
+import me.lucko.luckperms.common.webeditor.store.RemoteSession;
 
 import java.security.PublicKey;
 import java.util.HashMap;
@@ -84,7 +84,8 @@ public class HandlerHello implements Handler {
         }
 
         // check if session is valid
-        if (this.socket.getPlugin().getWebEditorStore().sessions().getSessionState(sessionId) != SessionState.IN_PROGRESS) {
+        RemoteSession session = this.socket.getPlugin().getWebEditorStore().sessions().getSession(sessionId);
+        if (session == null || session.isCompleted()) {
             sendReply(nonce, STATE_INVALID);
             return;
         }

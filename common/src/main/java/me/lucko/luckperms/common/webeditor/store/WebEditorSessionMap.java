@@ -25,39 +25,33 @@
 
 package me.lucko.luckperms.common.webeditor.store;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.lucko.luckperms.common.webeditor.WebEditorRequest;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class WebEditorSessionMap {
-    private final Map<String, SessionState> sessions = new ConcurrentHashMap<>();
+    private final Map<String, RemoteSession> sessions = new ConcurrentHashMap<>();
 
     /**
      * Adds a newly created session to the store.
      *
      * @param id the id of the session
      */
-    public void addNewSession(String id) {
-        this.sessions.put(id, SessionState.IN_PROGRESS);
+    public void addNewSession(String id, WebEditorRequest request) {
+        this.sessions.put(id, new RemoteSession(request));
     }
 
     /**
-     * Gets the session state for the given session id.
+     * Gets the session for the given session id.
      *
      * @param id the id of the session
-     * @return the session state
+     * @return the session
      */
-    public @NonNull SessionState getSessionState(String id) {
-        return this.sessions.getOrDefault(id, SessionState.NOT_KNOWN);
+    public @Nullable RemoteSession getSession(String id) {
+        return this.sessions.get(id);
     }
 
-    /**
-     * Marks a given session as complete.
-     *
-     * @param id the id of the session
-     */
-    public void markSessionCompleted(String id) {
-        this.sessions.put(id, SessionState.COMPLETED);
-    }
 }
