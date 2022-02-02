@@ -40,10 +40,10 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
-import me.lucko.luckperms.common.model.nodemap.MutateResult;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.Difference;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.webeditor.store.RemoteSession;
 
@@ -56,7 +56,6 @@ import net.luckperms.api.node.Node;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -213,7 +212,7 @@ public class WebEditorResponse {
             }
 
             Set<Node> nodes = NodeJsonSerializer.deserializeNodes(changeInfo.getAsJsonArray("nodes"));
-            MutateResult res = applyNodeChanges(holder, nodes);
+            Difference<Node> res = applyNodeChanges(holder, nodes);
 
             if (res.isEmpty()) {
                 return false;
@@ -247,7 +246,7 @@ public class WebEditorResponse {
             return true;
         }
 
-        private MutateResult applyNodeChanges(PermissionHolder holder, Set<Node> nodes) {
+        private Difference<Node> applyNodeChanges(PermissionHolder holder, Set<Node> nodes) {
             if (this.remoteSession != null) {
 
                 WebEditorRequest request = this.remoteSession.request();
@@ -259,9 +258,9 @@ public class WebEditorResponse {
                         // if the initial data sent to the remote session is still known
                         // use that to calculate a diff of the changes made to avoid overriding
                         // modified/added/removed nodes since the editor session was created
-                        MutateResult diff = new MutateResult();
-                        diff.recordChanges(MutateResult.ChangeType.REMOVE, nodesBefore);
-                        diff.recordChanges(MutateResult.ChangeType.ADD, nodes);
+                        Difference<Node> diff = new Difference<>();
+                        diff.recordChanges(Difference.ChangeType.REMOVE, nodesBefore);
+                        diff.recordChanges(Difference.ChangeType.ADD, nodes);
 
                         return holder.setNodes(DataType.NORMAL, diff, true);
                     }
@@ -295,32 +294,33 @@ public class WebEditorResponse {
                 return false;
             }
 
-            Set<String> diffAdded = getAdded(before, after);
-            Set<String> diffRemoved = getRemoved(before, after);
+            Difference<String> diff = new Difference<>();
+            diff.recordChanges(Difference.ChangeType.REMOVE, before);
+            diff.recordChanges(Difference.ChangeType.ADD, after);
 
-            int additions = diffAdded.size();
-            int deletions = diffRemoved.size();
+            Set<String> added = diff.getAdded();
+            Set<String> removed = diff.getRemoved();
 
             track.setGroups(after);
 
-            if (hasBeenReordered(before, after, diffAdded, diffRemoved)) {
+            if (hasBeenReordered(before, after, added, removed)) {
                 LoggedAction.build().source(this.sender).target(track)
                         .description("webeditor", "reorder", after)
                         .build().submit(this.plugin, this.sender);
             }
-            for (String n : diffAdded) {
+            for (String n : added) {
                 LoggedAction.build().source(this.sender).target(track)
                         .description("webeditor", "add", n)
                         .build().submit(this.plugin, this.sender);
             }
-            for (String n : diffRemoved) {
+            for (String n : removed) {
                 LoggedAction.build().source(this.sender).target(track)
                         .description("webeditor", "remove", n)
                         .build().submit(this.plugin, this.sender);
             }
 
             Message.APPLY_EDITS_SUCCESS.send(this.sender, "track", Component.text(track.getName()));
-            Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, additions, deletions);
+            Message.APPLY_EDITS_SUCCESS_SUMMARY.send(this.sender, added.size(), removed.size());
             Message.APPLY_EDITS_TRACK_BEFORE.send(this.sender, before);
             Message.APPLY_EDITS_TRACK_AFTER.send(this.sender, after);
 
@@ -448,18 +448,6 @@ public class WebEditorResponse {
             }
 
             return true;
-        }
-
-        private static <T> Set<T> getAdded(Collection<T> before, Collection<T> after) {
-            Set<T> added = new LinkedHashSet<>(after);
-            added.removeAll(before);
-            return added;
-        }
-
-        private static <T> Set<T> getRemoved(Collection<T> before, Collection<T> after) {
-            Set<T> removed = new LinkedHashSet<>(before);
-            removed.removeAll(after);
-            return removed;
         }
 
         private static <T> boolean hasBeenReordered(List<T> before, List<T> after, Collection<T> diffAdded, Collection<T> diffRemoved) {

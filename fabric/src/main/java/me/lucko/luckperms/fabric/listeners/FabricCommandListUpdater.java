@@ -27,16 +27,16 @@ package me.lucko.luckperms.fabric.listeners;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-import me.lucko.luckperms.fabric.LPFabricPlugin;
+import me.lucko.luckperms.common.api.implementation.ApiGroup;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.event.LuckPermsEventListener;
 import me.lucko.luckperms.common.util.CaffeineFactory;
-import me.lucko.luckperms.common.api.implementation.ApiGroup;
+import me.lucko.luckperms.fabric.LPFabricPlugin;
 
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.event.group.GroupDataRecalculateEvent;
+import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.UUID;

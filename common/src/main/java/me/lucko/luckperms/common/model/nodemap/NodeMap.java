@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
+import me.lucko.luckperms.common.util.Difference;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -134,30 +135,30 @@ public interface NodeMap {
 
     // mutate methods
 
-    MutateResult add(Node nodeWithoutInheritanceOrigin);
+    Difference<Node> add(Node nodeWithoutInheritanceOrigin);
 
-    MutateResult remove(Node node);
+    Difference<Node> remove(Node node);
 
-    MutateResult removeExact(Node node);
+    Difference<Node> removeExact(Node node);
 
-    MutateResult removeIf(Predicate<? super Node> predicate);
+    Difference<Node> removeIf(Predicate<? super Node> predicate);
 
-    MutateResult removeIf(ContextSet contextSet, Predicate<? super Node> predicate);
+    Difference<Node> removeIf(ContextSet contextSet, Predicate<? super Node> predicate);
 
-    MutateResult removeThenAdd(Node nodeToRemove, Node nodeToAdd);
+    Difference<Node> removeThenAdd(Node nodeToRemove, Node nodeToAdd);
 
-    MutateResult clear();
+    Difference<Node> clear();
 
-    MutateResult clear(ContextSet contextSet);
+    Difference<Node> clear(ContextSet contextSet);
 
-    MutateResult setContent(Iterable<? extends Node> set);
+    Difference<Node> setContent(Iterable<? extends Node> set);
 
-    MutateResult setContent(Stream<? extends Node> stream);
+    Difference<Node> setContent(Stream<? extends Node> stream);
 
-    MutateResult applyChanges(MutateResult changes);
+    Difference<Node> applyChanges(Difference<Node> changes);
 
-    MutateResult addAll(Iterable<? extends Node> set);
+    Difference<Node> addAll(Iterable<? extends Node> set);
 
-    MutateResult addAll(Stream<? extends Node> stream);
+    Difference<Node> addAll(Stream<? extends Node> stream);
 
 }

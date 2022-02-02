@@ -29,8 +29,9 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.comparator.ContextSetComparator;
 import me.lucko.luckperms.common.model.InheritanceOrigin;
 import me.lucko.luckperms.common.model.PermissionHolder;
-import me.lucko.luckperms.common.model.nodemap.MutateResult.ChangeType;
 import me.lucko.luckperms.common.node.comparator.NodeComparator;
+import me.lucko.luckperms.common.util.Difference;
+import me.lucko.luckperms.common.util.Difference.ChangeType;
 
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
@@ -122,11 +123,11 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult add(Node nodeWithoutInheritanceOrigin) {
+    public Difference<Node> add(Node nodeWithoutInheritanceOrigin) {
         Node node = addInheritanceOrigin(nodeWithoutInheritanceOrigin);
 
         ImmutableContextSet context = node.getContexts();
-        MutateResult result = new MutateResult();
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -162,9 +163,9 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult remove(Node node) {
+    public Difference<Node> remove(Node node) {
         ImmutableContextSet context = node.getContexts();
-        MutateResult result = new MutateResult();
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -191,7 +192,7 @@ public class NodeMapMutable extends NodeMapBase {
         return result;
     }
 
-    private static void removeMatching(Iterator<Node> it, Node node, MutateResult result) {
+    private static void removeMatching(Iterator<Node> it, Node node, Difference<Node> result) {
         while (it.hasNext()) {
             Node el = it.next();
             if (node.equals(el, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE)) {
@@ -201,7 +202,7 @@ public class NodeMapMutable extends NodeMapBase {
         }
     }
 
-    private static void removeMatchingButNotSame(Iterator<Node> it, Node node, MutateResult result) {
+    private static void removeMatchingButNotSame(Iterator<Node> it, Node node, Difference<Node> result) {
         while (it.hasNext()) {
             Node el = it.next();
             if (el != node && node.equals(el, NodeEqualityPredicate.IGNORE_EXPIRY_TIME_AND_VALUE)) {
@@ -212,9 +213,9 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult removeExact(Node node) {
+    public Difference<Node> removeExact(Node node) {
         ImmutableContextSet context = node.getContexts();
-        MutateResult result = new MutateResult();
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -245,8 +246,8 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult removeIf(Predicate<? super Node> predicate) {
-        MutateResult result = new MutateResult();
+    public Difference<Node> removeIf(Predicate<? super Node> predicate) {
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -261,9 +262,9 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult removeIf(ContextSet contextSet, Predicate<? super Node> predicate) {
+    public Difference<Node> removeIf(ContextSet contextSet, Predicate<? super Node> predicate) {
         ImmutableContextSet context = contextSet.immutableCopy();
-        MutateResult result = new MutateResult();
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -279,7 +280,7 @@ public class NodeMapMutable extends NodeMapBase {
         return result;
     }
 
-    private void removeMatching(Iterator<Node> it, Predicate<? super Node> predicate, MutateResult result) {
+    private void removeMatching(Iterator<Node> it, Predicate<? super Node> predicate, Difference<Node> result) {
         while (it.hasNext()) {
             Node node = it.next();
 
@@ -300,9 +301,9 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult removeThenAdd(Node nodeToRemove, Node nodeToAdd) {
+    public Difference<Node> removeThenAdd(Node nodeToRemove, Node nodeToAdd) {
         if (nodeToAdd.equals(nodeToRemove)) {
-            return new MutateResult();
+            return new Difference<>();
         }
 
         this.lock.lock();
@@ -314,8 +315,8 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult clear() {
-        MutateResult result = new MutateResult();
+    public Difference<Node> clear() {
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -336,9 +337,9 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult clear(ContextSet contextSet) {
+    public Difference<Node> clear(ContextSet contextSet) {
         ImmutableContextSet context = contextSet.immutableCopy();
-        MutateResult result = new MutateResult();
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -355,8 +356,8 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult setContent(Iterable<? extends Node> set) {
-        MutateResult result = new MutateResult();
+    public Difference<Node> setContent(Iterable<? extends Node> set) {
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -370,8 +371,8 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult setContent(Stream<? extends Node> stream) {
-        MutateResult result = new MutateResult();
+    public Difference<Node> setContent(Stream<? extends Node> stream) {
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -385,8 +386,8 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult applyChanges(MutateResult changes) {
-        MutateResult result = new MutateResult();
+    public Difference<Node> applyChanges(Difference<Node> changes) {
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -404,8 +405,8 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult addAll(Iterable<? extends Node> set) {
-        MutateResult result = new MutateResult();
+    public Difference<Node> addAll(Iterable<? extends Node> set) {
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
@@ -420,8 +421,8 @@ public class NodeMapMutable extends NodeMapBase {
     }
 
     @Override
-    public MutateResult addAll(Stream<? extends Node> stream) {
-        MutateResult result = new MutateResult();
+    public Difference<Node> addAll(Stream<? extends Node> stream) {
+        Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {

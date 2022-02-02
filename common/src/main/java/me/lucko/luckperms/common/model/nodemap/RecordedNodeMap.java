@@ -28,6 +28,8 @@ package me.lucko.luckperms.common.model.nodemap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.common.util.Difference;
+
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
@@ -53,7 +55,7 @@ public class RecordedNodeMap implements NodeMap {
 
     private final NodeMap delegate;
     private final Lock lock = new ReentrantLock();
-    private MutateResult changes = new MutateResult();
+    private Difference<Node> changes = new Difference<>();
 
     public RecordedNodeMap(NodeMap delegate) {
         this.delegate = delegate;
@@ -72,12 +74,12 @@ public class RecordedNodeMap implements NodeMap {
         }
     }
 
-    public MutateResult exportChanges(Predicate<MutateResult> onlyIf) {
+    public Difference<Node> exportChanges(Predicate<Difference<Node>> onlyIf) {
         this.lock.lock();
         try {
-            MutateResult existing = this.changes;
+            Difference<Node> existing = this.changes;
             if (onlyIf.test(existing)) {
-                this.changes = new MutateResult();
+                this.changes = new Difference<>();
                 return existing;
             }
             return null;
@@ -86,7 +88,7 @@ public class RecordedNodeMap implements NodeMap {
         }
     }
 
-    private MutateResult record(MutateResult result) {
+    private Difference<Node> record(Difference<Node> result) {
         this.lock.lock();
         try {
             this.changes.mergeFrom(result);
@@ -99,67 +101,67 @@ public class RecordedNodeMap implements NodeMap {
     // delegate, but pass the result through #record(MutateResult)
     
     @Override
-    public MutateResult add(Node nodeWithoutInheritanceOrigin) {
+    public Difference<Node> add(Node nodeWithoutInheritanceOrigin) {
         return record(this.delegate.add(nodeWithoutInheritanceOrigin));
     }
 
     @Override
-    public MutateResult remove(Node node) {
+    public Difference<Node> remove(Node node) {
         return record(this.delegate.remove(node));
     }
 
     @Override
-    public MutateResult removeExact(Node node) {
+    public Difference<Node> removeExact(Node node) {
         return record(this.delegate.removeExact(node));
     }
 
     @Override
-    public MutateResult removeIf(Predicate<? super Node> predicate) {
+    public Difference<Node> removeIf(Predicate<? super Node> predicate) {
         return record(this.delegate.removeIf(predicate));
     }
 
     @Override
-    public MutateResult removeIf(ContextSet contextSet, Predicate<? super Node> predicate) {
+    public Difference<Node> removeIf(ContextSet contextSet, Predicate<? super Node> predicate) {
         return record(this.delegate.removeIf(contextSet, predicate));
     }
 
     @Override
-    public MutateResult removeThenAdd(Node nodeToRemove, Node nodeToAdd) {
+    public Difference<Node> removeThenAdd(Node nodeToRemove, Node nodeToAdd) {
         return record(this.delegate.removeThenAdd(nodeToRemove, nodeToAdd));
     }
 
     @Override
-    public MutateResult clear() {
+    public Difference<Node> clear() {
         return record(this.delegate.clear());
     }
 
     @Override
-    public MutateResult clear(ContextSet contextSet) {
+    public Difference<Node> clear(ContextSet contextSet) {
         return record(this.delegate.clear(contextSet));
     }
 
     @Override
-    public MutateResult setContent(Iterable<? extends Node> set) {
+    public Difference<Node> setContent(Iterable<? extends Node> set) {
         return record(this.delegate.setContent(set));
     }
 
     @Override
-    public MutateResult setContent(Stream<? extends Node> stream) {
+    public Difference<Node> setContent(Stream<? extends Node> stream) {
         return record(this.delegate.setContent(stream));
     }
 
     @Override
-    public MutateResult applyChanges(MutateResult changes) {
+    public Difference<Node> applyChanges(Difference<Node> changes) {
         return record(this.delegate.applyChanges(changes));
     }
 
     @Override
-    public MutateResult addAll(Iterable<? extends Node> set) {
+    public Difference<Node> addAll(Iterable<? extends Node> set) {
         return record(this.delegate.addAll(set));
     }
 
     @Override
-    public MutateResult addAll(Stream<? extends Node> stream) {
+    public Difference<Node> addAll(Stream<? extends Node> stream) {
         return record(this.delegate.addAll(stream));
     }
 

@@ -38,6 +38,7 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 
+import java.io.EOFException;
 import java.security.PublicKey;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
@@ -74,6 +75,9 @@ public class WebEditorSocketListener extends WebSocketListener {
 
     @Override
     public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable e, Response response) {
+        if (e instanceof EOFException) {
+            return; // ignore
+        }
         this.socket.getPlugin().getLogger().warn("Exception occurred in web socket", e);
     }
 
