@@ -181,7 +181,7 @@ public class WebEditorSession {
 
         String pasteId;
         try {
-            pasteId = this.plugin.getBytebin().postContent(requestBuf, AbstractHttpClient.JSON_TYPE).key();
+            pasteId = this.plugin.getBytebin().postContent(requestBuf, AbstractHttpClient.JSON_TYPE, "editor").key();
         } catch (UnsuccessfulRequestException e) {
             Message.EDITOR_HTTP_REQUEST_FAILURE.send(this.sender, e.getResponse().code(), e.getResponse().message());
             return null;

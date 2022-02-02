@@ -138,7 +138,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 .build();
 
         this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
-        this.bytesocks = new BytesocksClient(httpClient, getConfiguration().get(ConfigKeys.BYTESOCKS_HOST), "luckperms");
+        this.bytesocks = new BytesocksClient(httpClient, getConfiguration().get(ConfigKeys.BYTESOCKS_HOST), "luckperms/editor");
         this.webEditorStore = new WebEditorStore(this);
 
         // init translation repo and update bundle files
