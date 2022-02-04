@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -78,8 +79,8 @@ public class WebEditorSession {
         this.sender = sender;
         this.cmdLabel = cmdLabel;
 
-        this.holders = initialRequest.getHolders().keySet();
-        this.tracks = initialRequest.getTracks().keySet();
+        this.holders = new HashSet<>(initialRequest.getHolders().keySet());
+        this.tracks = new HashSet<>(initialRequest.getTracks().keySet());
     }
 
     public void open() {
@@ -97,6 +98,12 @@ public class WebEditorSession {
             this.socket = socket;
             this.plugin.getWebEditorStore().sockets().putSocket(this.sender, this.socket);
         } catch (Exception e) {
+            if (e instanceof UnsuccessfulRequestException && ((UnsuccessfulRequestException) e).getResponse().code() == 502) {
+                // 502 - bad gateway, probably means the socket service is offline
+                // that's ok, no need to send a warning
+                return;
+            }
+
             this.plugin.getLogger().warn("Unable to establish socket connection", e);
         }
     }
