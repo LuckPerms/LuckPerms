@@ -31,6 +31,8 @@ import net.luckperms.api.context.ContextConsumer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.Subject;
@@ -46,7 +48,15 @@ public class ContextCalculatorProxy implements ForwardingContextCalculator<Subje
 
     @Override
     public void calculate(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
-        throw new UnsupportedOperationException();
+        EventContext eventContext = EventContext.builder()
+                .add(EventContextKeys.SUBJECT, subject)
+                .build();
+
+        Cause cause = Cause.builder()
+                .append(subject)
+                .build(eventContext);
+
+        calculate(cause, consumer);
     }
 
     public void calculate(@NonNull Cause cause, @NonNull ContextConsumer consumer) {
