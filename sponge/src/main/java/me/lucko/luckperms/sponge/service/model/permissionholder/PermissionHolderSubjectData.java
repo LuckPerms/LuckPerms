@@ -184,11 +184,11 @@ public class PermissionHolderSubjectData implements LPSubjectData {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(subject, "subject");
 
-        if (!subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
+        if (!subject.collectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
             return CompletableFuture.completedFuture(false);
         }
 
-        Node node = Inheritance.builder(subject.getSubjectIdentifier())
+        Node node = Inheritance.builder(subject.subjectIdentifier())
                 .withContext(contexts)
                 .build();
 
@@ -204,11 +204,11 @@ public class PermissionHolderSubjectData implements LPSubjectData {
         Objects.requireNonNull(contexts, "contexts");
         Objects.requireNonNull(subject, "subject");
 
-        if (!subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
+        if (!subject.collectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
             return CompletableFuture.completedFuture(false);
         }
 
-        Node node = Inheritance.builder(subject.getSubjectIdentifier())
+        Node node = Inheritance.builder(subject.subjectIdentifier())
                 .withContext(contexts)
                 .build();
 

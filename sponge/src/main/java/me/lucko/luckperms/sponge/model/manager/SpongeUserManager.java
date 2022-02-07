@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -170,7 +169,7 @@ public class SpongeUserManager extends AbstractUserManager<SpongeUser> implement
     }
 
     @Override
-    public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers) {
+    public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Iterable<String> identifiers) {
         return CompletableFuture.supplyAsync(() -> {
             ImmutableSet.Builder<LPSubject> subjects = ImmutableSet.builder();
             for (String id : identifiers) {

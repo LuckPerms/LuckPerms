@@ -29,6 +29,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.context.manager.ContextManager;
+import me.lucko.luckperms.common.context.manager.InlineQueryOptionsSupplier;
 import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 
@@ -60,9 +61,10 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer, ProxiedP
             throw new NullPointerException("subject");
         }
 
-        return new InlineQueryOptionsSupplier(subject, this.contextsCache);
+        return new InlineQueryOptionsSupplier<>(subject, this.contextsCache);
     }
 
+    // override getContext, getQueryOptions and invalidateCache to skip the QueryOptionsSupplier
     @Override
     public ImmutableContextSet getContext(ProxiedPlayer subject) {
         return getQueryOptions(subject).context();
@@ -83,18 +85,4 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer, ProxiedP
         return formQueryOptions(contextSet);
     }
 
-    private static final class InlineQueryOptionsSupplier implements QueryOptionsSupplier {
-        private final ProxiedPlayer key;
-        private final LoadingCache<ProxiedPlayer, QueryOptions> cache;
-
-        private InlineQueryOptionsSupplier(ProxiedPlayer key, LoadingCache<ProxiedPlayer, QueryOptions> cache) {
-            this.key = key;
-            this.cache = cache;
-        }
-
-        @Override
-        public QueryOptions getQueryOptions() {
-            return this.cache.get(this.key);
-        }
-    }
 }

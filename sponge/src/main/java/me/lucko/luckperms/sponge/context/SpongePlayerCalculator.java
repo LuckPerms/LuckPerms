@@ -37,81 +37,57 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.CatalogTypes;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.Humanoid;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.World;
-
-import java.util.Set;
+import org.spongepowered.api.world.server.ServerWorld;
 
 public class SpongePlayerCalculator implements ContextCalculator<Subject> {
     private final LPSpongePlugin plugin;
 
-    private final boolean gamemode;
-    private final boolean world;
-    private final boolean dimensionType;
-
-    public SpongePlayerCalculator(LPSpongePlugin plugin, Set<String> disabled) {
+    public SpongePlayerCalculator(LPSpongePlugin plugin) {
         this.plugin = plugin;
-        this.gamemode = !disabled.contains(DefaultContextKeys.GAMEMODE_KEY);
-        this.world = !disabled.contains(DefaultContextKeys.WORLD_KEY);
-        this.dimensionType = !disabled.contains(DefaultContextKeys.DIMENSION_TYPE_KEY);
     }
 
     @Override
     public void calculate(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
-        CommandSource source = subject.getCommandSource().orElse(null);
-        if (source == null) {
-            return;
-        }
-
-        if (source instanceof Locatable) {
-            World world = ((Locatable) source).getWorld();
-            if (this.dimensionType) {
-                consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogTypeName(world.getDimension().getType()));
-            }
-            if (this.world) {
-                this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getName(), consumer);
+        if (subject instanceof Locatable) {
+            World<?, ?> world = ((Locatable) subject).world();
+            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(world.worldType().key(RegistryTypes.WORLD_TYPE)));
+            if (world instanceof ServerWorld) {
+                this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(getContextKey(((ServerWorld) world).key()), consumer);
             }
         }
 
-        if (this.gamemode && source instanceof ValueContainer<?>) {
-            ValueContainer<?> valueContainer = (ValueContainer<?>) source;
-            valueContainer.get(Keys.GAME_MODE).ifPresent(mode -> consumer.accept(DefaultContextKeys.GAMEMODE_KEY, getCatalogTypeName(mode)));
+        if (subject instanceof ValueContainer) {
+            ValueContainer valueContainer = (ValueContainer) subject;
+            valueContainer.get(Keys.GAME_MODE).ifPresent(mode -> consumer.accept(DefaultContextKeys.GAMEMODE_KEY, getContextKey(mode.key(RegistryTypes.GAME_MODE))));
         }
     }
 
     @Override
-    public @NonNull ContextSet estimatePotentialContexts() {
+    public ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
         Game game = this.plugin.getBootstrap().getGame();
 
-        if (this.gamemode) {
-            for (GameMode mode : game.getRegistry().getAllOf(CatalogTypes.GAME_MODE)) {
-                builder.add(DefaultContextKeys.GAMEMODE_KEY, getCatalogTypeName(mode));
-            }
-        }
-        if (this.dimensionType) {
-            for (DimensionType dim : game.getRegistry().getAllOf(CatalogTypes.DIMENSION_TYPE)) {
-                builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getCatalogTypeName(dim));
-            }
-        }
-        if (this.world && game.isServerAvailable()) {
-            for (World world : game.getServer().getWorlds()) {
-                String worldName = world.getName();
+        game.registry(RegistryTypes.GAME_MODE).stream().forEach(mode -> {
+            builder.add(DefaultContextKeys.GAMEMODE_KEY, getContextKey(mode.key(RegistryTypes.GAME_MODE)));
+        });
+        game.registry(RegistryTypes.WORLD_TYPE).stream().forEach(dim -> {
+            builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(dim.key(RegistryTypes.WORLD_TYPE)));
+        });
+        if (game.isServerAvailable()) {
+            for (ServerWorld world : game.server().worldManager().worlds()) {
+                String worldName = getContextKey(world.key());
                 if (Context.isValidValue(worldName)) {
                     builder.add(DefaultContextKeys.WORLD_KEY, worldName);
                 }
@@ -121,37 +97,29 @@ public class SpongePlayerCalculator implements ContextCalculator<Subject> {
         return builder.build();
     }
 
-    private static String getCatalogTypeName(CatalogType type) {
-        String id = type.getId();
-        if (id.startsWith("minecraft:")){
-            return id.substring("minecraft:".length());
+    private static String getContextKey(ResourceKey key) {
+        if (key.namespace().equals("minecraft")) {
+            return key.value();
         }
-        return id;
+        return key.formatted();
     }
 
     @Listener(order = Order.LAST)
-    public void onWorldChange(MoveEntityEvent.Teleport e) {
-        if (!(this.world || this.dimensionType)) {
-            return;
-        }
-
-        Entity targetEntity = e.getTargetEntity();
+    public void onWorldChange(ChangeEntityWorldEvent.Post e) {
+        Entity targetEntity = e.entity();
         if (!(targetEntity instanceof Subject)) {
-            return;
-        }
-
-        if (e.getFromTransform().getExtent().equals(e.getToTransform().getExtent())) {
             return;
         }
 
         this.plugin.getContextManager().signalContextUpdate((Subject) targetEntity);
     }
 
-    @Listener(order = Order.LAST)
-    public void onGameModeChange(ChangeGameModeEvent e) {
-        Humanoid targetEntity = e.getTargetEntity();
-        if (this.gamemode && targetEntity instanceof Subject) {
-            this.plugin.getContextManager().signalContextUpdate((Subject) targetEntity);
-        }
-    }
+    // TODO: find replacement
+    //@Listener(order = Order.LAST)
+    //public void onGameModeChange(ChangeGameModeEvent e) {
+    //    Humanoid targetEntity = e.getHumanoid();
+    //    if (targetEntity instanceof Subject) {
+    //        this.plugin.getContextManager().signalContextUpdate((Subject) targetEntity);
+    //    }
+    //}
 }

@@ -28,33 +28,66 @@ package me.lucko.luckperms.sponge.context;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.common.context.manager.ContextManager;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.InlineQueryOptionsSupplier;
 import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+import me.lucko.luckperms.sponge.service.model.ContextCalculatorProxy;
+import me.lucko.luckperms.sponge.service.model.TemporaryCauseHolderSubject;
 
+import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.context.StaticContextCalculator;
 import net.luckperms.api.query.QueryOptions;
 
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class SpongeContextManager extends ContextManager<Subject, Player> {
+public class SpongeContextManager extends ContextManager<Subject, ServerPlayer> {
 
-    private final LoadingCache<Subject, QueryOptionsCache<Subject>> subjectCaches = CaffeineFactory.newBuilder()
-            .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build(key -> new QueryOptionsCache<>(key, this));
+    private final LoadingCache<Subject, QueryOptions> contextsCache = CaffeineFactory.newBuilder()
+            .expireAfterWrite(50, TimeUnit.MILLISECONDS)
+            .build(this::calculate);
 
     public SpongeContextManager(LPSpongePlugin plugin) {
-        super(plugin, Subject.class, Player.class);
+        super(plugin, Subject.class, ServerPlayer.class);
     }
 
     @Override
-    public UUID getUniqueId(Player player) {
-        return player.getUniqueId();
+    protected void callContextCalculator(ContextCalculator<? super Subject> calculator, Subject subject, ContextConsumer consumer) {
+        if (subject instanceof TemporaryCauseHolderSubject) {
+            Cause cause = ((TemporaryCauseHolderSubject) subject).getCause();
+            Subject actualSubject = ((TemporaryCauseHolderSubject) subject).getSubject();
+
+            if (calculator instanceof ContextCalculatorProxy) {
+                ((ContextCalculatorProxy) calculator).calculate(cause, consumer);
+            } else if (actualSubject != null) {
+                calculator.calculate(actualSubject, consumer);
+            } else if (calculator instanceof StaticContextCalculator) {
+                ((StaticContextCalculator) calculator).calculate(consumer);
+            } /* else {
+                // we just have to fail...
+                // there's no way to call a LuckPerms ContextCalculator if a Subject instance
+                // doesn't exist for the cause.
+            } */
+        } else {
+            Object associatedObject = subject.associatedObject().orElse(null);
+            if (associatedObject instanceof Subject) {
+                calculator.calculate((Subject) associatedObject, consumer);
+            } else {
+                calculator.calculate(subject, consumer);
+            }
+        }
+    }
+
+    @Override
+    public UUID getUniqueId(ServerPlayer player) {
+        return player.uniqueId();
     }
 
     @Override
@@ -63,15 +96,23 @@ public class SpongeContextManager extends ContextManager<Subject, Player> {
             throw new NullPointerException("subject");
         }
 
-        return this.subjectCaches.get(subject);
+        return new InlineQueryOptionsSupplier<>(subject, this.contextsCache);
+    }
+
+    // override getContext, getQueryOptions and invalidateCache to skip the QueryOptionsSupplier
+    @Override
+    public ImmutableContextSet getContext(Subject subject) {
+        return getQueryOptions(subject).context();
+    }
+
+    @Override
+    public QueryOptions getQueryOptions(Subject subject) {
+        return this.contextsCache.get(subject);
     }
 
     @Override
     protected void invalidateCache(Subject subject) {
-        QueryOptionsCache<Subject> cache = this.subjectCaches.getIfPresent(subject);
-        if (cache != null) {
-            cache.invalidate();
-        }
+        this.contextsCache.invalidate(subject);
     }
 
     @Override

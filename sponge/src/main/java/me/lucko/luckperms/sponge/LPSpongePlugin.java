@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge;
 
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
-import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
@@ -38,34 +37,42 @@ import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.track.StandardTrackManager;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
+import me.lucko.luckperms.common.sender.AbstractSender;
 import me.lucko.luckperms.common.sender.DummyConsoleSender;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.sponge.calculator.SpongeCalculatorFactory;
 import me.lucko.luckperms.sponge.commands.SpongeParentCommand;
 import me.lucko.luckperms.sponge.context.SpongeContextManager;
 import me.lucko.luckperms.sponge.context.SpongePlayerCalculator;
+import me.lucko.luckperms.sponge.listeners.SpongeCommandListUpdater;
 import me.lucko.luckperms.sponge.listeners.SpongeConnectionListener;
 import me.lucko.luckperms.sponge.listeners.SpongePlatformListener;
 import me.lucko.luckperms.sponge.messaging.SpongeMessagingFactory;
 import me.lucko.luckperms.sponge.model.manager.SpongeGroupManager;
 import me.lucko.luckperms.sponge.model.manager.SpongeUserManager;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.ProxyFactory;
-import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.model.ProxiedServiceObject;
 import me.lucko.luckperms.sponge.service.model.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 
-import org.spongepowered.api.service.permission.PermissionDescription;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
+import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.service.context.ContextService;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.plugin.PluginContainer;
 
-import java.util.Collection;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -88,8 +95,6 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     private SpongeContextManager contextManager;
     private LuckPermsService service;
 
-    private boolean lateLoad = false;
-
     public LPSpongePlugin(LPSpongeBootstrap bootstrap) {
         this.bootstrap = bootstrap;
     }
@@ -107,8 +112,11 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies = super.getGlobalDependencies();
-        dependencies.add(Dependency.ADVENTURE_PLATFORM);
+
+        //dependencies.add(Dependency.ADVENTURE_PLATFORM);
         //dependencies.add(Dependency.ADVENTURE_PLATFORM_SPONGEAPI);
+        dependencies.remove(Dependency.ADVENTURE);
+
         dependencies.add(Dependency.CONFIGURATE_CORE);
         dependencies.add(Dependency.CONFIGURATE_HOCON);
         dependencies.add(Dependency.HOCON_CONFIG);
@@ -117,14 +125,14 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new SpongeConfigAdapter(this, resolveConfig("luckperms.conf"));
+        return new SpongeConfigAdapter(this, resolveConfig());
     }
 
     @Override
     protected void registerPlatformListeners() {
         this.connectionListener = new SpongeConnectionListener(this);
-        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, this.connectionListener);
-        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, new SpongePlatformListener(this));
+        this.bootstrap.registerListeners(this.connectionListener);
+        this.bootstrap.registerListeners(new SpongePlatformListener(this));
     }
 
     @Override
@@ -135,7 +143,22 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerCommands() {
         this.commandManager = new SpongeCommandExecutor(this);
-        this.bootstrap.getGame().getCommandManager().register(this.bootstrap, this.commandManager, "luckperms", "lp", "perm", "perms", "permission", "permissions");
+        this.bootstrap.registerListeners(new RegisterCommandsListener(this.bootstrap.getPluginContainer(), this.commandManager));
+    }
+
+    public static final class RegisterCommandsListener {
+        private final PluginContainer pluginContainer;
+        private final Command.Raw command;
+
+        RegisterCommandsListener(PluginContainer pluginContainer, Command.Raw command) {
+            this.pluginContainer = pluginContainer;
+            this.command = command;
+        }
+
+        @Listener
+        public void onCommandRegister(RegisterCommandEvent<Command.Raw> event) {
+            event.register(this.pluginContainer, this.command, "luckperms", "lp", "perm", "perms", "permission", "permissions");
+        }
     }
 
     @Override
@@ -154,36 +177,46 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     protected void setupContextManager() {
         this.contextManager = new SpongeContextManager(this);
 
-        SpongePlayerCalculator playerCalculator = new SpongePlayerCalculator(this, getConfiguration().get(ConfigKeys.DISABLED_CONTEXTS));
-        this.bootstrap.getGame().getEventManager().registerListeners(this.bootstrap, playerCalculator);
+        SpongePlayerCalculator playerCalculator = new SpongePlayerCalculator(this);
+        this.bootstrap.registerListeners(playerCalculator);
         this.contextManager.registerCalculator(playerCalculator);
     }
 
     @Override
     protected void setupPlatformHooks() {
-        getLogger().info("Registering PermissionService...");
         this.service = new LuckPermsService(this);
 
-        PermissionService oldService = this.bootstrap.getGame().getServiceManager().provide(PermissionService.class).orElse(null);
-        if (oldService != null && !(oldService instanceof ProxiedServiceObject)) {
+        //PermissionService oldService = this.bootstrap.getGame().getServiceManager().provide(PermissionService.class).orElse(null);
+        //if (oldService != null && !(oldService instanceof ProxiedServiceObject)) {
+        //
+        //    // before registering our permission service, copy any existing permission descriptions
+        //    Collection<PermissionDescription> permissionDescriptions = oldService.getDescriptions();
+        //    for (PermissionDescription description : permissionDescriptions) {
+        //        if (description instanceof ProxiedServiceObject) {
+        //            continue;
+        //        }
+        //        ProxyFactory.registerDescription(this.service, description);
+        //    }
+        //}
 
-            // before registering our permission service, copy any existing permission descriptions
-            Collection<PermissionDescription> permissionDescriptions = oldService.getDescriptions();
-            for (PermissionDescription description : permissionDescriptions) {
-                if (description instanceof ProxiedServiceObject) {
-                    continue;
-                }
-                ProxyFactory.registerDescription(this.service, description);
-            }
+        this.bootstrap.registerListeners(new RegisterServiceListener(this.service));
+    }
+
+    public static final class RegisterServiceListener {
+        private final LuckPermsService service;
+
+        RegisterServiceListener(LuckPermsService service) {
+            this.service = service;
         }
 
-        if (this.bootstrap.getGame().getPluginManager().getPlugin("permissionsex").isPresent()) {
-            getLogger().warn("Detected PermissionsEx - assuming it's loaded for migration.");
-            getLogger().warn("Delaying LuckPerms PermissionService registration.");
-            this.lateLoad = true;
-        } else {
-            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, LPPermissionService.class, this.service);
-            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, PermissionService.class, this.service.sponge());
+        @Listener
+        public void onPermissionServiceProvide(ProvideServiceEvent.EngineScoped<PermissionService> event) {
+            event.suggest(this.service::sponge);
+        }
+
+        @Listener
+        public void onContextServiceProvide(ProvideServiceEvent.EngineScoped<ContextService> event) {
+            event.suggest(this.service::sponge);
         }
     }
 
@@ -194,7 +227,20 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerApiOnPlatform(LuckPerms api) {
-        this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, LuckPerms.class, api);
+        this.bootstrap.registerListeners(new RegisterApiListener(api));
+    }
+
+    public static final class RegisterApiListener {
+        private final LuckPerms api;
+
+        RegisterApiListener(LuckPerms api) {
+            this.api = api;
+        }
+
+        @Listener
+        public void onLuckPermsServiceProvide(ProvideServiceEvent<LuckPerms> event) {
+            event.suggest(() -> this.api);
+        }
     }
 
     @Override
@@ -209,13 +255,10 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         for (CommandPermission perm : CommandPermission.values()) {
             this.service.registerPermissionDescription(perm.getPermission(), null, this.bootstrap.getPluginContainer());
         }
-    }
 
-    public void lateEnable() {
-        if (this.lateLoad) {
-            getLogger().info("Providing late registration of PermissionService...");
-            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, LPPermissionService.class, this.service);
-            this.bootstrap.getGame().getServiceManager().setProvider(this.bootstrap, PermissionService.class, this.service.sponge());
+        // register sponge command list updater
+        if (getConfiguration().get(ConfigKeys.UPDATE_CLIENT_COMMAND_LIST)) {
+            getApiProvider().getEventBus().subscribe(new SpongeCommandListUpdater(this));
         }
     }
 
@@ -229,6 +272,22 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         this.service.invalidateAllCaches();
     }
 
+    private Path resolveConfig() {
+        Path path = this.bootstrap.getConfigDirectory().resolve("luckperms.conf");
+        if (!Files.exists(path)) {
+            try {
+                MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigDirectory());
+                try (InputStream is = getClass().getClassLoader().getResourceAsStream("luckperms.conf")) {
+                    Files.copy(is, path);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return path;
+    }
+
     @Override
     public Optional<QueryOptions> getQueryOptionsForUser(User user) {
         return this.bootstrap.getPlayer(user.getUniqueId()).map(player -> this.contextManager.getQueryOptions(player));
@@ -238,26 +297,28 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
     public Stream<Sender> getOnlineSenders() {
         return Stream.concat(
                 Stream.of(getConsoleSender()),
-                this.bootstrap.getServer().map(server -> server.getOnlinePlayers().stream().map(s -> this.senderFactory.wrap(s))).orElseGet(Stream::empty)
+                this.bootstrap.getServer().map(server -> server.onlinePlayers().stream().map(s -> this.senderFactory.wrap(s))).orElseGet(Stream::empty)
         );
     }
 
     @Override
     public Sender getConsoleSender() {
         if (this.bootstrap.getGame().isServerAvailable()) {
-            return this.senderFactory.wrap(this.bootstrap.getGame().getServer().getConsole());
+            return this.senderFactory.wrap(this.bootstrap.getGame().systemSubject());
         } else {
             return new DummyConsoleSender(this) {
                 @Override
                 public void sendMessage(Component message) {
-                    LPSpongePlugin.this.getLogger().info(LegacyComponentSerializer.legacySection().serialize(TranslationManager.render(message)));
+                    for (Component line : AbstractSender.splitNewlines(TranslationManager.render(message))) {
+                        LPSpongePlugin.this.bootstrap.getPluginLogger().info(PlainTextComponentSerializer.plainText().serialize(line));
+                    }
                 }
             };
         }
     }
 
     @Override
-    public List<Command<?>> getExtraCommands() {
+    public List<me.lucko.luckperms.common.command.abstraction.Command<?>> getExtraCommands() {
         return Collections.singletonList(new SpongeParentCommand(this));
     }
 
