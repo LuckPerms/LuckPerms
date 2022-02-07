@@ -23,45 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.webeditor;
+package me.lucko.luckperms.common.webeditor.socket.listener;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import com.google.gson.JsonObject;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.webeditor.socket.SocketMessageType;
+import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 
 /**
- * Contains a store of known web editor sessions.
+ * Handler for {@link SocketMessageType#CONNECTED}
  */
-public class WebEditorSessionStore {
-    private final Map<String, SessionState> sessions = new ConcurrentHashMap<>();
+public class HandlerConnected implements Handler {
 
-    /**
-     * Adds a newly created session to the store.
-     *
-     * @param id the id of the session
-     */
-    public void addNewSession(String id) {
-        this.sessions.put(id, SessionState.IN_PROGRESS);
+    /** The socket */
+    private final WebEditorSocket socket;
+
+    public HandlerConnected(WebEditorSocket socket) {
+        this.socket = socket;
     }
 
-    /**
-     * Gets the session state for the given session id.
-     *
-     * @param id the id of the session
-     * @return the session state
-     */
-    public @NonNull SessionState getSessionState(String id) {
-        return this.sessions.getOrDefault(id, SessionState.NOT_KNOWN);
+    @Override
+    public void handle(JsonObject msg) {
+        Message.EDITOR_SOCKET_CONNECTED.send(this.socket.getSender());
     }
-
-    /**
-     * Marks a given session as complete.
-     *
-     * @param id the id of the session
-     */
-    public void markSessionCompleted(String id) {
-        this.sessions.put(id, SessionState.COMPLETED);
-    }
-
 }

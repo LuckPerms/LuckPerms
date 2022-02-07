@@ -23,24 +23,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.mixin;
+package me.lucko.luckperms.common.webeditor.socket.listener;
 
-import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
+import com.google.gson.JsonObject;
 
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+import me.lucko.luckperms.common.webeditor.socket.SocketMessageType;
+import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+/**
+ * Handler for {@link SocketMessageType#PING}
+ */
+public class HandlerPing implements Handler {
 
-@Mixin(CommandManager.class)
-public class CommandManagerMixin {
-    @Inject(at = @At("HEAD"), method = "execute", cancellable = true)
-    private void commandExecuteCallback(ServerCommandSource source, String input, CallbackInfoReturnable<Integer> info) {
-        if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(source, input)) {
-            info.setReturnValue(0);
-        }
+    /** The socket */
+    private final WebEditorSocket socket;
+
+    /** The time a ping was last received */
+    private long lastPing = 0;
+
+    public HandlerPing(WebEditorSocket socket) {
+        this.socket = socket;
+    }
+
+    public long getLastPing() {
+        return this.lastPing;
+    }
+
+    @Override
+    public void handle(JsonObject msg) {
+        this.lastPing = System.currentTimeMillis();
+        this.socket.send(SocketMessageType.PONG.builder()
+                .add("ok", true)
+                .toJson()
+        );
     }
 }

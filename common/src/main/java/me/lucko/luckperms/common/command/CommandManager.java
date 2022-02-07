@@ -51,6 +51,7 @@ import me.lucko.luckperms.common.commands.misc.SearchCommand;
 import me.lucko.luckperms.common.commands.misc.SyncCommand;
 import me.lucko.luckperms.common.commands.misc.TranslationsCommand;
 import me.lucko.luckperms.common.commands.misc.TreeCommand;
+import me.lucko.luckperms.common.commands.misc.TrustEditorCommand;
 import me.lucko.luckperms.common.commands.misc.VerboseCommand;
 import me.lucko.luckperms.common.commands.track.CreateTrack;
 import me.lucko.luckperms.common.commands.track.DeleteTrack;
@@ -123,6 +124,7 @@ public class CommandManager {
                 .add(new BulkUpdateCommand())
                 .add(new TranslationsCommand())
                 .add(new ApplyEditsCommand())
+                .add(new TrustEditorCommand())
                 .add(new CreateGroup())
                 .add(new DeleteGroup())
                 .add(new ListGroups())

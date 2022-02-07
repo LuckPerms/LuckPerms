@@ -23,24 +23,35 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.mixin;
+package me.lucko.luckperms.common.webeditor.store;
 
-import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+/**
+ * Contains a store of known web editor sessions and provides a lookup function for
+ * trusted editor public keys.
+ */
+public class WebEditorStore {
+    private final WebEditorSessionMap sessions;
+    private final WebEditorSocketMap sockets;
+    private final WebEditorKeystore keystore;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-@Mixin(CommandManager.class)
-public class CommandManagerMixin {
-    @Inject(at = @At("HEAD"), method = "execute", cancellable = true)
-    private void commandExecuteCallback(ServerCommandSource source, String input, CallbackInfoReturnable<Integer> info) {
-        if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(source, input)) {
-            info.setReturnValue(0);
-        }
+    public WebEditorStore(LuckPermsPlugin plugin) {
+        this.sessions = new WebEditorSessionMap();
+        this.sockets = new WebEditorSocketMap();
+        this.keystore = new WebEditorKeystore(plugin.getBootstrap().getConfigDirectory().resolve("editor-keystore.json"));
     }
+
+    public WebEditorSessionMap sessions() {
+        return this.sessions;
+    }
+
+    public WebEditorSocketMap sockets() {
+        return this.sockets;
+    }
+
+    public WebEditorKeystore keystore() {
+        return this.keystore;
+    }
+
 }

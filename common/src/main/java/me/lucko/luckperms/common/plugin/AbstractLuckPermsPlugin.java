@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.http.BytebinClient;
+import me.lucko.luckperms.common.http.BytesocksClient;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -57,7 +58,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.webeditor.WebEditorSessionStore;
+import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
 
 import net.luckperms.api.LuckPerms;
 
@@ -90,7 +91,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
     private BytebinClient bytebin;
-    private WebEditorSessionStore webEditorSessionStore;
+    private BytesocksClient bytesocks;
+    private WebEditorStore webEditorStore;
     private TranslationRepository translationRepository;
     private FileWatcher fileWatcher = null;
     private Storage storage;
@@ -136,7 +138,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 .build();
 
         this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
-        this.webEditorSessionStore = new WebEditorSessionStore();
+        this.bytesocks = new BytesocksClient(httpClient, getConfiguration().get(ConfigKeys.BYTESOCKS_HOST), "luckperms/editor");
+        this.webEditorStore = new WebEditorStore(this);
 
         // init translation repo and update bundle files
         this.translationRepository = new TranslationRepository(this);
@@ -420,8 +423,13 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public WebEditorSessionStore getWebEditorSessionStore() {
-        return this.webEditorSessionStore;
+    public BytesocksClient getBytesocks() {
+        return this.bytesocks;
+    }
+
+    @Override
+    public WebEditorStore getWebEditorStore() {
+        return this.webEditorStore;
     }
 
     @Override

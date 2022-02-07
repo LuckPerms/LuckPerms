@@ -40,8 +40,8 @@ import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.model.nodemap.MutateResult;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.Difference;
 
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.LuckPermsEvent;
@@ -226,7 +226,7 @@ public final class EventDispatcher {
         postAsync(LogReceiveEvent.class, id, entry);
     }
 
-    public void dispatchNodeChanges(PermissionHolder target, DataType dataType, MutateResult changes) {
+    public void dispatchNodeChanges(PermissionHolder target, DataType dataType, Difference<Node> changes) {
         if (!this.eventBus.shouldPost(NodeAddEvent.class) && !this.eventBus.shouldPost(NodeRemoveEvent.class)) {
             return;
         }
@@ -239,15 +239,15 @@ public final class EventDispatcher {
         ImmutableSet<Node> state = target.getData(dataType).asImmutableSet();
 
         // call an event for each recorded change
-        for (MutateResult.Change change : changes.getChanges()) {
-            Class<? extends NodeMutateEvent> type = change.getType() == MutateResult.ChangeType.ADD ?
+        for (Difference.Change<Node> change : changes.getChanges()) {
+            Class<? extends NodeMutateEvent> type = change.type() == Difference.ChangeType.ADD ?
                     NodeAddEvent.class : NodeRemoveEvent.class;
 
-            postAsync(type, proxy, dataType, state, change.getNode());
+            postAsync(type, proxy, dataType, state, change.value());
         }
     }
 
-    public void dispatchNodeClear(PermissionHolder target, DataType dataType, MutateResult changes) {
+    public void dispatchNodeClear(PermissionHolder target, DataType dataType, Difference<Node> changes) {
         if (!this.eventBus.shouldPost(NodeClearEvent.class)) {
             return;
         }

@@ -25,55 +25,41 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-import me.lucko.luckperms.common.webeditor.WebEditorResponse;
+import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 
-import java.io.IOException;
-
-public class ApplyEditsCommand extends SingleCommand {
-    public ApplyEditsCommand() {
-        super(CommandSpec.APPLY_EDITS, "ApplyEdits", CommandPermission.APPLY_EDITS, Predicates.notInRange(1, 2));
+public class TrustEditorCommand extends SingleCommand {
+    public TrustEditorCommand() {
+        super(CommandSpec.TRUST_EDITOR, "TrustEditor", CommandPermission.TRUST_EDITOR, Predicates.not(1));
     }
 
     @Override
     public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
-        boolean ignoreSessionWarning = args.remove("--force");
+        String id = args.get(0);
 
-        String code = args.get(0);
-
-        if (code.isEmpty()) {
-            Message.APPLY_EDITS_INVALID_CODE.send(sender, code);
+        if (id.isEmpty()) {
+            Message.APPLY_EDITS_INVALID_CODE.send(sender, id);
             return;
         }
 
-        JsonObject data;
-        try {
-            data = plugin.getBytebin().getJsonContent(code).getAsJsonObject();
-        } catch (UnsuccessfulRequestException e) {
-            Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
-            return;
-        } catch (IOException e) {
-            plugin.getLogger().warn("Error reading data from bytebin", e);
-            Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
+        WebEditorSocket socket = plugin.getWebEditorStore().sockets().getSocket(sender);
+        if (socket == null) {
+            Message.EDITOR_SOCKET_TRUST_FAILURE.send(sender);
             return;
         }
 
-        if (data == null) {
-            Message.APPLY_EDITS_UNABLE_TO_READ.send(sender, code);
-            return;
+        if (socket.trustConnection(id)) {
+            Message.EDITOR_SOCKET_TRUST_SUCCESS.send(sender);
+        } else {
+            Message.EDITOR_SOCKET_TRUST_FAILURE.send(sender);
         }
-
-        new WebEditorResponse(code, data).apply(plugin, sender, null, label, ignoreSessionWarning);
     }
 
     @Override

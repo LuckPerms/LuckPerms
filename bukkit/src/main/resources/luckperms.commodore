@@ -57,6 +57,9 @@ luckperms {
   applyedits {
     code brigadier:string single_word;
   }
+  trusteditor {
+    id brigadier:string single_word;
+  }
   creategroup {
     name brigadier:string single_word {
       weight brigadier:integer {
