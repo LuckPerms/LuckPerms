@@ -96,6 +96,13 @@ public abstract class AbstractJavaScheduler implements SchedulerAdapter {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        this.worker.shutdown();
+        try {
+            this.worker.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static final class ErrorReportingExecutor implements Executor {
