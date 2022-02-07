@@ -23,24 +23,35 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.mixin;
+package me.lucko.luckperms.common.webeditor.store;
 
-import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
+import me.lucko.luckperms.common.webeditor.WebEditorRequest;
 
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-@Mixin(CommandManager.class)
-public class CommandManagerMixin {
-    @Inject(at = @At("HEAD"), method = "execute", cancellable = true)
-    private void commandExecuteCallback(ServerCommandSource source, String input, CallbackInfoReturnable<Integer> info) {
-        if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(source, input)) {
-            info.setReturnValue(0);
-        }
+public final class WebEditorSessionMap {
+    private final Map<String, RemoteSession> sessions = new ConcurrentHashMap<>();
+
+    /**
+     * Adds a newly created session to the store.
+     *
+     * @param id the id of the session
+     */
+    public void addNewSession(String id, WebEditorRequest request) {
+        this.sessions.put(id, new RemoteSession(request));
     }
+
+    /**
+     * Gets the session for the given session id.
+     *
+     * @param id the id of the session
+     * @return the session
+     */
+    public @Nullable RemoteSession getSession(String id) {
+        return this.sessions.get(id);
+    }
+
 }

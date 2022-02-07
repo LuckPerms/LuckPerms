@@ -23,24 +23,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.mixin;
+package me.lucko.luckperms.common.webeditor.socket.listener;
 
-import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
+import com.google.gson.JsonObject;
 
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+/**
+ * A handler for a given type of message.
+ */
+public interface Handler {
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+    void handle(JsonObject msg);
 
-@Mixin(CommandManager.class)
-public class CommandManagerMixin {
-    @Inject(at = @At("HEAD"), method = "execute", cancellable = true)
-    private void commandExecuteCallback(ServerCommandSource source, String input, CallbackInfoReturnable<Integer> info) {
-        if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(source, input)) {
-            info.setReturnValue(0);
-        }
-    }
 }

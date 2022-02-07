@@ -39,7 +39,6 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
-import me.lucko.luckperms.common.model.nodemap.MutateResult;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -47,6 +46,7 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
+import me.lucko.luckperms.common.util.Difference;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
@@ -351,15 +351,15 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public void saveUser(User user) throws SQLException {
-        MutateResult changes = user.normalData().exportChanges(results -> {
+        Difference<Node> changes = user.normalData().exportChanges(results -> {
             if (this.plugin.getUserManager().isNonDefaultUser(user)) {
                 return true;
             }
 
             // if the only change is adding the default node, we don't need to export
             if (results.getChanges().size() == 1) {
-                MutateResult.Change onlyChange = results.getChanges().iterator().next();
-                return !(onlyChange.getType() == MutateResult.ChangeType.ADD && this.plugin.getUserManager().isDefaultNode(onlyChange.getNode()));
+                Difference.Change<Node> onlyChange = results.getChanges().iterator().next();
+                return !(onlyChange.type() == Difference.ChangeType.ADD && this.plugin.getUserManager().isDefaultNode(onlyChange.value()));
             }
 
             return true;
@@ -480,7 +480,7 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public void saveGroup(Group group) throws SQLException {
-        MutateResult changes = group.normalData().exportChanges(c -> true);
+        Difference<Node> changes = group.normalData().exportChanges(c -> true);
 
         if (!changes.isEmpty()) {
             try (Connection c = this.connectionFactory.getConnection()) {

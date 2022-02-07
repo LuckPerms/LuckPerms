@@ -86,9 +86,11 @@ public enum CommandSpec {
     TRANSLATIONS("/%s translations",
             arg("install", false)
     ),
-    APPLY_EDITS("/%s applyedits <code> [target]",
-            arg("code", true),
-            arg("target", false)
+    APPLY_EDITS("/%s applyedits <code>",
+            arg("code", true)
+    ),
+    TRUST_EDITOR("/%s trusteditor <id>",
+            arg("id", true)
     ),
 
     CREATE_GROUP("/%s creategroup <group>",

@@ -23,24 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.mixin;
+package me.lucko.luckperms.common.webeditor.store;
 
-import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
+import com.github.benmanes.caffeine.cache.Cache;
 
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.CaffeineFactory;
+import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-@Mixin(CommandManager.class)
-public class CommandManagerMixin {
-    @Inject(at = @At("HEAD"), method = "execute", cancellable = true)
-    private void commandExecuteCallback(ServerCommandSource source, String input, CallbackInfoReturnable<Integer> info) {
-        if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(source, input)) {
-            info.setReturnValue(0);
-        }
+public final class WebEditorSocketMap {
+    private final Cache<UUID, WebEditorSocket> sockets = CaffeineFactory.newBuilder()
+            .weakValues()
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .build();
+
+    public WebEditorSocket getSocket(Sender sender) {
+        return this.sockets.getIfPresent(sender.getUniqueId());
+    }
+
+    public void putSocket(Sender sender, WebEditorSocket socket) {
+        this.sockets.put(sender.getUniqueId(), socket);
     }
 }
