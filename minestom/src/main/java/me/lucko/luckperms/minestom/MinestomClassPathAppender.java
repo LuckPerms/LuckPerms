@@ -40,7 +40,7 @@ public class MinestomClassPathAppender implements ClassPathAppender {
     @Override
     public void addJarToClasspath(Path file) {
         try {
-            this.bootstrap.getOrigin().getClassLoader().addURL(file.toUri().toURL());
+            this.bootstrap.descriptor().classLoader().addURL(file.toUri().toURL());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

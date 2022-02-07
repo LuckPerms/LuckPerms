@@ -14,7 +14,8 @@ repositories {
 dependencies {
     implementation project(':common')
 
-    compileOnly 'com.github.Minestom:Minestom:bcc652ede8'
+    compileOnly 'com.github.Minestom:Minestom:4a976a3333'
+    implementation 'org.yaml:snakeyaml:1.29'
 }
 
 java {
@@ -23,7 +24,7 @@ java {
 }
 
 processResources {
-    filesMatching("extension.json") {
+    filesMatching("META-INF/extension.json") {
         expand 'pluginVersion': project.ext.fullVersion
     }
 }
@@ -36,6 +37,7 @@ shadowJar {
         include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
         include(dependency("com.google.guava:guava:19.0"))
+        include(dependency("org.yaml:snakeyaml:1.29"))
         // We don't want to include the mappings in the jar do we?
         exclude '/mappings/*'
     }

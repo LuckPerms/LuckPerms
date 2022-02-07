@@ -76,7 +76,7 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
     }
 
     @Override
-    public void preInitialize() {
+    public LoadStatus initialize() {
         this.startupTime = Instant.now();
 
         try {
@@ -86,15 +86,14 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
         } finally {
             this.loadLatch.countDown();
         }
-    }
 
-    @Override
-    public void initialize() {
         try {
             this.plugin.enable();
         } finally {
             this.enableLatch.countDown();
         }
+
+        return LoadStatus.SUCCESS;
     }
 
     @Override
@@ -122,7 +121,7 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
 
     @Override
     public String getVersion() {
-        return this.getOrigin().getVersion();
+        return this.descriptor().version();
     }
 
     @Override
@@ -146,7 +145,7 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
     }
 
     @Override
-    public Path getDataDirectory() {
+    public Path dataDirectory() {
         // TODO This is a VERY hacky solution which I will fix
         return new File("./luckperms").toPath();
     }
