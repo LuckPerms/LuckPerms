@@ -61,9 +61,11 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -257,17 +259,24 @@ public class WebEditorRequest {
                     .distinct();
         }
 
-        stream.filter(uuid -> !users.containsKey(uuid))
+        Set<UUID> uuids = stream
+                .filter(uuid -> !users.containsKey(uuid))
                 .sorted()
                 .limit(MAX_USERS - users.size())
-                .map(uuid -> plugin.getStorage().loadUser(uuid, null))
-                .forEach(fut -> {
-                    User user = fut.join();
-                    if (user != null) {
-                        users.put(user.getUniqueId(), user);
-                        plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
-                    }
-                });
+                .collect(Collectors.toSet());
+
+        if (uuids.isEmpty()) {
+            return;
+        }
+
+        // load users in bulk from storage
+        Map<UUID, User> loadedUsers = plugin.getStorage().loadUsers(uuids).join();
+        users.putAll(loadedUsers);
+
+        // schedule cleanup
+        for (UUID uniqueId : loadedUsers.keySet()) {
+            plugin.getUserManager().getHouseKeeper().cleanup(uniqueId);
+        }
     }
 
 }

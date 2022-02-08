@@ -84,6 +84,7 @@ public class SqlStorage implements StorageImplementation {
     private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>(){}.getType();
 
     private static final String USER_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM '{prefix}user_permissions' WHERE uuid=?";
+    private static final String USER_PERMISSIONS_SELECT_MULTIPLE = "SELECT uuid, id, permission, value, server, world, expiry, contexts FROM '{prefix}user_permissions' WHERE ";
     private static final String USER_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM '{prefix}user_permissions' WHERE id=?";
     private static final String USER_PERMISSIONS_DELETE_SPECIFIC_PROPS = "DELETE FROM '{prefix}user_permissions' WHERE uuid=? AND permission=? AND value=? AND server=? AND world=? AND expiry=? AND contexts=?";
     private static final String USER_PERMISSIONS_DELETE = "DELETE FROM '{prefix}user_permissions' WHERE uuid=?";
@@ -99,6 +100,7 @@ public class SqlStorage implements StorageImplementation {
     private static final String PLAYER_SELECT_ALL_UUIDS_BY_USERNAME = "SELECT uuid FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
     private static final String PLAYER_DELETE_ALL_UUIDS_BY_USERNAME = "DELETE FROM '{prefix}players' WHERE username=? AND NOT uuid=?";
     private static final String PLAYER_SELECT_BY_UUID = "SELECT username, primary_group FROM '{prefix}players' WHERE uuid=? LIMIT 1";
+    private static final String PLAYER_SELECT_BY_UUID_MULTIPLE = "SELECT uuid, username, primary_group FROM '{prefix}players' WHERE ";
     private static final String PLAYER_SELECT_PRIMARY_GROUP_BY_UUID = "SELECT primary_group FROM '{prefix}players' WHERE uuid=? LIMIT 1";
     private static final String PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID = "UPDATE '{prefix}players' SET primary_group=? WHERE uuid=?";
 
@@ -319,16 +321,38 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public User loadUser(UUID uniqueId, String username) throws SQLException {
-        User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
-
         List<Node> nodes;
         SqlPlayerData playerData;
 
         try (Connection c = this.connectionFactory.getConnection()) {
-            nodes = selectUserPermissions(c, user.getUniqueId());
-            playerData = selectPlayerData(c, user.getUniqueId());
+            nodes = selectUserPermissions(c, uniqueId);
+            playerData = selectPlayerData(c, uniqueId);
         }
 
+        return createUser(uniqueId, username, playerData, nodes, true);
+    }
+
+    @Override
+    public Map<UUID, User> loadUsers(Set<UUID> uniqueIds) throws Exception {
+        Map<UUID, List<Node>> nodesMap;
+        Map<UUID, SqlPlayerData> playerDataMap;
+
+        try (Connection c = this.connectionFactory.getConnection()) {
+            nodesMap = selectUserPermissions(c, uniqueIds);
+            playerDataMap = selectPlayerData(c, uniqueIds);
+        }
+
+        Map<UUID, User> users = new HashMap<>();
+        for (UUID uniqueId : uniqueIds) {
+            SqlPlayerData playerData = playerDataMap.get(uniqueId);
+            List<Node> nodes = nodesMap.get(uniqueId);
+            users.put(uniqueId, createUser(uniqueId, null, playerData, nodes, false));
+        }
+        return users;
+    }
+
+    private User createUser(UUID uniqueId, String username, SqlPlayerData playerData, List<Node> nodes, boolean saveAfterAudit) throws SQLException {
+        User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
         if (playerData != null) {
             if (playerData.primaryGroup != null) {
                 user.getPrimaryGroup().setStoredValue(playerData.primaryGroup);
@@ -342,7 +366,7 @@ public class SqlStorage implements StorageImplementation {
         user.loadNodesFromStorage(nodes);
         this.plugin.getUserManager().giveDefaultIfNeeded(user);
 
-        if (user.auditTemporaryNodes()) {
+        if (user.auditTemporaryNodes() && saveAfterAudit) {
             saveUser(user);
         }
 
@@ -864,6 +888,58 @@ public class SqlStorage implements StorageImplementation {
                 }
             }
         }
+    }
+
+    private Map<UUID, List<Node>> selectUserPermissions(Connection c, Set<UUID> users) throws SQLException {
+        Map<UUID, List<Node>> map = new HashMap<>();
+        for (UUID uuid : users) {
+            map.put(uuid, new ArrayList<>());
+        }
+
+        try (Statement s = c.createStatement()) {
+            String sql = createUserSelectWhereClause(USER_PERMISSIONS_SELECT_MULTIPLE, users);
+            try (ResultSet rs = s.executeQuery(sql)) {
+                while (rs.next()) {
+                    UUID uuid = UUID.fromString(rs.getString("uuid"));
+                    Node node = readNode(rs);
+                    if (node != null) {
+                        map.get(uuid).add(readNode(rs));
+                    }
+                }
+            }
+        }
+
+        return map;
+    }
+
+    private Map<UUID, SqlPlayerData> selectPlayerData(Connection c, Set<UUID> users) throws SQLException {
+        Map<UUID, SqlPlayerData> map = new HashMap<>();
+
+        try (Statement s = c.createStatement()) {
+            String sql = createUserSelectWhereClause(PLAYER_SELECT_BY_UUID_MULTIPLE, users);
+            try (ResultSet rs = s.executeQuery(sql)) {
+                while (rs.next()) {
+                    UUID uuid = UUID.fromString(rs.getString("uuid"));
+                    SqlPlayerData data = new SqlPlayerData(
+                            rs.getString("primary_group"),
+                            rs.getString("username")
+                    );
+                    map.put(uuid, data);
+                }
+            }
+        }
+
+        return map;
+    }
+
+    private String createUserSelectWhereClause(String baseQuery, Set<UUID> users) {
+        String param = users.stream()
+                .map(uuid -> "'" + uuid + "'")
+                .collect(Collectors.joining(",", "uuid IN (", ")"));
+
+        // we don't want to use preparedstatements because the parameter length is variable
+        // safe to do string concat/replacement because the UUID.toString value isn't injectable
+        return this.statementProcessor.apply(baseQuery) + param;
     }
 
     private void deleteUser(Connection c, UUID user) throws SQLException {

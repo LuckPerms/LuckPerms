@@ -72,6 +72,7 @@ import org.bson.Document;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -326,6 +327,16 @@ public class MongoStorage implements StorageImplementation {
             }
         }
         return user;
+    }
+
+    @Override
+    public Map<UUID, User> loadUsers(Set<UUID> uniqueIds) throws Exception {
+        // make this a bulk search?
+        Map<UUID, User> map = new HashMap<>();
+        for (UUID uniqueId : uniqueIds) {
+            map.put(uniqueId, loadUser(uniqueId, null));
+        }
+        return map;
     }
 
     @Override
