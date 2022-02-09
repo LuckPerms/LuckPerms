@@ -58,11 +58,11 @@ public class WebEditorSocket {
     private final WebEditorSession session;
     /** The socket listener that handles incoming messages */
     private final WebEditorSocketListener listener;
+    /** The public and private keys used to sign messages sent by the plugin */
+    private final KeyPair pluginKeyPair;
 
     /** The websocket backing the connection */
     private BytesocksClient.Socket socket;
-    /** The public and private keys used to sign messages sent by the plugin */
-    private KeyPair localKeys;
     /** A task to check if the socket is still active */
     private SchedulerTask keepaliveTask;
     /** The public key used by the editor to sign messages */
@@ -75,6 +75,7 @@ public class WebEditorSocket {
         this.sender = sender;
         this.session = session;
         this.listener = new WebEditorSocketListener(this);
+        this.pluginKeyPair = plugin.getWebEditorStore().keyPair();
     }
 
     /**
@@ -86,7 +87,6 @@ public class WebEditorSocket {
      */
     public void initialize(BytesocksClient client) throws UnsuccessfulRequestException, IOException {
         this.socket = client.createSocket(this.listener);
-        this.localKeys = CryptographyUtils.generateKeyPair();
     }
 
     /**
@@ -112,7 +112,7 @@ public class WebEditorSocket {
      */
     public void appendDetailToRequest(WebEditorRequest request) {
         String channelId = this.socket.channelId();
-        String publicKey = Base64.getEncoder().encodeToString(this.localKeys.getPublic().getEncoded());
+        String publicKey = Base64.getEncoder().encodeToString(this.pluginKeyPair.getPublic().getEncoded());
 
         JsonObject socket = new JsonObject();
         socket.addProperty("protocolVersion", PROTOCOL_VERSION);
@@ -133,7 +133,7 @@ public class WebEditorSocket {
      */
     public void send(JsonObject msg) {
         String encoded = GsonProvider.normal().toJson(msg);
-        String signature = CryptographyUtils.sign(this.localKeys.getPrivate(), encoded);
+        String signature = CryptographyUtils.sign(this.pluginKeyPair.getPrivate(), encoded);
 
         JsonObject frame = new JObject()
                 .add("msg", encoded)

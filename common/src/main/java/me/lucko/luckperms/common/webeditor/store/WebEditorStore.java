@@ -26,6 +26,10 @@
 package me.lucko.luckperms.common.webeditor.store;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.webeditor.socket.CryptographyUtils;
+
+import java.security.KeyPair;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Contains a store of known web editor sessions and provides a lookup function for
@@ -35,11 +39,13 @@ public class WebEditorStore {
     private final WebEditorSessionMap sessions;
     private final WebEditorSocketMap sockets;
     private final WebEditorKeystore keystore;
+    private final CompletableFuture<KeyPair> keyPair;
 
     public WebEditorStore(LuckPermsPlugin plugin) {
         this.sessions = new WebEditorSessionMap();
         this.sockets = new WebEditorSocketMap();
         this.keystore = new WebEditorKeystore(plugin.getBootstrap().getConfigDirectory().resolve("editor-keystore.json"));
+        this.keyPair = CompletableFuture.supplyAsync(CryptographyUtils::generateKeyPair, plugin.getBootstrap().getScheduler().async());
     }
 
     public WebEditorSessionMap sessions() {
@@ -52,6 +58,13 @@ public class WebEditorStore {
 
     public WebEditorKeystore keystore() {
         return this.keystore;
+    }
+
+    public KeyPair keyPair() {
+        if (!this.keyPair.isDone()) {
+            throw new IllegalStateException("Web editor keypair has not been generated yet! Has the server just started?");
+        }
+        return this.keyPair.join();
     }
 
 }
