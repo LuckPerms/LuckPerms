@@ -26,6 +26,7 @@
 package me.lucko.luckperms.nukkit;
 
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
@@ -49,7 +50,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Bootstrap plugin for LuckPerms running on Nukkit.
  */
-public class LPNukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
+public class LPNukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap, BootstrappedWithLoader {
     private final PluginBase loader;
 
     /**
@@ -91,6 +92,7 @@ public class LPNukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
 
     // provide adapters
 
+    @Override
     public PluginBase getLoader() {
         return this.loader;
     }

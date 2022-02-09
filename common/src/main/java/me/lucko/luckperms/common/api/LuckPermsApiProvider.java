@@ -41,8 +41,12 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
+import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
 import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.actionlog.ActionLogger;
 import net.luckperms.api.context.ContextManager;
 import net.luckperms.api.messaging.MessagingService;
@@ -91,6 +95,37 @@ public class LuckPermsApiProvider implements LuckPerms {
         this.actionLogger = new ApiActionLogger(plugin);
         this.contextManager = new ApiContextManager(plugin, plugin.getContextManager());
         this.metaStackFactory = new ApiMetaStackFactory(plugin);
+    }
+
+    public void ensureApiWasLoadedByPlugin() {
+        LuckPermsBootstrap bootstrap = this.plugin.getBootstrap();
+        ClassLoader pluginClassLoader;
+        if (bootstrap instanceof BootstrappedWithLoader) {
+            pluginClassLoader = ((BootstrappedWithLoader) bootstrap).getLoader().getClass().getClassLoader();
+        } else {
+            pluginClassLoader = bootstrap.getClass().getClassLoader();
+        }
+
+        for (Class<?> apiClass : new Class[]{LuckPerms.class, LuckPermsProvider.class}) {
+            ClassLoader apiClassLoader = apiClass.getClassLoader();
+
+            if (!apiClassLoader.equals(pluginClassLoader)) {
+                String guilty = "unknown";
+                try {
+                    guilty = bootstrap.identifyClassLoader(apiClassLoader);
+                } catch (Exception e) {
+                    // ignore
+                }
+
+                PluginLogger logger = this.plugin.getLogger();
+                logger.warn("It seems that the LuckPerms API has been (class)loaded by a plugin other than LuckPerms!");
+                logger.warn("The API was loaded by " + apiClassLoader + " (" + guilty + ") and the " +
+                        "LuckPerms plugin was loaded by " + pluginClassLoader.toString() + ".");
+                logger.warn("This indicates that the other plugin has incorrectly \"shaded\" the " +
+                        "LuckPerms API into its jar file. This can cause errors at runtime and should be fixed.");
+                return;
+            }
+        }
     }
 
     @Override
