@@ -98,14 +98,23 @@ public class WebEditorSession {
             this.socket = socket;
             this.plugin.getWebEditorStore().sockets().putSocket(this.sender, this.socket);
         } catch (Exception e) {
-            if (e instanceof UnsuccessfulRequestException && ((UnsuccessfulRequestException) e).getResponse().code() == 502) {
-                // 502 - bad gateway, probably means the socket service is offline
-                // that's ok, no need to send a warning
-                return;
+            if (!ignoreSocketConnectError(e)) {
+                this.plugin.getLogger().warn("Unable to establish socket connection", e);
             }
-
-            this.plugin.getLogger().warn("Unable to establish socket connection", e);
         }
+    }
+
+    private static boolean ignoreSocketConnectError(Exception e) {
+        if (e instanceof UnsuccessfulRequestException) {
+            UnsuccessfulRequestException req = (UnsuccessfulRequestException) e;
+            int code = req.getResponse().code();
+
+            // 502 - bad gateway / 503 - service unavailable
+            // probably means the socket service is offline, that's ok, no need to send a warning
+            return code == 502 || code == 503;
+        }
+
+        return false;
     }
 
     private void createInitialSession() {
