@@ -44,6 +44,7 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryOptions;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,26 +68,23 @@ public class UserInfo extends ChildCommand<User> {
                 plugin.getBootstrap().isPlayerOnline(target.getUniqueId())
         );
 
-        List<InheritanceNode> parents = target.normalData().inheritanceAsSortedSet().stream()
+        Map<Boolean, List<InheritanceNode>> parents = target.normalData().inheritanceAsSortedSet().stream()
                 .filter(Node::getValue)
-                .filter(n -> !n.hasExpiry())
-                .collect(Collectors.toList());
+                .collect(Collectors.groupingBy(Node::hasExpiry, Collectors.toList()));
 
-        List<InheritanceNode> tempParents = target.normalData().inheritanceAsSortedSet().stream()
-                .filter(Node::getValue)
-                .filter(Node::hasExpiry)
-                .collect(Collectors.toList());
+        List<InheritanceNode> temporaryParents = parents.getOrDefault(true, Collections.emptyList());
+        List<InheritanceNode> permanentParents = parents.getOrDefault(false, Collections.emptyList());
 
-        if (!parents.isEmpty()) {
+        if (!permanentParents.isEmpty()) {
             Message.INFO_PARENT_HEADER.send(sender);
-            for (InheritanceNode node : parents) {
+            for (InheritanceNode node : permanentParents) {
                 Message.INFO_PARENT_NODE_ENTRY.send(sender, node);
             }
         }
 
-        if (!tempParents.isEmpty()) {
+        if (!temporaryParents.isEmpty()) {
             Message.INFO_TEMP_PARENT_HEADER.send(sender);
-            for (InheritanceNode node : tempParents) {
+            for (InheritanceNode node : temporaryParents) {
                 Message.INFO_PARENT_TEMPORARY_NODE_ENTRY.send(sender, node);
             }
         }
