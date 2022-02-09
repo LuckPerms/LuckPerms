@@ -69,14 +69,11 @@ public class UserInfo extends ChildCommand<User> {
         );
 
         Map<Boolean, List<InheritanceNode>> parents = target.normalData().inheritanceAsSortedSet().stream()
-                                                            .filter(Node::getValue)
-                                                            .collect(Collectors.groupingBy(Node::hasExpiry,
-                                                                                           Collectors.toList()));
+                .filter(Node::getValue)
+                .collect(Collectors.groupingBy(Node::hasExpiry, Collectors.toList()));
 
-        List<InheritanceNode> temporaryParents = parents.getOrDefault(true,
-                                                                      Collections.emptyList());
-        List<InheritanceNode> permanentParents = parents.getOrDefault(false,
-                                                                      Collections.emptyList());
+        List<InheritanceNode> temporaryParents = parents.getOrDefault(true, Collections.emptyList());
+        List<InheritanceNode> permanentParents = parents.getOrDefault(false, Collections.emptyList());
 
         if (!permanentParents.isEmpty()) {
             Message.INFO_PARENT_HEADER.send(sender);
