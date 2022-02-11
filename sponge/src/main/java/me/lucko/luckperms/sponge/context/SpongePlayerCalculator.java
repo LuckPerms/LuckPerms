@@ -39,6 +39,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.Entity;
@@ -82,11 +83,15 @@ public class SpongePlayerCalculator implements ContextCalculator<Subject> {
         game.registry(RegistryTypes.GAME_MODE).stream().forEach(mode -> {
             builder.add(DefaultContextKeys.GAMEMODE_KEY, getContextKey(mode.key(RegistryTypes.GAME_MODE)));
         });
-        game.registry(RegistryTypes.WORLD_TYPE).stream().forEach(dim -> {
-            builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(dim.key(RegistryTypes.WORLD_TYPE)));
-        });
+
         if (game.isServerAvailable()) {
-            for (ServerWorld world : game.server().worldManager().worlds()) {
+            Server server = game.server();
+
+            server.registry(RegistryTypes.WORLD_TYPE).stream().forEach(dim -> {
+                builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(dim.key(RegistryTypes.WORLD_TYPE)));
+            });
+
+            for (ServerWorld world : server.worldManager().worlds()) {
                 String worldName = getContextKey(world.key());
                 if (Context.isValidValue(worldName)) {
                     builder.add(DefaultContextKeys.WORLD_KEY, worldName);
