@@ -9,7 +9,7 @@
       "id": "luckperms",
       "name": "LuckPerms",
       "version": "${pluginVersion}",
-      "entrypoint": "me.lucko.luckperms.sponge.LPSpongeBootstrap",
+      "entrypoint": "me.lucko.luckperms.sponge.loader.SpongeLoaderPlugin",
       "description": "A permissions plugin",
       "links": {
         "homepage": "https://luckperms.net"

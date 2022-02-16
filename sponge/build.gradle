@@ -10,6 +10,7 @@ dependencies {
     implementation project(':common')
     implementation project(':sponge:sponge-service')
     implementation project(':sponge:sponge-service-api8')
+    compileOnly project(':common:loader-utils')
 
     compileOnly('org.spongepowered:spongeapi:8.0.0') {
         exclude(module: 'configurate-core')
@@ -26,10 +27,9 @@ processResources {
 }
 
 shadowJar {
-    archiveFileName = "LuckPerms-Sponge-${project.ext.fullVersion}.jar"
+    archiveFileName = 'luckperms-sponge.jarinjar'
 
     dependencies {
-        include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
     }
 
