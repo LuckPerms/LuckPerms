@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -79,8 +79,8 @@ public class WebEditorSession {
         this.sender = sender;
         this.cmdLabel = cmdLabel;
 
-        this.holders = new HashSet<>(initialRequest.getHolders().keySet());
-        this.tracks = new HashSet<>(initialRequest.getTracks().keySet());
+        this.holders = new LinkedHashSet<>(initialRequest.getHolders().keySet());
+        this.tracks = new LinkedHashSet<>(initialRequest.getTracks().keySet());
     }
 
     public void open() {
