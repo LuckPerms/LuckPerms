@@ -26,9 +26,13 @@
 package me.lucko.luckperms.sponge;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.util.MoreFiles;
@@ -42,13 +46,8 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
-import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.io.IOException;
@@ -62,12 +61,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Supplier;
 
 /**
  * Bootstrap plugin for LuckPerms running on Sponge.
  */
-@Plugin("luckperms")
-public class LPSpongeBootstrap implements LuckPermsBootstrap {
+public class LPSpongeBootstrap implements LuckPermsBootstrap, LoaderBootstrap, BootstrappedWithLoader {
+    private final Object loader;
 
     /**
      * The plugin logger
@@ -111,21 +111,30 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     /**
      * Injected configuration directory for the plugin
      */
-    private final Path configDirectory;
-
     @Inject
-    public LPSpongeBootstrap(Logger logger, Game game, PluginContainer pluginContainer, @ConfigDir(sharedRoot = false) Path configDirectory) {
-        this.logger = new Log4jPluginLogger(logger);
-        this.game = game;
-        this.pluginContainer = pluginContainer;
-        this.configDirectory = configDirectory;
+    @ConfigDir(sharedRoot = false)
+    private Path configDirectory;
+
+    public LPSpongeBootstrap(Supplier<Injector> loader) {
+        this.loader = loader;
+
+        Injector injector = loader.get();
+        this.logger = new Log4jPluginLogger(injector.getInstance(Logger.class));
+        this.game = injector.getInstance(Game.class);
+        this.pluginContainer = injector.getInstance(PluginContainer.class);
+        injector.injectMembers(this);
 
         this.schedulerAdapter = new SpongeSchedulerAdapter(this.game, this.pluginContainer);
-        this.classPathAppender = new SpongeClassPathAppender(this);
+        this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
         this.plugin = new LPSpongePlugin(this);
     }
 
     // provide adapters
+
+    @Override
+    public Object getLoader() {
+        return this.loader;
+    }
 
     @Override
     public PluginLogger getPluginLogger() {
@@ -143,15 +152,18 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
     }
 
     // lifecycle
-    @Listener(order = Order.FIRST)
-    public void onEnable(ConstructPluginEvent event) {
-        this.startTime = Instant.now();
+
+    @Override
+    public void onLoad() {
         try {
             this.plugin.load();
         } finally {
             this.loadLatch.countDown();
         }
+    }
 
+    public void onEnable() {
+        this.startTime = Instant.now();
         try {
             this.plugin.enable();
         } finally {
@@ -159,8 +171,7 @@ public class LPSpongeBootstrap implements LuckPermsBootstrap {
         }
     }
 
-    @Listener
-    public void onDisable(StoppingEngineEvent<Server> event) {
+    public void onDisable() {
         this.plugin.disable();
     }
 
