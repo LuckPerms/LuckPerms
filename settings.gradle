@@ -23,7 +23,7 @@ include (
         'fabric',
         'nukkit',
         'nukkit:loader',
-        'minestom'
+        'minestom',
         'sponge',
         'sponge:loader',
         'sponge:sponge-service',
