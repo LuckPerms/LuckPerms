@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.extension.SimpleExtensionManager;
 import me.lucko.luckperms.common.http.BytebinClient;
+import me.lucko.luckperms.common.http.BytesocksClient;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.locale.TranslationRepository;
@@ -55,7 +56,7 @@ import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
-import me.lucko.luckperms.common.webeditor.WebEditorSessionStore;
+import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
 
 import net.luckperms.api.query.QueryOptions;
 
@@ -250,11 +251,18 @@ public interface LuckPermsPlugin {
     BytebinClient getBytebin();
 
     /**
-     * Gets the web editor session store
+     * Gets the bytesocks instance in use by platform.
      *
-     * @return the web editor session store
+     * @return the bytesocks instance
      */
-    WebEditorSessionStore getWebEditorSessionStore();
+    BytesocksClient getBytesocks();
+
+    /**
+     * Gets the web editor store
+     *
+     * @return the web editor store
+     */
+    WebEditorStore getWebEditorStore();
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.

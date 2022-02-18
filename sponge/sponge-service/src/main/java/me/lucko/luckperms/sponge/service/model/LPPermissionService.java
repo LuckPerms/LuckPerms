@@ -30,14 +30,18 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.sponge.service.PermissionAndContextService;
 import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
 
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.plugin.PluginContainer;
+import net.kyori.adventure.text.Component;
+import net.luckperms.api.context.ImmutableContextSet;
+
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -49,11 +53,11 @@ public interface LPPermissionService {
 
     LuckPermsPlugin getPlugin();
 
-    ContextManager<Subject, Player> getContextManager();
+    ContextManager<Subject, ServerPlayer> getContextManager();
 
     SubjectReferenceFactory getReferenceFactory();
 
-    PermissionService sponge();
+    PermissionAndContextService sponge();
 
     LPSubjectCollection getUserSubjects();
 
@@ -69,13 +73,19 @@ public interface LPPermissionService {
 
     ImmutableMap<String, LPSubjectCollection> getLoadedCollections();
 
-    LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner);
+    LPPermissionDescription registerPermissionDescription(String id, Component description, PluginContainer owner);
 
     Optional<LPPermissionDescription> getDescription(String permission);
 
     ImmutableCollection<LPPermissionDescription> getDescriptions();
 
-    void registerContextCalculator(ContextCalculator<Subject> calculator);
+    void registerContextCalculator(ContextCalculator calculator);
+
+    ImmutableContextSet getContextsForCause(Cause cause);
+
+    ImmutableContextSet getContextsForCurrentCause();
+
+    void fireUpdateEvent(LPSubjectData subjectData);
 
     void invalidateAllCaches();
 }

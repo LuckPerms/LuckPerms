@@ -76,12 +76,12 @@ final class CachedSubjectReference implements LPSubjectReference {
     }
 
     @Override
-    public @NonNull String getCollectionIdentifier() {
+    public @NonNull String collectionIdentifier() {
         return this.collectionIdentifier;
     }
 
     @Override
-    public @NonNull String getSubjectIdentifier() {
+    public @NonNull String subjectIdentifier() {
         return this.subjectIdentifier;
     }
 
@@ -158,8 +158,8 @@ final class CachedSubjectReference implements LPSubjectReference {
         if (o == this) return true;
         if (!(o instanceof LPSubjectReference)) return false;
         final LPSubjectReference other = (LPSubjectReference) o;
-        return this.collectionIdentifier.equals(other.getCollectionIdentifier()) &&
-                this.subjectIdentifier.equals(other.getSubjectIdentifier());
+        return this.collectionIdentifier.equals(other.collectionIdentifier()) &&
+                this.subjectIdentifier.equals(other.subjectIdentifier());
     }
 
     @Override

@@ -59,7 +59,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -160,7 +159,7 @@ public class SpongeGroupManager extends AbstractGroupManager<SpongeGroup> implem
     }
 
     @Override
-    public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers) {
+    public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Iterable<String> identifiers) {
         return CompletableFuture.supplyAsync(() -> {
             ImmutableSet.Builder<LPSubject> subjects = ImmutableSet.builder();
             for (String id : identifiers) {

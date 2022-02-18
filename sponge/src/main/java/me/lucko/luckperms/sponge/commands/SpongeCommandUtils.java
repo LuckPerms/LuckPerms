@@ -94,9 +94,9 @@ public final class SpongeCommandUtils {
         StringBuilder sb = new StringBuilder();
         for (LPSubjectReference s : parents) {
             sb.append("&3> &a")
-                    .append(s.getSubjectIdentifier())
+                    .append(s.subjectIdentifier())
                     .append(" &bfrom collection &a")
-                    .append(s.getCollectionIdentifier())
+                    .append(s.collectionIdentifier())
                     .append("&b.\n");
         }
         return sb.toString();

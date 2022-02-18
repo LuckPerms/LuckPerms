@@ -28,14 +28,11 @@ package me.lucko.luckperms.common.webeditor;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
-import me.lucko.luckperms.common.http.AbstractHttpClient;
-import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
-import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
@@ -43,6 +40,7 @@ import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JArray;
 import me.lucko.luckperms.common.util.gson.JObject;
@@ -63,8 +61,11 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -74,6 +75,48 @@ import java.util.zip.GZIPOutputStream;
 public class WebEditorRequest {
 
     public static final int MAX_USERS = 500;
+
+    /**
+     * The encoded json object this payload is made up of
+     */
+    private final JsonObject payload;
+
+    private final Map<PermissionHolderIdentifier, List<Node>> holders;
+    private final Map<String, List<String>> tracks;
+
+    private WebEditorRequest(JsonObject payload, Map<PermissionHolder, List<Node>> holders, Map<Track, List<String>> tracks) {
+        this.payload = payload;
+        this.holders = holders.entrySet().stream().collect(ImmutableCollectors.toMap(
+                e -> e.getKey().getIdentifier(),
+                Map.Entry::getValue
+        ));
+        this.tracks = tracks.entrySet().stream().collect(ImmutableCollectors.toMap(
+                e -> e.getKey().getName(),
+                Map.Entry::getValue
+        ));
+    }
+
+    public JsonObject getPayload() {
+        return this.payload;
+    }
+
+    public byte[] encode() {
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
+            GsonProvider.normal().toJson(this.payload, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bytesOut.toByteArray();
+    }
+
+    public Map<PermissionHolderIdentifier, List<Node>> getHolders() {
+        return this.holders;
+    }
+
+    public Map<String, List<String>> getTracks() {
+        return this.tracks;
+    }
 
     /**
      * Generates a web editor request payload.
@@ -95,34 +138,35 @@ public class WebEditorRequest {
         }
 
         // form the payload data
-        return new WebEditorRequest(holders, tracks, sender, cmdLabel, potentialContexts.build(), plugin);
+        Map<PermissionHolder, List<Node>> holdersMap = holders.stream().collect(ImmutableCollectors.toMap(
+                Function.identity(),
+                holder -> holder.normalData().asList()
+        ));
+
+        Map<Track, List<String>> tracksMap = tracks.stream().collect(ImmutableCollectors.toMap(
+                Function.identity(),
+                Track::getGroups
+        ));
+
+        JsonObject json = createJsonPayload(holdersMap, tracksMap, sender, cmdLabel, potentialContexts.build(), plugin).toJson();
+        return new WebEditorRequest(json, holdersMap, tracksMap);
     }
 
-    /**
-     * The encoded json object this payload is made up of
-     */
-    private final JsonObject payload;
-
-    private WebEditorRequest(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, ImmutableContextSet potentialContexts, LuckPermsPlugin plugin) {
-        this.payload = new JObject()
+    private static JObject createJsonPayload(Map<PermissionHolder, List<Node>> holders, Map<Track, List<String>> tracks, Sender sender, String cmdLabel, ImmutableContextSet potentialContexts, LuckPermsPlugin plugin) {
+        return new JObject()
                 .add("metadata", formMetadata(sender, cmdLabel, plugin.getBootstrap().getVersion()))
-                .add("permissionHolders", new JArray()
-                        .consume(arr -> {
-                            for (PermissionHolder holder : holders) {
-                                arr.add(formPermissionHolder(holder));
-                            }
-                        })
-                )
-                .add("tracks", new JArray()
-                        .consume(arr -> {
-                            for (Track track : tracks) {
-                                arr.add(formTrack(track));
-                            }
-                        })
-                )
+                .add("permissionHolders", new JArray().consume(arr ->
+                        holders.forEach((holder, data) ->
+                                arr.add(formPermissionHolder(holder, data))
+                        )
+                ))
+                .add("tracks", new JArray().consume(arr ->
+                        tracks.forEach((track, data) ->
+                                arr.add(formTrack(track, data))
+                        )
+                ))
                 .add("knownPermissions", new JArray().addAll(plugin.getPermissionRegistry().rootAsList()))
-                .add("potentialContexts", ContextSetJsonSerializer.serialize(potentialContexts))
-                .toJson();
+                .add("potentialContexts", ContextSetJsonSerializer.serialize(potentialContexts));
     }
 
     private static JObject formMetadata(Sender sender, String cmdLabel, String pluginVersion) {
@@ -136,56 +180,19 @@ public class WebEditorRequest {
                 .add("pluginVersion", pluginVersion);
     }
 
-    private static JObject formPermissionHolder(PermissionHolder holder) {
+    private static JObject formPermissionHolder(PermissionHolder holder, List<Node> data) {
         return new JObject()
                 .add("type", holder.getType().toString())
                 .add("id", holder.getIdentifier().getName())
                 .add("displayName", holder.getPlainDisplayName())
-                .add("nodes", NodeJsonSerializer.serializeNodes(holder.normalData().asList()));
+                .add("nodes", NodeJsonSerializer.serializeNodes(data));
     }
 
-    private static JObject formTrack(Track track) {
+    private static JObject formTrack(Track track, List<String> data) {
         return new JObject()
                 .add("type", "track")
                 .add("id", track.getName())
-                .add("groups", new JArray().addAll(track.getGroups()));
-    }
-
-    public byte[] encode() {
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-        try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
-            GsonProvider.normal().toJson(this.payload, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return bytesOut.toByteArray();
-    }
-
-    /**
-     * Creates a web editor session, and sends the URL to the sender.
-     *
-     * @param plugin the plugin
-     * @param sender the sender creating the session
-     * @return the command result
-     */
-    public void createSession(LuckPermsPlugin plugin, Sender sender) {
-        String pasteId;
-        try {
-            pasteId = plugin.getBytebin().postContent(encode(), AbstractHttpClient.JSON_TYPE).key();
-        } catch (UnsuccessfulRequestException e) {
-            Message.EDITOR_HTTP_REQUEST_FAILURE.send(sender, e.getResponse().code(), e.getResponse().message());
-            return;
-        } catch (IOException e) {
-            new RuntimeException("Error uploading data to bytebin", e).printStackTrace();
-            Message.EDITOR_HTTP_UNKNOWN_FAILURE.send(sender);
-            return;
-        }
-
-        plugin.getWebEditorSessionStore().addNewSession(pasteId);
-
-        // form a url for the editor
-        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + pasteId;
-        Message.EDITOR_URL.send(sender, url);
+                .add("groups", new JArray().addAll(data));
     }
 
     public static void includeMatchingGroups(List<? super Group> holders, Predicate<? super Group> filter, LuckPermsPlugin plugin) {
@@ -252,17 +259,24 @@ public class WebEditorRequest {
                     .distinct();
         }
 
-        stream.filter(uuid -> !users.containsKey(uuid))
+        Set<UUID> uuids = stream
+                .filter(uuid -> !users.containsKey(uuid))
                 .sorted()
                 .limit(MAX_USERS - users.size())
-                .map(uuid -> plugin.getStorage().loadUser(uuid, null))
-                .forEach(fut -> {
-                    User user = fut.join();
-                    if (user != null) {
-                        users.put(user.getUniqueId(), user);
-                        plugin.getUserManager().getHouseKeeper().cleanup(user.getUniqueId());
-                    }
-                });
+                .collect(Collectors.toSet());
+
+        if (uuids.isEmpty()) {
+            return;
+        }
+
+        // load users in bulk from storage
+        Map<UUID, User> loadedUsers = plugin.getStorage().loadUsers(uuids).join();
+        users.putAll(loadedUsers);
+
+        // schedule cleanup
+        for (UUID uniqueId : loadedUsers.keySet()) {
+            plugin.getUserManager().getHouseKeeper().cleanup(uniqueId);
+        }
     }
 
 }

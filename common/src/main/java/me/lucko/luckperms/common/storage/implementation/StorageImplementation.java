@@ -69,6 +69,8 @@ public interface StorageImplementation {
 
     User loadUser(UUID uniqueId, String username) throws Exception;
 
+    Map<UUID, User> loadUsers(Set<UUID> uniqueIds) throws Exception;
+
     void saveUser(User user) throws Exception;
 
     Set<UUID> getUniqueUsers() throws Exception;

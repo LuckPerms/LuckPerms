@@ -83,15 +83,21 @@ public class BytebinClient extends AbstractHttpClient {
      *
      * @param buf the compressed content
      * @param contentType the type of the content
+     * @param userAgentExtra extra string to append to the user agent
      * @return the key of the resultant content
      * @throws IOException if an error occurs
      */
-    public Content postContent(byte[] buf, MediaType contentType) throws IOException, UnsuccessfulRequestException {
+    public Content postContent(byte[] buf, MediaType contentType, String userAgentExtra) throws IOException, UnsuccessfulRequestException {
         RequestBody body = RequestBody.create(contentType, buf);
+
+        String userAgent = this.userAgent;
+        if (userAgentExtra != null) {
+            userAgent += "/" + userAgentExtra;
+        }
 
         Request.Builder requestBuilder = new Request.Builder()
                 .url(this.url + "post")
-                .header("User-Agent", this.userAgent)
+                .header("User-Agent", userAgent)
                 .header("Content-Encoding", "gzip");
 
         Request request = requestBuilder.post(body).build();
@@ -102,6 +108,10 @@ public class BytebinClient extends AbstractHttpClient {
             }
             return new Content(key);
         }
+    }
+
+    public Content postContent(byte[] buf, MediaType contentType) throws IOException, UnsuccessfulRequestException {
+        return postContent(buf, contentType, null);
     }
 
     /**

@@ -67,6 +67,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -198,6 +199,16 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
             throw new FileIOException(uniqueId.toString(), e);
         }
         return user;
+    }
+
+    @Override
+    public Map<UUID, User> loadUsers(Set<UUID> uniqueIds) throws Exception {
+        // add multithreading here?
+        Map<UUID, User> map = new HashMap<>();
+        for (UUID uniqueId : uniqueIds) {
+            map.put(uniqueId, loadUser(uniqueId, null));
+        }
+        return map;
     }
 
     @Override

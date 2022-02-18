@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.bukkit.util.NullSafeConsoleCommandSender;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
@@ -56,7 +57,7 @@ import java.util.logging.Logger;
 /**
  * Bootstrap plugin for LuckPerms running on Bukkit.
  */
-public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
+public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap, BootstrappedWithLoader {
     private final JavaPlugin loader;
 
     /**
@@ -111,6 +112,7 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
 
     // provide adapters
 
+    @Override
     public JavaPlugin getLoader() {
         return this.loader;
     }

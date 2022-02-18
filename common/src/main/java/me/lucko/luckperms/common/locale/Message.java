@@ -1159,6 +1159,97 @@ public interface Message {
                     .clickEvent(ClickEvent.openUrl(url))
     );
 
+    Args0 EDITOR_SOCKET_CONNECTED = () -> prefixed(translatable()
+            // "&bEditor window connected successfully."
+            .color(AQUA)
+            .key("luckperms.command.editor.socket.connected")
+            .append(FULL_STOP)
+    );
+
+    Args0 EDITOR_SOCKET_RECONNECTED = () -> prefixed(translatable()
+            // "&7Editor window reconnected successfully."
+            .color(GRAY)
+            .key("luckperms.command.editor.socket.reconnected")
+            .append(FULL_STOP)
+    );
+
+    Args0 EDITOR_SOCKET_CHANGES_RECEIVED = () -> prefixed(translatable()
+            // "&7Changes have been received from the connected web editor session."
+            .color(GRAY)
+            .key("luckperms.command.editor.socket.changes-received")
+            .append(FULL_STOP)
+    );
+
+    Args4<String, String, String, Boolean> EDITOR_SOCKET_UNTRUSTED = (nonce, browser, cmdLabel, console) -> join(newline(),
+            // "&bAn editor window has connected, but it is not yet trusted."
+            // "&8(&7session id = &faaaaa&7, browser = &fChrome on Windows 10&8)"
+            // "&7If it was you, &aclick here&7 to trust the session!"
+            // "&7If it was you, run &a/lp trusteditor aaaaa&7 to trust the session!"
+            prefixed(translatable()
+                    .key("luckperms.command.editor.socket.untrusted")
+                    .color(AQUA)
+                    .append(FULL_STOP)),
+            prefixed(text()
+                    .color(DARK_GRAY)
+                    .append(OPEN_BRACKET)
+                    .append(translatable()
+                            .key("luckperms.command.editor.socket.untrusted.sessioninfo")
+                            .color(GRAY)
+                            .args(
+                                    text(nonce, WHITE),
+                                    text(browser, WHITE)
+                            )
+                    )
+                    .append(CLOSE_BRACKET)
+            ),
+            prefixed(text()
+                    .color(GRAY)
+                    .apply(builder -> {
+                        String command = "/" + cmdLabel + " trusteditor " + nonce;
+                        if (console) {
+                            builder.append(translatable()
+                                    .key("luckperms.command.editor.socket.untrusted.prompt.runcommand")
+                                    .args(text(command, GREEN))
+                                    .build()
+                            );
+                        } else {
+                            builder.append(translatable()
+                                    .key("luckperms.command.editor.socket.untrusted.prompt.click")
+                                    .args(translatable()
+                                            .key("luckperms.command.editor.socket.untrusted.prompt.click.action")
+                                            .color(GREEN)
+                                            .clickEvent(ClickEvent.runCommand(command))
+                                    )
+                                    .build()
+                            );
+                        }
+                    }))
+    );
+
+    Args0 EDITOR_SOCKET_TRUST_SUCCESS = () -> join(newline(),
+            // "&aThe editor session has been marked as trusted."
+            // "&7In the future, connections from the same browser will be trusted automatically."
+            // "&7The plugin will now attempt to establish a connection with the editor..."
+            prefixed(translatable()
+                    .key("luckperms.command.editor.socket.trust.success")
+                    .color(GREEN)
+                    .append(FULL_STOP)),
+            prefixed(translatable()
+                    .key("luckperms.command.editor.socket.trust.futureinfo")
+                    .color(GRAY)
+                    .append(FULL_STOP)),
+            prefixed(translatable()
+                    .key("luckperms.command.editor.socket.trust.connecting")
+                    .color(GRAY))
+    );
+
+    Args0 EDITOR_SOCKET_TRUST_FAILURE = () -> prefixed(translatable()
+            // "&cUnable to trust the given session because the socket is closed, or because a different connection was established instead."
+            .color(RED)
+            .key("luckperms.command.editor.socket.trust.failure")
+            .append(FULL_STOP)
+    );
+
     Args2<Integer, String> EDITOR_HTTP_REQUEST_FAILURE = (code, message) -> prefixed(text()
             // "&cUnable to communicate with the editor. (response code &4{}&c, message='{}')"
             .color(RED)

@@ -1,9 +1,9 @@
 group = 'net.luckperms'
-project.version = '5.3'
+project.version = '5.4'
 
 dependencies {
-    compileOnly 'org.checkerframework:checker-qual:3.12.0'
-    compileOnly 'org.jetbrains:annotations:20.1.0'
+    compileOnly 'org.checkerframework:checker-qual:3.21.2'
+    compileOnly 'org.jetbrains:annotations:23.0.0'
 }
 
 // Only used occasionally for deployment - not needed for normal builds.
@@ -18,12 +18,12 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         options.charSet = 'UTF-8'
         options.links(
                 'https://checkerframework.org/api/',
-                'https://javadoc.io/static/org.jetbrains/annotations/20.1.0/'
+                'https://javadoc.io/static/org.jetbrains/annotations/23.0.0/'
         )
         options.addStringOption('Xdoclint:none', '-quiet')
+        options.addStringOption('-since', '5.0,5.1,5.2,5.3,5.4')
 
         if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
-            options.addBooleanOption('-no-module-directories', true)
             options.links.add('https://docs.oracle.com/en/java/javase/11/docs/api/')
         } else {
             options.links.add('https://docs.oracle.com/javase/8/docs/api/')
@@ -43,11 +43,6 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
     artifacts {
         archives javadocJar
         archives sourcesJar
-    }
-
-    signing {
-        useGpgCmd()
-        sign configurations.archives
     }
 
     publishing {
@@ -73,44 +68,46 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                 artifact javadocJar
 
                 pom {
-                    name 'LuckPerms API'
-                    description 'A permissions plugin for Minecraft servers.'
-                    url 'https://luckperms.net'
+                    name = 'LuckPerms API'
+                    description = 'A permissions plugin for Minecraft servers.'
+                    url = 'https://luckperms.net'
 
                     licenses {
                         license {
-                            name 'MIT'
-                            url 'https://opensource.org/licenses/MIT'
+                            name = 'MIT'
+                            url = 'https://opensource.org/licenses/MIT'
                         }
                     }
 
                     developers {
                         developer {
-                            id 'lucko'
-                            name 'Luck'
-                            url 'https://lucko.me'
-                            email 'git@lucko.me'
+                            id = 'lucko'
+                            name = 'Luck'
+                            url = 'https://lucko.me'
+                            email = 'git@lucko.me'
                         }
                     }
 
                     scm {
-                        connection 'scm:git:https://github.com/lucko/LuckPerms.git'
-                        developerConnection 'scm:git:git@github.com:lucko/LuckPerms.git'
-                        url 'https://github.com/lucko/LuckPerms'
-                    }
-
-                    ciManagement {
-                        system 'Jenkins'
-                        url 'https://ci.lucko.me/job/LuckPerms'
+                        connection = 'scm:git:https://github.com/LuckPerms/LuckPerms.git'
+                        developerConnection = 'scm:git:git@github.com:LuckPerms/LuckPerms.git'
+                        url = 'https://github.com/LuckPerms/LuckPerms'
                     }
 
                     issueManagement {
-                        system 'GitHub'
-                        url 'https://github.com/lucko/LuckPerms/issues'
+                        system = 'GitHub'
+                        url = 'https://github.com/LuckPerms/LuckPerms/issues'
                     }
                 }
             }
         }
+    }
+
+    signing {
+        useGpgCmd()
+        sign configurations.archives
+        sign publishing.publications.mavenJava
+        required = true
     }
 }
 */

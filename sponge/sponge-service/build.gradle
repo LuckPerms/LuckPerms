@@ -1,11 +1,11 @@
 repositories {
-    maven { url 'https://repo.spongepowered.org/maven' }
+    maven { url 'https://repo.spongepowered.org/repository/maven-public/' }
 }
 
 dependencies {
     implementation project(':common')
 
-    compileOnly('org.spongepowered:spongeapi:7.2.0') {
+    compileOnly('org.spongepowered:spongeapi:8.0.0') {
         exclude(module: 'configurate-core')
         exclude(module: 'configurate-hocon')
         exclude(module: 'configurate-gson')

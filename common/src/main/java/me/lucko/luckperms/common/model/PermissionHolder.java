@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
-import me.lucko.luckperms.common.model.nodemap.MutateResult;
 import me.lucko.luckperms.common.model.nodemap.NodeMap;
 import me.lucko.luckperms.common.model.nodemap.NodeMapMutable;
 import me.lucko.luckperms.common.model.nodemap.RecordedNodeMap;
@@ -39,6 +38,7 @@ import me.lucko.luckperms.common.node.NodeEquality;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.DataSelector;
+import me.lucko.luckperms.common.util.Difference;
 
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.ContextSet;
@@ -223,8 +223,17 @@ public abstract class PermissionHolder {
         invalidateCache();
     }
 
-    public MutateResult setNodes(DataType type, Iterable<? extends Node> set, boolean callEvent) {
-        MutateResult res = getData(type).setContent(set);
+    public Difference<Node> setNodes(DataType type, Iterable<? extends Node> set, boolean callEvent) {
+        Difference<Node> res = getData(type).setContent(set);
+        invalidateCache();
+        if (callEvent) {
+            getPlugin().getEventDispatcher().dispatchNodeChanges(this, type, res);
+        }
+        return res;
+    }
+
+    public Difference<Node> setNodes(DataType type, Difference<Node> changes, boolean callEvent) {
+        Difference<Node> res = getData(type).applyChanges(changes);
         invalidateCache();
         if (callEvent) {
             getPlugin().getEventDispatcher().dispatchNodeChanges(this, type, res);
@@ -420,7 +429,7 @@ public abstract class PermissionHolder {
     }
 
     private boolean auditTemporaryNodes(DataType dataType) {
-        MutateResult result = getData(dataType).removeIf(Node::hasExpired);
+        Difference<Node> result = getData(dataType).removeIf(Node::hasExpired);
         if (!result.isEmpty()) {
             invalidateCache();
         }
@@ -454,7 +463,7 @@ public abstract class PermissionHolder {
             return DataMutateResult.FAIL_ALREADY_HAS;
         }
 
-        MutateResult changes = getData(dataType).add(node);
+        Difference<Node> changes = getData(dataType).add(node);
         invalidateCache();
         if (callEvent) {
             this.plugin.getEventDispatcher().dispatchNodeChanges(this, dataType, changes);
@@ -491,7 +500,7 @@ public abstract class PermissionHolder {
 
                 if (newNode != null) {
                     // Remove the old Node & add the new one.
-                    MutateResult changes = data.removeThenAdd(otherMatch, newNode);
+                    Difference<Node> changes = data.removeThenAdd(otherMatch, newNode);
                     invalidateCache();
                     this.plugin.getEventDispatcher().dispatchNodeChanges(this, dataType, changes);
 
@@ -509,7 +518,7 @@ public abstract class PermissionHolder {
             return DataMutateResult.FAIL_LACKS;
         }
 
-        MutateResult changes = getData(dataType).remove(node);
+        Difference<Node> changes = getData(dataType).remove(node);
         invalidateCache();
         this.plugin.getEventDispatcher().dispatchNodeChanges(this, dataType, changes);
 
@@ -531,7 +540,7 @@ public abstract class PermissionHolder {
                     Node newNode = node.toBuilder().expiry(newExpiry).build();
 
                     // Remove the old Node & add the new one.
-                    MutateResult changes = data.removeThenAdd(otherMatch, newNode);
+                    Difference<Node> changes = data.removeThenAdd(otherMatch, newNode);
                     invalidateCache();
                     this.plugin.getEventDispatcher().dispatchNodeChanges(this, dataType, changes);
 
@@ -545,7 +554,7 @@ public abstract class PermissionHolder {
     }
 
     public boolean removeIf(DataType dataType, @Nullable ContextSet contextSet, Predicate<? super Node> predicate, boolean giveDefault) {
-        MutateResult changes;
+        Difference<Node> changes;
         if (contextSet == null) {
             changes = getData(dataType).removeIf(predicate);
         } else {
@@ -566,7 +575,7 @@ public abstract class PermissionHolder {
     }
 
     public boolean clearNodes(DataType dataType, ContextSet contextSet, boolean giveDefault) {
-        MutateResult changes;
+        Difference<Node> changes;
         if (contextSet == null) {
             changes = getData(dataType).clear();
         } else {

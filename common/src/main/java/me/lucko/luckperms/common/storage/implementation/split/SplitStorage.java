@@ -153,6 +153,11 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
+    public Map<UUID, User> loadUsers(Set<UUID> uniqueIds) throws Exception {
+        return implFor(SplitStorageType.USER).loadUsers(uniqueIds);
+    }
+
+    @Override
     public void saveUser(User user) throws Exception {
         implFor(SplitStorageType.USER).saveUser(user);
     }

@@ -23,9 +23,12 @@ include (
         'fabric',
         'nukkit',
         'nukkit:loader',
-        'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7',
-        'velocity',
         'minestom'
+        'sponge',
+        'sponge:loader',
+        'sponge:sponge-service',
+        'sponge:sponge-service-api8',
+        'velocity'
 )
 include 'minestom'
 

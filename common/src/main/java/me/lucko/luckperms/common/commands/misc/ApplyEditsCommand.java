@@ -73,7 +73,7 @@ public class ApplyEditsCommand extends SingleCommand {
             return;
         }
 
-        new WebEditorResponse(code, data).apply(plugin, sender, label, ignoreSessionWarning);
+        new WebEditorResponse(code, data).apply(plugin, sender, null, label, ignoreSessionWarning);
     }
 
     @Override

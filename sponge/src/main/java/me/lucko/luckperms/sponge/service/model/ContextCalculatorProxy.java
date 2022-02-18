@@ -30,24 +30,37 @@ import me.lucko.luckperms.common.context.calculator.ForwardingContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.Subject;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.function.Consumer;
 
 public class ContextCalculatorProxy implements ForwardingContextCalculator<Subject> {
-    private final ContextCalculator<Subject> delegate;
+    private final ContextCalculator delegate;
 
-    public ContextCalculatorProxy(ContextCalculator<Subject> delegate) {
+    public ContextCalculatorProxy(ContextCalculator delegate) {
         this.delegate = delegate;
     }
 
     @Override
     public void calculate(@NonNull Subject subject, @NonNull ContextConsumer consumer) {
-        this.delegate.accumulateContexts(subject, new ForwardingContextSet(consumer));
+        EventContext eventContext = EventContext.builder()
+                .add(EventContextKeys.SUBJECT, subject)
+                .build();
+
+        Cause cause = Cause.builder()
+                .append(subject)
+                .build(eventContext);
+
+        calculate(cause, consumer);
+    }
+
+    public void calculate(@NonNull Cause cause, @NonNull ContextConsumer consumer) {
+        this.delegate.accumulateContexts(cause, new ForwardingContextConsumer(consumer));
     }
 
     @Override
@@ -55,42 +68,20 @@ public class ContextCalculatorProxy implements ForwardingContextCalculator<Subje
         return this.delegate;
     }
 
-    private static final class ForwardingContextSet implements Set<Context> {
+    private static final class ForwardingContextConsumer implements Consumer<Context> {
         private final ContextConsumer consumer;
 
-        private ForwardingContextSet(ContextConsumer consumer) {
+        private ForwardingContextConsumer(ContextConsumer consumer) {
             this.consumer = consumer;
         }
 
         @Override
-        public boolean add(Context context) {
-            if (!net.luckperms.api.context.Context.isValidKey(context.getKey()) ||
-                    !net.luckperms.api.context.Context.isValidValue(context.getValue())) {
-                return false;
+        public void accept(Context context) {
+            if (net.luckperms.api.context.Context.isValidKey(context.getKey()) &&
+                    net.luckperms.api.context.Context.isValidValue(context.getValue())) {
+                this.consumer.accept(context.getKey(), context.getValue());
             }
-            this.consumer.accept(context.getKey(), context.getValue());
-            return true;
         }
-
-        @Override
-        public boolean addAll(@NonNull Collection<? extends Context> c) {
-            for (Context context : c) {
-                add(context);
-            }
-            return true;
-        }
-
-        @Override public int size() { throw new UnsupportedOperationException(); }
-        @Override public boolean isEmpty() { throw new UnsupportedOperationException(); }
-        @Override public boolean contains(Object o) { throw new UnsupportedOperationException(); }
-        @Override public @NonNull Iterator<Context> iterator() { throw new UnsupportedOperationException(); }
-        @Override public @NonNull Object[] toArray() { throw new UnsupportedOperationException(); }
-        @Override public <T> @NonNull T[] toArray(@NonNull T[] a) { throw new UnsupportedOperationException(); }
-        @Override public boolean remove(Object o) { throw new UnsupportedOperationException(); }
-        @Override public boolean containsAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean retainAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public boolean removeAll(@NonNull Collection<?> c) { throw new UnsupportedOperationException(); }
-        @Override public void clear() { throw new UnsupportedOperationException(); }
     }
 
 }

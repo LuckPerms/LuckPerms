@@ -27,6 +27,7 @@ package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
@@ -56,7 +57,7 @@ import java.util.logging.Logger;
 /**
  * Bootstrap plugin for LuckPerms running on BungeeCord.
  */
-public class LPBungeeBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
+public class LPBungeeBootstrap implements LuckPermsBootstrap, LoaderBootstrap, BootstrappedWithLoader {
     private final Plugin loader;
 
     /**
@@ -101,6 +102,7 @@ public class LPBungeeBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
 
     // provide adapters
 
+    @Override
     public Plugin getLoader() {
         return this.loader;
     }

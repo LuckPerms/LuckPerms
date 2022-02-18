@@ -154,6 +154,16 @@ public class Storage {
         });
     }
 
+    public CompletableFuture<Map<UUID, User>> loadUsers(Set<UUID> uniqueIds) {
+        return future(() -> {
+            Map<UUID, User> users = this.implementation.loadUsers(uniqueIds);
+            for (User user : users.values()) {
+                this.plugin.getEventDispatcher().dispatchUserLoad(user);
+            }
+            return users;
+        });
+    }
+
     public CompletableFuture<Void> saveUser(User user) {
         return future(() -> this.implementation.saveUser(user));
     }
