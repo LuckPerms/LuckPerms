@@ -55,7 +55,7 @@ public class DependencyRegistry {
             .putAll(StorageType.JSON_COMBINED, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON)
             .putAll(StorageType.HOCON_COMBINED, Dependency.HOCON_CONFIG, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON)
             .putAll(StorageType.TOML_COMBINED, Dependency.TOML4J, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_TOML)
-            .putAll(StorageType.MONGODB, Dependency.MONGODB_DRIVER)
+            .putAll(StorageType.MONGODB, Dependency.MONGODB_DRIVER_CORE, Dependency.MONGODB_DRIVER_LEGACY, Dependency.MONGODB_DRIVER_SYNC, Dependency.MONGODB_DRIVER_BSON)
             .putAll(StorageType.MARIADB, Dependency.MARIADB_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)
             .putAll(StorageType.MYSQL, Dependency.MYSQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)
             .putAll(StorageType.POSTGRESQL, Dependency.POSTGRESQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)

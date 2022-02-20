@@ -197,11 +197,35 @@ public enum Dependency {
             "1.7.30",
             "zboHlk0btAoHYUhcax6ML4/Z6x0ZxTkorA1/lRAQXFc="
     ),
-    MONGODB_DRIVER(
+    MONGODB_DRIVER_CORE(
             "org.mongodb",
-            "mongo-java-driver",
-            "3.12.8",
-            "92uqr4qaL3dbw5wrb8sQWQqFxpzr/Y/DhForeyg3taI=",
+            "mongodb-driver-core",
+            "4.5.0",
+            "awqoW0ImUcrCTA2d1rDCjDLEjLMCrOjKWIcC7E+zLGA=",
+            Relocation.of("mongodb", "com{}mongodb"),
+            Relocation.of("bson", "org{}bson")
+    ),
+    MONGODB_DRIVER_LEGACY(
+            "org.mongodb",
+            "mongodb-driver-legacy",
+            "4.5.0",
+            "77KZGIr3KZmzBpN69rGOLXmnlJIBCXRl/U4gEIdlFhY=",
+            Relocation.of("mongodb", "com{}mongodb"),
+            Relocation.of("bson", "org{}bson")
+    ),
+    MONGODB_DRIVER_SYNC(
+            "org.mongodb",
+            "mongodb-driver-sync",
+            "4.5.0",
+            "q9XDSGJjlo/Ek6jHoCbqWnaK/dghB8y9aDM0hCLiSvk=",
+            Relocation.of("mongodb", "com{}mongodb"),
+            Relocation.of("bson", "org{}bson")
+    ),
+    MONGODB_DRIVER_BSON(
+            "org.mongodb",
+            "bson",
+            "4.5.0",
+            "6CFyEzxbdeiBEXdDBmcgqWs5dvicgFkBLU3MlQUIqRA=",
             Relocation.of("mongodb", "com{}mongodb"),
             Relocation.of("bson", "org{}bson")
     ),
