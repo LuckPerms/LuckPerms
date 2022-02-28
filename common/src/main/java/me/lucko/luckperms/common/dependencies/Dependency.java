@@ -128,8 +128,8 @@ public enum Dependency {
     COMMODORE(
             "me{}lucko",
             "commodore",
-            "1.12",
-            "rLpLs20OG9TETCx1QzA+I+LY8P+p6Q9fUjLSmJcl2Kk=",
+            "1.13",
+            "A4M1Im54vrYbcdSpteQvI6ppNPYWL+VpfBVjsdteY+M=",
             Relocation.of("commodore", "me{}lucko{}commodore")
     ),
     COMMODORE_FILE(
