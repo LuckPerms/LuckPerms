@@ -157,7 +157,7 @@ public class LPBungeeBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
             logger.severe("This is most likely because you are using an old/outdated version of BungeeCord.");
             logger.severe("If you need 1.7 support, replace your BungeeCord.jar file with the latest build of");
             logger.severe("'Travertine' from here:");
-            logger.severe("==> https://papermc.io/downloads#Travertine");
+            logger.severe("==> https://papermc.io/legacy#Travertine");
             logger.severe("");
             logger.severe("The proxy will now shutdown.");
             logger.severe("----------------------------------------------------------------------");
