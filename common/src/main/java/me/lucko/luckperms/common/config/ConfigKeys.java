@@ -91,7 +91,7 @@ public final class ConfigKeys {
     public static final ConfigKey<String> SERVER = key(c -> {
         String server = c.getString("server", "global").toLowerCase(Locale.ROOT);
         if (server.equals("load-from-system-property")) {
-            server = System.getProperty("luckperms.server", "global").toLowerCase(Locale.ROOT);
+            server = System.getenv().getOrDefault("LUCKPERMS_SERVER", System.getProperty("luckperms.server", "global")).toLowerCase(Locale.ROOT);
         }
         return server;
     });
