@@ -94,7 +94,7 @@ public final class ConfigKeys {
             server = System.getProperty("luckperms.server", "global").toLowerCase(Locale.ROOT);
         }
         if (server.equals("load-from-environment-variable")) {
-            System.getenv().getOrDefault("LUCKPERMS_SERVER", "global").toLowerCase(Locale.ROOT);
+            server = System.getenv().getOrDefault("LUCKPERMS_SERVER", "global").toLowerCase(Locale.ROOT);
         }
         return server;
     });
