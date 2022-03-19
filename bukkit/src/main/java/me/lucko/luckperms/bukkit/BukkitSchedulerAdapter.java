@@ -34,6 +34,7 @@ public class BukkitSchedulerAdapter extends AbstractJavaScheduler implements Sch
     private final Executor sync;
 
     public BukkitSchedulerAdapter(LPBukkitBootstrap bootstrap) {
+        super(bootstrap);
         this.sync = r -> bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(bootstrap.getLoader(), r);
     }
 
