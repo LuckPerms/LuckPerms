@@ -58,6 +58,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
+import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
 
 import net.luckperms.api.LuckPerms;
@@ -233,6 +234,13 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // cancel delayed/repeating tasks
         getBootstrap().getScheduler().shutdownScheduler();
+
+        // close web editor sockets
+        for (WebEditorSocket socket : this.webEditorStore.sockets().getSockets()) {
+            if (!socket.isClosed()) {
+                socket.close();
+            }
+        }
 
         // shutdown permission vault and verbose handler tasks
         this.permissionRegistry.close();

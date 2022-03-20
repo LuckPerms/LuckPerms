@@ -31,13 +31,12 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 
+import java.util.Collection;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public final class WebEditorSocketMap {
     private final Cache<UUID, WebEditorSocket> sockets = CaffeineFactory.newBuilder()
             .weakValues()
-            .expireAfterWrite(5, TimeUnit.MINUTES)
             .build();
 
     public WebEditorSocket getSocket(Sender sender) {
@@ -46,5 +45,13 @@ public final class WebEditorSocketMap {
 
     public void putSocket(Sender sender, WebEditorSocket socket) {
         this.sockets.put(sender.getUniqueId(), socket);
+    }
+
+    public void removeSocket(WebEditorSocket socket) {
+        this.sockets.asMap().values().remove(socket);
+    }
+
+    public Collection<WebEditorSocket> getSockets() {
+        return this.sockets.asMap().values();
     }
 }

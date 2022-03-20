@@ -217,6 +217,7 @@ public class WebEditorSocket {
 
     private void closeSocket() {
         this.socket.socket().close(1000, "Normal");
+        this.plugin.getWebEditorStore().sockets().removeSocket(this);
         this.closed = true;
     }
 
