@@ -91,6 +91,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private PermissionRegistry permissionRegistry;
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
+    private OkHttpClient httpClient;
     private BytebinClient bytebin;
     private BytesocksClient bytesocks;
     private WebEditorStore webEditorStore;
@@ -134,12 +135,12 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.configuration = new LuckPermsConfiguration(this, provideConfigurationAdapter());
 
         // setup a bytebin instance
-        OkHttpClient httpClient = new OkHttpClient.Builder()
+        this.httpClient = new OkHttpClient.Builder()
                 .callTimeout(15, TimeUnit.SECONDS)
                 .build();
 
-        this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
-        this.bytesocks = new BytesocksClient(httpClient, getConfiguration().get(ConfigKeys.BYTESOCKS_HOST), "luckperms/editor");
+        this.bytebin = new BytebinClient(this.httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+        this.bytesocks = new BytesocksClient(this.httpClient, getConfiguration().get(ConfigKeys.BYTESOCKS_HOST), "luckperms/editor");
         this.webEditorStore = new WebEditorStore(this);
 
         // init translation repo and update bundle files
@@ -272,6 +273,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // shutdown async executor pool
         getBootstrap().getScheduler().shutdownExecutor();
+
+        // shutdown okhttp
+        this.httpClient.dispatcher().executorService().shutdown();
+        this.httpClient.connectionPool().evictAll();
 
         // close classpath appender
         getBootstrap().getClassPathAppender().close();
