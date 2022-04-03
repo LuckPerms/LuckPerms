@@ -88,16 +88,7 @@ public final class ConfigKeys {
     /**
      * The name of the server
      */
-    public static final ConfigKey<String> SERVER = key(c -> {
-        String server = c.getString("server", "global").toLowerCase(Locale.ROOT);
-        if (server.equals("load-from-system-property")) {
-            server = System.getProperty("luckperms.server", "global").toLowerCase(Locale.ROOT);
-        }
-        if (server.equals("load-from-environment-variable")) {
-            server = System.getenv().getOrDefault("LUCKPERMS_SERVER", "global").toLowerCase(Locale.ROOT);
-        }
-        return server;
-    });
+    public static final ConfigKey<String> SERVER = lowercaseStringKey("server", "global");
 
     /**
      * How many minutes to wait between syncs. A value <= 0 will disable syncing.
@@ -501,14 +492,7 @@ public final class ConfigKeys {
     /**
      * The name of the server to use for Vault.
      */
-    public static final ConfigKey<String> VAULT_SERVER = key(c -> {
-        // default to true for backwards compatibility
-        if (USE_VAULT_SERVER.get(c)) {
-            return c.getString("vault-server", "global").toLowerCase(Locale.ROOT);
-        } else {
-            return SERVER.get(c);
-        }
-    });
+    public static final ConfigKey<String> VAULT_SERVER = lowercaseStringKey("vault-server", "global");
 
     /**
      * If Vault should apply global permissions

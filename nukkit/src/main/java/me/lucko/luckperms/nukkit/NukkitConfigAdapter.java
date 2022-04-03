@@ -32,11 +32,9 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class NukkitConfigAdapter implements ConfigurationAdapter {
     private final LuckPermsPlugin plugin;
@@ -73,17 +71,6 @@ public class NukkitConfigAdapter implements ConfigurationAdapter {
     public List<String> getStringList(String path, List<String> def) {
         List<String> list = this.configuration.getStringList(path);
         return list == null ? def : list;
-    }
-
-    @Override
-    public List<String> getKeys(String path, List<String> def) {
-        ConfigSection section = this.configuration.getSection(path);
-        if (section == null) {
-            return def;
-        }
-
-        Set<String> keys = section.getKeys(false);
-        return keys == null ? def : new ArrayList<>(keys);
     }
 
     @Override

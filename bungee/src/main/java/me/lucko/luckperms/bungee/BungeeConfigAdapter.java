@@ -34,7 +34,6 @@ import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,16 +77,6 @@ public class BungeeConfigAdapter implements ConfigurationAdapter {
     @Override
     public List<String> getStringList(String path, List<String> def) {
         return Optional.ofNullable(this.configuration.getStringList(path)).orElse(def);
-    }
-
-    @Override
-    public List<String> getKeys(String path, List<String> def) {
-        Configuration section = this.configuration.getSection(path);
-        if (section == null) {
-            return def;
-        }
-
-        return Optional.of((List<String>) new ArrayList<>(section.getKeys())).orElse(def);
     }
 
     @Override

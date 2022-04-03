@@ -95,16 +95,6 @@ public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
         return node.getList(Object::toString);
     }
 
-    @Override
-    public List<String> getKeys(String path, List<String> def) {
-        ConfigurationNode node = resolvePath(path);
-        if (node.isVirtual() || !node.isMap()) {
-            return def;
-        }
-
-        return node.getChildrenMap().keySet().stream().map(Object::toString).collect(Collectors.toList());
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, String> getStringMap(String path, Map<String, String> def) {

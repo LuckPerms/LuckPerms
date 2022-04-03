@@ -23,73 +23,77 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit;
+package me.lucko.luckperms.common.config.generic.adapter;
 
-import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import com.google.common.base.Splitter;
 
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BukkitConfigAdapter implements ConfigurationAdapter {
-    private final LuckPermsPlugin plugin;
-    private final File file;
-    private YamlConfiguration configuration;
+public abstract class StringBasedConfigurationAdapter implements ConfigurationAdapter {
 
-    public BukkitConfigAdapter(LuckPermsPlugin plugin, File file) {
-        this.plugin = plugin;
-        this.file = file;
-        reload();
-    }
+    private static final Splitter LIST_SPLITTER = Splitter.on(',');
+    private static final Splitter.MapSplitter MAP_SPLITTER = Splitter.on(',').withKeyValueSeparator('=');
 
-    @Override
-    public void reload() {
-        this.configuration = YamlConfiguration.loadConfiguration(this.file);
-    }
+    protected abstract @Nullable String resolveValue(String path);
 
     @Override
     public String getString(String path, String def) {
-        return this.configuration.getString(path, def);
+        String value = resolveValue(path);
+        if (value == null) {
+            return def;
+        }
+
+        return value;
     }
 
     @Override
     public int getInteger(String path, int def) {
-        return this.configuration.getInt(path, def);
+        String value = resolveValue(path);
+        if (value == null) {
+            return def;
+        }
+
+        try {
+            return Integer.parseInt(value);
+        } catch (IllegalArgumentException e) {
+            return def;
+        }
     }
 
     @Override
     public boolean getBoolean(String path, boolean def) {
-        return this.configuration.getBoolean(path, def);
+        String value = resolveValue(path);
+        if (value == null) {
+            return def;
+        }
+
+        try {
+            return Boolean.parseBoolean(value);
+        } catch (IllegalArgumentException e) {
+            return def;
+        }
     }
 
     @Override
     public List<String> getStringList(String path, List<String> def) {
-        List<String> list = this.configuration.getStringList(path);
-        return this.configuration.isSet(path) ? list : def;
+        String value = resolveValue(path);
+        if (value == null) {
+            return def;
+        }
+
+        return LIST_SPLITTER.splitToList(value);
     }
 
     @Override
     public Map<String, String> getStringMap(String path, Map<String, String> def) {
-        Map<String, String> map = new HashMap<>();
-        ConfigurationSection section = this.configuration.getConfigurationSection(path);
-        if (section == null) {
+        String value = resolveValue(path);
+        if (value == null) {
             return def;
         }
 
-        for (String key : section.getKeys(false)) {
-            map.put(key, section.getString(key));
-        }
-
-        return map;
-    }
-
-    @Override
-    public LuckPermsPlugin getPlugin() {
-        return this.plugin;
+        return MAP_SPLITTER.split(value);
     }
 }

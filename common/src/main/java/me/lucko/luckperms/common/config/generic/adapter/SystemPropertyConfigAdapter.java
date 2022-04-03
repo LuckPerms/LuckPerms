@@ -27,23 +27,38 @@ package me.lucko.luckperms.common.config.generic.adapter;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.util.List;
-import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface ConfigurationAdapter {
+public class SystemPropertyConfigAdapter extends StringBasedConfigurationAdapter {
+    private static final String PREFIX = "luckperms.";
 
-    LuckPermsPlugin getPlugin();
+    private final LuckPermsPlugin plugin;
 
-    void reload();
+    public SystemPropertyConfigAdapter(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
 
-    String getString(String path, String def);
+    @Override
+    protected @Nullable String resolveValue(String path) {
+        // e.g.
+        // 'server'            -> luckperms.server
+        // 'data.table_prefix' -> luckperms.data.table-prefix
+        String key = PREFIX + path;
 
-    int getInteger(String path, int def);
+        String value = System.getProperty(key);
+        if (value != null) {
+            this.plugin.getLogger().info("Resolved configuration value from system property: " + key + " = " + (path.contains("password") ? "*****" : value));
+        }
+        return value;
+    }
 
-    boolean getBoolean(String path, boolean def);
+    @Override
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
 
-    List<String> getStringList(String path, List<String> def);
-
-    Map<String, String> getStringMap(String path, Map<String, String> def);
-
+    @Override
+    public void reload() {
+        // no-op
+    }
 }

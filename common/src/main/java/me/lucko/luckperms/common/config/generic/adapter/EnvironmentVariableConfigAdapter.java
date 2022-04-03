@@ -27,23 +27,42 @@ package me.lucko.luckperms.common.config.generic.adapter;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.util.List;
-import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface ConfigurationAdapter {
+import java.util.Locale;
 
-    LuckPermsPlugin getPlugin();
+public class EnvironmentVariableConfigAdapter extends StringBasedConfigurationAdapter {
+    private static final String PREFIX = "LUCKPERMS_";
 
-    void reload();
+    private final LuckPermsPlugin plugin;
 
-    String getString(String path, String def);
+    public EnvironmentVariableConfigAdapter(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
 
-    int getInteger(String path, int def);
+    @Override
+    protected @Nullable String resolveValue(String path) {
+        // e.g.
+        // 'server'            -> LUCKPERMS_SERVER
+        // 'data.table_prefix' -> LUCKPERMS_DATA_TABLE_PREFIX
+        String key = PREFIX + path.toUpperCase(Locale.ROOT)
+                .replace('-', '_')
+                .replace('.', '_');
 
-    boolean getBoolean(String path, boolean def);
+        String value = System.getenv(key);
+        if (value != null) {
+            this.plugin.getLogger().info("Resolved configuration value from environment variable: " + key + " = " + (path.contains("password") ? "*****" : value));
+        }
+        return value;
+    }
 
-    List<String> getStringList(String path, List<String> def);
+    @Override
+    public LuckPermsPlugin getPlugin() {
+        return this.plugin;
+    }
 
-    Map<String, String> getStringMap(String path, Map<String, String> def);
-
+    @Override
+    public void reload() {
+        // no-op
+    }
 }
