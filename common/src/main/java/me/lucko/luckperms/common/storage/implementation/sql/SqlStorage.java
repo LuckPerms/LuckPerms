@@ -52,6 +52,7 @@ import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
@@ -237,7 +238,7 @@ public class SqlStorage implements StorageImplementation {
         if (!tablePrefix.equals("luckperms_")) {
             meta.put(
                     Component.translatable("luckperms.command.info.storage.meta.table-prefix-key"),
-                    Component.text(tablePrefix)
+                    Component.text(tablePrefix, NamedTextColor.WHITE)
             );
         }
 
