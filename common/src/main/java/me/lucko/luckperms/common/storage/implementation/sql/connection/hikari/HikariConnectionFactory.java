@@ -180,7 +180,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public Map<Component, Component> getMeta() {
+    public Map<Component, Component> getMeta(String tablePrefix) {
         Map<Component, Component> meta = new LinkedHashMap<>();
         boolean success = true;
 
@@ -200,6 +200,11 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
                     Component.text(duration + "ms", NamedTextColor.GREEN)
             );
         }
+        meta.put(
+                Component.translatable("luckperms.command.info.storage.meta.table-key"),
+                Component.text(tablePrefix)
+        );
+
         meta.put(
                 Component.translatable("luckperms.command.info.storage.meta.connected-key"),
                 Message.formatBoolean(success)

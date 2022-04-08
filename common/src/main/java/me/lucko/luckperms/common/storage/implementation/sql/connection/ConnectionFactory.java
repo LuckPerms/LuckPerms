@@ -47,6 +47,10 @@ public interface ConnectionFactory {
         return Collections.emptyMap();
     }
 
+    default Map<Component, Component> getMeta(String tablePrefix) {
+        return Collections.emptyMap();
+    }
+
     Function<String, String> getStatementProcessor();
 
     Connection getConnection() throws SQLException;

@@ -169,6 +169,11 @@ public class MongoStorage implements StorageImplementation {
             );
         }
         meta.put(
+                Component.translatable("luckperms.command.info.storage.meta.table-key"),
+                Component.text(this.prefix)
+        );
+
+        meta.put(
                 Component.translatable("luckperms.command.info.storage.meta.connected-key"),
                 Message.formatBoolean(success)
         );
