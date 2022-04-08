@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
@@ -200,10 +201,13 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
                     Component.text(duration + "ms", NamedTextColor.GREEN)
             );
         }
-        meta.put(
-                Component.translatable("luckperms.command.info.storage.meta.table-key"),
-                Component.text(tablePrefix)
-        );
+
+        if (!ConfigKeys.defaultTablePrefix.equals(tablePrefix)) {
+            meta.put(
+                    Component.translatable("luckperms.command.info.storage.meta.table-key"),
+                    Component.text(tablePrefix)
+            );
+        }
 
         meta.put(
                 Component.translatable("luckperms.command.info.storage.meta.connected-key"),

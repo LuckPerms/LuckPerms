@@ -168,10 +168,13 @@ public class MongoStorage implements StorageImplementation {
                     Component.text(duration + "ms", NamedTextColor.GREEN)
             );
         }
-        meta.put(
-                Component.translatable("luckperms.command.info.storage.meta.collection-key"),
-                Component.text(this.prefix)
-        );
+
+        if (!this.prefix.isEmpty()) {
+            meta.put(
+                    Component.translatable("luckperms.command.info.storage.meta.collection-key"),
+                    Component.text(this.prefix)
+            );
+        }
 
         meta.put(
                 Component.translatable("luckperms.command.info.storage.meta.connected-key"),
