@@ -558,13 +558,13 @@ public final class ConfigKeys {
     /**
      * Default value for table prefix
      */
-    public static final String defaultTablePrefix = "luckperms_";
+    public static final String DEFAULT_TABLE_PREFIX = "luckperms_";
 
     /**
      * The prefix for any SQL tables
      */
     public static final ConfigKey<String> SQL_TABLE_PREFIX = notReloadable(key(c -> {
-        return c.getString("data.table-prefix", c.getString("data.table_prefix", defaultTablePrefix));
+        return c.getString("data.table-prefix", c.getString("data.table_prefix", DEFAULT_TABLE_PREFIX));
     }));
 
     /**

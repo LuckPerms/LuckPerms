@@ -202,7 +202,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
             );
         }
 
-        if (!ConfigKeys.defaultTablePrefix.equals(tablePrefix)) {
+        if (!ConfigKeys.DEFAULT_TABLE_PREFIX.equals(tablePrefix)) {
             meta.put(
                     Component.translatable("luckperms.command.info.storage.meta.table-key"),
                     Component.text(tablePrefix)
