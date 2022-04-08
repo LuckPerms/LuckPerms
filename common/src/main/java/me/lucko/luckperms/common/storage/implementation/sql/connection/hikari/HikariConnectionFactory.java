@@ -200,7 +200,6 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
                     Component.text(duration + "ms", NamedTextColor.GREEN)
             );
         }
-
         meta.put(
                 Component.translatable("luckperms.command.info.storage.meta.connected-key"),
                 Message.formatBoolean(success)
