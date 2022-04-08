@@ -231,7 +231,17 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public Map<Component, Component> getMeta() {
-        return this.connectionFactory.getMeta(this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+        Map<Component, Component> meta = this.connectionFactory.getMeta();
+
+        String tablePrefix = this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX);
+        if (tablePrefix.equals("luckperms_")) {
+            meta.put(
+                    Component.translatable("luckperms.command.info.storage.meta.table-prefix-key"),
+                    Component.text(tablePrefix)
+            );
+        }
+
+        return meta;
     }
 
     @Override

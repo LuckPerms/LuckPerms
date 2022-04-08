@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
@@ -181,7 +180,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public Map<Component, Component> getMeta(String tablePrefix) {
+    public Map<Component, Component> getMeta() {
         Map<Component, Component> meta = new LinkedHashMap<>();
         boolean success = true;
 
@@ -199,13 +198,6 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
             meta.put(
                     Component.translatable("luckperms.command.info.storage.meta.ping-key"),
                     Component.text(duration + "ms", NamedTextColor.GREEN)
-            );
-        }
-
-        if (!ConfigKeys.DEFAULT_TABLE_PREFIX.equals(tablePrefix)) {
-            meta.put(
-                    Component.translatable("luckperms.command.info.storage.meta.table-key"),
-                    Component.text(tablePrefix)
             );
         }
 

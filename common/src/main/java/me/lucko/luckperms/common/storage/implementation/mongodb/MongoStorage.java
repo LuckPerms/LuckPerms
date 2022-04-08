@@ -169,17 +169,17 @@ public class MongoStorage implements StorageImplementation {
             );
         }
 
-        if (!this.prefix.isEmpty()) {
-            meta.put(
-                    Component.translatable("luckperms.command.info.storage.meta.collection-key"),
-                    Component.text(this.prefix)
-            );
-        }
-
         meta.put(
                 Component.translatable("luckperms.command.info.storage.meta.connected-key"),
                 Message.formatBoolean(success)
         );
+
+        if (!this.prefix.isEmpty()) {
+            meta.put(
+                    Component.translatable("luckperms.command.info.storage.meta.collection-prefix-key"),
+                    Component.text(this.prefix)
+            );
+        }
 
         return meta;
     }

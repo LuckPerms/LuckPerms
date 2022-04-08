@@ -37,6 +37,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -119,9 +120,11 @@ abstract class FlatfileConnectionFactory implements ConnectionFactory {
             fileSize = "0MB";
         }
 
-        return Collections.singletonMap(
+        Map<Component, Component> meta = new LinkedHashMap<>();
+        meta.put(
                 Component.translatable("luckperms.command.info.storage.meta.file-size-key"),
                 Component.text(fileSize, NamedTextColor.GREEN)
         );
+        return meta;
     }
 }
