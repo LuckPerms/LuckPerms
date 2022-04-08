@@ -173,6 +173,13 @@ public class MongoStorage implements StorageImplementation {
                 Message.formatBoolean(success)
         );
 
+        if (!this.prefix.isEmpty()) {
+            meta.put(
+                    Component.translatable("luckperms.command.info.storage.meta.collection-prefix-key"),
+                    Component.text(this.prefix)
+            );
+        }
+
         return meta;
     }
 
