@@ -169,7 +169,7 @@ public class MongoStorage implements StorageImplementation {
             );
         }
         meta.put(
-                Component.translatable("luckperms.command.info.storage.meta.table-key"),
+                Component.translatable("luckperms.command.info.storage.meta.collection-key"),
                 Component.text(this.prefix)
         );
 
