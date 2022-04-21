@@ -128,6 +128,8 @@ public class FabricCommandExecutor extends CommandManager implements Command<Ser
             return args;
         }
 
+        // usage of @ selectors requires at least level 2 permission
+        ServerCommandSource atAllowedSource = source.hasPermissionLevel(2) ? source : source.withLevel(2);
         for (ListIterator<String> it = args.listIterator(); it.hasNext(); ) {
             String arg = it.next();
             if (arg.isEmpty() || arg.charAt(0) != '@') {
@@ -136,8 +138,7 @@ public class FabricCommandExecutor extends CommandManager implements Command<Ser
 
             List<ServerPlayerEntity> matchedPlayers;
             try {
-                matchedPlayers = EntityArgumentType.entities().parse(new StringReader(arg))
-                        .getPlayers(source.withLevel(2));   // usage of @ selectors requires at least level 2 permission
+                matchedPlayers = EntityArgumentType.entities().parse(new StringReader(arg)).getPlayers(atAllowedSource);
             } catch (CommandSyntaxException e) {
                 this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + source + " executing " + args, e);
                 continue;
