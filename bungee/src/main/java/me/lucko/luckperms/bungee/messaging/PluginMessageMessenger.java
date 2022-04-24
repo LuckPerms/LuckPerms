@@ -25,15 +25,11 @@
 
 package me.lucko.luckperms.bungee.messaging;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-
 import me.lucko.luckperms.bungee.LPBungeePlugin;
+import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
-import net.luckperms.api.messenger.message.OutgoingMessage;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -41,20 +37,15 @@ import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
  */
-public class PluginMessageMessenger implements Messenger, Listener {
-    private static final String CHANNEL = "luckperms:update";
-
+public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements Listener {
     private final LPBungeePlugin plugin;
-    private final IncomingMessageConsumer consumer;
 
     public PluginMessageMessenger(LPBungeePlugin plugin, IncomingMessageConsumer consumer) {
+        super(consumer);
         this.plugin = plugin;
-        this.consumer = consumer;
     }
 
     public void init() {
@@ -70,19 +61,11 @@ public class PluginMessageMessenger implements Messenger, Listener {
         proxy.getPluginManager().unregisterListener(this);
     }
 
-    private void dispatchMessage(byte[] message) {
-        for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
-            server.sendData(CHANNEL, message, false);
-        }
-    }
-
     @Override
-    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF(outgoingMessage.asEncodedString());
-
-        byte[] message = out.toByteArray();
-        dispatchMessage(message);
+    protected void sendOutgoingMessage(byte[] buf) {
+        for (ServerInfo server : this.plugin.getBootstrap().getProxy().getServers().values()) {
+            server.sendData(CHANNEL, buf, false);
+        }
     }
 
     @EventHandler
@@ -97,14 +80,11 @@ public class PluginMessageMessenger implements Messenger, Listener {
             return;
         }
 
-        byte[] data = e.getData();
+        byte[] buf = e.getData();
 
-        ByteArrayDataInput in = ByteStreams.newDataInput(data);
-        String msg = in.readUTF();
-
-        if (this.consumer.consumeIncomingMessageAsString(msg)) {
+        if (handleIncomingMessage(buf)) {
             // Forward to other servers
-            this.plugin.getBootstrap().getScheduler().executeAsync(() -> dispatchMessage(data));
+            this.plugin.getBootstrap().getScheduler().executeAsync(() -> sendOutgoingMessage(buf));
         }
     }
 }
