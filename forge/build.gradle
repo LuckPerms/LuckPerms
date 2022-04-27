@@ -27,7 +27,7 @@ blossom {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.18.1'
+    mappings channel: 'official', version: '1.18.2'
 }
 
 mixin {
@@ -43,7 +43,7 @@ repositories {
 
 dependencies {
     implementation project(':common')
-    minecraft 'net.minecraftforge:forge:1.18.1-39.0.9'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.1.0'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
