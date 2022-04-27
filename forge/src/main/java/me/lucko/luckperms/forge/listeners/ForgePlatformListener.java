@@ -108,7 +108,8 @@ public class ForgePlatformListener {
             }
 
             event.setException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parseResults.getReader()));
-            break;
+            event.setCanceled(true);
+            return;
         }
 
         event.setParseResults(parseResults);
