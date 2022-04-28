@@ -71,6 +71,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
             return;
         }
 
+        // Ensure the GameProfile is complete, this is primarily for offline servers with no UUID forwarding configured.
         if (!this.gameProfile.isComplete()) {
             this.gameProfile = this.createFakeProfile(this.gameProfile);
         }
