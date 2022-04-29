@@ -36,9 +36,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Mixin into {@link PlayerList} for posting {@link ConnectionEvent.Login}
+ */
 @Mixin(value = PlayerList.class)
 public abstract class PlayerListMixin {
 
+    /**
+     * Mixin into {@link PlayerList#placeNewPlayer(Connection, ServerPlayer)} for posting {@link ConnectionEvent.Login},
+     * this event is used for finalizing an asynchronous preload operation for the connecting users' data which was
+     * started during {@link ConnectionEvent.Auth}.
+     */
     @Inject(
             method = "placeNewPlayer",
             at = @At(

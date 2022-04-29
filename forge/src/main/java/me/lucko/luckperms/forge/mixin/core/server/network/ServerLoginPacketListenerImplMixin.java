@@ -28,6 +28,7 @@ package me.lucko.luckperms.forge.mixin.core.server.network;
 import com.mojang.authlib.GameProfile;
 import me.lucko.luckperms.forge.event.ConnectionEvent;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Final;
@@ -58,6 +59,10 @@ public abstract class ServerLoginPacketListenerImplMixin {
 
     private boolean luckperms$authenticated;
 
+    /**
+     * Mixin into {@link ServerLoginPacketListenerImpl#tick} for posting {@link ConnectionEvent.Auth},
+     * this event is used for starting an asynchronous preload operation for the connecting users' data.
+     */
     @Inject(
             method = "tick",
             at = @At(
@@ -84,6 +89,10 @@ public abstract class ServerLoginPacketListenerImplMixin {
         MinecraftForge.EVENT_BUS.post(new ConnectionEvent.Auth(this.connection, this.gameProfile));
     }
 
+    /**
+     * Mixin into {@link ServerLoginPacketListenerImpl#onDisconnect(Component)} for posting {@link ConnectionEvent.Disconnect},
+     * this event is used for cleaning up failed logins.
+     */
     @Inject(
             method = "onDisconnect",
             at = @At(

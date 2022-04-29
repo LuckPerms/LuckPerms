@@ -32,6 +32,7 @@ import me.lucko.luckperms.forge.event.SuggestCommandsEvent;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,6 +50,10 @@ public abstract class CommandsMixin {
     @Shadow
     protected abstract void fillUsableCommands(CommandNode<CommandSourceStack> p_82113_, CommandNode<SharedSuggestionProvider> p_82114_, CommandSourceStack p_82115_, Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> p_82116_);
 
+    /**
+     * Mixin into {@link Commands#sendCommands(ServerPlayer)} for posting {@link SuggestCommandsEvent},
+     * this event allows modifications the command suggestions sent to the client.
+     */
     @Redirect(
             method = "sendCommands",
             at = @At(
