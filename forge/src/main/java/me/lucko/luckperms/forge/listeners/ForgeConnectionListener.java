@@ -36,6 +36,8 @@ import me.lucko.luckperms.forge.LPForgePlugin;
 import me.lucko.luckperms.forge.event.ConnectionEvent;
 import net.kyori.adventure.text.Component;
 import net.minecraft.Util;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -94,9 +96,8 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
     }
 
     @SubscribeEvent
-    public void onPlayerLoadFromFile(PlayerEvent.LoadFromFile event) {
-        ServerPlayer player = (ServerPlayer) event.getPlayer();
-        GameProfile profile = player.getGameProfile();
+    public void onLogin(ConnectionEvent.Login event) {
+        GameProfile profile = event.getProfile();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLogger().info("Processing post-login for " + profile.getId() + " - " + profile.getName());
@@ -105,15 +106,17 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
         try {
             CompletableFuture<Boolean> future = this.pendingConnections.get(profile.getId());
             if (future.getNow(false) != Boolean.TRUE) {
-                Component component = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build(), player.getLanguage());
-                player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
+                Component component = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
+                event.setMessage(ForgeSenderFactory.toNativeText(component));
+                event.setCanceled(true);
                 return;
             }
 
             future.cancel(false);
         } catch (Exception ex) {
-            Component component = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLanguage());
-            player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
+            Component component = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
+            event.setMessage(ForgeSenderFactory.toNativeText(component));
+            event.setCanceled(true);
             return;
         } finally {
             this.pendingConnections.remove(profile.getId());
@@ -130,15 +133,16 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
                         " doesn't currently have data pre-loaded, but they have been processed before in this session.");
             }
 
-            Component component = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLanguage());
+            Component component = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
-                player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
+                event.setMessage(ForgeSenderFactory.toNativeText(component));
+                event.setCanceled(true);
             } else {
-                player.sendMessage(ForgeSenderFactory.toNativeText(component), Util.NIL_UUID);
+                event.getConnection().send(new ClientboundChatPacket(ForgeSenderFactory.toNativeText(component), ChatType.SYSTEM, Util.NIL_UUID));
             }
         }
 
-        this.plugin.getContextManager().register(player);
+        this.plugin.getContextManager().register(event.getPlayer());
     }
 
     @SubscribeEvent

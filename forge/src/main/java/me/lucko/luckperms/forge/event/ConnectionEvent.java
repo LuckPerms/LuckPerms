@@ -27,6 +27,9 @@ package me.lucko.luckperms.forge.event;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
 public abstract class ConnectionEvent extends Event {
@@ -51,6 +54,30 @@ public abstract class ConnectionEvent extends Event {
 
         public Auth(Connection connection, GameProfile profile) {
             super(connection, profile);
+        }
+    }
+
+    @Cancelable
+    public static class Login extends ConnectionEvent {
+
+        private final ServerPlayer player;
+        private Component message;
+
+        public Login(Connection connection, ServerPlayer player) {
+            super(connection, player.getGameProfile());
+            this.player = player;
+        }
+
+        public ServerPlayer getPlayer() {
+            return player;
+        }
+
+        public Component getMessage() {
+            return message;
+        }
+
+        public void setMessage(Component message) {
+            this.message = message;
         }
     }
 
