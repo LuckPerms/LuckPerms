@@ -23,12 +23,11 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.forge;
+package me.lucko.luckperms.forge.classpath;
 
 import cpw.mods.cl.ModuleClassLoader;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.TransformingClassLoader;
-import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import sun.misc.Unsafe;
 
@@ -46,21 +45,18 @@ import java.util.jar.JarFile;
 /**
  * Extends {@link URLClassLoader} as modlauncher lacks the ability to dynamically add jars to the classpath.
  */
-public class ForgeClassPathAppender extends URLClassLoader implements ClassPathAppender {
+public class ForgeClassLoader extends URLClassLoader {
+
     private final PluginLogger logger;
     private final Map<String, ClassLoader> parentLoaders;
 
-    public ForgeClassPathAppender(PluginLogger logger) {
+    public ForgeClassLoader(PluginLogger logger) {
         super(new URL[0], (ModuleClassLoader) Launcher.class.getClassLoader());
         this.logger = logger;
         this.parentLoaders = getParentLoaders((TransformingClassLoader) Thread.currentThread().getContextClassLoader());
     }
 
-    @Override
-    public void addJarToClasspath(Path file) {
-        // For debugging purposes
-        // this.logger.info("Adding " + file + " to the classpath");
-
+    public void addToClasspath(Path file) {
         try {
             // Add the jar to ourselves the URLClassLoader
             addURL(file.toUri().toURL());
@@ -99,11 +95,6 @@ public class ForgeClassPathAppender extends URLClassLoader implements ClassPathA
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    @Override
-    public void close() {
-        // no-op
     }
 
     /**
