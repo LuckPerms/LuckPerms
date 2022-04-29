@@ -104,11 +104,13 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
 
         try {
             CompletableFuture<Boolean> future = this.pendingConnections.get(profile.getId());
-            if (future.get() != Boolean.TRUE) {
+            if (future.getNow(false) != Boolean.TRUE) {
                 Component component = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build(), player.getLanguage());
                 player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
                 return;
             }
+
+            future.cancel(false);
         } catch (Exception ex) {
             Component component = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLanguage());
             player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
