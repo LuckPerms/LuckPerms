@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.forge.mixin.core.commands;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import me.lucko.luckperms.forge.event.SuggestCommandsEvent;
@@ -74,23 +73,4 @@ public abstract class CommandsMixin {
         fillUsableCommands(event.getNode(), suggestionNode, source.withPermission(4), map);
     }
 
-    /**
-     * Forge will only re-throw the Exception passed in the {@link net.minecraftforge.event.CommandEvent CommandEvent} if it's an unchecked Exception,
-     * this behaviour prevents a {@link CommandSyntaxException CommandSyntaxException} from being propagated through the event.
-     *
-     * TODO Fix upstream.
-     */
-    @Redirect(
-            method = "performCommand",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lcom/google/common/base/Throwables;throwIfUnchecked(Ljava/lang/Throwable;)V",
-                    remap = false
-            )
-    )
-    private void onThrowIfUnchecked(Throwable throwable) throws CommandSyntaxException {
-        if (throwable instanceof CommandSyntaxException) {
-            throw (CommandSyntaxException) throwable;
-        }
-    }
 }
