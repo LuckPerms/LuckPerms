@@ -6,7 +6,6 @@
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "commands.CommandsMixin",
     "server.network.ServerLoginPacketListenerImplMixin",
     "server.players.PlayerListMixin"
   ],
