@@ -66,15 +66,13 @@ public class BrigadierRewriter {
         return new CommandDispatcher<>(node);
     }
 
+    @SuppressWarnings("unchecked")
     private CommandNode<CommandSourceStack> rebuild(CommandNode<CommandSourceStack> node) {
         if (node == null) return null;
         // If we are getting to this state and re-wrapping LPCommandNodes then something is incredibly broken.
-        if (node instanceof LPRootCommandNode)
-            throw new IllegalArgumentException("Unable to rebuild LPRootCommandNode");
-        if (node instanceof LPArgumentCommandNode)
-            throw new IllegalArgumentException("Unable to rebuild LPArgumentCommandNode");
-        if (node instanceof LPLiteralCommandNode)
-            throw new IllegalArgumentException("Unable to rebuild LPLiteralCommandNode");
+        if (node instanceof LPRootCommandNode) throw new IllegalArgumentException("Unable to rebuild LPRootCommandNode");
+        if (node instanceof LPArgumentCommandNode) throw new IllegalArgumentException("Unable to rebuild LPArgumentCommandNode");
+        if (node instanceof LPLiteralCommandNode) throw new IllegalArgumentException("Unable to rebuild LPLiteralCommandNode");
 
         CommandNode<CommandSourceStack> existingNode = nodes.get(node);
         if (existingNode != null) {
