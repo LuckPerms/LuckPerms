@@ -18,6 +18,6 @@ Source: https://github.com/LuckPerms/LuckPerms
 [[dependencies.luckperms]]
     modId="forge"
     mandatory=true
-    versionRange="[40.1.1,)"
+    versionRange="[40.1.20,)"
     ordering="NONE"
     side="BOTH"

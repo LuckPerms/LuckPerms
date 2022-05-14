@@ -2,21 +2,18 @@ buildscript {
     repositories {
         maven { url 'https://plugins.gradle.org/m2' }
         maven { url 'https://maven.minecraftforge.net/' }
-        maven { url 'https://repo.spongepowered.org/repository/maven-public' }
     }
 
     dependencies {
         classpath 'gradle.plugin.com.github.johnrengelman:shadow:7.1.2'
         classpath 'net.kyori:blossom:1.3.0'
         classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'net.kyori.blossom'
 apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
 
 sourceCompatibility = 1.8
 targetCompatibility = 17
@@ -31,11 +28,6 @@ minecraft {
     mappings channel: 'official', version: '1.18.2'
 }
 
-mixin {
-    disableRefMapWarning = true
-    add sourceSets.main, 'mixins.luckperms.refmap.json'
-}
-
 configurations {
 }
 
@@ -44,8 +36,7 @@ repositories {
 
 dependencies {
     implementation project(':common')
-    minecraft 'net.minecraftforge:forge:1.18.2-40.1.0'
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.1.20'
 }
 
 jar {
@@ -54,8 +45,7 @@ jar {
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 'Implementation-Title': 'LuckPerms',
                 'Implementation-Vendor': 'LuckPerms',
-                'Implementation-Version': "${project.version}",
-                'MixinConfigs': 'mixins.luckperms.core.json',
+                'Implementation-Version': project.ext.fullVersion,
                 'Specification-Title': 'luckperms',
                 'Specification-Vendor': 'LuckPerms',
                 'Specification-Version': '1'
@@ -64,15 +54,9 @@ jar {
 }
 
 processResources {
-    duplicatesStrategy(DuplicatesStrategy.INCLUDE)
-    from (sourceSets.main.resources.srcDirs) {
-        include('META-INF/mods.toml')
-        expand('version': version)
+    filesMatching('META-INF/mods.toml') {
+        expand 'version': project.ext.fullVersion
     }
-}
-
-reobf {
-    shadowJar {}
 }
 
 shadowJar {
