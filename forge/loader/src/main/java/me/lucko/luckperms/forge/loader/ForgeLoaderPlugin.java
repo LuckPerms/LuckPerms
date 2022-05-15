@@ -50,11 +50,7 @@ public class ForgeLoaderPlugin implements Supplier<ModContainer> {
 
     public ForgeLoaderPlugin() {
         this.container = ModList.get().getModContainerByObject(this).orElse(null);
-
         JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
-
-        Thread.currentThread().setContextClassLoader(loader);
-
         this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, Supplier.class, this);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);
