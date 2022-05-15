@@ -34,14 +34,15 @@ import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.forge.util.EventBusUtil;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -112,8 +113,7 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
         this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
         this.plugin = new LPForgePlugin(this);
 
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, false, ServerAboutToStartEvent.class, this::onServerAboutToStart);
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, ServerStoppingEvent.class, this::onServerStopping);
+        EventBusUtil.register(this);
     }
 
     // provide adapters
@@ -164,11 +164,13 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
         this.plugin.disable();
     }
 
-    private void onServerAboutToStart(ServerAboutToStartEvent event) {
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onServerAboutToStart(ServerAboutToStartEvent event) {
         this.server = event.getServer();
     }
 
-    private void onServerStopping(ServerStoppingEvent event) {
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onServerStopping(ServerStoppingEvent event) {
         this.server = null;
     }
 

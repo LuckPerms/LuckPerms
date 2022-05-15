@@ -41,6 +41,7 @@ import net.minecraft.commands.Commands;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -53,11 +54,10 @@ public class ForgeCommandExecutor extends CommandManager implements Command<Comm
     public ForgeCommandExecutor(LPForgePlugin plugin) {
         super(plugin);
         this.plugin = plugin;
-
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, RegisterCommandsEvent.class, this::onRegisterCommands);
     }
 
-    private void onRegisterCommands(RegisterCommandsEvent event) {
+    @SubscribeEvent
+    public void onRegisterCommands(RegisterCommandsEvent event) {
         for (String alias : COMMAND_ALIASES) {
             LiteralCommandNode<CommandSourceStack> command = Commands.literal(alias).executes(this).build();
             ArgumentCommandNode<CommandSourceStack, String> argument = Commands.argument("args", StringArgumentType.greedyString())

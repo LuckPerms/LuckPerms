@@ -48,6 +48,7 @@ import me.lucko.luckperms.forge.listeners.ForgeCommandListUpdater;
 import me.lucko.luckperms.forge.listeners.ForgeConnectionListener;
 import me.lucko.luckperms.forge.listeners.ForgePlatformListener;
 import me.lucko.luckperms.forge.messaging.ForgeMessagingFactory;
+import me.lucko.luckperms.forge.util.EventBusUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;
@@ -107,6 +108,8 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
     protected void registerPlatformListeners() {
         this.connectionListener = new ForgeConnectionListener(this);
         this.platformListener = new ForgePlatformListener(this);
+        EventBusUtil.register(this.connectionListener);
+        EventBusUtil.register(this.platformListener);
     }
 
     @Override
@@ -117,6 +120,7 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerCommands() {
         this.commandManager = new ForgeCommandExecutor(this);
+        EventBusUtil.register(this.commandManager);
     }
 
     @Override
@@ -136,6 +140,7 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
         this.contextManager = new ForgeContextManager(this);
 
         ForgePlayerCalculator playerCalculator = new ForgePlayerCalculator(this, getConfiguration().get(ConfigKeys.DISABLED_CONTEXTS));
+        EventBusUtil.register(playerCalculator);
         this.contextManager.registerCalculator(playerCalculator);
     }
 

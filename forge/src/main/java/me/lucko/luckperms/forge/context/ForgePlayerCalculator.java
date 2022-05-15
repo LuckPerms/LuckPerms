@@ -41,9 +41,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.ServerLevelData;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;
@@ -65,9 +64,6 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
         this.gamemode = !disabled.contains(DefaultContextKeys.GAMEMODE_KEY);
         this.world = !disabled.contains(DefaultContextKeys.WORLD_KEY);
         this.dimensionType = !disabled.contains(DefaultContextKeys.DIMENSION_TYPE_KEY);
-
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, PlayerEvent.PlayerChangedDimensionEvent.class, this::onPlayerChangedDimension);
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, PlayerEvent.PlayerChangeGameModeEvent.class, this::onPlayerChangeGameMode);
     }
 
     @Override
@@ -130,7 +126,8 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
         return key.toString();
     }
 
-    private void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+    @SubscribeEvent
+    public void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!(this.world || this.dimensionType)) {
             return;
         }
@@ -138,7 +135,8 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
         this.plugin.getContextManager().signalContextUpdate((ServerPlayer) event.getPlayer());
     }
 
-    private void onPlayerChangeGameMode(PlayerEvent.PlayerChangeGameModeEvent event) {
+    @SubscribeEvent
+    public void onPlayerChangeGameMode(PlayerEvent.PlayerChangeGameModeEvent event) {
         if (!this.gamemode || event.getNewGameMode().getId() == GAME_MODE_NOT_SET) {
             return;
         }
