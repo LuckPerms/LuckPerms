@@ -54,7 +54,6 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModContainer;
 
 import java.util.Optional;
@@ -69,6 +68,7 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
 
     private ForgeSenderFactory senderFactory;
     private ForgeConnectionListener connectionListener;
+    private ForgePlatformListener platformListener;
     private ForgeCommandExecutor commandManager;
     private StandardUserManager userManager;
     private StandardGroupManager groupManager;
@@ -106,8 +106,7 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerPlatformListeners() {
         this.connectionListener = new ForgeConnectionListener(this);
-        MinecraftForge.EVENT_BUS.register(this.connectionListener);
-        MinecraftForge.EVENT_BUS.register(new ForgePlatformListener(this));
+        this.platformListener = new ForgePlatformListener(this);
     }
 
     @Override
@@ -118,7 +117,6 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerCommands() {
         this.commandManager = new ForgeCommandExecutor(this);
-        MinecraftForge.EVENT_BUS.register(this.commandManager);
     }
 
     @Override
@@ -138,7 +136,6 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
         this.contextManager = new ForgeContextManager(this);
 
         ForgePlayerCalculator playerCalculator = new ForgePlayerCalculator(this, getConfiguration().get(ConfigKeys.DISABLED_CONTEXTS));
-        MinecraftForge.EVENT_BUS.register(playerCalculator);
         this.contextManager.registerCalculator(playerCalculator);
     }
 
@@ -203,6 +200,10 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
     @Override
     public ForgeConnectionListener getConnectionListener() {
         return this.connectionListener;
+    }
+
+    public ForgePlatformListener getPlatformListener() {
+        return platformListener;
     }
 
     @Override

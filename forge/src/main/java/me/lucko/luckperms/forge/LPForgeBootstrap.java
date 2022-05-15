@@ -26,12 +26,14 @@
 package me.lucko.luckperms.forge;
 
 import com.mojang.authlib.GameProfile;
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
-import me.lucko.luckperms.forge.classpath.ForgeClassPathAppender;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,12 +42,8 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.forgespi.language.IModInfo;
 import org.apache.logging.log4j.LogManager;
@@ -60,13 +58,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Supplier;
 
 /**
  * Bootstrap plugin for LuckPerms running on Forge.
  */
-@Mod(value = LPForgeBootstrap.ID)
-public final class LPForgeBootstrap implements LuckPermsBootstrap {
+public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstrap, BootstrappedWithLoader {
     public static final String ID = "luckperms";
+
+    /**
+     * The plugin loader
+     */
+    private final Supplier<ModContainer> loader;
 
     /**
      * The plugin logger
@@ -102,17 +105,23 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap {
      */
     private MinecraftServer server;
 
-    public LPForgeBootstrap() {
+    public LPForgeBootstrap(Supplier<ModContainer> loader) {
+        this.loader = loader;
         this.logger = new Log4jPluginLogger(LogManager.getLogger(LPForgeBootstrap.ID));
         this.schedulerAdapter = new ForgeSchedulerAdapter(this);
-        this.classPathAppender = new ForgeClassPathAppender(this.logger);
+        this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
         this.plugin = new LPForgePlugin(this);
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);
-        MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, false, ServerAboutToStartEvent.class, this::onServerAboutToStart);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, ServerStoppingEvent.class, this::onServerStopping);
     }
 
     // provide adapters
+
+    @Override
+    public Object getLoader() {
+        return this.loader;
+    }
 
     @Override
     public PluginLogger getPluginLogger() {
@@ -131,14 +140,18 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap {
 
     // lifecycle
 
-    public void onCommonSetup(FMLCommonSetupEvent event) {
+    @Override
+    public void onLoad() {
         this.startTime = Instant.now();
         try {
             this.plugin.load();
         } finally {
             this.loadLatch.countDown();
         }
+    }
 
+    @Override
+    public void onEnable() {
         try {
             this.plugin.enable();
         } finally {
@@ -146,14 +159,16 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onServerAboutToStart(ServerAboutToStartEvent event) {
+    @Override
+    public void onDisable() {
+        this.plugin.disable();
+    }
+
+    private void onServerAboutToStart(ServerAboutToStartEvent event) {
         this.server = event.getServer();
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onServerStopping(ServerStoppingEvent event) {
-        this.plugin.disable();
+    private void onServerStopping(ServerStoppingEvent event) {
         this.server = null;
     }
 

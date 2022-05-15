@@ -41,10 +41,10 @@ import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerNegotiationEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -55,10 +55,13 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
     public ForgeConnectionListener(LPForgePlugin plugin) {
         super(plugin);
         this.plugin = plugin;
+
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, PlayerNegotiationEvent.class, this::onPlayerNegotiation);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, false, PlayerEvent.LoadFromFile.class, this::onPlayerLoadFromFile);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, PlayerEvent.PlayerLoggedOutEvent.class, this::onPlayerLoggedOut);
     }
 
-    @SubscribeEvent
-    public void onPlayerNegotiation(PlayerNegotiationEvent event) {
+    private void onPlayerNegotiation(PlayerNegotiationEvent event) {
         String username = event.getProfile().getName();
         UUID uniqueId = event.getProfile().isComplete() ? event.getProfile().getId() : Player.createPlayerUUID(username);
 
@@ -108,8 +111,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+    private void onPlayerLoadFromFile(PlayerEvent.LoadFromFile event) {
         ServerPlayer player = (ServerPlayer) event.getPlayer();
         GameProfile profile = player.getGameProfile();
 
@@ -140,8 +142,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
         this.plugin.getContextManager().register(player);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+    private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         ServerPlayer player = (ServerPlayer) event.getPlayer();
 
         this.plugin.getContextManager().unregister(player);

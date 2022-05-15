@@ -38,10 +38,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.players.ServerOpList;
 import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.server.permission.events.PermissionGatherEvent;
 import net.minecraftforge.server.permission.handler.DefaultPermissionHandler;
 
@@ -55,10 +56,14 @@ public class ForgePlatformListener {
     public ForgePlatformListener(LPForgePlugin plugin) {
         this.plugin = plugin;
         this.brigadierRewriter = new BrigadierRewriter(plugin);
+
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, CommandEvent.class, this::onCommand);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, AddReloadListenerEvent.class, this::onAddReloadListener);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, PermissionGatherEvent.Handler.class, this::onPermissionGatherHandler);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, ServerStartingEvent.class, this::onServerStarting);
     }
 
-    @SubscribeEvent
-    public void onCommand(CommandEvent event) {
+    private void onCommand(CommandEvent event) {
         CommandContextBuilder<CommandSourceStack> context = event.getParseResults().getContext();
 
         if (!this.plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
@@ -77,14 +82,12 @@ public class ForgePlatformListener {
         }
     }
 
-    @SubscribeEvent
-    public void onAddReloadListener(AddReloadListenerEvent event) {
+    private void onAddReloadListener(AddReloadListenerEvent event) {
         Commands commands = event.getServerResources().getCommands();
         commands.dispatcher = this.brigadierRewriter.rebuild(commands.dispatcher);
     }
 
-    @SubscribeEvent
-    public void onPermissionGatherHandler(PermissionGatherEvent.Handler event) {
+    private void onPermissionGatherHandler(PermissionGatherEvent.Handler event) {
         ForgeConfigSpec.ConfigValue<String> permissionHandler = ForgeConfig.SERVER.permissionHandler;
         if (permissionHandler.get().equals(DefaultPermissionHandler.IDENTIFIER.toString())) {
             // Override the default permission handler with LuckPerms
@@ -94,8 +97,7 @@ public class ForgePlatformListener {
         event.addPermissionHandler(ForgePermissionHandler.IDENTIFIER, permissions -> new ForgePermissionHandler(this.plugin, permissions));
     }
 
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
+    private void onServerStarting(ServerStartingEvent event) {
         if (!this.plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
             ServerOpList ops = event.getServer().getPlayerList().getOps();
             ops.getEntries().clear();

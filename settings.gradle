@@ -22,6 +22,7 @@ include (
         'bungee:loader',
         'fabric',
         'forge',
+        'forge:loader',
         'nukkit',
         'nukkit:loader',
         'sponge',
