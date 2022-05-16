@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.forge.model;
+package me.lucko.luckperms.forge.capabilities;
 
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
@@ -33,19 +33,25 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 
 import java.util.Locale;
 import java.util.function.Function;
 
-public class ForgeUser {
+public class UserCapability {
+
+    public static final Capability<UserCapability> CAPABILITY = CapabilityManager.get(UserCapabilityToken.INSTANCE);
+    public static final ResourceLocation RESOURCE_LOCATION = new ResourceLocation("luckperms", "user");
 
     private final User user;
     private final QueryOptionsCache<ServerPlayer> queryOptionsCache;
     private String language;
     private Locale locale;
 
-    public ForgeUser(User user, QueryOptionsCache<ServerPlayer> queryOptionsCache) {
+    public UserCapability(User user, QueryOptionsCache<ServerPlayer> queryOptionsCache) {
         this.user = user;
         this.queryOptionsCache = queryOptionsCache;
     }
@@ -124,5 +130,4 @@ public class ForgeUser {
 
         return this.locale;
     }
-
 }

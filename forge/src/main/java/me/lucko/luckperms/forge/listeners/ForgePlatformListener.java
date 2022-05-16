@@ -31,14 +31,19 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.forge.LPForgePlugin;
+import me.lucko.luckperms.forge.capabilities.UserCapability;
+import me.lucko.luckperms.forge.capabilities.UserCapabilityProvider;
 import me.lucko.luckperms.forge.service.ForgePermissionHandler;
 import me.lucko.luckperms.forge.util.BrigadierRewriter;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.ServerOpList;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -55,6 +60,15 @@ public class ForgePlatformListener {
     public ForgePlatformListener(LPForgePlugin plugin) {
         this.plugin = plugin;
         this.brigadierRewriter = new BrigadierRewriter(plugin);
+    }
+
+    @SubscribeEvent
+    public void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
+        if (!(event.getObject() instanceof ServerPlayer)) {
+            return;
+        }
+
+        event.addCapability(UserCapability.RESOURCE_LOCATION, new UserCapabilityProvider(this.plugin, (ServerPlayer) event.getObject()));
     }
 
     @SubscribeEvent

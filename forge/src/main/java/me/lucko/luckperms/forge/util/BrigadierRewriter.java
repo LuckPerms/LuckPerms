@@ -35,7 +35,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.model.ForgeUser;
+import me.lucko.luckperms.forge.capabilities.UserCapability;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
@@ -116,7 +116,7 @@ public class BrigadierRewriter {
                 ServerPlayer player = (ServerPlayer) source.getEntity();
                 String permission = this.permissions.get(node);
                 if (permission != null) {
-                    ForgeUser user = this.plugin.getContextManager().getUser(player);
+                    UserCapability user = this.plugin.getContextManager().getUser(player);
                     Tristate state = user.checkPermission(permission);
 
                     if (state != Tristate.UNDEFINED) {

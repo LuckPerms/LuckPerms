@@ -27,7 +27,7 @@ package me.lucko.luckperms.forge.service;
 
 import me.lucko.luckperms.forge.LPForgeBootstrap;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.model.ForgeUser;
+import me.lucko.luckperms.forge.capabilities.UserCapability;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -66,7 +66,7 @@ public class ForgePermissionHandler implements IPermissionHandler {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getPermission(ServerPlayer player, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
-        ForgeUser user = this.plugin.getContextManager().getUser(player);
+        UserCapability user = this.plugin.getContextManager().getUser(player);
         if (node.getType() == PermissionTypes.BOOLEAN) {
             Tristate value = user.checkPermission(node.getNodeName());
             return (T) (Boolean) value.asBoolean();

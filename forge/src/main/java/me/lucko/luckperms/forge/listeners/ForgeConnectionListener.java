@@ -131,20 +131,15 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
             Component component = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLanguage());
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                 player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
-                return;
             } else {
                 player.sendMessage(ForgeSenderFactory.toNativeText(component), Util.NIL_UUID);
             }
         }
-
-        this.plugin.getContextManager().register(player);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         ServerPlayer player = (ServerPlayer) event.getPlayer();
-
-        this.plugin.getContextManager().unregister(player);
         handleDisconnect(player.getGameProfile().getId());
     }
 

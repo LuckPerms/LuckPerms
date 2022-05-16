@@ -25,29 +25,24 @@
 
 package me.lucko.luckperms.forge.context;
 
+import me.lucko.luckperms.common.cache.ExpiringCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.model.ForgeUser;
+import me.lucko.luckperms.forge.capabilities.UserCapability;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class ForgeContextManager extends ContextManager<ServerPlayer, ServerPlayer> {
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
-    private final Map<UUID, ForgeUser> users;
-
     public ForgeContextManager(LPForgePlugin plugin) {
         super(plugin, ServerPlayer.class, ServerPlayer.class);
-        this.users = new HashMap<>();
     }
 
     @Override
@@ -76,29 +71,15 @@ public class ForgeContextManager extends ContextManager<ServerPlayer, ServerPlay
 
     @Override
     public void invalidateCache(ServerPlayer subject) {
-        ForgeUser user = this.users.get(subject.getUUID());
-        if (user != null) {
-            user.getQueryOptionsCache().invalidate();
-        }
+        subject.getCapability(UserCapability.CAPABILITY)
+                .resolve()
+                .map(UserCapability::getQueryOptionsCache)
+                .ifPresent(ExpiringCache::invalidate);
     }
 
-    public void register(ServerPlayer player) {
-        User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
-        this.users.put(player.getUUID(), new ForgeUser(user, new QueryOptionsCache<>(player, this)));
-        signalContextUpdate(player);
-    }
-
-    public void unregister(ServerPlayer player) {
-        this.users.remove(player.getUUID());
-    }
-
-    public ForgeUser getUser(ServerPlayer player) {
-        ForgeUser user = this.users.get(player.getUUID());
-        if (user == null) {
-            throw new IllegalStateException("User " + player.getUUID() + " is not registered");
-        }
-
-        return user;
+    public UserCapability getUser(ServerPlayer player) {
+        return player.getCapability(UserCapability.CAPABILITY)
+                .orElseThrow(() -> new IllegalStateException("User " + player.getUUID() + " capability is missing"));
     }
 
 }
