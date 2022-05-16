@@ -27,6 +27,7 @@ package me.lucko.luckperms.forge.loader;
 
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -37,6 +38,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 @Mod(value = "luckperms")
@@ -47,14 +49,26 @@ public class ForgeLoaderPlugin implements Supplier<ModContainer> {
 
     private final ModContainer container;
     private final LoaderBootstrap plugin;
+    private final AtomicBoolean state;
 
     public ForgeLoaderPlugin() {
-        this.container = ModList.get().getModContainerByObject(this).orElse(null);
         JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
+
+        this.container = ModList.get().getModContainerByObject(this).orElse(null);
         this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, Supplier.class, this);
+        this.state = new AtomicBoolean(false);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);
         MinecraftForge.EVENT_BUS.register(this);
+
+        // Ensures LuckPerms is correctly shutdown
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (!this.state.compareAndSet(true, false)) {
+                return;
+            }
+
+            this.plugin.onDisable();
+        }));
     }
 
     @Override
@@ -63,12 +77,26 @@ public class ForgeLoaderPlugin implements Supplier<ModContainer> {
     }
 
     public void onCommonSetup(FMLCommonSetupEvent event) {
+        if (!this.state.compareAndSet(false, true)) {
+            return;
+        }
+
         this.plugin.onLoad();
         this.plugin.onEnable();
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onServerStopped(ServerStoppedEvent event) {
+        /* This event is fired client side when exiting a world,
+           the client is still running, so we cannot disable LuckPerms. */
+        if (!(event.getServer() instanceof DedicatedServer)) {
+            return;
+        }
+        
+        if (!this.state.compareAndSet(true, false)) {
+            return;
+        }
+
         this.plugin.onDisable();
     }
 
