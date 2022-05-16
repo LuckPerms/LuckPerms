@@ -28,6 +28,7 @@ package me.lucko.luckperms.forge.listeners;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import me.lucko.luckperms.common.cache.ExpiringCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.forge.LPForgePlugin;
@@ -45,6 +46,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.CommandEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.permission.events.PermissionGatherEvent;
@@ -69,6 +71,19 @@ public class ForgePlatformListener {
         }
 
         event.addCapability(UserCapability.RESOURCE_LOCATION, new UserCapabilityProvider(this.plugin, (ServerPlayer) event.getObject()));
+    }
+
+    @SubscribeEvent
+    public void onPlayerClone(PlayerEvent.Clone event) {
+        if (!event.isWasDeath()) {
+            return;
+        }
+
+        // The UserCapability is recreated on player death, invalidate the previous cache.
+        event.getOriginal().getCapability(UserCapability.CAPABILITY)
+                .resolve()
+                .map(UserCapability::getQueryOptionsCache)
+                .ifPresent(ExpiringCache::invalidate);
     }
 
     @SubscribeEvent
