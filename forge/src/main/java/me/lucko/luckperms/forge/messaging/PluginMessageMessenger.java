@@ -27,12 +27,11 @@ package me.lucko.luckperms.forge.messaging;
 
 import com.google.common.collect.Iterables;
 import io.netty.buffer.Unpooled;
+import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
-import me.lucko.luckperms.forge.LPForgeBootstrap;
 import me.lucko.luckperms.forge.LPForgePlugin;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
-import net.luckperms.api.messenger.message.OutgoingMessage;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
@@ -42,34 +41,34 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.event.EventNetworkChannel;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PluginMessageMessenger implements Messenger {
-    private static final ResourceLocation CHANNEL = new ResourceLocation(LPForgeBootstrap.ID, "update");
+public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements Messenger {
+    private static final ResourceLocation CHANNEL = new ResourceLocation(AbstractPluginMessageMessenger.CHANNEL);
 
     private final LPForgePlugin plugin;
-    private final IncomingMessageConsumer consumer;
     private EventNetworkChannel channel;
 
     public PluginMessageMessenger(LPForgePlugin plugin, IncomingMessageConsumer consumer) {
+        super(consumer);
         this.plugin = plugin;
-        this.consumer = consumer;
     }
 
     public void init() {
         this.channel = NetworkRegistry.newEventChannel(CHANNEL, () -> "1", predicate -> true, predicate -> true);
         this.channel.addListener(event -> {
-            String message = event.getPayload().readUtf();
-            this.consumer.consumeIncomingMessageAsString(message);
+            byte[] buf = new byte[event.getPayload().readableBytes()];
+            event.getPayload().readBytes(buf);
+
+            handleIncomingMessage(buf);
             event.getSource().get().setPacketHandled(true);
         });
     }
 
     @Override
-    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
+    protected void sendOutgoingMessage(byte[] buf) {
         AtomicReference<SchedulerTask> taskRef = new AtomicReference<>();
         SchedulerTask task = this.plugin.getBootstrap().getScheduler().asyncRepeating(() -> {
             ServerPlayer player = this.plugin.getBootstrap().getServer()
@@ -82,7 +81,7 @@ public class PluginMessageMessenger implements Messenger {
             }
 
             FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
-            byteBuf.writeUtf(outgoingMessage.asEncodedString());
+            byteBuf.writeBytes(buf);
             Packet<?> packet = new ClientboundCustomPayloadPacket(CHANNEL, byteBuf);
 
             player.connection.send(packet);
