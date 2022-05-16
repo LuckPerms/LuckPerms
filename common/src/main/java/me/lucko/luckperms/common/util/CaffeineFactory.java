@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.util;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import me.lucko.luckperms.common.plugin.scheduler.WorkerThreadFactory;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
@@ -45,7 +44,7 @@ public final class CaffeineFactory {
      *
      * By using our own pool, we ensure this will never happen.
      */
-    private static final ForkJoinPool loaderPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), new WorkerThreadFactory(), null, false);
+    private static final ForkJoinPool loaderPool = new ForkJoinPool();
 
     public static Caffeine<Object, Object> newBuilder() {
         return Caffeine.newBuilder().executor(loaderPool);

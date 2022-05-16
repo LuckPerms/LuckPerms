@@ -26,7 +26,6 @@
 package me.lucko.luckperms.forge;
 
 import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
-import me.lucko.luckperms.common.plugin.scheduler.WorkerThreadFactory;
 
 import java.util.concurrent.Executor;
 
@@ -34,7 +33,7 @@ public class ForgeSchedulerAdapter extends AbstractJavaScheduler {
     private final Executor sync;
 
     public ForgeSchedulerAdapter(LPForgeBootstrap bootstrap) {
-        super(bootstrap, new WorkerThreadFactory());
+        super(bootstrap);
         this.sync = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).executeBlocking(r);
     }
 
