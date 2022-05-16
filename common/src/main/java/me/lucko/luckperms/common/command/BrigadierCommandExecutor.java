@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -85,21 +86,22 @@ public abstract class BrigadierCommandExecutor<S> extends CommandManager impleme
 
         int idx = builder.getStart();
 
-        String buffer = context.getInput().substring(idx);
+        String buffer = builder.getInput().substring(idx);
         idx += buffer.length();
 
-        List<String> arguments;
+        List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(buffer);
+        List<String> resolvedArguments;
         if (this.plugin.getConfiguration().get(ConfigKeys.RESOLVE_COMMAND_SELECTORS)) {
-            arguments = resolveSelectors(source, ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(buffer));
+            resolvedArguments = resolveSelectors(source, new ArrayList<>(arguments));
         } else {
-            arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(buffer);
+            resolvedArguments = arguments;
         }
 
-        if (!arguments.isEmpty()) {
+        if (!arguments.isEmpty() && !resolvedArguments.isEmpty()) {
             idx -= arguments.get(arguments.size() - 1).length();
         }
 
-        List<String> completions = tabCompleteCommand(sender, arguments);
+        List<String> completions = tabCompleteCommand(sender, resolvedArguments);
 
         // Offset the builder from the current string range so suggestions are placed in the right spot
         builder = builder.createOffset(idx);
