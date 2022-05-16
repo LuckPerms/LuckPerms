@@ -28,7 +28,7 @@ package me.lucko.luckperms.forge.loader;
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
@@ -68,7 +68,7 @@ public class ForgeLoaderPlugin implements Supplier<ModContainer> {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onServerStopping(ServerStoppingEvent event) {
+    public void onServerStopped(ServerStoppedEvent event) {
         this.plugin.onDisable();
     }
 
