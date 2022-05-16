@@ -62,9 +62,7 @@ public class UserCapabilityProvider implements ICapabilityProvider {
 
         return LazyOptional.of(() -> {
             ContextManager<ServerPlayer, ServerPlayer> contextManager = this.plugin.getContextManager();
-            UserCapability userCapability = new UserCapability(user, new QueryOptionsCache<>(player, contextManager));
-            this.plugin.getEventDispatcher().dispatchContextUpdate(player);
-            return (T) userCapability;
+            return (T) new UserCapability(user, new QueryOptionsCache<>(player, contextManager));
         });
     }
 }
