@@ -25,9 +25,12 @@
 
 package me.lucko.luckperms.forge.service;
 
+import me.lucko.luckperms.common.cacheddata.type.MetaCache;
+import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.forge.LPForgeBootstrap;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.capabilities.UserCapability;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -63,26 +66,13 @@ public class ForgePermissionHandler implements IPermissionHandler {
         return this.permissionNodes;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T getPermission(ServerPlayer player, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
-        UserCapability user = this.plugin.getContextManager().getUser(player);
-        if (node.getType() == PermissionTypes.BOOLEAN) {
-            Tristate value = user.checkPermission(node.getNodeName());
-            return (T) (Boolean) value.asBoolean();
-        }
-
-        if (node.getType() == PermissionTypes.INTEGER) {
-            Integer value = user.getMetaValue(node.getNodeName(), Integer::parseInt);
+        User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
+        if (user != null) {
+            T value = getPermission(user, node);
             if (value != null) {
-                return (T) value;
-            }
-        }
-
-        if (node.getType() == PermissionTypes.STRING) {
-            String value = user.getMetaValue(node.getNodeName());
-            if (value != null) {
-                return (T) value;
+                return value;
             }
         }
 
@@ -91,7 +81,42 @@ public class ForgePermissionHandler implements IPermissionHandler {
 
     @Override
     public <T> T getOfflinePermission(UUID player, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
+        User user = this.plugin.getUserManager().getIfLoaded(player);
+        if (user != null) {
+            T value = getPermission(user, node);
+            if (value != null) {
+                return value;
+            }
+        }
+
         return node.getDefaultResolver().resolve(null, player, context);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T getPermission(User user, PermissionNode<T> node) {
+        if (node.getType() == PermissionTypes.BOOLEAN) {
+            PermissionCache cache = user.getCachedData().getPermissionData();
+            Tristate value = cache.checkPermission(node.getNodeName(), CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
+            return (T) (Boolean) value.asBoolean();
+        }
+
+        if (node.getType() == PermissionTypes.INTEGER) {
+            MetaCache cache = user.getCachedData().getMetaData();
+            Integer value = cache.getMetaValue(node.getNodeName(), Integer::parseInt).orElse(null);
+            if (value != null) {
+                return (T) value;
+            }
+        }
+
+        if (node.getType() == PermissionTypes.STRING) {
+            MetaCache cache = user.getCachedData().getMetaData();
+            String value = cache.getMetaValue(node.getNodeName());
+            if (value != null) {
+                return (T) value;
+            }
+        }
+
+        return null;
     }
 
 }
