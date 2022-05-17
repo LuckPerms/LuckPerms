@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.forge.util;
 
+import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.GenericEvent;
@@ -49,17 +50,26 @@ public class EventBusUtil {
 
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
+    /**
+     * Register an instance object, and add listeners for all {@link SubscribeEvent} annotated methods found.
+     *
+     * <p>This differs from {@link IEventBus#register} as reflection is used for invoking the registered listeners
+     * instead of ASM, which is incompatible with {@link JarInJarClassLoader}</p>
+     */
     public static void register(Object target) {
         for (Method method : target.getClass().getMethods()) {
+            // Ignore static methods, Support for these could be added, but they are not used in LuckPerms
             if (Modifier.isStatic(method.getModifiers())) {
                 continue;
             }
 
+            // Methods require a SubscribeEvent annotation in order to be registered
             SubscribeEvent subscribeEvent = method.getAnnotation(SubscribeEvent.class);
             if (subscribeEvent == null) {
                 continue;
             }
 
+            // Get the parameter types, this includes generic information which is required for GenericEvent
             Type[] parameterTypes = method.getGenericParameterTypes();
             if (parameterTypes.length != 1) {
                 throw new IllegalArgumentException(""
@@ -72,12 +82,13 @@ public class EventBusUtil {
             Type parameterType = parameterTypes[0];
             Class<?> eventType;
             Class<?> genericType;
-            if (parameterType instanceof Class) {
+            if (parameterType instanceof Class) { // Non-generic event
                 eventType = (Class<?>) parameterType;
                 genericType = null;
-            } else if (parameterType instanceof ParameterizedType) {
+            } else if (parameterType instanceof ParameterizedType) { // Generic event
                 ParameterizedType parameterizedType = (ParameterizedType) parameterType;
 
+                // Get the event class
                 Type rawType = parameterizedType.getRawType();
                 if (rawType instanceof Class) {
                     eventType = (Class<?>) rawType;
@@ -85,6 +96,7 @@ public class EventBusUtil {
                     throw new UnsupportedOperationException("Raw Type " + rawType.getClass() + " is not supported");
                 }
 
+                // Find the type of 'T' in 'GenericEvent<T>'
                 Type[] typeArguments = parameterizedType.getActualTypeArguments();
                 if (typeArguments.length != 1) {
                     throw new IllegalArgumentException(""
@@ -94,6 +106,7 @@ public class EventBusUtil {
                     );
                 }
 
+                // Get the generic class
                 Type typeArgument = typeArguments[0];
                 if (typeArgument instanceof Class<?>) {
                     genericType = (Class<?>) typeArgument;
@@ -104,6 +117,7 @@ public class EventBusUtil {
                 throw new UnsupportedOperationException("Parameter Type " + parameterType.getClass() + " is not supported");
             }
 
+            // Ensure 'genericType' is set if 'eventType' is a generic event
             if (GenericEvent.class.isAssignableFrom(eventType) && genericType == null) {
                 throw new IllegalArgumentException(""
                         + "Method " + method + " has @SubscribeEvent annotation, "
@@ -112,6 +126,7 @@ public class EventBusUtil {
                 );
             }
 
+            // Ensure 'eventType' is a subclass of event
             if (!Event.class.isAssignableFrom(eventType)) {
                 throw new IllegalArgumentException(""
                         + "Method " + method + " has @SubscribeEvent annotation, "
@@ -119,6 +134,8 @@ public class EventBusUtil {
                 );
             }
 
+            /* Use the 'LambdaMetafactory' to generate a consumer which can be passed directly to an 'IEventBus'
+               when registering a listener, this reduces the overhead involved when reflectively invoking methods. */
             Consumer<?> consumer;
             try {
                 MethodHandle methodHandle = LOOKUP.unreflect(method);
@@ -136,6 +153,7 @@ public class EventBusUtil {
                 throw new RuntimeException("Error whilst registering " + method, t);
             }
 
+            // Determine the 'IEventBus' that this eventType should be registered to.
             IEventBus eventBus;
             if (IModBusEvent.class.isAssignableFrom(eventType)) {
                 eventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -151,11 +169,17 @@ public class EventBusUtil {
         }
     }
 
+    /**
+     * Handles casting generics for {@link IEventBus#addGenericListener}.
+     */
     @SuppressWarnings("unchecked")
     private static <T extends GenericEvent<? extends F>, F> void addGenericListener(IEventBus eventBus, Class<?> genericClassFilter, SubscribeEvent subscribeEvent, Class<?> eventType, Consumer<?> consumer) {
         eventBus.addGenericListener((Class<F>) genericClassFilter, subscribeEvent.priority(), subscribeEvent.receiveCanceled(), (Class<T>) eventType, (Consumer<T>) consumer);
     }
 
+    /**
+     * Handles casting generics for {@link IEventBus#addListener}.
+     */
     @SuppressWarnings("unchecked")
     private static <T extends Event> void addListener(IEventBus eventBus, SubscribeEvent subscribeEvent, Class<?> eventType, Consumer<?> consumer) {
         eventBus.addListener(subscribeEvent.priority(), subscribeEvent.receiveCanceled(), (Class<T>) eventType, (Consumer<T>) consumer);
