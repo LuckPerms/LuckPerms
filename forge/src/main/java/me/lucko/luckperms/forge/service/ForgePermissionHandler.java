@@ -31,6 +31,8 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.forge.LPForgeBootstrap;
 import me.lucko.luckperms.forge.LPForgePlugin;
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -70,7 +72,7 @@ public class ForgePermissionHandler implements IPermissionHandler {
     public <T> T getPermission(ServerPlayer player, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
         User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
         if (user != null) {
-            T value = getPermission(user, node);
+            T value = getPermission(user, node, context);
             if (value != null) {
                 return value;
             }
@@ -83,7 +85,7 @@ public class ForgePermissionHandler implements IPermissionHandler {
     public <T> T getOfflinePermission(UUID player, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
         User user = this.plugin.getUserManager().getIfLoaded(player);
         if (user != null) {
-            T value = getPermission(user, node);
+            T value = getPermission(user, node, context);
             if (value != null) {
                 return value;
             }
@@ -93,15 +95,16 @@ public class ForgePermissionHandler implements IPermissionHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T getPermission(User user, PermissionNode<T> node) {
+    private <T> T getPermission(User user, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
+        QueryOptions queryOptions = getQueryOptions(user, context);
         if (node.getType() == PermissionTypes.BOOLEAN) {
-            PermissionCache cache = user.getCachedData().getPermissionData();
+            PermissionCache cache = user.getCachedData().getPermissionData(queryOptions);
             Tristate value = cache.checkPermission(node.getNodeName(), CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
             return (T) (Boolean) value.asBoolean();
         }
 
         if (node.getType() == PermissionTypes.INTEGER) {
-            MetaCache cache = user.getCachedData().getMetaData();
+            MetaCache cache = user.getCachedData().getMetaData(queryOptions);
             Integer value = cache.getMetaValue(node.getNodeName(), Integer::parseInt).orElse(null);
             if (value != null) {
                 return (T) value;
@@ -109,7 +112,7 @@ public class ForgePermissionHandler implements IPermissionHandler {
         }
 
         if (node.getType() == PermissionTypes.STRING) {
-            MetaCache cache = user.getCachedData().getMetaData();
+            MetaCache cache = user.getCachedData().getMetaData(queryOptions);
             String value = cache.getMetaValue(node.getNodeName());
             if (value != null) {
                 return (T) value;
@@ -117,6 +120,17 @@ public class ForgePermissionHandler implements IPermissionHandler {
         }
 
         return null;
+    }
+
+    private QueryOptions getQueryOptions(User user, PermissionDynamicContext<?>... context) {
+        QueryOptions queryOptions = user.getQueryOptions();
+        QueryOptions.Builder queryOptionsBuilder = queryOptions.toBuilder();
+        MutableContextSet contextSet = queryOptions.context().mutableCopy();
+        for (PermissionDynamicContext<?> dynamicContext : context) {
+            contextSet.add(dynamicContext.getDynamic().name(), dynamicContext.getSerializedValue());
+        }
+
+        return queryOptionsBuilder.context(contextSet).build();
     }
 
 }
