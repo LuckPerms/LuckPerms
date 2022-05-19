@@ -151,7 +151,7 @@ public final class PermissionServiceProxy implements PermissionAndContextService
 
     @Override
     public Set<Context> contextsFor(Cause cause) {
-        return CompatibilityUtil.convertContexts(this.handle.getContextsForCurrentCause());
+        return CompatibilityUtil.convertContexts(this.handle.getContextsForCause(cause));
     }
 
     @Override
