@@ -28,6 +28,7 @@ package me.lucko.luckperms.forge;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 

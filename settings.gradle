@@ -23,6 +23,7 @@ include (
         'fabric',
         'forge',
         'forge:loader',
+        'forge:forge-api',
         'nukkit',
         'nukkit:loader',
         'sponge',

@@ -23,24 +23,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.forge.capabilities;
+package me.lucko.luckperms.forge.service;
 
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import org.objectweb.asm.Type;
+import me.lucko.luckperms.forge.LPForgePlugin;
 
-/**
- * The {@link CapabilityToken#getType()} is transformed at runtime by {@link net.minecraftforge.fml.common.asm.CapabilityTokenSubclass},
- * with the jar-in-jar loader system this transformation never happens.
- */
-public class UserCapabilityToken extends CapabilityToken<UserCapability> {
+import net.minecraftforge.common.ForgeConfig;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.server.permission.events.PermissionGatherEvent;
+import net.minecraftforge.server.permission.handler.DefaultPermissionHandler;
 
-    public static final UserCapabilityToken INSTANCE = new UserCapabilityToken();
+public class ForgePermissionHandlerListener {
+    private final LPForgePlugin plugin;
 
-    private UserCapabilityToken() {
+    public ForgePermissionHandlerListener(LPForgePlugin plugin) {
+        this.plugin = plugin;
     }
 
-    @Override
-    public String getType() {
-        return Type.getDescriptor(UserCapability.class);
+    @SubscribeEvent
+    public void onPermissionGatherHandler(PermissionGatherEvent.Handler event) {
+        ForgeConfigSpec.ConfigValue<String> permissionHandler = ForgeConfig.SERVER.permissionHandler;
+        if (permissionHandler.get().equals(DefaultPermissionHandler.IDENTIFIER.toString())) {
+            // Override the default permission handler with LuckPerms
+            permissionHandler.set(ForgePermissionHandler.IDENTIFIER.toString());
+        }
+
+        event.addPermissionHandler(ForgePermissionHandler.IDENTIFIER, permissions -> new ForgePermissionHandler(this.plugin, permissions));
     }
+
 }

@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.forge.context;
 
-import me.lucko.luckperms.common.cache.ExpiringCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.capabilities.UserCapability;
+import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
+
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
@@ -56,7 +56,7 @@ public class ForgeContextManager extends ContextManager<ServerPlayer, ServerPlay
             throw new NullPointerException("subject");
         }
 
-        return getUser(subject).getQueryOptionsCache();
+        return UserCapabilityImpl.get(subject).getQueryOptionsCache();
     }
 
     @Override
@@ -71,15 +71,10 @@ public class ForgeContextManager extends ContextManager<ServerPlayer, ServerPlay
 
     @Override
     public void invalidateCache(ServerPlayer subject) {
-        subject.getCapability(UserCapability.CAPABILITY)
-                .resolve()
-                .map(UserCapability::getQueryOptionsCache)
-                .ifPresent(ExpiringCache::invalidate);
-    }
-
-    public UserCapability getUser(ServerPlayer player) {
-        return player.getCapability(UserCapability.CAPABILITY)
-                .orElseThrow(() -> new IllegalStateException("User " + player.getUUID() + " capability is missing"));
+        UserCapabilityImpl capability = UserCapabilityImpl.getNullable(subject);
+        if (capability != null) {
+            capability.getQueryOptionsCache().invalidate();
+        }
     }
 
 }

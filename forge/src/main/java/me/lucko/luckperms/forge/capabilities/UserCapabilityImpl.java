@@ -25,38 +25,81 @@
 
 package me.lucko.luckperms.forge.capabilities;
 
-import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
+import me.lucko.luckperms.forge.context.ForgeContextManager;
+
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraft.world.entity.player.Player;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
-import java.util.function.Function;
 
-public class UserCapability {
+public class UserCapabilityImpl implements UserCapability {
 
-    public static final Capability<UserCapability> CAPABILITY = CapabilityManager.get(UserCapabilityToken.INSTANCE);
-    public static final ResourceLocation RESOURCE_LOCATION = new ResourceLocation("luckperms", "user");
+    /**
+     * Gets a {@link UserCapability} for a given {@link ServerPlayer}.
+     *
+     * @param player the player
+     * @return the capability
+     */
+    public static @NotNull UserCapabilityImpl get(@NotNull Player player) {
+        return (UserCapabilityImpl) player.getCapability(CAPABILITY)
+                .orElseThrow(() -> new IllegalStateException("Capability missing for " + player.getUUID()));
+    }
 
-    private final User user;
-    private final QueryOptionsCache<ServerPlayer> queryOptionsCache;
+    /**
+     * Gets a {@link UserCapability} for a given {@link ServerPlayer}.
+     *
+     * @param player the player
+     * @return the capability, or null
+     */
+    public static @Nullable UserCapabilityImpl getNullable(@NotNull Player player) {
+        return (UserCapabilityImpl) player.getCapability(CAPABILITY).resolve().orElse(null);
+    }
+
+    private boolean initialised = false;
+
+    private User user;
+    private QueryOptionsCache<ServerPlayer> queryOptionsCache;
     private String language;
     private Locale locale;
 
-    public UserCapability(User user, QueryOptionsCache<ServerPlayer> queryOptionsCache) {
-        this.user = user;
-        this.queryOptionsCache = queryOptionsCache;
+    public UserCapabilityImpl() {
+
     }
 
+    public void initialise(UserCapabilityImpl previous) {
+        this.user = previous.user;
+        this.queryOptionsCache = previous.queryOptionsCache;
+        this.language = previous.language;
+        this.locale = previous.locale;
+        this.initialised = true;
+    }
+
+    public void initialise(User user, ServerPlayer player, ForgeContextManager contextManager) {
+        this.user = user;
+        this.queryOptionsCache = new QueryOptionsCache<>(player, contextManager);
+        this.initialised = true;
+    }
+
+    private void assertInitialised() {
+        if (!this.initialised) {
+            throw new IllegalStateException("Capability has not been initialised");
+        }
+    }
+
+    @Override
     public Tristate checkPermission(String permission) {
+        assertInitialised();
+
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -64,7 +107,10 @@ public class UserCapability {
         return checkPermission(permission, this.queryOptionsCache.getQueryOptions());
     }
 
+    @Override
     public Tristate checkPermission(String permission, QueryOptions queryOptions) {
+        assertInitialised();
+
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -77,48 +123,18 @@ public class UserCapability {
         return cache.checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
     }
 
-    public String getMetaValue(String key) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-
-        return getMetaValue(key, value -> value);
-    }
-
-    public <T> T getMetaValue(String key, Function<String, T> valueTransform) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-
-        if (valueTransform == null) {
-            throw new NullPointerException("valueTransform");
-        }
-
-        return getMetaValue(key, valueTransform, this.queryOptionsCache.getQueryOptions());
-    }
-
-    public <T> T getMetaValue(String key, Function<String, T> valueTransform, QueryOptions queryOptions) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-
-        if (valueTransform == null) {
-            throw new NullPointerException("valueTransform");
-        }
-
-        if (queryOptions == null) {
-            throw new NullPointerException("queryOptions");
-        }
-
-        MetaCache cache = this.user.getCachedData().getMetaData(queryOptions);
-        return cache.getMetaValue(key, valueTransform).orElse(null);
-    }
-
     public User getUser() {
+        assertInitialised();
         return this.user;
     }
 
+    @Override
+    public QueryOptions getQueryOptions() {
+        return getQueryOptionsCache().getQueryOptions();
+    }
+
     public QueryOptionsCache<ServerPlayer> getQueryOptionsCache() {
+        assertInitialised();
         return this.queryOptionsCache;
     }
 

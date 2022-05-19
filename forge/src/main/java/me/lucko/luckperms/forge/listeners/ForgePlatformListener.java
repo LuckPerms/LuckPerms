@@ -28,29 +28,19 @@ package me.lucko.luckperms.forge.listeners;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import me.lucko.luckperms.common.cache.ExpiringCache;
+
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.capabilities.UserCapability;
-import me.lucko.luckperms.forge.capabilities.UserCapabilityProvider;
-import me.lucko.luckperms.forge.service.ForgePermissionHandler;
 import me.lucko.luckperms.forge.util.BrigadierRewriter;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.ServerOpList;
-import net.minecraft.world.entity.Entity;
-import net.minecraftforge.common.ForgeConfig;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.CommandEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.server.permission.events.PermissionGatherEvent;
-import net.minecraftforge.server.permission.handler.DefaultPermissionHandler;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -62,28 +52,6 @@ public class ForgePlatformListener {
     public ForgePlatformListener(LPForgePlugin plugin) {
         this.plugin = plugin;
         this.brigadierRewriter = new BrigadierRewriter(plugin);
-    }
-
-    @SubscribeEvent
-    public void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        if (!(event.getObject() instanceof ServerPlayer)) {
-            return;
-        }
-
-        event.addCapability(UserCapability.RESOURCE_LOCATION, new UserCapabilityProvider(this.plugin, (ServerPlayer) event.getObject()));
-    }
-
-    @SubscribeEvent
-    public void onPlayerClone(PlayerEvent.Clone event) {
-        if (!event.isWasDeath()) {
-            return;
-        }
-
-        // The UserCapability is recreated on player death, invalidate the previous cache.
-        event.getOriginal().getCapability(UserCapability.CAPABILITY)
-                .resolve()
-                .map(UserCapability::getQueryOptionsCache)
-                .ifPresent(ExpiringCache::invalidate);
     }
 
     @SubscribeEvent
@@ -113,18 +81,7 @@ public class ForgePlatformListener {
     }
 
     @SubscribeEvent
-    public void onPermissionGatherHandler(PermissionGatherEvent.Handler event) {
-        ForgeConfigSpec.ConfigValue<String> permissionHandler = ForgeConfig.SERVER.permissionHandler;
-        if (permissionHandler.get().equals(DefaultPermissionHandler.IDENTIFIER.toString())) {
-            // Override the default permission handler with LuckPerms
-            permissionHandler.set(ForgePermissionHandler.IDENTIFIER.toString());
-        }
-
-        event.addPermissionHandler(ForgePermissionHandler.IDENTIFIER, permissions -> new ForgePermissionHandler(this.plugin, permissions));
-    }
-
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
+    public void onServerStarted(ServerStartedEvent event) {
         if (!this.plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
             ServerOpList ops = event.getServer().getPlayerList().getOps();
             ops.getEntries().clear();

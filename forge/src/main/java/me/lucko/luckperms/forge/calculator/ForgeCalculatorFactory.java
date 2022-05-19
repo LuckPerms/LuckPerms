@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.forge.LPForgePlugin;
 import me.lucko.luckperms.forge.context.ForgeContextManager;
+
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;

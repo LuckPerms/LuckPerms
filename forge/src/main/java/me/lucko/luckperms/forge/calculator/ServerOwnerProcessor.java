@@ -28,6 +28,7 @@ package me.lucko.luckperms.forge.calculator;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+
 import net.luckperms.api.util.Tristate;
 
 /**

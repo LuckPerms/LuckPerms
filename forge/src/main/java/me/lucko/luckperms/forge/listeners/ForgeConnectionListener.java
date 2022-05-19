@@ -26,6 +26,7 @@
 package me.lucko.luckperms.forge.listeners;
 
 import com.mojang.authlib.GameProfile;
+
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -33,6 +34,8 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.forge.ForgeSenderFactory;
 import me.lucko.luckperms.forge.LPForgePlugin;
+import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
+
 import net.kyori.adventure.text.Component;
 import net.minecraft.Util;
 import net.minecraft.network.Connection;
@@ -135,6 +138,11 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
                 player.sendMessage(ForgeSenderFactory.toNativeText(component), Util.NIL_UUID);
             }
         }
+
+        // initialise capability
+        UserCapabilityImpl userCapability = UserCapabilityImpl.get(player);
+        userCapability.initialise(user, player, this.plugin.getContextManager());
+        this.plugin.getContextManager().signalContextUpdate(player);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

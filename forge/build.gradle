@@ -38,6 +38,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}"
     implementation project(':common')
     compileOnly project(':common:loader-utils')
+    compileOnly project(':forge:forge-api')
 }
 
 reobf {

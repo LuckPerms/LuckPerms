@@ -28,6 +28,7 @@ package me.lucko.luckperms.forge.context;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.forge.LPForgePlugin;
+
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
@@ -43,6 +44,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;

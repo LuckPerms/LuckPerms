@@ -27,48 +27,47 @@ package me.lucko.luckperms.forge.loader;
 
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
-import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.network.NetworkConstants;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 @Mod(value = "luckperms")
 public class ForgeLoaderPlugin implements Supplier<ModContainer> {
+    private static final Logger LOGGER = LogManager.getLogger("luckperms");
 
     private static final String JAR_NAME = "luckperms-forge.jarinjar";
     private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.forge.LPForgeBootstrap";
 
     private final ModContainer container;
-    private final LoaderBootstrap plugin;
-    private final AtomicBoolean state;
+
+    private JarInJarClassLoader loader;
+    private LoaderBootstrap plugin;
 
     public ForgeLoaderPlugin() {
-        JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
-
         this.container = ModList.get().getModContainerByObject(this).orElse(null);
-        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, Supplier.class, this);
-        this.state = new AtomicBoolean(false);
 
+        markAsNotRequiredClientSide();
+
+        if (FMLEnvironment.dist.isClient()) {
+            LOGGER.info("Skipping LuckPerms init (not supported on the client!)");
+            return;
+        }
+
+        this.loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);
-        MinecraftForge.EVENT_BUS.register(this);
-
-        // Ensures LuckPerms is correctly shutdown
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (!this.state.compareAndSet(true, false)) {
-                return;
-            }
-
-            this.plugin.onDisable();
-        }));
     }
 
     @Override
@@ -77,27 +76,25 @@ public class ForgeLoaderPlugin implements Supplier<ModContainer> {
     }
 
     public void onCommonSetup(FMLCommonSetupEvent event) {
-        if (!this.state.compareAndSet(false, true)) {
-            return;
-        }
-
+        this.plugin = this.loader.instantiatePlugin(BOOTSTRAP_CLASS, Supplier.class, this);
         this.plugin.onLoad();
-        this.plugin.onEnable();
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onServerStopped(ServerStoppedEvent event) {
-        /* This event is fired client side when exiting a world,
-           the client is still running, so we cannot disable LuckPerms. */
-        if (!(event.getServer() instanceof DedicatedServer)) {
-            return;
+    private static void markAsNotRequiredClientSide() {
+        try {
+            // workaround as we don't compile against java 17
+            ModLoadingContext.class.getDeclaredMethod("registerExtensionPoint", Class.class, Supplier.class)
+                    .invoke(
+                            ModLoadingContext.get(),
+                            IExtensionPoint.DisplayTest.class,
+                            (Supplier<?>) () -> new IExtensionPoint.DisplayTest(
+                                    () -> NetworkConstants.IGNORESERVERONLY,
+                                    (a, b) -> true
+                            )
+                    );
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new IllegalStateException(e);
         }
-        
-        if (!this.state.compareAndSet(true, false)) {
-            return;
-        }
-
-        this.plugin.onDisable();
     }
 
 }

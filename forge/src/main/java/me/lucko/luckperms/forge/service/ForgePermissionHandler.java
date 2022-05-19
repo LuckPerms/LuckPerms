@@ -27,11 +27,16 @@ package me.lucko.luckperms.forge.service;
 
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.forge.LPForgeBootstrap;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import net.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.forge.capabilities.UserCapability;
+import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
+
+import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.resources.ResourceLocation;
@@ -70,9 +75,13 @@ public class ForgePermissionHandler implements IPermissionHandler {
 
     @Override
     public <T> T getPermission(ServerPlayer player, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
-        User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
-        if (user != null) {
-            T value = getPermission(user, node, context);
+        UserCapabilityImpl capability = UserCapabilityImpl.getNullable(player);
+
+        if (capability != null) {
+            User user = capability.getUser();
+            QueryOptions queryOptions = capability.getQueryOptionsCache().getQueryOptions();
+
+            T value = getPermissionValue(user, queryOptions, node, context);
             if (value != null) {
                 return value;
             }
@@ -84,8 +93,10 @@ public class ForgePermissionHandler implements IPermissionHandler {
     @Override
     public <T> T getOfflinePermission(UUID player, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
         User user = this.plugin.getUserManager().getIfLoaded(player);
+
         if (user != null) {
-            T value = getPermission(user, node, context);
+            QueryOptions queryOptions = user.getQueryOptions();
+            T value = getPermissionValue(user, queryOptions, node, context);
             if (value != null) {
                 return value;
             }
@@ -95,8 +106,9 @@ public class ForgePermissionHandler implements IPermissionHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T getPermission(User user, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
-        QueryOptions queryOptions = getQueryOptions(user, context);
+    private static <T> T getPermissionValue(User user, QueryOptions queryOptions, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
+        queryOptions = appendContextToQueryOptions(queryOptions, context);
+
         if (node.getType() == PermissionTypes.BOOLEAN) {
             PermissionCache cache = user.getCachedData().getPermissionData(queryOptions);
             Tristate value = cache.checkPermission(node.getNodeName(), CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
@@ -122,15 +134,19 @@ public class ForgePermissionHandler implements IPermissionHandler {
         return null;
     }
 
-    private QueryOptions getQueryOptions(User user, PermissionDynamicContext<?>... context) {
-        QueryOptions queryOptions = user.getQueryOptions();
-        QueryOptions.Builder queryOptionsBuilder = queryOptions.toBuilder();
-        MutableContextSet contextSet = queryOptions.context().mutableCopy();
-        for (PermissionDynamicContext<?> dynamicContext : context) {
-            contextSet.add(dynamicContext.getDynamic().name(), dynamicContext.getSerializedValue());
+    private static QueryOptions appendContextToQueryOptions(QueryOptions queryOptions, PermissionDynamicContext<?>... context) {
+        if (context.length == 0 || queryOptions.mode() != QueryMode.CONTEXTUAL) {
+            return queryOptions;
         }
 
-        return queryOptionsBuilder.context(contextSet).build();
+        ImmutableContextSet.Builder contextBuilder = new ImmutableContextSetImpl.BuilderImpl()
+                .addAll(queryOptions.context());
+
+        for (PermissionDynamicContext<?> dynamicContext : context) {
+            contextBuilder.add(dynamicContext.getDynamic().name(), dynamicContext.getSerializedValue());
+        }
+
+        return queryOptions.toBuilder().context(contextBuilder.build()).build();
     }
 
 }

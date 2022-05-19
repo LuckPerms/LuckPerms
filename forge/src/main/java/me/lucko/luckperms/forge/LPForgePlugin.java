@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.sender.DummyConsoleSender;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.forge.calculator.ForgeCalculatorFactory;
+import me.lucko.luckperms.forge.capabilities.UserCapabilityListener;
 import me.lucko.luckperms.forge.context.ForgeContextManager;
 import me.lucko.luckperms.forge.context.ForgePlayerCalculator;
 import me.lucko.luckperms.forge.listeners.ForgeAutoOpListener;
@@ -48,7 +49,8 @@ import me.lucko.luckperms.forge.listeners.ForgeCommandListUpdater;
 import me.lucko.luckperms.forge.listeners.ForgeConnectionListener;
 import me.lucko.luckperms.forge.listeners.ForgePlatformListener;
 import me.lucko.luckperms.forge.messaging.ForgeMessagingFactory;
-import me.lucko.luckperms.forge.util.EventBusUtil;
+import me.lucko.luckperms.forge.service.ForgePermissionHandlerListener;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;
@@ -69,7 +71,6 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
 
     private ForgeSenderFactory senderFactory;
     private ForgeConnectionListener connectionListener;
-    private ForgePlatformListener platformListener;
     private ForgeCommandExecutor commandManager;
     private StandardUserManager userManager;
     private StandardGroupManager groupManager;
@@ -83,6 +84,23 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
     @Override
     public LPForgeBootstrap getBootstrap() {
         return this.bootstrap;
+    }
+
+    protected void registerEarlyListeners() {
+        this.connectionListener = new ForgeConnectionListener(this);
+        this.bootstrap.registerListeners(this.connectionListener);
+
+        ForgePlatformListener platformListener = new ForgePlatformListener(this);
+        this.bootstrap.registerListeners(platformListener);
+
+        UserCapabilityListener userCapabilityListener = new UserCapabilityListener();
+        this.bootstrap.registerListeners(userCapabilityListener);
+
+        ForgePermissionHandlerListener permissionHandlerListener = new ForgePermissionHandlerListener(this);
+        this.bootstrap.registerListeners(permissionHandlerListener);
+
+        this.commandManager = new ForgeCommandExecutor(this);
+        this.bootstrap.registerListeners(this.commandManager);
     }
 
     @Override
@@ -106,10 +124,7 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerPlatformListeners() {
-        this.connectionListener = new ForgeConnectionListener(this);
-        this.platformListener = new ForgePlatformListener(this);
-        EventBusUtil.register(this.connectionListener);
-        EventBusUtil.register(this.platformListener);
+        // Too late for Forge, registered in #registerEarlyListeners
     }
 
     @Override
@@ -119,8 +134,7 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void registerCommands() {
-        this.commandManager = new ForgeCommandExecutor(this);
-        EventBusUtil.register(this.commandManager);
+        // Too late for Forge, registered in #registerEarlyListeners
     }
 
     @Override
@@ -140,7 +154,7 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
         this.contextManager = new ForgeContextManager(this);
 
         ForgePlayerCalculator playerCalculator = new ForgePlayerCalculator(this, getConfiguration().get(ConfigKeys.DISABLED_CONTEXTS));
-        EventBusUtil.register(playerCalculator);
+        this.bootstrap.registerListeners(playerCalculator);
         this.contextManager.registerCalculator(playerCalculator);
     }
 
@@ -205,10 +219,6 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
     @Override
     public ForgeConnectionListener getConnectionListener() {
         return this.connectionListener;
-    }
-
-    public ForgePlatformListener getPlatformListener() {
-        return platformListener;
     }
 
     @Override
