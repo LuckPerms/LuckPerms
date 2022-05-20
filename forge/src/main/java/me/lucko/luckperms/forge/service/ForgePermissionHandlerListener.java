@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.forge.service;
 
+import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.forge.LPForgePlugin;
 
 import net.minecraftforge.common.ForgeConfig;
@@ -32,6 +33,8 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.permission.events.PermissionGatherEvent;
 import net.minecraftforge.server.permission.handler.DefaultPermissionHandler;
+import net.minecraftforge.server.permission.nodes.PermissionNode;
+import net.minecraftforge.server.permission.nodes.PermissionTypes;
 
 public class ForgePermissionHandlerListener {
     private final LPForgePlugin plugin;
@@ -42,13 +45,21 @@ public class ForgePermissionHandlerListener {
 
     @SubscribeEvent
     public void onPermissionGatherHandler(PermissionGatherEvent.Handler event) {
+        // Override the default permission handler with LuckPerms
         ForgeConfigSpec.ConfigValue<String> permissionHandler = ForgeConfig.SERVER.permissionHandler;
         if (permissionHandler.get().equals(DefaultPermissionHandler.IDENTIFIER.toString())) {
-            // Override the default permission handler with LuckPerms
             permissionHandler.set(ForgePermissionHandler.IDENTIFIER.toString());
         }
 
         event.addPermissionHandler(ForgePermissionHandler.IDENTIFIER, permissions -> new ForgePermissionHandler(this.plugin, permissions));
+    }
+
+    @SubscribeEvent
+    public void onPermissionGatherNodes(PermissionGatherEvent.Nodes event) {
+        // register luckperms nodes
+        for (CommandPermission permission : CommandPermission.values()) {
+            event.addNodes(new PermissionNode<>("luckperms", permission.getNode(), PermissionTypes.BOOLEAN, (player, uuid, context) -> false));
+        }
     }
 
 }

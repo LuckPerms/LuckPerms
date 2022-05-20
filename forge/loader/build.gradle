@@ -18,7 +18,6 @@ sourceCompatibility = 1.8
 targetCompatibility = 17
 
 minecraft {
-    accessTransformer file('src/main/resources/META-INF/accesstransformer.cfg')
     mappings channel: 'official', version: minecraftVersion
 }
 
@@ -34,6 +33,7 @@ dependencies {
 
 build {
     dependsOn(":forge:build")
+    dependsOn(":forge-api:build")
 }
 
 jar {

@@ -117,8 +117,12 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.dependencyManager = new DependencyManager(this);
         this.dependencyManager.loadDependencies(getGlobalDependencies());
 
+        // load translations
         this.translationManager = new TranslationManager(this);
         this.translationManager.reload();
+
+        // load some utilities early
+        this.permissionRegistry = new PermissionRegistry(getBootstrap().getScheduler());
     }
 
     public final void enable() {
@@ -130,7 +134,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load some utilities early
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
-        this.permissionRegistry = new PermissionRegistry(getBootstrap().getScheduler());
         this.logDispatcher = new LogDispatcher(this);
 
         // load configuration

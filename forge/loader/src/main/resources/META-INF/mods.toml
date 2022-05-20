@@ -11,10 +11,7 @@ issueTrackerURL="https://github.com/LuckPerms/LuckPerms/issues"
     logoFile="luckperms.png"
     credits="Luck"
     authors="Luck"
-    description='''
-A permissions plugin for MinecraftForge.
-Source: https://github.com/LuckPerms/LuckPerms
-'''
+    description="A permissions plugin for Minecraft servers."
 [[dependencies.luckperms]]
     modId="forge"
     mandatory=true

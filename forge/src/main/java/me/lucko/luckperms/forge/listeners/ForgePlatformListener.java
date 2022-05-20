@@ -32,7 +32,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.util.BrigadierRewriter;
+import me.lucko.luckperms.forge.util.BrigadierInjector;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -47,11 +47,9 @@ import java.util.Locale;
 
 public class ForgePlatformListener {
     private final LPForgePlugin plugin;
-    private final BrigadierRewriter brigadierRewriter;
 
     public ForgePlatformListener(LPForgePlugin plugin) {
         this.plugin = plugin;
-        this.brigadierRewriter = new BrigadierRewriter(plugin);
     }
 
     @SubscribeEvent
@@ -77,7 +75,7 @@ public class ForgePlatformListener {
     @SubscribeEvent
     public void onAddReloadListener(AddReloadListenerEvent event) {
         Commands commands = event.getServerResources().getCommands();
-        commands.dispatcher = this.brigadierRewriter.rebuild(commands.dispatcher);
+        BrigadierInjector.inject(this.plugin, commands.getDispatcher());
     }
 
     @SubscribeEvent

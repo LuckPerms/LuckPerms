@@ -14,7 +14,6 @@ sourceCompatibility = 1.8
 targetCompatibility = 17
 
 minecraft {
-    accessTransformer file('../loader/src/main/resources/META-INF/accesstransformer.cfg')
     mappings channel: 'official', version: minecraftVersion
 }
 

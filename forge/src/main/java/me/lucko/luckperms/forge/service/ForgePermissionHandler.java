@@ -32,7 +32,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.forge.LPForgeBootstrap;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.capabilities.UserCapability;
 import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
 
 import net.luckperms.api.context.ImmutableContextSet;
@@ -61,6 +60,10 @@ public class ForgePermissionHandler implements IPermissionHandler {
     public ForgePermissionHandler(LPForgePlugin plugin, Collection<PermissionNode<?>> permissionNodes) {
         this.plugin = plugin;
         this.permissionNodes = Collections.unmodifiableSet(new HashSet<>(permissionNodes));
+
+        for (PermissionNode<?> node : this.permissionNodes) {
+            this.plugin.getPermissionRegistry().insert(node.getNodeName());
+        }
     }
 
     @Override

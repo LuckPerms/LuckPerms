@@ -237,7 +237,7 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
 
     @Override
     public Path getDataDirectory() {
-        return FMLPaths.GAMEDIR.get().resolve(LPForgeBootstrap.ID).toAbsolutePath();
+        return FMLPaths.CONFIGDIR.get().resolve(LPForgeBootstrap.ID).toAbsolutePath();
     }
 
     @Override
