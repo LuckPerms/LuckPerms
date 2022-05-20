@@ -33,7 +33,7 @@ dependencies {
 
 build {
     dependsOn(":forge:build")
-    dependsOn(":forge-api:build")
+    dependsOn(":forge:forge-api:build")
 }
 
 jar {
