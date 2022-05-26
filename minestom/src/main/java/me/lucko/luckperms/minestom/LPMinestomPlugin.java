@@ -211,7 +211,7 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
         if (!Files.exists(path)) {
             try {
                 MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigDirectory());
-                try (InputStream is = getClass().getClassLoader().getResourceAsStream("config.yml")) {
+                try (InputStream is = bootstrap.getPackagedResource("config.yml")) {
                     Files.copy(is, path);
                 }
             } catch (IOException e) {
