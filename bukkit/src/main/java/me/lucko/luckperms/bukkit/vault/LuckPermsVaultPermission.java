@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.cacheddata.type.MonitoredMetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -470,7 +471,12 @@ public class LuckPermsVaultPermission extends AbstractVaultPermission {
     }
 
     String getVaultServer() {
-        return this.plugin.getConfiguration().get(ConfigKeys.VAULT_SERVER);
+        LuckPermsConfiguration configuration = this.plugin.getConfiguration();
+        if (configuration.get(ConfigKeys.USE_VAULT_SERVER)) {
+            return configuration.get(ConfigKeys.VAULT_SERVER);
+        } else {
+            return configuration.get(ConfigKeys.SERVER);
+        }
     }
 
     boolean isIncludeGlobal() {

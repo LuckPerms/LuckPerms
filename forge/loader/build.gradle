@@ -1,0 +1,78 @@
+buildscript {
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2' }
+        maven { url 'https://maven.minecraftforge.net/' }
+    }
+
+    dependencies {
+        classpath 'gradle.plugin.com.github.johnrengelman:shadow:7.1.2'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
+    }
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'java-library'
+apply plugin: 'net.minecraftforge.gradle'
+
+sourceCompatibility = 1.8
+targetCompatibility = 17
+
+minecraft {
+    mappings channel: 'official', version: minecraftVersion
+}
+
+repositories {
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}"
+    implementation project(':api')
+    implementation project(':common:loader-utils')
+    implementation project(':forge:forge-api')
+}
+
+build {
+    dependsOn(":forge:build")
+    dependsOn(":forge:forge-api:build")
+}
+
+jar {
+    manifest {
+        attributes(
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'Implementation-Title': 'LuckPerms',
+                'Implementation-Vendor': 'LuckPerms',
+                'Implementation-Version': project.ext.fullVersion,
+                'Specification-Title': 'luckperms',
+                'Specification-Vendor': 'LuckPerms',
+                'Specification-Version': '1'
+        )
+    }
+}
+
+processResources {
+    filesMatching('META-INF/mods.toml') {
+        expand 'version': project.ext.fullVersion
+    }
+}
+
+reobf {
+    shadowJar {}
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-Forge-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':forge').tasks.shadowJar.archiveFile
+    }
+
+    dependencies {
+        include(dependency('net.luckperms:.*'))
+        include(dependency('me.lucko.luckperms:.*'))
+    }
+}
+
+artifacts {
+    archives shadowJar
+}

@@ -88,13 +88,7 @@ public final class ConfigKeys {
     /**
      * The name of the server
      */
-    public static final ConfigKey<String> SERVER = key(c -> {
-        String server = c.getString("server", "global").toLowerCase(Locale.ROOT);
-        if (server.equals("load-from-system-property")) {
-            server = System.getProperty("luckperms.server", "global").toLowerCase(Locale.ROOT);
-        }
-        return server;
-    });
+    public static final ConfigKey<String> SERVER = lowercaseStringKey("server", "global");
 
     /**
      * How many minutes to wait between syncs. A value <= 0 will disable syncing.
@@ -498,14 +492,7 @@ public final class ConfigKeys {
     /**
      * The name of the server to use for Vault.
      */
-    public static final ConfigKey<String> VAULT_SERVER = key(c -> {
-        // default to true for backwards compatibility
-        if (USE_VAULT_SERVER.get(c)) {
-            return c.getString("vault-server", "global").toLowerCase(Locale.ROOT);
-        } else {
-            return SERVER.get(c);
-        }
-    });
+    public static final ConfigKey<String> VAULT_SERVER = lowercaseStringKey("vault-server", "global");
 
     /**
      * If Vault should apply global permissions
@@ -518,9 +505,9 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> VAULT_IGNORE_WORLD = booleanKey("vault-ignore-world", false);
 
     /**
-     * If the owner of an integrated server should automatically bypasses all permission checks. On fabric, this only applies on an Integrated Server.
+     * If the owner of an integrated server should automatically bypass all permission checks. On fabric and forge, this only applies on an Integrated Server.
      */
-    public static final ConfigKey<Boolean> FABRIC_INTEGRATED_SERVER_OWNER_BYPASSES_CHECKS = booleanKey("integrated-server-owner-bypasses-checks", true);
+    public static final ConfigKey<Boolean> INTEGRATED_SERVER_OWNER_BYPASSES_CHECKS = booleanKey("integrated-server-owner-bypasses-checks", true);
 
     /**
      * Disabled context calculators

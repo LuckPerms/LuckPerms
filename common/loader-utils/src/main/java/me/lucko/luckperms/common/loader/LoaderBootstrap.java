@@ -32,8 +32,8 @@ public interface LoaderBootstrap {
 
     void onLoad();
 
-    void onEnable();
+    default void onEnable() {}
 
-    void onDisable();
+    default void onDisable() {}
 
 }

@@ -33,6 +33,9 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.EnvironmentVariableConfigAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.MultiConfigurationAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.SystemPropertyConfigAdapter;
 import me.lucko.luckperms.common.context.calculator.ConfigurationContextCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
@@ -59,6 +62,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
+import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
 
 import net.luckperms.api.LuckPerms;
@@ -91,6 +95,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     private PermissionRegistry permissionRegistry;
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
+    private OkHttpClient httpClient;
     private BytebinClient bytebin;
     private BytesocksClient bytesocks;
     private WebEditorStore webEditorStore;
@@ -113,8 +118,12 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.dependencyManager = new DependencyManager(this);
         this.dependencyManager.loadDependencies(getGlobalDependencies());
 
+        // load translations
         this.translationManager = new TranslationManager(this);
         this.translationManager.reload();
+
+        // load some utilities early
+        this.permissionRegistry = new PermissionRegistry(getBootstrap().getScheduler());
     }
 
     public final void enable() {
@@ -126,20 +135,24 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load some utilities early
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
-        this.permissionRegistry = new PermissionRegistry(getBootstrap().getScheduler());
         this.logDispatcher = new LogDispatcher(this);
 
         // load configuration
         getLogger().info("Loading configuration...");
-        this.configuration = new LuckPermsConfiguration(this, provideConfigurationAdapter());
+        ConfigurationAdapter configFileAdapter = provideConfigurationAdapter();
+        this.configuration = new LuckPermsConfiguration(this, new MultiConfigurationAdapter(this,
+                new SystemPropertyConfigAdapter(this),
+                new EnvironmentVariableConfigAdapter(this),
+                configFileAdapter
+        ));
 
         // setup a bytebin instance
-        OkHttpClient httpClient = new OkHttpClient.Builder()
+        this.httpClient = new OkHttpClient.Builder()
                 .callTimeout(15, TimeUnit.SECONDS)
                 .build();
 
-        this.bytebin = new BytebinClient(httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
-        this.bytesocks = new BytesocksClient(httpClient, getConfiguration().get(ConfigKeys.BYTESOCKS_HOST), "luckperms/editor");
+        this.bytebin = new BytebinClient(this.httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
+        this.bytesocks = new BytesocksClient(this.httpClient, getConfiguration().get(ConfigKeys.BYTESOCKS_HOST), "luckperms/editor");
         this.webEditorStore = new WebEditorStore(this);
 
         // init translation repo and update bundle files
@@ -235,6 +248,13 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // cancel delayed/repeating tasks
         getBootstrap().getScheduler().shutdownScheduler();
 
+        // close web editor sockets
+        for (WebEditorSocket socket : this.webEditorStore.sockets().getSockets()) {
+            if (!socket.isClosed()) {
+                socket.close();
+            }
+        }
+
         // shutdown permission vault and verbose handler tasks
         this.permissionRegistry.close();
         this.verboseHandler.close();
@@ -265,6 +285,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // shutdown async executor pool
         getBootstrap().getScheduler().shutdownExecutor();
+
+        // shutdown okhttp
+        this.httpClient.dispatcher().executorService().shutdown();
+        this.httpClient.connectionPool().evictAll();
 
         // close classpath appender
         getBootstrap().getClassPathAppender().close();

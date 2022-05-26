@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.velocity.messaging;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent.ForwardResult;
@@ -37,26 +34,23 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
+import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
-import net.luckperms.api.messenger.message.OutgoingMessage;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
  */
-public class PluginMessageMessenger implements Messenger {
-    private static final ChannelIdentifier CHANNEL = MinecraftChannelIdentifier.create("luckperms", "update");
+public class PluginMessageMessenger extends AbstractPluginMessageMessenger {
+    private static final ChannelIdentifier CHANNEL = MinecraftChannelIdentifier.from(AbstractPluginMessageMessenger.CHANNEL);
 
     private final LPVelocityPlugin plugin;
-    private final IncomingMessageConsumer consumer;
 
     public PluginMessageMessenger(LPVelocityPlugin plugin, IncomingMessageConsumer consumer) {
+        super(consumer);
         this.plugin = plugin;
-        this.consumer = consumer;
     }
 
     public void init() {
@@ -72,19 +66,11 @@ public class PluginMessageMessenger implements Messenger {
         proxy.getEventManager().unregisterListener(this.plugin.getBootstrap(), this);
     }
 
-    private void dispatchMessage(byte[] message) {
-        for (RegisteredServer server : this.plugin.getBootstrap().getProxy().getAllServers()) {
-            server.sendPluginMessage(CHANNEL, message);
-        }
-    }
-
     @Override
-    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF(outgoingMessage.asEncodedString());
-
-        byte[] message = out.toByteArray();
-        dispatchMessage(message);
+    protected void sendOutgoingMessage(byte[] buf) {
+        for (RegisteredServer server : this.plugin.getBootstrap().getProxy().getAllServers()) {
+            server.sendPluginMessage(CHANNEL, buf);
+        }
     }
 
     @Subscribe
@@ -102,12 +88,11 @@ public class PluginMessageMessenger implements Messenger {
             return;
         }
 
-        ByteArrayDataInput in = e.dataAsDataStream();
-        String msg = in.readUTF();
+        byte[] buf = e.getData();
 
-        if (this.consumer.consumeIncomingMessageAsString(msg)) {
+        if (handleIncomingMessage(buf)) {
             // Forward to other servers
-            this.plugin.getBootstrap().getScheduler().executeAsync(() -> dispatchMessage(e.getData()));
+            this.plugin.getBootstrap().getScheduler().executeAsync(() -> sendOutgoingMessage(buf));
         }
     }
 }

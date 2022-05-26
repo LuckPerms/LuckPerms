@@ -27,13 +27,12 @@ package me.lucko.luckperms.sponge.messaging;
 
 import com.google.common.collect.Iterables;
 
+import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
-import net.luckperms.api.messenger.message.OutgoingMessage;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.EngineConnectionSide;
@@ -41,6 +40,7 @@ import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.network.channel.raw.play.RawPlayDataHandler;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 
 import java.util.Collection;
@@ -49,17 +49,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
  */
-public class PluginMessageMessenger implements Messenger, RawPlayDataHandler<ServerSideConnection> {
-    private static final ResourceKey CHANNEL = ResourceKey.of("luckperms", "update");
+public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements RawPlayDataHandler<ServerSideConnection> {
+    private static final ResourceKey CHANNEL = ResourceKey.resolve(AbstractPluginMessageMessenger.CHANNEL);
 
     private final LPSpongePlugin plugin;
-    private final IncomingMessageConsumer consumer;
 
     private RawDataChannel channel = null;
 
     public PluginMessageMessenger(LPSpongePlugin plugin, IncomingMessageConsumer consumer) {
+        super(consumer);
         this.plugin = plugin;
-        this.consumer = consumer;
     }
 
     public void init() {
@@ -75,32 +74,39 @@ public class PluginMessageMessenger implements Messenger, RawPlayDataHandler<Ser
     }
 
     @Override
-    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
-        Task t = Task.builder()
+    protected void sendOutgoingMessage(byte[] buf) {
+        if (!this.plugin.getBootstrap().getGame().isServerAvailable()) {
+            return;
+        }
+
+        Task task = Task.builder()
                 .interval(10, TimeUnit.SECONDS)
-                .execute(task -> {
-                    if (!this.plugin.getBootstrap().getGame().isServerAvailable()) {
-                        return;
-                    }
-
-                    Collection<ServerPlayer> players = this.plugin.getBootstrap().getGame().server().onlinePlayers();
-                    ServerPlayer p = Iterables.getFirst(players, null);
-                    if (p == null) {
-                        return;
-                    }
-
-                    this.channel.play().sendTo(p, buf -> buf.writeUTF(outgoingMessage.asEncodedString()));
-                    task.cancel();
-                })
+                .execute(t -> sendOutgoingMessage(buf, t))
                 .plugin(this.plugin.getBootstrap().getPluginContainer())
                 .build();
 
-        this.plugin.getBootstrap().getScheduler().getSyncScheduler().submit(t);
+        this.plugin.getBootstrap().getScheduler().getSyncScheduler().submit(task);
+    }
+
+    private void sendOutgoingMessage(byte[] buf, ScheduledTask scheduledTask) {
+        if (!this.plugin.getBootstrap().getGame().isServerAvailable()) {
+            scheduledTask.cancel();
+            return;
+        }
+
+        Collection<ServerPlayer> players = this.plugin.getBootstrap().getGame().server().onlinePlayers();
+        ServerPlayer p = Iterables.getFirst(players, null);
+        if (p == null) {
+            return;
+        }
+
+        this.channel.play().sendTo(p, channelBuf -> channelBuf.writeBytes(buf));
+        scheduledTask.cancel();
     }
 
     @Override
-    public void handlePayload(ChannelBuf buf, ServerSideConnection connection) {
-        String msg = buf.readUTF();
-        this.consumer.consumeIncomingMessageAsString(msg);
+    public void handlePayload(ChannelBuf channelBuf, ServerSideConnection connection) {
+        byte[] buf = channelBuf.readBytes(channelBuf.available());
+        handleIncomingMessage(buf);
     }
 }

@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
@@ -51,6 +52,7 @@ import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
@@ -230,7 +232,17 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public Map<Component, Component> getMeta() {
-        return this.connectionFactory.getMeta();
+        Map<Component, Component> meta = this.connectionFactory.getMeta();
+
+        String tablePrefix = this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX);
+        if (!tablePrefix.equals("luckperms_")) {
+            meta.put(
+                    Component.translatable("luckperms.command.info.storage.meta.table-prefix-key"),
+                    Component.text(tablePrefix, NamedTextColor.WHITE)
+            );
+        }
+
+        return meta;
     }
 
     @Override

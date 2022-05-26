@@ -235,7 +235,7 @@ public abstract class Exporter implements Runnable {
             this.log.log("Finished gathering data, writing file...");
 
             try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(Files.newOutputStream(this.filePath)), StandardCharsets.UTF_8))) {
-                GsonProvider.prettyPrinting().toJson(json, out);
+                GsonProvider.normal().toJson(json, out);
             } catch (IOException e) {
                 e.printStackTrace();
             }

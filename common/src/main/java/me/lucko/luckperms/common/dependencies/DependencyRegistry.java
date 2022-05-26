@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.SetMultimap;
 import com.google.gson.JsonElement;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -46,22 +47,26 @@ import java.util.Set;
  */
 public class DependencyRegistry {
 
-    private static final ListMultimap<StorageType, Dependency> STORAGE_DEPENDENCIES = ImmutableListMultimap.<StorageType, Dependency>builder()
-            .putAll(StorageType.YAML, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML)
-            .putAll(StorageType.JSON, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON)
-            .putAll(StorageType.HOCON, Dependency.HOCON_CONFIG, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON)
-            .putAll(StorageType.TOML, Dependency.TOML4J, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_TOML)
-            .putAll(StorageType.YAML_COMBINED, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML)
-            .putAll(StorageType.JSON_COMBINED, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON)
-            .putAll(StorageType.HOCON_COMBINED, Dependency.HOCON_CONFIG, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON)
-            .putAll(StorageType.TOML_COMBINED, Dependency.TOML4J, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_TOML)
-            .putAll(StorageType.MONGODB, Dependency.MONGODB_DRIVER)
-            .putAll(StorageType.MARIADB, Dependency.MARIADB_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)
-            .putAll(StorageType.MYSQL, Dependency.MYSQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)
-            .putAll(StorageType.POSTGRESQL, Dependency.POSTGRESQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI)
-            .putAll(StorageType.SQLITE, Dependency.SQLITE_DRIVER)
-            .putAll(StorageType.H2, Dependency.H2_DRIVER)
+    private static final SetMultimap<StorageType, Dependency> STORAGE_DEPENDENCIES = ImmutableSetMultimap.<StorageType, Dependency>builder()
+            .putAll(StorageType.YAML,           Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML, Dependency.SNAKEYAML)
+            .putAll(StorageType.YAML_COMBINED,  Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML, Dependency.SNAKEYAML)
+            .putAll(StorageType.JSON,           Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON)
+            .putAll(StorageType.JSON_COMBINED,  Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON)
+            .putAll(StorageType.HOCON,          Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON, Dependency.HOCON_CONFIG)
+            .putAll(StorageType.HOCON_COMBINED, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON, Dependency.HOCON_CONFIG)
+            .putAll(StorageType.TOML,           Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_TOML, Dependency.TOML4J)
+            .putAll(StorageType.TOML_COMBINED,  Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_TOML, Dependency.TOML4J)
+            .putAll(StorageType.MONGODB,        Dependency.MONGODB_DRIVER_CORE, Dependency.MONGODB_DRIVER_LEGACY, Dependency.MONGODB_DRIVER_SYNC, Dependency.MONGODB_DRIVER_BSON)
+            .putAll(StorageType.MARIADB,        Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI, Dependency.MARIADB_DRIVER)
+            .putAll(StorageType.MYSQL,          Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI, Dependency.MYSQL_DRIVER)
+            .putAll(StorageType.POSTGRESQL,     Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI, Dependency.POSTGRESQL_DRIVER)
+            .putAll(StorageType.SQLITE,         Dependency.SQLITE_DRIVER)
+            .putAll(StorageType.H2,             Dependency.H2_DRIVER)
             .build();
+
+    private static final Set<Platform.Type> SNAKEYAML_PROVIDED_BY_PLATFORM = ImmutableSet.of(
+            Platform.Type.BUKKIT, Platform.Type.BUNGEECORD, Platform.Type.SPONGE, Platform.Type.NUKKIT
+    );
 
     private final LuckPermsPlugin plugin;
 
@@ -92,6 +97,11 @@ public class DependencyRegistry {
             dependencies.remove(Dependency.SLF4J_SIMPLE);
         }
 
+        // don't load snakeyaml if it's provided by the platform
+        if (dependencies.contains(Dependency.SNAKEYAML) && SNAKEYAML_PROVIDED_BY_PLATFORM.contains(this.plugin.getBootstrap().getType())) {
+            dependencies.remove(Dependency.SNAKEYAML);
+        }
+
         return dependencies;
     }
 
@@ -104,8 +114,8 @@ public class DependencyRegistry {
             relocations.add(Relocation.of("gson", "com{}google{}gson"));
         }
 
-        // relocate yaml within configurate when running velocity
-        if (dependency == Dependency.CONFIGURATE_YAML && type == Platform.Type.VELOCITY) {
+        // relocate yaml within configurate if its being provided by LP
+        if (dependency == Dependency.CONFIGURATE_YAML && !SNAKEYAML_PROVIDED_BY_PLATFORM.contains(type)) {
             relocations.add(Relocation.of("yaml", "org{}yaml{}snakeyaml"));
         }
     }

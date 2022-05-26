@@ -76,6 +76,8 @@ public interface Platform {
         NUKKIT("Nukkit"),
         VELOCITY("Velocity"),
         FABRIC("Fabric"),
+        FORGE("Forge");
+        FABRIC("Fabric"),
         MINESTOM("Minestom");
 
         private final String friendlyName;
