@@ -14,7 +14,7 @@ repositories {
 dependencies {
     implementation project(':common')
 
-    compileOnly 'com.github.Minestom:Minestom:4a976a3333'
+    compileOnly 'com.github.Minestom:Minestom:7b8445d0e2'
     implementation 'org.yaml:snakeyaml:1.29'
 }
 
@@ -24,7 +24,7 @@ java {
 }
 
 processResources {
-    filesMatching("META-INF/extension.json") {
+    filesMatching("extension.json") {
         expand 'pluginVersion': project.ext.fullVersion
     }
 }
@@ -33,11 +33,9 @@ shadowJar {
     archiveFileName = "LuckPerms-Minestom-${project.ext.fullVersion}.jar"
 
     dependencies {
-        exclude('net.minestom:.*')
+        exclude(dependency('net.kyori:adventure-.*:.*'))
         include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
-        include(dependency("com.google.guava:guava:19.0"))
-        include(dependency("org.yaml:snakeyaml:1.29"))
         // We don't want to include the mappings in the jar do we?
         exclude '/mappings/*'
     }

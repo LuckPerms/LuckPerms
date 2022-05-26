@@ -28,7 +28,6 @@ package me.lucko.luckperms.minestom;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.minestom.util.AdventureCompat;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
 import net.minestom.server.MinecraftServer;
@@ -65,11 +64,11 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Comma
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
         Locale locale = null;
-        if (sender instanceof Player) {
-            locale = Locale.forLanguageTag(((Player) sender).getSettings().getLocale());
+        if (sender instanceof Player player) {
+            locale = Locale.forLanguageTag(player.getSettings().getLocale());
         }
         Component rendered = TranslationManager.render(message, locale);
-        AdventureCompat.sendMessage(sender, rendered);
+        sender.sendMessage(rendered);
     }
 
     @Override

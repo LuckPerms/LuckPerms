@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.minestom.calculator;
 
-import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
@@ -33,6 +32,7 @@ import me.lucko.luckperms.common.calculator.processor.*;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.minestom.LPMinestomPlugin;
 import net.luckperms.api.query.QueryOptions;
+
 import java.util.ArrayList;
 import java.util.List;
 

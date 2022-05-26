@@ -146,14 +146,14 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected void registerHousekeepingTasks() {
-        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
-        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
+    protected void performFinalSetup() {
+        // No final setup necessary
     }
 
     @Override
-    protected void performFinalSetup() {
-
+    protected void registerHousekeepingTasks() {
+        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
+        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
     }
 
     @Override

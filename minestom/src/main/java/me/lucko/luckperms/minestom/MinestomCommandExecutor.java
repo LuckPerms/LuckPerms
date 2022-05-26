@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.minestom;
 
-import java.util.List;
-
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
@@ -36,6 +34,8 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 // todo tab completion support
 public class MinestomCommandExecutor extends CommandManager {
@@ -71,13 +71,9 @@ public class MinestomCommandExecutor extends CommandManager {
                 tabCompleteCommand(wrapped, arguments).stream().map(SuggestionEntry::new).forEach(suggestion::addEntry);
             });
 
-            setDefaultExecutor((sender, context) -> {
-                process(sender, context.getCommandName(), new String[0]);
-            });
+            setDefaultExecutor((sender, context) -> process(sender, context.getCommandName(), new String[0]));
 
-            addSyntax((sender, context) -> {
-                process(sender, context.getCommandName(), context.get(params));
-            }, params);
+            addSyntax((sender, context) -> process(sender, context.getCommandName(), context.get(params)), params);
         }
 
         public void process(@NotNull CommandSender sender, @NotNull String command, @NotNull String[] args) {
@@ -85,7 +81,5 @@ public class MinestomCommandExecutor extends CommandManager {
 
             this.commandExecutor.executeCommand(this.commandExecutor.plugin.getSenderFactory().wrap(sender), command, arguments);
         }
-
-
     }
 }
