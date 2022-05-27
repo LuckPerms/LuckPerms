@@ -33,9 +33,9 @@ shadowJar {
     archiveFileName = "LuckPerms-Minestom-${project.ext.fullVersion}.jar"
 
     dependencies {
-        exclude(dependency('net.kyori:adventure-.*:.*'))
         include(dependency('net.luckperms:.*'))
         include(dependency('me.lucko.luckperms:.*'))
+        include(dependency('com.google.guava:guava'))
         // We don't want to include the mappings in the jar do we?
         exclude '/mappings/*'
     }
