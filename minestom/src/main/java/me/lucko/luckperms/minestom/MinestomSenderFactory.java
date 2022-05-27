@@ -32,6 +32,7 @@ import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.entity.Player;
 
 import java.util.Locale;
@@ -45,8 +46,8 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Comma
 
     @Override
     protected UUID getUniqueId(CommandSender sender) {
-        if (sender instanceof Player) {
-            return sender.asPlayer().getUuid();
+        if (sender instanceof Player player) {
+            return player.getUuid();
         } else {
             return Sender.CONSOLE_UUID;
         }
@@ -54,8 +55,8 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Comma
 
     @Override
     protected String getName(CommandSender sender) {
-        if (sender instanceof Player) {
-            return sender.asPlayer().getUsername();
+        if (sender instanceof Player player) {
+            return player.getUsername();
         } else {
             return Sender.CONSOLE_NAME;
         }
@@ -92,6 +93,6 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Comma
 
     @Override
     protected boolean isConsole(CommandSender sender) {
-        return sender.isConsole();
+        return sender instanceof ConsoleSender;
     }
 }
