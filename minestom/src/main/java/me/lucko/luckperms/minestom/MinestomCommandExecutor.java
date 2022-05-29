@@ -66,8 +66,9 @@ public class MinestomCommandExecutor extends CommandManager {
 
             params.setSuggestionCallback((sender, context, suggestion) -> {
                 Sender wrapped = this.commandExecutor.plugin.getSenderFactory().wrap(sender);
-                String[] args = context.get(params);
-                if (args == null) args = new String[0];
+                String input = context.getInput();
+                String[] split = input.split(" ", 2);
+                String args = split.length > 1 ? split[1] : "";
                 List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args);
                 tabCompleteCommand(wrapped, arguments).stream().map(SuggestionEntry::new).forEach(suggestion::addEntry);
             });
