@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.context.manager.ContextManager;
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.Group;
@@ -60,7 +61,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -77,6 +80,20 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
 
     public LPMinestomPlugin(LPMinestomBootstrap bootstrap) {
         this.bootstrap = bootstrap;
+    }
+
+    @Override
+    protected Set<Dependency> getGlobalDependencies() {
+        return EnumSet.of(
+                Dependency.CAFFEINE,
+                Dependency.OKIO,
+                Dependency.OKHTTP,
+                Dependency.BYTEBUDDY,
+                Dependency.EVENT,
+                Dependency.CONFIGURATE_CORE,
+                Dependency.CONFIGURATE_YAML,
+                Dependency.SNAKEYAML
+        );
     }
 
     @Override

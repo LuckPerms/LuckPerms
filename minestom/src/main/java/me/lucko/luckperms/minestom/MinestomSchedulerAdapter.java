@@ -25,81 +25,21 @@
 
 package me.lucko.luckperms.minestom;
 
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
+import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.timer.ExecutionType;
-import net.minestom.server.timer.Task;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 
-public class MinestomSchedulerAdapter implements SchedulerAdapter {
-    private final MinestomExecutor asyncExecutor = new MinestomExecutor(true);
-    private final MinestomExecutor syncExecutor = new MinestomExecutor(false);
-    private final Set<Task> tasks = Collections.newSetFromMap(new WeakHashMap<>());
+public class MinestomSchedulerAdapter extends AbstractJavaScheduler {
+    private final Executor executor = r -> MinecraftServer.getSchedulerManager().buildTask(r).schedule();
 
-    @Override
-    public Executor async() {
-        return asyncExecutor;
+    public MinestomSchedulerAdapter(LuckPermsBootstrap bootstrap) {
+        super(bootstrap);
     }
 
     @Override
     public Executor sync() {
-        return syncExecutor;
-    }
-
-    @Override
-    public SchedulerTask asyncLater(Runnable task, long delay, TimeUnit unit) {
-        Task delayedTask = MinecraftServer.getSchedulerManager().buildTask(task).delay(delay, unit.toChronoUnit()).schedule();
-        this.tasks.add(delayedTask);
-        return delayedTask::cancel;
-    }
-
-    @Override
-    public SchedulerTask asyncRepeating(Runnable task, long interval, TimeUnit unit) {
-        Task repeatingTask = MinecraftServer.getSchedulerManager().buildTask(task).repeat(interval, unit.toChronoUnit()).schedule();
-        this.tasks.add(repeatingTask);
-        return repeatingTask::cancel;
-    }
-
-    @Override
-    public void shutdownScheduler() {
-        this.tasks.forEach(Task::cancel);
-    }
-
-    @Override
-    public void shutdownExecutor() {
-        this.asyncExecutor.cancel();
-        this.syncExecutor.cancel();
-    }
-
-    private static class MinestomExecutor implements Executor {
-        private final Set<Task> tasks = Collections.newSetFromMap(new WeakHashMap<>());
-        private final boolean async;
-
-        public MinestomExecutor(boolean async) {
-            this.async = async;
-        }
-
-        @Override
-        public void execute(@NotNull Runnable command) {
-            Task.Builder builder = MinecraftServer.getSchedulerManager().buildTask(command);
-            if (this.async) {
-                builder.executionType(ExecutionType.ASYNC);
-            } else {
-                builder.executionType(ExecutionType.SYNC);
-            }
-            Task task = builder.schedule();
-            this.tasks.add(task);
-        }
-
-        private void cancel() {
-            this.tasks.forEach(Task::cancel);
-        }
+        return executor;
     }
 }

@@ -60,7 +60,7 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
 
     public LPMinestomBootstrap() {
         this.plugin = new LPMinestomPlugin(this);
-        this.schedulerAdapter = new MinestomSchedulerAdapter();
+        this.schedulerAdapter = new MinestomSchedulerAdapter(this);
         this.classPathAppender = new MinestomClassPathAppender(this);
     }
 
@@ -70,8 +70,6 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
 
         try {
             this.plugin.load();
-            this.plugin.getDependencyManager().loadDependencies(
-                    EnumSet.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML));
         } finally {
             this.loadLatch.countDown();
         }
