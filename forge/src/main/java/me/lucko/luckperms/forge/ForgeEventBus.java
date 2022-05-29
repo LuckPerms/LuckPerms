@@ -23,26 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.minestom;
+package me.lucko.luckperms.forge;
 
-import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.event.AbstractEventBus;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
 
-public class MinestomClassPathAppender implements ClassPathAppender {
-    private final LPMinestomBootstrap bootstrap;
-
-    public MinestomClassPathAppender(LPMinestomBootstrap bootstrap) {
-        this.bootstrap = bootstrap;
+public class ForgeEventBus extends AbstractEventBus<ModContainer> {
+    public ForgeEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
+        super(plugin, apiProvider);
     }
 
     @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.bootstrap.descriptor().classLoader().addURL(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+    protected ModContainer checkPlugin(Object mod) throws IllegalArgumentException {
+        ModContainer modContainer = ModList.get().getModContainerByObject(mod).orElse(null);
+        if (modContainer != null) {
+            return modContainer;
         }
+
+        throw new IllegalArgumentException("Object " + mod + " (" + mod.getClass().getName() + ") is not a ModContainer.");
     }
+
 }

@@ -48,8 +48,9 @@ public class RedisMessenger implements Messenger {
     private final LuckPermsPlugin plugin;
     private final IncomingMessageConsumer consumer;
 
-    private JedisPool jedisPool;
-    private Subscription sub;
+    private /* final */ JedisPool jedisPool;
+    private /* final */ Subscription sub;
+    private boolean closing = false;
 
     public RedisMessenger(LuckPermsPlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
@@ -82,6 +83,7 @@ public class RedisMessenger implements Messenger {
 
     @Override
     public void close() {
+        this.closing = true;
         this.sub.unsubscribe();
         this.jedisPool.destroy();
     }
@@ -90,16 +92,21 @@ public class RedisMessenger implements Messenger {
 
         @Override
         public void run() {
-            boolean wasBroken = false;
-            while (!Thread.interrupted() && !RedisMessenger.this.jedisPool.isClosed()) {
+            boolean first = true;
+            while (!RedisMessenger.this.closing && !Thread.interrupted() && !RedisMessenger.this.jedisPool.isClosed()) {
                 try (Jedis jedis = RedisMessenger.this.jedisPool.getResource()) {
-                    if (wasBroken) {
+                    if (first) {
+                        first = false;
+                    } else {
                         RedisMessenger.this.plugin.getLogger().info("Redis pubsub connection re-established");
-                        wasBroken = false;
                     }
-                    jedis.subscribe(this, CHANNEL);
+
+                    jedis.subscribe(this, CHANNEL); // blocking call
                 } catch (Exception e) {
-                    wasBroken = true;
+                    if (RedisMessenger.this.closing) {
+                        return;
+                    }
+
                     RedisMessenger.this.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection", e);
                     try {
                         unsubscribe();

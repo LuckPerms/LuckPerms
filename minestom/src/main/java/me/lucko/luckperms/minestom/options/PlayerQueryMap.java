@@ -38,8 +38,7 @@ public class PlayerQueryMap {
     private static final Map<Player, QueryOptionsCache<Player>> luckpermsQueryMap = new HashMap<>();
 
     public static QueryOptionsCache<Player> getQueryOptionsCache(Player player, MinestomContextManager contextManager) {
-        if (luckpermsQueryMap.get(player) == null) luckpermsQueryMap.put(player, new QueryOptionsCache<>(player, contextManager));
-        return luckpermsQueryMap.get(player);
+        return luckpermsQueryMap.computeIfAbsent(player, player1 -> new QueryOptionsCache<>(player1, contextManager));
     }
 
     public static void initializePermissions(Player player, User user) {

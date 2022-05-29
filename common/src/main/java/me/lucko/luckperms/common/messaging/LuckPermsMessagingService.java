@@ -164,11 +164,21 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
 
     @Override
     public boolean consumeIncomingMessageAsString(@NonNull String encodedString) {
+        try {
+            return consumeIncomingMessageAsString0(encodedString);
+        } catch (Exception e) {
+            this.plugin.getLogger().warn("Unable to decode incoming messaging service message: '" + encodedString + "'", e);
+            return false;
+        }
+    }
+
+    private boolean consumeIncomingMessageAsString0(@NonNull String encodedString) {
         Objects.requireNonNull(encodedString, "encodedString");
-        JsonObject decodedObject = GsonProvider.normal().fromJson(encodedString, JsonObject.class).getAsJsonObject();
+        JsonObject parsed = Objects.requireNonNull(GsonProvider.normal().fromJson(encodedString, JsonObject.class), "parsed");
+        JsonObject json = parsed.getAsJsonObject();
 
         // extract id
-        JsonElement idElement = decodedObject.get("id");
+        JsonElement idElement = json.get("id");
         if (idElement == null) {
             throw new IllegalStateException("Incoming message has no id argument: " + encodedString);
         }
@@ -180,14 +190,14 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         }
 
         // extract type
-        JsonElement typeElement = decodedObject.get("type");
+        JsonElement typeElement = json.get("type");
         if (typeElement == null) {
             throw new IllegalStateException("Incoming message has no type argument: " + encodedString);
         }
         String type = typeElement.getAsString();
 
         // extract content
-        @Nullable JsonElement content = decodedObject.get("content");
+        @Nullable JsonElement content = json.get("content");
 
         // decode message
         Message decoded;

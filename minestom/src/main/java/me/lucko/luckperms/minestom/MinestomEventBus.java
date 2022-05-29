@@ -36,8 +36,8 @@ public class MinestomEventBus extends AbstractEventBus<Extension> {
 
     @Override
     protected Extension checkPlugin(Object plugin) throws IllegalArgumentException {
-        if (plugin instanceof Extension) {
-            return (Extension) plugin;
+        if (plugin instanceof Extension extension) {
+            return extension;
         }
 
         throw new IllegalArgumentException("Object " + plugin + " (" + plugin.getClass().getName() + ") is not a plugin.");

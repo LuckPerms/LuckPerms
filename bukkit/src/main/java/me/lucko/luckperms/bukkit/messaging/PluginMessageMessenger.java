@@ -26,15 +26,12 @@
 package me.lucko.luckperms.bukkit.messaging;
 
 import com.google.common.collect.Iterables;
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
-import net.luckperms.api.messenger.message.OutgoingMessage;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -46,15 +43,12 @@ import java.util.Collection;
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
  */
-public class PluginMessageMessenger implements Messenger, PluginMessageListener {
-    private static final String CHANNEL = "luckperms:update";
-
+public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements PluginMessageListener {
     private final LPBukkitPlugin plugin;
-    private final IncomingMessageConsumer consumer;
 
     public PluginMessageMessenger(LPBukkitPlugin plugin, IncomingMessageConsumer consumer) {
+        super(consumer);
         this.plugin = plugin;
-        this.consumer = consumer;
     }
 
     public void init() {
@@ -69,11 +63,7 @@ public class PluginMessageMessenger implements Messenger, PluginMessageListener 
     }
 
     @Override
-    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF(outgoingMessage.asEncodedString());
-        byte[] data = out.toByteArray();
-
+    protected void sendOutgoingMessage(byte[] buf) {
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -83,21 +73,18 @@ public class PluginMessageMessenger implements Messenger, PluginMessageListener 
                     return;
                 }
 
-                p.sendPluginMessage(PluginMessageMessenger.this.plugin.getLoader(), CHANNEL, data);
+                p.sendPluginMessage(PluginMessageMessenger.this.plugin.getLoader(), CHANNEL, buf);
                 cancel();
             }
         }.runTaskTimer(this.plugin.getLoader(), 1L, 100L);
     }
 
     @Override
-    public void onPluginMessageReceived(String s, @NonNull Player player, @NonNull byte[] bytes) {
-        if (!s.equals(CHANNEL)) {
+    public void onPluginMessageReceived(String channel, @NonNull Player player, byte @NonNull [] message) {
+        if (!channel.equals(CHANNEL)) {
             return;
         }
 
-        ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
-        String msg = in.readUTF();
-
-        this.consumer.consumeIncomingMessageAsString(msg);
+        handleIncomingMessage(message);
     }
 }

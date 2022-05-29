@@ -173,6 +173,7 @@ public enum CommandPermission {
     public static final String ROOT = "luckperms.";
 
     private final String node;
+    private final String permission;
 
     private final Type type;
 
@@ -180,14 +181,20 @@ public enum CommandPermission {
         this.type = type;
 
         if (type == Type.NONE) {
-            this.node = ROOT + node;
+            this.node = node;
         } else {
-            this.node = ROOT + type.getTag() + "." + node;
+            this.node = type.getTag() + "." + node;
         }
+
+        this.permission = ROOT + this.node;
+    }
+
+    public String getNode() {
+        return this.node;
     }
 
     public String getPermission() {
-        return this.node;
+        return this.permission;
     }
 
     public boolean isAuthorized(Sender sender) {

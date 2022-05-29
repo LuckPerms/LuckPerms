@@ -32,6 +32,7 @@ import net.kyori.adventure.text.Component;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -44,7 +45,7 @@ public interface ConnectionFactory {
     void shutdown() throws Exception;
 
     default Map<Component, Component> getMeta() {
-        return Collections.emptyMap();
+        return new LinkedHashMap<>();
     }
 
     Function<String, String> getStatementProcessor();

@@ -44,8 +44,6 @@ public interface ConfigurationAdapter {
 
     List<String> getStringList(String path, List<String> def);
 
-    List<String> getKeys(String path, List<String> def);
-
     Map<String, String> getStringMap(String path, Map<String, String> def);
 
 }

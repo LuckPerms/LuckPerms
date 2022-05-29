@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.minestom;
 
-import java.util.EnumSet;
-import me.lucko.luckperms.common.dependencies.Dependency;
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
@@ -36,15 +36,9 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import net.luckperms.api.platform.Platform;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extensions.Extension;
-import net.minestom.server.extensions.ExtensionManager;
-import net.minestom.server.permission.Permission;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -53,7 +47,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap {
+public class LPMinestomBootstrap implements LuckPermsBootstrap, LoaderBootstrap, BootstrappedWithLoader {
+    private final Extension loader;
     private final Slf4jPluginLogger logger = new Slf4jPluginLogger(LoggerFactory.getLogger("luckperms"));
 
     // Latches for enable and load
@@ -65,48 +60,56 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
      */
     private final LPMinestomPlugin plugin;
     private final MinestomSchedulerAdapter schedulerAdapter;
-    private final MinestomClassPathAppender classPathAppender;
+    private final ClassPathAppender classPathAppender;
 
     private Instant startupTime;
 
-    public LPMinestomBootstrap() {
+    public LPMinestomBootstrap(Extension loader) {
+        this.loader = loader;
+
         this.plugin = new LPMinestomPlugin(this);
-        this.schedulerAdapter = new MinestomSchedulerAdapter();
-        this.classPathAppender = new MinestomClassPathAppender(this);
+        this.schedulerAdapter = new MinestomSchedulerAdapter(this);
+        this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
     }
 
     @Override
-    public LoadStatus initialize() {
-        this.startupTime = Instant.now();
+    public Extension getLoader() {
+        return loader;
+    }
 
+    @Override
+    public void onLoad() {
         try {
             this.plugin.load();
-            this.plugin.getDependencyManager().loadDependencies(
-                    EnumSet.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML));
         } finally {
             this.loadLatch.countDown();
         }
+    }
 
+    @Override
+    public void onEnable() {
+        this.startupTime = Instant.now();
         try {
             this.plugin.enable();
         } finally {
             this.enableLatch.countDown();
         }
-
-        return LoadStatus.SUCCESS;
     }
 
     @Override
-    public void terminate() {
+    public void onDisable() {
         this.plugin.disable();
     }
 
     @Override
-    public PluginLogger getPluginLogger() { return logger; }
+    public PluginLogger getPluginLogger() {
+        return logger;
+    }
 
     @Override
-    // Temporary
-    public SchedulerAdapter getScheduler() { return schedulerAdapter; }
+    public SchedulerAdapter getScheduler() {
+        return schedulerAdapter;
+    }
 
     @Override
     public ClassPathAppender getClassPathAppender() {
@@ -114,14 +117,18 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
     }
 
     @Override
-    public CountDownLatch getLoadLatch() { return this.loadLatch; }
+    public CountDownLatch getLoadLatch() {
+        return this.loadLatch;
+    }
 
     @Override
-    public CountDownLatch getEnableLatch() { return this.enableLatch; }
+    public CountDownLatch getEnableLatch() {
+        return this.enableLatch;
+    }
 
     @Override
     public String getVersion() {
-        return this.descriptor().version();
+        return loader.getOrigin().getVersion();
     }
 
     @Override
@@ -145,14 +152,8 @@ public class LPMinestomBootstrap extends Extension implements LuckPermsBootstrap
     }
 
     @Override
-    public Path dataDirectory() {
-        // TODO This is a VERY hacky solution which I will fix
-        return new File("./luckperms").toPath();
-    }
-
-    @Override
-    public InputStream getResourceStream(String path) {
-        return getClass().getClassLoader().getResourceAsStream(path);
+    public Path getDataDirectory() {
+        return loader.getDataDirectory().toAbsolutePath();
     }
 
     @Override

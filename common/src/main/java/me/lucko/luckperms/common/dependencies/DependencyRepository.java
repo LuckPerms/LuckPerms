@@ -44,16 +44,19 @@ public enum DependencyRepository {
     /**
      * Maven Central mirror repository.
      *
-     * <p>This is used to reduce the load on repo.maven.org - I'm told they
-     * don't like being used as a CDN.</p>
+     * <p>This is used to reduce the load on repo.maven.org.</p>
+     *
+     * <p>Although Maven Central is technically a CDN, it is meant for developer use,
+     * not end-user products. It is trivial and not very expensive for us to provide a
+     * mirror, which will absorb any traffic caused by LP.</p>
+     *
+     * <p>LuckPerms will fallback to the real-thing if the mirror ever goes offline.
+     * Retrieved content is validated with a checksum, so there is no risk to integrity.</p>
      */
-    // Please ask me (@lucko) before using this mirror in your own project.
-    LUCK_MIRROR("https://nexus.lucko.me/repository/maven-central/") {
+    MAVEN_CENTRAL_MIRROR("https://libraries.luckperms.net/") {
         @Override
         protected URLConnection openConnection(Dependency dependency) throws IOException {
             URLConnection connection = super.openConnection(dependency);
-
-            // Tell nexus who we are
             connection.setRequestProperty("User-Agent", "luckperms");
 
             // Set a connect/read timeout, so if the mirror goes offline we can fallback

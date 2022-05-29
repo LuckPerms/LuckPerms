@@ -32,11 +32,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class BukkitConfigAdapter implements ConfigurationAdapter {
     private final LuckPermsPlugin plugin;
@@ -73,17 +71,6 @@ public class BukkitConfigAdapter implements ConfigurationAdapter {
     public List<String> getStringList(String path, List<String> def) {
         List<String> list = this.configuration.getStringList(path);
         return this.configuration.isSet(path) ? list : def;
-    }
-
-    @Override
-    public List<String> getKeys(String path, List<String> def) {
-        ConfigurationSection section = this.configuration.getConfigurationSection(path);
-        if (section == null) {
-            return def;
-        }
-
-        Set<String> keys = section.getKeys(false);
-        return keys == null ? def : new ArrayList<>(keys);
     }
 
     @Override

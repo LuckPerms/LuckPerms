@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.minestom;
 
-import java.util.List;
-
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
@@ -37,7 +35,8 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import org.jetbrains.annotations.NotNull;
 
-// todo tab completion support
+import java.util.List;
+
 public class MinestomCommandExecutor extends CommandManager {
     private final LuckPermsCommand command;
     private final LPMinestomPlugin plugin;
@@ -67,17 +66,15 @@ public class MinestomCommandExecutor extends CommandManager {
 
             params.setSuggestionCallback((sender, context, suggestion) -> {
                 Sender wrapped = this.commandExecutor.plugin.getSenderFactory().wrap(sender);
-                List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(context.get(params));
+                String[] args = context.get(params);
+                if (args == null) args = new String[0];
+                List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args);
                 tabCompleteCommand(wrapped, arguments).stream().map(SuggestionEntry::new).forEach(suggestion::addEntry);
             });
 
-            setDefaultExecutor((sender, context) -> {
-                process(sender, context.getCommandName(), new String[0]);
-            });
+            setDefaultExecutor((sender, context) -> process(sender, context.getCommandName(), new String[0]));
 
-            addSyntax((sender, context) -> {
-                process(sender, context.getCommandName(), context.get(params));
-            }, params);
+            addSyntax((sender, context) -> process(sender, context.getCommandName(), context.get(params)), params);
         }
 
         public void process(@NotNull CommandSender sender, @NotNull String command, @NotNull String[] args) {
@@ -85,7 +82,5 @@ public class MinestomCommandExecutor extends CommandManager {
 
             this.commandExecutor.executeCommand(this.commandExecutor.plugin.getSenderFactory().wrap(sender), command, arguments);
         }
-
-
     }
 }

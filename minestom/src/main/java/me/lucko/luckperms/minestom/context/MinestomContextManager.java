@@ -43,10 +43,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MinestomContextManager extends ContextManager<Player, Player> {
 
-    public MinestomContextManager(LuckPermsPlugin plugin) {
-        super(plugin, Player.class, Player.class);
-    }
-
+    public static final OptionKey<Boolean> OP_OPTION = OptionKey.of("op", Boolean.class);
     // cache the creation of ContextsCache instances for online players with no expiry
     private final LoadingMap<Player, QueryOptionsCache<Player>> onlineSubjectCaches = LoadingMap.of(key -> new QueryOptionsCache<>(key, this));
 
@@ -60,8 +57,9 @@ public class MinestomContextManager extends ContextManager<Player, Player> {
                 }
                 return new QueryOptionsCache<>(key, this);
             });
-    public static final OptionKey<Boolean> OP_OPTION = OptionKey.of("op", Boolean.class);
-
+    public MinestomContextManager(LuckPermsPlugin plugin) {
+        super(plugin, Player.class, Player.class);
+    }
 
     @Override
     public UUID getUniqueId(Player player) {
@@ -72,7 +70,8 @@ public class MinestomContextManager extends ContextManager<Player, Player> {
     public QueryOptionsSupplier getCacheFor(Player subject) {
         if (subject == null) throw new NullPointerException("subject");
 
-        if (subject.isOnline()) return this.onlineSubjectCaches.get(subject); else return this.offlineSubjectCaches.get(subject);
+        if (subject.isOnline()) return this.onlineSubjectCaches.get(subject);
+        else return this.offlineSubjectCaches.get(subject);
     }
 
     @Override

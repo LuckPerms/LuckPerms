@@ -24,6 +24,7 @@
  */
 
 package me.lucko.luckperms.minestom.context;
+
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import net.luckperms.api.context.*;
 import net.minestom.server.entity.GameMode;
@@ -31,7 +32,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class MinestomPlayerCalculator implements ContextCalculator<Player> {
-    private static final GameMode[] KNOWN_GAMEMODES = { GameMode.SURVIVAL, GameMode.CREATIVE, GameMode.ADVENTURE, GameMode.SPECTATOR };
+    private static final GameMode[] KNOWN_GAMEMODES = {GameMode.SURVIVAL, GameMode.CREATIVE, GameMode.ADVENTURE, GameMode.SPECTATOR};
 
     @Override
     public void calculate(Player subject, ContextConsumer consumer) {

@@ -25,30 +25,25 @@
 
 package me.lucko.luckperms.fabric;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-
-import me.lucko.luckperms.common.command.CommandManager;
-import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
+import me.lucko.luckperms.common.command.BrigadierCommandExecutor;
 import me.lucko.luckperms.common.sender.Sender;
-
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.ListIterator;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class FabricCommandExecutor extends CommandManager implements Command<ServerCommandSource>, SuggestionProvider<ServerCommandSource> {
-    private static final String[] COMMAND_ALIASES = new String[] {"luckperms", "lp", "perm", "perms", "permission", "permissions"};
+public class FabricCommandExecutor extends BrigadierCommandExecutor<ServerCommandSource> {
 
     private final LPFabricPlugin plugin;
 
@@ -76,43 +71,43 @@ public class FabricCommandExecutor extends CommandManager implements Command<Ser
     }
 
     @Override
-    public int run(CommandContext<ServerCommandSource> ctx) {
-        Sender wrapped = this.plugin.getSenderFactory().wrap(ctx.getSource());
-
-        int start = ctx.getRange().getStart();
-        List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(ctx.getInput().substring(start));
-
-        String label = arguments.remove(0);
-        if (label.startsWith("/")) {
-            label = label.substring(1);
-        }
-
-        executeCommand(wrapped, label, arguments);
-        return Command.SINGLE_SUCCESS;
+    public Sender getSender(ServerCommandSource source) {
+        return this.plugin.getSenderFactory().wrap(source);
     }
 
     @Override
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        Sender wrapped = this.plugin.getSenderFactory().wrap(ctx.getSource());
+    public List<String> resolveSelectors(ServerCommandSource source, List<String> args) {
+        // usage of @ selectors requires at least level 2 permission
+        ServerCommandSource atAllowedSource = source.hasPermissionLevel(2) ? source : source.withLevel(2);
+        for (ListIterator<String> it = args.listIterator(); it.hasNext(); ) {
+            String arg = it.next();
+            if (arg.isEmpty() || arg.charAt(0) != '@') {
+                continue;
+            }
 
-        int idx = builder.getStart();
+            List<ServerPlayerEntity> matchedPlayers;
+            try {
+                matchedPlayers = EntityArgumentType.entities().parse(new StringReader(arg)).getPlayers(atAllowedSource);
+            } catch (CommandSyntaxException e) {
+                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + source + " executing " + args, e);
+                continue;
+            }
 
-        String buffer = ctx.getInput().substring(idx);
-        idx += buffer.length();
+            if (matchedPlayers.isEmpty()) {
+                continue;
+            }
 
-        List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(buffer);
-        if (!arguments.isEmpty()) {
-            idx -= arguments.get(arguments.size() - 1).length();
+            if (matchedPlayers.size() > 1) {
+                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + source + " executing " + args +
+                        ": ambiguous result (more than one player matched) - " + matchedPlayers);
+                continue;
+            }
+
+            ServerPlayerEntity player = matchedPlayers.get(0);
+            it.set(player.getUuidAsString());
         }
 
-        List<String> completions = tabCompleteCommand(wrapped, arguments);
-
-        // Offset the builder from the current string range so suggestions are placed in the right spot
-        builder = builder.createOffset(idx);
-        for (String completion : completions) {
-            builder.suggest(completion);
-        }
-        return builder.buildFuture();
+        return args;
     }
 
 }

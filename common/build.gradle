@@ -17,6 +17,7 @@ dependencies {
 
     compileOnly project(':common:loader-utils')
 
+    compileOnly 'com.mojang:brigadier:1.0.18'
     compileOnly 'org.slf4j:slf4j-api:1.7.30'
     compileOnly 'org.apache.logging.log4j:log4j-api:2.14.0'
 
@@ -72,6 +73,6 @@ dependencies {
     api 'com.zaxxer:HikariCP:4.0.3'
     api 'redis.clients:jedis:3.5.2'
     api 'com.rabbitmq:amqp-client:5.12.0'
-    api 'org.mongodb:mongo-java-driver:3.12.8'
+    api 'org.mongodb:mongodb-driver-legacy:4.5.0'
     api 'org.yaml:snakeyaml:1.28'
 }

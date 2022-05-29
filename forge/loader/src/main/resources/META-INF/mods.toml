@@ -1,0 +1,20 @@
+modLoader="javafml"
+loaderVersion="[40,)"
+license="MIT"
+issueTrackerURL="https://github.com/LuckPerms/LuckPerms/issues"
+
+[[mods]]
+    modId="luckperms"
+    version="${version}"
+    displayName="LuckPerms"
+    displayURL="https://luckperms.net/"
+    logoFile="luckperms.png"
+    credits="Luck"
+    authors="Luck"
+    description="A permissions plugin for Minecraft servers."
+[[dependencies.luckperms]]
+    modId="forge"
+    mandatory=true
+    versionRange="[40.1.20,)"
+    ordering="NONE"
+    side="BOTH"

@@ -27,6 +27,7 @@ package me.lucko.luckperms.fabric.messaging;
 
 import com.google.common.collect.Iterables;
 
+import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 
@@ -34,29 +35,24 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
-import net.luckperms.api.messenger.Messenger;
-import net.luckperms.api.messenger.message.OutgoingMessage;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PluginMessageMessenger implements Messenger, ServerPlayNetworking.PlayChannelHandler {
-    private static final Identifier CHANNEL = new Identifier("luckperms", "update");
+public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements ServerPlayNetworking.PlayChannelHandler {
+    private static final Identifier CHANNEL = new Identifier(AbstractPluginMessageMessenger.CHANNEL);
 
     private final LPFabricPlugin plugin;
-    private final IncomingMessageConsumer consumer;
 
     public PluginMessageMessenger(LPFabricPlugin plugin, IncomingMessageConsumer consumer) {
+        super(consumer);
         this.plugin = plugin;
-        this.consumer = consumer;
     }
 
     public void init() {
@@ -69,7 +65,7 @@ public class PluginMessageMessenger implements Messenger, ServerPlayNetworking.P
     }
 
     @Override
-    public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
+    protected void sendOutgoingMessage(byte[] buf) {
         AtomicReference<SchedulerTask> taskRef = new AtomicReference<>();
         SchedulerTask task = this.plugin.getBootstrap().getScheduler().asyncRepeating(() -> {
             MinecraftServer server = this.plugin.getBootstrap().getServer().orElse(null);
@@ -83,9 +79,9 @@ public class PluginMessageMessenger implements Messenger, ServerPlayNetworking.P
                 return;
             }
 
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeString(outgoingMessage.asEncodedString());
-            ServerPlayNetworking.send(p, CHANNEL, buf);
+            PacketByteBuf packetBuf = PacketByteBufs.create();
+            packetBuf.writeBytes(buf);
+            ServerPlayNetworking.send(p, CHANNEL, packetBuf);
 
             SchedulerTask t = taskRef.getAndSet(null);
             if (t != null) {
@@ -96,8 +92,10 @@ public class PluginMessageMessenger implements Messenger, ServerPlayNetworking.P
     }
 
     @Override
-    public void receive(MinecraftServer server, ServerPlayerEntity entity, ServerPlayNetworkHandler netHandler, PacketByteBuf buf, PacketSender packetSender) {
-        String msg = buf.readString();
-        this.consumer.consumeIncomingMessageAsString(msg);
+    public void receive(MinecraftServer server, ServerPlayerEntity entity, ServerPlayNetworkHandler netHandler, PacketByteBuf packetBuf, PacketSender packetSender) {
+        byte[] buf = new byte[packetBuf.readableBytes()];
+        packetBuf.readBytes(buf);
+
+        handleIncomingMessage(buf);
     }
 }

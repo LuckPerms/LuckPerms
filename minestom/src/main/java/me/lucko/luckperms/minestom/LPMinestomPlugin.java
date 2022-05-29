@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.context.manager.ContextManager;
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.Group;
@@ -46,7 +47,6 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
-import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.minestom.calculator.MinestomCalculatorFactory;
 import me.lucko.luckperms.minestom.context.MinestomContextManager;
 import me.lucko.luckperms.minestom.context.MinestomPlayerCalculator;
@@ -56,11 +56,9 @@ import net.luckperms.api.query.QueryOptions;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -80,6 +78,20 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
+    protected Set<Dependency> getGlobalDependencies() {
+        return EnumSet.of(
+                Dependency.CAFFEINE,
+                Dependency.OKIO,
+                Dependency.OKHTTP,
+                Dependency.BYTEBUDDY,
+                Dependency.EVENT,
+                Dependency.CONFIGURATE_CORE,
+                Dependency.CONFIGURATE_YAML,
+                Dependency.SNAKEYAML
+        );
+    }
+
+    @Override
     protected void setupSenderFactory() {
         this.senderFactory = new MinestomSenderFactory(this);
     }
@@ -90,7 +102,7 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new MinestomConfigAdapter(this, resolveConfig());
+        return new MinestomConfigAdapter(this, resolveConfig("config.yml"));
     }
 
     @Override
@@ -146,14 +158,14 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected void registerHousekeepingTasks() {
-        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
-        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
+    protected void performFinalSetup() {
+        // No final setup necessary
     }
 
     @Override
-    protected void performFinalSetup() {
-
+    protected void registerHousekeepingTasks() {
+        this.bootstrap.getScheduler().asyncRepeating(new ExpireTemporaryTask(this), 3, TimeUnit.SECONDS);
+        this.bootstrap.getScheduler().asyncRepeating(new CacheHousekeepingTask(this), 2, TimeUnit.MINUTES);
     }
 
     @Override
@@ -205,21 +217,4 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
     public Sender getConsoleSender() {
         return getSenderFactory().wrap(MinecraftServer.getCommandManager().getConsoleSender());
     }
-
-    private Path resolveConfig() {
-        Path path = this.bootstrap.getConfigDirectory().resolve("config.yml");
-        if (!Files.exists(path)) {
-            try {
-                MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigDirectory());
-                try (InputStream is = getClass().getClassLoader().getResourceAsStream("config.yml")) {
-                    Files.copy(is, path);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return path;
-    }
-
 }

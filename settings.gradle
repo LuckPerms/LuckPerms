@@ -21,14 +21,16 @@ include (
         'bungee',
         'bungee:loader',
         'fabric',
+        'forge',
+        'forge:loader',
+        'forge:forge-api',
         'nukkit',
         'nukkit:loader',
-        'minestom',
         'sponge',
         'sponge:loader',
         'sponge:sponge-service',
         'sponge:sponge-service-api8',
-        'velocity'
+        'velocity',
+        'minestom',
+        'minestom:loader'
 )
-include 'minestom'
-
