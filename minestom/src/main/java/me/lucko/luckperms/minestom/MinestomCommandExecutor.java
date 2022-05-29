@@ -37,7 +37,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-// todo tab completion support
 public class MinestomCommandExecutor extends CommandManager {
     private final LuckPermsCommand command;
     private final LPMinestomPlugin plugin;
@@ -67,7 +66,9 @@ public class MinestomCommandExecutor extends CommandManager {
 
             params.setSuggestionCallback((sender, context, suggestion) -> {
                 Sender wrapped = this.commandExecutor.plugin.getSenderFactory().wrap(sender);
-                List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(context.get(params));
+                String[] args = context.get(params);
+                if (args == null) args = new String[0];
+                List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(args);
                 tabCompleteCommand(wrapped, arguments).stream().map(SuggestionEntry::new).forEach(suggestion::addEntry);
             });
 
