@@ -23,26 +23,35 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.minestom;
+package me.lucko.luckperms.minestom.loader;
 
-import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import net.minestom.server.extensions.Extension;
 
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+public class MinestomLoaderExtension extends Extension {
+    private static final String JAR_NAME = "luckperms-minestom.jarinjar";
+    private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.minestom.LPMinestomBootstrap";
 
-public class MinestomClassPathAppender implements ClassPathAppender {
-    private final LPMinestomBootstrap bootstrap;
+    private final LoaderBootstrap plugin;
 
-    public MinestomClassPathAppender(LPMinestomBootstrap bootstrap) {
-        this.bootstrap = bootstrap;
+    public MinestomLoaderExtension() {
+        JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
+        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, Extension.class, this);
     }
 
     @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.bootstrap.getOrigin().getClassLoader().addURL(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+    public void preInitialize() {
+        this.plugin.onLoad();
+    }
+
+    @Override
+    public void initialize() {
+        this.plugin.onEnable();
+    }
+
+    @Override
+    public void terminate() {
+        this.plugin.onDisable();
     }
 }

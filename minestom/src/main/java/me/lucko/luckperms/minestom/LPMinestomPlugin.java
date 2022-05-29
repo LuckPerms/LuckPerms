@@ -47,7 +47,6 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
-import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.minestom.calculator.MinestomCalculatorFactory;
 import me.lucko.luckperms.minestom.context.MinestomContextManager;
 import me.lucko.luckperms.minestom.context.MinestomPlayerCalculator;
@@ -57,10 +56,6 @@ import net.luckperms.api.query.QueryOptions;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
@@ -107,7 +102,7 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new MinestomConfigAdapter(this, resolveConfig());
+        return new MinestomConfigAdapter(this, resolveConfig("config.yml"));
     }
 
     @Override
@@ -222,21 +217,4 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
     public Sender getConsoleSender() {
         return getSenderFactory().wrap(MinecraftServer.getCommandManager().getConsoleSender());
     }
-
-    private Path resolveConfig() {
-        Path path = this.bootstrap.getConfigDirectory().resolve("config.yml");
-        if (!Files.exists(path)) {
-            try {
-                MoreFiles.createDirectoriesIfNotExists(this.bootstrap.getConfigDirectory());
-                try (InputStream is = bootstrap.getPackagedResource("config.yml")) {
-                    Files.copy(is, path);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return path;
-    }
-
 }

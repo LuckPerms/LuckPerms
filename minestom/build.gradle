@@ -13,9 +13,9 @@ repositories {
 
 dependencies {
     implementation project(':common')
+    compileOnly project(':common:loader-utils')
 
     compileOnly 'com.github.Minestom:Minestom:7b8445d0e2'
-    implementation 'org.yaml:snakeyaml:1.29'
 }
 
 java {
@@ -23,14 +23,8 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-processResources {
-    filesMatching("extension.json") {
-        expand 'pluginVersion': project.ext.fullVersion
-    }
-}
-
 shadowJar {
-    archiveFileName = "LuckPerms-Minestom-${project.ext.fullVersion}.jar"
+    archiveFileName = 'luckperms-minestom.jarinjar'
 
     dependencies {
         include(dependency('net.luckperms:.*'))
@@ -40,7 +34,6 @@ shadowJar {
         exclude '/mappings/*'
     }
 
-    relocate 'net.kyori.adventure', 'me.lucko.luckperms.lib.adventure'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
     relocate 'okio', 'me.lucko.luckperms.lib.okio'
