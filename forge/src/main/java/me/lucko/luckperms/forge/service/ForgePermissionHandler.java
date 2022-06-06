@@ -115,7 +115,9 @@ public class ForgePermissionHandler implements IPermissionHandler {
         if (node.getType() == PermissionTypes.BOOLEAN) {
             PermissionCache cache = user.getCachedData().getPermissionData(queryOptions);
             Tristate value = cache.checkPermission(node.getNodeName(), CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
-            return (T) (Boolean) value.asBoolean();
+            if (value != Tristate.UNDEFINED) {
+                return (T) (Boolean) value.asBoolean();
+            }
         }
 
         if (node.getType() == PermissionTypes.INTEGER) {
