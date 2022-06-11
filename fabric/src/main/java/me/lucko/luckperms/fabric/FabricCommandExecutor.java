@@ -53,7 +53,7 @@ public class FabricCommandExecutor extends BrigadierCommandExecutor<ServerComman
     }
 
     public void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             for (String alias : COMMAND_ALIASES) {
                 LiteralCommandNode<ServerCommandSource> cmd = literal(alias)
                         .executes(this)
