@@ -42,11 +42,11 @@ import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchronizer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.kyori.adventure.text.Component;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.dynamic.DynamicSerializableUuid;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -70,7 +70,7 @@ public class FabricConnectionListener extends AbstractConnectionListener {
 
         // Get their profile from the net handler - it should have been initialised by now.
         GameProfile profile = ((ServerLoginNetworkHandlerAccessor) netHandler).getGameProfile();
-        UUID uniqueId = PlayerEntity.getUuidFromProfile(profile);
+        UUID uniqueId = DynamicSerializableUuid.getUuidFromProfile(profile);
         String username = profile.getName();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {

@@ -2,7 +2,7 @@ import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0'
-    id 'fabric-loom' version '0.9.+'
+    id 'fabric-loom' version '0.12.+'
 }
 
 archivesBaseName = 'luckperms'
@@ -14,19 +14,19 @@ repositories {
 
 dependencies {
     // https://modmuss50.me/fabric.html
-    minecraft 'com.mojang:minecraft:1.18'
-    mappings 'net.fabricmc:yarn:1.18+build.1:v2'
-    modImplementation 'net.fabricmc:fabric-loader:0.12.6'
+    minecraft 'com.mojang:minecraft:1.19'
+    mappings 'net.fabricmc:yarn:1.19+build.1:v2'
+    modImplementation 'net.fabricmc:fabric-loader:0.14.6'
 
     Set<String> apiModules = [
             'fabric-api-base',
-            'fabric-command-api-v1',
+            'fabric-command-api-v2',
             'fabric-lifecycle-events-v1',
             'fabric-networking-api-v1'
     ]
 
     apiModules.forEach {
-        modImplementation(fabricApi.module(it, '0.43.1+1.18'))
+        modImplementation(fabricApi.module(it, '0.55.2+1.19'))
     }
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.1-SNAPSHOT'))
