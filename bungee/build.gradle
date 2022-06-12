@@ -7,7 +7,7 @@ dependencies {
     compileOnly project(':common:loader-utils')
 
     compileOnly 'net.md-5:bungeecord-api:1.16-R0.4'
-    compileOnly('me.lucko:adventure-platform-bungeecord:4.9.4') {
+    compileOnly('net.kyori:adventure-platform-bungeecord:4.1.0') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
         exclude(module: 'adventure-nbt')
