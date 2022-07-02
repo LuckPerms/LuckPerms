@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Minestom:Minestom:7b8445d0e2'
+    compileOnly 'com.github.Minestom:Minestom:529_extension_improvement-SNAPSHOT'
 
     implementation project(':api')
     implementation project(':common:loader-utils')
