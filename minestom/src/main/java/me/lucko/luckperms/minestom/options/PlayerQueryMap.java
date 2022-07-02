@@ -51,7 +51,6 @@ public class PlayerQueryMap {
         if (luckpermsQueryMap.get(player) == null) {
             getQueryOptionsCache(player, (MinestomContextManager) user.getPlugin().getContextManager());
         }
-        System.out.println("Initializing perms");
         List<Node> nodes = user.getOwnNodes(QueryOptions.builder(QueryMode.CONTEXTUAL).build());
         PlayerNodeChangeListener.setPermissionsFromNodes(nodes, player, LuckPermsProvider.get().getGroupManager());
     }
