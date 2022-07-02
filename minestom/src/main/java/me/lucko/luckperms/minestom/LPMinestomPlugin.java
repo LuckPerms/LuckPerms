@@ -57,7 +57,6 @@ import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.query.QueryOptions;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerLoginEvent;
 
 import java.util.EnumSet;
 import java.util.Optional;

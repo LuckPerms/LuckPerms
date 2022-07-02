@@ -73,7 +73,7 @@ public class PlayerNodeChangeListener {
         if(player == null) {
             throw new IllegalArgumentException("Player must be online");
         }
-        setPermissionsFromNodes(List.of(e.getNode()), player, luckPerms.getGroupManager(),true);
+        setPermissionsFromNodes(List.of(node), player, luckPerms.getGroupManager());
     }
 
     private void onNodeRemove(NodeRemoveEvent e) {
@@ -87,7 +87,7 @@ public class PlayerNodeChangeListener {
         if(player == null) {
             throw new IllegalArgumentException("Player must be online");
         }
-        setPermissionsFromNodes(List.of(e.getNode()), player, luckPerms.getGroupManager(),false);
+        setPermissionsFromNodes(List.of(node), player, luckPerms.getGroupManager());
     }
     private void onNodeClear(NodeClearEvent e) {
         if (!e.isUser()) {
@@ -100,14 +100,15 @@ public class PlayerNodeChangeListener {
         if(player == null) {
             throw new IllegalArgumentException("Player must be online");
         }
-        setPermissionsFromNodes(nodes, player, luckPerms.getGroupManager(),false);
+        setPermissionsFromNodes(nodes, player, luckPerms.getGroupManager());
     }
 
-    public static void setPermissionsFromNodes(Collection<Node> nodes, Player player, GroupManager groupManager, boolean add) {
+    public static void setPermissionsFromNodes(Collection<Node> nodes, Player player, GroupManager groupManager) {
+        System.out.println("[LuckPerms] Adding permissions to player: " + player.getUsername());
         for (Node node : nodes) {
             if (node instanceof PermissionNode) {
                 String permission = ((PermissionNode) node).getPermission();
-                if(add) {
+                if(node.getValue()) {
                     player.addPermission(new Permission(permission));
                 } else {
                     player.removePermission(new Permission(permission));
@@ -118,7 +119,7 @@ public class PlayerNodeChangeListener {
                 Group group = groupManager.getGroup(inheritanceNode.getGroupName());
                 Collection<PermissionNode> permissionNodes = group.getNodes(NodeType.PERMISSION);
                 for (PermissionNode permissionNode : permissionNodes) {
-                    if(add) {
+                    if(node.getValue()) {
                         player.addPermission(new Permission(permissionNode.getPermission()));
                     } else {
                         player.removePermission(new Permission(permissionNode.getPermission()));
