@@ -46,7 +46,7 @@ import me.lucko.luckperms.fabric.listeners.FabricAutoOpListener;
 import me.lucko.luckperms.fabric.listeners.FabricCommandListUpdater;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.FabricOtherListeners;
-import me.lucko.luckperms.fabric.listeners.PermissionCheckListener;
+import me.lucko.luckperms.fabric.listeners.FabricPermissionsApiListener;
 import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -88,7 +88,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
         this.connectionListener = new FabricConnectionListener(this);
         this.connectionListener.registerListeners();
 
-        new PermissionCheckListener(this).registerListeners();
+        new FabricPermissionsApiListener(this).registerListeners();
 
         // Command registration also need to occur early, and will persist across game states as well.
         this.commandManager = new FabricCommandExecutor(this);

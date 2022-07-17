@@ -25,7 +25,9 @@
 
 package me.lucko.luckperms.fabric.listeners;
 
+import me.lucko.fabric.api.permissions.v0.OptionRequestEvent;
 import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
+import me.lucko.luckperms.common.cacheddata.result.StringResult;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
@@ -41,31 +43,44 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Optional;
+
 /**
  * Listener to route permission checks made via fabric-permissions-api to LuckPerms.
  */
-public class PermissionCheckListener {
+public class FabricPermissionsApiListener {
     private final LPFabricPlugin plugin;
 
-    public PermissionCheckListener(LPFabricPlugin plugin) {
+    public FabricPermissionsApiListener(LPFabricPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void registerListeners() {
         PermissionCheckEvent.EVENT.register(this::onPermissionCheck);
+        OptionRequestEvent.EVENT.register(this::onOptionRequest);
     }
 
     private @NonNull TriState onPermissionCheck(CommandSource source, String permission) {
         if (source instanceof ServerCommandSource) {
             Entity entity = ((ServerCommandSource) source).getEntity();
             if (entity instanceof ServerPlayerEntity) {
-                return onPlayerPermissionCheck((ServerPlayerEntity) entity, permission);
+                return playerPermissionCheck((ServerPlayerEntity) entity, permission);
             }
         }
-        return onOtherPermissionCheck(source, permission);
+        return otherPermissionCheck(source, permission);
     }
 
-    private TriState onPlayerPermissionCheck(ServerPlayerEntity player, String permission) {
+    private @NonNull Optional<String> onOptionRequest(CommandSource source, String key) {
+        if (source instanceof ServerCommandSource) {
+            Entity entity = ((ServerCommandSource) source).getEntity();
+            if (entity instanceof ServerPlayerEntity) {
+                return playerGetOption((ServerPlayerEntity) entity, key);
+            }
+        }
+        return otherGetOption(source, key);
+    }
+
+    private TriState playerPermissionCheck(ServerPlayerEntity player, String permission) {
         switch (((MixinUser) player).hasPermission(permission)) {
             case TRUE:
                 return TriState.TRUE;
@@ -78,7 +93,7 @@ public class PermissionCheckListener {
         }
     }
 
-    private TriState onOtherPermissionCheck(CommandSource source, String permission) {
+    private TriState otherPermissionCheck(CommandSource source, String permission) {
         if (source instanceof ServerCommandSource) {
             String name = ((ServerCommandSource) source).getName();
             VerboseCheckTarget target = VerboseCheckTarget.internal(name);
@@ -88,6 +103,21 @@ public class PermissionCheckListener {
         }
 
         return TriState.DEFAULT;
+    }
+
+    private Optional<String> playerGetOption(ServerPlayerEntity player, String key) {
+        return Optional.ofNullable(((MixinUser) player).getOption(key));
+    }
+
+    private Optional<String> otherGetOption(CommandSource source, String key) {
+        if (source instanceof ServerCommandSource) {
+            String name = ((ServerCommandSource) source).getName();
+            VerboseCheckTarget target = VerboseCheckTarget.internal(name);
+
+            this.plugin.getVerboseHandler().offerMetaCheckEvent(CheckOrigin.PLATFORM_API, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, key, StringResult.nullResult());
+        }
+
+        return Optional.empty();
     }
 
 }
