@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.cacheddata.type;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
 import me.lucko.luckperms.common.cacheddata.result.StringResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.node.types.Weight;
@@ -40,6 +41,7 @@ import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
+import net.luckperms.api.node.types.WeightNode;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -80,7 +82,7 @@ public class MetaAccumulator {
     private final ListMultimap<String, StringResult<MetaNode>> meta;
     private final SortedMap<Integer, StringResult<PrefixNode>> prefixes;
     private final SortedMap<Integer, StringResult<SuffixNode>> suffixes;
-    private int weight = 0;
+    private IntegerResult<WeightNode> weight;
     private String primaryGroup;
 
     private Set<String> seenNodeKeys = new HashSet<>();
@@ -96,6 +98,7 @@ public class MetaAccumulator {
         this.meta = ArrayListMultimap.create();
         this.prefixes = new TreeMap<>(Comparator.reverseOrder());
         this.suffixes = new TreeMap<>(Comparator.reverseOrder());
+        this.weight = IntegerResult.nullResult();
         this.prefixDefinition = prefixDefinition;
         this.suffixDefinition = suffixDefinition;
         this.prefixAccumulator = new MetaStackAccumulator<>(this.prefixDefinition, ChatMetaType.PREFIX);
@@ -120,8 +123,8 @@ public class MetaAccumulator {
         }
 
         // perform final changes
-        if (!this.meta.containsKey(Weight.NODE_KEY) && this.weight != 0) {
-            this.meta.put(Weight.NODE_KEY, StringResult.of(String.valueOf(this.weight)));
+        if (!this.meta.containsKey(Weight.NODE_KEY) && !this.weight.isNull()) {
+            this.meta.put(Weight.NODE_KEY, StringResult.of(String.valueOf(this.weight.intResult())));
         }
         if (this.primaryGroup != null && !this.meta.containsKey("primarygroup")) {
             this.meta.put("primarygroup", StringResult.of(this.primaryGroup));
@@ -164,9 +167,11 @@ public class MetaAccumulator {
         }
     }
 
-    public void accumulateWeight(int weight) {
+    public void accumulateWeight(IntegerResult<WeightNode> weight) {
         ensureState(State.ACCUMULATING);
-        this.weight = Math.max(this.weight, weight);
+        if (this.weight.isNull() || weight.intResult() > this.weight.intResult()) {
+            this.weight = weight;
+        }
     }
 
     public void setPrimaryGroup(String primaryGroup) {
@@ -196,7 +201,7 @@ public class MetaAccumulator {
         return this.suffixes;
     }
 
-    public int getWeight() {
+    public IntegerResult<WeightNode> getWeight() {
         ensureState(State.COMPLETE);
         return this.weight;
     }

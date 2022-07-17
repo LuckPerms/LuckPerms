@@ -29,6 +29,7 @@ import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
+import net.luckperms.api.node.types.WeightNode;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -175,6 +176,30 @@ public interface CachedMetaData extends CachedData {
      */
     default @Nullable String getSuffix() {
         return querySuffix().result();
+    }
+
+    /**
+     * Query for a weight.
+     *
+     * <p>This method will always return a {@link Result}, and the
+     * {@link Result#result() inner result} {@link Integer} will never be null.
+     * A value of {@code 0} is equivalent to null.</p>
+     *
+     * @return a result containing the weight
+     * @since 5.5
+     */
+    @NonNull Result<Integer, WeightNode> queryWeight();
+
+    /**
+     * Gets the weight.
+     *
+     * <p>If the there is no defined weight, {@code 0} is returned.</p>
+     *
+     * @return the weight
+     * @since 5.5
+     */
+    default int getWeight() {
+        return queryWeight().result();
     }
 
     /**

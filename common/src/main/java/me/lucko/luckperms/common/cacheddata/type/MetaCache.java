@@ -34,8 +34,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 
 import me.lucko.luckperms.common.cacheddata.UsageTracked;
+import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
 import me.lucko.luckperms.common.cacheddata.result.StringResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
@@ -45,6 +48,7 @@ import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
+import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.query.meta.MetaValueSelector;
 
@@ -72,7 +76,7 @@ public class MetaCache extends UsageTracked implements CachedMetaData {
     private final Map<String, StringResult<MetaNode>> flattenedMeta;
     private final SortedMap<Integer, StringResult<PrefixNode>> prefixes;
     private final SortedMap<Integer, StringResult<SuffixNode>> suffixes;
-    private final int weight;
+    private final IntegerResult<WeightNode> weight;
     private final String primaryGroup;
     private final MetaStackDefinition prefixDefinition;
     private final MetaStackDefinition suffixDefinition;
@@ -119,18 +123,43 @@ public class MetaCache extends UsageTracked implements CachedMetaData {
         return this.flattenedMeta.getOrDefault(key.toLowerCase(Locale.ROOT), StringResult.nullResult());
     }
 
+    public @NonNull StringResult<PrefixNode> getPrefix(CheckOrigin origin) {
+        return this.prefix;
+    }
+
+    public @NonNull StringResult<SuffixNode> getSuffix(CheckOrigin origin) {
+        return this.suffix;
+    }
+
+    public @NonNull IntegerResult<WeightNode> getWeight(CheckOrigin origin) {
+        return this.weight;
+    }
+
+    public @NonNull Map<String, List<StringResult<MetaNode>>> getMetaResults(CheckOrigin origin) {
+        return this.meta;
+    }
+
+    public @Nullable String getPrimaryGroup(CheckOrigin origin) {
+        return this.primaryGroup;
+    }
+
+    public final Map<String, List<String>> getMeta(CheckOrigin origin) {
+        return Maps.transformValues(getMetaResults(origin), list -> Lists.transform(list, StringResult::result));
+    }
+
+    public @Nullable String getMetaOrChatMetaValue(String key, CheckOrigin origin) {
+        if (key.equals(Prefix.NODE_KEY)) {
+            return getPrefix(origin).result();
+        } else if (key.equals(Suffix.NODE_KEY)) {
+            return getSuffix(origin).result();
+        } else {
+            return getMetaValue(key, origin).result();
+        }
+    }
+
     @Override
     public final @NonNull Result<String, MetaNode> queryMetaValue(@NonNull String key) {
         return getMetaValue(key, CheckOrigin.LUCKPERMS_API);
-    }
-
-    @Override
-    public final @Nullable String getMetaValue(@NonNull String key) {
-        return getMetaValue(key, CheckOrigin.LUCKPERMS_API).result();
-    }
-
-    public @NonNull StringResult<PrefixNode> getPrefix(CheckOrigin origin) {
-        return this.prefix;
     }
 
     @Override
@@ -139,35 +168,23 @@ public class MetaCache extends UsageTracked implements CachedMetaData {
     }
 
     @Override
-    public final @Nullable String getPrefix() {
-        return getPrefix(CheckOrigin.LUCKPERMS_API).result();
-    }
-
-    public @NonNull StringResult<SuffixNode> getSuffix(CheckOrigin origin) {
-        return this.suffix;
-    }
-
-    @Override
     public final @NonNull Result<String, SuffixNode> querySuffix() {
         return getSuffix(CheckOrigin.LUCKPERMS_API);
     }
 
     @Override
-    public final @Nullable String getSuffix() {
-        return getSuffix(CheckOrigin.LUCKPERMS_API).result();
-    }
-
-    protected Map<String, List<StringResult<MetaNode>>> getMetaResults(CheckOrigin origin) {
-        return this.meta;
-    }
-
-    public final Map<String, List<String>> getMeta(CheckOrigin origin) {
-        return Maps.transformValues(getMetaResults(origin), list -> Lists.transform(list, StringResult::result));
+    public @NonNull Result<Integer, WeightNode> queryWeight() {
+        return getWeight(CheckOrigin.LUCKPERMS_API);
     }
 
     @Override
     public final @NonNull Map<String, List<String>> getMeta() {
         return getMeta(CheckOrigin.LUCKPERMS_API);
+    }
+
+    @Override
+    public final @Nullable String getPrimaryGroup() {
+        return getPrimaryGroup(CheckOrigin.LUCKPERMS_API);
     }
 
     @Override
@@ -178,24 +195,6 @@ public class MetaCache extends UsageTracked implements CachedMetaData {
     @Override
     public @NonNull SortedMap<Integer, String> getSuffixes() {
         return Maps.transformValues(this.suffixes, StringResult::result);
-    }
-
-    public int getWeight(CheckOrigin origin) {
-        return this.weight;
-    }
-
-    //@Override - not actually exposed in the API atm
-    public final int getWeight() {
-        return getWeight(CheckOrigin.LUCKPERMS_API);
-    }
-
-    public @Nullable String getPrimaryGroup(CheckOrigin origin) {
-        return this.primaryGroup;
-    }
-
-    @Override
-    public final @Nullable String getPrimaryGroup() {
-        return getPrimaryGroup(CheckOrigin.LUCKPERMS_API);
     }
 
     @Override

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.common.cache.Cache;
+import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 
@@ -36,12 +37,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.OptionalInt;
 
 /**
  * Cache instance to supply the weight of a {@link Group}.
  */
-public class WeightCache extends Cache<OptionalInt> {
+public class WeightCache extends Cache<IntegerResult<WeightNode>> {
     private final Group group;
 
     public WeightCache(Group group) {
@@ -49,27 +49,24 @@ public class WeightCache extends Cache<OptionalInt> {
     }
 
     @Override
-    protected @NonNull OptionalInt supply() {
-        boolean seen = false;
-        int weight = 0;
+    protected @NonNull IntegerResult<WeightNode> supply() {
+        IntegerResult<WeightNode> weight = null;
 
         for (WeightNode n : this.group.getOwnNodes(NodeType.WEIGHT, QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)) {
             int value = n.getWeight();
-            if (!seen || value > weight) {
-                seen = true;
-                weight = value;
+            if (weight == null || value > weight.intResult()) {
+                weight = IntegerResult.of(n);
             }
         }
 
-        if (!seen) {
+        if (weight == null) {
             Map<String, Integer> configWeights = this.group.getPlugin().getConfiguration().get(ConfigKeys.GROUP_WEIGHTS);
             Integer value = configWeights.get(this.group.getIdentifier().getName().toLowerCase(Locale.ROOT));
             if (value != null) {
-                seen = true;
-                weight = value;
+                weight = IntegerResult.of(value);
             }
         }
 
-        return seen ? OptionalInt.of(weight) : OptionalInt.empty();
+        return weight != null ? weight : IntegerResult.nullResult();
     }
 }
