@@ -30,5 +30,8 @@ include (
         'sponge:loader',
         'sponge:sponge-service',
         'sponge:sponge-service-api8',
-        'velocity'
+        'velocity',
+        'standalone',
+        'standalone:loader',
+        'standalone:app'
 )
