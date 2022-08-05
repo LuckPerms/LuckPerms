@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.standalone.app.integration;
+package me.lucko.luckperms.standalone.app.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +56,7 @@ public class DockerCommandSocket extends ServerSocket implements Runnable {
             thread.setDaemon(true);
             thread.start();
 
-            LOGGER.info("Created Docker command socket on port 3000");
+            LOGGER.info("Created Docker command socket on port " + port);
         } catch (Exception e) {
             LOGGER.error("Error starting docker command socket", e);
         }

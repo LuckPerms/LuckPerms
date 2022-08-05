@@ -23,9 +23,10 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.standalone.app.integration;
+package me.lucko.luckperms.standalone.app.utils;
 
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
+import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
 
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
 

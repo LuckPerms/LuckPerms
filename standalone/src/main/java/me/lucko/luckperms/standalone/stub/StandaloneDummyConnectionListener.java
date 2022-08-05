@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.standalone.dummy;
+package me.lucko.luckperms.standalone.stub;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;

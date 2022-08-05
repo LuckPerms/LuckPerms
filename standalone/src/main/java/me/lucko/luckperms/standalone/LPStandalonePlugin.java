@@ -38,11 +38,11 @@ import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
-import me.lucko.luckperms.standalone.dummy.StandaloneContextManager;
-import me.lucko.luckperms.standalone.dummy.StandaloneDummyConnectionListener;
-import me.lucko.luckperms.standalone.dummy.StandaloneEventBus;
+import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
+import me.lucko.luckperms.standalone.stub.StandaloneContextManager;
+import me.lucko.luckperms.standalone.stub.StandaloneDummyConnectionListener;
+import me.lucko.luckperms.standalone.stub.StandaloneEventBus;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
@@ -56,6 +56,8 @@ import java.util.stream.Stream;
  */
 public class LPStandalonePlugin extends AbstractLuckPermsPlugin {
     private final LPStandaloneBootstrap bootstrap;
+
+    private boolean running = false;
 
     private StandaloneSenderFactory senderFactory;
     private StandaloneDummyConnectionListener connectionListener;
@@ -76,6 +78,10 @@ public class LPStandalonePlugin extends AbstractLuckPermsPlugin {
 
     public LuckPermsApplication getLoader() {
         return this.bootstrap.getLoader();
+    }
+
+    public boolean isRunning() {
+        return this.running;
     }
 
     @Override
@@ -144,16 +150,17 @@ public class LPStandalonePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerApiOnPlatform(LuckPerms api) {
         this.bootstrap.getLoader().setApi(api);
+        this.bootstrap.getLoader().setHealthReporter(new StandaloneHealthReporter(this));
     }
 
     @Override
     protected void performFinalSetup() {
-
+        this.running = true;
     }
 
     @Override
     protected void removePlatformHooks() {
-
+        this.running = false;
     }
 
     @Override

@@ -26,9 +26,11 @@
 package me.lucko.luckperms.standalone.app;
 
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
-import me.lucko.luckperms.standalone.app.integration.DockerCommandSocket;
+import me.lucko.luckperms.standalone.app.integration.HealthReporter;
 import me.lucko.luckperms.standalone.app.integration.ShutdownCallback;
-import me.lucko.luckperms.standalone.app.integration.TerminalInterface;
+import me.lucko.luckperms.standalone.app.utils.DockerCommandSocket;
+import me.lucko.luckperms.standalone.app.utils.HeartbeatHttpServer;
+import me.lucko.luckperms.standalone.app.utils.TerminalInterface;
 
 import net.luckperms.api.LuckPerms;
 
@@ -55,12 +57,16 @@ public class LuckPermsApplication implements AutoCloseable {
     private LuckPerms luckPermsApi;
     /** A command executor interface to run LuckPerms commands */
     private CommandExecutor commandExecutor;
+    /** An interface that can poll the health of the application */
+    private HealthReporter healthReporter;
 
     /** If the application is running */
     private final AtomicBoolean running = new AtomicBoolean(true);
 
     /** The docker command socket */
     private DockerCommandSocket dockerCommandSocket;
+    /** The heartbeat http server */
+    private HeartbeatHttpServer heartbeatHttpServer;
 
     public LuckPermsApplication(ShutdownCallback shutdownCallback) {
         this.shutdownCallback = shutdownCallback;
@@ -75,6 +81,7 @@ public class LuckPermsApplication implements AutoCloseable {
         List<String> arguments = Arrays.asList(args);
         if (arguments.contains("--docker")) {
             this.dockerCommandSocket = DockerCommandSocket.createAndStart(3000, terminal);
+            this.heartbeatHttpServer = HeartbeatHttpServer.createAndStart(3001, this.healthReporter);
         }
 
         terminal.start(); // blocking
@@ -95,6 +102,14 @@ public class LuckPermsApplication implements AutoCloseable {
                 LOGGER.warn(e);
             }
         }
+
+        if (this.heartbeatHttpServer != null) {
+            try {
+                this.heartbeatHttpServer.close();
+            } catch (Exception e) {
+                LOGGER.warn(e);
+            }
+        }
     }
 
     public AtomicBoolean runningState() {
@@ -109,6 +124,11 @@ public class LuckPermsApplication implements AutoCloseable {
     // called before start()
     public void setCommandExecutor(CommandExecutor commandExecutor) {
         this.commandExecutor = commandExecutor;
+    }
+
+    // called before start()
+    public void setHealthReporter(HealthReporter healthReporter) {
+        this.healthReporter = healthReporter;
     }
 
     public String getVersion() {

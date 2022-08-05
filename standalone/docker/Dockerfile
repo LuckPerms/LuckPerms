@@ -20,3 +20,6 @@ RUN mkdir data
 VOLUME ["/opt/luckperms/data"]
 
 CMD ["java", "-jar", "luckperms-standalone.jar", "--docker"]
+
+HEALTHCHECK --interval=30s --timeout=15s --start-period=20s \
+    CMD wget http://localhost:3001/health -q -O - | grep -c '"up":true' || exit 1
