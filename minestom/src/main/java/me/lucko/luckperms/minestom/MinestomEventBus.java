@@ -65,7 +65,8 @@ public class MinestomEventBus extends AbstractEventBus<Extension> {
     static {
         DUMMY_EXTENSION = new Extension() {
             @Override
-            public LoadStatus initialize() {return LoadStatus.SUCCESS;}
+            public void initialize() {
+            }
 
             @Override
             public void terminate() {}

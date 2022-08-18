@@ -128,7 +128,7 @@ public class LPMinestomBootstrap implements LuckPermsBootstrap, LoaderBootstrap,
 
     @Override
     public String getVersion() {
-        return loader.descriptor().version();
+        return this.loader.getOrigin().getVersion();
     }
 
     @Override
