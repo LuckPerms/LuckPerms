@@ -103,7 +103,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlayerLoadFromFile(PlayerEvent.LoadFromFile event) {
-        ServerPlayer player = (ServerPlayer) event.getPlayer();
+        ServerPlayer player = (ServerPlayer) event.getEntity();
         GameProfile profile = player.getGameProfile();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
@@ -137,7 +137,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        ServerPlayer player = (ServerPlayer) event.getPlayer();
+        ServerPlayer player = (ServerPlayer) event.getEntity();
         handleDisconnect(player.getGameProfile().getId());
     }
 

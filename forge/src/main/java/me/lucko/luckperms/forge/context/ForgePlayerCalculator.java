@@ -134,7 +134,7 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
             return;
         }
 
-        this.plugin.getContextManager().signalContextUpdate((ServerPlayer) event.getPlayer());
+        this.plugin.getContextManager().signalContextUpdate((ServerPlayer) event.getEntity());
     }
 
     @SubscribeEvent
@@ -143,7 +143,7 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
             return;
         }
 
-        this.plugin.getContextManager().signalContextUpdate((ServerPlayer) event.getPlayer());
+        this.plugin.getContextManager().signalContextUpdate((ServerPlayer) event.getEntity());
     }
 
 }
