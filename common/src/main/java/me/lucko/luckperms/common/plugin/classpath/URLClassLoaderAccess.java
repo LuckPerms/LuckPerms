@@ -167,8 +167,10 @@ public abstract class URLClassLoaderAccess {
                 URLClassLoaderAccess.throwError(new NullPointerException("unopenedURLs or pathURLs"));
             }
 
-            this.unopenedURLs.add(url);
-            this.pathURLs.add(url);
+            synchronized (this.unopenedURLs)  {
+                this.unopenedURLs.add(url);
+                this.pathURLs.add(url);
+            }
         }
     }
 
