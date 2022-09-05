@@ -129,7 +129,7 @@ public class WebEditorSocketListener extends WebSocketListener {
 
         // check signature to ensure the message is from the connected editor
         PublicKey remotePublicKey = this.socket.getRemotePublicKey();
-        boolean verified = remotePublicKey == null || CryptographyUtils.verify(remotePublicKey, innerMsg, signature);
+        boolean verified = remotePublicKey != null && CryptographyUtils.verify(remotePublicKey, innerMsg, signature);
 
         // parse the inner message
         JsonObject msg = GsonProvider.parser().parse(innerMsg).getAsJsonObject();

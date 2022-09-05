@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCach
 
 plugins {
     id 'com.github.johnrengelman.shadow'
+    id 'application'
 }
 
 dependencies {
@@ -10,12 +11,8 @@ dependencies {
     implementation project(':standalone:app')
 }
 
-jar {
-    manifest {
-        attributes(
-                'Main-Class': 'me.lucko.luckperms.standalone.loader.StandaloneLoader'
-        )
-    }
+application {
+    mainClass = 'me.lucko.luckperms.standalone.loader.StandaloneLoader'
 }
 
 processResources {
