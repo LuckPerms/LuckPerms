@@ -258,7 +258,7 @@ public abstract class Exporter implements Runnable {
 
             ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
             try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(bytesOut), StandardCharsets.UTF_8)) {
-                GsonProvider.prettyPrinting().toJson(json, writer);
+                GsonProvider.normal().toJson(json, writer);
             } catch (IOException e) {
                 this.plugin.getLogger().severe("Error compressing data", e);
             }
