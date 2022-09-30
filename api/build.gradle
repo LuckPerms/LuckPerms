@@ -1,6 +1,12 @@
 group = 'net.luckperms'
 project.version = '5.4'
 
+jar {
+    manifest {
+        attributes('Automatic-Module-Name': 'net.luckperms.api')
+    }
+}
+
 dependencies {
     compileOnly 'org.checkerframework:checker-qual:3.21.2'
     compileOnly 'org.jetbrains:annotations:23.0.0'
