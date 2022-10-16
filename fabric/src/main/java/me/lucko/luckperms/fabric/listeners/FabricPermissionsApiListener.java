@@ -25,10 +25,13 @@
 
 package me.lucko.luckperms.fabric.listeners;
 
+import me.lucko.fabric.api.permissions.v0.OfflinePermissionCheckEvent;
 import me.lucko.fabric.api.permissions.v0.OptionRequestEvent;
 import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
 import me.lucko.luckperms.common.cacheddata.result.StringResult;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
@@ -36,6 +39,7 @@ import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.model.MixinUser;
 
 import net.fabricmc.fabric.api.util.TriState;
+import net.luckperms.api.util.Tristate;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -44,6 +48,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Listener to route permission checks made via fabric-permissions-api to LuckPerms.
@@ -58,6 +64,7 @@ public class FabricPermissionsApiListener {
     public void registerListeners() {
         PermissionCheckEvent.EVENT.register(this::onPermissionCheck);
         OptionRequestEvent.EVENT.register(this::onOptionRequest);
+        OfflinePermissionCheckEvent.EVENT.register(this::onOfflinePermissionCheck);
     }
 
     private @NonNull TriState onPermissionCheck(CommandSource source, String permission) {
@@ -80,17 +87,23 @@ public class FabricPermissionsApiListener {
         return otherGetOption(source, key);
     }
 
-    private TriState playerPermissionCheck(ServerPlayerEntity player, String permission) {
-        switch (((MixinUser) player).hasPermission(permission)) {
-            case TRUE:
-                return TriState.TRUE;
-            case FALSE:
-                return TriState.FALSE;
-            case UNDEFINED:
-                return TriState.DEFAULT;
-            default:
-                throw new AssertionError();
+    private @NonNull CompletableFuture<TriState> onOfflinePermissionCheck(UUID uuid, String permission) {
+        return lookupUser(uuid).thenApplyAsync(user -> {
+            PermissionCache permissionData = user.getCachedData().getPermissionData();
+            return fabricTristate(permissionData.checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result());
+        });
+    }
+
+    public CompletableFuture<User> lookupUser(UUID uuid) {
+        User user = this.plugin.getUserManager().getIfLoaded(uuid);
+        if (user != null) {
+            return CompletableFuture.completedFuture(user);
         }
+        return this.plugin.getStorage().loadUser(uuid, null);
+    }
+
+    private TriState playerPermissionCheck(ServerPlayerEntity player, String permission) {
+        return fabricTristate(((MixinUser) player).hasPermission(permission));
     }
 
     private TriState otherPermissionCheck(CommandSource source, String permission) {
@@ -118,6 +131,19 @@ public class FabricPermissionsApiListener {
         }
 
         return Optional.empty();
+    }
+
+    private static TriState fabricTristate(Tristate tristate) {
+        switch (tristate) {
+            case TRUE:
+                return TriState.TRUE;
+            case FALSE:
+                return TriState.FALSE;
+            case UNDEFINED:
+                return TriState.DEFAULT;
+            default:
+                throw new AssertionError();
+        }
     }
 
 }
