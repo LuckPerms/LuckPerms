@@ -128,6 +128,7 @@ public class DependencyRegistry {
             case ASM_COMMONS:
             case JAR_RELOCATOR:
             case H2_DRIVER:
+            case H2_DRIVER_LEGACY:
             case SQLITE_DRIVER:
                 return false;
             default:
