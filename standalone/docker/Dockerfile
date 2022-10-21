@@ -19,6 +19,9 @@ RUN mv * luckperms-standalone.jar
 RUN mkdir data
 VOLUME ["/opt/luckperms/data"]
 
+# preload and relocate dependency jars
+RUN java -jar luckperms-standalone.jar preloadDependencies
+
 CMD ["java", "-jar", "luckperms-standalone.jar", "--docker"]
 
 HEALTHCHECK --interval=30s --timeout=15s --start-period=20s \

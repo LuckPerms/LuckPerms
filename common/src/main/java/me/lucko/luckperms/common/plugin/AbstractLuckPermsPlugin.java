@@ -53,7 +53,6 @@ import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
-import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
@@ -160,8 +159,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // now the configuration is loaded, we can create a storage factory and load initial dependencies
         StorageFactory storageFactory = new StorageFactory(this);
-        Set<StorageType> storageTypes = storageFactory.getRequiredTypes();
-        this.dependencyManager.loadStorageDependencies(storageTypes);
+        this.dependencyManager.loadStorageDependencies(
+                storageFactory.getRequiredTypes(),
+                getConfiguration().get(ConfigKeys.REDIS_ENABLED),
+                getConfiguration().get(ConfigKeys.RABBITMQ_ENABLED)
+        );
 
         // register listeners
         registerPlatformListeners();
