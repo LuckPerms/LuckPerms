@@ -33,5 +33,8 @@ include (
         'velocity',
         'standalone',
         'standalone:loader',
-        'standalone:app'
+        'standalone:app',
+        'minestom',
+        'minestom:loader'
 )
+
