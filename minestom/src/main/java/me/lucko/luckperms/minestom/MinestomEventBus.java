@@ -27,9 +27,12 @@ package me.lucko.luckperms.minestom;
 
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.event.AbstractEventBus;
+import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import net.minestom.server.extensions.Extension;
 
 public class MinestomEventBus extends AbstractEventBus<Extension> {
+    private static final Extension DUMMY_EXTENSION;
+
     public MinestomEventBus(LPMinestomExtension plugin, LuckPermsApiProvider apiProvider) {
         super(plugin, apiProvider);
     }
@@ -38,6 +41,9 @@ public class MinestomEventBus extends AbstractEventBus<Extension> {
     protected Extension checkPlugin(Object plugin) throws IllegalArgumentException {
         if (plugin instanceof Extension extension) {
             return extension;
+        }
+        if(plugin instanceof AbstractLuckPermsPlugin) {
+            return DUMMY_EXTENSION;
         }
 
         throw new IllegalArgumentException("Object " + plugin + " (" + plugin.getClass().getName() + ") is not a plugin.");
@@ -54,5 +60,16 @@ public class MinestomEventBus extends AbstractEventBus<Extension> {
 //        }
 
         super.close();
+    }
+
+    static {
+        DUMMY_EXTENSION = new Extension() {
+            @Override
+            public void initialize() {
+            }
+
+            @Override
+            public void terminate() {}
+        };
     }
 }

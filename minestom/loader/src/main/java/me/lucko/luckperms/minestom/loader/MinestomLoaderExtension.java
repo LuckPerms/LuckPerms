@@ -40,13 +40,14 @@ public class MinestomLoaderExtension extends Extension {
         this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, Extension.class, this);
     }
 
-    @Override
     public void preInitialize() {
         this.plugin.onLoad();
+        getLogger().debug("Preinit called");
     }
 
     @Override
     public void initialize() {
+        this.plugin.onLoad();
         this.plugin.onEnable();
     }
 

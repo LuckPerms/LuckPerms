@@ -28,9 +28,15 @@ package me.lucko.luckperms.minestom.options;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.minestom.context.MinestomContextManager;
+import me.lucko.luckperms.minestom.listener.PlayerNodeChangeListener;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.query.QueryMode;
+import net.luckperms.api.query.QueryOptions;
 import net.minestom.server.entity.Player;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerQueryMap {
@@ -42,7 +48,10 @@ public class PlayerQueryMap {
     }
 
     public static void initializePermissions(Player player, User user) {
-        if (luckpermsQueryMap.get(player) == null)
+        if (luckpermsQueryMap.get(player) == null) {
             getQueryOptionsCache(player, (MinestomContextManager) user.getPlugin().getContextManager());
+        }
+        List<Node> nodes = user.getOwnNodes(QueryOptions.builder(QueryMode.CONTEXTUAL).build());
+        PlayerNodeChangeListener.setPermissionsFromNodes(nodes, player, LuckPermsProvider.get().getGroupManager());
     }
 }

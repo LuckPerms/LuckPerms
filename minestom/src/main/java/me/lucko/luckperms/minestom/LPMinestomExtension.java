@@ -51,7 +51,9 @@ import me.lucko.luckperms.minestom.calculator.MinestomCalculatorFactory;
 import me.lucko.luckperms.minestom.context.MinestomContextManager;
 import me.lucko.luckperms.minestom.context.MinestomPlayerCalculator;
 import me.lucko.luckperms.minestom.listener.MinestomConnectionListener;
+import me.lucko.luckperms.minestom.listener.PlayerNodeChangeListener;
 import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.query.QueryOptions;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -159,7 +161,8 @@ public class LPMinestomExtension extends AbstractLuckPermsPlugin {
 
     @Override
     protected void performFinalSetup() {
-        // No final setup necessary
+        // register minestom permission system compatability
+        new PlayerNodeChangeListener(this, LuckPermsProvider.get()).register();
     }
 
     @Override
