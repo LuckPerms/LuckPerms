@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.model;
 import com.google.common.collect.Iterables;
 
 import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;
+import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.inheritance.InheritanceComparator;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
@@ -49,6 +50,7 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
@@ -400,9 +402,9 @@ public abstract class PermissionHolder {
             }
 
             // accumulate weight
-            OptionalInt w = holder.getWeight();
-            if (w.isPresent()) {
-                accumulator.accumulateWeight(w.getAsInt());
+            IntegerResult<WeightNode> weight = holder.getWeightResult();
+            if (!weight.isNull()) {
+                accumulator.accumulateWeight(weight);
             }
         }
 
@@ -591,8 +593,13 @@ public abstract class PermissionHolder {
         return true;
     }
 
+    public IntegerResult<WeightNode> getWeightResult() {
+        return IntegerResult.nullResult();
+    }
+
     public OptionalInt getWeight() {
-        return OptionalInt.empty();
+        IntegerResult<WeightNode> result = getWeightResult();
+        return result.isNull() ? OptionalInt.empty() : OptionalInt.of(result.intResult());
     }
 
     private static final class MergedNodeResult implements DataMutateResult.WithMergedNode {

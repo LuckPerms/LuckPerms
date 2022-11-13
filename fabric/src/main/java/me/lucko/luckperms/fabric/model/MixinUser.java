@@ -68,4 +68,8 @@ public interface MixinUser {
 
     Tristate hasPermission(String permission, QueryOptions queryOptions);
 
+    String getOption(String key);
+
+    String getOption(String key, QueryOptions queryOptions);
+
 }

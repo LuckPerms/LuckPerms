@@ -31,7 +31,7 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.luckperms.common.command.BrigadierCommandExecutor;
 import me.lucko.luckperms.common.sender.Sender;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -53,7 +53,7 @@ public class FabricCommandExecutor extends BrigadierCommandExecutor<ServerComman
     }
 
     public void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             for (String alias : COMMAND_ALIASES) {
                 LiteralCommandNode<ServerCommandSource> cmd = literal(alias)
                         .executes(this)

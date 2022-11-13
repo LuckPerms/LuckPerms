@@ -58,12 +58,8 @@ public class UserCapabilityListener {
 
     @SubscribeEvent
     public void onPlayerClone(PlayerEvent.Clone event) {
-        if (!event.isWasDeath()) {
-            return;
-        }
-
         Player previousPlayer = event.getOriginal();
-        Player currentPlayer = event.getPlayer();
+        Player currentPlayer = event.getEntity();
 
         previousPlayer.reviveCaps();
         try {

@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[40,)"
+loaderVersion="[41,)"
 license="MIT"
 issueTrackerURL="https://github.com/LuckPerms/LuckPerms/issues"
 
@@ -12,9 +12,3 @@ issueTrackerURL="https://github.com/LuckPerms/LuckPerms/issues"
     credits="Luck"
     authors="Luck"
     description="A permissions plugin for Minecraft servers."
-[[dependencies.luckperms]]
-    modId="forge"
-    mandatory=true
-    versionRange="[40.1.20,)"
-    ordering="NONE"
-    side="BOTH"
