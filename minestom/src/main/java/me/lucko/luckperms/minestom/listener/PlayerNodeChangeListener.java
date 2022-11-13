@@ -128,6 +128,7 @@ public class PlayerNodeChangeListener {
 
             }
         }
+        player.refreshCommands();
     }
 
 }
