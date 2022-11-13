@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.forge;
 
+import com.mojang.brigadier.ParseResults;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
@@ -101,7 +102,8 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
 
     @Override
     protected void performCommand(CommandSourceStack sender, String command) {
-        sender.getServer().getCommands().performCommand(sender, command);
+        ParseResults<CommandSourceStack> results = sender.getServer().getCommands().getDispatcher().parse(command, sender);
+        sender.getServer().getCommands().performCommand(results, command);
     }
 
     @Override

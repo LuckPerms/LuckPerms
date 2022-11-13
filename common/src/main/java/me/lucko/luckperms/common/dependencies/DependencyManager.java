@@ -31,8 +31,11 @@ import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.util.MoreFiles;
+
+import net.luckperms.api.platform.Platform;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -49,18 +52,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 
 /**
  * Loads and manages runtime dependencies for the plugin.
  */
 public class DependencyManager {
 
-    /** The plugin instance */
-    private final LuckPermsPlugin plugin;
     /** A registry containing plugin specific behaviour for dependencies. */
     private final DependencyRegistry registry;
     /** The path where library jars are cached. */
     private final Path cacheDirectory;
+    /** The classpath appender to preload dependencies into */
+    private final ClassPathAppender classPathAppender;
+    /** The executor to use when loading dependencies */
+    private final Executor loadingExecutor;
 
     /** A map of dependencies which have already been loaded. */
     private final EnumMap<Dependency, Path> loaded = new EnumMap<>(Dependency.class);
@@ -70,9 +76,17 @@ public class DependencyManager {
     private @MonotonicNonNull RelocationHandler relocationHandler = null;
 
     public DependencyManager(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
-        this.registry = new DependencyRegistry(plugin);
+        this.registry = new DependencyRegistry(plugin.getBootstrap().getType());
         this.cacheDirectory = setupCacheDirectory(plugin);
+        this.classPathAppender = plugin.getBootstrap().getClassPathAppender();
+        this.loadingExecutor = plugin.getBootstrap().getScheduler().async();
+    }
+
+    public DependencyManager(Path cacheDirectory, Executor executor) { // standalone
+        this.registry = new DependencyRegistry(Platform.Type.STANDALONE);
+        this.cacheDirectory = cacheDirectory;
+        this.classPathAppender = null;
+        this.loadingExecutor = executor;
     }
 
     private synchronized RelocationHandler getRelocationHandler() {
@@ -114,19 +128,24 @@ public class DependencyManager {
         }
     }
 
-    public void loadStorageDependencies(Set<StorageType> storageTypes) {
-        loadDependencies(this.registry.resolveStorageDependencies(storageTypes));
+    public void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq) {
+        loadDependencies(this.registry.resolveStorageDependencies(storageTypes, redis, rabbitmq));
     }
 
     public void loadDependencies(Set<Dependency> dependencies) {
         CountDownLatch latch = new CountDownLatch(dependencies.size());
 
         for (Dependency dependency : dependencies) {
-            this.plugin.getBootstrap().getScheduler().async().execute(() -> {
+            if (this.loaded.containsKey(dependency)) {
+                latch.countDown();
+                continue;
+            }
+
+            this.loadingExecutor.execute(() -> {
                 try {
                     loadDependency(dependency);
                 } catch (Throwable e) {
-                    this.plugin.getLogger().severe("Unable to load dependency " + dependency.name() + ".", e);
+                    new RuntimeException("Unable to load dependency " + dependency.name(), e).printStackTrace();
                 } finally {
                     latch.countDown();
                 }
@@ -149,8 +168,8 @@ public class DependencyManager {
 
         this.loaded.put(dependency, file);
 
-        if (this.registry.shouldAutoLoad(dependency)) {
-            this.plugin.getBootstrap().getClassPathAppender().addJarToClasspath(file);
+        if (this.classPathAppender != null && this.registry.shouldAutoLoad(dependency)) {
+            this.classPathAppender.addJarToClasspath(file);
         }
     }
 

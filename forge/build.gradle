@@ -68,6 +68,7 @@ shadowJar {
     relocate 'com.rabbitmq', 'me.lucko.luckperms.lib.rabbitmq'
     relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
     relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
+    relocate 'org.yaml.snakeyaml', 'me.lucko.luckperms.lib.yaml'
 }
 
 artifacts {

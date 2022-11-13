@@ -240,7 +240,7 @@ public class WebEditorRequest {
         users.values().stream()
                 .sorted(Comparator
                         // sort firstly by the users relative weight (depends on the groups they inherit)
-                        .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(CheckOrigin.INTERNAL)).reversed()
+                        .<User>comparingInt(u -> u.getCachedData().getMetaData(QueryOptions.nonContextual()).getWeight(CheckOrigin.INTERNAL).intResult()).reversed()
                         // then, prioritise users we actually have a username for
                         .thenComparing(u -> u.getUsername().isPresent(), ((Comparator<Boolean>) Boolean::compare).reversed())
                         // then sort according to their username

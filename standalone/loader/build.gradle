@@ -1,0 +1,34 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
+
+plugins {
+    id 'com.github.johnrengelman.shadow'
+    id 'application'
+}
+
+dependencies {
+    implementation project(':api')
+    implementation project(':common:loader-utils')
+    implementation project(':standalone:app')
+}
+
+application {
+    mainClass = 'me.lucko.luckperms.standalone.loader.StandaloneLoader'
+}
+
+processResources {
+    include '*.xml'
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-Standalone-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':standalone').tasks.shadowJar.archiveFile
+    }
+
+    transform(Log4j2PluginsCacheFileTransformer)
+}
+
+artifacts {
+    archives shadowJar
+}

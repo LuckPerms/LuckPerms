@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.fabric.mixin;
 
+import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -136,6 +137,36 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
         return data.checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
     }
 
+    @Override
+    public String getOption(String key) {
+        if (key == null) {
+            throw new NullPointerException("key");
+        }
+        if (this.luckperms$user == null || this.luckperms$queryOptions == null) {
+            // "fake" players will have our mixin, but won't have been initialised.
+            return null;
+        }
+        return getOption(key, this.luckperms$queryOptions.getQueryOptions());
+    }
+
+    @Override
+    public String getOption(String key, QueryOptions queryOptions) {
+        if (key == null) {
+            throw new NullPointerException("key");
+        }
+        if (queryOptions == null) {
+            throw new NullPointerException("queryOptions");
+        }
+
+        final User user = this.luckperms$user;
+        if (user == null || this.luckperms$queryOptions == null) {
+            // "fake" players will have our mixin, but won't have been initialised.
+            return null;
+        }
+
+        MetaCache cache = user.getCachedData().getMetaData(queryOptions);
+        return cache.getMetaOrChatMetaValue(key, CheckOrigin.PLATFORM_API);
+    }
 
     @Inject(at = @At("TAIL"), method = "copyFrom")
     private void luckperms_copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {

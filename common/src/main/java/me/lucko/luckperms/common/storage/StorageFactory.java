@@ -114,7 +114,7 @@ public class StorageFactory {
             case H2:
                 return new SqlStorage(
                         this.plugin,
-                        new H2ConnectionFactory(this.plugin.getBootstrap().getDataDirectory().resolve("luckperms-h2")),
+                        new H2ConnectionFactory(this.plugin.getBootstrap().getDataDirectory().resolve("luckperms-h2-v2")),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case POSTGRESQL:

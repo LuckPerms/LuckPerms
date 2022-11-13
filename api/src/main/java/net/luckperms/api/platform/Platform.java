@@ -78,6 +78,7 @@ public interface Platform {
         FABRIC("Fabric"),
         FORGE("Forge"),
         MINESTOM("Minestom");
+        STANDALONE("Standalone");
 
         private final String friendlyName;
 
