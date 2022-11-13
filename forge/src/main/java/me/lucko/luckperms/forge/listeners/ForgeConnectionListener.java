@@ -37,13 +37,10 @@ import me.lucko.luckperms.forge.LPForgePlugin;
 import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.Util;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerNegotiationEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -63,7 +60,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
     @SubscribeEvent
     public void onPlayerNegotiation(PlayerNegotiationEvent event) {
         String username = event.getProfile().getName();
-        UUID uniqueId = event.getProfile().isComplete() ? event.getProfile().getId() : Player.createPlayerUUID(username);
+        UUID uniqueId = event.getProfile().isComplete() ? event.getProfile().getId() : UUIDUtil.createOfflinePlayerUUID(username);
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLogger().info("Processing pre-login (sync phase) for " + uniqueId + " - " + username);
@@ -99,21 +96,14 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
                 Component component = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
                 connection.send(new ClientboundLoginDisconnectPacket(ForgeSenderFactory.toNativeText(component)));
                 connection.disconnect(ForgeSenderFactory.toNativeText(component));
-            } else {
-                // Schedule the message to be sent on the next tick.
-                this.plugin.getBootstrap().getServer().orElseThrow(IllegalStateException::new).execute(() -> {
-                    Component component = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
-                    connection.send(new ClientboundChatPacket(ForgeSenderFactory.toNativeText(component), ChatType.SYSTEM, Util.NIL_UUID));
-                });
+                this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, null);
             }
-
-            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, null);
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlayerLoadFromFile(PlayerEvent.LoadFromFile event) {
-        ServerPlayer player = (ServerPlayer) event.getPlayer();
+        ServerPlayer player = (ServerPlayer) event.getEntity();
         GameProfile profile = player.getGameProfile();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
@@ -135,7 +125,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                 player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
             } else {
-                player.sendMessage(ForgeSenderFactory.toNativeText(component), Util.NIL_UUID);
+                player.sendSystemMessage(ForgeSenderFactory.toNativeText(component));
             }
         }
 
@@ -147,7 +137,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        ServerPlayer player = (ServerPlayer) event.getPlayer();
+        ServerPlayer player = (ServerPlayer) event.getEntity();
         handleDisconnect(player.getGameProfile().getId());
     }
 

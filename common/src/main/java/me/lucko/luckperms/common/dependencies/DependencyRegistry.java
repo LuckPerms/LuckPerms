@@ -30,10 +30,8 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.gson.JsonElement;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 
 import net.luckperms.api.platform.Platform;
@@ -68,26 +66,26 @@ public class DependencyRegistry {
             Platform.Type.BUKKIT, Platform.Type.BUNGEECORD, Platform.Type.SPONGE, Platform.Type.NUKKIT
     );
 
-    private final LuckPermsPlugin plugin;
+    private final Platform.Type platformType;
 
-    public DependencyRegistry(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
+    public DependencyRegistry(Platform.Type platformType) {
+        this.platformType = platformType;
     }
 
-    public Set<Dependency> resolveStorageDependencies(Set<StorageType> storageTypes) {
+    public Set<Dependency> resolveStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq) {
         Set<Dependency> dependencies = new LinkedHashSet<>();
         for (StorageType storageType : storageTypes) {
             dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));
         }
 
-        if (this.plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+        if (redis) {
             dependencies.add(Dependency.COMMONS_POOL_2);
             dependencies.add(Dependency.JEDIS);
             dependencies.add(Dependency.SLF4J_API);
             dependencies.add(Dependency.SLF4J_SIMPLE);
         }
 
-        if (this.plugin.getConfiguration().get(ConfigKeys.RABBITMQ_ENABLED)) {
+        if (rabbitmq) {
             dependencies.add(Dependency.RABBITMQ);
         }
 
@@ -98,7 +96,7 @@ public class DependencyRegistry {
         }
 
         // don't load snakeyaml if it's provided by the platform
-        if (dependencies.contains(Dependency.SNAKEYAML) && SNAKEYAML_PROVIDED_BY_PLATFORM.contains(this.plugin.getBootstrap().getType())) {
+        if (dependencies.contains(Dependency.SNAKEYAML) && SNAKEYAML_PROVIDED_BY_PLATFORM.contains(this.platformType)) {
             dependencies.remove(Dependency.SNAKEYAML);
         }
 
@@ -106,8 +104,6 @@ public class DependencyRegistry {
     }
 
     public void applyRelocationSettings(Dependency dependency, List<Relocation> relocations) {
-        Platform.Type type = this.plugin.getBootstrap().getType();
-
         // support for LuckPerms legacy (bukkit 1.7.10)
         if (!RelocationHandler.DEPENDENCIES.contains(dependency) && isGsonRelocated()) {
             relocations.add(Relocation.of("guava", "com{}google{}common"));
@@ -115,7 +111,7 @@ public class DependencyRegistry {
         }
 
         // relocate yaml within configurate if its being provided by LP
-        if (dependency == Dependency.CONFIGURATE_YAML && !SNAKEYAML_PROVIDED_BY_PLATFORM.contains(type)) {
+        if (dependency == Dependency.CONFIGURATE_YAML && !SNAKEYAML_PROVIDED_BY_PLATFORM.contains(this.platformType)) {
             relocations.add(Relocation.of("yaml", "org{}yaml{}snakeyaml"));
         }
     }
@@ -128,6 +124,7 @@ public class DependencyRegistry {
             case ASM_COMMONS:
             case JAR_RELOCATOR:
             case H2_DRIVER:
+            case H2_DRIVER_LEGACY:
             case SQLITE_DRIVER:
                 return false;
             default:

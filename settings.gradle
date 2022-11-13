@@ -31,6 +31,9 @@ include (
         'sponge:sponge-service',
         'sponge:sponge-service-api8',
         'velocity',
+        'standalone',
+        'standalone:loader',
+        'standalone:app',
         'minestom',
         'minestom:loader'
 )

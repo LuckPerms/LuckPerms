@@ -3,7 +3,7 @@ plugins {
 }
 
 repositories {
-    maven { url 'https://papermc.io/repo/repository/maven-public/' }
+    maven { url 'https://repo.papermc.io/repository/maven-public/' }
 }
 
 dependencies {
@@ -11,12 +11,12 @@ dependencies {
     compileOnly project(':common:loader-utils')
 
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
-    compileOnly('me.lucko:adventure-platform-bukkit:4.9.4') {
+    compileOnly('net.kyori:adventure-platform-bukkit:4.1.0') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
         exclude(module: 'adventure-nbt')
     }
-    compileOnly 'me.lucko:commodore:1.13'
+    compileOnly 'me.lucko:commodore:2.0'
     compileOnly('net.milkbowl.vault:VaultAPI:1.7') {
         exclude(module: 'bukkit')
     }

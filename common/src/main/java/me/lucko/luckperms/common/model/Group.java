@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.model;
 import me.lucko.luckperms.common.api.implementation.ApiGroup;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
+import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -36,13 +37,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.DisplayNameNode;
+import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public class Group extends PermissionHolder {
     private final ApiGroup apiProxy = new ApiGroup(this);
@@ -55,7 +56,7 @@ public class Group extends PermissionHolder {
     /**
      * Caches the groups weight
      */
-    private final Cache<OptionalInt> weightCache = new WeightCache(this);
+    private final Cache<IntegerResult<WeightNode>> weightCache = new WeightCache(this);
 
     /**
      * Caches the groups display name
@@ -143,7 +144,7 @@ public class Group extends PermissionHolder {
     }
 
     @Override
-    public OptionalInt getWeight() {
+    public IntegerResult<WeightNode> getWeightResult() {
         return this.weightCache.get();
     }
 

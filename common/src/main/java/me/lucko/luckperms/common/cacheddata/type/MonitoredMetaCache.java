@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.cacheddata.type;
 import com.google.common.collect.ForwardingMap;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
+import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
 import me.lucko.luckperms.common.cacheddata.result.StringResult;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
@@ -38,6 +39,7 @@ import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
+import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.query.QueryOptions;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -65,38 +67,35 @@ public class MonitoredMetaCache extends MetaCache implements CachedMetaData {
     }
 
     @Override
-    @NonNull
-    public StringResult<MetaNode> getMetaValue(String key, CheckOrigin origin) {
+    public @NonNull StringResult<MetaNode> getMetaValue(String key, CheckOrigin origin) {
         StringResult<MetaNode> value = super.getMetaValue(key, origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), key, value);
         return value;
     }
 
     @Override
-    @NonNull
-    public StringResult<PrefixNode> getPrefix(CheckOrigin origin) {
+    public @NonNull StringResult<PrefixNode> getPrefix(CheckOrigin origin) {
         StringResult<PrefixNode> value = super.getPrefix(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), Prefix.NODE_KEY, value);
         return value;
     }
 
     @Override
-    @NonNull
-    public StringResult<SuffixNode> getSuffix(CheckOrigin origin) {
+    public @NonNull StringResult<SuffixNode> getSuffix(CheckOrigin origin) {
         StringResult<SuffixNode> value = super.getSuffix(origin);
         this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), Suffix.NODE_KEY, value);
         return value;
     }
 
     @Override
-    protected Map<String, List<StringResult<MetaNode>>> getMetaResults(CheckOrigin origin) {
+    public @NonNull Map<String, List<StringResult<MetaNode>>> getMetaResults(CheckOrigin origin) {
         return new MonitoredMetaMap(super.getMetaResults(origin), origin);
     }
 
     @Override
-    public int getWeight(CheckOrigin origin) {
-        int value = super.getWeight(origin);
-        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), "weight", StringResult.of(String.valueOf(value)));
+    public @NonNull IntegerResult<WeightNode> getWeight(CheckOrigin origin) {
+        IntegerResult<WeightNode> value = super.getWeight(origin);
+        this.plugin.getVerboseHandler().offerMetaCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), "weight", value.asStringResult());
         return value;
     }
 
