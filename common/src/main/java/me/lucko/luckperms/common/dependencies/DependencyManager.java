@@ -128,8 +128,8 @@ public class DependencyManager {
         }
     }
 
-    public void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq) {
-        loadDependencies(this.registry.resolveStorageDependencies(storageTypes, redis, rabbitmq));
+    public void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats) {
+        loadDependencies(this.registry.resolveStorageDependencies(storageTypes, redis, rabbitmq, nats));
     }
 
     public void loadDependencies(Set<Dependency> dependencies) {
