@@ -245,7 +245,6 @@ public enum Dependency {
             Relocation.of("jedis", "redis{}clients{}jedis"),
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
-
     NATS(
         "io.nats",
         "jnats",
@@ -253,7 +252,6 @@ public enum Dependency {
         "/WZgFi9iJToRGIiGoShlwE5aHwstOuNGZyr4UaBRilM=",
         Relocation.of("nats", "io{}nats{}client")
     ),
-
     RABBITMQ(
             "com{}rabbitmq",
             "amqp-client",

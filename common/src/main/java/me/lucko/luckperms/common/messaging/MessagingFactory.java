@@ -36,13 +36,13 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
+
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
 public class MessagingFactory<P extends LuckPermsPlugin> {
@@ -152,27 +152,21 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
         @Override
         public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
-            NatsMessenger natsMessenger = new NatsMessenger(plugin, incomingMessageConsumer);
+            NatsMessenger natsMessenger = new NatsMessenger(getPlugin(), incomingMessageConsumer);
 
             LuckPermsConfiguration configuration = getPlugin().getConfiguration();
             String address = configuration.get(ConfigKeys.NATS_ADDRESS);
             String username = configuration.get(ConfigKeys.NATS_USERNAME);
             String password = configuration.get(ConfigKeys.NATS_PASSWORD);
-            boolean ssl = configuration.get(ConfigKeys.NATS_SSL);
-
+            if (password.isEmpty()) {
+                password = null;
+            }
             if (username.isEmpty()) {
                 username = null;
             }
-            if(password.isEmpty()) {
-                password = null;
-            }
+            boolean ssl = configuration.get(ConfigKeys.NATS_SSL);
 
-            try {
-                natsMessenger.connect(address, username, password, ssl);
-            } catch (IOException | InterruptedException | NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-
+            natsMessenger.init(address, username, password, ssl);
             return natsMessenger;
         }
     }

@@ -651,7 +651,6 @@ public final class ConfigKeys {
      */
     public static final ConfigKey<Boolean> REDIS_SSL = notReloadable(booleanKey("redis.ssl", false));
 
-
     /**
      * If nats messaging is enabled
      */
@@ -676,8 +675,6 @@ public final class ConfigKeys {
      * If the nats connection should use SSL
      */
     public static final ConfigKey<Boolean> NATS_SSL = notReloadable(booleanKey("nats.ssl", false));
-
-
 
     /**
      * If rabbitmq messaging is enabled

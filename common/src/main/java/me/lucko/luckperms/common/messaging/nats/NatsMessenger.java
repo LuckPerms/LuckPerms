@@ -28,16 +28,25 @@ package me.lucko.luckperms.common.messaging.nats;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import io.nats.client.*;
-import io.nats.client.Options.Builder;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
+
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.Throwing;
+
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import io.nats.client.Connection;
+import io.nats.client.Dispatcher;
+import io.nats.client.Message;
+import io.nats.client.MessageHandler;
+import io.nats.client.Nats;
+import io.nats.client.Options;
+import io.nats.client.Options.Builder;
+
+import java.time.Duration;
 
 /**
  * An implementation of Messenger for Nats messaging client.
@@ -63,24 +72,36 @@ public class NatsMessenger implements Messenger {
         this.connection.publish(CHANNEL, output.toByteArray());
     }
 
-    public void connect(String address, String username, String password, boolean ssl)
-            throws IOException, InterruptedException, NoSuchAlgorithmException {
+    public void init(String address, String username, String password, boolean ssl) {
         String[] addressSplit = address.split(":");
         String host = addressSplit[0];
         int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Options.DEFAULT_PORT;
-        Builder builder = new Builder()
-                .server("nats://" + host + ":" + port)
-                .userInfo(username, password)
-                .reconnectWait(Duration.ofSeconds(5))
-                .maxReconnects(Integer.MAX_VALUE)
-                .connectionName("LuckPerms client");
 
-        if (ssl) {
-            builder = builder.secure();
-        }
+        this.connection = createConnection(builder -> {
+            builder.server("nats://" + host + ":" + port)
+                    .reconnectWait(Duration.ofSeconds(5))
+                    .maxReconnects(Integer.MAX_VALUE)
+                    .connectionName("LuckPerms");
 
-        this.connection = Nats.connect(builder.build());
+            if (username != null && password != null) {
+                builder.userInfo(username, password);
+            }
+
+            if (ssl) {
+                builder.secure();
+            }
+        });
         this.messageDispatcher = this.connection.createDispatcher(new Handler()).subscribe(CHANNEL);
+    }
+
+    private Connection createConnection(Throwing.Consumer<Builder> config) {
+        try {
+            Builder builder = new Builder();
+            config.accept(builder);
+            return Nats.connect(builder.build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -101,7 +122,7 @@ public class NatsMessenger implements Messenger {
             ByteArrayDataInput input = ByteStreams.newDataInput(data);
             String messageAsString = input.readUTF();
 
-            consumer.consumeIncomingMessageAsString(messageAsString);
+            NatsMessenger.this.consumer.consumeIncomingMessageAsString(messageAsString);
         }
     }
 }

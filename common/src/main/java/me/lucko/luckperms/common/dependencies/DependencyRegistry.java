@@ -85,7 +85,7 @@ public class DependencyRegistry {
             dependencies.add(Dependency.SLF4J_SIMPLE);
         }
 
-        if(nats) {
+        if (nats) {
             dependencies.add(Dependency.NATS);
         }
 
