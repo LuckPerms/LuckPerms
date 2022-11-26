@@ -162,7 +162,8 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.dependencyManager.loadStorageDependencies(
                 storageFactory.getRequiredTypes(),
                 getConfiguration().get(ConfigKeys.REDIS_ENABLED),
-                getConfiguration().get(ConfigKeys.RABBITMQ_ENABLED)
+                getConfiguration().get(ConfigKeys.RABBITMQ_ENABLED),
+                getConfiguration().get(ConfigKeys.NATS_ENABLED)
         );
 
         // register listeners
