@@ -30,33 +30,43 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.StandardProtocolFamily;
+import java.net.UnixDomainSocketAddress;
+import java.nio.channels.Channels;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 /**
- * Simple/dumb socket that listens for connections on a given port,
+ * Simple/dumb unix domain socket that listens for connections,
  * reads the input to a string, then executes it as a command.
  *
- * Combined with a small sh/nc program, this makes it easy to execute
- * commands against a standalone instance of LP in a Docker container.
+ * <p>Combined with a small sh/nc program, this makes it easy to execute
+ * commands against a standalone instance of LP in a Docker container.</p>
  */
-public class DockerCommandSocket extends ServerSocket implements Runnable {
+public class DockerCommandSocket implements Runnable, AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger(DockerCommandSocket.class);
 
-    public static DockerCommandSocket createAndStart(int port, TerminalInterface terminal) {
+    public static DockerCommandSocket createAndStart(String socketPath, TerminalInterface terminal) {
         DockerCommandSocket socket = null;
 
         try {
-            socket = new DockerCommandSocket(port, terminal::runCommand);
+            Path path = Paths.get(socketPath);
+            Files.deleteIfExists(path);
+
+            ServerSocketChannel channel = ServerSocketChannel.open(StandardProtocolFamily.UNIX);
+            channel.bind(UnixDomainSocketAddress.of(path));
+
+            socket = new DockerCommandSocket(channel, terminal::runCommand);
 
             Thread thread = new Thread(socket, "docker-command-socket");
             thread.setDaemon(true);
             thread.start();
-
-            LOGGER.info("Created Docker command socket on port " + port);
         } catch (Exception e) {
             LOGGER.error("Error starting docker command socket", e);
         }
@@ -64,30 +74,35 @@ public class DockerCommandSocket extends ServerSocket implements Runnable {
         return socket;
     }
 
+    private final ServerSocketChannel channel;
     private final Consumer<String> callback;
 
-    public DockerCommandSocket(int port, Consumer<String> callback) throws IOException {
-        super(port);
+    public DockerCommandSocket(ServerSocketChannel channel, Consumer<String> callback) throws IOException {
+        this.channel = channel;
         this.callback = callback;
     }
 
     @Override
     public void run() {
-        while (!isClosed()) {
-            try (Socket socket = accept()) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+        while (this.channel.isOpen()) {
+            try (SocketChannel socket = this.channel.accept()) {
+                try (BufferedReader reader = new BufferedReader(Channels.newReader(socket, StandardCharsets.UTF_8))) {
                     String cmd;
                     while ((cmd = reader.readLine()) != null) {
                         LOGGER.info("Executing command from Docker: " + cmd);
                         this.callback.accept(cmd);
                     }
                 }
+            } catch (ClosedChannelException e) {
+                // ignore
             } catch (IOException e) {
-                if (e instanceof SocketException && e.getMessage().equals("Socket closed")) {
-                    return;
-                }
                 LOGGER.error("Error processing input from the Docker socket", e);
             }
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.channel.close();
     }
 }

@@ -2,6 +2,9 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
+sourceCompatibility = 17
+targetCompatibility = 17
+
 dependencies {
     implementation project(':common')
     compileOnly project(':common:loader-utils')
