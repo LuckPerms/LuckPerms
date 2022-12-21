@@ -41,8 +41,18 @@ public interface InternalMessagingService {
      */
     String getName();
 
+   /**
+     * Gets the messenger of this messaging service
+     *
+     * @return the messenger of this messaging service
+     */
     Messenger getMessenger();
 
+   /**
+     * Gets the messenger provider of this messaging service
+     *
+     * @return the messenger provider of this messaging service
+     */
     MessengerProvider getMessengerProvider();
 
     /**
