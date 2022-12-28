@@ -465,6 +465,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> COMMANDS_ALLOW_OP = notReloadable(booleanKey("commands-allow-op", true));
 
     /**
+     * If LuckPerms should rate-limit command executions.
+     */
+    public static final ConfigKey<Boolean> COMMANDS_RATE_LIMIT = booleanKey("commands-rate-limit", true);
+
+    /**
      * If Vault lookups for offline players on the main server thread should be enabled
      */
     public static final ConfigKey<Boolean> VAULT_UNSAFE_LOOKUPS = booleanKey("vault-unsafe-lookups", false);
