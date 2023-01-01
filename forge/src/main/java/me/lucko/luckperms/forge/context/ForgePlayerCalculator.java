@@ -28,14 +28,8 @@ package me.lucko.luckperms.forge.context;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.forge.LPForgePlugin;
-
-import net.luckperms.api.context.Context;
-import net.luckperms.api.context.ContextCalculator;
-import net.luckperms.api.context.ContextConsumer;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.DefaultContextKeys;
-import net.luckperms.api.context.ImmutableContextSet;
-import net.minecraft.core.Registry;
+import net.luckperms.api.context.*;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -44,7 +38,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;
@@ -102,7 +95,7 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
 
         MinecraftServer server = this.plugin.getBootstrap().getServer().orElse(null);
         if (this.dimensionType && server != null) {
-            server.registryAccess().registry(Registry.DIMENSION_TYPE_REGISTRY).ifPresent(registry -> {
+            server.registryAccess().registry(Registries.DIMENSION_TYPE).ifPresent(registry -> {
                 for (ResourceLocation resourceLocation : registry.keySet()) {
                     builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(resourceLocation));
                 }
