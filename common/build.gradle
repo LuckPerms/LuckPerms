@@ -48,7 +48,7 @@ dependencies {
         exclude(module: 'guava')
     }
 
-    api 'com.google.code.gson:gson:2.8.9'
+    api 'com.google.code.gson:gson:2.7'
     api 'com.google.guava:guava:19.0'
 
     api 'com.github.ben-manes.caffeine:caffeine:2.9.0'
