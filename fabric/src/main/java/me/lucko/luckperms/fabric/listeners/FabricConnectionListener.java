@@ -46,7 +46,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.dynamic.DynamicSerializableUuid;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -70,7 +69,7 @@ public class FabricConnectionListener extends AbstractConnectionListener {
 
         // Get their profile from the net handler - it should have been initialised by now.
         GameProfile profile = ((ServerLoginNetworkHandlerAccessor) netHandler).getGameProfile();
-        UUID uniqueId = DynamicSerializableUuid.getUuidFromProfile(profile);
+        UUID uniqueId = profile.getId();
         String username = profile.getName();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {

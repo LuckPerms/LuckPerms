@@ -101,7 +101,7 @@ public class TranslationManager {
     public void reload() {
         // remove any previous registry
         if (this.registry != null) {
-            GlobalTranslator.get().removeSource(this.registry);
+            GlobalTranslator.translator().removeSource(this.registry);
             this.installed.clear();
         }
 
@@ -115,7 +115,7 @@ public class TranslationManager {
         loadFromResourceBundle();
 
         // register it to the global source, so our translations can be picked up by adventure-platform
-        GlobalTranslator.get().addSource(this.registry);
+        GlobalTranslator.translator().addSource(this.registry);
     }
 
     /**
