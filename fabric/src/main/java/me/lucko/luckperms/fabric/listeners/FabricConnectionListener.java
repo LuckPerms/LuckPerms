@@ -26,6 +26,7 @@
 package me.lucko.luckperms.fabric.listeners;
 
 import com.mojang.authlib.GameProfile;
+
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -35,6 +36,7 @@ import me.lucko.luckperms.fabric.FabricSenderFactory;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.mixin.ServerLoginNetworkHandlerAccessor;
 import me.lucko.luckperms.fabric.model.MixinUser;
+
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchronizer;
@@ -47,8 +49,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-
-import static net.minecraft.util.Uuids.getUuidFromProfile;
 
 public class FabricConnectionListener extends AbstractConnectionListener {
     private final LPFabricPlugin plugin;
@@ -69,7 +69,7 @@ public class FabricConnectionListener extends AbstractConnectionListener {
 
         // Get their profile from the net handler - it should have been initialised by now.
         GameProfile profile = ((ServerLoginNetworkHandlerAccessor) netHandler).getGameProfile();
-        UUID uniqueId = getUuidFromProfile(profile);
+        UUID uniqueId = profile.getId();
         String username = profile.getName();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
