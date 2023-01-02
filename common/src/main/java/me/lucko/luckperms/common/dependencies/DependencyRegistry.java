@@ -72,7 +72,7 @@ public class DependencyRegistry {
         this.platformType = platformType;
     }
 
-    public Set<Dependency> resolveStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq) {
+    public Set<Dependency> resolveStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats) {
         Set<Dependency> dependencies = new LinkedHashSet<>();
         for (StorageType storageType : storageTypes) {
             dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));
@@ -83,6 +83,10 @@ public class DependencyRegistry {
             dependencies.add(Dependency.JEDIS);
             dependencies.add(Dependency.SLF4J_API);
             dependencies.add(Dependency.SLF4J_SIMPLE);
+        }
+
+        if (nats) {
+            dependencies.add(Dependency.NATS);
         }
 
         if (rabbitmq) {

@@ -1,17 +1,17 @@
 plugins {
     id 'net.kyori.blossom' version '1.3.0'
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 repositories {
-    maven { url 'https://repo.velocitypowered.com/releases/' }
+    maven { url 'https://repo.papermc.io/repository/maven-public/' }
 }
 
 dependencies {
     implementation project(':common')
 
-    compileOnly 'com.velocitypowered:velocity-api:3.0.0'
-    annotationProcessor 'com.velocitypowered:velocity-api:3.0.0'
+    compileOnly 'com.velocitypowered:velocity-api:3.1.1'
+    annotationProcessor 'com.velocitypowered:velocity-api:3.1.1'
 }
 
 blossom {
@@ -41,6 +41,7 @@ shadowJar {
     relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
     relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
     relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
+    relocate 'io.nats.client', 'me.lucko.luckperms.lib.nats'
     relocate 'com.rabbitmq', 'me.lucko.luckperms.lib.rabbitmq'
     relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
     relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'

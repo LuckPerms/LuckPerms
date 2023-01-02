@@ -11,6 +11,9 @@ dependencies {
     implementation project(':standalone:app')
 }
 
+sourceCompatibility = 17
+targetCompatibility = 17
+
 application {
     mainClass = 'me.lucko.luckperms.standalone.loader.StandaloneLoader'
 }

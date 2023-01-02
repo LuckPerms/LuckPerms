@@ -465,6 +465,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> COMMANDS_ALLOW_OP = notReloadable(booleanKey("commands-allow-op", true));
 
     /**
+     * If LuckPerms should rate-limit command executions.
+     */
+    public static final ConfigKey<Boolean> COMMANDS_RATE_LIMIT = booleanKey("commands-rate-limit", true);
+
+    /**
      * If Vault lookups for offline players on the main server thread should be enabled
      */
     public static final ConfigKey<Boolean> VAULT_UNSAFE_LOOKUPS = booleanKey("vault-unsafe-lookups", false);
@@ -650,6 +655,31 @@ public final class ConfigKeys {
      * If the redis connection should use SSL
      */
     public static final ConfigKey<Boolean> REDIS_SSL = notReloadable(booleanKey("redis.ssl", false));
+
+    /**
+     * If nats messaging is enabled
+     */
+    public static final ConfigKey<Boolean> NATS_ENABLED = notReloadable(booleanKey("nats.enabled", false));
+
+    /**
+     * The address of the nats server
+     */
+    public static final ConfigKey<String> NATS_ADDRESS = notReloadable(stringKey("nats.address", null));
+
+    /**
+     * The username to connect with, or an empty string if it should use default
+     */
+    public static final ConfigKey<String> NATS_USERNAME = notReloadable(stringKey("nats.username", ""));
+
+    /**
+     * The password in use by the nats server, or an empty string if there is no password
+     */
+    public static final ConfigKey<String> NATS_PASSWORD = notReloadable(stringKey("nats.password", ""));
+
+    /**
+     * If the nats connection should use SSL
+     */
+    public static final ConfigKey<Boolean> NATS_SSL = notReloadable(booleanKey("nats.ssl", false));
 
     /**
      * If rabbitmq messaging is enabled

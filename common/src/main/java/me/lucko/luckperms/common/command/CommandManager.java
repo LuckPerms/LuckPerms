@@ -58,6 +58,7 @@ import me.lucko.luckperms.common.commands.track.DeleteTrack;
 import me.lucko.luckperms.common.commands.track.ListTracks;
 import me.lucko.luckperms.common.commands.track.TrackParentCommand;
 import me.lucko.luckperms.common.commands.user.UserParentCommand;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
@@ -65,6 +66,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.util.ExpiringSet;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import net.kyori.adventure.text.Component;
@@ -78,6 +80,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -99,6 +102,7 @@ public class CommandManager {
             .build()
     );
     private final AtomicBoolean executingCommand = new AtomicBoolean(false);
+    private final ExpiringSet<UUID> playerRateLimit = new ExpiringSet<>(500, TimeUnit.MILLISECONDS);
     private final TabCompletions tabCompletions;
     private final Map<String, Command<?>> mainCommands;
 
@@ -145,6 +149,12 @@ public class CommandManager {
     }
 
     public CompletableFuture<Void> executeCommand(Sender sender, String label, List<String> args) {
+        UUID uniqueId = sender.getUniqueId();
+        if (this.plugin.getConfiguration().get(ConfigKeys.COMMANDS_RATE_LIMIT) && !sender.isConsole() && !this.playerRateLimit.add(uniqueId)) {
+            this.plugin.getLogger().warn("Player '" + uniqueId + "' is spamming LuckPerms commands. Ignoring further inputs.");
+            return CompletableFuture.completedFuture(null);
+        }
+
         SchedulerAdapter scheduler = this.plugin.getBootstrap().getScheduler();
         List<String> argsCopy = new ArrayList<>(args);
 

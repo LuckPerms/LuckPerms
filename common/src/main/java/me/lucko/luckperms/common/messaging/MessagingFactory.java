@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.messaging;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+import me.lucko.luckperms.common.messaging.nats.NatsMessenger;
 import me.lucko.luckperms.common.messaging.rabbitmq.RabbitMQMessenger;
 import me.lucko.luckperms.common.messaging.redis.RedisMessenger;
 import me.lucko.luckperms.common.messaging.sql.SqlMessenger;
@@ -67,6 +68,8 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                 messagingType = "redis";
             } else if (this.plugin.getConfiguration().get(ConfigKeys.RABBITMQ_ENABLED)) {
                 messagingType = "rabbitmq";
+            } else if (this.plugin.getConfiguration().get(ConfigKeys.NATS_ENABLED)) {
+                messagingType = "nats";
             } else {
                 for (StorageImplementation implementation : this.plugin.getStorage().getImplementations()) {
                     if (implementation instanceof SqlStorage) {
@@ -84,13 +87,16 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             return null;
         }
 
-        this.plugin.getLogger().info("Loading messaging service... [" + messagingType.toUpperCase(Locale.ROOT) + "]");
+        if (messagingType.equals("custom")) {
+            this.plugin.getLogger().info("Messaging service is set to custom. No service is initialized at this stage yet.");
+            return null;
+        }
 
+        this.plugin.getLogger().info("Loading messaging service... [" + messagingType.toUpperCase(Locale.ROOT) + "]");
         InternalMessagingService service = getServiceFor(messagingType);
         if (service != null) {
             return service;
         }
-
         this.plugin.getLogger().warn("Messaging service '" + messagingType + "' not recognised.");
         return null;
     }
@@ -105,6 +111,16 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                 }
             } else {
                 this.plugin.getLogger().warn("Messaging Service was set to redis, but redis is not enabled!");
+            }
+        } else if (messagingType.equals("nats")) {
+            if (this.plugin.getConfiguration().get(ConfigKeys.NATS_ENABLED)) {
+                try {
+                    return new LuckPermsMessagingService(this.plugin, new NatsMesengerProvider());
+                } catch (Exception e) {
+                    getPlugin().getLogger().severe("Exception occurred whilst enabling Nats messaging service", e);
+                }
+            } else {
+                this.plugin.getLogger().warn("Messaging Service was set to nats, but nats is not enabled!");
             }
         } else if (messagingType.equals("rabbitmq")) {
             if (this.plugin.getConfiguration().get(ConfigKeys.RABBITMQ_ENABLED)) {
@@ -125,6 +141,34 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
         }
 
         return null;
+    }
+
+    private class NatsMesengerProvider implements MessengerProvider {
+
+        @Override
+        public @NonNull String getName() {
+            return "Nats";
+        }
+
+        @Override
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
+            NatsMessenger natsMessenger = new NatsMessenger(getPlugin(), incomingMessageConsumer);
+
+            LuckPermsConfiguration configuration = getPlugin().getConfiguration();
+            String address = configuration.get(ConfigKeys.NATS_ADDRESS);
+            String username = configuration.get(ConfigKeys.NATS_USERNAME);
+            String password = configuration.get(ConfigKeys.NATS_PASSWORD);
+            if (password.isEmpty()) {
+                password = null;
+            }
+            if (username.isEmpty()) {
+                username = null;
+            }
+            boolean ssl = configuration.get(ConfigKeys.NATS_SSL);
+
+            natsMessenger.init(address, username, password, ssl);
+            return natsMessenger;
+        }
     }
 
     private class RedisMessengerProvider implements MessengerProvider {

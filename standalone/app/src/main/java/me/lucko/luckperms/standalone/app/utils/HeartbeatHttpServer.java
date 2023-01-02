@@ -59,7 +59,7 @@ public class HeartbeatHttpServer implements HttpHandler, AutoCloseable {
 
         try {
             socket = new HeartbeatHttpServer(healthReporter, port);
-            LOGGER.info("Created Heartbeat HTTP server on port " + port);
+            LOGGER.info("Started healthcheck HTTP server on :" + port);
         } catch (Exception e) {
             LOGGER.error("Error starting Heartbeat HTTP server", e);
         }
