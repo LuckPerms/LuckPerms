@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A simple pagination utility
@@ -92,6 +93,19 @@ public class Paginated<T> {
         @Override
         public String toString() {
             return this.position + ": " + this.value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Entry)) return false;
+            Entry<?> entry = (Entry<?>) o;
+            return this.position == entry.position && Objects.equals(this.value, entry.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.position, this.value);
         }
     }
 
