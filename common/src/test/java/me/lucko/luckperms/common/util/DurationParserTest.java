@@ -25,82 +25,100 @@
 
 package me.lucko.luckperms.common.util;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DurationParserTest {
 
-    private static void test(Duration expected, String input) {
+    private static Stream<Arguments> testSimple() {
+        Duration years = ChronoUnit.YEARS.getDuration();
+        Duration months = ChronoUnit.MONTHS.getDuration();
+
+        return Stream.of(
+                Arguments.of("2y", years.multipliedBy(2)),
+                Arguments.of("3year", years.multipliedBy(3)),
+                Arguments.of("4years", years.multipliedBy(4)),
+                Arguments.of("2 y", years.multipliedBy(2)),
+                Arguments.of("3 year", years.multipliedBy(3)),
+                Arguments.of("4 years", years.multipliedBy(4)),
+        
+                Arguments.of("2mo", months.multipliedBy(2)),
+                Arguments.of("3month", months.multipliedBy(3)),
+                Arguments.of("4months", months.multipliedBy(4)),
+                Arguments.of("2 mo", months.multipliedBy(2)),
+                Arguments.of("3 month", months.multipliedBy(3)),
+                Arguments.of("4 months", months.multipliedBy(4)),
+        
+                Arguments.of("2w", Duration.ofDays(7 * 2)),
+                Arguments.of("3week", Duration.ofDays(7 * 3)),
+                Arguments.of("4weeks", Duration.ofDays(7 * 4)),
+                Arguments.of("2 w", Duration.ofDays(7 * 2)),
+                Arguments.of("3 week", Duration.ofDays(7 * 3)),
+                Arguments.of("4 weeks", Duration.ofDays(7 * 4)),
+        
+                Arguments.of("2d", Duration.ofDays(2)),
+                Arguments.of("3day", Duration.ofDays(3)),
+                Arguments.of("4days", Duration.ofDays(4)),
+                Arguments.of("2 d", Duration.ofDays(2)),
+                Arguments.of("3 day", Duration.ofDays(3)),
+                Arguments.of("4 days", Duration.ofDays(4)),
+        
+                Arguments.of("2h", Duration.ofHours(2)),
+                Arguments.of("3hour", Duration.ofHours(3)),
+                Arguments.of("4hours", Duration.ofHours(4)),
+                Arguments.of("2 h", Duration.ofHours(2)),
+                Arguments.of("3 hour", Duration.ofHours(3)),
+                Arguments.of("4 hours", Duration.ofHours(4)),
+        
+                Arguments.of("2m", Duration.ofMinutes(2)),
+                Arguments.of("3min", Duration.ofMinutes(3)),
+                Arguments.of("4mins", Duration.ofMinutes(4)),
+                Arguments.of("5minute", Duration.ofMinutes(5)),
+                Arguments.of("6minutes", Duration.ofMinutes(6)),
+                Arguments.of("2 m", Duration.ofMinutes(2)),
+                Arguments.of("3 min", Duration.ofMinutes(3)),
+                Arguments.of("4 mins", Duration.ofMinutes(4)),
+                Arguments.of("5 minute", Duration.ofMinutes(5)),
+                Arguments.of("6 minutes", Duration.ofMinutes(6)),
+        
+                Arguments.of("2s", Duration.ofSeconds(2)),
+                Arguments.of("3sec", Duration.ofSeconds(3)),
+                Arguments.of("4secs", Duration.ofSeconds(4)),
+                Arguments.of("5second", Duration.ofSeconds(5)),
+                Arguments.of("6seconds", Duration.ofSeconds(6)),
+                Arguments.of("2 s", Duration.ofSeconds(2)),
+                Arguments.of("3 sec", Duration.ofSeconds(3)),
+                Arguments.of("4 secs", Duration.ofSeconds(4)),
+                Arguments.of("5 second", Duration.ofSeconds(5)),
+                Arguments.of("6 seconds", Duration.ofSeconds(6))
+        );
+    }
+    
+    @ParameterizedTest
+    @MethodSource
+    public void testSimple(String input, Duration expected) {
         assertEquals(expected, DurationParser.parseDuration(input));
     }
 
-    @Test
-    void testSimple() {
-        test(ChronoUnit.YEARS.getDuration().multipliedBy(2), "2y");
-        test(ChronoUnit.YEARS.getDuration().multipliedBy(3), "3year");
-        test(ChronoUnit.YEARS.getDuration().multipliedBy(4), "4years");
-        test(ChronoUnit.YEARS.getDuration().multipliedBy(2), "2 y");
-        test(ChronoUnit.YEARS.getDuration().multipliedBy(3), "3 year");
-        test(ChronoUnit.YEARS.getDuration().multipliedBy(4), "4 years");
-
-        test(ChronoUnit.MONTHS.getDuration().multipliedBy(2), "2mo");
-        test(ChronoUnit.MONTHS.getDuration().multipliedBy(3), "3month");
-        test(ChronoUnit.MONTHS.getDuration().multipliedBy(4), "4months");
-        test(ChronoUnit.MONTHS.getDuration().multipliedBy(2), "2 mo");
-        test(ChronoUnit.MONTHS.getDuration().multipliedBy(3), "3 month");
-        test(ChronoUnit.MONTHS.getDuration().multipliedBy(4), "4 months");
-
-        test(Duration.ofDays(7 * 2), "2w");
-        test(Duration.ofDays(7 * 3), "3week");
-        test(Duration.ofDays(7 * 4), "4weeks");
-        test(Duration.ofDays(7 * 2), "2 w");
-        test(Duration.ofDays(7 * 3), "3 week");
-        test(Duration.ofDays(7 * 4), "4 weeks");
-
-        test(Duration.ofDays(2), "2d");
-        test(Duration.ofDays(3), "3day");
-        test(Duration.ofDays(4), "4days");
-        test(Duration.ofDays(2), "2 d");
-        test(Duration.ofDays(3), "3 day");
-        test(Duration.ofDays(4), "4 days");
-
-        test(Duration.ofHours(2), "2h");
-        test(Duration.ofHours(3), "3hour");
-        test(Duration.ofHours(4), "4hours");
-        test(Duration.ofHours(2), "2 h");
-        test(Duration.ofHours(3), "3 hour");
-        test(Duration.ofHours(4), "4 hours");
-
-        test(Duration.ofMinutes(2), "2m");
-        test(Duration.ofMinutes(3), "3min");
-        test(Duration.ofMinutes(4), "4mins");
-        test(Duration.ofMinutes(5), "5minute");
-        test(Duration.ofMinutes(6), "6minutes");
-        test(Duration.ofMinutes(2), "2 m");
-        test(Duration.ofMinutes(3), "3 min");
-        test(Duration.ofMinutes(4), "4 mins");
-        test(Duration.ofMinutes(5), "5 minute");
-        test(Duration.ofMinutes(6), "6 minutes");
-
-        test(Duration.ofSeconds(2), "2s");
-        test(Duration.ofSeconds(3), "3sec");
-        test(Duration.ofSeconds(4), "4secs");
-        test(Duration.ofSeconds(5), "5second");
-        test(Duration.ofSeconds(6), "6seconds");
-        test(Duration.ofSeconds(2), "2 s");
-        test(Duration.ofSeconds(3), "3 sec");
-        test(Duration.ofSeconds(4), "4 secs");
-        test(Duration.ofSeconds(5), "5 second");
-        test(Duration.ofSeconds(6), "6 seconds");
-    }
-
-    @Test
-    void testCombined() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "5y 4mo 3w 2d 1h 6m 7s",
+            "5y4mo3w2d1h6m7s",
+            "5 years 4 months 3 weeks 2 days 1 hour 6 minutes 7 seconds",
+            "5y, 4mo, 3w, 2d, 1h, 6m, 7s",
+            "5y,4mo,3w,2d,1h,6m,7s",
+            "5 years, 4 months, 3 weeks, 2 days, 1 hour, 6 minutes, 7 seconds"
+    })
+    public void testCombined(String input) {
         Duration expected = ChronoUnit.YEARS.getDuration().multipliedBy(5)
                 .plus(ChronoUnit.MONTHS.getDuration().multipliedBy(4))
                 .plus(ChronoUnit.WEEKS.getDuration().multipliedBy(3))
@@ -109,20 +127,17 @@ public class DurationParserTest {
                 .plusMinutes(6)
                 .plusSeconds(7);
 
-        test(expected, "5y 4mo 3w 2d 1h 6m 7s");
-        test(expected, "5y4mo3w2d1h6m7s");
-        test(expected, "5 years 4 months 3 weeks 2 days 1 hour 6 minutes 7 seconds");
-
-        test(expected, "5y, 4mo, 3w, 2d, 1h, 6m, 7s");
-        test(expected, "5y,4mo,3w,2d,1h,6m,7s");
-        test(expected, "5 years, 4 months, 3 weeks, 2 days, 1 hour, 6 minutes, 7 seconds");
+        assertEquals(expected, DurationParser.parseDuration(input));
     }
 
-    @Test
-    void testFail() {
-        assertThrows(IllegalArgumentException.class, () -> DurationParser.parseDuration("definitely not a duration"));
-        assertThrows(IllegalArgumentException.class, () -> DurationParser.parseDuration("still 1 not a duration"));
-        assertThrows(IllegalArgumentException.class, () -> DurationParser.parseDuration("still 1s not a duration"));
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "definitely not a duration",
+            "still 1 not a duration",
+            "still 1s not a duration"
+    })
+    public void testFail(String input) {
+        assertThrows(IllegalArgumentException.class, () -> DurationParser.parseDuration(input));
     }
 
 }
