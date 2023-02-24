@@ -57,6 +57,8 @@ import net.luckperms.api.util.Tristate;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -89,6 +91,9 @@ import static net.kyori.adventure.text.format.TextDecoration.BOLD;
  * A collection of formatted messages used by the plugin.
  */
 public interface Message {
+
+    static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd '@' HH:mm:ss")
+            .withZone(ZoneId.systemDefault());
 
     TextComponent OPEN_BRACKET = Component.text('(');
     TextComponent CLOSE_BRACKET = Component.text(')');
@@ -3714,7 +3719,7 @@ public interface Message {
                                     .color(GRAY)
                                     .key("luckperms.duration.since")
                                     .args(DurationFormatter.CONCISE_LOW_ACCURACY.format(action.getDurationSince()))
-                                    .hoverEvent(HoverEvent.showText(text().append(text("Date: ", GRAY)).append(text(action.getTimestamp().toString(), AQUA))))
+                                    .hoverEvent(HoverEvent.showText(text().append(text("Date: ", GRAY)).append(text(DATE_FORMAT.format(action.getTimestamp()), AQUA))))
                             )
                             .append(CLOSE_BRACKET)
                     )
