@@ -3714,6 +3714,7 @@ public interface Message {
                                     .color(GRAY)
                                     .key("luckperms.duration.since")
                                     .args(DurationFormatter.CONCISE_LOW_ACCURACY.format(action.getDurationSince()))
+                                    .hoverEvent(HoverEvent.showText(text().append(text("Date: ", GRAY)).append(text(action.getTimestamp().toString(), AQUA))))
                             )
                             .append(CLOSE_BRACKET)
                     )
