@@ -186,7 +186,7 @@ public class VerboseCommand extends SingleCommand {
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return TabCompleter.create()
-                .at(0, CompletionSupplier.startsWith("on", "record", "off", "upload", "command"))
+                .at(0, CompletionSupplier.startsWith("on", "record", "off", "upload", "paste", "command"))
                 .complete(args);
     }
 }
