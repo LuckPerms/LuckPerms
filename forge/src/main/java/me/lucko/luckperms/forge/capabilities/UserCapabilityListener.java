@@ -68,6 +68,8 @@ public class UserCapabilityListener {
 
             current.initialise(previous);
             current.getQueryOptionsCache().invalidate();
+        } catch (IllegalStateException e) {
+            // continue on if we cannot copy original data
         } finally {
             previousPlayer.invalidateCaps();
         }
