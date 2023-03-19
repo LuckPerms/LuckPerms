@@ -65,7 +65,7 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
         ImmutableContextSet context = args.getContextOrDefault(1, plugin).immutableCopy();
 
         if (name.isEmpty()) {
-            Message.INVALID_INPUT_EMPTY.send(sender, "display name");
+            Message.INVALID_DISPLAY_NAME_EMPTY.send(sender);
             return;
         }
 

@@ -2201,16 +2201,16 @@ public interface Message {
     );
 
     Args1<String> INVALID_INPUT_EMPTY = s -> prefixed(translatable()
-            // "&cThe empty string is not a valid {0}."
-            .key("luckperms.command.misc.invalid-input-empty")
-            .args(text(s))
+            // "&cThe empty string is not a valid {s}."
+            .key("luckperms.command.misc.invalid-input-empty-" + s)
             .color(RED)
             .append(FULL_STOP)
     );
 
     // Predefined shorthands for the above message
     Args0 INVALID_PERMISSION_EMPTY = () -> INVALID_INPUT_EMPTY.build("permission");
-    Args0 INVALID_META_KEY_EMPTY = () -> INVALID_INPUT_EMPTY.build("meta key");
+    Args0 INVALID_META_KEY_EMPTY = () -> INVALID_INPUT_EMPTY.build("meta-key");
+    Args0 INVALID_DISPLAY_NAME_EMPTY = () -> INVALID_INPUT_EMPTY.build("display-name");
 
     Args3<PermissionHolder, Group, ContextSet> SET_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
             // "&b{}&a now inherits permissions from &b{}&a in context {}&a."
