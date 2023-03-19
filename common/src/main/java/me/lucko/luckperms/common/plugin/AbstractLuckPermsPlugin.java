@@ -292,6 +292,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.httpClient.dispatcher().executorService().shutdown();
         this.httpClient.connectionPool().evictAll();
 
+        // close isolated loaders for non-relocated dependencies
+        getDependencyManager().close();
+
         // close classpath appender
         getBootstrap().getClassPathAppender().close();
 

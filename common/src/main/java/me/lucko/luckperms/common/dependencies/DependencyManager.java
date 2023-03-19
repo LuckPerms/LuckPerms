@@ -57,7 +57,7 @@ import java.util.concurrent.Executor;
 /**
  * Loads and manages runtime dependencies for the plugin.
  */
-public class DependencyManager {
+public class DependencyManager implements AutoCloseable {
 
     /** A registry containing plugin specific behaviour for dependencies. */
     private final DependencyRegistry registry;
@@ -233,6 +233,27 @@ public class DependencyManager {
         }
 
         return cacheDirectory;
+    }
+
+    @Override
+    public void close() {
+        IOException firstEx = null;
+
+        for (IsolatedClassLoader loader : this.loaders.values()) {
+            try {
+                loader.close();
+            } catch (IOException ex) {
+                if (firstEx == null) {
+                    firstEx = ex;
+                } else {
+                    firstEx.addSuppressed(ex);
+                }
+            }
+        }
+
+        if (firstEx != null) {
+            firstEx.printStackTrace();
+        }
     }
 
 }
