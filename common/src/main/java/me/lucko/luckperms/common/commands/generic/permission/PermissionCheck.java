@@ -72,6 +72,10 @@ public class PermissionCheck extends GenericChildCommand {
         }
 
         String node = args.get(0);
+        if (node.isEmpty()) {
+            Message.INVALID_PERMISSION_EMPTY.send(sender);
+            return;
+        }
 
         // accumulate nodes
         List<Node> own = new ArrayList<>();

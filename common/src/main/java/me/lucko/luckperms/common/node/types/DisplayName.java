@@ -95,7 +95,11 @@ public class DisplayName extends AbstractNode<DisplayNameNode, DisplayNameNode.B
 
         @Override
         public @NonNull Builder displayName(@NonNull String displayName) {
-            this.displayName = Objects.requireNonNull(displayName, "displayName");
+            Objects.requireNonNull(displayName, "displayName");
+            if (displayName.isEmpty()) {
+                throw new IllegalArgumentException("display name is empty");
+            }
+            this.displayName = displayName;
             return this;
         }
 

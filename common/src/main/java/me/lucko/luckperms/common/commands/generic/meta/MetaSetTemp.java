@@ -71,6 +71,11 @@ public class MetaSetTemp extends GenericChildCommand {
         TemporaryNodeMergeStrategy modifier = args.getTemporaryModifierAndRemove(3).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
         MutableContextSet context = args.getContextOrDefault(3, plugin);
 
+        if (key.isEmpty()) {
+            Message.INVALID_META_KEY_EMPTY.send(sender);
+            return;
+        }
+
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, key)) {

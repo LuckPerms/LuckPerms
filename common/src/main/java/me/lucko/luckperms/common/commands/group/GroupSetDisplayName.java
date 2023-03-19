@@ -64,6 +64,11 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
         String name = args.get(0);
         ImmutableContextSet context = args.getContextOrDefault(1, plugin).immutableCopy();
 
+        if (name.isEmpty()) {
+            Message.INVALID_INPUT_EMPTY.send(sender, "display name");
+            return;
+        }
+
         String previousName = target.normalData().nodesInContext(context).stream()
                 .filter(NodeType.DISPLAY_NAME::matches)
                 .map(NodeType.DISPLAY_NAME::cast)
