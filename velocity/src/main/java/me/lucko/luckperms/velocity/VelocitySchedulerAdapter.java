@@ -53,11 +53,6 @@ public class VelocitySchedulerAdapter implements SchedulerAdapter {
     }
 
     @Override
-    public Executor sync() {
-        return this.executor;
-    }
-
-    @Override
     public SchedulerTask asyncLater(Runnable task, long delay, TimeUnit unit) {
         ScheduledTask t = this.bootstrap.getProxy().getScheduler().buildTask(this.bootstrap, task)
                 .delay((int) delay, unit)

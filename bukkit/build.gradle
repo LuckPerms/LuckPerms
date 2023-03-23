@@ -6,11 +6,15 @@ repositories {
     maven { url 'https://repo.papermc.io/repository/maven-public/' }
 }
 
+java {
+    disableAutoTargetJvm()
+}
+
 dependencies {
     implementation project(':common')
     compileOnly project(':common:loader-utils')
 
-    compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
+    compileOnly 'dev.folia:folia-api:26.1.2.build.8-stable'
     compileOnly('net.kyori:adventure-platform-bukkit:4.4.0') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
