@@ -113,7 +113,7 @@ public class ExportCommand extends SingleCommand {
         }
 
         // Run the exporter in its own thread.
-        plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        plugin.getBootstrap().getScheduler().async(() -> {
             try {
                 exporter.run();
             } finally {

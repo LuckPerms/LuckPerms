@@ -83,7 +83,7 @@ public class BukkitAutoOpListener implements LuckPermsEventListener {
         if (callerIsSync) {
             player.setOp(value);
         } else {
-            this.plugin.getBootstrap().getScheduler().executeSync(() -> player.setOp(value));
+            this.plugin.getBootstrap().getScheduler().sync(player, () -> player.setOp(value));
         }
     }
 

@@ -79,7 +79,7 @@ public class SpongeCommandListUpdater implements LuckPermsEventListener {
 
     // Called when the buffer times out.
     private void sendUpdate(UUID uniqueId) {
-        this.plugin.getBootstrap().getScheduler().sync().execute(() -> {
+        this.plugin.getBootstrap().getScheduler().sync(() -> {
             ServerPlayer player = this.plugin.getBootstrap().getPlayer(uniqueId).orElse(null);
             if (player != null) {
                 CommandManager commandManager = this.plugin.getBootstrap().getGame().server().commandManager();

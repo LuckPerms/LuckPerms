@@ -26,6 +26,7 @@
 package me.lucko.luckperms.bukkit.listeners;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import me.lucko.luckperms.bukkit.LPBukkitBootstrap;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.event.LuckPermsEventListener;
@@ -90,12 +91,15 @@ public class BukkitCommandListUpdater implements LuckPermsEventListener {
 
     // Called when the buffer times out.
     private void sendUpdate(UUID uniqueId) {
-        if (this.plugin.getBootstrap().isServerStopping()) {
+        LPBukkitBootstrap bootstrap = this.plugin.getBootstrap();
+        if (bootstrap.isServerStopping()) {
             return;
         }
-        
-        this.plugin.getBootstrap().getScheduler().sync()
-                .execute(() -> this.plugin.getBootstrap().getPlayer(uniqueId).ifPresent(Player::updateCommands));
+
+        Player player = bootstrap.getPlayer(uniqueId).orElse(null);
+        if (player != null) {
+            bootstrap.getScheduler().sync(player, player::updateCommands);
+        }
     }
 
     private final class SendBuffer extends BufferedRequest<Void> {
