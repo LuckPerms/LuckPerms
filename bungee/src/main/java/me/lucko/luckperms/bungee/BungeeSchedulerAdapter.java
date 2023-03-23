@@ -53,11 +53,6 @@ public class BungeeSchedulerAdapter implements SchedulerAdapter {
     }
 
     @Override
-    public Executor sync() {
-        return this.executor;
-    }
-
-    @Override
     public SchedulerTask asyncLater(Runnable task, long delay, TimeUnit unit) {
         ScheduledTask t = this.bootstrap.getProxy().getScheduler().schedule(this.bootstrap.getLoader(), task, delay, unit);
         this.tasks.add(t);
