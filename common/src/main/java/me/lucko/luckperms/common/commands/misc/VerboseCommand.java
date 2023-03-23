@@ -94,7 +94,7 @@ public class VerboseCommand extends SingleCommand {
             String commandWithSlash = String.join(" ", args.subList(2, args.size()));
             String command = commandWithSlash.charAt(0) == '/' ? commandWithSlash.substring(1) : commandWithSlash;
 
-            plugin.getBootstrap().getScheduler().sync().execute(() -> {
+            plugin.getBootstrap().getScheduler().sync(executor, () -> {
                 Message.VERBOSE_ON_COMMAND.send(sender, executor.getName(), command);
 
                 verboseHandler.registerListener(sender, VerboseFilter.acceptAll(), true);

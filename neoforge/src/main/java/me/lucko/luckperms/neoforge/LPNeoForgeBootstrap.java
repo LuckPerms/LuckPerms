@@ -80,7 +80,7 @@ public final class LPNeoForgeBootstrap implements LuckPermsBootstrap, LoaderBoot
     /**
      * A scheduler adapter for the platform
      */
-    private final SchedulerAdapter schedulerAdapter;
+    private final NeoForgeSchedulerAdapter schedulerAdapter;
 
     /**
      * The plugin class path appender
@@ -133,7 +133,7 @@ public final class LPNeoForgeBootstrap implements LuckPermsBootstrap, LoaderBoot
     }
 
     @Override
-    public SchedulerAdapter getScheduler() {
+    public NeoForgeSchedulerAdapter getScheduler() {
         return this.schedulerAdapter;
     }
 

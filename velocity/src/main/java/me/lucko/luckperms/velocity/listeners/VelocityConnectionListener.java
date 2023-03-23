@@ -77,7 +77,7 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
             this.plugin.getLogger().info("Processing pre-login for " + p.getUniqueId() + " - " + p.getUsername());
         }
 
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().async(() -> {
             /* Actually process the login for the connection.
                We do this here to delay the login until the data is ready.
                If the login gets cancelled later on, then this will be cleaned up.

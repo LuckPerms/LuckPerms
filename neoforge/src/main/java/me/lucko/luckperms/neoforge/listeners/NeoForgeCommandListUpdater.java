@@ -91,14 +91,15 @@ public class NeoForgeCommandListUpdater implements LuckPermsEventListener {
 
     // Called when the buffer times out.
     private void sendUpdate(UUID uniqueId) {
-        this.plugin.getBootstrap().getScheduler().sync().execute(() -> {
-            this.plugin.getBootstrap().getPlayer(uniqueId).ifPresent(player -> {
+        this.plugin.getBootstrap().getScheduler().sync((() -> {
+            ServerPlayer player = this.plugin.getBootstrap().getPlayer(uniqueId).orElse(null);
+            if (player != null) {
                 MinecraftServer server = player.getServer();
                 if (server != null) {
                     server.getPlayerList().sendPlayerPermissionLevel(player);
                 }
-            });
-        });
+            }
+        }));
     }
 
     private final class SendBuffer extends BufferedRequest<Void> {

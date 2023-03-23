@@ -35,6 +35,7 @@ import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.group.GroupDataRecalculateEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.UUID;
@@ -89,14 +90,15 @@ public class FabricCommandListUpdater implements LuckPermsEventListener {
 
     // Called when the buffer times out.
     private void sendUpdate(UUID uniqueId) {
-        this.plugin.getBootstrap().getScheduler().sync()
-                .execute(() -> this.plugin.getBootstrap().getPlayer(uniqueId)
-                    .ifPresent(player -> this.plugin.getBootstrap().getServer()
-                        .ifPresent(server -> {
-                            server.getPlayerManager().sendCommandTree(player);
-                        })
-                    )
-                );
+        this.plugin.getBootstrap().getScheduler().sync(() -> {
+            ServerPlayerEntity player = this.plugin.getBootstrap().getPlayer(uniqueId).orElse(null);
+            if (player != null) {
+                MinecraftServer server = player.getServer();
+                if (server != null) {
+                    server.getPlayerManager().sendCommandTree(player);
+                }
+            }
+        });
     }
 
     private final class SendBuffer extends BufferedRequest<Void> {

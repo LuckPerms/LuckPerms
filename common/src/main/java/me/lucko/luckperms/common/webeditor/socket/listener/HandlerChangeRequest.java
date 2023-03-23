@@ -66,7 +66,7 @@ public class HandlerChangeRequest implements Handler {
         }
 
         // send "change-accepted" response
-        this.socket.getPlugin().getBootstrap().getScheduler().executeAsync(() ->
+        this.socket.getPlugin().getBootstrap().getScheduler().async(() ->
                 this.socket.send(SocketMessageType.CHANGE_RESPONSE.builder()
                         .add("state", STATE_ACCEPTED)
                         .toJson()
