@@ -25,22 +25,32 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.common.plugin.scheduler.JavaSchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.sender.Sender;
+import org.bukkit.command.CommandSender;
 
 import java.util.concurrent.Executor;
 
-public class BukkitSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
-    private final Executor sync;
+public class BukkitSchedulerAdapter extends JavaSchedulerAdapter implements SchedulerAdapter {
+    private final Executor syncExecutor;
 
     public BukkitSchedulerAdapter(LPBukkitBootstrap bootstrap) {
         super(bootstrap);
-        this.sync = r -> bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(bootstrap.getLoader(), r);
+        this.syncExecutor = r -> bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(bootstrap.getLoader(), r);
+    }
+
+    public void sync(Runnable task) {
+        this.syncExecutor.execute(task);
+    }
+
+    public void sync(CommandSender ctx, Runnable task) {
+        this.syncExecutor.execute(task);
     }
 
     @Override
-    public Executor sync() {
-        return this.sync;
+    public void sync(Sender ctx, Runnable task) {
+        this.syncExecutor.execute(task);
     }
 
 }

@@ -246,7 +246,7 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public void fireUpdateEvent(LPSubjectData subjectData) {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().async(() -> {
             SubjectDataUpdateEvent event = new SubjectDataUpdateEventImpl(this.plugin, subjectData);
             this.plugin.getBootstrap().getGame().eventManager().post(event);
         });

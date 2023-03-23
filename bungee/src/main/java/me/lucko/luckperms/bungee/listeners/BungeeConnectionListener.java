@@ -77,7 +77,7 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
            this will prevent the event from completing until we're finished handling. */
         e.registerIntent(this.plugin.getLoader());
 
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().async(() -> {
             /* Actually process the login for the connection.
                We do this here to delay the login until the data is ready.
                If the login gets cancelled later on, then this will be cleaned up.

@@ -140,7 +140,7 @@ public final class EventDispatcher {
         }
 
         // async: generate an event class and post it
-        this.eventBus.getPlugin().getBootstrap().getScheduler().executeAsync(() -> post(eventClass, params));
+        this.eventBus.getPlugin().getBootstrap().getScheduler().async(() -> post(eventClass, params));
     }
 
     private void postSync(Class<? extends LuckPermsEvent> eventClass, Object... params) {

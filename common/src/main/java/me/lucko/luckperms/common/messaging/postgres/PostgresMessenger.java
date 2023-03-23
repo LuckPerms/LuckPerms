@@ -113,7 +113,7 @@ public class PostgresMessenger implements Messenger {
 
         try {
             this.listener = new NotificationListener();
-            this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+            this.plugin.getBootstrap().getScheduler().async(() -> {
                 this.listener.listenAndBind();
                 if (!firstStartup) {
                     this.plugin.getLogger().info("Postgres listen/notify connection re-established");

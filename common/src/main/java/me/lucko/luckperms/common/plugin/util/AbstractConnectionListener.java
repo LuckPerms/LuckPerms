@@ -117,7 +117,7 @@ public abstract class AbstractConnectionListener {
         this.plugin.getUserManager().getHouseKeeper().registerUsage(uniqueId);
 
         // force a clear of transient nodes
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().async(() -> {
             User user = this.plugin.getUserManager().getIfLoaded(uniqueId);
             if (user != null) {
                 user.clearNodes(DataType.TRANSIENT, null, false);
