@@ -23,37 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.command.spec;
+package me.lucko.luckperms.common.locale;
 
-import me.lucko.luckperms.common.locale.Message;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
+import org.junit.jupiter.api.Test;
 
-public class Argument {
-    private final String name;
-    private final boolean required;
-    private final TranslatableComponent description;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Set;
 
-    Argument(String name, boolean required, TranslatableComponent description) {
-        this.name = name;
-        this.required = required;
-        this.description = description;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TranslationTest {
+
+    @Test
+    public void testBundleParse() {
+        ResourceBundle bundle = ResourceBundle.getBundle("luckperms", Locale.ENGLISH, UTF8ResourceBundleControl.get());
+        Set<String> keys = bundle.keySet();
+        assertTrue(keys.size() > 100);
+
+        for (String key : keys) {
+            assertTrue(key.startsWith("luckperms."), "key " + key + " should start with 'luckperms.'");
+        }
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public boolean isRequired() {
-        return this.required;
-    }
-
-    public TranslatableComponent getDescription() {
-        return this.description;
-    }
-
-    public Component asPrettyString() {
-        return (this.required ? Message.REQUIRED_ARGUMENT : Message.OPTIONAL_ARGUMENT).build(this.name);
-    }
 }
