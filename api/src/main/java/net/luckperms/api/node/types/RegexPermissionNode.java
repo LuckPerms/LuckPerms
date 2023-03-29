@@ -101,6 +101,7 @@ public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, Reg
          *
          * @param pattern the pattern
          * @return the builder
+         * @throws IllegalArgumentException if {@code pattern} is empty
          */
         @NonNull Builder pattern(@NonNull String pattern);
 

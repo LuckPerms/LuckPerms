@@ -62,6 +62,11 @@ public class MetaUnset extends GenericChildCommand {
         String key = args.get(0);
         MutableContextSet context = args.getContextOrDefault(1, plugin);
 
+        if (key.isEmpty()) {
+            Message.INVALID_META_KEY_EMPTY.send(sender);
+            return;
+        }
+
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, key)) {

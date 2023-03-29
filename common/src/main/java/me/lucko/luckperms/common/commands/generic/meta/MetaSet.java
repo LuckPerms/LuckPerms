@@ -66,6 +66,11 @@ public class MetaSet extends GenericChildCommand {
         String value = args.get(1);
         MutableContextSet context = args.getContextOrDefault(2, plugin);
 
+        if (key.isEmpty()) {
+            Message.INVALID_META_KEY_EMPTY.send(sender);
+            return;
+        }
+
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||
                 ArgumentPermissions.checkArguments(plugin, sender, permission, key)) {

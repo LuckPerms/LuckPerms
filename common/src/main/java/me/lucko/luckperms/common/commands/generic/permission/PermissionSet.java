@@ -67,7 +67,8 @@ public class PermissionSet extends GenericChildCommand {
         MutableContextSet context = args.getContextOrDefault(2, plugin);
 
         if (node.isEmpty()) {
-            Message.PERMISSION_INVALID_ENTRY_EMPTY.send(sender);
+            Message.INVALID_PERMISSION_EMPTY.send(sender);
+            return;
         }
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||

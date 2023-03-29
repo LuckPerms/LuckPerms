@@ -87,6 +87,7 @@ public interface MetaNode extends ScopedNode<MetaNode, MetaNode.Builder> {
          *
          * @param key the meta key
          * @return the builder
+         * @throws IllegalArgumentException if {@code key} is empty
          */
         @NonNull Builder key(@NonNull String key);
 

@@ -48,7 +48,6 @@ public class NodeParseTest {
     @CsvSource({
             "group.test, test",
             "group.TEST, test",
-            "group.hello world, hello world"
     })
     public void testInheritance(String key, String expectedGroupName) {
         Inheritance.Builder builder = Inheritance.parse(key);
@@ -66,6 +65,14 @@ public class NodeParseTest {
     public void testInheritanceFail(String key) {
         Inheritance.Builder builder = Inheritance.parse(key);
         assertNull(builder);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "group.hello world"
+    })
+    public void testInheritanceThrows(String key) {
+        assertThrows(IllegalArgumentException.class, () -> Inheritance.parse(key));
     }
 
     @ParameterizedTest
@@ -90,6 +97,14 @@ public class NodeParseTest {
     public void testDisplayNameFail(String key) {
         DisplayName.Builder builder = DisplayName.parse(key);
         assertNull(builder);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "displayname."
+    })
+    public void testDisplayNameThrows(String key) {
+        assertThrows(IllegalArgumentException.class, () -> DisplayName.parse(key));
     }
 
     @ParameterizedTest

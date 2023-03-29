@@ -96,6 +96,7 @@ public interface InheritanceNode extends ScopedNode<InheritanceNode, Inheritance
          *
          * @param group the group name
          * @return the builder
+         * @throws IllegalArgumentException if {@code group} is not a valid group name
          */
         @NonNull Builder group(@NonNull String group);
 
