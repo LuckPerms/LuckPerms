@@ -707,6 +707,11 @@ public final class ConfigKeys {
     public static final ConfigKey<String> RABBITMQ_PASSWORD = notReloadable(stringKey("rabbitmq.password", "guest"));
 
     /**
+     * If the editor key should be generated lazily (only when needed)
+     */
+    public static final ConfigKey<Boolean> EDITOR_LAZILY_GENERATE_KEY = booleanKey("editor-lazily-generate-key", false);
+
+    /**
      * The URL of the bytebin instance used to upload data
      */
     public static final ConfigKey<String> BYTEBIN_URL = stringKey("bytebin-url", "https://usercontent.luckperms.net/");

@@ -23,12 +23,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.standalone;
+package me.lucko.luckperms.standalone.utils;
 
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.storage.StorageType;
+import me.lucko.luckperms.standalone.LPStandaloneBootstrap;
+import me.lucko.luckperms.standalone.LPStandalonePlugin;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
 
 import java.nio.file.Path;
@@ -45,18 +47,18 @@ import java.util.Set;
  * </ul>
  * </p>
  */
-public final class LPStandaloneTestBootstrap extends LPStandaloneBootstrap {
+public final class TestPluginBootstrap extends LPStandaloneBootstrap {
     private static final ClassPathAppender NOOP_APPENDER = file -> {};
 
     private final Path dataDirectory;
-    private LPStandaloneTestPlugin plugin;
+    private TestPlugin plugin;
 
-    LPStandaloneTestBootstrap(LuckPermsApplication app, Path dataDirectory) {
+    TestPluginBootstrap(LuckPermsApplication app, Path dataDirectory) {
         super(app, NOOP_APPENDER);
         this.dataDirectory = dataDirectory;
     }
 
-    public LPStandaloneTestPlugin getPlugin() {
+    public TestPlugin getPlugin() {
         return this.plugin;
     }
 
@@ -66,14 +68,13 @@ public final class LPStandaloneTestBootstrap extends LPStandaloneBootstrap {
     }
 
     @Override
-    LPStandalonePlugin createTestPlugin() {
-        System.setProperty("luckperms.auto-install-translations", "false");
-        this.plugin = new LPStandaloneTestPlugin(this);
+    protected LPStandalonePlugin createTestPlugin() {
+        this.plugin = new TestPlugin(this);
         return this.plugin;
     }
 
-    static final class LPStandaloneTestPlugin extends LPStandalonePlugin {
-        LPStandaloneTestPlugin(LPStandaloneBootstrap bootstrap) {
+    public static final class TestPlugin extends LPStandalonePlugin {
+        TestPlugin(LPStandaloneBootstrap bootstrap) {
             super(bootstrap);
         }
 

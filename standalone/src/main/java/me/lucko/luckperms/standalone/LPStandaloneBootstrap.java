@@ -72,7 +72,7 @@ public class LPStandaloneBootstrap implements LuckPermsBootstrap, LoaderBootstra
     }
 
     @VisibleForTesting
-    LPStandaloneBootstrap(LuckPermsApplication loader, ClassPathAppender classPathAppender) {
+    protected LPStandaloneBootstrap(LuckPermsApplication loader, ClassPathAppender classPathAppender) {
         this.loader = loader;
 
         this.logger = new Log4jPluginLogger(LuckPermsApplication.LOGGER);
@@ -82,7 +82,7 @@ public class LPStandaloneBootstrap implements LuckPermsBootstrap, LoaderBootstra
     }
 
     @VisibleForTesting
-    LPStandalonePlugin createTestPlugin() {
+    protected LPStandalonePlugin createTestPlugin() {
         return new LPStandalonePlugin(this);
     }
 

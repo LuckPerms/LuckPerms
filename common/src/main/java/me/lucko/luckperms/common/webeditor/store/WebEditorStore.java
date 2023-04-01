@@ -25,6 +25,10 @@
 
 package me.lucko.luckperms.common.webeditor.store;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.webeditor.socket.CryptographyUtils;
 
@@ -35,17 +39,29 @@ import java.util.concurrent.CompletableFuture;
  * Contains a store of known web editor sessions and provides a lookup function for
  * trusted editor public keys.
  */
+@SuppressWarnings("Guava")
 public class WebEditorStore {
     private final WebEditorSessionMap sessions;
     private final WebEditorSocketMap sockets;
     private final WebEditorKeystore keystore;
-    private final CompletableFuture<KeyPair> keyPair;
+    private final Supplier<CompletableFuture<KeyPair>> keyPair;
 
     public WebEditorStore(LuckPermsPlugin plugin) {
         this.sessions = new WebEditorSessionMap();
         this.sockets = new WebEditorSocketMap();
         this.keystore = new WebEditorKeystore(plugin.getBootstrap().getConfigDirectory().resolve("editor-keystore.json"));
-        this.keyPair = CompletableFuture.supplyAsync(CryptographyUtils::generateKeyPair, plugin.getBootstrap().getScheduler().async());
+
+        Supplier<CompletableFuture<KeyPair>> keyPair = () -> CompletableFuture.supplyAsync(
+                CryptographyUtils::generateKeyPair,
+                plugin.getBootstrap().getScheduler().async()
+        );
+
+        if (plugin.getConfiguration().get(ConfigKeys.EDITOR_LAZILY_GENERATE_KEY)) {
+            this.keyPair = Suppliers.memoize(keyPair);
+        } else {
+            CompletableFuture<KeyPair> future = keyPair.get();
+            this.keyPair = () -> future;
+        }
     }
 
     public WebEditorSessionMap sessions() {
@@ -61,10 +77,10 @@ public class WebEditorStore {
     }
 
     public KeyPair keyPair() {
-        if (!this.keyPair.isDone()) {
+        if (!this.keyPair.get().isDone()) {
             throw new IllegalStateException("Web editor keypair has not been generated yet! Has the server just started?");
         }
-        return this.keyPair.join();
+        return this.keyPair.get().join();
     }
 
 }

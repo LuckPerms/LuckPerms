@@ -28,9 +28,9 @@ package me.lucko.luckperms.standalone;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.types.Permission;
-import me.lucko.luckperms.standalone.app.LuckPermsApplication;
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
 import me.lucko.luckperms.standalone.app.integration.HealthReporter;
+import me.lucko.luckperms.standalone.utils.TestPluginProvider;
 
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeEqualityPredicate;
@@ -49,13 +49,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * A set of 'integration tests' for the standalone LuckPerms app.
  */
-public class StandaloneIntegrationTests {
-
-    private @TempDir Path tempDir;
+public class IntegrationTest {
 
     @Test
-    public void testLoadEnableDisable() {
-        useTestPlugin((app, bootstrap, plugin) -> {
+    public void testLoadEnableDisable(@TempDir Path tempDir) {
+        TestPluginProvider.use(tempDir, (app, bootstrap, plugin) -> {
             HealthReporter.Health health = app.getHealthReporter().poll();
             assertNotNull(health);
             assertTrue(health.isUp());
@@ -63,8 +61,8 @@ public class StandaloneIntegrationTests {
     }
 
     @Test
-    public void testRunCommand() {
-        useTestPlugin((app, bootstrap, plugin) -> {
+    public void testRunCommand(@TempDir Path tempDir) {
+        TestPluginProvider.use(tempDir, (app, bootstrap, plugin) -> {
             CommandExecutor commandExecutor = app.getCommandExecutor();
             commandExecutor.execute("group default permission set test").join();
 
@@ -75,15 +73,15 @@ public class StandaloneIntegrationTests {
     }
 
     @Test
-    public void testReloadConfig() throws IOException {
-        useTestPlugin((app, bootstrap, plugin) -> {
+    public void testReloadConfig(@TempDir Path tempDir) throws IOException {
+        TestPluginProvider.use(tempDir, (app, bootstrap, plugin) -> {
             String server = plugin.getConfiguration().get(ConfigKeys.SERVER);
             assertEquals("global", server);
 
             Integer syncTime = plugin.getConfiguration().get(ConfigKeys.SYNC_TIME);
             assertEquals(-1, syncTime);
 
-            Path config = this.tempDir.resolve("config.yml");
+            Path config = tempDir.resolve("config.yml");
             assertTrue(Files.exists(config));
 
             String configString = Files.readString(config)
@@ -99,24 +97,6 @@ public class StandaloneIntegrationTests {
             syncTime = plugin.getConfiguration().get(ConfigKeys.SYNC_TIME);
             assertEquals(-1, syncTime); // unchanged
         });
-    }
-
-    private <E extends Throwable> void useTestPlugin(TestPluginConsumer<E> consumer) throws E {
-        LuckPermsApplication app = new LuckPermsApplication(() -> {});
-        LPStandaloneTestBootstrap bootstrap = new LPStandaloneTestBootstrap(app, this.tempDir);
-
-        bootstrap.onLoad();
-        bootstrap.onEnable();
-
-        try {
-            consumer.accept(app, bootstrap, bootstrap.getPlugin());
-        } finally {
-            bootstrap.onDisable();
-        }
-    }
-
-    interface TestPluginConsumer<E extends Throwable> {
-        void accept(LuckPermsApplication app, LPStandaloneTestBootstrap bootstrap, LPStandalonePlugin plugin) throws E;
     }
 
 }

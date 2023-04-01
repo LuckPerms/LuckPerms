@@ -37,12 +37,15 @@ import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * An implementation of {@link Messenger} using RabbitMQ.
@@ -62,6 +65,7 @@ public class RabbitMQMessenger implements Messenger {
     private Connection connection;
     private Channel channel;
     private Subscription sub;
+    private SchedulerTask checkConnectionTask;
 
     public RabbitMQMessenger(LuckPermsPlugin plugin, IncomingMessageConsumer consumer) {
         this.plugin = plugin;
@@ -81,7 +85,8 @@ public class RabbitMQMessenger implements Messenger {
         this.connectionFactory.setPassword(password);
 
         this.sub = new Subscription();
-        this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
+        checkAndReopenConnection(true);
+        this.checkConnectionTask = this.plugin.getBootstrap().getScheduler().asyncRepeating(() -> checkAndReopenConnection(false), 5, TimeUnit.SECONDS);
     }
 
     @Override
@@ -100,7 +105,7 @@ public class RabbitMQMessenger implements Messenger {
         try {
             this.channel.close();
             this.connection.close();
-            this.sub.isClosed = true;
+            this.checkConnectionTask.cancel();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -159,30 +164,7 @@ public class RabbitMQMessenger implements Messenger {
         }
     }
 
-    private class Subscription implements Runnable, DeliverCallback {
-        private boolean isClosed = false;
-
-        @Override
-        public void run() {
-            boolean firstStartup = true;
-            while (!Thread.interrupted() && !this.isClosed) {
-                try {
-                    if (!checkAndReopenConnection(firstStartup)) {
-                        // Sleep for 5 seconds to prevent massive spam in console
-                        Thread.sleep(5000);
-                        continue;
-                    }
-
-                    // Check connection life every every 30 seconds
-                    Thread.sleep(30_000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    firstStartup = false;
-                }
-            }
-        }
-
+    private class Subscription implements DeliverCallback {
         @Override
         public void handle(String consumerTag, Delivery message) {
             try {
