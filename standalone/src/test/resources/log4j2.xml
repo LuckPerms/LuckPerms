@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" shutdownHook="disable">
+    <Appenders>
+        <TerminalConsole name="Console">
+            <PatternLayout pattern="%highlight{[%d{HH:mm:ss} %level]: %msg%n%xEx}"/>
+        </TerminalConsole>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

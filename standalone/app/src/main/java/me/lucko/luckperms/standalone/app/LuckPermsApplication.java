@@ -130,6 +130,14 @@ public class LuckPermsApplication implements AutoCloseable {
         this.healthReporter = healthReporter;
     }
 
+    public CommandExecutor getCommandExecutor() {
+        return this.commandExecutor;
+    }
+
+    public HealthReporter getHealthReporter() {
+        return this.healthReporter;
+    }
+
     public String getVersion() {
         return "@version@";
     }

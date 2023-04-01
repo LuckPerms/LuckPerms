@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -37,7 +36,6 @@ public class DependencyChecksumTest {
 
     @ParameterizedTest
     @EnumSource
-    @Tag("dependency_checksum")
     public void checksumMatches(Dependency dependency) throws DependencyDownloadException {
         for (DependencyRepository repo : DependencyRepository.values()) {
             byte[] hash = Dependency.createDigest().digest(repo.downloadRaw(dependency));

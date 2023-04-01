@@ -31,8 +31,14 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: Run build with Gradle wrapper
-        run: ./gradlew build
+      - name: Run build and tests with Gradle wrapper
+        run: ./gradlew test build
+
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@v3
+        if: success() || failure()
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
 
       - name: Upload all artifacts
         uses: actions/upload-artifact@v3

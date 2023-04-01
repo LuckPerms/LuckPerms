@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.config.generic.adapter.SystemPropertyConfigAdap
 import me.lucko.luckperms.common.context.calculator.ConfigurationContextCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.DependencyManagerImpl;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
@@ -113,7 +114,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
      */
     public final void load() {
         // load dependencies
-        this.dependencyManager = new DependencyManager(this);
+        this.dependencyManager = createDependencyManager();
         this.dependencyManager.loadDependencies(getGlobalDependencies());
 
         // load translations
@@ -302,6 +303,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     // hooks called during load
+
+    protected DependencyManager createDependencyManager() {
+        return new DependencyManagerImpl(this);
+    }
 
     protected Set<Dependency> getGlobalDependencies() {
         return EnumSet.of(

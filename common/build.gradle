@@ -3,9 +3,7 @@ plugins {
 }
 
 test {
-    useJUnitPlatform {
-        excludeTags 'dependency_checksum'
-    }
+    useJUnitPlatform {}
 }
 
 dependencies {
@@ -14,7 +12,6 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
     testImplementation 'org.mockito:mockito-core:4.11.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:4.11.0'
-
     testImplementation 'com.h2database:h2:2.1.214'
 
     api project(':api')

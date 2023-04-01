@@ -52,7 +52,7 @@ public class RelocationHandler {
     private final Method jarRelocatorRunMethod;
 
     public RelocationHandler(DependencyManager dependencyManager) {
-        IsolatedClassLoader classLoader = null;
+        ClassLoader classLoader = null;
         try {
             // download the required dependencies for remapping
             dependencyManager.loadDependencies(DEPENDENCIES);
@@ -70,8 +70,8 @@ public class RelocationHandler {
             this.jarRelocatorRunMethod.setAccessible(true);
         } catch (Exception e) {
             try {
-                if (classLoader != null) {
-                    classLoader.close();
+                if (classLoader instanceof IsolatedClassLoader) {
+                    ((IsolatedClassLoader) classLoader).close();
                 }
             } catch (IOException ex) {
                 e.addSuppressed(ex);
