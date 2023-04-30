@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
@@ -45,7 +44,7 @@ import me.lucko.luckperms.common.storage.implementation.sql.connection.file.H2Co
 import me.lucko.luckperms.common.storage.implementation.sql.connection.file.SqliteConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
-import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.PostgreConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.PostgresConnectionFactory;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.util.Map;
@@ -120,7 +119,7 @@ public class StorageFactory {
             case POSTGRESQL:
                 return new SqlStorage(
                         this.plugin,
-                        new PostgreConnectionFactory(this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                        new PostgresConnectionFactory(this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         this.plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MONGODB:

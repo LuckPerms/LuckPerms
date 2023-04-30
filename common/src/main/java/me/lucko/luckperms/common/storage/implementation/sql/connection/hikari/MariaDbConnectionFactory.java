@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
-
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import java.util.Map;
@@ -59,7 +58,7 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected void setProperties(HikariConfig config, Map<String, String> properties) {
+    protected void setProperties(HikariConfig config, Map<String, Object> properties) {
         String propertiesString = properties.entrySet().stream()
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining(";"));
