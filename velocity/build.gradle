@@ -36,7 +36,7 @@ shadowJar {
     relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
     relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
     relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
-    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
+    relocate 'com.impossibl', 'me.lucko.luckperms.lib.postgresql'
     relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
     relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
     relocate 'org.bson', 'me.lucko.luckperms.lib.bson'

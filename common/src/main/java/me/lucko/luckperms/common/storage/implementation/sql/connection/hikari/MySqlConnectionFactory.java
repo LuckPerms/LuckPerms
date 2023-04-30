@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
-
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import java.sql.Driver;
@@ -80,7 +79,7 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected void overrideProperties(Map<String, String> properties) {
+    protected void overrideProperties(Map<String, Object> properties) {
         // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
         properties.putIfAbsent("cachePrepStmts", "true");
         properties.putIfAbsent("prepStmtCacheSize", "250");

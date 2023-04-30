@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.dependencies;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHelper;
 
@@ -154,11 +153,18 @@ public enum Dependency {
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
-            "org{}postgresql",
-            "postgresql",
-            "42.2.19",
-            "IydH+gkk2Iom36QrgSi2+hFAgC2AQSWJFZboyl8pEyI=",
-            Relocation.of("postgresql", "org{}postgresql")
+            "com{}impossibl{}pgjdbc-ng",
+            "pgjdbc-ng",
+            "0.8.9",
+            "WEYMezl02Rot2n2ATs7NABcvL9ceQ/oLA/XPduIEaWA=",
+            Relocation.of("postgresql", "com{}impossibl")
+    ),
+    POSTGRESQL_DRIVER_SPY(
+            "com{}impossibl{}pgjdbc-ng",
+            "spy",
+            "0.8.9",
+            "72ZuhpMy/4EYJZuSjBjGI5NGgdWmOpwjDHW9ISnqso8=",
+            Relocation.of("postgresql", "com{}impossibl")
     ),
     H2_DRIVER_LEGACY(
             "com.h2database",
