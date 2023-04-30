@@ -3719,7 +3719,7 @@ public interface Message {
                                     .color(GRAY)
                                     .key("luckperms.duration.since")
                                     .args(DurationFormatter.CONCISE_LOW_ACCURACY.format(action.getDurationSince()))
-                                    .hoverEvent(HoverEvent.showText(text().append(text("Date: ", GRAY)).append(text(DATE_FORMAT.format(action.getTimestamp()), AQUA))))
+                                    .hoverEvent(HoverEvent.showText(text().append(translatable("luckperms.duration.date", GRAY)).append(text(": ", GRAY)).append(text(DATE_FORMAT.format(action.getTimestamp()), AQUA))))
                             )
                             .append(CLOSE_BRACKET)
                     )
