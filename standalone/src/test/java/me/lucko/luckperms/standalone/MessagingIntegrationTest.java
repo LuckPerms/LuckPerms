@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-@Tag("docker")
+//@Tag("docker")
 public class MessagingIntegrationTest {
 
     private static void testMessaging(Map<String, String> config, Path tempDirA, Path tempDirB) throws InterruptedException {
@@ -73,7 +73,10 @@ public class MessagingIntegrationTest {
             assertNotNull(messagingServiceB);
 
             CountDownLatch latch = new CountDownLatch(1);
-            pluginB.app().getApi().getEventBus().subscribe(PreNetworkSyncEvent.class, e -> latch.countDown());
+            pluginB.app().getApi().getEventBus().subscribe(PreNetworkSyncEvent.class, e -> {
+                latch.countDown();
+                e.setCancelled(true);
+            });
 
             // send a message from plugin A to plugin B and wait for the message to be received
             messagingServiceA.pushUpdate();
@@ -102,6 +105,33 @@ public class MessagingIntegrationTest {
                     .put("data.address", host + ":" + port)
                     .put("data.database", "minecraft")
                     .put("data.username", "root")
+                    .put("data.password", "passw0rd")
+                    .build();
+
+            testMessaging(config, tempDirA, tempDirB);
+        }
+    }
+
+    @Nested
+    class Postgres {
+
+        @Container
+        private final GenericContainer<?> container = new GenericContainer<>(DockerImageName.parse("postgres"))
+                .withEnv("POSTGRES_PASSWORD", "passw0rd")
+                .withExposedPorts(5432);
+
+        @Test
+        public void testPostgres(@TempDir Path tempDirA, @TempDir Path tempDirB) throws InterruptedException {
+            assertTrue(this.container.isRunning());
+
+            String host = this.container.getHost();
+            Integer port = this.container.getFirstMappedPort();
+
+            Map<String, String> config = ImmutableMap.<String, String>builder()
+                    .put("storage-method", "postgresql")
+                    .put("data.address", host + ":" + port)
+                    .put("data.database", "postgres")
+                    .put("data.username", "postgres")
                     .put("data.password", "passw0rd")
                     .build();
 
