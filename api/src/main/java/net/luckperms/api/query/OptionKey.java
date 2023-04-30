@@ -26,7 +26,6 @@
 package net.luckperms.api.query;
 
 import net.luckperms.api.node.metadata.NodeMetadataKey;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 

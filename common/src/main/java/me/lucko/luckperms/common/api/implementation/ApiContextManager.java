@@ -28,14 +28,12 @@ package me.lucko.luckperms.common.api.implementation;
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.QueryOptionsBuilderImpl;
-
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextSetFactory;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

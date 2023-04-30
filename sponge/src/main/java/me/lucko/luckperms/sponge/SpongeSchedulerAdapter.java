@@ -26,11 +26,9 @@
 package me.lucko.luckperms.sponge;
 
 import com.google.common.base.Suppliers;
-
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.util.Iterators;
-
 import org.spongepowered.api.Game;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;

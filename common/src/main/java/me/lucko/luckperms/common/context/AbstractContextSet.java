@@ -29,7 +29,6 @@ import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;

@@ -28,12 +28,10 @@ package me.lucko.luckperms.common.node.types;
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
 import me.lucko.luckperms.common.node.factory.Delimiters;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.SuffixNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

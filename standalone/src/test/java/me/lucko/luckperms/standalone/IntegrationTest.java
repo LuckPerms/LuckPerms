@@ -31,10 +31,8 @@ import me.lucko.luckperms.common.node.types.Permission;
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
 import me.lucko.luckperms.standalone.app.integration.HealthReporter;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
-
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeEqualityPredicate;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

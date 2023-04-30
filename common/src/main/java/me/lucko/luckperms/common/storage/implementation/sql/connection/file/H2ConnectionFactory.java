@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.file;
 
 import me.lucko.luckperms.common.dependencies.Dependency;
-import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.lang.reflect.Constructor;

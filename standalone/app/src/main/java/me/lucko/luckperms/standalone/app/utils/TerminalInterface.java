@@ -27,9 +27,7 @@ package me.lucko.luckperms.standalone.app.utils;
 
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
-
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
-
 import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;

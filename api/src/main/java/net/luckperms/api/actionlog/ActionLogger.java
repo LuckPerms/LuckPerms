@@ -26,7 +26,6 @@
 package net.luckperms.api.actionlog;
 
 import net.luckperms.api.messaging.MessagingService;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.CompletableFuture;

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.bukkit.util;
 
 import com.google.common.graph.MutableGraph;
-
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.SimplePluginManager;
 

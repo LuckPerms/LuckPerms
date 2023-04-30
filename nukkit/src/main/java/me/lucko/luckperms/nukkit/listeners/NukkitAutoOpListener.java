@@ -25,17 +25,15 @@
 
 package me.lucko.luckperms.nukkit.listeners;
 
+import cn.nukkit.Player;
 import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.event.LuckPermsEventListener;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.query.QueryOptions;
-
-import cn.nukkit.Player;
 
 import java.util.Map;
 

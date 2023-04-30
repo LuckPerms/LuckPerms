@@ -35,7 +35,7 @@ dependencies {
     testImplementation 'com.h2database:h2:2.1.214'
     testImplementation 'mysql:mysql-connector-java:8.0.23'
     testImplementation 'org.mariadb.jdbc:mariadb-java-client:2.7.2'
-    testImplementation 'org.mongodb:mongodb-driver-sync:4.5.0'
+    testImplementation 'org.mongodb:mongodb-driver-legacy:4.5.0'
     testImplementation 'me.lucko.configurate:configurate-toml:3.7'
     testImplementation 'org.spongepowered:configurate-hocon:3.7.2'
     testImplementation 'org.yaml:snakeyaml:1.28'

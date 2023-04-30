@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.inheritance;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
-
 import net.luckperms.api.query.QueryOptions;
 
 /**

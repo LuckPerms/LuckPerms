@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.tasks;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import net.luckperms.api.event.cause.CreationCause;
 
 import java.util.concurrent.TimeUnit;

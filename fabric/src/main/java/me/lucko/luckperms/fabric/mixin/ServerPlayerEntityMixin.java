@@ -34,13 +34,11 @@ import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
 import me.lucko.luckperms.fabric.model.MixinUser;
-
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

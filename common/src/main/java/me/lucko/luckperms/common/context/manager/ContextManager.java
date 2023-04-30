@@ -30,14 +30,12 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.context.calculator.ForwardingContextCalculator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;

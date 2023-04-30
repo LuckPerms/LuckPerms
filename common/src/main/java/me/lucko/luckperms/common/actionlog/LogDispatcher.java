@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-
 import net.luckperms.api.event.log.LogBroadcastEvent;
 import net.luckperms.api.event.log.LogNotifyEvent;
 

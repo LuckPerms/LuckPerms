@@ -26,11 +26,8 @@
 package me.lucko.luckperms.common.messaging.message;
 
 import com.google.gson.JsonElement;
-
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
-
 import net.luckperms.api.messenger.message.type.UpdateMessage;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

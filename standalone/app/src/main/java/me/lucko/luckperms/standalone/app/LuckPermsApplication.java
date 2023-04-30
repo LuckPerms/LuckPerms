@@ -31,9 +31,7 @@ import me.lucko.luckperms.standalone.app.integration.ShutdownCallback;
 import me.lucko.luckperms.standalone.app.utils.DockerCommandSocket;
 import me.lucko.luckperms.standalone.app.utils.HeartbeatHttpServer;
 import me.lucko.luckperms.standalone.app.utils.TerminalInterface;
-
 import net.luckperms.api.LuckPerms;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

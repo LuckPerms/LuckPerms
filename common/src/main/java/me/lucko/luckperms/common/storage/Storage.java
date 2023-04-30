@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.model.Group;
@@ -38,7 +37,6 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorage;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Throwing;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;

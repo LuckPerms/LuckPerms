@@ -26,11 +26,8 @@
 package me.lucko.luckperms.common.context;
 
 import com.google.common.collect.Lists;
-
 import me.lucko.luckperms.common.context.comparator.ContextSetComparator;
-
 import net.luckperms.api.context.ImmutableContextSet;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

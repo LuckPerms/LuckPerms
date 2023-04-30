@@ -29,7 +29,6 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.Unmodifiable;

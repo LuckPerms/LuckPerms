@@ -26,13 +26,11 @@
 package me.lucko.luckperms.bungee.context;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.context.manager.InlineQueryOptionsSupplier;
 import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.util.CaffeineFactory;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryOptions;
 import net.md_5.bungee.api.connection.ProxiedPlayer;

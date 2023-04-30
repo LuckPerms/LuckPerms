@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.actionlog;
 
 import com.google.common.base.Strings;
-
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
@@ -35,12 +34,10 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
-
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Duration;

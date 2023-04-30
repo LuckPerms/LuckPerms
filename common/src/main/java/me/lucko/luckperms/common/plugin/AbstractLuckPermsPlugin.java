@@ -63,9 +63,7 @@ import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
-
 import net.luckperms.api.LuckPerms;
-
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;

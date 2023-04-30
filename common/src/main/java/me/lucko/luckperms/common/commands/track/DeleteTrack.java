@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.DeletionCause;

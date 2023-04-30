@@ -26,7 +26,6 @@
 package net.luckperms.api.node;
 
 import net.luckperms.api.model.PermissionHolder;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

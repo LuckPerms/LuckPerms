@@ -26,9 +26,7 @@
 package me.lucko.luckperms.common.node;
 
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.node.utils.ShorthandParser;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.UniqueIdType;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;

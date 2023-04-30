@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.bulkupdate;
 
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.bulkupdate.action.Action;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
@@ -36,9 +35,7 @@ import me.lucko.luckperms.common.bulkupdate.query.Query;
 import me.lucko.luckperms.common.bulkupdate.query.QueryField;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.node.types.Permission;
-
 import net.luckperms.api.node.Node;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

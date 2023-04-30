@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;

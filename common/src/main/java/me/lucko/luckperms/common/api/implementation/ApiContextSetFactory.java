@@ -27,11 +27,9 @@ package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.context.MutableContextSetImpl;
-
 import net.luckperms.api.context.ContextSetFactory;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ApiContextSetFactory implements ContextSetFactory {

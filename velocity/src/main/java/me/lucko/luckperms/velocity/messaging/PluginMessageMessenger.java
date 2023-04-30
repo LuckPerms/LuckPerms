@@ -33,10 +33,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-
 import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
-
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 

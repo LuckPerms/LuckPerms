@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.context.calculator;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.DefaultContextKeys;

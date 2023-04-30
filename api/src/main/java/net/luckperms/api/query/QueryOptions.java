@@ -29,7 +29,6 @@ import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;

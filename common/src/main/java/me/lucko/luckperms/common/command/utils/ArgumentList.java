@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.command.utils;
 
 import com.google.common.collect.ForwardingList;
-
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.commands.user.UserParentCommand;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
@@ -34,13 +33,11 @@ import me.lucko.luckperms.common.context.MutableContextSetImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationParser;
-
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Duration;

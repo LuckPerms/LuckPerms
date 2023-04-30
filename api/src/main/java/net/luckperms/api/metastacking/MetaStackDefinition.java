@@ -26,7 +26,6 @@
 package net.luckperms.api.metastacking;
 
 import net.luckperms.api.query.OptionKey;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 

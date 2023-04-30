@@ -26,9 +26,7 @@
 package me.lucko.luckperms.common.util;
 
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.util.Difference.ChangeType;
-
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

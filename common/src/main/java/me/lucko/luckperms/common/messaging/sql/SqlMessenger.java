@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
-
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 
 import java.sql.Connection;

@@ -27,7 +27,6 @@ package me.lucko.luckperms.standalone;
 
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.standalone.app.integration.HealthReporter;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 

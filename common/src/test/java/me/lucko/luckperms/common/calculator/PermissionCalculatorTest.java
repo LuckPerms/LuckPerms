@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.calculator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.processor.AbstractOverrideWildcardProcessor;
@@ -44,10 +43,8 @@ import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

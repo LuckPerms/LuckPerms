@@ -25,22 +25,19 @@
 
 package me.lucko.luckperms.nukkit.inject.permissible;
 
+import cn.nukkit.permission.Permission;
+import cn.nukkit.permission.PermissionAttachment;
+import cn.nukkit.permission.PermissionRemovedExecutor;
+import cn.nukkit.plugin.Plugin;
 import com.google.common.base.Preconditions;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
-
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
-
-import cn.nukkit.permission.Permission;
-import cn.nukkit.permission.PermissionAttachment;
-import cn.nukkit.permission.PermissionRemovedExecutor;
-import cn.nukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 import java.util.Collection;

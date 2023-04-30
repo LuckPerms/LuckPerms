@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.locale;
 
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;

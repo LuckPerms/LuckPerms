@@ -26,16 +26,13 @@
 package me.lucko.luckperms.bukkit.listeners;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.event.LuckPermsEventListener;
 import me.lucko.luckperms.common.util.CaffeineFactory;
-
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
-
 import org.bukkit.entity.Player;
 
 import java.util.UUID;

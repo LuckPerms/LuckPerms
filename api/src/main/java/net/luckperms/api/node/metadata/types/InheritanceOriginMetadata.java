@@ -29,7 +29,6 @@ import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 

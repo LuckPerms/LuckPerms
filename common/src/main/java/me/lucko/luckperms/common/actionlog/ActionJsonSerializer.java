@@ -29,9 +29,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-
 import me.lucko.luckperms.common.util.gson.JObject;
-
 import net.luckperms.api.actionlog.Action;
 
 import java.time.Instant;

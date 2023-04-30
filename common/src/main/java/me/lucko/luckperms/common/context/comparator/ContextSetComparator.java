@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.context.comparator;
 
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
-
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;

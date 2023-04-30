@@ -27,7 +27,6 @@ package net.luckperms.api.track;
 
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.util.Result;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;

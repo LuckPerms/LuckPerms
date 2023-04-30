@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.command.spec;
 
 import me.lucko.luckperms.common.locale.Message;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 

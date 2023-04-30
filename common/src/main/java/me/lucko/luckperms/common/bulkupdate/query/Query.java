@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.bulkupdate.query;
 
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.node.Node;
 

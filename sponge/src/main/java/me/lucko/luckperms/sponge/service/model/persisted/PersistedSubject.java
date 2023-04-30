@@ -35,7 +35,6 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubject;
 import me.lucko.luckperms.sponge.service.model.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.calculated.MonitoredSubjectData;
-
 import net.luckperms.api.model.data.DataType;
 
 import java.io.IOException;

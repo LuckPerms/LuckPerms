@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.context;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.context.manager.InlineQueryOptionsSupplier;
 import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
@@ -34,13 +33,11 @@ import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.model.ContextCalculatorProxy;
 import me.lucko.luckperms.sponge.service.model.TemporaryCauseHolderSubject;
-
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
 import net.luckperms.api.query.QueryOptions;
-
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.Subject;

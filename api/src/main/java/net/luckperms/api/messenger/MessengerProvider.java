@@ -26,7 +26,6 @@
 package net.luckperms.api.messenger;
 
 import net.luckperms.api.LuckPerms;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.OverrideOnly;
 

@@ -37,7 +37,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.model.data.DataType;
 
 import java.util.UUID;

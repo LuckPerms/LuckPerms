@@ -29,11 +29,9 @@ import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.cache.PatternCache;
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.RegexPermissionNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

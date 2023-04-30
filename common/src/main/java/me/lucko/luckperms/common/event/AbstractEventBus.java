@@ -27,13 +27,11 @@ package me.lucko.luckperms.common.event;
 
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import net.kyori.event.EventSubscriber;
 import net.kyori.event.SimpleEventBus;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.EventSubscription;
 import net.luckperms.api.event.LuckPermsEvent;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

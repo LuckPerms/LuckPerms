@@ -32,16 +32,13 @@ import com.velocitypowered.api.permission.PermissionFunction;
 import com.velocitypowered.api.permission.PermissionProvider;
 import com.velocitypowered.api.permission.PermissionSubject;
 import com.velocitypowered.api.proxy.Player;
-
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 import me.lucko.luckperms.velocity.service.CompatibilityUtil;
-
 import net.luckperms.api.util.Tristate;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class MonitoringPermissionCheckListener {

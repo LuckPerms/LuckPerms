@@ -28,7 +28,6 @@ package me.lucko.luckperms.standalone;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
 

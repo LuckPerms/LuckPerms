@@ -26,13 +26,11 @@
 package me.lucko.luckperms.fabric;
 
 import com.mojang.authlib.GameProfile;
-
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
-
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -40,7 +38,6 @@ import net.fabricmc.loader.api.ModContainer;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-
 import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;

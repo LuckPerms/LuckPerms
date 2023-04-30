@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;

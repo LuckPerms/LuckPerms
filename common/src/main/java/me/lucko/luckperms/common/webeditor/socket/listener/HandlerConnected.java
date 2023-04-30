@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.webeditor.socket.listener;
 
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.webeditor.socket.SocketMessageType;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;

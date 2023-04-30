@@ -36,9 +36,7 @@ import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.node.types.Weight;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
-
 import net.luckperms.api.context.ContextSatisfyMode;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
@@ -45,7 +44,6 @@ import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.metastacking.MetaStackDefinition;

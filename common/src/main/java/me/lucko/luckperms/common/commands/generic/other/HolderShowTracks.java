@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.other;
 
 import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -40,7 +39,6 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;

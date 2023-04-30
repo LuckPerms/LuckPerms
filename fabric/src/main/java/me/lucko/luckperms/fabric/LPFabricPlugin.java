@@ -48,7 +48,6 @@ import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.FabricOtherListeners;
 import me.lucko.luckperms.fabric.listeners.FabricPermissionsApiListener;
 import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
-
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.ModContainer;
 import net.kyori.adventure.text.Component;

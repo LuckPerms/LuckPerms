@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.webeditor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -46,7 +45,6 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Difference;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.webeditor.store.RemoteSession;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.util;
 
 import com.google.common.collect.ImmutableList;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

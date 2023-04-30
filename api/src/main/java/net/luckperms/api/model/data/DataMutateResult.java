@@ -29,7 +29,6 @@ import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.track.Track;
 import net.luckperms.api.util.Result;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

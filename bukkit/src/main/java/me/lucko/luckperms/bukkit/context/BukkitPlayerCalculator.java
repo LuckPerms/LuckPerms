@@ -26,19 +26,16 @@
 package me.lucko.luckperms.bukkit.context;
 
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.EnumNamer;
-
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
-
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.World.Environment;

@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.manager.user.AbstractUserManager;
 import me.lucko.luckperms.common.model.manager.user.UserHousekeeper;
@@ -46,11 +45,9 @@ import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
-
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
 

@@ -29,12 +29,10 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.event.LuckPermsEventListener;
 import me.lucko.luckperms.common.model.User;
-
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.query.QueryOptions;
-
 import org.bukkit.entity.Player;
 
 import java.util.Map;

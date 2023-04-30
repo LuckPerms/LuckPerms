@@ -25,19 +25,6 @@
 
 package me.lucko.luckperms.nukkit.context;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
-import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-
-import net.luckperms.api.context.Context;
-import net.luckperms.api.context.ContextCalculator;
-import net.luckperms.api.context.ContextConsumer;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.DefaultContextKeys;
-import net.luckperms.api.context.ImmutableContextSet;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.event.EventHandler;
@@ -46,6 +33,16 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.entity.EntityLevelChangeEvent;
 import cn.nukkit.event.player.PlayerGameModeChangeEvent;
 import cn.nukkit.level.Level;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
+import net.luckperms.api.context.Context;
+import net.luckperms.api.context.ContextCalculator;
+import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.context.ImmutableContextSet;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;
 import java.util.Set;

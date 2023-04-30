@@ -26,16 +26,13 @@
 package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.node.types.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.types.PermissionNode;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

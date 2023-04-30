@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.dependencies;
 
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.dependencies.relocation.Relocation;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
@@ -34,9 +33,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.util.MoreFiles;
-
 import net.luckperms.api.platform.Platform;
-
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.io.IOException;

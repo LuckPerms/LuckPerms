@@ -27,9 +27,7 @@ package me.lucko.luckperms.common.verbose;
 
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
-
 import net.luckperms.api.model.PermissionHolder;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;

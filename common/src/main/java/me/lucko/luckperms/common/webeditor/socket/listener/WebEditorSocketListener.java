@@ -26,17 +26,14 @@
 package me.lucko.luckperms.common.webeditor.socket.listener;
 
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.webeditor.socket.CryptographyUtils;
 import me.lucko.luckperms.common.webeditor.socket.SocketMessageType;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.EOFException;
 import java.security.PublicKey;

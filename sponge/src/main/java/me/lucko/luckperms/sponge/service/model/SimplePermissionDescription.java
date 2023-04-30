@@ -26,9 +26,7 @@
 package me.lucko.luckperms.sponge.service.model;
 
 import me.lucko.luckperms.sponge.service.ProxyFactory;
-
 import net.kyori.adventure.text.Component;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.plugin.PluginContainer;

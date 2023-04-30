@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.model.manager.user;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.Manager;
-
 import net.luckperms.api.node.Node;
 
 import java.util.UUID;

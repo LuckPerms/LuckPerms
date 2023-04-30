@@ -28,13 +28,11 @@ package me.lucko.luckperms.common.context.calculator;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
-
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ConfigurationContextCalculator implements StaticContextCalculator {

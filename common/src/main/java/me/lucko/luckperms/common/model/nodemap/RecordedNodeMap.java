@@ -27,9 +27,7 @@ package me.lucko.luckperms.common.model.nodemap;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.util.Difference;
-
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;

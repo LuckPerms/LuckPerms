@@ -28,12 +28,9 @@ package me.lucko.luckperms.common.context;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-
 import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
-
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

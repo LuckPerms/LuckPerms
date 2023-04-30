@@ -26,10 +26,8 @@
 package me.lucko.luckperms.common.context.manager;
 
 import me.lucko.luckperms.common.cache.ExpiringCache;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.TimeUnit;

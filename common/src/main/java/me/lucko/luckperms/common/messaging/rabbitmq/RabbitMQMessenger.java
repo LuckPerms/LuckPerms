@@ -35,14 +35,11 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
-
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.TimeUnit;

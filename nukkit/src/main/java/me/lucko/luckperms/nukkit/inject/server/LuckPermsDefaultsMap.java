@@ -25,18 +25,14 @@
 
 package me.lucko.luckperms.nukkit.inject.server;
 
-import com.google.common.collect.ForwardingMap;
-import com.google.common.collect.ImmutableMap;
-
-import me.lucko.luckperms.common.cache.Cache;
-import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-
-import net.luckperms.api.util.Tristate;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginManager;
+import com.google.common.collect.ForwardingMap;
+import com.google.common.collect.ImmutableMap;
+import me.lucko.luckperms.common.cache.Cache;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
+import net.luckperms.api.util.Tristate;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
 import java.util.HashMap;

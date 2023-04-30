@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.sender.Sender;
-
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

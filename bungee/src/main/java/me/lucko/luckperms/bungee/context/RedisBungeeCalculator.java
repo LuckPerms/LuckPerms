@@ -27,14 +27,11 @@ package me.lucko.luckperms.bungee.context;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
-
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class RedisBungeeCalculator implements StaticContextCalculator {

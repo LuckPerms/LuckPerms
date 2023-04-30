@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.commands;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -36,7 +35,6 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
-
 import net.luckperms.api.context.ImmutableContextSet;
 
 import java.util.List;

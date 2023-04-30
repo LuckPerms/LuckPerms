@@ -25,11 +25,10 @@
 
 package me.lucko.luckperms.common.storage.implementation.file.loader;
 
-import org.yaml.snakeyaml.DumperOptions;
-
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.yaml.snakeyaml.DumperOptions;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

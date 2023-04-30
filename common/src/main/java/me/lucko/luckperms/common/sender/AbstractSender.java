@@ -26,9 +26,7 @@
 package me.lucko.luckperms.common.sender;
 
 import com.google.common.collect.Iterables;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.util.Tristate;

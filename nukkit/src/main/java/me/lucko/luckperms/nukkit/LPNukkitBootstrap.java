@@ -25,18 +25,16 @@
 
 package me.lucko.luckperms.nukkit;
 
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.plugin.PluginBase;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
-
 import net.luckperms.api.platform.Platform;
-
-import cn.nukkit.Player;
-import cn.nukkit.Server;
-import cn.nukkit.plugin.PluginBase;
 
 import java.nio.file.Path;
 import java.time.Instant;

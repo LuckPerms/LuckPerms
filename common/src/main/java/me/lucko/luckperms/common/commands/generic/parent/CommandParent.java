@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.command.abstraction.GenericChildCommand;
 import me.lucko.luckperms.common.command.abstraction.GenericParentCommand;
 import me.lucko.luckperms.common.command.spec.CommandSpec;

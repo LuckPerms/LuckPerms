@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.treeview;
 
 import com.google.common.collect.Maps;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;

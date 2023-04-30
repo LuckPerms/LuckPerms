@@ -26,11 +26,9 @@
 package me.lucko.luckperms.common.context;
 
 import com.google.common.collect.ImmutableSet;
-
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ImmutableContextSet;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

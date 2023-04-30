@@ -26,13 +26,11 @@
 package me.lucko.luckperms.common.event;
 
 import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
-
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.player.PlayerDataSaveEvent;
 import net.luckperms.api.event.sync.PreSyncEvent;
 import net.luckperms.api.model.PlayerSaveResult;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

@@ -35,7 +35,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 

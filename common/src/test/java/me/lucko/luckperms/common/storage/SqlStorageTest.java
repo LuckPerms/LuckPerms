@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.event.EventDispatcher;
@@ -39,13 +38,10 @@ import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.file.NonClosableConnection;
-
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.model.PlayerSaveResult.Outcome;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.types.PermissionNode;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,9 +52,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +66,6 @@ import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SqlStorageTest {

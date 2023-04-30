@@ -27,12 +27,10 @@ package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.model.manager.user.UserManager;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.platform.PlayerAdapter;
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

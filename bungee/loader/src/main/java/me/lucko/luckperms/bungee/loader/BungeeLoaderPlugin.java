@@ -27,7 +27,6 @@ package me.lucko.luckperms.bungee.loader;
 
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
-
 import net.md_5.bungee.api.plugin.Plugin;
 
 public class BungeeLoaderPlugin extends Plugin {

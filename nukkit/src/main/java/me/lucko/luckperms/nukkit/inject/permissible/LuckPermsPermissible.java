@@ -25,9 +25,14 @@
 
 package me.lucko.luckperms.nukkit.inject.permissible;
 
+import cn.nukkit.Player;
+import cn.nukkit.permission.PermissibleBase;
+import cn.nukkit.permission.Permission;
+import cn.nukkit.permission.PermissionAttachment;
+import cn.nukkit.permission.PermissionAttachmentInfo;
+import cn.nukkit.plugin.Plugin;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
@@ -37,19 +42,10 @@ import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.calculator.OpProcessor;
 import me.lucko.luckperms.nukkit.calculator.PermissionMapProcessor;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
-
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import cn.nukkit.Player;
-import cn.nukkit.permission.PermissibleBase;
-import cn.nukkit.permission.Permission;
-import cn.nukkit.permission.PermissionAttachment;
-import cn.nukkit.permission.PermissionAttachmentInfo;
-import cn.nukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 import java.util.Collection;

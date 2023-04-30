@@ -26,7 +26,6 @@
 package me.lucko.luckperms.bukkit.vault;
 
 import com.google.common.base.Preconditions;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
@@ -46,7 +45,6 @@ import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.util.UniqueIdType;
 import me.lucko.luckperms.common.util.Uuids;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
@@ -56,7 +54,6 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.milkbowl.vault.permission.Permission;
-
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

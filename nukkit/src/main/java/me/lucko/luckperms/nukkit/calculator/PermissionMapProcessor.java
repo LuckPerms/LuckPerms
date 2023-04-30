@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.calculator.processor.AbstractOverrideWildcardPr
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.inject.PermissionDefault;
-
 import net.luckperms.api.util.Tristate;
 
 /**

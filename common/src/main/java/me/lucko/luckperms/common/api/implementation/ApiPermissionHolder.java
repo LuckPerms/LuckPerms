@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.api.implementation;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -42,7 +41,6 @@ import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;

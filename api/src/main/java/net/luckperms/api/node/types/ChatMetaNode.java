@@ -28,7 +28,6 @@ package net.luckperms.api.node.types;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.ScopedNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

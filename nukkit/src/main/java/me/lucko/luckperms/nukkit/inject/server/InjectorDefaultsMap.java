@@ -25,13 +25,11 @@
 
 package me.lucko.luckperms.nukkit.inject.server;
 
-import com.google.common.collect.ImmutableMap;
-
-import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-
 import cn.nukkit.Server;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginManager;
+import com.google.common.collect.ImmutableMap;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;

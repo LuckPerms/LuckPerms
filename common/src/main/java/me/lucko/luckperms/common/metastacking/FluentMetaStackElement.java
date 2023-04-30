@@ -27,11 +27,9 @@ package me.lucko.luckperms.common.metastacking;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import net.luckperms.api.metastacking.MetaStackElement;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.types.ChatMetaNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

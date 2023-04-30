@@ -27,10 +27,8 @@ package me.lucko.luckperms.common.node;
 
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.types.Permission;
-
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

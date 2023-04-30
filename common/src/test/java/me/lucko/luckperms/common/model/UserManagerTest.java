@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.event.EventDispatcher;
@@ -36,7 +35,6 @@ import me.lucko.luckperms.common.node.types.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

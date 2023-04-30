@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.locale;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.command.spec.Argument;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -44,7 +43,6 @@ import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.storage.Storage;
-
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorFlag;
@@ -61,7 +59,6 @@ import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.platform.Platform;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;

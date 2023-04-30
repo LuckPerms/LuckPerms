@@ -29,11 +29,9 @@ import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
-
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
-
 import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.Player;

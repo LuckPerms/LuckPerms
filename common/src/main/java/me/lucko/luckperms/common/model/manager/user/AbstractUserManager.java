@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.CompletableFutures;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;

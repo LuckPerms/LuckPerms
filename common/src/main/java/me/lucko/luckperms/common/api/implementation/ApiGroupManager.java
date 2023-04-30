@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.api.implementation;
 
 import com.google.common.collect.ImmutableListMultimap;
-
 import me.lucko.luckperms.common.api.ApiUtils;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
@@ -35,13 +34,11 @@ import me.lucko.luckperms.common.node.matcher.StandardNodeMatchers;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.matcher.NodeMatcher;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;

@@ -26,13 +26,10 @@
 package me.lucko.luckperms.standalone;
 
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.standalone.app.integration.HealthReporter;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
-
 import net.luckperms.api.event.sync.PreNetworkSyncEvent;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -51,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-//@Tag("docker")
+@Tag("docker")
 public class MessagingIntegrationTest {
 
     private static void testMessaging(Map<String, String> config, Path tempDirA, Path tempDirB) throws InterruptedException {

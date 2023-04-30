@@ -28,7 +28,6 @@ package me.lucko.luckperms.bungee;
 import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;

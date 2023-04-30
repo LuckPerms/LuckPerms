@@ -30,10 +30,8 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.manager.track.TrackManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

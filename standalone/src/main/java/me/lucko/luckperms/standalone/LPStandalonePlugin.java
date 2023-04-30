@@ -43,7 +43,6 @@ import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
 import me.lucko.luckperms.standalone.stub.StandaloneContextManager;
 import me.lucko.luckperms.standalone.stub.StandaloneDummyConnectionListener;
 import me.lucko.luckperms.standalone.stub.StandaloneEventBus;
-
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 

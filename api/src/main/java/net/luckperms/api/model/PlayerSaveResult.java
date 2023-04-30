@@ -26,7 +26,6 @@
 package net.luckperms.api.model;
 
 import net.luckperms.api.model.user.UserManager;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.Unmodifiable;

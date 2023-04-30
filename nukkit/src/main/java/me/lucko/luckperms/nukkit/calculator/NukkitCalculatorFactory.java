@@ -37,7 +37,6 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import me.lucko.luckperms.nukkit.context.NukkitContextManager;
-
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;

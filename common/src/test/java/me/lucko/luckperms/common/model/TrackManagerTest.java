@@ -26,10 +26,8 @@
 package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.model.manager.track.StandardTrackManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

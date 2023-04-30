@@ -37,7 +37,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryOptions;

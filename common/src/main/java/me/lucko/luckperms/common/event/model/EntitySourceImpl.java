@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.event.model;
 
 import net.luckperms.api.event.source.EntitySource;
 import net.luckperms.api.platform.PlatformEntity;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class EntitySourceImpl implements EntitySource {

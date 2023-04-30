@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.model;
 
 import net.luckperms.api.model.PermissionHolder.Identifier;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.calculator.processor.AbstractOverrideWildcardPr
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
-
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 

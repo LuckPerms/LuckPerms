@@ -28,7 +28,6 @@ package net.luckperms.api.event.log;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;

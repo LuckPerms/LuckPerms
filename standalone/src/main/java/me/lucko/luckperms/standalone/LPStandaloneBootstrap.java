@@ -33,9 +33,7 @@ import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
-
 import net.luckperms.api.platform.Platform;
-
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.nio.file.Path;

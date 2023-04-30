@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.webeditor.store;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.webeditor.socket.CryptographyUtils;

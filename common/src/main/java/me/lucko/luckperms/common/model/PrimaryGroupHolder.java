@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.inheritance.InheritanceGraph;
-
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryOptions;
 

@@ -26,10 +26,8 @@
 package me.lucko.luckperms.common.calculator.processor;
 
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.node.AbstractNode;
-
 import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
 

@@ -27,7 +27,6 @@ package me.lucko.luckperms.velocity.util;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.ResultedEvent.ComponentResult;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 

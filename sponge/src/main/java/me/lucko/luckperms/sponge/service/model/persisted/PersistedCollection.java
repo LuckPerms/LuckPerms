@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
@@ -39,10 +38,8 @@ import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.util.Tristate;
-
 import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.Locale;

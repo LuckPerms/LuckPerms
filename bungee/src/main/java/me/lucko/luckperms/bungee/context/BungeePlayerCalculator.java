@@ -28,7 +28,6 @@ package me.lucko.luckperms.bungee.context;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
-
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
@@ -41,7 +40,6 @@ import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BungeePlayerCalculator implements ContextCalculator<ProxiedPlayer>, Listener {

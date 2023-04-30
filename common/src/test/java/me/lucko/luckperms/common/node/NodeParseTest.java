@@ -32,7 +32,6 @@ import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.RegexPermission;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.node.types.Weight;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;

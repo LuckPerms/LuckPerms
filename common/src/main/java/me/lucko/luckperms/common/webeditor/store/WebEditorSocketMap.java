@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.webeditor.store;
 
 import com.github.benmanes.caffeine.cache.Cache;
-
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;

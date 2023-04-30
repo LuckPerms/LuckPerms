@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.cacheddata;
 
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
-
 import net.luckperms.api.cacheddata.CachedData;
 import net.luckperms.api.query.QueryOptions;
 

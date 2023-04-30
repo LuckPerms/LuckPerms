@@ -28,13 +28,11 @@ package me.lucko.luckperms.common.model;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.model.nodemap.NodeMapMutable;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.query.QueryOptionsBuilderImpl;
 import me.lucko.luckperms.common.util.Difference;
-
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
@@ -45,7 +43,6 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -29,9 +29,7 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.processor.AbstractOverrideWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-
 import net.luckperms.api.util.Tristate;
-
 import org.bukkit.permissions.Permission;
 
 /**

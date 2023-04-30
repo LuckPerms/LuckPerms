@@ -26,16 +26,13 @@
 package me.lucko.luckperms.sponge.listeners;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.event.LuckPermsEventListener;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
-
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 

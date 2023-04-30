@@ -27,7 +27,6 @@ package me.lucko.luckperms.bukkit.inject.permissible;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.calculator.OpProcessor;
 import me.lucko.luckperms.bukkit.calculator.PermissionMapProcessor;
@@ -36,10 +35,8 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.Permission;

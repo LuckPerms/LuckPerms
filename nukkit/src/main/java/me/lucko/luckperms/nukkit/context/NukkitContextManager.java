@@ -25,20 +25,17 @@
 
 package me.lucko.luckperms.nukkit.context;
 
+import cn.nukkit.Player;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
-
-import cn.nukkit.Player;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;

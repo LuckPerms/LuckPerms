@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.context.manager;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import net.luckperms.api.query.QueryOptions;
 
 public final class InlineQueryOptionsSupplier<T> implements QueryOptionsSupplier {

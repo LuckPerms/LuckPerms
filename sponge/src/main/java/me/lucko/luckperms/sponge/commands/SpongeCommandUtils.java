@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
-
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.util.Tristate;

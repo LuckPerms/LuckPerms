@@ -26,7 +26,6 @@
 package me.lucko.luckperms.velocity;
 
 import com.velocitypowered.api.plugin.PluginContainer;
-
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 

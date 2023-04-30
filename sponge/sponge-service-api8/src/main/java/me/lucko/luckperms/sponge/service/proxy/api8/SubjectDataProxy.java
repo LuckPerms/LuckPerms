@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.service.proxy.api8;
 
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.common.util.CompletableFutures;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
@@ -35,7 +34,6 @@ import me.lucko.luckperms.sponge.service.model.LPProxiedServiceObject;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.context.Context;

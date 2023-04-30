@@ -28,13 +28,11 @@ package me.lucko.luckperms.forge.util;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-
 import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.forge.capabilities.UserCapability;
 import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
-
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;

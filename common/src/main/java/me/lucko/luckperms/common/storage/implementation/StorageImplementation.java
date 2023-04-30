@@ -33,12 +33,10 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;

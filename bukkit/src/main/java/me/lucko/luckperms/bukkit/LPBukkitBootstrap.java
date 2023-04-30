@@ -33,9 +33,7 @@ import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
-
 import net.luckperms.api.platform.Platform;
-
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;

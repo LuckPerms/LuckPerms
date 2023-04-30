@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.messaging;
 
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.model.User;
-
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;

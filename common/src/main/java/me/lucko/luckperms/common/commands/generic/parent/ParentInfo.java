@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.Collections;

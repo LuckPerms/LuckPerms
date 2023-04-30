@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.common.bulkupdate.comparison.Comparison;
 import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
@@ -47,7 +46,6 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.node.Node;
 
 import java.util.ArrayList;

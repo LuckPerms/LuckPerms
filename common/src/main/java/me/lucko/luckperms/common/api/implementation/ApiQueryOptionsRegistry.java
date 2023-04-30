@@ -26,10 +26,8 @@
 package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
-
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.query.QueryOptionsRegistry;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class ApiQueryOptionsRegistry implements QueryOptionsRegistry {

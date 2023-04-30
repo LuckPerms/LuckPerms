@@ -28,7 +28,6 @@ package net.luckperms.api.query.dataorder;
 import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.query.OptionKey;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Comparator;

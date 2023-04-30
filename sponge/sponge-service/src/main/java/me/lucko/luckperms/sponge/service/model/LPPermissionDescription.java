@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.service.model;
 
 import net.kyori.adventure.text.Component;
-
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.plugin.PluginContainer;
 

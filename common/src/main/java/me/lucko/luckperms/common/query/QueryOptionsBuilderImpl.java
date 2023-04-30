@@ -26,14 +26,12 @@
 package me.lucko.luckperms.common.query;
 
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
-
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

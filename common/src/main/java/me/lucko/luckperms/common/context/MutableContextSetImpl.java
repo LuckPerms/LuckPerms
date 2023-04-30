@@ -31,13 +31,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
-
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;

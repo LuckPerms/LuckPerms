@@ -28,7 +28,6 @@ package me.lucko.luckperms.bungee;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
-
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Command;

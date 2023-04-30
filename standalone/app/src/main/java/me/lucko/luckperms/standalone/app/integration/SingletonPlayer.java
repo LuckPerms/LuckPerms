@@ -27,7 +27,6 @@ package me.lucko.luckperms.standalone.app.integration;
 
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
 import me.lucko.luckperms.standalone.app.utils.AnsiUtils;
-
 import net.kyori.adventure.text.Component;
 
 import java.util.UUID;

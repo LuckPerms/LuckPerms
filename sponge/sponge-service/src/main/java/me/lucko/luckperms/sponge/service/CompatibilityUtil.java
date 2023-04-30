@@ -26,16 +26,13 @@
 package me.lucko.luckperms.sponge.service;
 
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.context.ContextImpl;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.sponge.service.context.ForwardingContextSet;
 import me.lucko.luckperms.sponge.service.context.ForwardingImmutableContextSet;
-
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.util.Tristate;
-
 import org.spongepowered.api.service.context.Context;
 
 import java.util.Map;

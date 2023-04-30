@@ -26,7 +26,6 @@
 package me.lucko.luckperms.standalone;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.dependencies.DependencyManagerImpl;

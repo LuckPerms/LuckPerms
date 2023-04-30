@@ -25,17 +25,15 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.common.locale.TranslationManager;
-import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.sender.SenderFactory;
-
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.luckperms.api.util.Tristate;
-
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
+import me.lucko.luckperms.common.locale.TranslationManager;
+import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.sender.SenderFactory;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.luckperms.api.util.Tristate;
 
 import java.util.Locale;
 import java.util.UUID;

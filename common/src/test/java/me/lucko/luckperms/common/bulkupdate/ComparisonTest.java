@@ -26,13 +26,8 @@
 package me.lucko.luckperms.common.bulkupdate;
 
 import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
-
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.event;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.api.implementation.ApiPermissionHolder;
 import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.UserCachedDataManager;
@@ -42,7 +41,6 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Difference;
-
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.cause.CreationCause;
@@ -95,7 +93,6 @@ import net.luckperms.api.extension.Extension;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;

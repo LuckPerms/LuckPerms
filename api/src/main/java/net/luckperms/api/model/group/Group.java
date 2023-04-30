@@ -27,7 +27,6 @@ package net.luckperms.api.model.group;
 
 import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

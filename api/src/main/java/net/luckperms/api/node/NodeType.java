@@ -34,7 +34,6 @@ import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.RegexPermissionNode;
 import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

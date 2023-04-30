@@ -26,7 +26,6 @@
 package me.lucko.luckperms.bukkit.vault;
 
 import com.google.common.base.Strings;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
@@ -39,7 +38,6 @@ import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;

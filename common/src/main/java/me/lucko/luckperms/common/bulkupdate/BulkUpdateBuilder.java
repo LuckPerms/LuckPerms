@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.bulkupdate;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.bulkupdate.action.Action;
 import me.lucko.luckperms.common.bulkupdate.query.Query;
 

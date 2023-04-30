@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.model;
 
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

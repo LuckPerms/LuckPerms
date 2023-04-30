@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.calculator;
 
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
-
 import net.luckperms.api.query.QueryOptions;
 
 public class FixedTypeDefaultsProcessor extends TypeDefaultsProcessor {

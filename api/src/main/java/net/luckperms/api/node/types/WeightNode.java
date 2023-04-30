@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

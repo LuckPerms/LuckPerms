@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.verbose;
 
 import me.lucko.luckperms.common.verbose.expression.BooleanExpressionCompiler;
 import me.lucko.luckperms.common.verbose.expression.BooleanExpressionCompiler.VariableEvaluator;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 

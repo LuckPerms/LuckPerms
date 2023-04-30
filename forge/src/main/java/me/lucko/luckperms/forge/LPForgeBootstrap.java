@@ -26,7 +26,6 @@
 package me.lucko.luckperms.forge;
 
 import com.mojang.authlib.GameProfile;
-
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
@@ -36,7 +35,6 @@ import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.forge.util.ForgeEventBusFacade;
-
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -49,7 +47,6 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.forgespi.language.IModInfo;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 

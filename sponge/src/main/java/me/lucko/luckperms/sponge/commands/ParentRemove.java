@@ -36,7 +36,6 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-
 import net.luckperms.api.context.ImmutableContextSet;
 
 public class ParentRemove extends ChildCommand<LPSubjectData> {

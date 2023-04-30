@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.storage.misc;
 
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @SuppressWarnings("deprecation")

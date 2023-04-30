@@ -36,9 +36,7 @@ import me.lucko.luckperms.sponge.service.proxy.api8.PermissionServiceProxy;
 import me.lucko.luckperms.sponge.service.proxy.api8.SubjectCollectionProxy;
 import me.lucko.luckperms.sponge.service.proxy.api8.SubjectDataProxy;
 import me.lucko.luckperms.sponge.service.proxy.api8.SubjectProxy;
-
 import net.luckperms.api.model.data.DataType;
-
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;

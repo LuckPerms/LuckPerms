@@ -27,11 +27,9 @@ package me.lucko.luckperms.common.node;
 
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.node.types.Permission;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
-
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

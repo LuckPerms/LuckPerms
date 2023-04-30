@@ -26,7 +26,6 @@
 package me.lucko.luckperms.fabric.listeners;
 
 import com.mojang.authlib.GameProfile;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -36,7 +35,6 @@ import me.lucko.luckperms.fabric.FabricSenderFactory;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.mixin.ServerLoginNetworkHandlerAccessor;
 import me.lucko.luckperms.fabric.model.MixinUser;
-
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchronizer;

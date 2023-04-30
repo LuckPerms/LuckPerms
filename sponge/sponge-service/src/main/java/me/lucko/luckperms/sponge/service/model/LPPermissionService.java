@@ -27,15 +27,12 @@ package me.lucko.luckperms.sponge.service.model;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.PermissionAndContextService;
 import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.ImmutableContextSet;
-
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.context.ContextCalculator;
