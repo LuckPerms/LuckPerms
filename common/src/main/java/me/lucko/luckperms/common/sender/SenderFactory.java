@@ -63,6 +63,10 @@ public abstract class SenderFactory<P extends LuckPermsPlugin, T> implements Aut
 
     protected abstract boolean isConsole(T sender);
 
+    protected boolean consoleHasAllPermissions() {
+        return true;
+    }
+
     public final Sender wrap(T sender) {
         Objects.requireNonNull(sender, "sender");
         return new AbstractSender<>(this.plugin, this, sender);

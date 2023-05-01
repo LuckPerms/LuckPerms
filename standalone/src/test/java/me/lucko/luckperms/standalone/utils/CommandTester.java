@@ -27,15 +27,17 @@ package me.lucko.luckperms.standalone.utils;
 
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
 import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
+import me.lucko.luckperms.standalone.utils.TestPluginBootstrap.TestPlugin;
+import me.lucko.luckperms.standalone.utils.TestPluginBootstrap.TestSenderFactory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.luckperms.api.util.Tristate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,17 +45,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Utility for testing LuckPerms commands with BDD-like given/when/then assertions.
  */
-public final class CommandTester implements Consumer<Component> {
+public final class CommandTester implements Consumer<Component>, Function<String, Tristate> {
 
     private static final Logger LOGGER = LogManager.getLogger(CommandTester.class);
+
+    /** The test plugin */
+    private final TestPlugin plugin;
 
     /** The LuckPerms command executor */
     private final CommandExecutor executor;
 
+    /** The current map of permissions held by the fake executor */
+    private Map<String, Tristate> permissions = null;
+
+    /** A set of the permissions that have been checked for */
+    private final Set<String> checkedPermissions = Collections.synchronizedSet(new HashSet<>());
+
     /** A buffer of messages received by the test tool */
     private final List<Component> messageBuffer = Collections.synchronizedList(new ArrayList<>());
 
-    public CommandTester(CommandExecutor executor) {
+    public CommandTester(TestPlugin plugin, CommandExecutor executor) {
+        this.plugin = plugin;
         this.executor = executor;
     }
 
@@ -68,18 +80,65 @@ public final class CommandTester implements Consumer<Component> {
     }
 
     /**
+     * Perform a permission check for the fake executor
+     *
+     * @param permission the permission
+     * @return the result of the permission check
+     */
+    @Override
+    public Tristate apply(String permission) {
+        if (this.permissions == null) {
+            this.checkedPermissions.add(permission);
+            return Tristate.TRUE;
+        } else {
+            Tristate result = this.permissions.getOrDefault(permission, Tristate.UNDEFINED);
+            if (result != Tristate.UNDEFINED) {
+                this.checkedPermissions.add(permission);
+            }
+            return result;
+        }
+    }
+
+    /**
+     * Marks that the fake executor should have all permissions
+     *
+     * @return this
+     */
+    public CommandTester givenHasAllPermissions() {
+        this.permissions = null;
+        return this;
+    }
+
+    /**
+     * Marks that the fake executor should have the given permissions
+     *
+     * @return this
+     */
+    public CommandTester givenHasPermissions(String... permissions) {
+        this.permissions = new HashMap<>();
+        for (String permission : permissions) {
+            this.permissions.put(permission, Tristate.TRUE);
+        }
+        return this;
+    }
+
+    /**
      * Execute a command using the {@link CommandExecutor} and capture output to this test instance.
      *
      * @param command the command to run
      * @return this
      */
-    public CommandTester givenCommand(String command) {
+    public CommandTester whenRunCommand(String command) {
         LOGGER.info("Executing test command: " + command);
 
+        TestSenderFactory senderFactory = this.plugin.getSenderFactory();
+        senderFactory.setPermissionChecker(this);
         SingletonPlayer.INSTANCE.addMessageSink(this);
-        this.executor.execute(command).join();
-        SingletonPlayer.INSTANCE.removeMessageSink(this);
 
+        this.executor.execute(command).join();
+
+        SingletonPlayer.INSTANCE.removeMessageSink(this);
+        senderFactory.resetPermissionChecker();
         return this;
     }
 
@@ -96,6 +155,10 @@ public final class CommandTester implements Consumer<Component> {
 
         assertEquals(expected.trim(), actual.trim());
 
+        if (this.permissions != null) {
+            assertEquals(this.checkedPermissions, this.permissions.keySet());
+        }
+
         return this.clearMessageBuffer();
     }
 
@@ -106,6 +169,7 @@ public final class CommandTester implements Consumer<Component> {
      */
     public CommandTester clearMessageBuffer() {
         this.messageBuffer.clear();
+        this.checkedPermissions.clear();
         return this;
     }
 
@@ -127,14 +191,20 @@ public final class CommandTester implements Consumer<Component> {
      * @return this
      */
     public CommandTester outputTest(String cmd) {
-        System.out.printf(".executeCommand(\"%s\")%n", cmd);
-        this.givenCommand(cmd);
+        this.whenRunCommand(cmd);
+
+        String checkedPermissions = this.checkedPermissions.stream()
+                .map(s -> "\"" + s + "\"")
+                .collect(Collectors.joining(", "));
+
+        System.out.printf(".givenHasPermissions(%s)%n", checkedPermissions);
+        System.out.printf(".whenRunCommand(\"%s\")%n", cmd);
 
         List<String> render = this.renderBuffer();
         if (render.size() == 1) {
-            System.out.printf(".expect(\"%s\")%n", render.get(0));
+            System.out.printf(".thenExpect(\"%s\")%n", render.get(0));
         } else {
-            System.out.println(".expect(\"\"\"");
+            System.out.println(".thenExpect(\"\"\"");
             for (String s : render) {
                 System.out.println("        " + s);
             }

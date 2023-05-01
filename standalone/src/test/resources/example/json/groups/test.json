@@ -1,0 +1,45 @@
+{
+  "name": "test",
+  "permissions": [
+    {
+      "permission": "group.default",
+      "value": false,
+      "expiry": 2532384000,
+      "context": {
+        "server": "foo",
+        "test": "test",
+        "world": "bar"
+      }
+    },
+    {
+      "permission": "test",
+      "value": false,
+      "expiry": 2532384000,
+      "context": {
+        "server": "foo",
+        "test": "test",
+        "world": "bar"
+      }
+    },
+    {
+      "permission": "example.permission",
+      "value": true
+    }
+  ],
+  "prefixes": [
+    {
+      "prefix": "TEST",
+      "priority": 100,
+      "context": {
+        "server": "foo",
+        "world": "bar"
+      }
+    }
+  ],
+  "meta": [
+    {
+      "key": "foo",
+      "value": "bar"
+    }
+  ]
+}

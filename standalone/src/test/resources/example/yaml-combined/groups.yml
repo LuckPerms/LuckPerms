@@ -1,0 +1,28 @@
+default:
+  permissions: []
+test:
+  permissions:
+  - group.default:
+      value: false
+      expiry: 2532384000
+      context:
+        server: foo
+        test: test
+        world: bar
+  - test:
+      value: false
+      expiry: 2532384000
+      context:
+        server: foo
+        test: test
+        world: bar
+  - example.permission
+  prefixes:
+  - TEST:
+      priority: 100
+      context:
+        server: foo
+        world: bar
+  meta:
+  - foo:
+      value: bar
