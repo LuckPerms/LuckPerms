@@ -156,8 +156,19 @@ public class RabbitMQMessenger implements Messenger {
                 this.plugin.getLogger().info("RabbitMQ pubsub connection re-established");
             }
             return true;
-        } catch (Exception ignored) {
-            return false;
+        } catch (Exception e) {
+            if (firstStartup) {
+                this.plugin.getLogger().warn("Unable to connect to RabbitMQ, waiting for 5 seconds then retrying...", e);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+                return checkAndReopenConnection(false);
+            } else {
+                this.plugin.getLogger().severe("Unable to connect to RabbitMQ", e);
+                return false;
+            }
         }
     }
 
