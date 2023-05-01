@@ -141,8 +141,8 @@ public enum Dependency {
     MARIADB_DRIVER(
             "org{}mariadb{}jdbc",
             "mariadb-java-client",
-            "2.7.2",
-            "o/Z3bfCELPZefxWFFQEtUwfalJ9mBCKC4e5EdN0Z9Eg=",
+            "3.1.3",
+            "ESl+5lYkJsScgTh8hgFTy8ExxMPQQkktT20tl6s6HKU=",
             Relocation.of("mariadb", "org{}mariadb{}jdbc")
     ),
     MYSQL_DRIVER(
