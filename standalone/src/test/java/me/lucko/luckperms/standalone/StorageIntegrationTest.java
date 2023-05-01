@@ -39,6 +39,7 @@ import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.GenericContainer;
@@ -55,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-//@Tag("docker")
+@Tag("docker")
 public class StorageIntegrationTest {
 
     private static final Node TEST_PERMISSION = Permission.builder()
