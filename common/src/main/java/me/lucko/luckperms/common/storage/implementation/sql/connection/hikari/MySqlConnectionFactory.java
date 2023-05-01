@@ -65,17 +65,7 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
         // Calling Class.forName("com.mysql.cj.jdbc.Driver") is enough to call the static initializer
         // which makes our driver available in DriverManager. We don't want that, so unregister it after
         // the pool has been setup.
-        Enumeration<Driver> drivers = DriverManager.getDrivers();
-        while (drivers.hasMoreElements()) {
-            Driver driver = drivers.nextElement();
-            if (driver.getClass().getName().equals("com.mysql.cj.jdbc.Driver")) {
-                try {
-                    DriverManager.deregisterDriver(driver);
-                } catch (SQLException e) {
-                    // ignore
-                }
-            }
-        }
+        deregisterDriver("com.mysql.cj.jdbc.Driver");
     }
 
     @Override
