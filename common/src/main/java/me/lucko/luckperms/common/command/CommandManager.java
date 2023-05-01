@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.command;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import me.lucko.luckperms.common.command.abstraction.Command;
@@ -144,6 +145,11 @@ public class CommandManager {
 
     public TabCompletions getTabCompletions() {
         return this.tabCompletions;
+    }
+
+    @VisibleForTesting
+    public Map<String, Command<?>> getMainCommands() {
+        return this.mainCommands;
     }
 
     public CompletableFuture<Void> executeCommand(Sender sender, String label, List<String> args) {

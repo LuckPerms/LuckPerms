@@ -142,4 +142,8 @@ public class ImportCommand extends SingleCommand {
         });
     }
 
+    public boolean isRunning() {
+        return this.running.get();
+    }
+
 }

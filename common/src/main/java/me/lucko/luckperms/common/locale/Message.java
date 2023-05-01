@@ -1938,13 +1938,25 @@ public interface Message {
             .append(text(':'))
     );
 
-    Args2<String, Component> LIST_TRACKS_ENTRY = (name, path) -> text()
-            // "&a{}: {}"
-            .color(GREEN)
-            .append(text(name))
-            .append(text(": "))
-            .append(path)
-            .build();
+    Args3<String, ContextSet, Component> LIST_TRACKS_ENTRY = (name, contextSet, path) -> join(newline(),
+            // "&3> &a{}: {}"
+            // "&7  ({}&7)"
+            text()
+                    .append(text('>', DARK_AQUA))
+                    .append(space())
+                    .append(text().color(GREEN)
+                            .append(text(name))
+                            .append(text(": "))
+                            .append(formatContextSetBracketed(contextSet, empty()))
+                            .build()
+                    ),
+            text()
+                    .color(GRAY)
+                    .append(text("  "))
+                    .append(OPEN_BRACKET)
+                    .append(path)
+                    .append(CLOSE_BRACKET)
+    );
 
     Args1<PermissionHolder> LIST_TRACKS_EMPTY = holder -> prefixed(translatable()
             // "&b{}&a is not on any tracks."

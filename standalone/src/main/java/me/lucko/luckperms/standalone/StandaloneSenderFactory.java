@@ -53,7 +53,7 @@ public class StandaloneSenderFactory extends SenderFactory<LPStandalonePlugin, S
     @Override
     protected void sendMessage(SingletonPlayer sender, Component message) {
         Component rendered = TranslationManager.render(message, Locale.getDefault());
-        sender.printStdout(rendered);
+        sender.sendMessage(rendered);
     }
 
     @Override

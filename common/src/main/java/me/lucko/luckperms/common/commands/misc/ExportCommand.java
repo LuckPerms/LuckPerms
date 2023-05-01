@@ -122,4 +122,8 @@ public class ExportCommand extends SingleCommand {
         });
     }
 
+    public boolean isRunning() {
+        return this.running.get();
+    }
+
 }
