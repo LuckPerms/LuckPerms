@@ -25,8 +25,11 @@
 
 package me.lucko.luckperms.minestom.listener;
 
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import me.lucko.luckperms.minestom.LPMinestomPlugin;
 import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.node.NodeAddEvent;
 import net.luckperms.api.event.node.NodeClearEvent;
@@ -34,6 +37,7 @@ import net.luckperms.api.event.node.NodeRemoveEvent;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.group.GroupManager;
 import net.luckperms.api.model.user.User;
+import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
@@ -100,18 +104,35 @@ public class PlayerNodeChangeListener {
         if(player == null) {
             throw new IllegalArgumentException("Player must be online");
         }
-        setPermissionsFromNodes(nodes, player, luckPerms.getGroupManager());
+        setPermissionsFromNodes(nodes, player,  luckPerms.getGroupManager());
     }
 
     public static void setPermissionsFromNodes(Collection<Node> nodes, Player player, GroupManager groupManager) {
-        System.out.println("[LuckPerms] Adding permissions to player: " + player.getUsername());
+        UserManager userManager = LuckPermsProvider.get().getUserManager();
+        UUID uuid = player.getUuid();
+        User user;
+
+        if (userManager.isLoaded(uuid)) {
+            user = userManager.getUser(uuid);
+        } else {
+            try {
+                user = userManager.loadUser(uuid).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        Set<Permission> permissions = player.getAllPermissions();
+        for (Permission permission : permissions) {
+            player.removePermission(permission);
+        }
+
         for (Node node : nodes) {
             if (node instanceof PermissionNode) {
                 String permission = ((PermissionNode) node).getPermission();
-                if(node.getValue()) {
+                boolean hasPermission = user.getCachedData().getPermissionData().checkPermission(permission).asBoolean();
+                if (hasPermission) {
                     player.addPermission(new Permission(permission));
-                } else {
-                    player.removePermission(new Permission(permission));
                 }
 
             } else if (node instanceof InheritanceNode) {
@@ -119,15 +140,16 @@ public class PlayerNodeChangeListener {
                 Group group = groupManager.getGroup(inheritanceNode.getGroupName());
                 Collection<PermissionNode> permissionNodes = group.getNodes(NodeType.PERMISSION);
                 for (PermissionNode permissionNode : permissionNodes) {
-                    if(node.getValue()) {
+                    String permission = permissionNode.getPermission();
+                    boolean hasPermission = user.getCachedData().getPermissionData().checkPermission(permission).asBoolean();
+                    if (hasPermission) {
                         player.addPermission(new Permission(permissionNode.getPermission()));
-                    } else {
-                        player.removePermission(new Permission(permissionNode.getPermission()));
                     }
                 }
 
             }
         }
+
         player.refreshCommands();
     }
 
