@@ -83,10 +83,9 @@ public class TreeNode {
         return a;
     }
     public @Nullable TreeNode tryInsert(String s) {
-        Map<String, TreeNode> childMap = getChildMap();
-        if (!allowInsert(this)) {
+        if (!allowInsert(this))
             return null;
-        }
+        Map<String, TreeNode> childMap = getChildMap();
         return childMap.computeIfAbsent(s, x -> new TreeNode(this));
     }
 
