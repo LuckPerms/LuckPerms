@@ -27,11 +27,9 @@ package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.actionlog.ActionLog;
 import net.luckperms.api.actionlog.ActionLogger;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.CompletableFuture;

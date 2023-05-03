@@ -26,15 +26,12 @@
 package me.lucko.luckperms.common.extension;
 
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.classpath.URLClassLoaderAccess;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
-
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.extension.Extension;
 import net.luckperms.api.extension.ExtensionManager;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.BufferedReader;

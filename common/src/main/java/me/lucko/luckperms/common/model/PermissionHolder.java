@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.Iterables;
-
 import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
@@ -40,7 +39,6 @@ import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.query.DataSelector;
 import me.lucko.luckperms.common.util.Difference;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
@@ -54,7 +52,6 @@ import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.model.nodemap;
 
 import com.google.common.collect.ImmutableCollection;
-
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;

@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.service;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.util.Predicates;
@@ -48,10 +47,8 @@ import me.lucko.luckperms.sponge.service.model.persisted.DefaultsCollection;
 import me.lucko.luckperms.sponge.service.model.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.model.persisted.SubjectStorage;
 import me.lucko.luckperms.sponge.service.reference.SubjectReferenceFactory;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.ImmutableContextSet;
-
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.permission.SubjectDataUpdateEvent;

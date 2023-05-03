@@ -46,7 +46,6 @@ import net.luckperms.api.platform.PluginMetadata;
 import net.luckperms.api.query.QueryOptionsRegistry;
 import net.luckperms.api.track.Track;
 import net.luckperms.api.track.TrackManager;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.Internal;
 

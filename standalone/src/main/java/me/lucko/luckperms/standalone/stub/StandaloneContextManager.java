@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.standalone.LPStandalonePlugin;
 import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryOptions;
 

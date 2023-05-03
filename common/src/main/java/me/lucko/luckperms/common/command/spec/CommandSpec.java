@@ -26,8 +26,8 @@
 package me.lucko.luckperms.common.command.spec;
 
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 
 import java.util.Arrays;
 import java.util.List;
@@ -418,7 +418,7 @@ public enum CommandSpec {
         this.args = args.length == 0 ? null : Arrays.stream(args)
                 .map(builder -> {
                     String key = builder.id.replace(".", "").replace(' ', '-');
-                    Component description = Component.translatable("luckperms.usage." + key() + ".argument." + key);
+                    TranslatableComponent description = Component.translatable("luckperms.usage." + key() + ".argument." + key);
                     return new Argument(builder.name, builder.required, description);
                 })
                 .collect(ImmutableCollectors.toList());
@@ -428,7 +428,7 @@ public enum CommandSpec {
         this(null, args);
     }
 
-    public Component description() {
+    public TranslatableComponent description() {
         return Component.translatable("luckperms.usage." + this.key() + ".description");
     }
 

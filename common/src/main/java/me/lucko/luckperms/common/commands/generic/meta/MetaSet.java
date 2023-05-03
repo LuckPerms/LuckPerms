@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
@@ -65,6 +64,11 @@ public class MetaSet extends GenericChildCommand {
         String key = args.get(0);
         String value = args.get(1);
         MutableContextSet context = args.getContextOrDefault(2, plugin);
+
+        if (key.isEmpty()) {
+            Message.INVALID_META_KEY_EMPTY.send(sender);
+            return;
+        }
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||
                 ArgumentPermissions.checkGroup(plugin, sender, target, context) ||

@@ -28,16 +28,6 @@ package me.lucko.luckperms.common.messaging.nats;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.util.Throwing;
-
-import net.luckperms.api.messenger.IncomingMessageConsumer;
-import net.luckperms.api.messenger.Messenger;
-import net.luckperms.api.messenger.message.OutgoingMessage;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import io.nats.client.Connection;
 import io.nats.client.Dispatcher;
 import io.nats.client.Message;
@@ -45,6 +35,12 @@ import io.nats.client.MessageHandler;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import io.nats.client.Options.Builder;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.Throwing;
+import net.luckperms.api.messenger.IncomingMessageConsumer;
+import net.luckperms.api.messenger.Messenger;
+import net.luckperms.api.messenger.message.OutgoingMessage;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Duration;
 

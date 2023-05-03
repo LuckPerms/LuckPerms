@@ -26,9 +26,7 @@
 package me.lucko.luckperms.common.config.generic.adapter;
 
 import com.google.common.base.Splitter;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 

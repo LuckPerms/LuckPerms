@@ -28,7 +28,6 @@ package me.lucko.luckperms.standalone;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
 
@@ -54,7 +53,7 @@ public class StandaloneSenderFactory extends SenderFactory<LPStandalonePlugin, S
     @Override
     protected void sendMessage(SingletonPlayer sender, Component message) {
         Component rendered = TranslationManager.render(message, Locale.getDefault());
-        sender.printStdout(rendered);
+        sender.sendMessage(rendered);
     }
 
     @Override

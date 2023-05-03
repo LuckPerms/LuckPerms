@@ -28,9 +28,7 @@ package me.lucko.luckperms.common.bulkupdate;
 import me.lucko.luckperms.common.bulkupdate.action.Action;
 import me.lucko.luckperms.common.bulkupdate.query.Query;
 import me.lucko.luckperms.common.model.HolderType;
-
 import net.luckperms.api.node.Node;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashSet;

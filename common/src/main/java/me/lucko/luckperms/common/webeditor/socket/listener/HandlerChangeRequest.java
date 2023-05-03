@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.webeditor.socket.listener;
 
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.http.UnsuccessfulRequestException;
 import me.lucko.luckperms.common.locale.Message;

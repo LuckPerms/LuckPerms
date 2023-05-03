@@ -26,12 +26,9 @@
 package me.lucko.luckperms.common.api.implementation;
 
 import com.google.common.base.Preconditions;
-
 import me.lucko.luckperms.common.cacheddata.GroupCachedDataManager;
 import me.lucko.luckperms.common.model.Group;
-
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

@@ -26,12 +26,10 @@
 package me.lucko.luckperms.common.command.tabcomplete;
 
 import com.google.common.base.Splitter;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.treeview.TreeNode;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.context.ImmutableContextSet;
 
 import java.util.ArrayList;

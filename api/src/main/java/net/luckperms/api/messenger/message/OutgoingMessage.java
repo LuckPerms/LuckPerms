@@ -26,7 +26,6 @@
 package net.luckperms.api.messenger.message;
 
 import net.luckperms.api.messenger.IncomingMessageConsumer;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

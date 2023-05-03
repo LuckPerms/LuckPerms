@@ -34,9 +34,7 @@ import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Uuids;
-
 import net.luckperms.api.node.Node;
-
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 

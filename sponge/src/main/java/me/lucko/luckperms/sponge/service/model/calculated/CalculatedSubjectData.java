@@ -28,7 +28,6 @@ package me.lucko.luckperms.sponge.service.model.calculated;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.comparator.ContextSetComparator;
 import me.lucko.luckperms.common.model.InheritanceOrigin;
@@ -39,7 +38,6 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
-
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
@@ -49,7 +47,6 @@ import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PermissionNode;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-
 import org.spongepowered.api.service.permission.SubjectData;
 
 import java.util.HashMap;

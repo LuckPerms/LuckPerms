@@ -26,9 +26,7 @@
 package me.lucko.luckperms.common.context;
 
 import me.lucko.luckperms.common.context.comparator.ContextComparator;
-
 import net.luckperms.api.context.Context;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class ContextImpl implements Context, Comparable<Context> {

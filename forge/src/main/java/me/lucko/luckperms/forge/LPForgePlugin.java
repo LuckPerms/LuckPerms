@@ -50,7 +50,6 @@ import me.lucko.luckperms.forge.listeners.ForgeConnectionListener;
 import me.lucko.luckperms.forge.listeners.ForgePlatformListener;
 import me.lucko.luckperms.forge.messaging.ForgeMessagingFactory;
 import me.lucko.luckperms.forge.service.ForgePermissionHandlerListener;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;

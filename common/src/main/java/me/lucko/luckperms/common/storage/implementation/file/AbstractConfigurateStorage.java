@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.file;
 
 import com.google.common.collect.Iterables;
-
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
@@ -47,7 +46,6 @@ import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateL
 import me.lucko.luckperms.common.storage.implementation.file.loader.JsonLoader;
 import me.lucko.luckperms.common.storage.implementation.file.loader.YamlLoader;
 import me.lucko.luckperms.common.util.MoreFiles;
-
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -58,7 +56,6 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
-
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.Types;
 

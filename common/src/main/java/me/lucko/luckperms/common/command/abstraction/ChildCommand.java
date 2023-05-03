@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.command.spec.Argument;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.sender.Sender;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;

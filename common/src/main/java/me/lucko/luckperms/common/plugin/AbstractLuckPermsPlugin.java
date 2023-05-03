@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.config.generic.adapter.SystemPropertyConfigAdap
 import me.lucko.luckperms.common.context.calculator.ConfigurationContextCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.DependencyManagerImpl;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
@@ -63,9 +64,7 @@ import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
-
 import net.luckperms.api.LuckPerms;
-
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;
@@ -114,7 +113,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
      */
     public final void load() {
         // load dependencies
-        this.dependencyManager = new DependencyManager(this);
+        this.dependencyManager = createDependencyManager();
         this.dependencyManager.loadDependencies(getGlobalDependencies());
 
         // load translations
@@ -293,6 +292,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.httpClient.dispatcher().executorService().shutdown();
         this.httpClient.connectionPool().evictAll();
 
+        // close isolated loaders for non-relocated dependencies
+        getDependencyManager().close();
+
         // close classpath appender
         getBootstrap().getClassPathAppender().close();
 
@@ -300,6 +302,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     // hooks called during load
+
+    protected DependencyManager createDependencyManager() {
+        return new DependencyManagerImpl(this);
+    }
 
     protected Set<Dependency> getGlobalDependencies() {
         return EnumSet.of(

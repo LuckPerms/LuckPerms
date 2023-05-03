@@ -27,10 +27,8 @@ package me.lucko.luckperms.sponge.loader;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
-
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;

@@ -36,6 +36,12 @@ cd LuckPerms/
 
 You can find the output jars in the `loader/build/libs` or `build/libs` directories.
 
+## Tests
+There are some automated tests which run during each build.
+
+* Unit tests are defined in [`common/src/test`](https://github.com/LuckPerms/LuckPerms/tree/master/common/src/test)
+* Integration tests are defined in [`standalone/src/test`](https://github.com/LuckPerms/LuckPerms/tree/master/standalone/src/test).
+
 ## Contributing
 #### Pull Requests
 If you make any changes or improvements to the plugin which you think would be beneficial to others, please consider making a pull request to merge your changes back into the upstream project. (especially if your changes are bug fixes!)

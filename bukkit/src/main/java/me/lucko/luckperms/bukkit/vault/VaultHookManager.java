@@ -26,10 +26,8 @@
 package me.lucko.luckperms.bukkit.vault;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
-
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
 

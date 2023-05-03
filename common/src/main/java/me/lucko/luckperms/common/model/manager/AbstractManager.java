@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.model.manager;
 
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.common.cache.LoadingMap;
 
 import java.util.Collection;

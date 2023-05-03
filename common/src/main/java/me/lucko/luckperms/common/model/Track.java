@@ -26,13 +26,11 @@
 package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.api.implementation.ApiTrack;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -40,7 +38,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.track.DemotionResult;
 import net.luckperms.api.track.PromotionResult;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;

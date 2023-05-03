@@ -28,7 +28,6 @@ package net.luckperms.api.context;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.Internal;
 

@@ -27,7 +27,6 @@ package me.lucko.luckperms.bukkit.loader;
 
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
-
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BukkitLegacyLoaderPlugin extends JavaPlugin {

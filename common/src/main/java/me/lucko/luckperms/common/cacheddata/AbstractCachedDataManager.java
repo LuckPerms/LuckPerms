@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.CompletableFutures;
-
 import net.luckperms.api.cacheddata.CachedData;
 import net.luckperms.api.cacheddata.CachedDataManager;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -43,7 +42,6 @@ import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;

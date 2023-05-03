@@ -28,10 +28,8 @@ package me.lucko.luckperms.common.node.utils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
-
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;

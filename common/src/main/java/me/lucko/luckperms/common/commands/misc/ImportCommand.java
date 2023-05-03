@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.backup.Importer;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -141,6 +140,10 @@ public class ImportCommand extends SingleCommand {
                 this.running.set(false);
             }
         });
+    }
+
+    public boolean isRunning() {
+        return this.running.get();
     }
 
 }

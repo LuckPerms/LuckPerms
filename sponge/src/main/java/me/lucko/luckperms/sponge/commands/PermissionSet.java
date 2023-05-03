@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.util.Tristate;
 

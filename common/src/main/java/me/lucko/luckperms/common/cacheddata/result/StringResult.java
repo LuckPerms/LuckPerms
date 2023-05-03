@@ -29,7 +29,6 @@ import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.MetaNode;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.sender;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import net.luckperms.api.util.Tristate;
 
 import java.util.UUID;

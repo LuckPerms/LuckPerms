@@ -26,12 +26,10 @@
 package me.lucko.luckperms.common.verbose.event;
 
 import com.google.gson.JsonArray;
-
 import me.lucko.luckperms.common.cacheddata.result.StringResult;
 import me.lucko.luckperms.common.node.utils.NodeJsonSerializer;
 import me.lucko.luckperms.common.util.gson.JObject;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
-
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.Locale;

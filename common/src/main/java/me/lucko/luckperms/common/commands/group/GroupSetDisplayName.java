@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.node.types.DisplayName;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeType;
@@ -63,6 +62,11 @@ public class GroupSetDisplayName extends ChildCommand<Group> {
 
         String name = args.get(0);
         ImmutableContextSet context = args.getContextOrDefault(1, plugin).immutableCopy();
+
+        if (name.isEmpty()) {
+            Message.INVALID_DISPLAY_NAME_EMPTY.send(sender);
+            return;
+        }
 
         String previousName = target.normalData().nodesInContext(context).stream()
                 .filter(NodeType.DISPLAY_NAME::matches)

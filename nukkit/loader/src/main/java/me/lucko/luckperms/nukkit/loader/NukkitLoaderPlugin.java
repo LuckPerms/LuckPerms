@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.nukkit.loader;
 
+import cn.nukkit.plugin.PluginBase;
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
-
-import cn.nukkit.plugin.PluginBase;
 
 public class NukkitLoaderPlugin extends PluginBase {
     private static final String JAR_NAME = "luckperms-nukkit.jarinjar";

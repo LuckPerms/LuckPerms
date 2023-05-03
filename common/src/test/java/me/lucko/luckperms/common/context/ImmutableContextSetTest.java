@@ -25,27 +25,25 @@
 
 package me.lucko.luckperms.common.context;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ImmutableContextSet;
-
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ContextSetTest {
+public class ImmutableContextSetTest {
 
-    @Test
-    public void testImmutableBuilder() {
-        List<Consumer<ImmutableContextSet.Builder>> tests = ImmutableList.of(
+    private static Stream<Consumer<ImmutableContextSet.Builder>> testBuilder() {
+        return Stream.of(
                 builder -> {
                     builder.add("test", "a");
                     builder.add("test", "b");
@@ -73,29 +71,31 @@ public class ContextSetTest {
                     builder.add("test", "c");
                 }
         );
+    }
 
-        for (Consumer<ImmutableContextSet.Builder> action : tests) {
-            ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-            action.accept(builder);
-            ImmutableContextSet set = builder.build();
+    @ParameterizedTest
+    @MethodSource
+    public void testBuilder(Consumer<ImmutableContextSet.Builder> action) {
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
+        action.accept(builder);
+        ImmutableContextSet set = builder.build();
 
-            ImmutableSet<Context> expected = ImmutableSet.of(
-                    new ContextImpl("test", "a"),
-                    new ContextImpl("test", "b"),
-                    new ContextImpl("test", "c")
-            );
+        ImmutableSet<Context> expected = ImmutableSet.of(
+                new ContextImpl("test", "a"),
+                new ContextImpl("test", "b"),
+                new ContextImpl("test", "c")
+        );
 
-            assertEquals(expected, set.toSet());
-            assertEquals(3, set.size());
+        assertEquals(expected, set.toSet());
+        assertEquals(3, set.size());
 
-            assertTrue(set.contains("test", "a"));
-            assertTrue(set.contains("test", "b"));
-            assertTrue(set.contains("test", "c"));
-        }
+        assertTrue(set.contains("test", "a"));
+        assertTrue(set.contains("test", "b"));
+        assertTrue(set.contains("test", "c"));
     }
 
     @Test
-    public void testImmutableContains() {
+    public void testContains() {
         ImmutableContextSet set = new ImmutableContextSetImpl.BuilderImpl()
                 .add("test", "a")
                 .add("test", "a")
@@ -111,8 +111,18 @@ public class ContextSetTest {
         assertFalse(set.containsKey("aaa"));
     }
 
-    @Test
-    public void testImmutableContainsAll() {
+    private static Stream<Consumer<ImmutableContextSet.Builder>> testContainsAllTrue() {
+        return Stream.of(
+                builder -> builder.add("aaa", "a").add("bbb", "a"),
+                builder -> builder.add("aaa", "b").add("bbb", "a"),
+                builder -> builder.add("aaa", "c").add("bbb", "a"),
+                builder -> builder.add("aaa", "c").add("bbb", "b")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void testContainsAllTrue(Consumer<ImmutableContextSet.Builder> setup) {
         ImmutableContextSetImpl set = (ImmutableContextSetImpl) new ImmutableContextSetImpl.BuilderImpl()
                 .add("aaa", "a")
                 .add("aaa", "b")
@@ -121,38 +131,43 @@ public class ContextSetTest {
                 .add("bbb", "b")
                 .build();
 
-        List<Consumer<ImmutableContextSet.Builder>> trueTests = ImmutableList.of(
-                builder -> builder.add("aaa", "a").add("bbb", "a"),
-                builder -> builder.add("aaa", "b").add("bbb", "a"),
-                builder -> builder.add("aaa", "c").add("bbb", "a"),
-                builder -> builder.add("aaa", "c").add("bbb", "b")
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
+        setup.accept(builder);
+
+        assertTrue(set.otherContainsAll(
+                builder.build(),
+                ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY)
         );
+    }
 
-        for (Consumer<ImmutableContextSet.Builder> test : trueTests) {
-            ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-            test.accept(builder);
-            assertTrue(set.otherContainsAll(
-                    builder.build(),
-                    ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY)
-            );
-        }
-
-        List<Consumer<ImmutableContextSet.Builder>> falseTests = ImmutableList.of(
+    private static Stream<Consumer<ImmutableContextSet.Builder>> testContainsAllFalse() {
+        return Stream.of(
                 builder -> builder.add("aaa", "a").add("bbb", "z"),
                 builder -> builder.add("aaa", "b").add("bbb", "z"),
                 builder -> builder.add("aaa", "b"),
                 builder -> builder.add("aaa", "c"),
                 builder -> {}
         );
+    }
 
-        for (Consumer<ImmutableContextSet.Builder> test : falseTests) {
-            ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-            test.accept(builder);
-            assertFalse(set.otherContainsAll(
-                    builder.build(),
-                    ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY)
-            );
-        }
+    @ParameterizedTest
+    @MethodSource
+    public void testContainsAllFalse(Consumer<ImmutableContextSet.Builder> setup) {
+        ImmutableContextSetImpl set = (ImmutableContextSetImpl) new ImmutableContextSetImpl.BuilderImpl()
+                .add("aaa", "a")
+                .add("aaa", "b")
+                .add("aaa", "c")
+                .add("bbb", "a")
+                .add("bbb", "b")
+                .build();
+
+        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
+        setup.accept(builder);
+
+        assertFalse(set.otherContainsAll(
+                builder.build(),
+                ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY)
+        );
     }
 
 }

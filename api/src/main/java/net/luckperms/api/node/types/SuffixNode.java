@@ -28,7 +28,6 @@ package net.luckperms.api.node.types;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

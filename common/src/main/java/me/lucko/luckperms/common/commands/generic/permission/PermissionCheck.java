@@ -44,7 +44,6 @@ import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.PermissionHolder.Identifier;
@@ -72,6 +71,10 @@ public class PermissionCheck extends GenericChildCommand {
         }
 
         String node = args.get(0);
+        if (node.isEmpty()) {
+            Message.INVALID_PERMISSION_EMPTY.send(sender);
+            return;
+        }
 
         // accumulate nodes
         List<Node> own = new ArrayList<>();

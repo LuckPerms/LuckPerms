@@ -27,12 +27,11 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-
+import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.InheritanceNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -97,7 +96,11 @@ public class Inheritance extends AbstractNode<InheritanceNode, InheritanceNode.B
 
         @Override
         public @NonNull Builder group(@NonNull String group) {
-            this.groupName = Objects.requireNonNull(group, "group");
+            Objects.requireNonNull(group, "group");
+            if (!DataConstraints.GROUP_NAME_TEST.test(group)) {
+                throw new IllegalArgumentException("group name is invalid");
+            }
+            this.groupName = group;
             return this;
         }
 

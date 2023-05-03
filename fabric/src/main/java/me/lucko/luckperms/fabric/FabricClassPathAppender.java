@@ -26,7 +26,6 @@
 package me.lucko.luckperms.fabric;
 
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
-
 import net.fabricmc.loader.launch.common.FabricLauncherBase;
 
 import java.net.MalformedURLException;

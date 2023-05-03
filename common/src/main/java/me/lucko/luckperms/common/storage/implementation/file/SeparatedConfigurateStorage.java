@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.storage.implementation.file;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.User;
@@ -40,9 +39,7 @@ import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.common.util.Uuids;
-
 import net.luckperms.api.node.Node;
-
 import ninja.leaping.configurate.ConfigurationNode;
 
 import java.io.IOException;

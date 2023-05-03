@@ -27,7 +27,6 @@ package me.lucko.luckperms.bukkit.inject.permissible;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.bukkit.util.CraftBukkitImplementation;
-
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.ServerOperator;

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.bukkit.inject.permissible;
 
 import me.lucko.luckperms.common.util.EmptyCollections;
-
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;

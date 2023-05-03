@@ -26,14 +26,13 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
-
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class PostgreConnectionFactory extends HikariConnectionFactory {
-    public PostgreConnectionFactory(StorageCredentials configuration) {
+public class PostgresConnectionFactory extends HikariConnectionFactory {
+    public PostgresConnectionFactory(StorageCredentials configuration) {
         super(configuration);
     }
 
@@ -49,21 +48,27 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
 
     @Override
     protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
-        config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
+        config.setDataSourceClassName("com.impossibl.postgres.jdbc.PGDataSource");
         config.addDataSourceProperty("serverName", address);
-        config.addDataSourceProperty("portNumber", port);
+        config.addDataSourceProperty("portNumber", Integer.parseInt(port));
         config.addDataSourceProperty("databaseName", databaseName);
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
     }
 
     @Override
-    protected void overrideProperties(Map<String, String> properties) {
+    protected void overrideProperties(Map<String, Object> properties) {
         super.overrideProperties(properties);
 
         // remove the default config properties which don't exist for PostgreSQL
         properties.remove("useUnicode");
         properties.remove("characterEncoding");
+
+        // socketTimeout -> networkTimeout
+        Object socketTimeout = properties.remove("socketTimeout");
+        if (socketTimeout != null) {
+            properties.putIfAbsent("networkTimeout", Integer.parseInt(socketTimeout.toString()));
+        }
     }
 
     @Override

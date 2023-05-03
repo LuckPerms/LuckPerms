@@ -26,12 +26,10 @@
 package me.lucko.luckperms.common.cacheddata.type;
 
 import me.lucko.luckperms.common.cacheddata.result.StringResult;
-
 import net.luckperms.api.metastacking.MetaStackDefinition;
 import net.luckperms.api.metastacking.MetaStackElement;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.types.ChatMetaNode;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;

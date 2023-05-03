@@ -27,7 +27,6 @@ package me.lucko.luckperms.bungee.messaging;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
-
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.md_5.bungee.api.ProxyServer;

@@ -30,7 +30,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -41,7 +40,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.CompletableFutures;
 import me.lucko.luckperms.common.util.Uuids;
-
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;

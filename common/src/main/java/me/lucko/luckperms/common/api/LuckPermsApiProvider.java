@@ -44,7 +44,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
-
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.actionlog.ActionLogger;
@@ -61,7 +60,6 @@ import net.luckperms.api.platform.PlayerAdapter;
 import net.luckperms.api.platform.PluginMetadata;
 import net.luckperms.api.query.QueryOptionsRegistry;
 import net.luckperms.api.track.TrackManager;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

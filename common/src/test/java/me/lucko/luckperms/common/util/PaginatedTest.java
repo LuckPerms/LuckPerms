@@ -26,45 +26,79 @@
 package me.lucko.luckperms.common.util;
 
 import com.google.common.collect.ImmutableList;
-
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PaginatedTest {
 
-    @Test
-    void testSimple() {
-        Paginated<String> paginated = new Paginated<>(ImmutableList.of("one", "two", "three", "four", "five"));
-        assertEquals(3, paginated.getMaxPages(2));
-        assertEquals(1, paginated.getMaxPages(5));
-        assertEquals(1, paginated.getMaxPages(6));
+    private static final Paginated<String> EXAMPLE_PAGE = new Paginated<>(ImmutableList.of("one", "two", "three", "four", "five"));
 
-        List<Paginated.Entry<String>> page1 = paginated.getPage(1, 2);
-        assertEquals(2, page1.size());
-        assertEquals("one", page1.get(0).value());
-        assertEquals(1, page1.get(0).position());
-        assertEquals("two", page1.get(1).value());
-        assertEquals(2, page1.get(1).position());
+    @ParameterizedTest
+    @CsvSource({
+            "3, 2",
+            "1, 5",
+            "1, 6"
+    })
+    public void testMaxPages(int expected, int entriesPerPage) {
+        assertEquals(expected, EXAMPLE_PAGE.getMaxPages(entriesPerPage));
+    }
 
-        List<Paginated.Entry<String>> page2 = paginated.getPage(2, 2);
-        assertEquals(2, page2.size());
-        assertEquals("three", page2.get(0).value());
-        assertEquals(3, page2.get(0).position());
-        assertEquals("four", page2.get(1).value());
-        assertEquals(4, page2.get(1).position());
+    @ParameterizedTest
+    @CsvSource({
+            "1, 2",
+            "2, 2",
+            "3, 1"
+    })
+    public void testPageSize(int pageNo, int expectedSize) {
+        List<Paginated.Entry<String>> page = EXAMPLE_PAGE.getPage(pageNo, 2);
+        assertEquals(expectedSize, page.size());
+    }
 
-        List<Paginated.Entry<String>> page3 = paginated.getPage(3, 2);
-        assertEquals(1, page3.size());
-        assertEquals("five", page3.get(0).value());
-        assertEquals(5, page3.get(0).position());
+    private static Stream<Arguments> testPageContent() {
+        return Stream.of(
+                Arguments.of(1, ImmutableList.of(
+                        new Paginated.Entry<>(1, "one"),
+                        new Paginated.Entry<>(2, "two")
+                )),
+                Arguments.of(2, ImmutableList.of(
+                        new Paginated.Entry<>(3, "three"),
+                        new Paginated.Entry<>(4, "four")
+                )),
+                Arguments.of(3, ImmutableList.of(
+                        new Paginated.Entry<>(5, "five")
+                ))
+        );
+    }
 
-        assertThrows(IllegalStateException.class, () -> paginated.getPage(4, 2));
-        assertThrows(IllegalArgumentException.class, () -> paginated.getPage(0, 2));
-        assertThrows(IllegalArgumentException.class, () -> paginated.getPage(-1, 2));
+    @ParameterizedTest
+    @MethodSource
+    public void testPageContent(int pageNo, List<Paginated.Entry<String>> expectedContent) {
+        assertEquals(expectedContent, EXAMPLE_PAGE.getPage(pageNo, 2));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "4, 2",
+    })
+    public void testFailState(int pageNo, int pageSize) {
+        assertThrows(IllegalStateException.class, () -> EXAMPLE_PAGE.getPage(pageNo, pageSize));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, 2",
+            "-1, 2"
+    })
+    public void testFailArgument(int pageNo, int pageSize) {
+        assertThrows(IllegalArgumentException.class, () -> EXAMPLE_PAGE.getPage(pageNo, pageSize));
     }
 
 }

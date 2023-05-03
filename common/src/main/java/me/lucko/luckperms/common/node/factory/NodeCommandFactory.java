@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.node.factory;
 
 import me.lucko.luckperms.common.model.HolderType;
-
 import net.luckperms.api.context.Context;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.ChatMetaNode;

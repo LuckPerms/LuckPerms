@@ -31,9 +31,7 @@ import me.lucko.luckperms.standalone.app.integration.ShutdownCallback;
 import me.lucko.luckperms.standalone.app.utils.DockerCommandSocket;
 import me.lucko.luckperms.standalone.app.utils.HeartbeatHttpServer;
 import me.lucko.luckperms.standalone.app.utils.TerminalInterface;
-
 import net.luckperms.api.LuckPerms;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -128,6 +126,18 @@ public class LuckPermsApplication implements AutoCloseable {
     // called before start()
     public void setHealthReporter(HealthReporter healthReporter) {
         this.healthReporter = healthReporter;
+    }
+
+    public LuckPerms getApi() {
+        return this.luckPermsApi;
+    }
+
+    public CommandExecutor getCommandExecutor() {
+        return this.commandExecutor;
+    }
+
+    public HealthReporter getHealthReporter() {
+        return this.healthReporter;
     }
 
     public String getVersion() {

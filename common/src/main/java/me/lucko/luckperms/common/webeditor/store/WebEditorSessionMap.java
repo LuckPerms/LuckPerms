@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.webeditor.store;
 
 import me.lucko.luckperms.common.webeditor.WebEditorRequest;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;

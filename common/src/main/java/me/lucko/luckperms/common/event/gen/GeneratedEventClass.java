@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.event.gen;
 
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.event.EventDispatcher;
-
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.ClassFileVersion;
 import net.bytebuddy.description.NamedElement;

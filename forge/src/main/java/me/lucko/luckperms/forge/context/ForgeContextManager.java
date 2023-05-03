@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.forge.LPForgePlugin;
 import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;

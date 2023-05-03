@@ -28,13 +28,11 @@ package me.lucko.luckperms.common.metastacking;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-
 import net.luckperms.api.metastacking.MetaStackElement;
 import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 import net.luckperms.api.node.types.ChatMetaNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

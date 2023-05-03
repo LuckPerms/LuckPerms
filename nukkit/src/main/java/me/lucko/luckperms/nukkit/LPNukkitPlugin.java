@@ -25,6 +25,13 @@
 
 package me.lucko.luckperms.nukkit;
 
+import cn.nukkit.Player;
+import cn.nukkit.command.PluginCommand;
+import cn.nukkit.permission.Permission;
+import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.plugin.PluginManager;
+import cn.nukkit.plugin.service.ServicePriority;
+import cn.nukkit.utils.Config;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -55,17 +62,8 @@ import me.lucko.luckperms.nukkit.inject.server.LuckPermsSubscriptionMap;
 import me.lucko.luckperms.nukkit.listeners.NukkitAutoOpListener;
 import me.lucko.luckperms.nukkit.listeners.NukkitConnectionListener;
 import me.lucko.luckperms.nukkit.listeners.NukkitPlatformListener;
-
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
-
-import cn.nukkit.Player;
-import cn.nukkit.command.PluginCommand;
-import cn.nukkit.permission.Permission;
-import cn.nukkit.plugin.PluginBase;
-import cn.nukkit.plugin.PluginManager;
-import cn.nukkit.plugin.service.ServicePriority;
-import cn.nukkit.utils.Config;
 
 import java.util.Optional;
 import java.util.stream.Stream;

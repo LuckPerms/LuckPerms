@@ -25,16 +25,13 @@
 
 package me.lucko.luckperms.nukkit.inject.server;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-
-import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import cn.nukkit.Player;
 import cn.nukkit.permission.Permissible;
 import cn.nukkit.plugin.PluginManager;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;

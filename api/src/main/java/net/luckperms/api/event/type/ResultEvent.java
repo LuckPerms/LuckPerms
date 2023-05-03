@@ -26,7 +26,6 @@
 package net.luckperms.api.event.type;
 
 import net.luckperms.api.event.util.Param;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.atomic.AtomicReference;

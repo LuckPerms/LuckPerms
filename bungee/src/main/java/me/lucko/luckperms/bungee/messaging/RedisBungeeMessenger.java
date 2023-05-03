@@ -28,15 +28,12 @@ package me.lucko.luckperms.bungee.messaging;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
-
 import me.lucko.luckperms.bungee.LPBungeePlugin;
-
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.config.generic.key;
 
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 
 import java.util.Locale;

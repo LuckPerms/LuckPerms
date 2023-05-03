@@ -26,17 +26,14 @@
 package me.lucko.luckperms.bukkit.inject.permissible;
 
 import com.google.common.base.Preconditions;
-
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
-
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
-
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionRemovedExecutor;
 import org.bukkit.plugin.Plugin;

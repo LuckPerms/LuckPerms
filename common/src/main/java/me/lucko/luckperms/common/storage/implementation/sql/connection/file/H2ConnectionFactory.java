@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.file;
 
 import me.lucko.luckperms.common.dependencies.Dependency;
-import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.lang.reflect.Constructor;
@@ -56,7 +55,7 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
     public void init(LuckPermsPlugin plugin) {
         migrateOldDatabaseFile("luckperms.db.mv.db");
 
-        IsolatedClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.H2_DRIVER));
+        ClassLoader classLoader = plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.H2_DRIVER));
         try {
             Class<?> connectionClass = classLoader.loadClass("org.h2.jdbc.JdbcConnection");
             this.connectionConstructor = connectionClass.getConstructor(String.class, Properties.class, String.class, Object.class, boolean.class);
@@ -148,7 +147,7 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
 
         private Constructor<?> getConnectionConstructor() {
             this.plugin.getDependencyManager().loadDependencies(Collections.singleton(Dependency.H2_DRIVER_LEGACY));
-            IsolatedClassLoader classLoader = this.plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.H2_DRIVER_LEGACY));
+            ClassLoader classLoader = this.plugin.getDependencyManager().obtainClassLoaderWith(EnumSet.of(Dependency.H2_DRIVER_LEGACY));
             try {
                 Class<?> connectionClass = classLoader.loadClass("org.h2.jdbc.JdbcConnection");
                 return connectionClass.getConstructor(String.class, Properties.class);

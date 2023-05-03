@@ -26,15 +26,15 @@
 package me.lucko.luckperms.common.command.spec;
 
 import me.lucko.luckperms.common.locale.Message;
-
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 
 public class Argument {
     private final String name;
     private final boolean required;
-    private final Component description;
+    private final TranslatableComponent description;
 
-    Argument(String name, boolean required, Component description) {
+    Argument(String name, boolean required, TranslatableComponent description) {
         this.name = name;
         this.required = required;
         this.description = description;
@@ -48,7 +48,7 @@ public class Argument {
         return this.required;
     }
 
-    public Component getDescription() {
+    public TranslatableComponent getDescription() {
         return this.description;
     }
 

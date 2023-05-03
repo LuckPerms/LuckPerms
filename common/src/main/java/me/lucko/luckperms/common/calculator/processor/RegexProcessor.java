@@ -27,10 +27,8 @@ package me.lucko.luckperms.common.calculator.processor;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.node.types.RegexPermission;
-
 import net.luckperms.api.node.Node;
 
 import java.util.Collections;

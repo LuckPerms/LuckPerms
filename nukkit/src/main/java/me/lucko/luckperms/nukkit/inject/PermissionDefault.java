@@ -25,9 +25,8 @@
 
 package me.lucko.luckperms.nukkit.inject;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import cn.nukkit.permission.Permission;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
 import java.util.Locale;

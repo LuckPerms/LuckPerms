@@ -31,9 +31,7 @@ import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.luckperms.api.node.Node;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;

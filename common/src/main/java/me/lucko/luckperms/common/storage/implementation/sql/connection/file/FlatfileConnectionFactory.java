@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.file;
 
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -36,7 +35,6 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

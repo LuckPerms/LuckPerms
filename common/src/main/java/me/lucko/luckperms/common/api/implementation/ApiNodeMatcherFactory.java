@@ -26,14 +26,12 @@
 package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.node.matcher.StandardNodeMatchers;
-
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.matcher.NodeMatcher;
 import net.luckperms.api.node.matcher.NodeMatcherFactory;
 import net.luckperms.api.node.types.MetaNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

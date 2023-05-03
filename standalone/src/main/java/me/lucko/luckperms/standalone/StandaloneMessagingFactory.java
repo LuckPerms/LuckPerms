@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.standalone;
 
-import me.lucko.luckperms.standalone.LPStandalonePlugin;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 

@@ -27,7 +27,6 @@ package net.luckperms.api.event.node;
 
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.node.Node;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 

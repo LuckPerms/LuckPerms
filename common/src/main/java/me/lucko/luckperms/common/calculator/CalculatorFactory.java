@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.calculator;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
-
 import net.luckperms.api.query.QueryOptions;
 
 /**

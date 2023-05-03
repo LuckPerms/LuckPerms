@@ -26,7 +26,6 @@
 package me.lucko.luckperms.velocity;
 
 import com.velocitypowered.api.scheduler.ScheduledTask;
-
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.util.Iterators;

@@ -29,10 +29,8 @@ import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
-
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.WeightNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;

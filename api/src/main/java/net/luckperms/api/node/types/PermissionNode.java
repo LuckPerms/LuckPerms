@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.OptionalInt;
@@ -104,6 +103,7 @@ public interface PermissionNode extends ScopedNode<PermissionNode, PermissionNod
          *
          * @param permission the permission
          * @return the builder
+         * @throws IllegalArgumentException if {@code permission} is empty
          */
         @NonNull Builder permission(@NonNull String permission);
 

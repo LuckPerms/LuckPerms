@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
@@ -101,6 +100,7 @@ public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, Reg
          *
          * @param pattern the pattern
          * @return the builder
+         * @throws IllegalArgumentException if {@code pattern} is empty
          */
         @NonNull Builder pattern(@NonNull String pattern);
 

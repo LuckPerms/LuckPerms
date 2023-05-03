@@ -27,7 +27,6 @@ package me.lucko.luckperms.forge.service;
 
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.forge.LPForgePlugin;
-
 import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

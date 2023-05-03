@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.treeview;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;

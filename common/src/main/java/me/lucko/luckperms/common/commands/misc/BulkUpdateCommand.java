@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import com.github.benmanes.caffeine.cache.Cache;
-
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateBuilder;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;

@@ -26,7 +26,6 @@
 package net.luckperms.api.actionlog;
 
 import net.luckperms.api.LuckPermsProvider;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

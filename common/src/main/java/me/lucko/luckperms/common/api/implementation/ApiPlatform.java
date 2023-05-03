@@ -26,10 +26,8 @@
 package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import net.luckperms.api.platform.Platform;
 import net.luckperms.api.platform.PluginMetadata;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Instant;

@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
-
 import me.lucko.luckperms.common.cacheddata.UsageTracked;
 import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
 import me.lucko.luckperms.common.cacheddata.result.StringResult;
@@ -41,7 +40,6 @@ import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.metastacking.MetaStackDefinition;
@@ -51,7 +49,6 @@ import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.query.meta.MetaValueSelector;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

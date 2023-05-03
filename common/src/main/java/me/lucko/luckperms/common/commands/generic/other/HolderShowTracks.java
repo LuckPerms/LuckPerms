@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.generic.other;
 
 import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -37,15 +36,15 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-
-import net.kyori.adventure.text.Component;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +70,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
             return;
         }
 
-        List<Map.Entry<Track, Component>> lines = new ArrayList<>();
+        List<Map.Entry<Track, InheritanceNode>> lines = new ArrayList<>();
 
         if (target.getType() == HolderType.USER) {
             // if the holder is a user, we want to query parent groups for tracks
@@ -87,13 +86,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
                         .collect(Collectors.toList());
 
                 for (Track track : tracks) {
-                    Component line = Component.text()
-                            .append(Message.formatContextSetBracketed(node.getContexts(), Component.empty()))
-                            .append(Component.newline())
-                            .append(Message.formatTrackPath(track.getGroups(), groupName))
-                            .build();
-
-                    lines.add(Maps.immutableEntry(track, line));
+                    lines.add(Maps.immutableEntry(track, node));
                 }
             }
         } else {
@@ -101,10 +94,11 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
             String groupName = ((Group) target).getName();
             List<Track> tracks = plugin.getTrackManager().getAll().values().stream()
                     .filter(t -> t.containsGroup(groupName))
+                    .sorted(Comparator.comparing(Track::getName))
                     .collect(Collectors.toList());
 
             for (Track track : tracks) {
-                lines.add(Maps.immutableEntry(track, Message.formatTrackPath(track.getGroups(), groupName)));
+                lines.add(Maps.immutableEntry(track, Inheritance.builder(groupName).build()));
             }
         }
 
@@ -114,8 +108,10 @@ public class HolderShowTracks<T extends PermissionHolder> extends ChildCommand<T
         }
 
         Message.LIST_TRACKS.send(sender, target);
-        for (Map.Entry<Track, Component> line : lines) {
-            Message.LIST_TRACKS_ENTRY.send(sender, line.getKey().getName(), line.getValue());
+        for (Map.Entry<Track, InheritanceNode> line : lines) {
+            Track track = line.getKey();
+            InheritanceNode node = line.getValue();
+            Message.LIST_TRACKS_ENTRY.send(sender, track.getName(), node.getContexts(), Message.formatTrackPath(track.getGroups(), node.getGroupName()));
         }
     }
 }

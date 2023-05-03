@@ -26,7 +26,6 @@
 package me.lucko.luckperms.forge.util;
 
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
-
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.GenericEvent;

@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge;
 
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.event.AbstractEventBus;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.plugin.PluginContainer;
 

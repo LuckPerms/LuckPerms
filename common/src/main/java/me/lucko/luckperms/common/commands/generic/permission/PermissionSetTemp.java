@@ -42,7 +42,6 @@ import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -72,7 +71,8 @@ public class PermissionSetTemp extends GenericChildCommand {
         MutableContextSet context = args.getContextOrDefault(3, plugin);
 
         if (node.isEmpty()) {
-            Message.PERMISSION_INVALID_ENTRY_EMPTY.send(sender);
+            Message.INVALID_PERMISSION_EMPTY.send(sender);
+            return;
         }
 
         if (ArgumentPermissions.checkContext(plugin, sender, permission, context) ||

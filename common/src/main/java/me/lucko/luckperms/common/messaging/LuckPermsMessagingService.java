@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.messaging;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -39,7 +38,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ExpiringSet;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JObject;
-
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
@@ -48,7 +46,6 @@ import net.luckperms.api.messenger.message.Message;
 import net.luckperms.api.messenger.message.type.ActionLogMessage;
 import net.luckperms.api.messenger.message.type.UpdateMessage;
 import net.luckperms.api.messenger.message.type.UserUpdateMessage;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

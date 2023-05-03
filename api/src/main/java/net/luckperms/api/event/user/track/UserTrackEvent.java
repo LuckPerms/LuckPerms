@@ -30,7 +30,6 @@ import net.luckperms.api.event.type.Sourced;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.track.Track;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;

@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.event.gen;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.event.LuckPermsEvent;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.invoke.MethodHandles;

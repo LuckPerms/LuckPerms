@@ -26,13 +26,10 @@
 package me.lucko.luckperms.sponge.messaging;
 
 import com.google.common.collect.Iterables;
-
 import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
-
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.EngineConnectionSide;

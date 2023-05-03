@@ -27,21 +27,37 @@ package me.lucko.luckperms.standalone.app.integration;
 
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
 import me.lucko.luckperms.standalone.app.utils.AnsiUtils;
-
 import net.kyori.adventure.text.Component;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Consumer;
 
 /**
  * Dummy/singleton player class used by the standalone plugin.
  *
- * In various places (ContextManager, SenderFactory, ..) the platform "player" type is used
- * as a generic parameter. This class acts as this type for the standalone plugin.
+ * <p>In various places (ContextManager, SenderFactory, ..) the platform "player" type is used
+ * as a generic parameter. This class acts as this type for the standalone plugin.</p>
  */
 public class SingletonPlayer {
+
+    /** Empty UUID used by the singleton player. */
+    private static final UUID UUID = new UUID(0, 0);
+
+    /** A message sink that prints the component to stdout */
+    private static final Consumer<Component> PRINT_TO_STDOUT = component -> LuckPermsApplication.LOGGER.info(AnsiUtils.format(component));
+
+    /** Singleton instance */
     public static final SingletonPlayer INSTANCE = new SingletonPlayer();
 
-    private static final UUID UUID = new UUID(0, 0);
+    /** A set of message sinks that messages are delivered to */
+    private final Set<Consumer<Component>> messageSinks;
+
+    private SingletonPlayer() {
+        this.messageSinks = new CopyOnWriteArraySet<>();
+        this.messageSinks.add(PRINT_TO_STDOUT);
+    }
 
     public String getName() {
         return "StandaloneUser";
@@ -51,8 +67,18 @@ public class SingletonPlayer {
         return UUID;
     }
 
-    public void printStdout(Component component) {
-        LuckPermsApplication.LOGGER.info(AnsiUtils.format(component));
+    public void sendMessage(Component component) {
+        for (Consumer<Component> sink : this.messageSinks) {
+            sink.accept(component);
+        }
+    }
+
+    public void addMessageSink(Consumer<Component> sink) {
+        this.messageSinks.add(sink);
+    }
+
+    public void removeMessageSink(Consumer<Component> sink) {
+        this.messageSinks.remove(sink);
     }
 
 }

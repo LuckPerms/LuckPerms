@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.nukkit.listeners;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.EventHandler;
@@ -36,6 +32,9 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
 import cn.nukkit.event.server.RemoteServerCommandEvent;
 import cn.nukkit.event.server.ServerCommandEvent;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 
 import java.util.Locale;
 import java.util.regex.Pattern;

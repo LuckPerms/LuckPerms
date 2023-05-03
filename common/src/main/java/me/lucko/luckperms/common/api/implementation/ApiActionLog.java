@@ -27,10 +27,8 @@ package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.api.ApiUtils;
-
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.actionlog.ActionLog;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

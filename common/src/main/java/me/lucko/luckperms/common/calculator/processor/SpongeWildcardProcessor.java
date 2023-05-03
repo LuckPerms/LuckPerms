@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.calculator.processor;
 
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.node.AbstractNode;
-
 import net.luckperms.api.node.Node;
 
 public class SpongeWildcardProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {

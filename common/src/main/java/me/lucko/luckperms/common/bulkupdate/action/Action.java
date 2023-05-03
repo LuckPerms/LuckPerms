@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.bulkupdate.action;
 
 import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-
 import net.luckperms.api.node.Node;
 
 /**

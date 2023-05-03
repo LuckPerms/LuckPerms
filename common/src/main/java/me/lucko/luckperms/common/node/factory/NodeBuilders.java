@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.RegexPermission;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.node.types.Weight;
-
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.types.DisplayNameNode;
 import net.luckperms.api.node.types.InheritanceNode;
@@ -42,7 +41,6 @@ import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.RegexPermissionNode;
 import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

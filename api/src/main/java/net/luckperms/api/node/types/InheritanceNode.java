@@ -31,7 +31,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -96,6 +95,7 @@ public interface InheritanceNode extends ScopedNode<InheritanceNode, Inheritance
          *
          * @param group the group name
          * @return the builder
+         * @throws IllegalArgumentException if {@code group} is not a valid group name
          */
         @NonNull Builder group(@NonNull String group);
 

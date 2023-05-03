@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.service.model;
 
 import net.luckperms.api.query.QueryOptions;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.permission.Subject;
 

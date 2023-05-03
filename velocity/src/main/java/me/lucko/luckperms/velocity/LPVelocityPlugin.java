@@ -46,7 +46,6 @@ import me.lucko.luckperms.velocity.context.VelocityPlayerCalculator;
 import me.lucko.luckperms.velocity.listeners.MonitoringPermissionCheckListener;
 import me.lucko.luckperms.velocity.listeners.VelocityConnectionListener;
 import me.lucko.luckperms.velocity.messaging.VelocityMessagingFactory;
-
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.query.QueryOptions;

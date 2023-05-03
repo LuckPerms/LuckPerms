@@ -50,8 +50,8 @@ import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.DeletionCause;
 
@@ -72,6 +72,10 @@ public class DeleteGroup extends SingleCommand {
         }
 
         String groupName = args.get(0).toLowerCase(Locale.ROOT);
+        if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
+            Message.GROUP_INVALID_ENTRY.send(sender, groupName);
+            return;
+        }
 
         if (groupName.equalsIgnoreCase(GroupManager.DEFAULT_GROUP_NAME)) {
             Message.DELETE_GROUP_ERROR_DEFAULT.send(sender);

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.util;
 
 import com.google.common.collect.ImmutableMap;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
@@ -36,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class EnumNamerTest {
 
     @Test
-    void testSimple() {
+    public void testSimple() {
         EnumNamer<TestEnum> namer = new EnumNamer<>(
                 TestEnum.class,
                 ImmutableMap.of(TestEnum.THING, "hi"),

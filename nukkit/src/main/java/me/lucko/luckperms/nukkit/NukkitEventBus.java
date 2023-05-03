@@ -25,13 +25,12 @@
 
 package me.lucko.luckperms.nukkit;
 
-import me.lucko.luckperms.common.api.LuckPermsApiProvider;
-import me.lucko.luckperms.common.event.AbstractEventBus;
-
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.plugin.PluginDisableEvent;
 import cn.nukkit.plugin.Plugin;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 
 public class NukkitEventBus extends AbstractEventBus<Plugin> implements Listener {
     public NukkitEventBus(LPNukkitPlugin plugin, LuckPermsApiProvider apiProvider) {

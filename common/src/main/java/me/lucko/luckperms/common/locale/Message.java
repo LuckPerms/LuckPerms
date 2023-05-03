@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.locale;
 
 import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -38,7 +37,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationFormatter;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
@@ -57,6 +55,8 @@ import net.luckperms.api.util.Tristate;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -89,6 +89,9 @@ import static net.kyori.adventure.text.format.TextDecoration.BOLD;
  * A collection of formatted messages used by the plugin.
  */
 public interface Message {
+
+    static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd '@' HH:mm:ss")
+            .withZone(ZoneId.systemDefault());
 
     TextComponent OPEN_BRACKET = Component.text('(');
     TextComponent CLOSE_BRACKET = Component.text(')');
@@ -1935,13 +1938,25 @@ public interface Message {
             .append(text(':'))
     );
 
-    Args2<String, Component> LIST_TRACKS_ENTRY = (name, path) -> text()
-            // "&a{}: {}"
-            .color(GREEN)
-            .append(text(name))
-            .append(text(": "))
-            .append(path)
-            .build();
+    Args3<String, ContextSet, Component> LIST_TRACKS_ENTRY = (name, contextSet, path) -> join(newline(),
+            // "&3> &a{}: {}"
+            // "&7  ({}&7)"
+            text()
+                    .append(text('>', DARK_AQUA))
+                    .append(space())
+                    .append(text().color(GREEN)
+                            .append(text(name))
+                            .append(text(": "))
+                            .append(formatContextSetBracketed(contextSet, empty()))
+                            .build()
+                    ),
+            text()
+                    .color(GRAY)
+                    .append(text("  "))
+                    .append(OPEN_BRACKET)
+                    .append(path)
+                    .append(CLOSE_BRACKET)
+    );
 
     Args1<PermissionHolder> LIST_TRACKS_EMPTY = holder -> prefixed(translatable()
             // "&b{}&a is not on any tracks."
@@ -2200,12 +2215,17 @@ public interface Message {
             .append(FULL_STOP)
     );
 
-    Args0 PERMISSION_INVALID_ENTRY_EMPTY = () -> prefixed(translatable()
-            // "&cThe empty string is not a valid permission."
-            .key("luckperms.command.misc.permission-invalid-empty")
+    Args1<String> INVALID_INPUT_EMPTY = s -> prefixed(translatable()
+            // "&cThe empty string is not a valid {s}."
+            .key("luckperms.command.misc.invalid-input-empty-" + s)
             .color(RED)
             .append(FULL_STOP)
     );
+
+    // Predefined shorthands for the above message
+    Args0 INVALID_PERMISSION_EMPTY = () -> INVALID_INPUT_EMPTY.build("permission");
+    Args0 INVALID_META_KEY_EMPTY = () -> INVALID_INPUT_EMPTY.build("meta-key");
+    Args0 INVALID_DISPLAY_NAME_EMPTY = () -> INVALID_INPUT_EMPTY.build("display-name");
 
     Args3<PermissionHolder, Group, ContextSet> SET_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
             // "&b{}&a now inherits permissions from &b{}&a in context {}&a."
@@ -3714,6 +3734,7 @@ public interface Message {
                                     .color(GRAY)
                                     .key("luckperms.duration.since")
                                     .args(DurationFormatter.CONCISE_LOW_ACCURACY.format(action.getDurationSince()))
+                                    .hoverEvent(HoverEvent.showText(text().append(translatable("luckperms.duration.date", GRAY)).append(text(": ", GRAY)).append(text(DATE_FORMAT.format(action.getTimestamp()), AQUA))))
                             )
                             .append(CLOSE_BRACKET)
                     )

@@ -27,7 +27,6 @@ package net.luckperms.api.messaging;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.user.User;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

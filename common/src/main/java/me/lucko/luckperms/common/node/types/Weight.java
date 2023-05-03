@@ -27,11 +27,9 @@ package me.lucko.luckperms.common.node.types;
 
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.AbstractNodeBuilder;
-
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.WeightNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

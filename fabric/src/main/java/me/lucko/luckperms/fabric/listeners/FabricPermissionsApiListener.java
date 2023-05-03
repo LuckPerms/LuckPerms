@@ -37,14 +37,12 @@ import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.model.MixinUser;
-
 import net.fabricmc.fabric.api.util.TriState;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;

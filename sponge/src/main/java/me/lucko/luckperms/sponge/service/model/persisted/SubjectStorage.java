@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.service.model.persisted;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
-
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.MoreFiles;
 import me.lucko.luckperms.common.util.gson.GsonProvider;

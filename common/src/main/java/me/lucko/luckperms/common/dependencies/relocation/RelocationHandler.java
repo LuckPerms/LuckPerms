@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -51,11 +52,12 @@ public class RelocationHandler {
     private final Method jarRelocatorRunMethod;
 
     public RelocationHandler(DependencyManager dependencyManager) {
+        ClassLoader classLoader = null;
         try {
             // download the required dependencies for remapping
             dependencyManager.loadDependencies(DEPENDENCIES);
             // get a classloader containing the required dependencies as sources
-            IsolatedClassLoader classLoader = dependencyManager.obtainClassLoaderWith(DEPENDENCIES);
+            classLoader = dependencyManager.obtainClassLoaderWith(DEPENDENCIES);
 
             // load the relocator class
             Class<?> jarRelocatorClass = classLoader.loadClass(JAR_RELOCATOR_CLASS);
@@ -67,6 +69,14 @@ public class RelocationHandler {
             this.jarRelocatorRunMethod = jarRelocatorClass.getDeclaredMethod(JAR_RELOCATOR_RUN_METHOD);
             this.jarRelocatorRunMethod.setAccessible(true);
         } catch (Exception e) {
+            try {
+                if (classLoader instanceof IsolatedClassLoader) {
+                    ((IsolatedClassLoader) classLoader).close();
+                }
+            } catch (IOException ex) {
+                e.addSuppressed(ex);
+            }
+
             throw new RuntimeException(e);
         }
     }
@@ -81,4 +91,5 @@ public class RelocationHandler {
         Object relocator = this.jarRelocatorConstructor.newInstance(input.toFile(), output.toFile(), mappings);
         this.jarRelocatorRunMethod.invoke(relocator);
     }
+
 }

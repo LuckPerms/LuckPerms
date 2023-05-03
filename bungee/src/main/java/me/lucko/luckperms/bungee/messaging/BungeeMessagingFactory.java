@@ -29,11 +29,9 @@ import me.lucko.luckperms.bungee.LPBungeePlugin;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
-
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {

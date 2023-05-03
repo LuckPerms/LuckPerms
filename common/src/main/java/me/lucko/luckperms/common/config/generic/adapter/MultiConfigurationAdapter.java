@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.config.generic.adapter;
 
 import com.google.common.collect.ImmutableList;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;

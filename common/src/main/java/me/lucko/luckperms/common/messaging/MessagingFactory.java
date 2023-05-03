@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.messaging;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.messaging.nats.NatsMessenger;
+import me.lucko.luckperms.common.messaging.postgres.PostgresMessenger;
 import me.lucko.luckperms.common.messaging.rabbitmq.RabbitMQMessenger;
 import me.lucko.luckperms.common.messaging.redis.RedisMessenger;
 import me.lucko.luckperms.common.messaging.sql.SqlMessenger;
@@ -36,11 +37,10 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MariaDbConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.MySqlConnectionFactory;
-
+import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.PostgresConnectionFactory;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;
@@ -76,6 +76,10 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                         SqlStorage sql = (SqlStorage) implementation;
                         if (sql.getConnectionFactory() instanceof MySqlConnectionFactory || sql.getConnectionFactory() instanceof MariaDbConnectionFactory) {
                             messagingType = "sql";
+                            break;
+                        }
+                        if (sql.getConnectionFactory() instanceof PostgresConnectionFactory) {
+                            messagingType = "postgresql";
                             break;
                         }
                     }
@@ -137,6 +141,12 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                 return new LuckPermsMessagingService(this.plugin, new SqlMessengerProvider());
             } catch (Exception e) {
                 getPlugin().getLogger().severe("Exception occurred whilst enabling SQL messaging service", e);
+            }
+        } else if (messagingType.equals("postgresql")) {
+            try {
+                return new LuckPermsMessagingService(this.plugin, new PostgresMessengerProvider());
+            } catch (Exception e) {
+                getPlugin().getLogger().severe("Exception occurred whilst enabling Postgres messaging service", e);
             }
         }
 
@@ -238,6 +248,31 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                         SqlMessenger sql = new SqlMessenger(getPlugin(), storage, incomingMessageConsumer);
                         sql.init();
                         return sql;
+                    }
+                }
+            }
+
+            throw new IllegalStateException("Can't find a supported sql storage implementation");
+        }
+    }
+
+    private class PostgresMessengerProvider implements MessengerProvider {
+
+        @Override
+        public @NonNull String getName() {
+            return "PostgreSQL";
+        }
+
+        @Override
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
+            for (StorageImplementation implementation : getPlugin().getStorage().getImplementations()) {
+                if (implementation instanceof SqlStorage) {
+                    SqlStorage storage = (SqlStorage) implementation;
+                    if (storage.getConnectionFactory() instanceof PostgresConnectionFactory) {
+                        // found an implementation match!
+                        PostgresMessenger messenger = new PostgresMessenger(getPlugin(), storage, incomingMessageConsumer);
+                        messenger.init();
+                        return messenger;
                     }
                 }
             }

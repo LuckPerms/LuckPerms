@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.command;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
@@ -68,7 +68,6 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.ExpiringSet;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -146,6 +145,11 @@ public class CommandManager {
 
     public TabCompletions getTabCompletions() {
         return this.tabCompletions;
+    }
+
+    @VisibleForTesting
+    public Map<String, Command<?>> getMainCommands() {
+        return this.mainCommands;
     }
 
     public CompletableFuture<Void> executeCommand(Sender sender, String label, List<String> args) {

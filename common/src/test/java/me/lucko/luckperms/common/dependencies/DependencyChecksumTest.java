@@ -25,54 +25,21 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.Base64;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DependencyChecksumTest {
 
-    @Test
-    @Tag("dependency_checksum")
-    public void check() {
-        Dependency[] dependencies = Dependency.values();
-        DependencyRepository[] repos = DependencyRepository.values();
-        ExecutorService pool = Executors.newCachedThreadPool();
-
-        AtomicBoolean failed = new AtomicBoolean(false);
-
-        for (Dependency dependency : dependencies) {
-            for (DependencyRepository repo : repos) {
-                pool.submit(() -> {
-                    try {
-                        byte[] hash = Dependency.createDigest().digest(repo.downloadRaw(dependency));
-                        if (!dependency.checksumMatches(hash)) {
-                            System.out.println("NO MATCH - " + repo.name() + " - " + dependency.name() + ": " + Base64.getEncoder().encodeToString(hash));
-                            failed.set(true);
-                        } else {
-                            System.out.println("OK - " + repo.name() + " - " + dependency.name());
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-        }
-
-        pool.shutdown();
-        try {
-            pool.awaitTermination(1, TimeUnit.HOURS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (failed.get()) {
-            Assertions.fail("Some dependency checksums did not match");
+    @ParameterizedTest
+    @EnumSource
+    public void checksumMatches(Dependency dependency) throws DependencyDownloadException {
+        for (DependencyRepository repo : DependencyRepository.values()) {
+            byte[] hash = Dependency.createDigest().digest(repo.downloadRaw(dependency));
+            assertTrue(dependency.checksumMatches(hash), "Dependency " + dependency.name() + " has hash " +  Base64.getEncoder().encodeToString(hash));
         }
     }
 

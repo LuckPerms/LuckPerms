@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
@@ -45,7 +44,6 @@ import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.metastacking.MetaStackDefinition;
@@ -407,7 +405,7 @@ public final class ConfigKeys {
         String middleSpacer = l.getString("meta-formatting.suffix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.suffix.end-spacer", "");
         DuplicateRemovalFunction duplicateRemovalFunction;
-        switch (l.getString("meta-formatting.prefix.duplicates", "").toLowerCase(Locale.ROOT)) {
+        switch (l.getString("meta-formatting.suffix.duplicates", "").toLowerCase(Locale.ROOT)) {
             case "first-only":
                 duplicateRemovalFunction = DuplicateRemovalFunction.FIRST_ONLY;
                 break;
@@ -705,6 +703,11 @@ public final class ConfigKeys {
      * The password in use by the rabbitmq server, or an empty string if there is no password
      */
     public static final ConfigKey<String> RABBITMQ_PASSWORD = notReloadable(stringKey("rabbitmq.password", "guest"));
+
+    /**
+     * If the editor key should be generated lazily (only when needed)
+     */
+    public static final ConfigKey<Boolean> EDITOR_LAZILY_GENERATE_KEY = booleanKey("editor-lazily-generate-key", false);
 
     /**
      * The URL of the bytebin instance used to upload data

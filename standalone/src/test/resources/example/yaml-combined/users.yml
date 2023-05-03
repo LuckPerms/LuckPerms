@@ -1,0 +1,30 @@
+c1d60c50-70b5-4722-8057-87767557e50d:
+  name: Luck
+  primary-group: default
+  permissions:
+  - group.default:
+      value: false
+      expiry: 2532384000
+      context:
+        server: foo
+        test: test
+        world: bar
+  - test:
+      value: false
+      expiry: 2532384000
+      context:
+        server: foo
+        test: test
+        world: bar
+  - example.permission
+  parents:
+  - default
+  prefixes:
+  - TEST:
+      priority: 100
+      context:
+        server: foo
+        world: bar
+  meta:
+  - foo:
+      value: bar

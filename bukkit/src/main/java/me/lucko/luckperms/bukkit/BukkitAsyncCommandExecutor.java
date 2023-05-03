@@ -26,11 +26,9 @@
 package me.lucko.luckperms.bukkit;
 
 import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
-
 import me.lucko.luckperms.bukkit.util.CommandMapUtil;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.EventHandler;

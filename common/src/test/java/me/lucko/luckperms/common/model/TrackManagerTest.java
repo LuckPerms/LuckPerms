@@ -23,48 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.utils;
+package me.lucko.luckperms.common.model;
 
 import com.google.common.collect.ImmutableSet;
-
+import me.lucko.luckperms.common.model.manager.track.StandardTrackManager;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ShorthandParserTest {
+@ExtendWith(MockitoExtension.class)
+public class TrackManagerTest {
 
-    private static void test(String shorthand, String... expected) {
-        assertEquals(ImmutableSet.copyOf(expected), ShorthandParser.expandShorthand(shorthand));
-    }
-
-    @Test
-    void testNumericRange() {
-        test("{2-4}", "2", "3", "4");
-    }
+    @Mock private LuckPermsPlugin plugin;
 
     @Test
-    void testCharacterRange() {
-        test("{a-d}", "a", "b", "c", "d");
-        test("{A-D}", "A", "B", "C", "D");
-    }
-
-    @Test
-    void testList() {
-        test("{aa,bb,cc}", "aa", "bb", "cc");
-        test("{aa|bb|cc}", "aa", "bb", "cc");
-        test("{aa,bb|cc}", "aa", "bb", "cc");
-    }
-
-    @Test
-    void testGroups() {
-        test("he{y|llo} {1-2}", "hey 1", "hey 2", "hello 1", "hello 2");
-        test("my.permission.{test,hi}", "my.permission.test", "my.permission.hi");
-        test("my.permission.{a-c}", "my.permission.a", "my.permission.b", "my.permission.c");
-        
-        // use ( ) instead
-        test("he(y|llo) (1-2)", "hey 1", "hey 2", "hello 1", "hello 2");
-        test("my.permission.(test,hi)", "my.permission.test", "my.permission.hi");
-        test("my.permission.(a-c)", "my.permission.a", "my.permission.b", "my.permission.c");
+    public void testSanitizeIdentifier() {
+        StandardTrackManager manager = new StandardTrackManager(this.plugin);
+        Track track = manager.getOrMake("TEST");
+        assertEquals("test", track.getName());
+        assertEquals(ImmutableSet.of("test"), manager.getAll().keySet());
     }
 
 }

@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.listeners;
 
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.command.ExecuteCommandEvent;

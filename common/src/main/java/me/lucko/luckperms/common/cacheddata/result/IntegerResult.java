@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.cacheddata.result;
 import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.WeightNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

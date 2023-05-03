@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.calculator.processor;
 
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
-
 import net.luckperms.api.node.Node;
 
 import java.util.Map;

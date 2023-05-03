@@ -26,7 +26,6 @@
 package net.luckperms.api.context;
 
 import net.luckperms.api.LuckPermsProvider;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;

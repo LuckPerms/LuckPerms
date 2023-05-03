@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.util;
 
 import com.google.common.collect.Range;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;

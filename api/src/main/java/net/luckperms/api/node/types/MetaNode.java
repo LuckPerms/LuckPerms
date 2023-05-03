@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -87,6 +86,7 @@ public interface MetaNode extends ScopedNode<MetaNode, MetaNode.Builder> {
          *
          * @param key the meta key
          * @return the builder
+         * @throws IllegalArgumentException if {@code key} is empty
          */
         @NonNull Builder key(@NonNull String key);
 

@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.common.verbose.event.MetaCheckEvent;
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
-
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.Map;

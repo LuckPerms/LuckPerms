@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.treeview;
 
 import com.google.common.base.Splitter;
-
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.util.ImmutableCollectors;

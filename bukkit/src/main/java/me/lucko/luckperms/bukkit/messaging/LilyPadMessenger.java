@@ -25,19 +25,16 @@
 
 package me.lucko.luckperms.bukkit.messaging;
 
-import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-
-import net.luckperms.api.messenger.IncomingMessageConsumer;
-import net.luckperms.api.messenger.Messenger;
-import net.luckperms.api.messenger.message.OutgoingMessage;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import lilypad.client.connect.api.Connect;
 import lilypad.client.connect.api.event.EventListener;
 import lilypad.client.connect.api.event.MessageEvent;
 import lilypad.client.connect.api.request.RequestException;
 import lilypad.client.connect.api.request.impl.MessageRequest;
+import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import net.luckperms.api.messenger.IncomingMessageConsumer;
+import net.luckperms.api.messenger.Messenger;
+import net.luckperms.api.messenger.message.OutgoingMessage;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;

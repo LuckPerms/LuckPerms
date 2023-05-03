@@ -5,12 +5,44 @@ plugins {
 sourceCompatibility = 17
 targetCompatibility = 17
 
+test {
+    useJUnitPlatform {
+        if (!project.hasProperty('dockerTests')) {
+            excludeTags 'docker'
+        }
+    }
+}
+
 dependencies {
     implementation project(':common')
     compileOnly project(':common:loader-utils')
     compileOnly project(':standalone:app')
 
     compileOnly 'org.spongepowered:configurate-yaml:3.7.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
+    testImplementation "org.testcontainers:junit-jupiter:1.17.6"
+    testImplementation 'org.mockito:mockito-core:4.11.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.11.0'
+    testImplementation 'org.awaitility:awaitility:4.2.0'
+
+    testImplementation 'com.zaxxer:HikariCP:4.0.3'
+    testImplementation 'redis.clients:jedis:3.5.2'
+    testImplementation 'io.nats:jnats:2.16.4'
+    testImplementation 'com.rabbitmq:amqp-client:5.12.0'
+    testImplementation 'com.impossibl.pgjdbc-ng:pgjdbc-ng:0.8.9'
+    testImplementation 'com.h2database:h2:2.1.214'
+    testImplementation 'mysql:mysql-connector-java:8.0.23'
+    testImplementation 'org.mariadb.jdbc:mariadb-java-client:3.1.3'
+    testImplementation 'org.mongodb:mongodb-driver-legacy:4.5.0'
+    testImplementation 'me.lucko.configurate:configurate-toml:3.7'
+    testImplementation 'org.spongepowered:configurate-hocon:3.7.2'
+    testImplementation 'org.yaml:snakeyaml:1.28'
+
+    testImplementation project(':standalone:app')
+    testImplementation project(':common:loader-utils')
 }
 
 shadowJar {
@@ -28,7 +60,7 @@ shadowJar {
     relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
     relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
     relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
-    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
+    relocate 'com.impossibl', 'me.lucko.luckperms.lib.postgresql'
     relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
     relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
     relocate 'org.bson', 'me.lucko.luckperms.lib.bson'

@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.util;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;

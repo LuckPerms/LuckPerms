@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
-
 import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.regex.Pattern;

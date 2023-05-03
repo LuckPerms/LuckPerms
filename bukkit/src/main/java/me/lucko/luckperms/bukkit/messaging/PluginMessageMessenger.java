@@ -26,13 +26,10 @@
 package me.lucko.luckperms.bukkit.messaging;
 
 import com.google.common.collect.Iterables;
-
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
-
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
-
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;

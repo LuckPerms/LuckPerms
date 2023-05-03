@@ -26,9 +26,9 @@
 package me.lucko.luckperms.standalone;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.DependencyManagerImpl;
 import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
 import me.lucko.luckperms.common.util.MoreFiles;
 
@@ -54,7 +54,7 @@ public class StandaloneDependencyPreloader {
         MoreFiles.createDirectoriesIfNotExists(cacheDirectory);
 
         ExecutorService executorService = Executors.newFixedThreadPool(8, new ThreadFactoryBuilder().setDaemon(true).build());
-        DependencyManager dependencyManager = new DependencyManager(cacheDirectory, executorService);
+        DependencyManager dependencyManager = new DependencyManagerImpl(cacheDirectory, executorService);
 
         Set<Dependency> dependencies = new HashSet<>(Arrays.asList(Dependency.values()));
         System.out.println("Preloading " + dependencies.size() + " dependencies...");

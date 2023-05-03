@@ -28,7 +28,6 @@ package net.luckperms.api.node;
 import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;

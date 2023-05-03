@@ -29,7 +29,6 @@ import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.matcher.NodeMatcher;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.Unmodifiable;

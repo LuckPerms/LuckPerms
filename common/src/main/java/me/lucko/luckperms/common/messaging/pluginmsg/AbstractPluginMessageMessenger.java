@@ -28,11 +28,9 @@ package me.lucko.luckperms.common.messaging.pluginmsg;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**

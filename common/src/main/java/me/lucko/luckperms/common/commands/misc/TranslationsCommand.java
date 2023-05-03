@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.locale.TranslationRepository.LanguageInfo;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
-
 import net.kyori.adventure.text.Component;
 
 import java.io.IOException;

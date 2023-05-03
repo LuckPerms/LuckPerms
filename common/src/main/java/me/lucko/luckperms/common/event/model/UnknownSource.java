@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.event.model;
 
 import net.luckperms.api.event.source.Source;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public final class UnknownSource implements Source {

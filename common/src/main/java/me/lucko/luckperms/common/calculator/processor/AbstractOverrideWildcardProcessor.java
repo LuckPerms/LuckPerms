@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.calculator.processor;
 
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
-
 import net.luckperms.api.util.Tristate;
 
 public abstract class AbstractOverrideWildcardProcessor extends AbstractPermissionProcessor implements PermissionProcessor {

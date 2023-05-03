@@ -26,28 +26,34 @@
 package me.lucko.luckperms.common.verbose;
 
 import me.lucko.luckperms.common.verbose.expression.BooleanExpressionCompiler;
+import me.lucko.luckperms.common.verbose.expression.BooleanExpressionCompiler.VariableEvaluator;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BooleanExpressionTest {
 
-    private static void test(String expression, boolean expected) {
-        assertEquals(
-                expected,
-                BooleanExpressionCompiler.compile(expression).eval(var -> var.equals("true")),
-                expression + " is not " + expected
-        );
+    private static final VariableEvaluator STRING_EVAL = var -> var.equals("true");
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "false & false | true",
+            "true | false & false",
+            "(true & ((true | false) & !(true & false)))"
+    })
+    public void testEvaluatesTrue(String expression) {
+        assertTrue(BooleanExpressionCompiler.compile(expression).eval(STRING_EVAL));
     }
 
-    @Test
-    void testBrackets() {
-        test("false & false | true", true);
-        test("false & (false | true)", false);
-        test("true | false & false", true);
-        test("(true | false) & false", false);
-        test("(true & ((true | false) & !(true & false)))", true);
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "false & (false | true)",
+            "(true | false) & false"
+    })
+    public void testEvaluatesFalse(String expression) {
+        assertFalse(BooleanExpressionCompiler.compile(expression).eval(STRING_EVAL));
     }
 
 }

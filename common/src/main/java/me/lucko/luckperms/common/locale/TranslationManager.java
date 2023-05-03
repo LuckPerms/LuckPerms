@@ -26,17 +26,14 @@
 package me.lucko.luckperms.common.locale;
 
 import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.MoreFiles;
-
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;

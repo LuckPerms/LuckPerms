@@ -25,13 +25,12 @@
 
 package me.lucko.luckperms.nukkit.inject.permissible;
 
-import me.lucko.luckperms.common.util.EmptyCollections;
-
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.permission.PermissionAttachment;
 import cn.nukkit.permission.PermissionAttachmentInfo;
 import cn.nukkit.plugin.Plugin;
+import me.lucko.luckperms.common.util.EmptyCollections;
 
 import java.lang.reflect.Field;
 import java.util.Collections;

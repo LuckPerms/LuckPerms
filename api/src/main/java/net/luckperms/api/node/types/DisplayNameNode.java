@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -79,6 +78,7 @@ public interface DisplayNameNode extends ScopedNode<DisplayNameNode, DisplayName
          *
          * @param displayName the display name
          * @return the builder
+         * @throws IllegalArgumentException if {@code displayName} is empty
          */
         @NonNull Builder displayName(@NonNull String displayName);
 

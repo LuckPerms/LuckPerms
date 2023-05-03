@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
-
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import java.util.Map;
@@ -50,23 +49,20 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
 
     @Override
     protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
-        config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
-        config.addDataSourceProperty("serverName", address);
-        config.addDataSourceProperty("port", port);
-        config.addDataSourceProperty("databaseName", databaseName);
+        config.setDriverClassName("org.mariadb.jdbc.Driver");
+        config.setJdbcUrl("jdbc:mariadb://" + address + ":" + port + "/" + databaseName);
         config.setUsername(username);
         config.setPassword(password);
     }
 
     @Override
-    protected void setProperties(HikariConfig config, Map<String, String> properties) {
-        String propertiesString = properties.entrySet().stream()
-                .map(e -> e.getKey() + "=" + e.getValue())
-                .collect(Collectors.joining(";"));
+    protected void postInitialize() {
+        super.postInitialize();
 
-        // kinda hacky. this will call #setProperties on the datasource, which will append these options
-        // onto the connections.
-        config.addDataSourceProperty("properties", propertiesString);
+        // Calling Class.forName("org.mariadb.jdbc.Driver") is enough to call the static initializer
+        // which makes our driver available in DriverManager. We don't want that, so unregister it after
+        // the pool has been setup.
+        deregisterDriver("org.mariadb.jdbc.Driver");
     }
 
     @Override

@@ -35,7 +35,6 @@ import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
-
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
