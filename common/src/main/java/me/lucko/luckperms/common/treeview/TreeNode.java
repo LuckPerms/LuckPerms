@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -59,7 +60,8 @@ public class TreeNode {
         }
     }
 
-    private Map<String, TreeNode> children = null;
+    private final AtomicReference<ConcurrentMap<String, TreeNode>>
+            children = new AtomicReference<>();
 
     private final int level;
 
@@ -73,13 +75,13 @@ public class TreeNode {
     }
 
     // lazy init
-    private synchronized Map<String, TreeNode> getChildMap() {
-        if (this.children == null) {
-            this.children = new ConcurrentHashMap<>();
-        }
-        return this.children;
+    private Map<String, TreeNode> getChildMap() {
+        ConcurrentMap<String, TreeNode> a;
+        do {} while ((a = children.get()) == null &&
+                !children.compareAndSet(null,
+                        a = new ConcurrentHashMap<>()));
+        return a;
     }
-
     public @Nullable TreeNode tryInsert(String s) {
         Map<String, TreeNode> childMap = getChildMap();
         if (!allowInsert(this)) {
@@ -89,22 +91,21 @@ public class TreeNode {
     }
 
     public Optional<Map<String, TreeNode>> getChildren() {
-        return Optional.ofNullable(this.children);
+        return Optional.ofNullable(this.children.get());
     }
 
     public int getChildrenSize() {
-        if (this.children == null) {
-            return 0;
-        } else {
-            return this.children.size();
-        }
+        ConcurrentMap<String, TreeNode> a = children.get();
+
+        return a == null ? 0 : a.size();
     }
 
     public ImmutableTreeNode makeImmutableCopy() {
-        if (this.children == null) {
+        ConcurrentMap<String, TreeNode> a = children.get();
+        if (a == null) {
             return new ImmutableTreeNode(null);
         } else {
-            return new ImmutableTreeNode(this.children.entrySet().stream()
+            return new ImmutableTreeNode(a.entrySet().stream()
                     .map(e -> Maps.immutableEntry(
                             e.getKey(),
                             e.getValue().makeImmutableCopy()
