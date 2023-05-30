@@ -72,11 +72,13 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     @Override
     protected void sendMessage(ServerCommandSource sender, Component message) {
-        Locale locale = null;
+        final Locale locale;
         if (sender.getEntity() instanceof ServerPlayerEntity) {
             locale = ((MixinUser) sender.getEntity()).getCachedLocale();
+        } else {
+            locale = null;
         }
-        sender.sendFeedback(toNativeText(TranslationManager.render(message, locale)), false);
+        sender.sendFeedback(() -> toNativeText(TranslationManager.render(message, locale)), false);
     }
 
     @Override
