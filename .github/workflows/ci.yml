@@ -98,6 +98,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Determine the LuckPerms version
+        run: |
+          echo "luckperms_version=$(git describe --tags | awk -F "-" '{print $1 "." $2}')" >> "$GITHUB_ENV"
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v3
@@ -105,6 +109,12 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: |
             latest=${{ github.ref == 'refs/heads/master' }}
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=raw,enable=${{ github.ref == 'refs/heads/master' }},value=${{ env.luckperms_version }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
