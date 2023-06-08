@@ -74,16 +74,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Retrieve saved standalone jar artifact
         uses: actions/download-artifact@v3
         with:
           name: standalone-binary
           path: standalone/docker/
-
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: standalone/docker/
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
