@@ -56,8 +56,8 @@ public enum Dependency {
     JAR_RELOCATOR(
             "me.lucko",
             "jar-relocator",
-            "1.4",
-            "1RsiF3BiVztjlfTA+svDCuoDSGFuSpTZYHvUK8yBx8I="
+            "1.7",
+            "b30RhOF6kHiHl+O5suNLh/+eAr1iOFEFLXhwkHHDu4I="
     ),
 
     ADVENTURE(

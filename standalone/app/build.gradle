@@ -16,6 +16,7 @@ dependencies {
 
     api 'com.google.code.gson:gson:2.9.0'
     api 'com.google.guava:guava:31.1-jre'
+    api 'io.netty:netty-all:4.1.93.Final'
 
     api('net.kyori:adventure-api:4.11.0') {
         exclude(module: 'adventure-bom')
