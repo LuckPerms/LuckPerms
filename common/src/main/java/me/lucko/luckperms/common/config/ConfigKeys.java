@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import java.util.Collections;
 import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
@@ -631,8 +632,16 @@ public final class ConfigKeys {
 
     /**
      * The address of the redis server
+     *
+     * @deprecated use {@link #REDIS_ADDRESSES}
      */
-    public static final ConfigKey<List<String>> REDIS_ADDRESSES = notReloadable(stringListKey("redis.addresses", null));
+    @Deprecated
+    public static final ConfigKey<String> REDIS_ADDRESS = notReloadable(stringKey("redis.address", ""));
+
+    /**
+     * The addresses of the redis server
+     */
+    public static final ConfigKey<List<String>> REDIS_ADDRESSES = notReloadable(stringListKey("redis.addresses", new ArrayList<>()));
 
     /**
      * The username to connect with, or an empty string if it should use default

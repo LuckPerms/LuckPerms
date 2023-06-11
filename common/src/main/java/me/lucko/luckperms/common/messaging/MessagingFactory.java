@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.messaging;
 
 import java.util.List;
+import java.util.Optional;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.messaging.nats.NatsMessenger;
@@ -204,6 +205,8 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                 username = null;
             }
             boolean ssl = config.get(ConfigKeys.REDIS_SSL);
+
+            Optional.ofNullable(config.get(ConfigKeys.REDIS_ADDRESS)).ifPresent(addresses::add);
 
             redis.init(addresses, username, password, ssl);
             return redis;
