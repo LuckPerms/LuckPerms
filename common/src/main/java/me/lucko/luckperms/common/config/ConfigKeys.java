@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import java.util.Collections;
 import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
