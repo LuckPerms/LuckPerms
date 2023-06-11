@@ -31,7 +31,6 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
-import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.*;
 import me.lucko.luckperms.common.config.generic.key.SimpleConfigKey;
 import me.lucko.luckperms.common.context.calculator.WorldNameRewriter;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
@@ -67,6 +66,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.*;
 
 /**
  * All of the {@link ConfigKey}s used by LuckPerms.
