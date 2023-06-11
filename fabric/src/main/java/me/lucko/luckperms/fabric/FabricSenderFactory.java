@@ -29,12 +29,15 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
+import me.lucko.luckperms.fabric.mixin.ServerCommandSourceAccessor;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.rcon.RconCommandOutput;
 import net.minecraft.text.Text;
 
 import java.util.Locale;
@@ -107,7 +110,10 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     @Override
     protected boolean isConsole(ServerCommandSource sender) {
-        return sender.getEntity() == null;
+        CommandOutput output = ((ServerCommandSourceAccessor) sender).getOutput();
+        return output == sender.getServer() || // Console
+            output.getClass() == RconCommandOutput.class || // Rcon
+            (output == CommandOutput.DUMMY && sender.getName().equals("")); // Functions
     }
 
     public static Text toNativeText(Component component) {

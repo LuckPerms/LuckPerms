@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "CommandManagerMixin",
+    "ServerCommandSourceAccessor",
     "ServerLoginNetworkHandlerAccessor",
     "ServerPlayerEntityMixin"
   ],
