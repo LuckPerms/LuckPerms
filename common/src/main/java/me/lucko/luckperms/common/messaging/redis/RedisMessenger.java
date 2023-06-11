@@ -26,14 +26,16 @@
 package me.lucko.luckperms.common.messaging.redis;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.DefaultJedisClientConfig;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.Protocol;
 
@@ -46,7 +48,7 @@ public class RedisMessenger implements Messenger {
     private final LuckPermsPlugin plugin;
     private final IncomingMessageConsumer consumer;
 
-    private /* final */ JedisPool jedisPool;
+    private /* final */ JedisCluster jedisCluster;
     private /* final */ Subscription sub;
     private boolean closing = false;
 
@@ -56,34 +58,33 @@ public class RedisMessenger implements Messenger {
     }
 
     public void init(List<String> addresses, String username, String password, boolean ssl) {
-        String[] addressSplit = addresses.get(0).split(":"); // TODO: Only for config testing
-        String host = addressSplit[0];
-        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
+        Set<HostAndPort> hosts = addresses.stream().map(s -> {
+            String[] addressSplit = s.split(":");
+            String host = addressSplit[0];
+            int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
+            return new HostAndPort(host, port);
+        }).collect(Collectors.toSet());
+        DefaultJedisClientConfig.Builder jedisClientConfig = DefaultJedisClientConfig.builder()
+                .password(password)
+                .ssl(ssl)
+                .timeoutMillis(Protocol.DEFAULT_TIMEOUT);
+        if (username != null) jedisClientConfig.user(username);
 
-        if (username == null) {
-            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, password, ssl);
-        } else {
-            this.jedisPool = new JedisPool(new JedisPoolConfig(), host, port, Protocol.DEFAULT_TIMEOUT, username, password, ssl);
-        }
-
+        this.jedisCluster = new JedisCluster(hosts, jedisClientConfig.build());
         this.sub = new Subscription();
         this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
     }
 
     @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
-        try (Jedis jedis = this.jedisPool.getResource()) {
-            jedis.publish(CHANNEL, outgoingMessage.asEncodedString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.jedisCluster.publish(CHANNEL, outgoingMessage.asEncodedString());
     }
 
     @Override
     public void close() {
         this.closing = true;
         this.sub.unsubscribe();
-        this.jedisPool.destroy();
+        this.jedisCluster.close();
     }
 
     private class Subscription extends JedisPubSub implements Runnable {
@@ -91,15 +92,15 @@ public class RedisMessenger implements Messenger {
         @Override
         public void run() {
             boolean first = true;
-            while (!RedisMessenger.this.closing && !Thread.interrupted() && !RedisMessenger.this.jedisPool.isClosed()) {
-                try (Jedis jedis = RedisMessenger.this.jedisPool.getResource()) {
+            while (!RedisMessenger.this.closing && !Thread.interrupted() && !RedisMessenger.this.jedisCluster.getClusterNodes().isEmpty()) {
+                try {
                     if (first) {
                         first = false;
                     } else {
                         RedisMessenger.this.plugin.getLogger().info("Redis pubsub connection re-established");
                     }
 
-                    jedis.subscribe(this, CHANNEL); // blocking call
+                    RedisMessenger.this.jedisCluster.subscribe(this, CHANNEL); // blocking call
                 } catch (Exception e) {
                     if (RedisMessenger.this.closing) {
                         return;
