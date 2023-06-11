@@ -45,6 +45,11 @@ dependencies {
         exclude(module: 'adventure-api')
     }
 
+    api("net.kyori:adventure-text-minimessage:4.11.0") {
+        exclude(module: 'adventure-bom')
+        exclude(module: 'adventure-api')
+    }
+
     api('net.kyori:event-api:3.0.0') {
         exclude(module: 'checker-qual')
         exclude(module: 'guava')
