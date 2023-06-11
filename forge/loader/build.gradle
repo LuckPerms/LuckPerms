@@ -1,7 +1,7 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'java-library'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.forgegradle)
+    id("java-library")
 }
 
 sourceCompatibility = 1.8

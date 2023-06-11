@@ -1,8 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 
 plugins {
-    id 'com.github.johnrengelman.shadow'
-    id 'application'
+    alias(libs.plugins.shadow)
+    id("application")
 }
 
 dependencies {
