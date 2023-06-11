@@ -1,7 +1,7 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'fabric-loom' version '1.2-SNAPSHOT'
 }
 
@@ -75,8 +75,8 @@ shadowJar {
 
 task remappedShadowJar(type: RemapJarTask) {
     dependsOn tasks.shadowJar
-    input.set(tasks.shadowJar.archiveFile)
-    addNestedDependencies.set(true)
+    input = tasks.shadowJar.archiveFile
+    addNestedDependencies = true
     archiveFileName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
 }
 

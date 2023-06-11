@@ -77,7 +77,7 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
             locale = null;
         }
 
-        sender.sendSuccess(toNativeText(TranslationManager.render(message, locale)), false);
+        sender.sendSuccess(() -> toNativeText(TranslationManager.render(message, locale)), false);
     }
 
     @Override

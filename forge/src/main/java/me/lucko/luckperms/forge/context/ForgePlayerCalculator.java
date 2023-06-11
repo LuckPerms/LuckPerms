@@ -68,7 +68,7 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
 
     @Override
     public void calculate(@NonNull ServerPlayer target, @NonNull ContextConsumer consumer) {
-        ServerLevel level = target.getLevel();
+        ServerLevel level = target.serverLevel();
         if (this.dimensionType) {
             consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(level.dimension().location()));
         }

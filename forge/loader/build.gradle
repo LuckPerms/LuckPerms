@@ -1,27 +1,14 @@
-buildscript {
-    repositories {
-        maven { url 'https://plugins.gradle.org/m2' }
-        maven { url 'https://maven.minecraftforge.net/' }
-    }
-
-    dependencies {
-        classpath 'gradle.plugin.com.github.johnrengelman:shadow:7.1.2'
-        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
-    }
+plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'java-library'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
-
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java-library'
-apply plugin: 'net.minecraftforge.gradle'
 
 sourceCompatibility = 1.8
 targetCompatibility = 17
 
 minecraft {
     mappings channel: 'official', version: minecraftVersion
-}
-
-repositories {
 }
 
 dependencies {
@@ -54,10 +41,6 @@ processResources {
     filesMatching('META-INF/mods.toml') {
         expand 'version': project.ext.fullVersion
     }
-}
-
-reobf {
-    shadowJar {}
 }
 
 shadowJar {
