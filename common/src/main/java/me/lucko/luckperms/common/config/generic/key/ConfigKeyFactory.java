@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.config.generic.key;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 
 import java.util.Locale;
@@ -36,6 +37,7 @@ public interface ConfigKeyFactory<T> {
 
     ConfigKeyFactory<Boolean> BOOLEAN = ConfigurationAdapter::getBoolean;
     ConfigKeyFactory<String> STRING = ConfigurationAdapter::getString;
+    ConfigKeyFactory<List<String>> STRING_LIST = ConfigurationAdapter::getStringList;
     ConfigKeyFactory<String> LOWERCASE_STRING = (adapter, path, def) -> adapter.getString(path, def).toLowerCase(Locale.ROOT);
     ConfigKeyFactory<Map<String, String>> STRING_MAP = (config, path, def) -> ImmutableMap.copyOf(config.getStringMap(path, ImmutableMap.of()));
 
@@ -54,6 +56,10 @@ public interface ConfigKeyFactory<T> {
 
     static SimpleConfigKey<String> stringKey(String path, String def) {
         return key(new Bound<>(STRING, path, def));
+    }
+
+    static SimpleConfigKey<List<String>> stringListKey(String path, List<String> def) {
+        return key(new Bound<>(STRING_LIST, path, def));
     }
 
     static SimpleConfigKey<String> lowercaseStringKey(String path, String def) {

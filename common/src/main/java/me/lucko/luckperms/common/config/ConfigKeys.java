@@ -31,6 +31,7 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.*;
 import me.lucko.luckperms.common.config.generic.key.SimpleConfigKey;
 import me.lucko.luckperms.common.context.calculator.WorldNameRewriter;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
@@ -66,13 +67,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
-import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.booleanKey;
-import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.key;
-import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.lowercaseStringKey;
-import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.mapKey;
-import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.notReloadable;
-import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.stringKey;
 
 /**
  * All of the {@link ConfigKey}s used by LuckPerms.
@@ -637,7 +631,7 @@ public final class ConfigKeys {
     /**
      * The address of the redis server
      */
-    public static final ConfigKey<String> REDIS_ADDRESS = notReloadable(stringKey("redis.address", null));
+    public static final ConfigKey<List<String>> REDIS_ADDRESSES = notReloadable(stringListKey("redis.addresses", null));
 
     /**
      * The username to connect with, or an empty string if it should use default

@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.messaging.redis;
 
+import java.util.List;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
@@ -54,8 +55,8 @@ public class RedisMessenger implements Messenger {
         this.consumer = consumer;
     }
 
-    public void init(String address, String username, String password, boolean ssl) {
-        String[] addressSplit = address.split(":");
+    public void init(List<String> addresses, String username, String password, boolean ssl) {
+        String[] addressSplit = addresses.get(0).split(":"); // TODO: Only for config testing
         String host = addressSplit[0];
         int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
 
