@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.messaging.postgres;
 
-import com.impossibl.postgres.api.jdbc.PGConnection;
-import com.impossibl.postgres.api.jdbc.PGNotificationListener;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
@@ -34,12 +32,17 @@ import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.postgresql.PGConnection;
+import org.postgresql.PGNotification;
+import org.postgresql.util.PSQLException;
 
+import java.net.SocketException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An implementation of {@link Messenger} using Postgres.
@@ -68,7 +71,7 @@ public class PostgresMessenger implements Messenger {
 
     @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
-        try (PGConnection connection = this.sqlStorage.getConnectionFactory().getConnection().unwrap(PGConnection.class)) {
+        try (Connection connection = this.sqlStorage.getConnectionFactory().getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement("SELECT pg_notify(?, ?)")) {
                 ps.setString(1, CHANNEL);
                 ps.setString(2, outgoingMessage.asEncodedString());
@@ -122,47 +125,60 @@ public class PostgresMessenger implements Messenger {
         }
     }
 
-    private class NotificationListener implements PGNotificationListener, AutoCloseable {
-        private final CountDownLatch latch = new CountDownLatch(1);
-        private final AtomicBoolean listening = new AtomicBoolean(false);
+    private class NotificationListener implements AutoCloseable {
+        private static final int RECEIVE_TIMEOUT_MILLIS = 1000;
+
+        private final AtomicBoolean open = new AtomicBoolean(true);
+        private final AtomicReference<Thread> listeningThread = new AtomicReference<>();
 
         public void listenAndBind() {
-            try (PGConnection connection = PostgresMessenger.this.sqlStorage.getConnectionFactory().getConnection().unwrap(PGConnection.class)) {
-                connection.addNotificationListener(CHANNEL, this);
-
+            try (Connection connection = PostgresMessenger.this.sqlStorage.getConnectionFactory().getConnection()) {
                 try (Statement s = connection.createStatement()) {
                     s.execute("LISTEN \"" + CHANNEL + "\"");
                 }
 
-                this.listening.set(true);
-                this.latch.await();
+                PGConnection pgConnection = connection.unwrap(PGConnection.class);
+                this.listeningThread.set(Thread.currentThread());
+
+                while (this.open.get()) {
+                    PGNotification[] notifications = pgConnection.getNotifications(RECEIVE_TIMEOUT_MILLIS);
+                    if (notifications != null) {
+                        for (PGNotification notification : notifications) {
+                            handleNotification(notification);
+                        }
+                    }
+                }
+
+            } catch (PSQLException e) {
+                if (!(e.getCause() instanceof SocketException && e.getCause().getMessage().equals("Socket closed"))) {
+                    e.printStackTrace();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                this.listening.set(false);
+                this.listeningThread.set(null);
             }
         }
 
         public boolean isListening() {
-            return this.listening.get();
+            return this.listeningThread.get() != null;
         }
 
-        @Override
-        public void notification(int processId, String channelName, String payload) {
-            if (!CHANNEL.equals(channelName)) {
+        public void handleNotification(PGNotification notification) {
+            if (!CHANNEL.equals(notification.getName())) {
                 return;
             }
-            PostgresMessenger.this.consumer.consumeIncomingMessageAsString(payload);
-        }
-
-        @Override
-        public void closed() {
-            this.latch.countDown();
+            PostgresMessenger.this.consumer.consumeIncomingMessageAsString(notification.getParameter());
         }
 
         @Override
         public void close() {
-            this.latch.countDown();
+            if (this.open.compareAndSet(true, false)) {
+                Thread thread = this.listeningThread.get();
+                if (thread != null) {
+                    thread.interrupt();
+                }
+            }
         }
     }
 

@@ -48,9 +48,9 @@ public class PostgresConnectionFactory extends HikariConnectionFactory {
 
     @Override
     protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
-        config.setDataSourceClassName("com.impossibl.postgres.jdbc.PGDataSource");
+        config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
         config.addDataSourceProperty("serverName", address);
-        config.addDataSourceProperty("portNumber", Integer.parseInt(port));
+        config.addDataSourceProperty("portNumber", port);
         config.addDataSourceProperty("databaseName", databaseName);
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
@@ -63,12 +63,6 @@ public class PostgresConnectionFactory extends HikariConnectionFactory {
         // remove the default config properties which don't exist for PostgreSQL
         properties.remove("useUnicode");
         properties.remove("characterEncoding");
-
-        // socketTimeout -> networkTimeout
-        Object socketTimeout = properties.remove("socketTimeout");
-        if (socketTimeout != null) {
-            properties.putIfAbsent("networkTimeout", Integer.parseInt(socketTimeout.toString()));
-        }
     }
 
     @Override

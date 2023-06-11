@@ -78,6 +78,6 @@ dependencies {
     compileOnly 'io.nats:jnats:2.16.4'
     compileOnly 'com.rabbitmq:amqp-client:5.12.0'
     compileOnly 'org.mongodb:mongodb-driver-legacy:4.5.0'
-    compileOnly 'com.impossibl.pgjdbc-ng:pgjdbc-ng:0.8.9'
+    compileOnly 'org.postgresql:postgresql:42.6.0'
     compileOnly 'org.yaml:snakeyaml:1.28'
 }
