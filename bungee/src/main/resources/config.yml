@@ -259,11 +259,11 @@ push-log-entries: true
 broadcast-received-log-entries: false
 
 # Settings for Redis.
-# Port 6379 is used by default; paste the addresses of your nodes in the format "host:port" under addresses.
+# Port 6379 is used by default; set address to "host:port" if differs
+# Multiple Redis nodes can be specified in the same format as a string list under the name "addresses".
 redis:
   enabled: false
-  addresses:
-    - localhost
+  address: localhost
   username: ''
   password: ''
 
