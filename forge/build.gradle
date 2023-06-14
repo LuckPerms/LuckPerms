@@ -23,6 +23,10 @@ dependencies {
     compileOnly project(':forge:forge-api')
 }
 
+reobf {
+    shadowJar {}
+}
+
 shadowJar {
     archiveFileName = "luckperms-forge.jarinjar"
 

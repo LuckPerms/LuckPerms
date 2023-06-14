@@ -43,6 +43,10 @@ processResources {
     }
 }
 
+reobf {
+    shadowJar {}
+}
+
 shadowJar {
     archiveFileName = "LuckPerms-Forge-${project.ext.fullVersion}.jar"
 
