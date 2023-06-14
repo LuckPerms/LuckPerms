@@ -38,8 +38,10 @@ import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.rcon.RconConsoleSource;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Locale;
@@ -107,7 +109,10 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
 
     @Override
     protected boolean isConsole(CommandSourceStack sender) {
-        return !(sender.getEntity() instanceof Player);
+        CommandSource output = sender.source;
+        return output == sender.getServer() || // Console
+                output.getClass() == RconConsoleSource.class || // Rcon
+                (output == CommandSource.NULL && sender.getTextName().equals("")); // Functions
     }
 
     public static net.minecraft.network.chat.Component toNativeText(Component component) {
