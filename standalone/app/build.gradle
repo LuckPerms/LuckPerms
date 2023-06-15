@@ -36,7 +36,7 @@ dependencies {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
     }
-    api('net.kyori:ansi:1.0.0-SNAPSHOT')
+    api('net.kyori:ansi:1.0.1')
 }
 
 blossom {
