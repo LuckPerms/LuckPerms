@@ -25,9 +25,6 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.messaging.nats.NatsMessenger;
@@ -46,6 +43,9 @@ import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Locale;
 
 public class MessagingFactory<P extends LuckPermsPlugin> {

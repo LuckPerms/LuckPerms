@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.common.messaging.redis;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
@@ -43,6 +39,11 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.exceptions.JedisClusterOperationException;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * An implementation of {@link Messenger} using Redis.
