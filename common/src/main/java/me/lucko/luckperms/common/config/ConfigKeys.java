@@ -631,14 +631,11 @@ public final class ConfigKeys {
 
     /**
      * The address of the redis server
-     *
-     * @deprecated The Config Key is only available for backwards compatibility. Please use {@link #REDIS_ADDRESSES}
      */
-    @Deprecated
     public static final ConfigKey<String> REDIS_ADDRESS = notReloadable(stringKey("redis.address", null));
 
     /**
-     * The addresses of the redis servers
+     * The addresses of the redis servers (only for redis clusters)
      */
     public static final ConfigKey<List<String>> REDIS_ADDRESSES = notReloadable(stringListKey("redis.addresses", new ArrayList<>()));
 
