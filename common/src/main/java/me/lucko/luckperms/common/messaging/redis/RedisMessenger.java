@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.messaging.redis;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -35,20 +36,26 @@ import net.luckperms.api.messenger.message.OutgoingMessage;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.DefaultJedisClientConfig;
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisClientConfig;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.Protocol;
+import redis.clients.jedis.exceptions.JedisClusterOperationException;
 
 /**
  * An implementation of {@link Messenger} using Redis.
  */
 public class RedisMessenger implements Messenger {
+
     private static final String CHANNEL = "luckperms:update";
 
     private final LuckPermsPlugin plugin;
     private final IncomingMessageConsumer consumer;
 
     private /* final */ JedisCluster jedisCluster;
+    private /* final */ JedisPool jedisPool;
     private /* final */ Subscription sub;
     private boolean closing = false;
 
@@ -70,21 +77,42 @@ public class RedisMessenger implements Messenger {
                 .timeoutMillis(Protocol.DEFAULT_TIMEOUT);
         if (username != null) jedisClientConfig.user(username);
 
-        this.jedisCluster = new JedisCluster(hosts, jedisClientConfig.build());
+        JedisClientConfig config = jedisClientConfig.build();
+        try {
+            this.jedisCluster = new JedisCluster(hosts, config);
+            this.plugin.getLogger().info("Redis Cluster supported was detected!");
+        } catch (JedisClusterOperationException e) {
+            // The Redis cluster could not be initialized. Therefore, we do not use the cluster support.
+            Optional<HostAndPort> hostAndPort = hosts.stream().findAny();
+            if (hostAndPort.isPresent()) {
+                this.jedisPool = new JedisPool(hostAndPort.get(), config);
+            } else {
+                this.plugin.getLogger().warn("No host for Redis could be found!");
+                return; // If there is no host, then nothing will work anyway.
+            }
+        }
+
         this.sub = new Subscription();
         this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
     }
 
     @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
-        this.jedisCluster.publish(CHANNEL, outgoingMessage.asEncodedString());
+        if (this.jedisPool != null) {
+            try (Jedis jedis = this.jedisPool.getResource()) {
+                jedis.publish(CHANNEL, outgoingMessage.asEncodedString());
+            }
+        } else if (this.jedisCluster != null) {
+            this.jedisCluster.publish(CHANNEL, outgoingMessage.asEncodedString());
+        }
     }
 
     @Override
     public void close() {
         this.closing = true;
         this.sub.unsubscribe();
-        this.jedisCluster.close();
+        if (this.jedisCluster != null) this.jedisCluster.close();
+        if (this.jedisPool != null) this.jedisPool.destroy();
     }
 
     private class Subscription extends JedisPubSub implements Runnable {
@@ -92,7 +120,7 @@ public class RedisMessenger implements Messenger {
         @Override
         public void run() {
             boolean first = true;
-            while (!RedisMessenger.this.closing && !Thread.interrupted() && !RedisMessenger.this.jedisCluster.getClusterNodes().isEmpty()) {
+            while (!RedisMessenger.this.closing && !Thread.interrupted() && this.isRedisAlive()) {
                 try {
                     if (first) {
                         first = false;
@@ -100,7 +128,14 @@ public class RedisMessenger implements Messenger {
                         RedisMessenger.this.plugin.getLogger().info("Redis pubsub connection re-established");
                     }
 
-                    RedisMessenger.this.jedisCluster.subscribe(this, CHANNEL); // blocking call
+                    if (RedisMessenger.this.jedisCluster != null) {
+                        RedisMessenger.this.jedisCluster.subscribe(this, CHANNEL); // blocking call
+                    } else if (RedisMessenger.this.jedisPool != null) {
+                        try (Jedis jedis = RedisMessenger.this.jedisPool.getResource()) {
+                            jedis.subscribe(this, CHANNEL); // blocking call
+                        }
+                    }
+
                 } catch (Exception e) {
                     if (RedisMessenger.this.closing) {
                         return;
@@ -130,6 +165,11 @@ public class RedisMessenger implements Messenger {
             }
             RedisMessenger.this.consumer.consumeIncomingMessageAsString(msg);
         }
-    }
 
+        private boolean isRedisAlive() {
+            if (RedisMessenger.this.jedisCluster != null) return !RedisMessenger.this.jedisCluster.getClusterNodes().isEmpty();
+            if (RedisMessenger.this.jedisPool != null) return !RedisMessenger.this.jedisPool.isClosed();
+            return false;
+        }
+    }
 }

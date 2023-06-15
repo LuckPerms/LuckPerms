@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.messaging;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -195,7 +196,7 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             RedisMessenger redis = new RedisMessenger(getPlugin(), incomingMessageConsumer);
 
             LuckPermsConfiguration config = getPlugin().getConfiguration();
-            List<String> addresses = config.get(ConfigKeys.REDIS_ADDRESSES);
+            List<String> addresses = new ArrayList<>(config.get(ConfigKeys.REDIS_ADDRESSES));
             String username = config.get(ConfigKeys.REDIS_USERNAME);
             String password = config.get(ConfigKeys.REDIS_PASSWORD);
             if (password.isEmpty()) {
