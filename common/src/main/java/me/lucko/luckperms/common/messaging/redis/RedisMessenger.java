@@ -80,9 +80,14 @@ public class RedisMessenger implements Messenger {
         JedisClientConfig config = jedisClientConfig.build();
         try {
             this.jedisCluster = new JedisCluster(hosts, config);
-            this.plugin.getLogger().info("Redis Cluster supported was detected!");
+            this.plugin.getLogger().info("Redis Cluster support was detected!");
         } catch (JedisClusterOperationException e) {
             // The Redis cluster could not be initialized. Therefore, we do not use the cluster support.
+
+            if (addresses.size() > 1) {
+                this.plugin.getLogger().warn("The Redis cluster support seems to be disabled, and the connection to Redis is now only being attempted with a single node.");
+            }
+
             Optional<HostAndPort> hostAndPort = hosts.stream().findAny();
             if (hostAndPort.isPresent()) {
                 this.jedisPool = new JedisPool(hostAndPort.get(), config);
