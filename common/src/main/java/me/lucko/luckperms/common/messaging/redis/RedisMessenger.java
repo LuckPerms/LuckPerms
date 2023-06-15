@@ -121,6 +121,7 @@ public class RedisMessenger implements Messenger {
         public void run() {
             boolean first = true;
             while (!RedisMessenger.this.closing && !Thread.interrupted() && this.isRedisAlive()) {
+                Jedis jedis = null;
                 try {
                     if (first) {
                         first = false;
@@ -131,9 +132,8 @@ public class RedisMessenger implements Messenger {
                     if (RedisMessenger.this.jedisCluster != null) {
                         RedisMessenger.this.jedisCluster.subscribe(this, CHANNEL); // blocking call
                     } else if (RedisMessenger.this.jedisPool != null) {
-                        try (Jedis jedis = RedisMessenger.this.jedisPool.getResource()) {
-                            jedis.subscribe(this, CHANNEL); // blocking call
-                        }
+                        jedis = RedisMessenger.this.jedisPool.getResource();
+                        jedis.subscribe(this, CHANNEL); // blocking call
                     }
 
                 } catch (Exception e) {
@@ -154,6 +154,8 @@ public class RedisMessenger implements Messenger {
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                     }
+                } finally {
+                    if (jedis != null) jedis.close();
                 }
             }
         }
