@@ -110,7 +110,7 @@ public class RedisMessenger implements Messenger {
     @Override
     public void close() {
         this.closing = true;
-        this.sub.unsubscribe();
+        if (this.sub != null) this.sub.unsubscribe();
         if (this.jedisCluster != null) this.jedisCluster.close();
         if (this.jedisPool != null) this.jedisPool.destroy();
     }
