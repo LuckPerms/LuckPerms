@@ -116,6 +116,19 @@ public interface UserManager {
     @NonNull CompletableFuture<Void> saveUser(@NonNull User user);
 
     /**
+     * Saves a user's data back to the plugin's storage provider with an option to give default permissions or not.
+     *
+     * <p>You should call this after you make any changes to a user.</p>
+     *
+     * @param user the user to save
+     * @param shouldGiveDefault if true, will give default group
+     * @return a future to encapsulate the operation.
+     * @throws NullPointerException  if user is null
+     * @throws IllegalStateException if the user instance was not obtained from LuckPerms.
+     */
+    @NonNull CompletableFuture<Void> saveUser(@NonNull User user, boolean shouldGiveDefault);
+
+    /**
      * Loads a user from the plugin's storage provider, applies the given {@code action},
      * then saves the user's data back to storage.
      *
@@ -129,11 +142,29 @@ public interface UserManager {
      * @since 5.1
      */
     default @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super User> action) {
-        /* This default method is overridden in the implementation, and is just here
+        return modifyUser(uniqueId, action, true);
+    }
+    	        /* This default method is overridden in the implementation, and is just here
            to demonstrate what this method does in the API sources. */
+
+    /**
+     * Loads a user from the plugin's storage provider, applies the given {@code action},
+     * then saves the user's data back to storage with an option to give default permissions or not.
+     *
+     * <p>This method effectively calls {@link #loadUser(UUID)}, followed by the {@code action},
+     * then {@link #saveUser(User, boolean)}, and returns an encapsulation of the whole process as a
+     * {@link CompletableFuture}. </p>
+     *
+     * @param uniqueId the uuid of the user
+     * @param action the action to apply to the user
+     * @param shouldGiveDefault if true, will give default group
+     * @return a future to encapsulate the operation
+     * @since 5.1
+     */
+    default @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super User> action, boolean shouldGiveDefault) {
         return loadUser(uniqueId)
                 .thenApplyAsync(user -> { action.accept(user); return user; })
-                .thenCompose(this::saveUser);
+                .thenCompose(user -> saveUser(user, shouldGiveDefault));
     }
 
     /**
