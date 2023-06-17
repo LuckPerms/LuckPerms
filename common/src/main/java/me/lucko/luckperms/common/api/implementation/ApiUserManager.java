@@ -93,9 +93,9 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
         return saveUser(user, true);
     }
 
-    public @NonNull CompletableFuture<Void> saveUser(net.luckperms.api.model.user.@NonNull User user, boolean shouldGiveDefault) {
+    public @NonNull CompletableFuture<Void> saveUser(net.luckperms.api.model.user.@NonNull User user, boolean shouldCheckIfGiveDefaultIfNeeded) {
         User internal = ApiUser.cast(Objects.requireNonNull(user, "user"));
-        if (shouldGiveDefault) {
+        if (shouldCheckIfGiveDefaultIfNeeded) {
             this.plugin.getUserManager().giveDefaultIfNeeded(internal);
         }
         return this.plugin.getStorage().saveUser(internal);
@@ -106,7 +106,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
         return modifyUser(uniqueId, action, true);
     }
 
-    public @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super net.luckperms.api.model.user.User> action, boolean shouldGiveDefault) {
+    public @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super net.luckperms.api.model.user.User> action, boolean shouldCheckIfGiveDefaultIfNeeded) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         Objects.requireNonNull(action, "action");
 
@@ -116,7 +116,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
                     return user;
                 }, this.plugin.getBootstrap().getScheduler().async())
                 .thenCompose(user -> {
-                    if (shouldGiveDefault) {
+                    if (shouldCheckIfGiveDefaultIfNeeded) {
                         this.plugin.getUserManager().giveDefaultIfNeeded(user);
                     }
                     return this.plugin.getStorage().saveUser(user);
