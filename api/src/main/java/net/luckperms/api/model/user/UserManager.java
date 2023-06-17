@@ -121,12 +121,12 @@ public interface UserManager {
      * <p>You should call this after you make any changes to a user.</p>
      *
      * @param user the user to save
-     * @param shouldGiveDefault if true, will give default group
+     * @param shouldCheckIfGiveDefaultIfNeeded if true, will still run a check to check if it will give default if it's needed, if false will not run a check at all
      * @return a future to encapsulate the operation.
      * @throws NullPointerException  if user is null
      * @throws IllegalStateException if the user instance was not obtained from LuckPerms.
      */
-    @NonNull CompletableFuture<Void> saveUser(@NonNull User user, boolean shouldGiveDefault);
+    @NonNull CompletableFuture<Void> saveUser(@NonNull User user, boolean shouldCheckIfGiveDefaultIfNeeded);
 
     /**
      * Loads a user from the plugin's storage provider, applies the given {@code action},
@@ -157,14 +157,14 @@ public interface UserManager {
      *
      * @param uniqueId the uuid of the user
      * @param action the action to apply to the user
-     * @param shouldGiveDefault if true, will give default group
+     * @param shouldCheckIfGiveDefaultIfNeeded if true, will still run a check to check if it will give default if it's needed, if false will not run a check at all
      * @return a future to encapsulate the operation
      * @since 5.1
      */
-    default @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super User> action, boolean shouldGiveDefault) {
+    default @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super User> action, boolean shouldCheckIfGiveDefaultIfNeeded) {
         return loadUser(uniqueId)
                 .thenApplyAsync(user -> { action.accept(user); return user; })
-                .thenCompose(user -> saveUser(user, shouldGiveDefault));
+                .thenCompose(user -> saveUser(user, shouldCheckIfGiveDefaultIfNeeded));
     }
 
     /**
