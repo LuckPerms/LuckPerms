@@ -28,20 +28,31 @@ package me.lucko.luckperms.common.storage;
 import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PrimaryGroupHolder;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.model.manager.group.StandardGroupManager;
+import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
+import me.lucko.luckperms.common.model.manager.user.UserManager;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.node.types.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.file.NonClosableConnection;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.model.PlayerSaveResult.Outcome;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.node.types.PermissionNode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,6 +69,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -66,18 +78,25 @@ import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SqlStorageTest {
 
     @Mock private LuckPermsPlugin plugin;
     @Mock private LuckPermsBootstrap bootstrap;
+    @Mock private LuckPermsConfiguration configuration;
 
     private SqlStorage storage;
 
     @BeforeEach
     public void setupMocksAndDatabase() throws Exception {
         lenient().when(this.plugin.getBootstrap()).thenReturn(this.bootstrap);
+        lenient().when(this.plugin.getConfiguration()).thenReturn(this.configuration);
+        lenient().when(this.plugin.getEventDispatcher()).thenReturn(mock(EventDispatcher.class));
+        lenient().when(this.bootstrap.getScheduler()).thenReturn(mock(SchedulerAdapter.class));
+        lenient().when(this.configuration.get(ConfigKeys.PRIMARY_GROUP_CALCULATION)).thenReturn(PrimaryGroupHolder.AllParentsByWeight::new);
+        lenient().when(this.configuration.get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD)).thenReturn("parents-by-weight");
         lenient().when(this.bootstrap.getResourceStream(anyString()))
                 .then(answer((String path) -> SqlStorageTest.class.getClassLoader().getResourceAsStream(path)));
         lenient().when(this.plugin.getEventDispatcher()).thenReturn(mock(EventDispatcher.class));
@@ -195,6 +214,48 @@ public class SqlStorageTest {
         assertNotNull(loaded);
         assertNotSame(group, loaded);
         assertEquals(nodes, loaded.normalData().asSet());
+    }
+
+    @Test
+    public void testSaveAndDeleteUser() throws SQLException {
+        StandardUserManager userManager = new StandardUserManager(this.plugin);
+
+        //noinspection unchecked,rawtypes
+        when(this.plugin.getUserManager()).thenReturn((UserManager) userManager);
+
+        UUID exampleUniqueId = UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5");
+        String exampleUsername = "Notch";
+        PermissionNode examplePermission = Permission.builder()
+                .permission("test.1")
+                .withContext("server", "test")
+                .build();
+        InheritanceNode defaultGroupNode = Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build();
+
+        // create a default user, assert that is doesn't appear in unique users list
+        this.storage.savePlayerData(exampleUniqueId, exampleUsername);
+        assertFalse(this.storage.getUniqueUsers().contains(exampleUniqueId));
+
+        // give the user a node, assert that it does appear in unique users list
+        User user = this.storage.loadUser(exampleUniqueId, exampleUsername);
+        user.setNode(DataType.NORMAL, examplePermission, true);
+        this.storage.saveUser(user);
+        assertTrue(this.storage.getUniqueUsers().contains(exampleUniqueId));
+
+        // clear all nodes (reset to default) and assert that it does not appear in unique users list
+        user.clearNodes(DataType.NORMAL, null, true);
+        this.storage.saveUser(user);
+        assertFalse(this.storage.getUniqueUsers().contains(exampleUniqueId));
+        assertEquals(ImmutableSet.of(defaultGroupNode), user.normalData().asSet());
+
+        // give it a node again, assert that it shows as a unique user
+        user.setNode(DataType.NORMAL, examplePermission, true);
+        this.storage.saveUser(user);
+        assertTrue(this.storage.getUniqueUsers().contains(exampleUniqueId));
+        assertEquals(ImmutableSet.of(defaultGroupNode, examplePermission), user.normalData().asSet());
+
+        // reload user data from the db and assert that it is unchanged
+        user = this.storage.loadUser(exampleUniqueId, exampleUsername);
+        assertEquals(ImmutableSet.of(defaultGroupNode, examplePermission), user.normalData().asSet());
     }
 
     private static class TestH2ConnectionFactory implements ConnectionFactory {

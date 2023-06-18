@@ -62,7 +62,11 @@ import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class StorageIntegrationTest {
@@ -119,8 +123,10 @@ public class StorageIntegrationTest {
 
         // try to create / save a user
         UUID exampleUniqueId = UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d");
-        plugin.getStorage().savePlayerData(exampleUniqueId, "Luck").join();
-        User user = plugin.getStorage().loadUser(exampleUniqueId, "Luck").join();
+        String exampleUsername = "Luck";
+
+        plugin.getStorage().savePlayerData(exampleUniqueId, exampleUsername).join();
+        User user = plugin.getStorage().loadUser(exampleUniqueId, exampleUsername).join();
         user.setNode(DataType.NORMAL, TEST_PERMISSION_1, true);
         user.setNode(DataType.NORMAL, TEST_PERMISSION_2, true);
         user.setNode(DataType.NORMAL, TEST_GROUP, true);
@@ -137,6 +143,35 @@ public class StorageIntegrationTest {
         User testUser = plugin.getStorage().loadUser(exampleUniqueId, null).join();
         assertNotNull(testUser);
         assertEquals(ImmutableSet.of(Inheritance.builder("default").build(), TEST_PERMISSION_1, TEST_PERMISSION_2, TEST_GROUP, TEST_PREFIX, TEST_META), testUser.normalData().asSet());
+        assertTrue(exampleUsername.equalsIgnoreCase(testUser.getUsername().orElse("unknown")));
+
+
+        // create another user
+        UUID otherExampleUniqueId = UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5");
+        String otherExampleUsername = "Notch";
+
+        plugin.getStorage().savePlayerData(otherExampleUniqueId, otherExampleUsername).join();
+        assertFalse(plugin.getStorage().getUniqueUsers().join().contains(otherExampleUniqueId));
+
+        User otherUser = plugin.getStorage().loadUser(otherExampleUniqueId, otherExampleUsername).join();
+        otherUser.setNode(DataType.NORMAL, TEST_PERMISSION_1, true);
+        plugin.getStorage().saveUser(otherUser).join();
+        assertTrue(plugin.getStorage().getUniqueUsers().join().contains(otherExampleUniqueId));
+
+        otherUser.clearNodes(DataType.NORMAL, null, true);
+        plugin.getStorage().saveUser(otherUser).join();
+        assertFalse(plugin.getStorage().getUniqueUsers().join().contains(otherExampleUniqueId));
+
+
+        // test uuid/username lookup
+        assertEquals(otherExampleUniqueId, plugin.getStorage().getPlayerUniqueId(otherExampleUsername).join());
+        assertTrue(otherExampleUsername.equalsIgnoreCase(plugin.getStorage().getPlayerName(otherExampleUniqueId).join()));
+
+        plugin.getStorage().deletePlayerData(otherExampleUniqueId).join();
+        assertNull(plugin.getStorage().getPlayerUniqueId(otherExampleUsername).join());
+        assertNull(plugin.getStorage().getPlayerName(otherExampleUniqueId).join());
+        assertNull(plugin.getStorage().getPlayerUniqueId("example").join());
+        assertNull(plugin.getStorage().getPlayerName(UUID.randomUUID()).join());
     }
 
     @Nested

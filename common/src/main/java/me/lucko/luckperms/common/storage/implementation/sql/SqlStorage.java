@@ -399,6 +399,13 @@ public class SqlStorage implements StorageImplementation {
             return true;
         });
 
+        // if the user only has the default group, delete their data
+        boolean isDefaultUser = !this.plugin.getUserManager().isNonDefaultUser(user);
+        if (changes != null && isDefaultUser) {
+            user.normalData().addDefaultNodeToChangeSet();
+            changes = null;
+        }
+
         if (changes == null) {
             try (Connection c = this.connectionFactory.getConnection()) {
                 deleteUser(c, user.getUniqueId());
