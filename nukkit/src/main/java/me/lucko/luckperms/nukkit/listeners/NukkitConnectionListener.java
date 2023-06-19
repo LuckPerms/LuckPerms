@@ -193,7 +193,7 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
     public void onPlayerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
 
-        // https://github.com/lucko/LuckPerms/issues/2269
+        // https://github.com/LuckPerms/LuckPerms/issues/2269
         if (player.getUniqueId() == null) {
             return;
         }
