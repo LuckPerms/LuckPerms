@@ -8,7 +8,7 @@ on:
       - 'v*'
   pull_request:
     branches:
-      - 'master'
+      - 'feat/folia'
 
 env:
   REGISTRY: ghcr.io
