@@ -79,8 +79,8 @@ public final class UniqueIdType {
                 break;
             case 2:
                 // if the uuid is version 2, assume it is an NPC
-                // see: https://github.com/lucko/LuckPerms/issues/1470
-                // and https://github.com/lucko/LuckPerms/issues/1470#issuecomment-475403162
+                // see: https://github.com/LuckPerms/LuckPerms/issues/1470
+                // and https://github.com/LuckPerms/LuckPerms/issues/1470#issuecomment-475403162
                 type = UniqueIdDetermineTypeEvent.TYPE_NPC;
                 break;
             default:

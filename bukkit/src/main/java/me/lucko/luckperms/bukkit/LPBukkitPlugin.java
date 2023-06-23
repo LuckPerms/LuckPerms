@@ -217,7 +217,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
          * Vault in their onEnable without depending on us.
          *
          * Noteworthy discussion here:
-         * - https://github.com/lucko/LuckPerms/issues/1959
+         * - https://github.com/LuckPerms/LuckPerms/issues/1959
          * - https://hub.spigotmc.org/jira/browse/SPIGOT-5546
          * - https://github.com/PaperMC/Paper/pull/3509
          */

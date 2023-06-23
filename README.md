@@ -29,7 +29,7 @@ LuckPerms uses Gradle to handle dependencies & building.
 
 #### Compiling from source
 ```sh
-git clone https://github.com/lucko/LuckPerms.git
+git clone https://github.com/LuckPerms/LuckPerms.git
 cd LuckPerms/
 ./gradlew build
 ```
@@ -56,4 +56,4 @@ The project is split up into a few separate modules.
 * **Bukkit, BungeeCord, Fabric, Forge, Nukkit, Sponge & Velocity** - Each use the common module to implement plugins on the respective server platforms.
 
 ## License
-LuckPerms is licensed under the permissive MIT license. Please see [`LICENSE.txt`](https://github.com/lucko/LuckPerms/blob/master/LICENSE.txt) for more info.
+LuckPerms is licensed under the permissive MIT license. Please see [`LICENSE.txt`](https://github.com/LuckPerms/LuckPerms/blob/master/LICENSE.txt) for more info.
