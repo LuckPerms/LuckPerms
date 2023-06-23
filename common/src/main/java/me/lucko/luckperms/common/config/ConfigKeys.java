@@ -67,7 +67,13 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.*;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.booleanKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.key;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.lowercaseStringKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.mapKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.notReloadable;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.stringKey;
+import static me.lucko.luckperms.common.config.generic.key.ConfigKeyFactory.stringListKey;
 
 /**
  * All of the {@link ConfigKey}s used by LuckPerms.
@@ -637,7 +643,7 @@ public final class ConfigKeys {
     /**
      * The addresses of the redis servers (only for redis clusters)
      */
-    public static final ConfigKey<List<String>> REDIS_ADDRESSES = notReloadable(stringListKey("redis.addresses", new ArrayList<>()));
+    public static final ConfigKey<List<String>> REDIS_ADDRESSES = notReloadable(stringListKey("redis.addresses", ImmutableList.of()));
 
     /**
      * The username to connect with, or an empty string if it should use default

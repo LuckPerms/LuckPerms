@@ -45,7 +45,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Locale;
 
 public class MessagingFactory<P extends LuckPermsPlugin> {
@@ -196,7 +195,8 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             RedisMessenger redis = new RedisMessenger(getPlugin(), incomingMessageConsumer);
 
             LuckPermsConfiguration config = getPlugin().getConfiguration();
-            List<String> addresses = new ArrayList<>(config.get(ConfigKeys.REDIS_ADDRESSES));
+            String address = config.get(ConfigKeys.REDIS_ADDRESS);
+            List<String> addresses = config.get(ConfigKeys.REDIS_ADDRESSES);
             String username = config.get(ConfigKeys.REDIS_USERNAME);
             String password = config.get(ConfigKeys.REDIS_PASSWORD);
             if (password.isEmpty()) {
@@ -207,9 +207,18 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             }
             boolean ssl = config.get(ConfigKeys.REDIS_SSL);
 
-            Optional.ofNullable(config.get(ConfigKeys.REDIS_ADDRESS)).ifPresent(addresses::add);
+            if (!addresses.isEmpty()) {
+                // redis cluster
+                addresses = new ArrayList<>(addresses);
+                if (address != null) {
+                    addresses.add(address);
+                }
+                redis.init(addresses, username, password, ssl);
+            } else {
+                // redis pool
+                redis.init(address, username, password, ssl);
+            }
 
-            redis.init(addresses, username, password, ssl);
             return redis;
         }
     }

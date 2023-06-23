@@ -32,12 +32,13 @@ import net.luckperms.api.messenger.message.OutgoingMessage;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.DefaultJedisClientConfig;
 import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisClientConfig;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.Protocol;
+import redis.clients.jedis.UnifiedJedis;
 import redis.clients.jedis.exceptions.JedisClusterOperationException;
 
 import java.util.List;
@@ -49,14 +50,12 @@ import java.util.stream.Collectors;
  * An implementation of {@link Messenger} using Redis.
  */
 public class RedisMessenger implements Messenger {
-
     private static final String CHANNEL = "luckperms:update";
 
     private final LuckPermsPlugin plugin;
     private final IncomingMessageConsumer consumer;
 
-    private /* final */ JedisCluster jedisCluster;
-    private /* final */ JedisPool jedisPool;
+    private /* final */ UnifiedJedis jedis;
     private /* final */ Subscription sub;
     private boolean closing = false;
 
@@ -66,88 +65,73 @@ public class RedisMessenger implements Messenger {
     }
 
     public void init(List<String> addresses, String username, String password, boolean ssl) {
-        Set<HostAndPort> hosts = addresses.stream().map(s -> {
-            String[] addressSplit = s.split(":");
-            String host = addressSplit[0];
-            int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
-            return new HostAndPort(host, port);
-        }).collect(Collectors.toSet());
-        DefaultJedisClientConfig.Builder jedisClientConfig = DefaultJedisClientConfig.builder()
+        Set<HostAndPort> hosts = addresses.stream().map(RedisMessenger::parseAddress).collect(Collectors.toSet());
+        this.init(new JedisCluster(hosts, jedisConfig(username, password, ssl)));
+    }
+
+    public void init(String address, String username, String password, boolean ssl) {
+        this.init(new JedisPooled(parseAddress(address), jedisConfig(username, password, ssl)));
+    }
+
+    private void init(UnifiedJedis jedis) {
+        this.jedis = jedis;
+        this.sub = new Subscription(this);
+        this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
+    }
+
+    private static JedisClientConfig jedisConfig(String username, String password, boolean ssl) {
+        return DefaultJedisClientConfig.builder()
+                .user(username)
                 .password(password)
                 .ssl(ssl)
-                .timeoutMillis(Protocol.DEFAULT_TIMEOUT);
-        if (username != null) jedisClientConfig.user(username);
+                .timeoutMillis(Protocol.DEFAULT_TIMEOUT)
+                .build();
+    }
 
-        JedisClientConfig config = jedisClientConfig.build();
-        try {
-            this.jedisCluster = new JedisCluster(hosts, config);
-            this.plugin.getLogger().info("Redis Cluster support was detected!");
-        } catch (JedisClusterOperationException e) {
-            // The Redis cluster could not be initialized. Therefore, we do not use the cluster support.
-
-            if (addresses.size() > 1) {
-                this.plugin.getLogger().warn("The Redis cluster support seems to be disabled, and the connection to Redis is now only being attempted with a single node.");
-            }
-
-            Optional<HostAndPort> hostAndPort = hosts.stream().findAny();
-            if (hostAndPort.isPresent()) {
-                this.jedisPool = new JedisPool(hostAndPort.get(), config);
-            } else {
-                this.plugin.getLogger().warn("No host for Redis could be found!");
-                return; // If there is no host, then nothing will work anyway.
-            }
-        }
-
-        this.sub = new Subscription();
-        this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
+    private static HostAndPort parseAddress(String address) {
+        String[] addressSplit = address.split(":");
+        String host = addressSplit[0];
+        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
+        return new HostAndPort(host, port);
     }
 
     @Override
     public void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage) {
-        if (this.jedisPool != null) {
-            try (Jedis jedis = this.jedisPool.getResource()) {
-                jedis.publish(CHANNEL, outgoingMessage.asEncodedString());
-            }
-        } else if (this.jedisCluster != null) {
-            this.jedisCluster.publish(CHANNEL, outgoingMessage.asEncodedString());
-        }
+        this.jedis.publish(CHANNEL, outgoingMessage.asEncodedString());
     }
 
     @Override
     public void close() {
         this.closing = true;
-        if (this.sub != null) this.sub.unsubscribe();
-        if (this.jedisCluster != null) this.jedisCluster.close();
-        if (this.jedisPool != null) this.jedisPool.destroy();
+        this.sub.unsubscribe();
+        this.jedis.close();
     }
 
-    private class Subscription extends JedisPubSub implements Runnable {
+    private static class Subscription extends JedisPubSub implements Runnable {
+        private final RedisMessenger messenger;
+
+        private Subscription(RedisMessenger messenger) {
+            this.messenger = messenger;
+        }
 
         @Override
         public void run() {
             boolean first = true;
-            while (!RedisMessenger.this.closing && !Thread.interrupted() && this.isRedisAlive()) {
-                Jedis jedis = null;
+            while (!this.messenger.closing && !Thread.interrupted() && this.isRedisAlive()) {
                 try {
                     if (first) {
                         first = false;
                     } else {
-                        RedisMessenger.this.plugin.getLogger().info("Redis pubsub connection re-established");
+                        this.messenger.plugin.getLogger().info("Redis pubsub connection re-established");
                     }
 
-                    if (RedisMessenger.this.jedisCluster != null) {
-                        RedisMessenger.this.jedisCluster.subscribe(this, CHANNEL); // blocking call
-                    } else if (RedisMessenger.this.jedisPool != null) {
-                        jedis = RedisMessenger.this.jedisPool.getResource();
-                        jedis.subscribe(this, CHANNEL); // blocking call
-                    }
-
+                    this.messenger.jedis.subscribe(this, CHANNEL); // blocking call
                 } catch (Exception e) {
-                    if (RedisMessenger.this.closing) {
+                    if (this.messenger.closing) {
                         return;
                     }
 
-                    RedisMessenger.this.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection", e);
+                    this.messenger.plugin.getLogger().warn("Redis pubsub connection dropped, trying to re-open the connection", e);
                     try {
                         unsubscribe();
                     } catch (Exception ignored) {
@@ -160,8 +144,6 @@ public class RedisMessenger implements Messenger {
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                     }
-                } finally {
-                    if (jedis != null) jedis.close();
                 }
             }
         }
@@ -171,13 +153,19 @@ public class RedisMessenger implements Messenger {
             if (!channel.equals(CHANNEL)) {
                 return;
             }
-            RedisMessenger.this.consumer.consumeIncomingMessageAsString(msg);
+            this.messenger.consumer.consumeIncomingMessageAsString(msg);
         }
 
         private boolean isRedisAlive() {
-            if (RedisMessenger.this.jedisCluster != null) return !RedisMessenger.this.jedisCluster.getClusterNodes().isEmpty();
-            if (RedisMessenger.this.jedisPool != null) return !RedisMessenger.this.jedisPool.isClosed();
-            return false;
+            UnifiedJedis jedis = this.messenger.jedis;
+
+            if (jedis instanceof JedisPooled) {
+                return !((JedisPooled) jedis).getPool().isClosed();
+            } else if (jedis instanceof JedisCluster) {
+                return !((JedisCluster) jedis).getClusterNodes().isEmpty();
+            } else {
+                throw new RuntimeException("Unknown jedis type: " + jedis.getClass().getName());
+            }
         }
     }
 }
