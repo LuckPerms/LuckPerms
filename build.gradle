@@ -1,5 +1,5 @@
 plugins {
-    id 'org.cadixdev.licenser' version '0.6.1' apply false
+    alias(libs.plugins.licenser) apply false
 }
 
 defaultTasks 'licenseFormat', 'build'
