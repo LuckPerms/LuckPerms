@@ -4153,8 +4153,8 @@ public interface Message {
     );
 
     static Component formatColoredValue(String value) {
-        boolean containsLegacyFormattingCharacter = value.indexOf(LegacyComponentSerializer.AMPERSAND_CHAR) != 1
-                || value.indexOf(LegacyComponentSerializer.SECTION_CHAR) != 1;
+        boolean containsLegacyFormattingCharacter = value.indexOf(LegacyComponentSerializer.AMPERSAND_CHAR) != -1
+                || value.indexOf(LegacyComponentSerializer.SECTION_CHAR) != -1;
 
         HoverEvent<Component> hover = HoverEvent.showText(text(value, WHITE));
 
