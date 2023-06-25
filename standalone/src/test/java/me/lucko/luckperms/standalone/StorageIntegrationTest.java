@@ -134,7 +134,7 @@ public class StorageIntegrationTest {
         // try to create / save a track
         Track track = plugin.getStorage().createAndLoadTrack("example", CreationCause.INTERNAL).join();
         track.setGroups(ImmutableList.of("default", "test"));
-        plugin.getStorage().saveTrack(track);
+        plugin.getStorage().saveTrack(track).join();
 
         // try to create / save a user
         UUID exampleUniqueId = UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d");
