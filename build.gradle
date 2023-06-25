@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.licenser) apply false
 }
 
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 defaultTasks 'licenseFormat', 'build'
 
 subprojects {
@@ -15,8 +18,18 @@ subprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
+    }
+
+    tasks.withType(Test).configureEach {
+        testLogging {
+            events = [TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED]
+            exceptionFormat = TestExceptionFormat.FULL
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+        }
     }
 
     jar {
