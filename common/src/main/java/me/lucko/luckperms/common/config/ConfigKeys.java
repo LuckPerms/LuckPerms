@@ -726,6 +726,11 @@ public final class ConfigKeys {
     public static final ConfigKey<String> BYTESOCKS_HOST = stringKey("bytesocks-host", "usersockets.luckperms.net");
 
     /**
+     * If TLS (https/wss) should be used when connecting to bytesocks
+     */
+    public static final ConfigKey<Boolean> BYTESOCKS_USE_TLS = booleanKey("bytesocks-use-tls", true);
+
+    /**
      * The URL of the web editor
      */
     public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = stringKey("web-editor-url", "https://luckperms.net/editor/");

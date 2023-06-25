@@ -87,6 +87,17 @@ public abstract class BufferedRequest<T> {
     }
 
     /**
+     * Gets if the request buffer has been enqueued
+     *
+     * @return if the buffer is enqueued
+     */
+    public boolean isEnqueued() {
+        synchronized (this.mutex) {
+            return this.processor != null;
+        }
+    }
+
+    /**
      * Requests the value, bypassing the buffer
      *
      * @return the value

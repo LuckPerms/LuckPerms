@@ -56,10 +56,9 @@ import java.util.stream.Collectors;
  */
 public class WebEditorSession {
 
-    public static void createAndOpen(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
+    public static WebEditorSession create(List<PermissionHolder> holders, List<Track> tracks, Sender sender, String cmdLabel, LuckPermsPlugin plugin) {
         WebEditorRequest initialRequest = WebEditorRequest.generate(holders, tracks, sender, cmdLabel, plugin);
-        WebEditorSession session = new WebEditorSession(initialRequest, plugin, sender, cmdLabel);
-        session.open();
+        return new WebEditorSession(initialRequest, plugin, sender, cmdLabel);
     }
 
     private WebEditorRequest initialRequest;
@@ -83,9 +82,9 @@ public class WebEditorSession {
         this.tracks = new LinkedHashSet<>(initialRequest.getTracks().keySet());
     }
 
-    public void open() {
+    public String open() {
         createSocket();
-        createInitialSession();
+        return createInitialSession();
     }
 
     private void createSocket() {
@@ -117,7 +116,7 @@ public class WebEditorSession {
         return false;
     }
 
-    private void createInitialSession() {
+    private String createInitialSession() {
         Objects.requireNonNull(this.initialRequest);
 
         WebEditorRequest request = this.initialRequest;
@@ -129,7 +128,7 @@ public class WebEditorSession {
 
         String id = uploadRequestData(request);
         if (id == null) {
-            return;
+            return null;
         }
 
         // form a url for the editor
@@ -140,6 +139,12 @@ public class WebEditorSession {
         if (this.socket != null) {
             this.socket.scheduleCleanupIfUnused();
         }
+
+        return id;
+    }
+
+    public WebEditorSocket getSocket() {
+        return this.socket;
     }
 
     public void includeCreatedGroup(Group group) {

@@ -49,11 +49,11 @@ public class BytesocksClient extends AbstractHttpClient {
      * @param host the bytesocks host
      * @param userAgent the client user agent string
      */
-    public BytesocksClient(OkHttpClient okHttpClient, String host, String userAgent) {
+    public BytesocksClient(OkHttpClient okHttpClient, String host, boolean tls, String userAgent) {
         super(okHttpClient);
 
-        this.httpUrl = "https://" + host + "/";
-        this.wsUrl = "wss://" + host + "/";
+        this.httpUrl = (tls ? "https://" : "http://") + host + "/";
+        this.wsUrl = (tls ? "wss://" : "ws://") + host + "/";
         this.userAgent = userAgent;
     }
 

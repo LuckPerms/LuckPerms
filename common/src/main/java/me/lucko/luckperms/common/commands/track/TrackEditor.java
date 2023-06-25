@@ -97,7 +97,7 @@ public class TrackEditor extends ChildCommand<Track> {
 
         Message.EDITOR_START.send(sender);
 
-        WebEditorSession.createAndOpen(holders, Collections.singletonList(target), sender, label, plugin);
+        WebEditorSession.create(holders, Collections.singletonList(target), sender, label, plugin).open();
     }
 
 }

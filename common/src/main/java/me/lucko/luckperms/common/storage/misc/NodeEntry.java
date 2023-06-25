@@ -55,6 +55,11 @@ public final class NodeEntry<H extends Comparable<H>, N extends Node> implements
     }
 
     @Override
+    public String toString() {
+        return "NodeEntry(holder=" + this.holder + ", node=" + this.node + ')';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof NodeEntry)) return false;

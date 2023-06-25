@@ -126,7 +126,7 @@ public final class TestPluginBootstrap extends LPStandaloneBootstrap {
         }
     }
 
-    static final class TestSenderFactory extends StandaloneSenderFactory {
+    public static final class TestSenderFactory extends StandaloneSenderFactory {
 
         private Function<String, Tristate> permissionChecker;
 

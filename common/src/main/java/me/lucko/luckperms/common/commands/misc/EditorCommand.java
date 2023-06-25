@@ -107,7 +107,7 @@ public class EditorCommand extends SingleCommand {
 
         Message.EDITOR_START.send(sender);
 
-        WebEditorSession.createAndOpen(holders, tracks, sender, label, plugin);
+        WebEditorSession.create(holders, tracks, sender, label, plugin).open();
     }
 
     private enum Type {

@@ -76,9 +76,6 @@ public class WebEditorStore {
     }
 
     public KeyPair keyPair() {
-        if (!this.keyPair.get().isDone()) {
-            throw new IllegalStateException("Web editor keypair has not been generated yet! Has the server just started?");
-        }
         return this.keyPair.get().join();
     }
 
