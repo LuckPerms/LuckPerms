@@ -28,10 +28,6 @@ package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 import com.zaxxer.hikari.HikariConfig;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.function.Function;
 

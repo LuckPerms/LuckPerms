@@ -28,9 +28,7 @@ package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 import com.zaxxer.hikari.HikariConfig;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
-import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class MariaDbConnectionFactory extends HikariConnectionFactory {
     public MariaDbConnectionFactory(StorageCredentials configuration) {
