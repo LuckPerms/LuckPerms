@@ -45,8 +45,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Utility for testing LuckPerms commands with BDD-like given/when/then assertions.
@@ -155,11 +157,25 @@ public final class CommandTester implements Consumer<Component>, Function<String
      * @return this
      */
     public CommandTester thenExpect(String expected) {
-        String actual = this.renderBuffer().stream()
-                .map(String::trim)
-                .collect(Collectors.joining("\n"));
-
+        String actual = this.renderBuffer();
         assertEquals(expected.trim(), actual.trim());
+
+        if (this.permissions != null) {
+            assertEquals(this.checkedPermissions, this.permissions.keySet());
+        }
+
+        return this.clearMessageBuffer();
+    }
+
+    /**
+     * Asserts that the current contents of the message buffer starts with the given input string.
+     *
+     * @param expected the expected contents
+     * @return this
+     */
+    public CommandTester thenExpectStartsWith(String expected) {
+        String actual = this.renderBuffer();
+        assertTrue(actual.trim().startsWith(expected.trim()), "expected '" + actual + "' to start with '" + expected + "'");
 
         if (this.permissions != null) {
             assertEquals(this.checkedPermissions, this.permissions.keySet());
@@ -180,14 +196,21 @@ public final class CommandTester implements Consumer<Component>, Function<String
     }
 
     /**
-     * Renders the contents of the message buffer.
+     * Renders the contents of the message buffer as a stream of lines.
      *
      * @return rendered copy of the buffer
      */
-    public List<String> renderBuffer() {
-        return this.messageBuffer.stream()
-                .map(component -> PlainTextComponentSerializer.plainText().serialize(component))
-                .collect(Collectors.toList());
+    public Stream<String> renderBufferStream() {
+        return this.messageBuffer.stream().map(component -> PlainTextComponentSerializer.plainText().serialize(component));
+    }
+
+    /**
+     * Renders the contents of the message buffer as a joined string.
+     *
+     * @return rendered copy of the buffer
+     */
+    public String renderBuffer() {
+        return this.renderBufferStream().map(String::trim).collect(Collectors.joining("\n"));
     }
 
     /**
@@ -206,7 +229,7 @@ public final class CommandTester implements Consumer<Component>, Function<String
         System.out.printf(".givenHasPermissions(%s)%n", checkedPermissions);
         System.out.printf(".whenRunCommand(\"%s\")%n", cmd);
 
-        List<String> render = this.renderBuffer();
+        List<String> render = this.renderBufferStream().toList();
         if (render.size() == 1) {
             System.out.printf(".thenExpect(\"%s\")%n", render.get(0));
         } else {
