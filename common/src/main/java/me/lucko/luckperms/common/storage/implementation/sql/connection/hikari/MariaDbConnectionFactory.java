@@ -25,12 +25,11 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
-import com.zaxxer.hikari.HikariConfig;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import java.util.function.Function;
 
-public class MariaDbConnectionFactory extends HikariConnectionFactory {
+public class MariaDbConnectionFactory extends DriverBasedHikariConnectionFactory {
     public MariaDbConnectionFactory(StorageCredentials configuration) {
         super(configuration);
     }
@@ -46,21 +45,13 @@ public class MariaDbConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
-        config.setDriverClassName("org.mariadb.jdbc.Driver");
-        config.setJdbcUrl("jdbc:mariadb://" + address + ":" + port + "/" + databaseName);
-        config.setUsername(username);
-        config.setPassword(password);
+    protected String driverClassName() {
+        return "org.mariadb.jdbc.Driver";
     }
 
     @Override
-    protected void postInitialize() {
-        super.postInitialize();
-
-        // Calling Class.forName("org.mariadb.jdbc.Driver") is enough to call the static initializer
-        // which makes our driver available in DriverManager. We don't want that, so unregister it after
-        // the pool has been setup.
-        deregisterDriver("org.mariadb.jdbc.Driver");
+    protected String driverJdbcIdentifier() {
+        return "mariadb";
     }
 
     @Override

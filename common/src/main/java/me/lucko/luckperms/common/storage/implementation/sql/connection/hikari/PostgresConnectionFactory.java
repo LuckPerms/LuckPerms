@@ -25,13 +25,12 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
-import com.zaxxer.hikari.HikariConfig;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class PostgresConnectionFactory extends HikariConnectionFactory {
+public class PostgresConnectionFactory extends DriverBasedHikariConnectionFactory {
     public PostgresConnectionFactory(StorageCredentials configuration) {
         super(configuration);
     }
@@ -47,13 +46,13 @@ public class PostgresConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
-        config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
-        config.addDataSourceProperty("serverName", address);
-        config.addDataSourceProperty("portNumber", port);
-        config.addDataSourceProperty("databaseName", databaseName);
-        config.addDataSourceProperty("user", username);
-        config.addDataSourceProperty("password", password);
+    protected String driverClassName() {
+        return "org.postgresql.Driver";
+    }
+
+    @Override
+    protected String driverJdbcIdentifier() {
+        return "postgresql";
     }
 
     @Override
