@@ -13,6 +13,7 @@ test {
             excludeTags 'docker'
         }
     }
+    systemProperty('net.kyori.ansi.colorLevel', 'indexed16')
 }
 
 jacocoTestReport {

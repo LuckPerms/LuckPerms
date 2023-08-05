@@ -24,7 +24,7 @@ For more information, see the wiki article on [Why LuckPerms?](https://luckperms
 LuckPerms uses Gradle to handle dependencies & building.
 
 #### Requirements
-* Java 8 JDK or newer
+* Java 17 JDK or newer
 * Git
 
 #### Compiling from source
