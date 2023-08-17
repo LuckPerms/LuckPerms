@@ -1,0 +1,38 @@
+plugins {
+    id 'com.github.johnrengelman.shadow'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compileOnly 'net.onelitefeather.microtus:Minestom:1.1.1'
+
+    implementation project(':api')
+    implementation project(':common:loader-utils')
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+processResources {
+    filesMatching("extension.json") {
+        expand 'pluginVersion': project.ext.fullVersion
+    }
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-Minestom-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':minestom').tasks.shadowJar.archiveFile
+    }
+}
+
+artifacts {
+    archives shadowJar
+}
