@@ -1,12 +1,19 @@
-// Fabric Needs this
 pluginManagement {
     repositories {
-        jcenter()
         maven {
-            url 'https://maven.fabricmc.net/'
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        maven {
+            name = 'Forge'
+            url = 'https://maven.minecraftforge.net/'
         }
         gradlePluginPortal()
     }
+}
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version("0.5.0")
 }
 
 rootProject.name = 'luckperms'

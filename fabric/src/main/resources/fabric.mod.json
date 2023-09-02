@@ -17,8 +17,8 @@
   "license": "MIT",
   "contact": {
     "homepage": "https://luckperms.net",
-    "source": "https://github.com/lucko/LuckPerms",
-    "issues": "https://github.com/lucko/LuckPerms/issues"
+    "source": "https://github.com/LuckPerms/LuckPerms",
+    "issues": "https://github.com/LuckPerms/LuckPerms/issues"
   },
   "environment": "server",
   "entrypoints": {

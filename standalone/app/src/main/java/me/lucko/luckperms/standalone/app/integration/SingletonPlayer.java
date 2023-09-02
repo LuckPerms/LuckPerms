@@ -26,8 +26,9 @@
 package me.lucko.luckperms.standalone.app.integration;
 
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
-import me.lucko.luckperms.standalone.app.utils.AnsiUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
+import net.kyori.ansi.ColorLevel;
 
 import java.util.Set;
 import java.util.UUID;
@@ -46,7 +47,7 @@ public class SingletonPlayer {
     private static final UUID UUID = new UUID(0, 0);
 
     /** A message sink that prints the component to stdout */
-    private static final Consumer<Component> PRINT_TO_STDOUT = component -> LuckPermsApplication.LOGGER.info(AnsiUtils.format(component));
+    private static final Consumer<Component> PRINT_TO_STDOUT = component -> LuckPermsApplication.LOGGER.info(ANSIComponentSerializer.ansi().serialize(component));
 
     /** Singleton instance */
     public static final SingletonPlayer INSTANCE = new SingletonPlayer();

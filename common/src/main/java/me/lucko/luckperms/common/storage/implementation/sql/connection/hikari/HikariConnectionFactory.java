@@ -37,11 +37,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -243,20 +240,6 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
             }
 
             logger.warn("Class " + className + " has been loaded by: " + loaderName);
-        }
-    }
-
-    protected static void deregisterDriver(String driverClassName) {
-        Enumeration<Driver> drivers = DriverManager.getDrivers();
-        while (drivers.hasMoreElements()) {
-            Driver driver = drivers.nextElement();
-            if (driver.getClass().getName().equals(driverClassName)) {
-                try {
-                    DriverManager.deregisterDriver(driver);
-                } catch (SQLException e) {
-                    // ignore
-                }
-            }
         }
     }
 }

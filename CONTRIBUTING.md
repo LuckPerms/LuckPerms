@@ -8,7 +8,7 @@ Before reporting a bug or issue, please make sure that the issue is actually bei
 
 If you're unsure, feel free to ask using the above resources BEFORE making a report.
 
-Bugs or issues should be reported using the [GitHub Issues tab](https://github.com/lucko/LuckPerms/issues).
+Bugs or issues should be reported using the [GitHub Issues tab](https://github.com/LuckPerms/LuckPerms/issues).
 
 ### :pencil: Want to contribute code?
 #### Pull Requests

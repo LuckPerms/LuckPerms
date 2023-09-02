@@ -27,6 +27,8 @@ package me.lucko.luckperms.common.model.nodemap;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
+import me.lucko.luckperms.common.model.manager.group.GroupManager;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.util.Difference;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -84,6 +86,12 @@ public class RecordedNodeMap implements NodeMap {
         } finally {
             this.lock.unlock();
         }
+    }
+
+    public Difference<Node> addDefaultNodeToChangeSet() {
+        Difference<Node> diff = new Difference<>();
+        diff.recordChange(Difference.ChangeType.ADD, Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build());
+        return record(diff);
     }
 
     private Difference<Node> record(Difference<Node> result) {

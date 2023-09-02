@@ -1,22 +1,21 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'fabric-loom' version '1.1-SNAPSHOT'
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.loom)
 }
 
 archivesBaseName = 'luckperms'
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
-    mavenLocal()
 }
 
 dependencies {
     // https://modmuss50.me/fabric.html
-    minecraft 'com.mojang:minecraft:1.19.4'
-    mappings 'net.fabricmc:yarn:1.19.4+build.1:v2'
-    modImplementation 'net.fabricmc:fabric-loader:0.14.17'
+    minecraft 'com.mojang:minecraft:1.20.1'
+    mappings 'net.fabricmc:yarn:1.20.1+build.2:v2'
+    modImplementation 'net.fabricmc:fabric-loader:0.14.21'
 
     Set<String> apiModules = [
             'fabric-api-base',
@@ -26,7 +25,7 @@ dependencies {
     ]
 
     apiModules.forEach {
-        modImplementation(fabricApi.module(it, '0.76.0+1.19.4'))
+        modImplementation(fabricApi.module(it, '0.83.1+1.20.1'))
     }
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.2-SNAPSHOT'))
@@ -61,7 +60,7 @@ shadowJar {
     relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
     relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
     relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
-    relocate 'com.impossibl', 'me.lucko.luckperms.lib.postgresql'
+    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
     relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
     relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
     relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
@@ -75,8 +74,8 @@ shadowJar {
 
 task remappedShadowJar(type: RemapJarTask) {
     dependsOn tasks.shadowJar
-    input.set(tasks.shadowJar.archiveFile)
-    addNestedDependencies.set(true)
+    input = tasks.shadowJar.archiveFile
+    addNestedDependencies = true
     archiveFileName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
 }
 

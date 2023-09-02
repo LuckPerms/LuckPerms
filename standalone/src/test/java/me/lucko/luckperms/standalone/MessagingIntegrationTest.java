@@ -26,9 +26,13 @@
 package me.lucko.luckperms.standalone;
 
 import com.google.common.collect.ImmutableMap;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.standalone.app.integration.HealthReporter;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
+import net.luckperms.api.actionlog.Action;
+import net.luckperms.api.event.EventBus;
+import net.luckperms.api.event.log.LogReceiveEvent;
 import net.luckperms.api.event.sync.PreNetworkSyncEvent;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -41,6 +45,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -69,14 +74,33 @@ public class MessagingIntegrationTest {
             assertNotNull(messagingServiceA);
             assertNotNull(messagingServiceB);
 
-            CountDownLatch latch = new CountDownLatch(1);
-            pluginB.app().getApi().getEventBus().subscribe(PreNetworkSyncEvent.class, e -> {
+            LoggedAction exampleLogEntry = LoggedAction.build()
+                    .source(UUID.randomUUID())
+                    .sourceName("Test Source")
+                    .targetType(Action.Target.Type.USER)
+                    .target(UUID.randomUUID())
+                    .targetName("Test Target")
+                    .description("hello 123 hello 123")
+                    .build();
+
+            // register 2 listeners on plugin B
+            CountDownLatch latch = new CountDownLatch(2);
+            EventBus eventBus = pluginB.app().getApi().getEventBus();
+            eventBus.subscribe(PreNetworkSyncEvent.class, e -> {
                 latch.countDown();
                 e.setCancelled(true);
             });
+            eventBus.subscribe(LogReceiveEvent.class, e -> {
+                if (e.getEntry().equals(exampleLogEntry)) {
+                    latch.countDown();
+                }
+            });
 
-            // send a message from plugin A to plugin B and wait for the message to be received
+            // send some messages from plugin A to plugin B
             messagingServiceA.pushUpdate();
+            messagingServiceA.pushLog(exampleLogEntry);
+
+            // wait for the messages to be sent/received
             assertTrue(latch.await(30, TimeUnit.SECONDS));
         }
     }

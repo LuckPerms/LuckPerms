@@ -149,8 +149,17 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 .callTimeout(15, TimeUnit.SECONDS)
                 .build();
 
-        this.bytebin = new BytebinClient(this.httpClient, getConfiguration().get(ConfigKeys.BYTEBIN_URL), "luckperms");
-        this.bytesocks = new BytesocksClient(this.httpClient, getConfiguration().get(ConfigKeys.BYTESOCKS_HOST), "luckperms/editor");
+        this.bytebin = new BytebinClient(
+                this.httpClient,
+                getConfiguration().get(ConfigKeys.BYTEBIN_URL),
+                "luckperms"
+        );
+        this.bytesocks = new BytesocksClient(
+                this.httpClient,
+                getConfiguration().get(ConfigKeys.BYTESOCKS_HOST),
+                getConfiguration().get(ConfigKeys.BYTESOCKS_USE_TLS),
+                "luckperms/editor"
+        );
         this.webEditorStore = new WebEditorStore(this);
 
         // init translation repo and update bundle files
@@ -176,7 +185,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
                 this.fileWatcher = new FileWatcher(this, getBootstrap().getDataDirectory());
             } catch (Throwable e) {
                 // catch throwable here, seems some JVMs throw UnsatisfiedLinkError when trying
-                // to create a watch service. see: https://github.com/lucko/LuckPerms/issues/2066
+                // to create a watch service. see: https://github.com/LuckPerms/LuckPerms/issues/2066
                 getLogger().warn("Error occurred whilst trying to create a file watcher:", e);
             }
         }
@@ -450,6 +459,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     @Override
     public LuckPermsConfiguration getConfiguration() {
         return this.configuration;
+    }
+
+    public OkHttpClient getHttpClient() {
+        return this.httpClient;
     }
 
     @Override

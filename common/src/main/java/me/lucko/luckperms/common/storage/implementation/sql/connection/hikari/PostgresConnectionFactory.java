@@ -25,13 +25,12 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
-import com.zaxxer.hikari.HikariConfig;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class PostgresConnectionFactory extends HikariConnectionFactory {
+public class PostgresConnectionFactory extends DriverBasedHikariConnectionFactory {
     public PostgresConnectionFactory(StorageCredentials configuration) {
         super(configuration);
     }
@@ -47,13 +46,13 @@ public class PostgresConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
-        config.setDataSourceClassName("com.impossibl.postgres.jdbc.PGDataSource");
-        config.addDataSourceProperty("serverName", address);
-        config.addDataSourceProperty("portNumber", Integer.parseInt(port));
-        config.addDataSourceProperty("databaseName", databaseName);
-        config.addDataSourceProperty("user", username);
-        config.addDataSourceProperty("password", password);
+    protected String driverClassName() {
+        return "org.postgresql.Driver";
+    }
+
+    @Override
+    protected String driverJdbcIdentifier() {
+        return "postgresql";
     }
 
     @Override
@@ -63,12 +62,6 @@ public class PostgresConnectionFactory extends HikariConnectionFactory {
         // remove the default config properties which don't exist for PostgreSQL
         properties.remove("useUnicode");
         properties.remove("characterEncoding");
-
-        // socketTimeout -> networkTimeout
-        Object socketTimeout = properties.remove("socketTimeout");
-        if (socketTimeout != null) {
-            properties.putIfAbsent("networkTimeout", Integer.parseInt(socketTimeout.toString()));
-        }
     }
 
     @Override

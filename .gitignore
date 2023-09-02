@@ -1,3 +1,6 @@
+### LuckPerms Standalone ###
+standalone/loader/data/
+
 ### Gradle & IntelliJ ###
 .gradle/
 /.idea/

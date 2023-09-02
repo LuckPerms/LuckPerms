@@ -56,36 +56,35 @@ public enum Dependency {
     JAR_RELOCATOR(
             "me.lucko",
             "jar-relocator",
-            "1.4",
-            "1RsiF3BiVztjlfTA+svDCuoDSGFuSpTZYHvUK8yBx8I="
+            "1.7",
+            "b30RhOF6kHiHl+O5suNLh/+eAr1iOFEFLXhwkHHDu4I="
     ),
-
     ADVENTURE(
             "me{}lucko",
             "adventure-api",
-            "4.11.0",
-            "7xrFaBbsTiQPZKBDzvDnTd8XIgOsHTy9qQICm3342GU=",
+            "4.13.0",
+            "gcmYlY1KDrzbnE9nB8rA44oBZKPSMvv9kNRefoEuud0=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM(
             "me{}lucko",
             "adventure-platform-api",
-            "4.11.2",
-            "zCnxNgosme++TsheFaL+YHdtRIrp+oJhUiI8awsKgfQ=",
+            "4.13.0",
+            "Kk8IkEMVa9ITBfC3yocpcXQiZ9CwN9VxeWjKUD8I0n0=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM_BUKKIT(
             "me{}lucko",
             "adventure-platform-bukkit",
-            "4.11.2",
-            "mrtYZvt00GH4oejuBJ2QEbFkmz1F+PGmthPwroSxCgo=",
+            "4.13.0",
+            "Rif/+xdGfRrlhxXYb2+jMFBnwnLQ2pnjAJ/BxWApins=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     ADVENTURE_PLATFORM_BUNGEECORD(
             "me{}lucko",
             "adventure-platform-bungeecord",
-            "4.11.2",
-            "+WUdRdZ6qkacw3ha/R3ayLx46soMywGe70Zmnw4yha8=",
+            "4.13.0",
+            "MLk/qAgWC9YT2ImLq/sVo114V5Rk1jQr4jc57WAoO74=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
     EVENT(
@@ -153,18 +152,11 @@ public enum Dependency {
             Relocation.of("mysql", "com{}mysql")
     ),
     POSTGRESQL_DRIVER(
-            "com{}impossibl{}pgjdbc-ng",
-            "pgjdbc-ng",
-            "0.8.9",
-            "WEYMezl02Rot2n2ATs7NABcvL9ceQ/oLA/XPduIEaWA=",
-            Relocation.of("postgresql", "com{}impossibl")
-    ),
-    POSTGRESQL_DRIVER_SPY(
-            "com{}impossibl{}pgjdbc-ng",
-            "spy",
-            "0.8.9",
-            "72ZuhpMy/4EYJZuSjBjGI5NGgdWmOpwjDHW9ISnqso8=",
-            Relocation.of("postgresql", "com{}impossibl")
+            "org{}postgresql",
+            "postgresql",
+            "42.6.0",
+            "uBfGekDJQkn9WdTmhuMyftDT0/rkJrINoPHnVlLPxGE=",
+            Relocation.of("postgresql", "org{}postgresql")
     ),
     H2_DRIVER_LEGACY(
             "com.h2database",
@@ -246,8 +238,8 @@ public enum Dependency {
     JEDIS(
             "redis.clients",
             "jedis",
-            "3.5.2",
-            "jX3340YaYjHFQN2sA+GCo33LB4FuIYKgQUPUv2MK/Xo=",
+            "4.4.3",
+            "wwwoCDPCywcfoNwpvwP95kXYusXSTtXhuVrB31sxE0k=",
             Relocation.of("jedis", "redis{}clients{}jedis"),
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),

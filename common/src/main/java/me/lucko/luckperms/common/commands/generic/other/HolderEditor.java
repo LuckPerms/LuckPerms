@@ -84,7 +84,7 @@ public class HolderEditor<T extends PermissionHolder> extends ChildCommand<T> {
 
         Message.EDITOR_START.send(sender);
 
-        WebEditorSession.createAndOpen(holders, Collections.emptyList(), sender, label, plugin);
+        WebEditorSession.create(holders, Collections.emptyList(), sender, label, plugin).open();
     }
 
 }

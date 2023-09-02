@@ -131,6 +131,11 @@ public class FileActionLogger {
     }
 
     public Log getLog() throws IOException {
+        // if there is log content waiting to be written, flush immediately before trying to read
+        if (this.saveBuffer.isEnqueued()) {
+            this.saveBuffer.requestDirectly();
+        }
+
         if (!Files.exists(this.contentFile)) {
             return Log.empty();
         }

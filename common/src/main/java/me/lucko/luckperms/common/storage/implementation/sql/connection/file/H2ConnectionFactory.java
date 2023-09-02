@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.storage.implementation.sql.connection.file;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -122,6 +123,12 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
             Path tempMigrationFile = this.directory.resolve("luckperms-h2-migration.sql");
 
             this.plugin.getLogger().warn("[DB Upgrade] Found an old (v1) H2 database file. LuckPerms will now attempt to upgrade it to v2 (this is a one time operation).");
+
+            try {
+                Files.deleteIfExists(tempMigrationFile);
+            } catch (IOException e) {
+                this.plugin.getLogger().warn("[DB Upgrade] Unable to delete temporary data from a previous migration attempt", e);
+            }
 
             this.plugin.getLogger().info("[DB Upgrade] Stage 1: Exporting the old database to an intermediary file...");
             Constructor<?> constructor = getConnectionConstructor();
