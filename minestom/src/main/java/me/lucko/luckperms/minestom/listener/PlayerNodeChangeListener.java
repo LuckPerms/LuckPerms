@@ -31,9 +31,7 @@ import me.lucko.luckperms.minestom.LPMinestomPlugin;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.event.EventBus;
-import net.luckperms.api.event.node.NodeAddEvent;
-import net.luckperms.api.event.node.NodeClearEvent;
-import net.luckperms.api.event.node.NodeRemoveEvent;
+import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.group.GroupManager;
 import net.luckperms.api.model.user.User;
@@ -61,50 +59,16 @@ public class PlayerNodeChangeListener {
 
     public void register() {
         EventBus eventBus = this.luckPerms.getEventBus();
-        eventBus.subscribe(this.plugin, NodeAddEvent.class, this::onNodeAdd);
-        eventBus.subscribe(this.plugin, NodeRemoveEvent.class, this::onNodeRemove);
-        eventBus.subscribe(this.plugin, NodeClearEvent.class, this::onNodeClear);
+        eventBus.subscribe(this.plugin, UserDataRecalculateEvent.class, this::onUserDataRecalculate);
     }
 
-    private void onNodeAdd(NodeAddEvent e) {
-        if (!e.isUser()) {
-            return;
-        }
-
-        User target = (User) e.getTarget();
-        Node node = e.getNode();
+    private void onUserDataRecalculate(UserDataRecalculateEvent e) {
+        User target = (User) e.getUser();
+        
         Player player = MinecraftServer.getConnectionManager().getPlayer(target.getUniqueId());
-        if(player == null) {
-            throw new IllegalArgumentException("Player must be online");
-        }
-        setPermissionsFromNodes(List.of(node), player, luckPerms.getGroupManager());
-    }
-
-    private void onNodeRemove(NodeRemoveEvent e) {
-        if (!e.isUser()) {
-            return;
-        }
-
-        User target = (User) e.getTarget();
-        Node node = e.getNode();
-        Player player = MinecraftServer.getConnectionManager().getPlayer(target.getUniqueId());
-        if(player == null) {
-            throw new IllegalArgumentException("Player must be online");
-        }
-        setPermissionsFromNodes(List.of(node), player, luckPerms.getGroupManager());
-    }
-    private void onNodeClear(NodeClearEvent e) {
-        if (!e.isUser()) {
-            return;
-        }
-
-        User target = (User) e.getTarget();
-        Set<Node> nodes = e.getNodes();
-        Player player = MinecraftServer.getConnectionManager().getPlayer(target.getUniqueId());
-        if(player == null) {
-            throw new IllegalArgumentException("Player must be online");
-        }
-        setPermissionsFromNodes(nodes, player,  luckPerms.getGroupManager());
+        if(player == null) return;
+        
+        setPermissionsFromNodes(e.getUser().getNodes(), player,  luckPerms.getGroupManager());
     }
 
     public static void setPermissionsFromNodes(Collection<Node> nodes, Player player, GroupManager groupManager) {
