@@ -1,0 +1,5 @@
+{
+  "entrypoint": "me.lucko.luckperms.minestom.loader.MinestomLoaderExtension",
+  "name": "LuckPerms",
+  "version": "5.4.0"
+}
