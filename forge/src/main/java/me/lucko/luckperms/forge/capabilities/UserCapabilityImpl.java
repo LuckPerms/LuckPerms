@@ -63,6 +63,9 @@ public class UserCapabilityImpl implements UserCapability {
      * @return the capability
      */
     public static @NotNull UserCapabilityImpl get(@NotNull Player player) {
+        if (!player.getCapability(CAPABILITY).isPresent()) {
+            player.reviveCaps();
+        }
         return (UserCapabilityImpl) getCapability(player).orElseThrow(() -> new IllegalStateException("Capability missing for " + player.getUUID()));
     }
 
