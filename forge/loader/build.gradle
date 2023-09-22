@@ -7,6 +7,10 @@ plugins {
 sourceCompatibility = 1.8
 targetCompatibility = 17
 
+configurations {
+    testJar
+}
+
 minecraft {
     mappings channel: 'official', version: minecraftVersion
 }
@@ -59,6 +63,20 @@ shadowJar {
         include(dependency('me.lucko.luckperms:.*'))
     }
 }
+
+tasks.register('copyTestJar', Copy) {
+    from tasks.shadowJar.archiveFile
+    into layout.buildDirectory.dir('testJars')
+    dependsOn reobfShadowJar
+    rename { String fileName ->
+        return 'luckperms-forge.testjar'
+    }
+}
+
+artifacts.add('testJar',  layout.buildDirectory.dir('testJars')) {
+    builtBy('copyTestJar')
+}
+
 
 artifacts {
     archives shadowJar

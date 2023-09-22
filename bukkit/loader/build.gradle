@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.shadow)
 }
 
+configurations {
+    testJar
+}
+
 repositories {
     maven { url 'https://repo.papermc.io/repository/maven-public/' }
 }
@@ -25,6 +29,18 @@ shadowJar {
     from {
         project(':bukkit').tasks.shadowJar.archiveFile
     }
+}
+
+tasks.register('copyTestJar', Copy) {
+    from tasks.shadowJar.archiveFile
+    into layout.buildDirectory.dir('testJars')
+    rename { String fileName ->
+        return 'luckperms-bukkit.testjar'
+    }
+}
+
+artifacts.add('testJar',  layout.buildDirectory.dir('testJars')) {
+    builtBy('copyTestJar')
 }
 
 artifacts {

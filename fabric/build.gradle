@@ -7,6 +7,10 @@ plugins {
 
 archivesBaseName = 'luckperms'
 
+configurations {
+    testJar
+}
+
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
 }
@@ -80,6 +84,18 @@ task remappedShadowJar(type: RemapJarTask) {
 }
 
 tasks.assemble.dependsOn tasks.remappedShadowJar
+
+tasks.register('copyTestJar', Copy) {
+    from tasks.remappedShadowJar.archiveFile
+    into layout.buildDirectory.dir('testJars')
+    rename { String fileName ->
+        return 'luckperms-fabric.testjar'
+    }
+}
+
+artifacts.add('testJar',  layout.buildDirectory.dir('testJars')) {
+    builtBy('copyTestJar')
+}
 
 artifacts {
     archives remappedShadowJar
