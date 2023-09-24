@@ -36,7 +36,7 @@ import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket;
+import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -175,8 +175,8 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
         this.luckperms$locale = oldMixin.getCachedLocale();
     }
 
-    @Inject(at = @At("HEAD"), method = "setClientSettings")
-    private void luckperms_setClientSettings(ClientSettingsC2SPacket information, CallbackInfo ci) {
+    @Inject(at = @At("HEAD"), method = "setClientOptions")
+    private void luckperms_setClientOptions(SyncedClientOptions information, CallbackInfo ci) {
         String language = information.language();
         this.luckperms$locale = TranslationManager.parseLocale(language);
     }

@@ -67,9 +67,9 @@ public class FabricConnectionListener extends AbstractConnectionListener {
         /* Called when the player first attempts a connection with the server. */
 
         // Get their profile from the net handler - it should have been initialised by now.
+        String username = ((ServerLoginNetworkHandlerAccessor) netHandler).getProfileName();
         GameProfile profile = ((ServerLoginNetworkHandlerAccessor) netHandler).getGameProfile();
-        UUID uniqueId = profile.isComplete() ? profile.getId() : Uuids.getOfflinePlayerUuid(profile.getName());
-        String username = profile.getName();
+        UUID uniqueId = profile == null ? Uuids.getOfflinePlayerUuid(username) : profile.getId();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLogger().info("Processing pre-login (sync phase) for " + uniqueId + " - " + username);
