@@ -28,7 +28,6 @@ package me.lucko.luckperms.fabric.mixin;
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
-import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
@@ -36,7 +35,6 @@ import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,8 +42,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Locale;
 
 /**
  * Mixin into {@link ServerPlayerEntity} to store LP caches and implement {@link MixinUser}.
@@ -64,9 +60,6 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
      * having to maintain a map of Player->Cache.
      */
     private QueryOptionsCache<ServerPlayerEntity> luckperms$queryOptions;
-
-    // Cache player locale
-    private Locale luckperms$locale;
 
     // Used by PlayerChangeWorldCallback hook below.
     @Shadow public abstract ServerWorld getServerWorld();
@@ -87,11 +80,6 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
             this.luckperms$queryOptions = contextManager.newQueryOptionsCache((ServerPlayerEntity) (Object) this);
         }
         return this.luckperms$queryOptions;
-    }
-
-    @Override
-    public Locale getCachedLocale() {
-        return this.luckperms$locale;
     }
 
     @Override
@@ -172,13 +160,6 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
         this.luckperms$user = oldMixin.getLuckPermsUser();
         this.luckperms$queryOptions = oldMixin.getQueryOptionsCache();
         this.luckperms$queryOptions.invalidate();
-        this.luckperms$locale = oldMixin.getCachedLocale();
-    }
-
-    @Inject(at = @At("HEAD"), method = "setClientSettings")
-    private void luckperms_setClientSettings(ClientSettingsC2SPacket information, CallbackInfo ci) {
-        String language = information.language();
-        this.luckperms$locale = TranslationManager.parseLocale(language);
     }
 
     @Inject(at = @At("TAIL"), method = "worldChanged")

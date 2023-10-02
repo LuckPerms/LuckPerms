@@ -52,8 +52,6 @@ public interface MixinUser {
      */
     QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(FabricContextManager contextManager);
 
-    Locale getCachedLocale();
-
     /**
      * Initialises permissions for this player using the given {@link User}.
      *

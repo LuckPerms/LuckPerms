@@ -68,7 +68,7 @@ public class FabricConnectionListener extends AbstractConnectionListener {
 
         // Get their profile from the net handler - it should have been initialised by now.
         GameProfile profile = ((ServerLoginNetworkHandlerAccessor) netHandler).getGameProfile();
-        UUID uniqueId = profile.isComplete() ? profile.getId() : Uuids.getOfflinePlayerUuid(profile.getName());
+        UUID uniqueId = profile.getId();
         String username = profile.getName();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
