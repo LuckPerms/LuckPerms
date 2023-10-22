@@ -27,7 +27,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                 'https://javadoc.io/static/org.jetbrains/annotations/23.0.0/'
         )
         options.addStringOption('Xdoclint:none', '-quiet')
-        options.addStringOption('-since', '5.0,5.1,5.2,5.3,5.4')
+        options.addStringOption('-since', '5.0,5.1,5.2,5.3,5.4,5.5')
 
         if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
             options.links.add('https://docs.oracle.com/en/java/javase/11/docs/api/')
@@ -36,19 +36,9 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         }
     }
 
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier 'javadoc'
-        from javadoc.destinationDir
-    }
-
-    task sourcesJar(type: Jar) {
-        classifier 'sources'
-        from sourceSets.main.allSource
-    }
-
-    artifacts {
-        archives javadocJar
-        archives sourcesJar
+    java {
+        withJavadocJar()
+        withSourcesJar()
     }
 
     publishing {
@@ -70,8 +60,6 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                 artifactId = 'api'
 
                 from components.java
-                artifact sourcesJar
-                artifact javadocJar
 
                 pom {
                     name = 'LuckPerms API'
@@ -111,7 +99,6 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
 
     signing {
         useGpgCmd()
-        sign configurations.archives
         sign publishing.publications.mavenJava
         required = true
     }

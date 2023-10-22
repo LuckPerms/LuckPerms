@@ -46,6 +46,6 @@ public interface Health {
      *
      * @return details about the healthcheck status
      */
-    Map<String, String> getDetails();
+    Map<String, Object> getDetails();
 
 }

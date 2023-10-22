@@ -33,18 +33,18 @@ import java.util.Map;
 public class HealthCheckResult implements Health {
     private static final Gson GSON = new Gson();
 
-    public static HealthCheckResult healthy(Map<String, String> details) {
+    public static HealthCheckResult healthy(Map<String, Object> details) {
         return new HealthCheckResult(true, details);
     }
 
-    public static HealthCheckResult unhealthy(Map<String, String> details) {
+    public static HealthCheckResult unhealthy(Map<String, Object> details) {
         return new HealthCheckResult(false, details);
     }
 
     private final boolean healthy;
-    private final Map<String, String> details;
+    private final Map<String, Object> details;
 
-    HealthCheckResult(boolean healthy, Map<String, String> details) {
+    HealthCheckResult(boolean healthy, Map<String, Object> details) {
         this.healthy = healthy;
         this.details = details;
     }
@@ -55,7 +55,7 @@ public class HealthCheckResult implements Health {
     }
 
     @Override
-    public Map<String, String> getDetails() {
+    public Map<String, Object> getDetails() {
         return this.details;
     }
 

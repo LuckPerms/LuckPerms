@@ -408,15 +408,15 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
             return HealthCheckResult.unhealthy(Collections.singletonMap("reason", "storage disconnected"));
         }
 
-        Map<String, String> map = new LinkedHashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         if (meta.connected() != null) {
-            map.put("storageConnected", meta.connected().toString());
+            map.put("storageConnected", meta.connected());
         }
         if (meta.ping() != null) {
-            map.put("storagePing", meta.ping().toString());
+            map.put("storagePing", meta.ping());
         }
         if (meta.sizeBytes() != null) {
-            map.put("storageSizeBytes", meta.sizeBytes().toString());
+            map.put("storageSizeBytes", meta.sizeBytes());
         }
 
         return HealthCheckResult.healthy(map);
