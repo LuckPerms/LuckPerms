@@ -37,7 +37,6 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorage;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Throwing;
-import net.kyori.adventure.text.Component;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
@@ -126,7 +125,7 @@ public class Storage {
         }
     }
 
-    public Map<Component, Component> getMeta() {
+    public StorageMetadata getMeta() {
         return this.implementation.getMeta();
     }
 

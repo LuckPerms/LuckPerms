@@ -23,25 +23,45 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.misc;
+package me.lucko.luckperms.common.plugin.util;
 
-import me.lucko.luckperms.common.command.abstraction.SingleCommand;
-import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.spec.CommandSpec;
-import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.Predicates;
+import com.google.gson.Gson;
+import net.luckperms.api.platform.Health;
 
-public class InfoCommand extends SingleCommand {
-    public InfoCommand() {
-        super(CommandSpec.INFO, "Info", CommandPermission.INFO, Predicates.alwaysFalse());
+import java.util.Map;
+
+public class HealthCheckResult implements Health {
+    private static final Gson GSON = new Gson();
+
+    public static HealthCheckResult healthy(Map<String, String> details) {
+        return new HealthCheckResult(true, details);
+    }
+
+    public static HealthCheckResult unhealthy(Map<String, String> details) {
+        return new HealthCheckResult(false, details);
+    }
+
+    private final boolean healthy;
+    private final Map<String, String> details;
+
+    HealthCheckResult(boolean healthy, Map<String, String> details) {
+        this.healthy = healthy;
+        this.details = details;
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
-        Message.INFO.send(sender, plugin, plugin.getStorage().getMeta());
+    public boolean isHealthy() {
+        return this.healthy;
+    }
+
+    @Override
+    public Map<String, String> getDetails() {
+        return this.details;
+    }
+
+    @Override
+    public String toString() {
+        return GSON.toJson(this);
     }
 
 }

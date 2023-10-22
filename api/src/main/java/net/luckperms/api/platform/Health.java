@@ -23,25 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.misc;
+package net.luckperms.api.platform;
 
-import me.lucko.luckperms.common.command.abstraction.SingleCommand;
-import me.lucko.luckperms.common.command.access.CommandPermission;
-import me.lucko.luckperms.common.command.spec.CommandSpec;
-import me.lucko.luckperms.common.command.utils.ArgumentList;
-import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.Predicates;
+import java.util.Map;
 
-public class InfoCommand extends SingleCommand {
-    public InfoCommand() {
-        super(CommandSpec.INFO, "Info", CommandPermission.INFO, Predicates.alwaysFalse());
-    }
+/**
+ * Represents the "health" status (healthcheck) of a LuckPerms implementation.
+ *
+ * @since 5.5
+ */
+public interface Health {
 
-    @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
-        Message.INFO.send(sender, plugin, plugin.getStorage().getMeta());
-    }
+    /**
+     * Gets if LuckPerms is healthy.
+     *
+     * @return if LuckPerms is healthy
+     */
+    boolean isHealthy();
+
+    /**
+     * Gets extra metadata/details about the healthcheck result.
+     *
+     * @return details about the healthcheck status
+     */
+    Map<String, String> getDetails();
 
 }

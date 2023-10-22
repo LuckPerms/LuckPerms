@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.storage.StorageMetadata;
 import me.lucko.luckperms.common.util.DurationFormatter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -55,6 +56,7 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.util.Tristate;
 
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -1535,7 +1537,7 @@ public interface Message {
             )
     );
 
-    Args2<LuckPermsPlugin, Map<Component, Component>> INFO = (plugin, storageMeta) -> joinNewline(
+    Args2<LuckPermsPlugin, StorageMetadata> INFO = (plugin, storageMeta) -> joinNewline(
             // "&2Running &bLuckPerms v{}&2 by &bLuck&2."
             // "&f-  &3Platform: &f{}"
             // "&f-  &3Server Brand: &f{}"
@@ -1598,14 +1600,39 @@ public interface Message {
                                 .append(text(plugin.getStorage().getName(), WHITE))
                         );
 
-                        for (Map.Entry<Component, Component> metaEntry : storageMeta.entrySet()) {
+                        if (storageMeta.connected() != null) {
                             builder.append(newline());
                             builder.append(prefixed(text()
                                     .color(DARK_AQUA)
                                     .append(text("     "))
-                                    .append(metaEntry.getKey())
+                                    .append(translatable("luckperms.command.info.storage.meta.connected-key"))
                                     .append(text(": "))
-                                    .append(metaEntry.getValue())
+                                    .append(formatBoolean(storageMeta.connected()))
+                            ));
+                        }
+
+                        if (storageMeta.ping() != null) {
+                            builder.append(newline());
+                            builder.append(prefixed(text()
+                                    .color(DARK_AQUA)
+                                    .append(text("     "))
+                                    .append(translatable("luckperms.command.info.storage.meta.ping-key"))
+                                    .append(text(": "))
+                                    .append(text(storageMeta.ping() + "ms", GREEN))
+                            ));
+                        }
+
+                        if (storageMeta.sizeBytes() != null) {
+                            DecimalFormat format = new DecimalFormat("#.##");
+                            String size = format.format(storageMeta.sizeBytes() / 1048576D) + "MB";
+
+                            builder.append(newline());
+                            builder.append(prefixed(text()
+                                    .color(DARK_AQUA)
+                                    .append(text("     "))
+                                    .append(translatable("luckperms.command.info.storage.meta.file-size-key"))
+                                    .append(text(": "))
+                                    .append(text(size, GREEN))
                             ));
                         }
                     })),

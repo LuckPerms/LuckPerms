@@ -57,6 +57,7 @@ import me.lucko.luckperms.common.tasks.SyncTask;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.webeditor.store.WebEditorStore;
+import net.luckperms.api.platform.Health;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.Collections;
@@ -262,6 +263,13 @@ public interface LuckPermsPlugin {
      * @return the web editor store
      */
     WebEditorStore getWebEditorStore();
+
+    /**
+     * Runs a health check for the plugin.
+     *
+     * @return the result of the healthcheck
+     */
+    Health runHealthCheck();
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.

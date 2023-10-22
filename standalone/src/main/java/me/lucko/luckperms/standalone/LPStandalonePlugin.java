@@ -56,8 +56,6 @@ import java.util.stream.Stream;
 public class LPStandalonePlugin extends AbstractLuckPermsPlugin {
     private final LPStandaloneBootstrap bootstrap;
 
-    private boolean running = false;
-
     private StandaloneSenderFactory senderFactory;
     private StandaloneDummyConnectionListener connectionListener;
     private StandaloneCommandManager commandManager;
@@ -77,10 +75,6 @@ public class LPStandalonePlugin extends AbstractLuckPermsPlugin {
 
     public LuckPermsApplication getLoader() {
         return this.bootstrap.getLoader();
-    }
-
-    public boolean isRunning() {
-        return this.running;
     }
 
     @Override
@@ -149,17 +143,11 @@ public class LPStandalonePlugin extends AbstractLuckPermsPlugin {
     @Override
     protected void registerApiOnPlatform(LuckPerms api) {
         this.bootstrap.getLoader().setApi(api);
-        this.bootstrap.getLoader().setHealthReporter(new StandaloneHealthReporter(this));
     }
 
     @Override
     protected void performFinalSetup() {
-        this.running = true;
-    }
 
-    @Override
-    protected void removePlatformHooks() {
-        this.running = false;
     }
 
     @Override

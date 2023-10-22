@@ -278,6 +278,11 @@ public class SqlStorageTest {
         }
 
         @Override
+        public StorageMetadata getMeta() {
+            return new StorageMetadata();
+        }
+
+        @Override
         public void init(LuckPermsPlugin plugin) {
 
         }

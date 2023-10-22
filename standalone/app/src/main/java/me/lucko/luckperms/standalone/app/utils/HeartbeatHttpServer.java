@@ -29,7 +29,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import me.lucko.luckperms.standalone.app.integration.HealthReporter;
+import net.luckperms.api.platform.Health;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,6 +39,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 /**
  * Provides a tiny http server indicating the current status of the app
@@ -52,7 +53,7 @@ public class HeartbeatHttpServer implements HttpHandler, AutoCloseable {
             .build()
     );
 
-    public static HeartbeatHttpServer createAndStart(int port, HealthReporter healthReporter) {
+    public static HeartbeatHttpServer createAndStart(int port, Supplier<Health> healthReporter) {
         HeartbeatHttpServer socket = null;
 
         try {
@@ -65,10 +66,10 @@ public class HeartbeatHttpServer implements HttpHandler, AutoCloseable {
         return socket;
     }
 
-    private final HealthReporter healthReporter;
+    private final Supplier<Health> healthReporter;
     private final HttpServer server;
 
-    public HeartbeatHttpServer(HealthReporter healthReporter, int port) throws IOException {
+    public HeartbeatHttpServer(Supplier<Health> healthReporter, int port) throws IOException {
         this.healthReporter = healthReporter;
         this.server = HttpServer.create(new InetSocketAddress(port), 50);
         this.server.createContext("/health", this);
@@ -78,10 +79,10 @@ public class HeartbeatHttpServer implements HttpHandler, AutoCloseable {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        HealthReporter.Health health = this.healthReporter.poll();
+        Health health = this.healthReporter.get();
         byte[] response = health.toString().getBytes(StandardCharsets.UTF_8);
 
-        exchange.sendResponseHeaders(health.isUp() ? 200 : 503, response.length);
+        exchange.sendResponseHeaders(health.isHealthy() ? 200 : 503, response.length);
         try (OutputStream responseBody = exchange.getResponseBody()) {
             responseBody.write(response);
         }

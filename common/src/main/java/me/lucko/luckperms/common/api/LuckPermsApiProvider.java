@@ -55,6 +55,7 @@ import net.luckperms.api.model.group.GroupManager;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.NodeBuilderRegistry;
 import net.luckperms.api.node.matcher.NodeMatcherFactory;
+import net.luckperms.api.platform.Health;
 import net.luckperms.api.platform.Platform;
 import net.luckperms.api.platform.PlayerAdapter;
 import net.luckperms.api.platform.PluginMetadata;
@@ -170,6 +171,11 @@ public class LuckPermsApiProvider implements LuckPerms {
     @Override
     public @NonNull CompletableFuture<Void> runUpdateTask() {
         return this.plugin.getSyncTaskBuffer().request();
+    }
+
+    @Override
+    public @NonNull Health runHealthCheck() {
+        return this.plugin.runHealthCheck();
     }
 
     @Override

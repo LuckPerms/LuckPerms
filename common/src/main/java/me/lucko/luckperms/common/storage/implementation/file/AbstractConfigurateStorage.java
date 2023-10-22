@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.StorageMetadata;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.file.loader.ConfigurateLoader;
 import me.lucko.luckperms.common.storage.implementation.file.loader.JsonLoader;
@@ -114,6 +115,11 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     @Override
     public String getImplementationName() {
         return this.implementationName;
+    }
+
+    @Override
+    public StorageMetadata getMeta() {
+        return new StorageMetadata();
     }
 
     /**

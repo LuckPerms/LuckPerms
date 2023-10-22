@@ -40,6 +40,7 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.NodeBuilderRegistry;
 import net.luckperms.api.node.matcher.NodeMatcherFactory;
+import net.luckperms.api.platform.Health;
 import net.luckperms.api.platform.Platform;
 import net.luckperms.api.platform.PlayerAdapter;
 import net.luckperms.api.platform.PluginMetadata;
@@ -218,6 +219,17 @@ public interface LuckPerms {
      * @return a future
      */
     @NonNull CompletableFuture<Void> runUpdateTask();
+
+    /**
+     * Executes a health check.
+     *
+     * <p>This task checks if the LuckPerms implementation is running and
+     * whether it has a connection to the database (if applicable).</p>
+     *
+     * @return the health status
+     * @since 5.5
+     */
+    @NonNull Health runHealthCheck();
 
     /**
      * Registers a {@link MessengerProvider} for use by the platform.

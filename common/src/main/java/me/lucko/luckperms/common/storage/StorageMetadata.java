@@ -23,55 +23,55 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.standalone.app.integration;
+package me.lucko.luckperms.common.storage;
 
-import com.google.gson.Gson;
+public class StorageMetadata {
 
-import java.util.Map;
+    // remote
+    private Boolean connected;
+    private Integer ping;
 
-/**
- * An interface able to provide information about the application/plugin health.
- */
-public interface HealthReporter {
+    // local
+    private Long sizeBytes;
 
-    /**
-     * Polls the current health status.
-     *
-     * @return the health status
-     */
-    Health poll();
+    public Boolean connected() {
+        return this.connected;
+    }
 
-    final class Health {
-        private static final Gson GSON = new Gson();
+    public Integer ping() {
+        return this.ping;
+    }
 
-        private final boolean up;
-        private final Map<String, String> details;
+    public Long sizeBytes() {
+        return this.sizeBytes;
+    }
 
-        Health(boolean up, Map<String, String> details) {
-            this.up = up;
-            this.details = details;
+    public StorageMetadata connected(boolean connected) {
+        this.connected = connected;
+        return this;
+    }
+
+    public StorageMetadata ping(int ping) {
+        this.ping = ping;
+        return this;
+    }
+
+    public StorageMetadata sizeBytes(long sizeBytes) {
+        this.sizeBytes = sizeBytes;
+        return this;
+    }
+
+    public StorageMetadata combine(StorageMetadata other) {
+        if (this.connected == null || (other.connected != null && !other.connected)) {
+            this.connected = other.connected;
         }
-
-        public boolean isUp() {
-            return this.up;
+        if (this.ping == null || (other.ping != null && other.ping > this.ping)) {
+            this.ping = other.ping;
         }
-
-        public Map<String, String> details() {
-            return this.details;
+        if (this.sizeBytes == null || (other.sizeBytes != null && other.sizeBytes > this.sizeBytes)) {
+            this.sizeBytes = other.sizeBytes;
         }
-
-        @Override
-        public String toString() {
-            return GSON.toJson(this);
-        }
-
-        public static Health up(Map<String, String> details) {
-            return new Health(true, details);
-        }
-
-        public static Health down(Map<String, String> details) {
-            return new Health(false, details);
-        }
+        return this;
     }
 
 }

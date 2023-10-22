@@ -29,10 +29,10 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.types.Permission;
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
-import me.lucko.luckperms.standalone.app.integration.HealthReporter;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.NodeEqualityPredicate;
+import net.luckperms.api.platform.Health;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -52,9 +52,9 @@ public class IntegrationTest {
     @Test
     public void testLoadEnableDisable(@TempDir Path tempDir) {
         TestPluginProvider.use(tempDir, (app, bootstrap, plugin) -> {
-            HealthReporter.Health health = app.getHealthReporter().poll();
+            Health health = plugin.runHealthCheck();
             assertNotNull(health);
-            assertTrue(health.isUp());
+            assertTrue(health.isHealthy());
         });
     }
 

@@ -28,12 +28,12 @@ package me.lucko.luckperms.standalone;
 import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import me.lucko.luckperms.standalone.app.integration.HealthReporter;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.log.LogReceiveEvent;
 import net.luckperms.api.event.sync.PreNetworkSyncEvent;
+import net.luckperms.api.platform.Health;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -61,13 +61,13 @@ public class MessagingIntegrationTest {
              TestPluginProvider.Plugin pluginB = TestPluginProvider.create(tempDirB, config)) {
 
             // check the plugins are healthy
-            HealthReporter.Health healthA = pluginA.app().getHealthReporter().poll();
+            Health healthA = pluginA.plugin().runHealthCheck();
             assertNotNull(healthA);
-            assertTrue(healthA.isUp());
+            assertTrue(healthA.isHealthy());
 
-            HealthReporter.Health healthB = pluginB.app().getHealthReporter().poll();
+            Health healthB = pluginB.plugin().runHealthCheck();
             assertNotNull(healthB);
-            assertTrue(healthB.isUp());
+            assertTrue(healthB.isHealthy());
 
             InternalMessagingService messagingServiceA = pluginA.plugin().getMessagingService().orElse(null);
             InternalMessagingService messagingServiceB = pluginB.plugin().getMessagingService().orElse(null);

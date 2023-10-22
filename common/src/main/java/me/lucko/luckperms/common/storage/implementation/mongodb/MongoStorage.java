@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.context.MutableContextSetImpl;
-import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.Track;
@@ -49,13 +48,12 @@ import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.node.matcher.ConstraintNodeMatcher;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.StorageMetadata;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.Iterators;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSet;
@@ -72,7 +70,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -147,37 +144,25 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public Map<Component, Component> getMeta() {
-        Map<Component, Component> meta = new LinkedHashMap<>();
-        boolean success = true;
+    public StorageMetadata getMeta() {
+        StorageMetadata metadata = new StorageMetadata();
 
+        boolean success = true;
         long start = System.currentTimeMillis();
+
         try {
             this.database.runCommand(new Document("ping", 1));
         } catch (Exception e) {
             success = false;
         }
-        long duration = System.currentTimeMillis() - start;
 
         if (success) {
-            meta.put(
-                    Component.translatable("luckperms.command.info.storage.meta.ping-key"),
-                    Component.text(duration + "ms", NamedTextColor.GREEN)
-            );
-        }
-        meta.put(
-                Component.translatable("luckperms.command.info.storage.meta.connected-key"),
-                Message.formatBoolean(success)
-        );
-
-        if (!this.prefix.isEmpty()) {
-            meta.put(
-                    Component.translatable("luckperms.command.info.storage.meta.collection-prefix-key"),
-                    Component.text(this.prefix, NamedTextColor.WHITE)
-            );
+            int duration = (int) (System.currentTimeMillis() - start);
+            metadata.ping(duration);
         }
 
-        return meta;
+        metadata.connected(success);
+        return metadata;
     }
 
     @Override

@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.node.types.Permission;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
-import me.lucko.luckperms.standalone.app.integration.HealthReporter;
 import me.lucko.luckperms.standalone.utils.TestPluginBootstrap;
 import me.lucko.luckperms.standalone.utils.TestPluginBootstrap.TestPlugin;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
@@ -50,6 +49,7 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.platform.Health;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -118,9 +118,9 @@ public class StorageIntegrationTest {
 
     private static void testStorage(LuckPermsApplication app, TestPluginBootstrap bootstrap, TestPlugin plugin) {
         // check the plugin is healthy
-        HealthReporter.Health health = app.getHealthReporter().poll();
+        Health health = plugin.runHealthCheck();
         assertNotNull(health);
-        assertTrue(health.isUp());
+        assertTrue(health.isHealthy());
 
         // try to create / save a group
         Group group = plugin.getStorage().createAndLoadGroup("test", CreationCause.INTERNAL).join();

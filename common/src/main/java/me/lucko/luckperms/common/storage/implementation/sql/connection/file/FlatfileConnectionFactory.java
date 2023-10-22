@@ -25,25 +25,19 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.connection.file;
 
+import me.lucko.luckperms.common.storage.StorageMetadata;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Abstract {@link ConnectionFactory} using a file based database driver.
  */
 abstract class FlatfileConnectionFactory implements ConnectionFactory {
-    /** Format used for formatting database file size. */
-    protected static final DecimalFormat FILE_SIZE_FORMAT = new DecimalFormat("#.##");
 
     /** The current open connection, if any */
     private NonClosableConnection connection;
@@ -101,28 +95,19 @@ abstract class FlatfileConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public Map<Component, Component> getMeta() {
-        String fileSize;
+    public StorageMetadata getMeta() {
+        StorageMetadata metadata = new StorageMetadata();
+
         Path databaseFile = getWriteFile();
         if (Files.exists(databaseFile)) {
-            long length;
             try {
-                length = Files.size(databaseFile);
+                long length = Files.size(databaseFile);
+                metadata.sizeBytes(length);
             } catch (IOException e) {
-                length = 0;
+                // ignore
             }
-
-            double size = length / 1048576D;
-            fileSize = FILE_SIZE_FORMAT.format(size) + "MB";
-        } else {
-            fileSize = "0MB";
         }
 
-        Map<Component, Component> meta = new LinkedHashMap<>();
-        meta.put(
-                Component.translatable("luckperms.command.info.storage.meta.file-size-key"),
-                Component.text(fileSize, NamedTextColor.GREEN)
-        );
-        return meta;
+        return metadata;
     }
 }
