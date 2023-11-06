@@ -58,28 +58,15 @@ import net.luckperms.api.node.Node;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.sql.BatchUpdateException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SqlStorage implements StorageImplementation {
-    private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>(){}.getType();
+    private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>() {
+    }.getType();
 
     private static final String USER_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM '{prefix}user_permissions' WHERE uuid=?";
     private static final String USER_PERMISSIONS_SELECT_MULTIPLE = "SELECT uuid, id, permission, value, server, world, expiry, contexts FROM '{prefix}user_permissions' WHERE ";
@@ -129,7 +116,7 @@ public class SqlStorage implements StorageImplementation {
     private static final String ACTION_SELECT_ALL = "SELECT * FROM '{prefix}actions'";
 
     private final LuckPermsPlugin plugin;
-    
+
     private final ConnectionFactory connectionFactory;
     private final Function<String, String> statementProcessor;
 
@@ -678,9 +665,12 @@ public class SqlStorage implements StorageImplementation {
             // remove the mappings for conflicting uuids
             try (Connection c = this.connectionFactory.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_DELETE_ALL_UUIDS_BY_USERNAME))) {
-                    ps.setString(1, username);
-                    ps.setString(2, uniqueId.toString());
-                    ps.execute();
+                    for (UUID conflict : conflicting) {
+                        ps.setString(1, username);
+                        ps.setString(2, conflict.toString());
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
                 }
             }
             result = result.withOtherUuidsPresent(conflicting);
