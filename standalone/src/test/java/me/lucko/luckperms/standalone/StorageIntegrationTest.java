@@ -45,6 +45,8 @@ import me.lucko.luckperms.standalone.utils.TestPluginBootstrap.TestPlugin;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
+import net.luckperms.api.model.PlayerSaveResult;
+import net.luckperms.api.model.PlayerSaveResult.Outcome;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
@@ -139,7 +141,12 @@ public class StorageIntegrationTest {
         // try to create / save a user
         UUID exampleUniqueId = UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d");
         String exampleUsername = "Luck";
-        plugin.getStorage().savePlayerData(exampleUniqueId, exampleUsername).join();
+
+        PlayerSaveResult saveResult = plugin.getStorage().savePlayerData(exampleUniqueId, exampleUsername).join();
+        assertEquals(ImmutableSet.of(Outcome.CLEAN_INSERT), saveResult.getOutcomes());
+        assertNull(saveResult.getOtherUniqueIds());
+        assertNull(saveResult.getPreviousUsername());
+
         User user = plugin.getStorage().loadUser(exampleUniqueId, exampleUsername).join();
         user.setNode(DataType.NORMAL, TEST_PERMISSION_1, true);
         user.setNode(DataType.NORMAL, TEST_PERMISSION_2, true);
@@ -217,6 +224,27 @@ public class StorageIntegrationTest {
         assertNull(plugin.getStorage().getPlayerName(otherExampleUniqueId).join());
         assertNull(plugin.getStorage().getPlayerUniqueId("example").join());
         assertNull(plugin.getStorage().getPlayerName(UUID.randomUUID()).join());
+
+
+        // test savePlayerData
+        saveResult = plugin.getStorage().savePlayerData(exampleUniqueId, exampleUsername).join();
+        assertEquals(ImmutableSet.of(Outcome.NO_CHANGE), saveResult.getOutcomes());
+        assertNull(saveResult.getOtherUniqueIds());
+        assertNull(saveResult.getPreviousUsername());
+
+        saveResult = plugin.getStorage().savePlayerData(exampleUniqueId, "test").join();
+        assertEquals(ImmutableSet.of(Outcome.USERNAME_UPDATED), saveResult.getOutcomes());
+        assertNull(saveResult.getOtherUniqueIds());
+        assertTrue(exampleUsername.equalsIgnoreCase(saveResult.getPreviousUsername()));
+        assertNull(plugin.getStorage().getPlayerUniqueId(exampleUsername).join());
+        assertTrue("test".equalsIgnoreCase(plugin.getStorage().getPlayerName(exampleUniqueId).join()));
+
+        saveResult = plugin.getStorage().savePlayerData(otherExampleUniqueId, "test").join();
+        assertEquals(ImmutableSet.of(Outcome.CLEAN_INSERT, Outcome.OTHER_UNIQUE_IDS_PRESENT_FOR_USERNAME), saveResult.getOutcomes());
+        assertEquals(ImmutableSet.of(exampleUniqueId), saveResult.getOtherUniqueIds());
+        assertNull(saveResult.getPreviousUsername());
+        assertEquals(otherExampleUniqueId, plugin.getStorage().getPlayerUniqueId("test").join());
+        assertNull(plugin.getStorage().getPlayerName(exampleUniqueId).join());
     }
 
     @Nested

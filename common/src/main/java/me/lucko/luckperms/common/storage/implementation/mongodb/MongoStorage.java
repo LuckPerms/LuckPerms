@@ -549,7 +549,7 @@ public class MongoStorage implements StorageImplementation {
 
         if (!conflicting.isEmpty()) {
             // remove the mappings for conflicting uuids
-            c.deleteMany(Filters.and(conflicting.stream().map(u -> Filters.eq("_id", u)).collect(Collectors.toList())));
+            c.deleteMany(Filters.or(conflicting.stream().map(u -> Filters.eq("_id", u)).collect(Collectors.toList())));
             result = result.withOtherUuidsPresent(conflicting);
         }
 
