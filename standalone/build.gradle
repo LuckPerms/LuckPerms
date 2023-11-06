@@ -48,6 +48,7 @@ dependencies {
     testImplementation 'me.lucko.configurate:configurate-toml:3.7'
     testImplementation 'org.spongepowered:configurate-hocon:3.7.2'
     testImplementation 'org.yaml:snakeyaml:1.28'
+    testImplementation 'net.luckperms:rest-api-java-client:0.1-SNAPSHOT'
 
     testImplementation project(':standalone:app')
     testImplementation project(':common:loader-utils')

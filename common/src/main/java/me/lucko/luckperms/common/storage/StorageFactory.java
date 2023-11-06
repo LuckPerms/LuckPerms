@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.storage.implementation.file.loader.JsonLoader;
 import me.lucko.luckperms.common.storage.implementation.file.loader.TomlLoader;
 import me.lucko.luckperms.common.storage.implementation.file.loader.YamlLoader;
 import me.lucko.luckperms.common.storage.implementation.mongodb.MongoStorage;
+import me.lucko.luckperms.common.storage.implementation.rest.RestStorage;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorage;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorageType;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
@@ -128,6 +129,12 @@ public class StorageFactory {
                         this.plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES),
                         this.plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX),
                         this.plugin.getConfiguration().get(ConfigKeys.MONGODB_CONNECTION_URI)
+                );
+            case REST:
+                return new RestStorage(
+                        this.plugin,
+                        this.plugin.getConfiguration().get(ConfigKeys.REST_STORAGE_URL),
+                        this.plugin.getConfiguration().get(ConfigKeys.REST_STORAGE_AUTH_KEY)
                 );
             case YAML:
                 return new SeparatedConfigurateStorage(this.plugin, "YAML", new YamlLoader(), ".yml", "yaml-storage");

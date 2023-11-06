@@ -16,6 +16,7 @@ jacocoTestReport {
 }
 
 dependencies {
+    testImplementation 'org.slf4j:slf4j-simple:1.7.36'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
@@ -27,6 +28,7 @@ dependencies {
     testImplementation 'org.spongepowered:configurate-yaml:3.7.2'
     testImplementation 'org.spongepowered:configurate-hocon:3.7.2'
     testImplementation 'me.lucko.configurate:configurate-toml:3.7'
+    testImplementation 'net.luckperms:rest-api-java-client:0.1-SNAPSHOT'
 
     api project(':api')
     api 'org.checkerframework:checker-qual:3.12.0'
@@ -99,4 +101,5 @@ dependencies {
     compileOnly 'org.mongodb:mongodb-driver-legacy:4.5.0'
     compileOnly 'org.postgresql:postgresql:42.6.0'
     compileOnly 'org.yaml:snakeyaml:1.28'
+    compileOnly 'net.luckperms:rest-api-java-client:0.1-SNAPSHOT'
 }
