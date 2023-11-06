@@ -79,7 +79,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SqlStorage implements StorageImplementation {
-    private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>() {}.getType();
+    private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>(){}.getType();
 
     private static final String USER_PERMISSIONS_SELECT = "SELECT id, permission, value, server, world, expiry, contexts FROM '{prefix}user_permissions' WHERE uuid=?";
     private static final String USER_PERMISSIONS_SELECT_MULTIPLE = "SELECT uuid, id, permission, value, server, world, expiry, contexts FROM '{prefix}user_permissions' WHERE ";
@@ -129,7 +129,7 @@ public class SqlStorage implements StorageImplementation {
     private static final String ACTION_SELECT_ALL = "SELECT * FROM '{prefix}actions'";
 
     private final LuckPermsPlugin plugin;
-
+    
     private final ConnectionFactory connectionFactory;
     private final Function<String, String> statementProcessor;
 
