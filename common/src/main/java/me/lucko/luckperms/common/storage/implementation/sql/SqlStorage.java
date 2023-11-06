@@ -678,12 +678,9 @@ public class SqlStorage implements StorageImplementation {
             // remove the mappings for conflicting uuids
             try (Connection c = this.connectionFactory.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_DELETE_ALL_UUIDS_BY_USERNAME))) {
-                    for (UUID conflict : conflicting) {
-                        ps.setString(1, username);
-                        ps.setString(2, conflict.toString());
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
+                    ps.setString(1, username);
+                    ps.setString(2, uniqueId.toString());
+                    ps.execute();
                 }
             }
             result = result.withOtherUuidsPresent(conflicting);
