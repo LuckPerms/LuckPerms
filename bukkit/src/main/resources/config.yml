@@ -717,5 +717,5 @@ update-client-command-list: true
 register-command-list-data: true
 
 # If LuckPerms should attempt to resolve Vanilla command target selectors for LP commands.
-# See here for more info: https://minecraft.gamepedia.com/Commands#Target_selectors
+# See here for more info: https://minecraft.wiki/w/Target_selectors
 resolve-command-selectors: false
