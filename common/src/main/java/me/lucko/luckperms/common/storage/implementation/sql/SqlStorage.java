@@ -127,7 +127,7 @@ public class SqlStorage implements StorageImplementation {
 
     private static final String ACTION_INSERT = "INSERT INTO '{prefix}actions' (time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String ACTION_SELECT_ALL = "SELECT * FROM '{prefix}actions'";
-
+    
     private final LuckPermsPlugin plugin;
 
     private final ConnectionFactory connectionFactory;
