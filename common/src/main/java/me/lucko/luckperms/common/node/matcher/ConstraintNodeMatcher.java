@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.node.matcher;
 
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
+import me.lucko.luckperms.common.filter.Constraint;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.matcher.NodeMatcher;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -48,7 +48,7 @@ public abstract class ConstraintNodeMatcher<T extends Node> implements NodeMatch
     public abstract @Nullable T filterConstraintMatch(@NonNull Node node);
 
     public @Nullable T match(Node node) {
-        return getConstraint().eval(node.getKey()) ? filterConstraintMatch(node) : null;
+        return getConstraint().evaluate(node.getKey()) ? filterConstraintMatch(node) : null;
     }
 
     @Override

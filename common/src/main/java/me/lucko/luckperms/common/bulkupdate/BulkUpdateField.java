@@ -23,34 +23,45 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.query;
+package me.lucko.luckperms.common.bulkupdate;
+
+import me.lucko.luckperms.common.filter.FilterField;
+import net.luckperms.api.context.DefaultContextKeys;
+import net.luckperms.api.node.Node;
 
 import java.util.Locale;
 
 /**
- * Represents a field being used in an update
+ * Represents a field being used in a bulk update
  */
-public enum QueryField {
+public enum BulkUpdateField implements FilterField<Node> {
 
-    PERMISSION("permission"),
-    SERVER("server"),
-    WORLD("world");
+    PERMISSION {
+        @Override
+        public String getValue(Node node) {
+            return node.getKey();
+        }
+    },
 
-    private final String sqlName;
+    SERVER {
+        @Override
+        public String getValue(Node node) {
+            return node.getContexts().getAnyValue(DefaultContextKeys.SERVER_KEY).orElse("global");
+        }
+    },
 
-    public static QueryField of(String s) {
+    WORLD {
+        @Override
+        public String getValue(Node node) {
+            return node.getContexts().getAnyValue(DefaultContextKeys.WORLD_KEY).orElse("global");
+        }
+    };
+
+    public static BulkUpdateField of(String s) {
         try {
             return valueOf(s.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return null;
         }
-    }
-
-    QueryField(String sqlName) {
-        this.sqlName = sqlName;
-    }
-
-    public String getSqlName() {
-        return this.sqlName;
     }
 }

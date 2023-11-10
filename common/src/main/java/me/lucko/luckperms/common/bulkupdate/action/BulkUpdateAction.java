@@ -27,22 +27,24 @@ package me.lucko.luckperms.common.bulkupdate.action;
 
 import net.luckperms.api.node.Node;
 
-public class DeleteAction implements BulkUpdateAction {
+/**
+ * Represents an action to be applied to a given node.
+ */
+public interface BulkUpdateAction {
 
-    public static DeleteAction create() {
-        return new DeleteAction();
-    }
+    /**
+     * Gets the name of this action
+     *
+     * @return the name of the action
+     */
+    String getName();
 
-    private DeleteAction() {
-    }
+    /**
+     * Applies this action to the given NodeModel, and returns the result.
+     *
+     * @param from the node to base changes from
+     * @return the new node instance, or null if the node should be deleted.
+     */
+    Node apply(Node from);
 
-    @Override
-    public String getName() {
-        return "delete";
-    }
-
-    @Override
-    public Node apply(Node from) {
-        return null; // this action just deletes nodes, so return null
-    }
 }

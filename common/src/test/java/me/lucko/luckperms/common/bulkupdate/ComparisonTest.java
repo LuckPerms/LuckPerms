@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.bulkupdate;
 
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
+import me.lucko.luckperms.common.filter.Comparison;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -43,8 +43,10 @@ public class ComparisonTest {
             "'', foo, false",
     })
     public void testEquals(String expression, String test, boolean expected) {
-        assertEquals(expected, StandardComparison.EQUAL.compile(expression).test(test));
-        assertEquals(!expected, StandardComparison.NOT_EQUAL.compile(expression).test(test));
+        assertEquals(expected, Comparison.EQUAL.comparing(expression).evaluate(test));
+        assertEquals(expected, Comparison.EQUAL.comparing(test).evaluate(expression));
+        assertEquals(!expected, Comparison.NOT_EQUAL.comparing(expression).evaluate(test));
+        assertEquals(!expected, Comparison.NOT_EQUAL.comparing(test).evaluate(expression));
     }
 
     @ParameterizedTest(name = "[{index}] {0} {1}")
@@ -72,8 +74,8 @@ public class ComparisonTest {
             "_ar, bbar, false",
     })
     public void testSimilar(String expression, String test, boolean expected) {
-        assertEquals(expected, StandardComparison.SIMILAR.compile(expression).test(test));
-        assertEquals(!expected, StandardComparison.NOT_SIMILAR.compile(expression).test(test));
+        assertEquals(expected, Comparison.SIMILAR.comparing(expression).evaluate(test));
+        assertEquals(!expected, Comparison.NOT_SIMILAR.comparing(expression).evaluate(test));
     }
 
 }

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate;
+package me.lucko.luckperms.common.storage.implementation.sql.builder;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -57,12 +57,21 @@ public class PreparedStatementBuilder {
     }
 
     public PreparedStatement build(Connection connection, Function<String, String> mapping) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(mapping.apply(this.sb.toString()));
-        for (int i = 0; i < this.variables.size(); i++) {
-            String var = this.variables.get(i);
-            statement.setString(i + 1, var);
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement(mapping.apply(this.sb.toString()));
+            for (int i = 0; i < this.variables.size(); i++) {
+                String var = this.variables.get(i);
+                statement.setString(i + 1, var);
+            }
+            return statement;
+        } catch (SQLException e) {
+            // if an exception is thrown, any try-with-resources block above this call won't be able to close the statement
+            if (statement != null) {
+                statement.close();
+            }
+            throw e;
         }
-        return statement;
     }
 
     public String toReadableString() {
@@ -71,5 +80,9 @@ public class PreparedStatementBuilder {
             s = s.replaceFirst("\\?", var);
         }
         return s;
+    }
+
+    public String toQueryString() {
+        return this.sb.toString();
     }
 }

@@ -23,38 +23,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.action;
-
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-import net.luckperms.api.node.Node;
+package me.lucko.luckperms.common.filter;
 
 /**
- * Represents an action to be applied to a given node.
+ * Represents a field that can be filtered on.
+ *
+ * @param <T> the type the field is on
  */
-public interface Action {
+public interface FilterField<T> {
 
     /**
-     * Gets the name of this action
+     * Gets the value of this field on the given object.
      *
-     * @return the name of the action
+     * @param object the object
+     * @return the field value as a string
      */
-    String getName();
-
-    /**
-     * Applies this action to the given NodeModel, and returns the result.
-     *
-     * @param from the node to base changes from
-     * @return the new nodemodel instance, or null if the node should be deleted.
-     */
-    Node apply(Node from);
-
-    /**
-     * Gets this action in SQL form.
-     *
-     * Will include a placeholder for the table, as "{table}".
-     *
-     * @param builder the statement builder
-     */
-    void appendSql(PreparedStatementBuilder builder);
+    String getValue(T object);
 
 }

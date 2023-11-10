@@ -23,26 +23,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.action;
+package me.lucko.luckperms.common.storage.implementation.sql.builder;
 
-import net.luckperms.api.node.Node;
+public class AbstractSqlBuilder {
 
-public class DeleteAction implements BulkUpdateAction {
+    protected final PreparedStatementBuilder builder = new PreparedStatementBuilder();
 
-    public static DeleteAction create() {
-        return new DeleteAction();
+    public PreparedStatementBuilder builder() {
+        return this.builder;
     }
 
-    private DeleteAction() {
-    }
-
-    @Override
-    public String getName() {
-        return "delete";
-    }
-
-    @Override
-    public Node apply(Node from) {
-        return null; // this action just deletes nodes, so return null
-    }
 }

@@ -23,43 +23,42 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.comparison;
+package me.lucko.luckperms.common.filter;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
- * An enumeration of standard {@link Comparison}s.
+ * A method of comparing two strings
  */
-public enum StandardComparison implements Comparison {
+public enum Comparison {
 
-    EQUAL("==", "=") {
+    EQUAL("==") {
         @Override
-        public CompiledExpression compile(String expression) {
-            return expression::equalsIgnoreCase;
+        Predicate<String> compile(String value) {
+            return value::equalsIgnoreCase;
         }
     },
 
-    NOT_EQUAL("!=", "!=") {
+    NOT_EQUAL("!=") {
         @Override
-        public CompiledExpression compile(String expression) {
-            return string -> !expression.equalsIgnoreCase(string);
+        Predicate<String> compile(String value) {
+            return string -> !value.equalsIgnoreCase(string);
         }
     },
 
-    SIMILAR("~~", "LIKE") {
+    SIMILAR("~~") {
         @Override
-        public CompiledExpression compile(String expression) {
-            Pattern pattern = StandardComparison.compilePatternForLikeSyntax(expression);
+        Predicate<String> compile(String value) {
+            Pattern pattern = Comparison.compilePatternForLikeSyntax(value);
             return string -> pattern.matcher(string).matches();
         }
     },
 
-    NOT_SIMILAR("!~", "NOT LIKE") {
+    NOT_SIMILAR("!~") {
         @Override
-        public CompiledExpression compile(String expression) {
-            Pattern pattern = StandardComparison.compilePatternForLikeSyntax(expression);
+        Predicate<String> compile(String value) {
+            Pattern pattern = Comparison.compilePatternForLikeSyntax(value);
             return string -> !pattern.matcher(string).matches();
         }
     };
@@ -68,21 +67,37 @@ public enum StandardComparison implements Comparison {
     public static final String WILDCARD_ONE = "_";
 
     private final String symbol;
-    private final String asSql;
 
-    StandardComparison(String symbol, String asSql) {
+    Comparison(String symbol) {
         this.symbol = symbol;
-        this.asSql = asSql;
     }
 
-    @Override
+    /**
+     * Gets the symbol which represents this comparison
+     *
+     * @return the comparison symbol
+     */
     public String getSymbol() {
         return this.symbol;
     }
 
-    @Override
-    public void appendSql(PreparedStatementBuilder builder) {
-        builder.append(this.asSql);
+    /**
+     * Creates a {@link Predicate} which compares an input string with the given value
+     *
+     * @param value the value
+     * @return the compiled predicate
+     */
+    abstract Predicate<String> compile(String value);
+
+    /**
+     * Creates a {@link Constraint} that compares inputs with the
+     * given value according to the {@link Comparison} type.
+     *
+     * @param value the value to compare with
+     * @return a constraint
+     */
+    public Constraint comparing(String value) {
+        return new Constraint(this, compile(value), value);
     }
 
     @Override
@@ -90,8 +105,8 @@ public enum StandardComparison implements Comparison {
         return this.symbol;
     }
 
-    public static StandardComparison parseComparison(String s) {
-        for (StandardComparison t : values()) {
+    public static Comparison parse(String s) {
+        for (Comparison t : values()) {
             if (t.getSymbol().equals(s)) {
                 return t;
             }

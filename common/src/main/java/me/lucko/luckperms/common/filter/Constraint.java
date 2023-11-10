@@ -23,24 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.comparison;
+package me.lucko.luckperms.common.filter;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
+import java.util.function.Predicate;
 
 public class Constraint {
 
-    public static Constraint of(Comparison comparison, String expression) {
-        return new Constraint(comparison, expression);
+    private final Comparison comparison;
+    private final Predicate<String> predicate;
+    private final String value;
+
+    Constraint(Comparison comparison, Predicate<String> predicate, String value) {
+        this.comparison = comparison;
+        this.predicate = predicate;
+        this.value = value;
     }
 
-    private final Comparison comparison;
-    private final String expressionValue;
-    private final Comparison.CompiledExpression compiledExpression;
+    public Comparison comparison() {
+        return this.comparison;
+    }
 
-    private Constraint(Comparison comparison, String expression) {
-        this.comparison = comparison;
-        this.expressionValue = expression;
-        this.compiledExpression = this.comparison.compile(this.expressionValue);
+    public String value() {
+        return this.value;
     }
 
     /**
@@ -49,20 +53,12 @@ public class Constraint {
      * @param value the value
      * @return true if satisfied
      */
-    public boolean eval(String value) {
-        return this.compiledExpression.test(value);
-    }
-
-    public void appendSql(PreparedStatementBuilder builder, String field) {
-        // e.g. field LIKE ?
-        builder.append(field).append(' ');
-        this.comparison.appendSql(builder);
-        builder.append(' ');
-        builder.variable(this.expressionValue);
+    public boolean evaluate(String value) {
+        return this.predicate.test(value);
     }
 
     @Override
     public String toString() {
-        return this.comparison + " " + this.expressionValue;
+        return this.comparison + " " + this.value;
     }
 }

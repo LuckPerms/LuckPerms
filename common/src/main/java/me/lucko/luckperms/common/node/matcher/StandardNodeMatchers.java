@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.node.matcher;
 
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
+import me.lucko.luckperms.common.filter.Comparison;
+import me.lucko.luckperms.common.filter.Constraint;
 import me.lucko.luckperms.common.node.AbstractNode;
 import me.lucko.luckperms.common.node.types.DisplayName;
 import me.lucko.luckperms.common.node.types.Inheritance;
@@ -50,7 +50,7 @@ public final class StandardNodeMatchers {
     }
 
     public static ConstraintNodeMatcher<Node> key(String key) {
-        return new Generic(Constraint.of(StandardComparison.EQUAL, key));
+        return new Generic(Comparison.EQUAL.comparing(key));
     }
 
     public static <T extends Node> ConstraintNodeMatcher<T> key(T node) {
@@ -58,7 +58,7 @@ public final class StandardNodeMatchers {
     }
 
     public static ConstraintNodeMatcher<Node> keyStartsWith(String startsWith) {
-        return new Generic(Constraint.of(StandardComparison.SIMILAR, startsWith + StandardComparison.WILDCARD));
+        return new Generic(Comparison.SIMILAR.comparing(startsWith + Comparison.WILDCARD));
     }
 
     public static <T extends Node> ConstraintNodeMatcher<T> equals(T other, NodeEqualityPredicate equalityPredicate) {
@@ -89,7 +89,7 @@ public final class StandardNodeMatchers {
         private final NodeEqualityPredicate equalityPredicate;
 
         NodeEquals(T node, NodeEqualityPredicate equalityPredicate) {
-            super(Constraint.of(StandardComparison.EQUAL, node.getKey()));
+            super(Comparison.EQUAL.comparing(node.getKey()));
             this.node = node;
             this.equalityPredicate = equalityPredicate;
         }
@@ -106,7 +106,7 @@ public final class StandardNodeMatchers {
 
     private static final class MetaKeyEquals extends ConstraintNodeMatcher<MetaNode> {
         MetaKeyEquals(String metaKey) {
-            super(Constraint.of(StandardComparison.SIMILAR, Meta.key(metaKey, StandardComparison.WILDCARD)));
+            super(Comparison.SIMILAR.comparing(Meta.key(metaKey, Comparison.WILDCARD)));
         }
 
         @Override
@@ -130,19 +130,19 @@ public final class StandardNodeMatchers {
 
         private static Constraint getConstraintForType(NodeType<?> type) {
             if (type == NodeType.REGEX_PERMISSION) {
-                return Constraint.of(StandardComparison.SIMILAR, RegexPermission.key(StandardComparison.WILDCARD));
+                return Comparison.SIMILAR.comparing(RegexPermission.key(Comparison.WILDCARD));
             } else if (type == NodeType.INHERITANCE) {
-                return Constraint.of(StandardComparison.SIMILAR, Inheritance.key(StandardComparison.WILDCARD));
+                return Comparison.SIMILAR.comparing(Inheritance.key(Comparison.WILDCARD));
             } else if (type == NodeType.PREFIX) {
-                return Constraint.of(StandardComparison.SIMILAR, Prefix.NODE_MARKER + StandardComparison.WILDCARD + AbstractNode.NODE_SEPARATOR + StandardComparison.WILDCARD);
+                return Comparison.SIMILAR.comparing(Prefix.NODE_MARKER + Comparison.WILDCARD + AbstractNode.NODE_SEPARATOR + Comparison.WILDCARD);
             } else if (type == NodeType.SUFFIX) {
-                return Constraint.of(StandardComparison.SIMILAR, Suffix.NODE_MARKER + StandardComparison.WILDCARD + AbstractNode.NODE_SEPARATOR + StandardComparison.WILDCARD);
+                return Comparison.SIMILAR.comparing(Suffix.NODE_MARKER + Comparison.WILDCARD + AbstractNode.NODE_SEPARATOR + Comparison.WILDCARD);
             } else if (type == NodeType.META) {
-                return Constraint.of(StandardComparison.SIMILAR, Meta.key(StandardComparison.WILDCARD, StandardComparison.WILDCARD));
+                return Comparison.SIMILAR.comparing(Meta.key(Comparison.WILDCARD, Comparison.WILDCARD));
             } else if (type == NodeType.WEIGHT) {
-                return Constraint.of(StandardComparison.SIMILAR, Weight.NODE_MARKER + StandardComparison.WILDCARD);
+                return Comparison.SIMILAR.comparing(Weight.NODE_MARKER + Comparison.WILDCARD);
             } else if (type == NodeType.DISPLAY_NAME) {
-                return Constraint.of(StandardComparison.SIMILAR, DisplayName.key(StandardComparison.WILDCARD));
+                return Comparison.SIMILAR.comparing(DisplayName.key(Comparison.WILDCARD));
             }
 
             throw new IllegalArgumentException("Unable to create a NodeMatcher for NodeType " + type.name());

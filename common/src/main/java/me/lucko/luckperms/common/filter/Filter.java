@@ -23,48 +23,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.comparison;
+package me.lucko.luckperms.common.filter;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
+public class Filter<F extends Enum<F> & FilterField<T>, T> {
+    private final F field;
+    private final Constraint constraint;
 
-/**
- * A method of comparing two strings
- */
-public interface Comparison {
+    public Filter(F field, Constraint constraint) {
+        this.field = field;
+        this.constraint = constraint;
+    }
+
+    public final F field() {
+        return this.field;
+    }
+
+    public final Constraint constraint() {
+        return this.constraint;
+    }
 
     /**
-     * Gets the symbol which represents this comparison
+     * Returns if the given value satisfies this filter
      *
-     * @return the comparison symbol
+     * @param value the value
+     * @return true if satisfied
      */
-    String getSymbol();
-
-    /**
-     * Creates a {@link CompiledExpression} for the given expression
-     *
-     * @param expression the expression
-     * @return the compiled expression
-     */
-    CompiledExpression compile(String expression);
-
-    /**
-     * Returns the comparison operator in SQL form
-     */
-    void appendSql(PreparedStatementBuilder builder);
-
-    /**
-     * An instance of {@link Comparison} which is bound to an expression.
-     */
-    interface CompiledExpression {
-
-        /**
-         * Tests the expression against a given string, according to the
-         * rules of the parent {@link Comparison}.
-         *
-         * @param string the string
-         * @return if there was a match
-         */
-        boolean test(String string);
+    public boolean evaluate(T value) {
+        return this.constraint.evaluate(this.field.getValue(value));
     }
 
 }

@@ -26,13 +26,11 @@
 package me.lucko.luckperms.common.bulkupdate;
 
 import com.google.common.collect.ImmutableSet;
-import me.lucko.luckperms.common.bulkupdate.action.Action;
+import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
-import me.lucko.luckperms.common.bulkupdate.query.Query;
-import me.lucko.luckperms.common.bulkupdate.query.QueryField;
+import me.lucko.luckperms.common.filter.Comparison;
+import me.lucko.luckperms.common.filter.Constraint;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.node.types.Permission;
 import net.luckperms.api.node.Node;
@@ -53,9 +51,9 @@ public class BulkUpdateTest {
     @Test
     public void testUpdate() {
         BulkUpdate update = BulkUpdateBuilder.create()
-                .action(UpdateAction.of(QueryField.SERVER, "foo"))
-                .query(Query.of(QueryField.WORLD, Constraint.of(StandardComparison.EQUAL, "bar")))
-                .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.SIMILAR, "hello%")))
+                .action(UpdateAction.of(BulkUpdateField.SERVER, "foo"))
+                .filter(BulkUpdateField.WORLD, Comparison.EQUAL.comparing("bar"))
+                .filter(BulkUpdateField.PERMISSION, Comparison.SIMILAR.comparing("hello%"))
                 .trackStatistics(true)
                 .build();
 
@@ -88,8 +86,8 @@ public class BulkUpdateTest {
     public void testDelete() {
         BulkUpdate update = BulkUpdateBuilder.create()
                 .action(DeleteAction.create())
-                .query(Query.of(QueryField.WORLD, Constraint.of(StandardComparison.EQUAL, "bar")))
-                .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.SIMILAR, "hello%")))
+                .filter(BulkUpdateField.WORLD, Comparison.EQUAL.comparing("bar"))
+                .filter(BulkUpdateField.PERMISSION, Comparison.SIMILAR.comparing("hello%"))
                 .trackStatistics(true)
                 .build();
 
@@ -118,19 +116,24 @@ public class BulkUpdateTest {
     private static Stream<Arguments> testSimpleActionSql() {
         return Stream.of(
                 Arguments.of("DELETE FROM {table}", DeleteAction.create()),
-                Arguments.of("UPDATE {table} SET permission=foo", UpdateAction.of(QueryField.PERMISSION, "foo")),
-                Arguments.of("UPDATE {table} SET server=foo", UpdateAction.of(QueryField.SERVER, "foo")),
-                Arguments.of("UPDATE {table} SET world=foo", UpdateAction.of(QueryField.WORLD, "foo"))
+                Arguments.of("UPDATE {table} SET permission=foo", UpdateAction.of(BulkUpdateField.PERMISSION, "foo")),
+                Arguments.of("UPDATE {table} SET server=foo", UpdateAction.of(BulkUpdateField.SERVER, "foo")),
+                Arguments.of("UPDATE {table} SET world=foo", UpdateAction.of(BulkUpdateField.WORLD, "foo"))
         );
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource
-    public void testSimpleActionSql(String expectedSql, Action action) {
+    public void testSimpleActionSql(String expectedSql, BulkUpdateAction action) {
         BulkUpdate update = BulkUpdateBuilder.create()
                 .action(action)
                 .build();
-        assertEquals(expectedSql, update.buildAsSql().toReadableString());
+
+        BulkUpdateSqlBuilder sqlBuilder = new BulkUpdateSqlBuilder();
+        sqlBuilder.visit(update);
+        String sql = sqlBuilder.builder().toReadableString();
+
+        assertEquals(expectedSql, sql);
     }
 
     private static Stream<Arguments> testQueryFilterSql() {
@@ -138,51 +141,71 @@ public class BulkUpdateTest {
                 Arguments.of(
                         "DELETE FROM {table} WHERE permission = foo",
                         DeleteAction.create(),
-                        Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.EQUAL, "foo"))
+                        BulkUpdateField.PERMISSION,
+                        Comparison.EQUAL.comparing("foo")
                 ),
                 Arguments.of(
                         "DELETE FROM {table} WHERE permission != foo",
                         DeleteAction.create(),
-                        Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.NOT_EQUAL, "foo"))
+                        BulkUpdateField.PERMISSION,
+                        Comparison.NOT_EQUAL.comparing("foo")
                 ),
                 Arguments.of(
                         "DELETE FROM {table} WHERE permission LIKE foo",
                         DeleteAction.create(),
-                        Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.SIMILAR, "foo"))
+                        BulkUpdateField.PERMISSION,
+                        Comparison.SIMILAR.comparing("foo")
                 ),
                 Arguments.of(
                         "DELETE FROM {table} WHERE permission NOT LIKE foo",
                         DeleteAction.create(),
-                        Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.NOT_SIMILAR, "foo"))
+                        BulkUpdateField.PERMISSION,
+                        Comparison.NOT_SIMILAR.comparing("foo")
                 ),
                 Arguments.of(
                         "UPDATE {table} SET server=foo WHERE world = bar",
-                        UpdateAction.of(QueryField.SERVER, "foo"),
-                        Query.of(QueryField.WORLD, Constraint.of(StandardComparison.EQUAL, "bar"))
+                        UpdateAction.of(BulkUpdateField.SERVER, "foo"),
+                        BulkUpdateField.WORLD,
+                        Comparison.EQUAL.comparing("bar")
                 )
         );
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource
-    public void testQueryFilterSql(String expectedSql, Action action, Query query) {
+    public void testQueryFilterSql(String expectedSql, BulkUpdateAction action, BulkUpdateField field, Constraint constraint) {
         BulkUpdate update = BulkUpdateBuilder.create()
                 .action(action)
-                .query(query)
+                .filter(field, constraint)
                 .build();
-        assertEquals(expectedSql, update.buildAsSql().toReadableString());
+
+        BulkUpdateSqlBuilder sqlBuilder = new BulkUpdateSqlBuilder();
+        sqlBuilder.visit(update);
+        String sql = sqlBuilder.builder().toReadableString();
+
+        assertEquals(expectedSql, sql);
     }
 
     @Test
     public void testQueryFilterMultipleSql() {
         BulkUpdate update = BulkUpdateBuilder.create()
-                .action(UpdateAction.of(QueryField.SERVER, "foo"))
-                .query(Query.of(QueryField.WORLD, Constraint.of(StandardComparison.EQUAL, "bar")))
-                .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.SIMILAR, "baz")))
+                .action(UpdateAction.of(BulkUpdateField.SERVER, "foo"))
+                .filter(BulkUpdateField.WORLD, Comparison.EQUAL.comparing("bar"))
+                .filter(BulkUpdateField.PERMISSION, Comparison.SIMILAR.comparing("baz"))
+                .filter(BulkUpdateField.SERVER, Comparison.NOT_EQUAL.comparing("aaa"))
+                .filter(BulkUpdateField.WORLD, Comparison.NOT_SIMILAR.comparing("bbb"))
                 .build();
 
-        String expected = "UPDATE {table} SET server=foo WHERE world = bar AND permission LIKE baz";
-        assertEquals(expected, update.buildAsSql().toReadableString());
+        BulkUpdateSqlBuilder sqlBuilder = new BulkUpdateSqlBuilder();
+        sqlBuilder.visit(update);
+        assertEquals(
+                "UPDATE {table} SET server=? WHERE world = ? AND permission LIKE ? AND server != ? AND world NOT LIKE ?",
+                sqlBuilder.builder().toQueryString()
+        );
+        assertEquals(
+                "UPDATE {table} SET server=foo WHERE world = bar AND permission LIKE baz AND server != aaa AND world NOT LIKE bbb",
+                sqlBuilder.builder().toReadableString()
+        );
     }
 
 }
