@@ -34,18 +34,21 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.forge.ForgeSenderFactory;
 import me.lucko.luckperms.forge.LPForgePlugin;
 import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
+import me.lucko.luckperms.forge.tasks.UserLoginTask;
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.util.thread.BlockableEventLoop;
+import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerNegotiationEvent;
+import net.minecraftforge.event.network.GatherLoginConfigurationTasksEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.network.NetworkDirection;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class ForgeConnectionListener extends AbstractConnectionListener {
     private final LPForgePlugin plugin;
@@ -56,47 +59,22 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
     }
 
     @SubscribeEvent
-    public void onPlayerNegotiation(PlayerNegotiationEvent event) {
-        String username = event.getProfile().getName();
-        UUID uniqueId = event.getProfile().isComplete() ? event.getProfile().getId() : UUIDUtil.createOfflinePlayerUUID(username);
+    public void onPlayerNegotiation(GatherLoginConfigurationTasksEvent event) {
+        if (!(event.getConnection().getPacketListener() instanceof ServerConfigurationPacketListenerImpl)) {
+            return;
+        }
+        final GameProfile gameProfile = ((ServerConfigurationPacketListenerImpl) event.getConnection().getPacketListener()).getOwner();
+        if (gameProfile == null) {
+            return;
+        }
+        String username = gameProfile.getName();
+        UUID uniqueId = gameProfile.getId();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLogger().info("Processing pre-login (sync phase) for " + uniqueId + " - " + username);
         }
 
-        event.enqueueWork(CompletableFuture.runAsync(() -> {
-            onPlayerNegotiationAsync(event.getConnection(), uniqueId, username);
-        }, this.plugin.getBootstrap().getScheduler().async()));
-    }
-
-    private void onPlayerNegotiationAsync(Connection connection, UUID uniqueId, String username) {
-        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Processing pre-login (async phase) for " + uniqueId + " - " + username);
-        }
-
-        /* Actually process the login for the connection.
-           We do this here to delay the login until the data is ready.
-           If the login gets cancelled later on, then this will be cleaned up.
-
-           This includes:
-           - loading uuid data
-           - loading permissions
-           - creating a user instance in the UserManager for this connection.
-           - setting up cached data. */
-        try {
-            User user = loadUser(uniqueId, username);
-            recordConnection(uniqueId);
-            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, user);
-        } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + uniqueId + " - " + username, ex);
-            
-            if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
-                Component component = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
-                connection.send(new ClientboundLoginDisconnectPacket(ForgeSenderFactory.toNativeText(component)));
-                connection.disconnect(ForgeSenderFactory.toNativeText(component));
-                this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, null);
-            }
-        }
+        event.addTask(new UserLoginTask(this.plugin));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

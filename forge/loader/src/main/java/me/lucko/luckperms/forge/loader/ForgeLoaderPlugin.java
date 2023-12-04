@@ -35,7 +35,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.network.NetworkConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -86,7 +85,7 @@ public class ForgeLoaderPlugin implements Supplier<ModContainer> {
                             ModLoadingContext.get(),
                             IExtensionPoint.DisplayTest.class,
                             (Supplier<?>) () -> new IExtensionPoint.DisplayTest(
-                                    () -> NetworkConstants.IGNORESERVERONLY,
+                                    () -> IExtensionPoint.DisplayTest.IGNORESERVERONLY,
                                     (a, b) -> true
                             )
                     );
