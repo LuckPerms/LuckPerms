@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.filter;
 
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -33,35 +32,10 @@ import java.util.regex.Pattern;
  */
 public enum Comparison {
 
-    EQUAL("==") {
-        @Override
-        Predicate<String> compile(String value) {
-            return value::equalsIgnoreCase;
-        }
-    },
-
-    NOT_EQUAL("!=") {
-        @Override
-        Predicate<String> compile(String value) {
-            return string -> !value.equalsIgnoreCase(string);
-        }
-    },
-
-    SIMILAR("~~") {
-        @Override
-        Predicate<String> compile(String value) {
-            Pattern pattern = Comparison.compilePatternForLikeSyntax(value);
-            return string -> pattern.matcher(string).matches();
-        }
-    },
-
-    NOT_SIMILAR("!~") {
-        @Override
-        Predicate<String> compile(String value) {
-            Pattern pattern = Comparison.compilePatternForLikeSyntax(value);
-            return string -> !pattern.matcher(string).matches();
-        }
-    };
+    EQUAL("=="),
+    NOT_EQUAL("!="),
+    SIMILAR("~~"),
+    NOT_SIMILAR("!~");
 
     public static final String WILDCARD = "%";
     public static final String WILDCARD_ONE = "_";
@@ -81,25 +55,6 @@ public enum Comparison {
         return this.symbol;
     }
 
-    /**
-     * Creates a {@link Predicate} which compares an input string with the given value
-     *
-     * @param value the value
-     * @return the compiled predicate
-     */
-    abstract Predicate<String> compile(String value);
-
-    /**
-     * Creates a {@link Constraint} that compares inputs with the
-     * given value according to the {@link Comparison} type.
-     *
-     * @param value the value to compare with
-     * @return a constraint
-     */
-    public Constraint comparing(String value) {
-        return new Constraint(this, compile(value), value);
-    }
-
     @Override
     public String toString() {
         return this.symbol;
@@ -114,7 +69,7 @@ public enum Comparison {
         return null;
     }
 
-    static Pattern compilePatternForLikeSyntax(String expression) {
+    public static Pattern compilePatternForLikeSyntax(String expression) {
         expression = expression.replace(".", "\\.");
 
         // convert from SQL LIKE syntax to regex

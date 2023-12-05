@@ -25,35 +25,22 @@
 
 package me.lucko.luckperms.common.filter;
 
-public class Filter<T, FT> {
-    private final FilterField<T, FT> field;
-    private final Constraint<FT> constraint;
+public class PageParameters {
 
-    public Filter(FilterField<T, FT> field, Constraint<FT> constraint) {
-        this.field = field;
-        this.constraint = constraint;
+    private final int pageSize;
+    private final int pageNumber;
+
+    public PageParameters(int pageSize, int pageNumber) {
+        this.pageSize = pageSize;
+        this.pageNumber = pageNumber;
     }
 
-    public final FilterField<T, FT> field() {
-        return this.field;
+    public int pageSize() {
+        return this.pageSize;
     }
 
-    public final Constraint<FT> constraint() {
-        return this.constraint;
+    public int pageNumber() {
+        return this.pageNumber;
     }
 
-    /**
-     * Returns if the given value satisfies this filter
-     *
-     * @param value the value
-     * @return true if satisfied
-     */
-    public boolean evaluate(T value) {
-        return this.constraint.evaluate(this.field.getValue(value));
-    }
-
-    @Override
-    public String toString() {
-        return this.field + " " + this.constraint;
-    }
 }

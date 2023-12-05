@@ -25,9 +25,13 @@
 
 package me.lucko.luckperms.common.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilters;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.event.EventDispatcher;
@@ -126,6 +130,81 @@ public class SqlStorageTest {
         Log log = this.storage.getLog();
         assertEquals(1, log.getContent().size());
         assertEquals(action, log.getContent().first());
+    }
+
+    @Test
+    public void testActionLogPage() throws Exception {
+        UUID sourceUuid = UUID.randomUUID();
+        UUID targetUuid = UUID.randomUUID();
+
+        Function<Integer, LoggedAction> mockAction = i -> LoggedAction.build()
+                .source(i % 2 == 0 ? sourceUuid : UUID.randomUUID())
+                .sourceName("Test Source")
+                .targetType(Action.Target.Type.USER)
+                .target(targetUuid)
+                .targetName("Test Target")
+                .description("hello " + i)
+                .build();
+
+        for (int i = 0; i < 100; i++) {
+            this.storage.logAction(mockAction.apply(i));
+        }
+
+        for (int i = 0; i < 10; i++) {
+            this.storage.logAction(LoggedAction.build()
+                    .source(UUID.randomUUID())
+                    .sourceName("Test Source")
+                    .targetType(Action.Target.Type.GROUP)
+                    .targetName(i % 2 == 0 ? "test_group" : "dummy")
+                    .description("group test " + i)
+                    .build());
+        }
+
+        for (int i = 0; i < 10; i++) {
+            this.storage.logAction(LoggedAction.build()
+                    .source(UUID.randomUUID())
+                    .sourceName("Test Source")
+                    .targetType(Action.Target.Type.TRACK)
+                    .targetName(i % 2 == 0 ? "test_track" : "dummy")
+                    .description("track test " + i)
+                    .build());
+        }
+
+        LogPage page = this.storage.getLogPage(ActionFilters.source(sourceUuid), new PageParameters(5, 1));
+        assertEquals(ImmutableList.of(
+                mockAction.apply(98),
+                mockAction.apply(96),
+                mockAction.apply(94),
+                mockAction.apply(92),
+                mockAction.apply(90)
+        ), page.getContent());
+
+        page = this.storage.getLogPage(ActionFilters.source(sourceUuid), new PageParameters(5, 3));
+        assertEquals(ImmutableList.of(
+                mockAction.apply(78),
+                mockAction.apply(76),
+                mockAction.apply(74),
+                mockAction.apply(72),
+                mockAction.apply(70)
+        ), page.getContent());
+
+        page = this.storage.getLogPage(ActionFilters.source(sourceUuid), new PageParameters(200, 1));
+        assertEquals(50, page.getContent().size());
+
+        page = this.storage.getLogPage(ActionFilters.all(), new PageParameters(200, 1));
+        assertEquals(120, page.getContent().size());
+
+        page = this.storage.getLogPage(ActionFilters.user(targetUuid), new PageParameters(200, 1));
+        assertEquals(100, page.getContent().size());
+
+        page = this.storage.getLogPage(ActionFilters.group("test_group"), new PageParameters(10, 1));
+        assertEquals(5, page.getContent().size());
+
+        page = this.storage.getLogPage(ActionFilters.track("test_track"), new PageParameters(10, 1));
+        assertEquals(5, page.getContent().size());
+
+        page = this.storage.getLogPage(ActionFilters.search("hello"), new PageParameters(200, 1));
+        assertEquals(100, page.getContent().size());
     }
 
     @Test

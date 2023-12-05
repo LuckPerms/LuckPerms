@@ -393,14 +393,14 @@ public class LoggedAction implements Action {
         }
     }
 
-    public static char getTypeCharacter(Target.Type type) {
+    public static String getTypeString(Target.Type type) {
         switch (type) {
             case USER:
-                return 'U';
+                return "U";
             case GROUP:
-                return 'G';
+                return "G";
             case TRACK:
-                return 'T';
+                return "T";
             default:
                 throw new AssertionError();
         }

@@ -27,7 +27,10 @@ package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.filter.FilterList;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -135,6 +138,10 @@ public class Storage {
 
     public CompletableFuture<Log> getLog() {
         return future(this.implementation::getLog);
+    }
+
+    public CompletableFuture<LogPage> getLogPage(FilterList<Action> filters, PageParameters page) {
+        return future(() -> this.implementation.getLogPage(filters, page));
     }
 
     public CompletableFuture<Void> applyBulkUpdate(BulkUpdate bulkUpdate) {

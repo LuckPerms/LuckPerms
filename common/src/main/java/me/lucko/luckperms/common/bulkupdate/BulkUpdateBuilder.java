@@ -27,8 +27,11 @@ package me.lucko.luckperms.common.bulkupdate;
 
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
+import me.lucko.luckperms.common.filter.Comparison;
 import me.lucko.luckperms.common.filter.Constraint;
+import me.lucko.luckperms.common.filter.ConstraintFactory;
 import me.lucko.luckperms.common.filter.Filter;
+import me.lucko.luckperms.common.filter.FilterList;
 import net.luckperms.api.node.Node;
 
 import java.util.LinkedHashSet;
@@ -53,7 +56,7 @@ public class BulkUpdateBuilder {
     private boolean trackStatistics = false;
 
     // a set of filters which data must match to be acted upon
-    private final Set<Filter<BulkUpdateField, Node>> filters = new LinkedHashSet<>();
+    private final Set<Filter<Node, String>> filters = new LinkedHashSet<>();
 
     private BulkUpdateBuilder() {
     }
@@ -73,8 +76,8 @@ public class BulkUpdateBuilder {
         return this;
     }
 
-    public BulkUpdateBuilder filter(BulkUpdateField field, Constraint constraint) {
-        this.filters.add(new Filter<>(field, constraint));
+    public BulkUpdateBuilder filter(BulkUpdateField field, Comparison comparison, String value) {
+        this.filters.add(new Filter<>(field, ConstraintFactory.STRINGS.build(comparison, value)));
         return this;
     }
 
@@ -83,7 +86,8 @@ public class BulkUpdateBuilder {
             throw new IllegalStateException("no action specified");
         }
 
-        return new BulkUpdate(this.dataType, this.action, ImmutableList.copyOf(this.filters), this.trackStatistics);
+        FilterList<Node> filters = new FilterList<>(FilterList.LogicalOperator.AND, ImmutableList.copyOf(this.filters));
+        return new BulkUpdate(this.dataType, this.action, filters, this.trackStatistics);
     }
 
     @Override

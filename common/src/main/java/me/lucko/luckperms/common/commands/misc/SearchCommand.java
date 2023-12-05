@@ -66,7 +66,7 @@ public class SearchCommand extends SingleCommand {
             args.add(0, "==");
         }
 
-        ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.of(comparison.comparing(args.get(1)));
+        ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.key(args.get(1), comparison);
         int page = args.getIntOrDefault(2, 1);
 
         Message.SEARCH_SEARCHING.send(sender, matcher.toString());

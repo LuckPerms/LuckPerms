@@ -29,12 +29,16 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilterSqlBuilder;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateSqlBuilder;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
-import me.lucko.luckperms.common.filter.FilterSqlBuilder;
+import me.lucko.luckperms.common.filter.sql.ConstraintSqlBuilder;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -258,6 +262,27 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
+    public LogPage getLogPage(FilterList<Action> filter, PageParameters page) throws SQLException {
+        LogPage.Builder builder = LogPage.builder();
+        try (Connection c = this.connectionFactory.getConnection()) {
+            ActionFilterSqlBuilder sqlBuilder = new ActionFilterSqlBuilder();
+            sqlBuilder.builder().append(ACTION_SELECT_ALL);
+            sqlBuilder.visit(filter);
+            sqlBuilder.builder().append(" ORDER BY id DESC");
+            sqlBuilder.visit(page);
+
+            try (PreparedStatement ps = sqlBuilder.builder().build(c, this.statementProcessor)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        builder.add(readAction(rs));
+                    }
+                }
+            }
+        }
+        return builder.build();
+    }
+
+    @Override
     public void applyBulkUpdate(BulkUpdate bulkUpdate) throws SQLException {
         BulkUpdateStatistics stats = bulkUpdate.getStatistics();
 
@@ -439,9 +464,10 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws SQLException {
-        FilterSqlBuilder sqlBuilder = new FilterSqlBuilder();
+        ConstraintSqlBuilder sqlBuilder = new ConstraintSqlBuilder();
         sqlBuilder.builder().append(USER_PERMISSIONS_SELECT_PERMISSION);
-        sqlBuilder.visit(constraint);
+        sqlBuilder.builder().append("permission ");
+        sqlBuilder.visit(constraint.getConstraint());
 
         List<NodeEntry<UUID, N>> held = new ArrayList<>();
         try (Connection c = this.connectionFactory.getConnection()) {
@@ -544,9 +570,10 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws SQLException {
-        FilterSqlBuilder sqlBuilder = new FilterSqlBuilder();
+        ConstraintSqlBuilder sqlBuilder = new ConstraintSqlBuilder();
         sqlBuilder.builder().append(GROUP_PERMISSIONS_SELECT_PERMISSION);
-        sqlBuilder.visit(constraint);
+        sqlBuilder.builder().append("permission ");
+        sqlBuilder.visit(constraint.getConstraint());
 
         List<NodeEntry<String, N>> held = new ArrayList<>();
         try (Connection c = this.connectionFactory.getConnection()) {
@@ -748,7 +775,7 @@ public class SqlStorage implements StorageImplementation {
         ps.setLong(1, action.getTimestamp().getEpochSecond());
         ps.setString(2, action.getSource().getUniqueId().toString());
         ps.setString(3, action.getSource().getName());
-        ps.setString(4, Character.toString(LoggedAction.getTypeCharacter(action.getTarget().getType())));
+        ps.setString(4, LoggedAction.getTypeString(action.getTarget().getType()));
         ps.setString(5, action.getTarget().getUniqueId().map(UUID::toString).orElse("null"));
         ps.setString(6, action.getTarget().getName());
         ps.setString(7, action.getDescription());

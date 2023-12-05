@@ -23,37 +23,48 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.filter;
+package me.lucko.luckperms.common.actionlog;
 
-public class Filter<T, FT> {
-    private final FilterField<T, FT> field;
-    private final Constraint<FT> constraint;
+import com.google.common.collect.ImmutableList;
 
-    public Filter(FilterField<T, FT> field, Constraint<FT> constraint) {
-        this.field = field;
-        this.constraint = constraint;
+import java.util.ArrayList;
+import java.util.List;
+
+public class LogPage {
+    private static final LogPage EMPTY = new LogPage(ImmutableList.of());
+
+    public static LogPage.Builder builder() {
+        return new LogPage.Builder();
     }
 
-    public final FilterField<T, FT> field() {
-        return this.field;
+    public static LogPage empty() {
+        return EMPTY;
     }
 
-    public final Constraint<FT> constraint() {
-        return this.constraint;
+    private final List<LoggedAction> content;
+
+    LogPage(List<LoggedAction> content) {
+        this.content = ImmutableList.copyOf(content);
     }
 
-    /**
-     * Returns if the given value satisfies this filter
-     *
-     * @param value the value
-     * @return true if satisfied
-     */
-    public boolean evaluate(T value) {
-        return this.constraint.evaluate(this.field.getValue(value));
+    public List<LoggedAction> getContent() {
+        return this.content;
     }
 
-    @Override
-    public String toString() {
-        return this.field + " " + this.constraint;
+    public static class Builder {
+        private final List<LoggedAction> content = new ArrayList<>();
+
+        public Builder add(LoggedAction e) {
+            this.content.add(e);
+            return this;
+        }
+
+        public LogPage build() {
+            if (this.content.isEmpty()) {
+                return EMPTY;
+            }
+            return new LogPage(this.content);
+        }
     }
+
 }

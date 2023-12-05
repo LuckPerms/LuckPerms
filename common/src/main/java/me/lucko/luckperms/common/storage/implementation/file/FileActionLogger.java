@@ -30,7 +30,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 import me.lucko.luckperms.common.actionlog.ActionJsonSerializer;
 import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.cache.BufferedRequest;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import net.luckperms.api.actionlog.Action;
@@ -155,6 +158,11 @@ public class FileActionLogger {
         }
 
         return log.build();
+    }
+
+    public LogPage getLogPage(FilterList<Action> filters, PageParameters page) throws IOException {
+
+
     }
 
     private final class SaveBuffer extends BufferedRequest<Void> {

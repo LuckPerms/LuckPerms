@@ -27,23 +27,23 @@ package me.lucko.luckperms.common.filter;
 
 import java.util.function.Predicate;
 
-public class Constraint {
+public class Constraint<T> {
 
     private final Comparison comparison;
-    private final Predicate<String> predicate;
-    private final String value;
+    private final T value;
+    private final Predicate<T> predicate;
 
-    Constraint(Comparison comparison, Predicate<String> predicate, String value) {
+    Constraint(Comparison comparison, T value, Predicate<T> predicate) {
         this.comparison = comparison;
-        this.predicate = predicate;
         this.value = value;
+        this.predicate = predicate;
     }
 
     public Comparison comparison() {
         return this.comparison;
     }
 
-    public String value() {
+    public T value() {
         return this.value;
     }
 
@@ -53,7 +53,7 @@ public class Constraint {
      * @param value the value
      * @return true if satisfied
      */
-    public boolean evaluate(String value) {
+    public boolean evaluate(T value) {
         return this.predicate.test(value);
     }
 

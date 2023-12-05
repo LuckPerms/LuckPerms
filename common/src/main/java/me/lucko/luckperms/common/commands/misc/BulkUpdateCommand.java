@@ -142,7 +142,7 @@ public class BulkUpdateCommand extends SingleCommand {
             }
 
             String expr = parts[2];
-            bulkUpdateBuilder.filter(field, comparison.comparing(expr));
+            bulkUpdateBuilder.filter(field, comparison, expr);
         }
 
         BulkUpdate bulkUpdate = bulkUpdateBuilder.build();

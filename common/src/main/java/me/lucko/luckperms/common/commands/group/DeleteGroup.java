@@ -113,7 +113,7 @@ public class DeleteGroup extends SingleCommand {
                     .trackStatistics(false)
                     .dataType(DataType.ALL)
                     .action(DeleteAction.create())
-                    .filter(BulkUpdateField.PERMISSION, Comparison.EQUAL.comparing(Inheritance.key(groupName)))
+                    .filter(BulkUpdateField.PERMISSION, Comparison.EQUAL, Inheritance.key(groupName))
                     .build();
             plugin.getStorage().applyBulkUpdate(operation).whenCompleteAsync((v, ex) -> {
                 if (ex != null) {

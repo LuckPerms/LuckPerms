@@ -29,12 +29,14 @@ import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
 import me.lucko.luckperms.common.filter.Filter;
-import me.lucko.luckperms.common.filter.FilterSqlBuilder;
+import me.lucko.luckperms.common.filter.FilterField;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.sql.FilterSqlBuilder;
 import net.luckperms.api.node.Node;
 
 import java.util.List;
 
-public class BulkUpdateSqlBuilder extends FilterSqlBuilder {
+public class BulkUpdateSqlBuilder extends FilterSqlBuilder<Node> {
 
     public void visit(BulkUpdate update) {
         visit(update.getAction());
@@ -53,7 +55,7 @@ public class BulkUpdateSqlBuilder extends FilterSqlBuilder {
 
     public void visit(UpdateAction action) {
         this.builder.append("UPDATE {table} SET ");
-        visit(action.getField());
+        visitFieldName(action.getField());
         this.builder.append("=");
         this.builder.variable(action.getNewValue());
     }
@@ -62,35 +64,20 @@ public class BulkUpdateSqlBuilder extends FilterSqlBuilder {
         this.builder.append("DELETE FROM {table}");
     }
 
-    public void visit(BulkUpdateField field) {
-        switch (field) {
-            case PERMISSION:
-                this.builder.append("permission");
-                break;
-            case SERVER:
-                this.builder.append("server");
-                break;
-            case WORLD:
-                this.builder.append("world");
-                break;
-            default:
-                throw new AssertionError(field);
-        }
+    public void visit(List<Filter<Node, String>> filters) {
+        visit(FilterList.LogicalOperator.AND, filters);
     }
 
-    public void visit(List<Filter<BulkUpdateField, Node>> filters) {
-        if (filters.isEmpty()) {
-            return;
-        }
-
-        this.builder.append(" WHERE");
-        for (int i = 0; i < filters.size(); i++) {
-            Filter<BulkUpdateField, Node> filter = filters.get(i);
-            this.builder.append(" ");
-            if (i != 0) {
-                this.builder.append("AND ");
-            }
-            visit(filter, this::visit);
+    @Override
+    public void visitFieldName(FilterField<Node, ?> field) {
+        if (field == BulkUpdateField.PERMISSION) {
+            this.builder.append("permission");
+        } else if (field == BulkUpdateField.SERVER) {
+            this.builder.append("server");
+        } else if (field == BulkUpdateField.WORLD) {
+            this.builder.append("world");
+        } else {
+            throw new AssertionError(field);
         }
     }
 

@@ -25,12 +25,28 @@
 
 package me.lucko.luckperms.common.filter;
 
+import java.util.function.Function;
+
 /**
  * Represents a field that can be filtered on.
  *
  * @param <T> the type the field is on
  */
-public interface FilterField<T> {
+public interface FilterField<T, FT> {
+
+    static <T, FT> FilterField<T, FT> named(String name, Function<T, FT> func) {
+        return new FilterField<T, FT>() {
+            @Override
+            public FT getValue(T object) {
+                return func.apply(object);
+            }
+
+            @Override
+            public String toString() {
+                return name;
+            }
+        };
+    }
 
     /**
      * Gets the value of this field on the given object.
@@ -38,6 +54,21 @@ public interface FilterField<T> {
      * @param object the object
      * @return the field value as a string
      */
-    String getValue(T object);
+    FT getValue(T object);
 
+    default Filter<T, FT> isEqualTo(FT value, ConstraintFactory<FT> factory) {
+        return new Filter<>(this, factory.build(Comparison.EQUAL, value));
+    }
+
+    default Filter<T, FT> isNotEqualTo(FT value, ConstraintFactory<FT> factory) {
+        return new Filter<>(this, factory.build(Comparison.NOT_EQUAL, value));
+    }
+
+    default Filter<T, FT> isSimilarTo(FT value, ConstraintFactory<FT> factory) {
+        return new Filter<>(this, factory.build(Comparison.SIMILAR, value));
+    }
+
+    default Filter<T, FT> isNotSimilarTo(FT value, ConstraintFactory<FT> factory) {
+        return new Filter<>(this, factory.build(Comparison.NOT_SIMILAR, value));
+    }
 }

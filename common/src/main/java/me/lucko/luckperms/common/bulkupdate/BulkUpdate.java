@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.bulkupdate;
 
 import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
 import me.lucko.luckperms.common.filter.Filter;
+import me.lucko.luckperms.common.filter.FilterList;
 import me.lucko.luckperms.common.model.HolderType;
 import net.luckperms.api.node.Node;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -49,13 +50,13 @@ public final class BulkUpdate {
     private final BulkUpdateAction action;
 
     // a set of filters which data must match to be acted upon
-    private final List<Filter<BulkUpdateField, Node>> filters;
+    private final FilterList<Node> filters;
 
     // update statistics of the operation (number of nodes, users and groups affected)
     private final BulkUpdateStatistics statistics = new BulkUpdateStatistics();
     private final boolean trackStatistics;
 
-    public BulkUpdate(DataType dataType, BulkUpdateAction action, List<Filter<BulkUpdateField, Node>> filters, boolean trackStatistics) {
+    public BulkUpdate(DataType dataType, BulkUpdateAction action, FilterList<Node> filters, boolean trackStatistics) {
         this.dataType = dataType;
         this.action = action;
         this.filters = filters;
@@ -69,12 +70,7 @@ public final class BulkUpdate {
      * @return true if satisfied
      */
     public boolean satisfiesFilters(Node node) {
-        for (Filter<BulkUpdateField, Node> filter : this.filters) {
-            if (!filter.evaluate(node)) {
-                return false;
-            }
-        }
-        return true;
+        return this.filters.evaluate(node);
     }
 
     /**
@@ -137,7 +133,7 @@ public final class BulkUpdate {
         return this.action;
     }
 
-    public List<Filter<BulkUpdateField, Node>> getFilters() {
+    public FilterList<Node> getFilters() {
         return this.filters;
     }
 

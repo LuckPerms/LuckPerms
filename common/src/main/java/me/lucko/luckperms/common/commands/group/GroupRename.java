@@ -111,7 +111,7 @@ public class GroupRename extends ChildCommand<Group> {
                                 .trackStatistics(false)
                                 .dataType(me.lucko.luckperms.common.bulkupdate.DataType.ALL)
                                 .action(UpdateAction.of(BulkUpdateField.PERMISSION, Inheritance.key(newGroupName)))
-                                .filter(BulkUpdateField.PERMISSION, Comparison.EQUAL.comparing(Inheritance.key(target.getName())))
+                                .filter(BulkUpdateField.PERMISSION, Comparison.EQUAL, Inheritance.key(target.getName()))
                                 .build();
                         return plugin.getStorage().applyBulkUpdate(operation);
                     } else {
