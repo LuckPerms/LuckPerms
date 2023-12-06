@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.fabric.mixin.ServerCommandSourceAccessor;
-import me.lucko.luckperms.fabric.model.MixinUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
@@ -118,6 +117,6 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
     }
 
     public static Text toNativeText(Component component) {
-        return Text.Serializer.fromJson(GsonComponentSerializer.gson().serialize(component));
+        return Text.Serialization.fromJson(GsonComponentSerializer.gson().serialize(component));
     }
 }
