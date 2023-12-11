@@ -40,6 +40,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component.Serializer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.rcon.RconConsoleSource;
 import net.minecraft.world.entity.player.Player;
@@ -116,7 +117,7 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
     }
 
     public static net.minecraft.network.chat.Component toNativeText(Component component) {
-        return net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serialize(component));
+        return Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(component));
     }
 
 }
