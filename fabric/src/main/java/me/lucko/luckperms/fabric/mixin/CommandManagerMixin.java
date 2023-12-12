@@ -32,14 +32,14 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(CommandManager.class)
 public class CommandManagerMixin {
     @Inject(at = @At("HEAD"), method = "execute", cancellable = true)
-    private void commandExecuteCallback(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfoReturnable<Integer> info) {
+    private void commandExecuteCallback(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfo ci) {
         if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(parseResults.getContext().getSource(), command)) {
-            info.setReturnValue(0);
+            ci.cancel();
         }
     }
 }
