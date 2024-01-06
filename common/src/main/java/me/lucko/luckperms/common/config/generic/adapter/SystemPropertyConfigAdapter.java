@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.config.generic.adapter;
 
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -46,7 +47,8 @@ public class SystemPropertyConfigAdapter extends StringBasedConfigurationAdapter
 
         String value = System.getProperty(key);
         if (value != null) {
-            this.plugin.getLogger().info("Resolved configuration value from system property: " + key + " = " + (path.contains("password") ? "*****" : value));
+            String printableValue = ConfigKeys.shouldCensorValue(path) ? "*****" : value;
+            this.plugin.getLogger().info(String.format("Resolved configuration value from system property: %s = %s", key, printableValue));
         }
         return value;
     }
