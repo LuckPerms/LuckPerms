@@ -97,6 +97,27 @@ public interface TrackManager {
     @NonNull CompletableFuture<Void> deleteTrack(@NonNull Track track);
 
     /**
+     * Loads (or creates) a track from the plugin's storage provider, applies the given {@code action},
+     * then saves the track's data back to storage.
+     *
+     * <p>This method effectively calls {@link #createAndLoadTrack(String)}, followed by the
+     * {@code action}, then {@link #saveTrack(Track)}, and returns an encapsulation of the whole
+     * process as a {@link CompletableFuture}. </p>
+     *
+     * @param name the name of the track
+     * @param action the action to apply to the track
+     * @return a future to encapsulate the operation
+     * @since 5.5
+     */
+    default @NonNull CompletableFuture<Void> modifyTrack(@NonNull String name, @NonNull Consumer<? super Track> action) {
+        /* This default method is overridden in the implementation, and is just here
+           to demonstrate what this method does in the API sources. */
+        return createAndLoadTrack(name)
+                .thenApplyAsync(track -> { action.accept(track); return track; })
+                .thenCompose(this::saveTrack);
+    }
+
+    /**
      * Loads all tracks into memory.
      *
      * @return a future to encapsulate the operation.
