@@ -38,6 +38,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class ApiTrackManager extends ApiAbstractManager<Track, net.luckperms.api.track.Track, TrackManager<?>> implements net.luckperms.api.track.TrackManager {
     public ApiTrackManager(LuckPermsPlugin plugin, TrackManager<?> handle) {
@@ -72,6 +73,19 @@ public class ApiTrackManager extends ApiAbstractManager<Track, net.luckperms.api
     public @NonNull CompletableFuture<Void> deleteTrack(net.luckperms.api.track.@NonNull Track track) {
         Objects.requireNonNull(track, "track");
         return this.plugin.getStorage().deleteTrack(ApiTrack.cast(track), DeletionCause.API);
+    }
+
+    @Override
+    public @NonNull CompletableFuture<Void> modifyTrack(@NonNull String name, @NonNull Consumer<? super net.luckperms.api.track.Track> action) {
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(action, "action");
+
+        return this.plugin.getStorage().createAndLoadTrack(name, CreationCause.API)
+                .thenApplyAsync(track -> {
+                    action.accept(track.getApiProxy());
+                    return track;
+                }, this.plugin.getBootstrap().getScheduler().async())
+                .thenCompose(track -> this.plugin.getStorage().saveTrack(track));
     }
 
     @Override
