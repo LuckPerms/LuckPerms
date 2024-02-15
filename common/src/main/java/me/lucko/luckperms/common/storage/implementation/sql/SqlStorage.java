@@ -874,7 +874,7 @@ public class SqlStorage implements StorageImplementation {
                 while (rs.next()) {
                     Node node = readNode(rs);
                     if (node != null) {
-                        nodes.add(readNode(rs));
+                        nodes.add(node);
                     }
                 }
             }
