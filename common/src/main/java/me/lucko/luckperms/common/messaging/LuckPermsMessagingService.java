@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.util.ExpiringSet;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JObject;
 import net.luckperms.api.actionlog.Action;
+import net.luckperms.api.event.sync.SyncType;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
@@ -235,29 +236,35 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     private void processIncomingMessage(Message message) {
         if (message instanceof UpdateMessage) {
             UpdateMessage msg = (UpdateMessage) message;
+            UUID msgId = msg.getId();
 
-            this.plugin.getLogger().info("[Messaging] Received update ping with id: " + msg.getId());
-
-            if (this.plugin.getEventDispatcher().dispatchNetworkPreSync(false, msg.getId())) {
+            if (this.plugin.getEventDispatcher().dispatchNetworkPreSync(false, msgId, SyncType.FULL, null)) {
                 return;
             }
 
-            this.plugin.getSyncTaskBuffer().request();
+            this.plugin.getLogger().info("[Messaging] Received update ping with id: " + msgId);
+            this.plugin.getSyncTaskBuffer().request()
+                    .thenRunAsync(() -> this.plugin.getEventDispatcher().dispatchNetworkPostSync(msgId, SyncType.FULL, true, null));
+
         } else if (message instanceof UserUpdateMessage) {
             UserUpdateMessage msg = (UserUpdateMessage) message;
+            UUID msgId = msg.getId();
+            UUID userUniqueId = msg.getUserUniqueId();
 
-            User user = this.plugin.getUserManager().getIfLoaded(msg.getUserUniqueId());
+            if (this.plugin.getEventDispatcher().dispatchNetworkPreSync(false, msgId, SyncType.SPECIFIC_USER, userUniqueId)) {
+                return;
+            }
+
+            User user = this.plugin.getUserManager().getIfLoaded(userUniqueId);
             if (user == null) {
+                this.plugin.getEventDispatcher().dispatchNetworkPostSync(msgId, SyncType.SPECIFIC_USER, false, userUniqueId);
                 return;
             }
 
-            this.plugin.getLogger().info("[Messaging] Received user update ping for '" + user.getPlainDisplayName() + "' with id: " + msg.getId());
-
-            if (this.plugin.getEventDispatcher().dispatchNetworkPreSync(false, msg.getId())) {
-                return;
-            }
-
-            this.plugin.getStorage().loadUser(user.getUniqueId(), null);
+            this.plugin.getLogger().info("[Messaging] Received user update ping for '" + user.getPlainDisplayName() + "' with id: " + msgId);
+            this.plugin.getStorage().loadUser(user.getUniqueId(), null)
+                    .thenRunAsync(() -> this.plugin.getEventDispatcher().dispatchNetworkPostSync(msgId, SyncType.SPECIFIC_USER, true, userUniqueId));
+            
         } else if (message instanceof ActionLogMessage) {
             ActionLogMessage msg = (ActionLogMessage) message;
 

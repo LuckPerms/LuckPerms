@@ -34,12 +34,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.UUID;
 
 /**
- * Called after a request for synchronisation has been received via the messaging service,
- * but before it has actually been completed.
+ * Called after a network synchronisation task has been completed.
  *
- * <p>Note: the generic {@link PreSyncEvent} will also be called for {@link SyncType#FULL full syncs}.</p>
+ * <p>Note: the generic {@link PostSyncEvent} will also be called for {@link SyncType#FULL full syncs}.</p>
+ *
+ * @since 5.5
  */
-public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
+public interface PostNetworkSyncEvent extends LuckPermsEvent {
 
     /**
      * Gets the ID of the sync request
@@ -53,18 +54,29 @@ public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
      * Gets the sync type.
      *
      * @return the sync type
-     * @since 5.5
      */
     @Param(1)
     @NonNull SyncType getType();
 
     /**
-     * Gets the unique id of the specific user that will be synced, if applicable.
+     * Gets if a sync occurred.
      *
-     * @return the unique id of the specific user
-     * @since 5.5
+     * <p>For {@link SyncType} = {@link SyncType#FULL FULL}, this method always returns true.</p>
+     *
+     * <p>For {@link SyncType} = {@link SyncType#SPECIFIC_USER SPECIFIC_USER}, this method returns true if the
+     * user in question was online/loaded in memory at the time, and false otherwise.</p>
+     *
+     * @return if a sync occurred
      */
     @Param(2)
+    boolean didSyncOccur();
+
+    /**
+     * Gets the unique id of the specific user that has been synced, if applicable.
+     *
+     * @return the unique id of the specific user
+     */
+    @Param(3)
     @Nullable UUID getSpecificUserUniqueId();
 
 }

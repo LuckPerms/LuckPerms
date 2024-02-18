@@ -29,7 +29,10 @@ import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.type.Cancellable;
 
 /**
- * Called before a sync task runs
+ * Called just before a full synchronisation task runs.
+ *
+ * <p>Note: this event is also called before synchronisations that were triggered over the network.
+ * In other words, this event will be called in addition to {@link PreNetworkSyncEvent}.</p>
  */
 public interface PreSyncEvent extends LuckPermsEvent, Cancellable {
 

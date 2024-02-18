@@ -33,7 +33,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.UUID;
 
 /**
- * Called when a log entry is received via the MessagingService
+ * Called when a log entry is received via the MessagingService.
+ *
+ * <p>Note: listening to this event is the same as listening to the {@link LogBroadcastEvent}
+ * and filtering for {@link LogBroadcastEvent#getOrigin() origin} =
+ * {@link net.luckperms.api.event.log.LogBroadcastEvent.Origin#REMOTE REMOTE}.</p>
  */
 public interface LogReceiveEvent extends LuckPermsEvent {
 

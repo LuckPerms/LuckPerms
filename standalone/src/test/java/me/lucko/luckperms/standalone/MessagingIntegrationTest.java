@@ -26,13 +26,17 @@
 package me.lucko.luckperms.standalone;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.log.LogReceiveEvent;
 import net.luckperms.api.event.sync.PreNetworkSyncEvent;
+import net.luckperms.api.event.sync.SyncType;
+import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.platform.Health;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -49,7 +53,9 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
@@ -83,25 +89,44 @@ public class MessagingIntegrationTest {
                     .description("hello 123 hello 123")
                     .build();
 
-            // register 2 listeners on plugin B
-            CountDownLatch latch = new CountDownLatch(2);
+            UUID exampleUniqueId = UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d");
+            String exampleUsername = "Luck";
+            User user = pluginA.plugin().getStorage().loadUser(exampleUniqueId, exampleUsername).join();
+
             EventBus eventBus = pluginB.app().getApi().getEventBus();
+
+            CountDownLatch latch1 = new CountDownLatch(1);
             eventBus.subscribe(PreNetworkSyncEvent.class, e -> {
-                latch.countDown();
-                e.setCancelled(true);
+                if (e.getType() == SyncType.FULL) {
+                    latch1.countDown();
+                    e.setCancelled(true);
+                }
             });
+
+            CountDownLatch latch2 = new CountDownLatch(1);
+            eventBus.subscribe(PreNetworkSyncEvent.class, e -> {
+                if (e.getType() == SyncType.SPECIFIC_USER && exampleUniqueId.equals(e.getSpecificUserUniqueId())) {
+                    latch2.countDown();
+                    e.setCancelled(true);
+                }
+            });
+
+            CountDownLatch latch3 = new CountDownLatch(1);
             eventBus.subscribe(LogReceiveEvent.class, e -> {
                 if (e.getEntry().equals(exampleLogEntry)) {
-                    latch.countDown();
+                    latch3.countDown();
                 }
             });
 
             // send some messages from plugin A to plugin B
             messagingServiceA.pushUpdate();
+            messagingServiceA.pushUserUpdate(user);
             messagingServiceA.pushLog(exampleLogEntry);
 
             // wait for the messages to be sent/received
-            assertTrue(latch.await(30, TimeUnit.SECONDS));
+            assertTrue(latch1.await(10, TimeUnit.SECONDS));
+            assertTrue(latch2.await(10, TimeUnit.SECONDS));
+            assertTrue(latch3.await(10, TimeUnit.SECONDS));
         }
     }
 

@@ -70,9 +70,11 @@ import net.luckperms.api.event.player.lookup.UsernameLookupEvent;
 import net.luckperms.api.event.player.lookup.UsernameValidityCheckEvent;
 import net.luckperms.api.event.source.Source;
 import net.luckperms.api.event.sync.ConfigReloadEvent;
+import net.luckperms.api.event.sync.PostNetworkSyncEvent;
 import net.luckperms.api.event.sync.PostSyncEvent;
 import net.luckperms.api.event.sync.PreNetworkSyncEvent;
 import net.luckperms.api.event.sync.PreSyncEvent;
+import net.luckperms.api.event.sync.SyncType;
 import net.luckperms.api.event.track.TrackCreateEvent;
 import net.luckperms.api.event.track.TrackDeleteEvent;
 import net.luckperms.api.event.track.TrackLoadAllEvent;
@@ -270,12 +272,16 @@ public final class EventDispatcher {
         postAsync(ConfigReloadEvent.class);
     }
 
+    public void dispatchNetworkPostSync(UUID id, SyncType type, boolean didOccur, UUID specificUserUniqueId) {
+        postAsync(PostNetworkSyncEvent.class, id, type, didOccur, specificUserUniqueId);
+    }
+
     public void dispatchPostSync() {
         postAsync(PostSyncEvent.class);
     }
 
-    public boolean dispatchNetworkPreSync(boolean initialState, UUID id) {
-        return postCancellable(PreNetworkSyncEvent.class, initialState, id);
+    public boolean dispatchNetworkPreSync(boolean initialState, UUID id, SyncType type, UUID specificUserUniqueId) {
+        return postCancellable(PreNetworkSyncEvent.class, initialState, id, type, specificUserUniqueId);
     }
 
     public boolean dispatchPreSync(boolean initialState) {
@@ -414,6 +420,7 @@ public final class EventDispatcher {
                 UsernameLookupEvent.class,
                 UsernameValidityCheckEvent.class,
                 ConfigReloadEvent.class,
+                PostNetworkSyncEvent.class,
                 PostSyncEvent.class,
                 PreNetworkSyncEvent.class,
                 PreSyncEvent.class,

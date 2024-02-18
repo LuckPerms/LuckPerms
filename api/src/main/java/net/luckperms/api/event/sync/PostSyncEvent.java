@@ -28,7 +28,10 @@ package net.luckperms.api.event.sync;
 import net.luckperms.api.event.LuckPermsEvent;
 
 /**
- * Called when an sync task has been completed
+ * Called after a full synchronisation task has been completed.
+ *
+ * <p>Note: this event is also called after synchronisations that were triggered over the network.
+ * In other words, this event will be called in addition to {@link PostNetworkSyncEvent}.</p>
  */
 public interface PostSyncEvent extends LuckPermsEvent {
 
