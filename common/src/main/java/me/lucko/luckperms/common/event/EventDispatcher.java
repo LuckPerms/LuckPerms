@@ -58,6 +58,7 @@ import net.luckperms.api.event.log.LogNetworkPublishEvent;
 import net.luckperms.api.event.log.LogNotifyEvent;
 import net.luckperms.api.event.log.LogPublishEvent;
 import net.luckperms.api.event.log.LogReceiveEvent;
+import net.luckperms.api.event.messaging.CustomMessageReceiveEvent;
 import net.luckperms.api.event.node.NodeAddEvent;
 import net.luckperms.api.event.node.NodeClearEvent;
 import net.luckperms.api.event.node.NodeMutateEvent;
@@ -223,6 +224,10 @@ public final class EventDispatcher {
 
     public void dispatchLogReceive(UUID id, Action entry) {
         postAsync(LogReceiveEvent.class, id, entry);
+    }
+
+    public void dispatchCustomMessageReceive(String channelId, String payload) {
+        postAsync(CustomMessageReceiveEvent.class, channelId, payload);
     }
 
     public void dispatchNodeChanges(PermissionHolder target, DataType dataType, Difference<Node> changes) {
@@ -410,6 +415,7 @@ public final class EventDispatcher {
                 LogNotifyEvent.class,
                 LogPublishEvent.class,
                 LogReceiveEvent.class,
+                CustomMessageReceiveEvent.class,
                 NodeAddEvent.class,
                 NodeClearEvent.class,
                 NodeRemoveEvent.class,

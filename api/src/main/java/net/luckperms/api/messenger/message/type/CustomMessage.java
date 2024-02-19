@@ -23,42 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.implementation;
+package net.luckperms.api.messenger.message.type;
 
-import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import net.luckperms.api.messaging.MessagingService;
-import net.luckperms.api.model.user.User;
+import net.luckperms.api.messenger.message.Message;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Objects;
+/**
+ * Represents a "custom payload" message.
+ *
+ * <p>Used by API consumers to send custom messages between servers.</p>
+ *
+ * @see net.luckperms.api.messaging.MessagingService#sendCustomMessage(String, String)
+ * @see net.luckperms.api.event.messaging.CustomMessageReceiveEvent
+ * @since 5.5
+ */
+public interface CustomMessage extends Message {
 
-public class ApiMessagingService implements MessagingService {
-    private final InternalMessagingService handle;
+    /**
+     * Gets the channel identifier.
+     *
+     * @return the namespace
+     */
+    @NonNull String getChannelId();
 
-    public ApiMessagingService(InternalMessagingService handle) {
-        this.handle = handle;
-    }
+    /**
+     * Gets the payload.
+     *
+     * @return the payload
+     */
+    @NonNull String getPayload();
 
-    @Override
-    public @NonNull String getName() {
-        return this.handle.getName();
-    }
-
-    @Override
-    public void pushUpdate() {
-        this.handle.pushUpdate();
-    }
-
-    @Override
-    public void pushUserUpdate(@NonNull User user) {
-        Objects.requireNonNull(user, "user");
-        this.handle.pushUserUpdate(ApiUser.cast(user));
-    }
-
-    @Override
-    public void sendCustomMessage(@NonNull String channelId, @NonNull String payload) {
-        Objects.requireNonNull(channelId, "channelId");
-        Objects.requireNonNull(payload, "payload");
-        this.handle.pushCustomPayload(channelId, payload);
-    }
 }
