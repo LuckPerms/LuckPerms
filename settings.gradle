@@ -23,6 +23,8 @@ include (
         'common:loader-utils',
         'bukkit',
         'bukkit:loader',
+        'mockbukkit',
+        'mockbukkit:loader',
         'bukkit-legacy',
         'bukkit-legacy:loader',
         'bungee',

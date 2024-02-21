@@ -1,0 +1,32 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
+repositories {
+    maven { url 'https://repo.papermc.io/repository/maven-public/' }
+}
+
+dependencies {
+    compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
+
+    implementation project(':api')
+    implementation project(':common:loader-utils')
+}
+
+processResources {
+    filesMatching('plugin.yml') {
+        expand 'pluginVersion': project.ext.fullVersion
+    }
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-MockBukkit-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':mockbukkit').tasks.shadowJar.archiveFile
+    }
+}
+
+artifacts {
+    archives shadowJar
+}
