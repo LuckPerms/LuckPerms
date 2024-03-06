@@ -76,4 +76,12 @@ public interface InternalMessagingService {
      */
     void pushLog(Action logEntry);
 
+    /**
+     * Pushes a custom payload to connected servers.
+     *
+     * @param channelId the channel id
+     * @param payload the payload
+     */
+    void pushCustomPayload(String channelId, String payload);
+
 }

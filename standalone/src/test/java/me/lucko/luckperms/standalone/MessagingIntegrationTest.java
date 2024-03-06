@@ -26,7 +26,6 @@
 package me.lucko.luckperms.standalone;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.User;
@@ -34,9 +33,9 @@ import me.lucko.luckperms.standalone.utils.TestPluginProvider;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.log.LogReceiveEvent;
+import net.luckperms.api.event.messaging.CustomMessageReceiveEvent;
 import net.luckperms.api.event.sync.PreNetworkSyncEvent;
 import net.luckperms.api.event.sync.SyncType;
-import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.platform.Health;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -53,9 +52,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
@@ -118,15 +115,24 @@ public class MessagingIntegrationTest {
                 }
             });
 
+            CountDownLatch latch4 = new CountDownLatch(1);
+            eventBus.subscribe(CustomMessageReceiveEvent.class, e -> {
+                if (e.getChannelId().equals("luckperms:test") && e.getPayload().equals("hello")) {
+                    latch4.countDown();
+                }
+            });
+
             // send some messages from plugin A to plugin B
             messagingServiceA.pushUpdate();
             messagingServiceA.pushUserUpdate(user);
             messagingServiceA.pushLog(exampleLogEntry);
+            messagingServiceA.pushCustomPayload("luckperms:test", "hello");
 
             // wait for the messages to be sent/received
             assertTrue(latch1.await(10, TimeUnit.SECONDS));
             assertTrue(latch2.await(10, TimeUnit.SECONDS));
             assertTrue(latch3.await(10, TimeUnit.SECONDS));
+            assertTrue(latch4.await(10, TimeUnit.SECONDS));
         }
     }
 

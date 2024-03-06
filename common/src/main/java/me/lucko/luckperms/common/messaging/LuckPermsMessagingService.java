@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.messaging.message.ActionLogMessageImpl;
+import me.lucko.luckperms.common.messaging.message.CustomMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UpdateMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UserUpdateMessageImpl;
 import me.lucko.luckperms.common.model.User;
@@ -45,6 +46,7 @@ import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
 import net.luckperms.api.messenger.message.Message;
 import net.luckperms.api.messenger.message.type.ActionLogMessage;
+import net.luckperms.api.messenger.message.type.CustomMessage;
 import net.luckperms.api.messenger.message.type.UpdateMessage;
 import net.luckperms.api.messenger.message.type.UserUpdateMessage;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -69,7 +71,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         this.messenger = messengerProvider.obtain(this);
         Objects.requireNonNull(this.messenger, "messenger");
 
-        this.receivedMessages = new ExpiringSet<>(1, TimeUnit.HOURS);
+        this.receivedMessages = new ExpiringSet<>(5, TimeUnit.MINUTES);
         this.updateBuffer = new PushUpdateBuffer(plugin);
     }
 
@@ -137,6 +139,14 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     }
 
     @Override
+    public void pushCustomPayload(String channelId, String payload) {
+        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+            UUID requestId = generatePingId();
+            this.messenger.sendOutgoingMessage(new CustomMessageImpl(requestId, channelId, payload));
+        });
+    }
+
+    @Override
     public boolean consumeIncomingMessage(@NonNull Message message) {
         Objects.requireNonNull(message, "message");
 
@@ -147,7 +157,8 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
         // determine if the message can be handled by us
         boolean valid = message instanceof UpdateMessage ||
                 message instanceof UserUpdateMessage ||
-                message instanceof ActionLogMessage;
+                message instanceof ActionLogMessage ||
+                message instanceof CustomMessage;
 
         // instead of throwing an exception here, just return false
         // it means an instance of LP can gracefully handle messages it doesn't
@@ -208,6 +219,9 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
                 break;
             case ActionLogMessageImpl.TYPE:
                 decoded = ActionLogMessageImpl.decode(content, id);
+                break;
+            case CustomMessageImpl.TYPE:
+                decoded = CustomMessageImpl.decode(content, id);
                 break;
             default:
                 // gracefully return if we just don't recognise the type
@@ -270,6 +284,12 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
 
             this.plugin.getEventDispatcher().dispatchLogReceive(msg.getId(), msg.getAction());
             this.plugin.getLogDispatcher().dispatchFromRemote((LoggedAction) msg.getAction());
+
+        } else if (message instanceof CustomMessage) {
+            CustomMessage msg = (CustomMessage) message;
+
+            this.plugin.getEventDispatcher().dispatchCustomMessageReceive(msg.getChannelId(), msg.getPayload());
+
         } else {
             throw new IllegalArgumentException("Unknown message type: " + message.getClass().getName());
         }
