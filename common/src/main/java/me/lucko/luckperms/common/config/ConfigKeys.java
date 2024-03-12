@@ -762,7 +762,8 @@ public final class ConfigKeys {
      * @return true if the value should be censored
      */
     public static boolean shouldCensorValue(final String path) {
-        return path.contains("password") || path.contains("uri");
+        final String lower = path.toLowerCase(Locale.ROOT);
+        return lower.contains("password") || lower.contains("uri");
     }
 
 }
