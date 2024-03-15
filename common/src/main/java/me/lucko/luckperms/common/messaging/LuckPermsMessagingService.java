@@ -108,7 +108,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
 
     @Override
     public void pushUpdate() {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().async(() -> {
             UUID requestId = generatePingId();
             this.plugin.getLogger().info("[Messaging] Sending ping with id: " + requestId);
             this.messenger.sendOutgoingMessage(new UpdateMessageImpl(requestId));
@@ -117,7 +117,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
 
     @Override
     public void pushUserUpdate(User user) {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().async(() -> {
             UUID requestId = generatePingId();
             this.plugin.getLogger().info("[Messaging] Sending user ping for '" + user.getPlainDisplayName() + "' with id: " + requestId);
             this.messenger.sendOutgoingMessage(new UserUpdateMessageImpl(requestId, user.getUniqueId()));
@@ -126,7 +126,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
 
     @Override
     public void pushLog(Action logEntry) {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().async(() -> {
             UUID requestId = generatePingId();
 
             if (this.plugin.getEventDispatcher().dispatchLogNetworkPublish(!this.plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), requestId, logEntry)) {

@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.plugin.scheduler;
 
+import me.lucko.luckperms.common.sender.Sender;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +36,15 @@ import java.util.concurrent.TimeUnit;
 public interface SchedulerAdapter {
 
     /**
+     * Executes a task sync
+     *
+     * @param task the task
+     */
+    default void sync(Sender ctx, Runnable task) {
+        async(task);
+    }
+
+    /**
      * Gets an async executor instance
      *
      * @return an async executor instance
@@ -41,28 +52,12 @@ public interface SchedulerAdapter {
     Executor async();
 
     /**
-     * Gets a sync executor instance
-     *
-     * @return a sync executor instance
-     */
-    Executor sync();
-
-    /**
      * Executes a task async
      *
      * @param task the task
      */
-    default void executeAsync(Runnable task) {
+    default void async(Runnable task) {
         async().execute(task);
-    }
-
-    /**
-     * Executes a task sync
-     *
-     * @param task the task
-     */
-    default void executeSync(Runnable task) {
-        sync().execute(task);
     }
 
     /**
@@ -95,7 +90,7 @@ public interface SchedulerAdapter {
     /**
      * Shuts down the executor instance.
      *
-     * <p>{@link #async()} and {@link #executeAsync(Runnable)}.</p>
+     * <p>{@link #async()} and {@link #async(Runnable)}.</p>
      */
     void shutdownExecutor();
 
