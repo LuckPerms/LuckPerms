@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.fabric.FabricSenderFactory;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
+import me.lucko.luckperms.fabric.event.PreOnPlayerConnectCallback;
 import me.lucko.luckperms.fabric.mixin.ServerLoginNetworkHandlerAccessor;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -41,6 +42,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchron
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerCommonNetworkHandler;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -58,8 +60,8 @@ public class FabricConnectionListener extends AbstractConnectionListener {
 
     public void registerListeners() {
         ServerLoginConnectionEvents.QUERY_START.register(this::onPreLogin);
-        ServerPlayConnectionEvents.JOIN.register(this::onLogin);
         ServerPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
+        PreOnPlayerConnectCallback.EVENT.register(this::onLogin);
     }
 
     private void onPreLogin(ServerLoginNetworkHandler netHandler, MinecraftServer server, PacketSender packetSender, LoginSynchronizer sync) {
@@ -106,9 +108,7 @@ public class FabricConnectionListener extends AbstractConnectionListener {
         }
     }
 
-    private void onLogin(ServerPlayNetworkHandler netHandler, PacketSender packetSender, MinecraftServer server) {
-        final ServerPlayerEntity player = netHandler.player;
-
+    private boolean onLogin(ServerPlayerEntity player, ServerCommonNetworkHandler netHandler, MinecraftServer server) {
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLogger().info("Processing login for " + player.getUuid() + " - " + player.getGameProfile().getName());
         }
@@ -121,13 +121,14 @@ public class FabricConnectionListener extends AbstractConnectionListener {
                     " doesn't currently have data pre-loaded - denying login.");
             Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
             netHandler.disconnect(FabricSenderFactory.toNativeText(reason));
-            return;
+            return false;
         }
 
         // init permissions handler
         ((MixinUser) player).initializePermissions(user);
 
         this.plugin.getContextManager().signalContextUpdate(player);
+        return true;
     }
 
     private void onDisconnect(ServerPlayNetworkHandler netHandler, MinecraftServer server) {
