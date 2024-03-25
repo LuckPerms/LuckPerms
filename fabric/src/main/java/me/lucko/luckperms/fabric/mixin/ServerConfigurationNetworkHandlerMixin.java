@@ -26,7 +26,9 @@
 package me.lucko.luckperms.fabric.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.authlib.GameProfile;
 import me.lucko.luckperms.fabric.event.PreOnPlayerConnectCallback;
+import me.lucko.luckperms.fabric.event.ServerConfigurationTickCallback;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.c2s.config.ReadyC2SPacket;
 import net.minecraft.server.MinecraftServer;
@@ -34,13 +36,17 @@ import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerCommonNetworkHandler;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerConfigurationNetworkHandler.class)
 public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommonNetworkHandler {
+    @Shadow @Final private GameProfile profile;
+
     public ServerConfigurationNetworkHandlerMixin(MinecraftServer server, ClientConnection connection, ConnectedClientData clientData) {
         super(server, connection, clientData);
     }
@@ -51,4 +57,10 @@ public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommo
             ci.cancel();
         }
     }
+
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void onTick(CallbackInfo ci) {
+        ServerConfigurationTickCallback.EVENT.invoker().onServerConfigurationTick(this.profile, (ServerConfigurationNetworkHandler) (Object) this, this.server);
+    }
+
 }

@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.fabric.FabricSenderFactory;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.event.PreOnPlayerConnectCallback;
+import me.lucko.luckperms.fabric.event.ServerConfigurationTickCallback;
 import me.lucko.luckperms.fabric.mixin.ServerLoginNetworkHandlerAccessor;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -42,10 +43,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchron
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerCommonNetworkHandler;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.network.*;
+import net.minecraft.util.Uuids;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -62,6 +61,7 @@ public class FabricConnectionListener extends AbstractConnectionListener {
         ServerLoginConnectionEvents.QUERY_START.register(this::onPreLogin);
         ServerPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         PreOnPlayerConnectCallback.EVENT.register(this::onLogin);
+        ServerConfigurationTickCallback.EVENT.register(this::onConfigurationTick);
     }
 
     private void onPreLogin(ServerLoginNetworkHandler netHandler, MinecraftServer server, PacketSender packetSender, LoginSynchronizer sync) {
@@ -129,6 +129,14 @@ public class FabricConnectionListener extends AbstractConnectionListener {
 
         this.plugin.getContextManager().signalContextUpdate(player);
         return true;
+    }
+
+    private void onConfigurationTick(GameProfile gameProfile, ServerConfigurationNetworkHandler serverConfigurationNetworkHandler, MinecraftServer server) {
+        /* This forces the user data to be kept as long as user is connected.
+           This should fix cases of players disconnecting whey they download big resource pack
+           on a slow connection or some other mod delays it for any reason it needs to.
+         */
+        this.plugin.getUserManager().getHouseKeeper().registerUsage(gameProfile.getId());
     }
 
     private void onDisconnect(ServerPlayNetworkHandler netHandler, MinecraftServer server) {
