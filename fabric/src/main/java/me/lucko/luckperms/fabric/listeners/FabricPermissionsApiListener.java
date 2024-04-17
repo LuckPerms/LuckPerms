@@ -25,11 +25,13 @@
 
 package me.lucko.luckperms.fabric.listeners;
 
+import me.lucko.fabric.api.permissions.v0.OfflineOptionRequestEvent;
 import me.lucko.fabric.api.permissions.v0.OfflinePermissionCheckEvent;
 import me.lucko.fabric.api.permissions.v0.OptionRequestEvent;
 import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
 import me.lucko.luckperms.common.cacheddata.result.StringResult;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.cacheddata.type.MonitoredMetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
@@ -63,6 +65,7 @@ public class FabricPermissionsApiListener {
         PermissionCheckEvent.EVENT.register(this::onPermissionCheck);
         OptionRequestEvent.EVENT.register(this::onOptionRequest);
         OfflinePermissionCheckEvent.EVENT.register(this::onOfflinePermissionCheck);
+        OfflineOptionRequestEvent.EVENT.register(this::onOfflineOptionRequest);
     }
 
     private @NonNull TriState onPermissionCheck(CommandSource source, String permission) {
@@ -89,6 +92,13 @@ public class FabricPermissionsApiListener {
         return lookupUser(uuid).thenApplyAsync(user -> {
             PermissionCache permissionData = user.getCachedData().getPermissionData();
             return fabricTristate(permissionData.checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result());
+        });
+    }
+
+    private @NonNull CompletableFuture<Optional<String>> onOfflineOptionRequest(UUID uuid, String key) {
+        return lookupUser(uuid).thenApplyAsync(user -> {
+            MonitoredMetaCache metaData = user.getCachedData().getMetaData();
+            return Optional.ofNullable(metaData.getMetaOrChatMetaValue(key, CheckOrigin.PLATFORM_API));
         });
     }
 

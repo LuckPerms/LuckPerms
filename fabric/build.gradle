@@ -28,7 +28,7 @@ dependencies {
         modImplementation(fabricApi.module(it, '0.91.2+1.20.4'))
     }
 
-    include(modImplementation('me.lucko:fabric-permissions-api:0.2-SNAPSHOT'))
+    include(modImplementation('me.lucko:fabric-permissions-api:0.3.1'))
 
     implementation project(':common')
 }
