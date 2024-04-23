@@ -31,9 +31,13 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -43,7 +47,7 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements ServerPlayNetworking.PlayChannelHandler {
+public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements ServerPlayNetworking.PlayPayloadHandler<PluginMessageMessenger.PluginMessagePayload> {
     private static final Identifier CHANNEL = new Identifier(AbstractPluginMessageMessenger.CHANNEL);
 
     private final LPFabricPlugin plugin;
@@ -54,7 +58,9 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
     }
 
     public void init() {
-        ServerPlayNetworking.registerGlobalReceiver(CHANNEL, this);
+        PayloadTypeRegistry.playS2C().register(PluginMessagePayload.ID, PluginMessagePayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(PluginMessagePayload.ID, PluginMessagePayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(PluginMessagePayload.ID, this);
     }
 
     @Override
@@ -77,9 +83,7 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
                 return;
             }
 
-            PacketByteBuf packetBuf = PacketByteBufs.create();
-            packetBuf.writeBytes(buf);
-            ServerPlayNetworking.send(p, CHANNEL, packetBuf);
+            ServerPlayNetworking.send(p, new PluginMessagePayload(buf));
 
             SchedulerTask t = taskRef.getAndSet(null);
             if (t != null) {
@@ -90,10 +94,32 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
     }
 
     @Override
-    public void receive(MinecraftServer server, ServerPlayerEntity entity, ServerPlayNetworkHandler netHandler, PacketByteBuf packetBuf, PacketSender packetSender) {
-        byte[] buf = new byte[packetBuf.readableBytes()];
-        packetBuf.readBytes(buf);
+    public void receive(PluginMessagePayload payload, ServerPlayNetworking.Context context) {
+        handleIncomingMessage(payload.data);
+    }
 
-        handleIncomingMessage(buf);
+    public static class PluginMessagePayload implements CustomPayload {
+        public static final CustomPayload.Id<PluginMessagePayload> ID = new CustomPayload.Id<>(CHANNEL);
+        public static final PacketCodec<RegistryByteBuf, PluginMessagePayload> CODEC = PacketCodec.of(PluginMessagePayload::write, PluginMessagePayload::new).cast();
+
+        private final byte[] data;
+
+        private PluginMessagePayload(byte[] data) {
+            this.data = data;
+        }
+
+        private PluginMessagePayload(PacketByteBuf buf) {
+            this.data = new byte[buf.readableBytes()];
+            buf.readBytes(this.data);
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeBytes(this.data);
+        }
+
+        @Override
+        public Id<PluginMessagePayload> getId() {
+            return ID;
+        }
     }
 }

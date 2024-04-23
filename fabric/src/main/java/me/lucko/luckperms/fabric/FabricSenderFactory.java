@@ -33,6 +33,7 @@ import me.lucko.luckperms.fabric.mixin.ServerCommandSourceAccessor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -117,6 +118,6 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
     }
 
     public static Text toNativeText(Component component) {
-        return Text.Serialization.fromJsonTree(GsonComponentSerializer.gson().serializeToTree(component));
+        return Text.Serialization.fromJsonTree(GsonComponentSerializer.gson().serializeToTree(component), DynamicRegistryManager.EMPTY);
     }
 }
