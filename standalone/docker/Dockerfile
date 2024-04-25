@@ -1,5 +1,5 @@
-FROM alpine
-RUN apk add --no-cache openjdk17 netcat-openbsd
+FROM eclipse-temurin:21-alpine
+RUN apk add --no-cache netcat-openbsd
 
 # create a simple 'send' command that will allow users
 # to run, for example: docker exec <container> send lp info
@@ -12,8 +12,7 @@ USER app
 
 # copy jar file into image
 WORKDIR /opt/luckperms
-COPY LuckPerms-Standalone-*.jar .
-RUN mv * luckperms-standalone.jar
+COPY luckperms-standalone.jar .
 
 # create volume for data directory
 RUN mkdir data
