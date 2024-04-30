@@ -25,6 +25,10 @@ shadowJar {
     from {
         project(':bukkit').tasks.shadowJar.archiveFile
     }
+
+    manifest {
+        attributes(["paperweight-mappings-namespace": "mojang"])
+    }
 }
 
 artifacts {
