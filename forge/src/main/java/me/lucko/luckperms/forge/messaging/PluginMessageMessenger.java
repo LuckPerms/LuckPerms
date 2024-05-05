@@ -85,7 +85,7 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
             FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
             byteBuf.writeBytes(buf);
             byteBuf.writeResourceLocation(CHANNEL);
-            Packet<?> packet = new ClientboundCustomPayloadPacket(byteBuf);
+            Packet<?> packet = new ClientboundCustomPayloadPacket(new MessagePayload(CHANNEL, byteBuf));
 
             player.connection.send(packet);
 
