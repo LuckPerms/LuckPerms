@@ -25,14 +25,22 @@
 
 package me.lucko.luckperms.forge.util;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.locale.TranslationManager;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.forge.ForgeSenderFactory;
+import me.lucko.luckperms.forge.LPForgePlugin;
 import me.lucko.luckperms.forge.capabilities.UserCapability;
 import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
@@ -68,7 +76,7 @@ public final class BrigadierInjector {
      * @param plugin the plugin
      * @param dispatcher the command dispatcher
      */
-    public static void inject(LuckPermsPlugin plugin, CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void inject(LPForgePlugin plugin, CommandDispatcher<CommandSourceStack> dispatcher) {
         Iterable<CommandNodeWithParent> tree = CommandNodeGraph.INSTANCE.traverse(
                 TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER,
                 new CommandNodeWithParent(null, dispatcher.getRoot())
@@ -89,7 +97,7 @@ public final class BrigadierInjector {
 
             plugin.getPermissionRegistry().insert(permission);
 
-            InjectedPermissionRequirement newRequirement = new InjectedPermissionRequirement(permission, requirement);
+            InjectedPermissionRequirement newRequirement = new InjectedPermissionRequirement(plugin, permission, requirement);
             try {
                 REQUIREMENT_FIELD.set(node.node, newRequirement);
             } catch (IllegalAccessException e) {
@@ -127,10 +135,12 @@ public final class BrigadierInjector {
      * delegating to the existing requirement.
      */
     private static final class InjectedPermissionRequirement implements Predicate<CommandSourceStack> {
+        private final LPForgePlugin plugin;
         private final String permission;
         private final Predicate<CommandSourceStack> delegate;
 
-        private InjectedPermissionRequirement(String permission, Predicate<CommandSourceStack> delegate) {
+        private InjectedPermissionRequirement(LPForgePlugin plugin, String permission, Predicate<CommandSourceStack> delegate) {
+            this.plugin = plugin;
             this.permission = permission;
             this.delegate = delegate;
         }
@@ -139,7 +149,26 @@ public final class BrigadierInjector {
         public boolean test(CommandSourceStack source) {
             if (source.getEntity() instanceof ServerPlayer) {
                 ServerPlayer player = (ServerPlayer) source.getEntity();
+                // If player is still connecting and has not been added to world then initialise capability
+                UserCapabilityImpl userCapability = UserCapabilityImpl.get(player);
+                if (!player.isAddedToWorld() && !userCapability.initialised()) {
+                    GameProfile profile = player.getGameProfile();
+                    User user = this.plugin.getUserManager().getIfLoaded(profile.getId());
 
+                    if (user == null) {
+                        this.plugin.getLogger().warn("User " + profile.getId() + " - " + profile.getName() +
+                                " doesn't currently have data pre-loaded, but they have been processed before in this session.");
+
+                        Component component = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLanguage());
+                        if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
+                            player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
+                            return false;
+                        }
+                    }
+                    // initialise capability
+                    userCapability.initialise(user, player, this.plugin.getContextManager());
+                    this.plugin.getContextManager().signalContextUpdate(player);
+                }
                 UserCapability user = UserCapabilityImpl.get(player);
                 Tristate state = user.checkPermission(this.permission);
 
