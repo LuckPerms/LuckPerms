@@ -104,10 +104,6 @@ public class UserCapabilityImpl implements UserCapability {
         this.initialised = true;
     }
 
-    public boolean initialised() {
-        return this.initialised;
-    }
-
     private void assertInitialised() {
         if (!this.initialised) {
             throw new IllegalStateException("Capability has not been initialised");
