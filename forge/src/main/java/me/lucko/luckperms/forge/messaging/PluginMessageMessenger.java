@@ -33,15 +33,13 @@ import me.lucko.luckperms.forge.LPForgePlugin;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.EventNetworkChannel;
-import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -84,10 +82,8 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
 
             FriendlyByteBuf byteBuf = new FriendlyByteBuf(Unpooled.buffer());
             byteBuf.writeBytes(buf);
-            byteBuf.writeResourceLocation(CHANNEL);
-            Packet<?> packet = new ClientboundCustomPayloadPacket(new MessagePayload(CHANNEL, byteBuf));
 
-            player.connection.send(packet);
+            this.channel.send(byteBuf, PacketDistributor.PLAYER.with(player));
 
             SchedulerTask t = taskRef.getAndSet(null);
             if (t != null) {
