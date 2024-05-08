@@ -4,8 +4,8 @@ plugins {
     id("java-library")
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 17
+sourceCompatibility = 17
+targetCompatibility = 21
 
 minecraft {
     mappings channel: 'official', version: minecraftVersion
@@ -41,10 +41,6 @@ processResources {
     filesMatching('META-INF/mods.toml') {
         expand 'version': project.ext.fullVersion
     }
-}
-
-reobf {
-    shadowJar {}
 }
 
 shadowJar {

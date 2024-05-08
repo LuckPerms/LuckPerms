@@ -44,16 +44,14 @@ import java.util.Locale;
 public class UserCapabilityImpl implements UserCapability {
 
     private static LazyOptional<UserCapability> getCapability(Player player) {
-        if (!player.isRemoved()) {
-            return player.getCapability(CAPABILITY);
-        } else {
-            player.reviveCaps();
-            try {
-                return player.getCapability(CAPABILITY);
-            } finally {
-                player.invalidateCaps();
-            }
+        LazyOptional<UserCapability> optional = player.getCapability(CAPABILITY);
+        if (optional.isPresent()) {
+            return optional;
         }
+
+        // if capability is missing, try to restore them before trying again
+        player.reviveCaps();
+        return player.getCapability(CAPABILITY);
     }
 
     /**

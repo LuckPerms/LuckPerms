@@ -4,8 +4,8 @@ plugins {
     alias(libs.plugins.forgegradle)
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 17
+sourceCompatibility = 17
+targetCompatibility = 21
 
 blossom {
     replaceTokenIn 'src/main/java/me/lucko/luckperms/forge/LPForgeBootstrap.java'
@@ -21,10 +21,6 @@ dependencies {
     implementation project(':common')
     compileOnly project(':common:loader-utils')
     compileOnly project(':forge:forge-api')
-}
-
-reobf {
-    shadowJar {}
 }
 
 shadowJar {

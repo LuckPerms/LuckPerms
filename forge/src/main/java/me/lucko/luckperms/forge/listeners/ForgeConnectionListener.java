@@ -43,6 +43,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.network.GatherLoginConfigurationTasksEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -115,7 +116,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onPlayerLoadFromFile(PlayerEvent.LoadFromFile event) {
+    public void onPlayerLoggedIn(PlayerLoggedInEvent event) {
         ServerPlayer player = (ServerPlayer) event.getEntity();
         GameProfile profile = player.getGameProfile();
 
@@ -137,6 +138,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
             Component component = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLanguage());
             if (this.plugin.getConfiguration().get(ConfigKeys.CANCEL_FAILED_LOGINS)) {
                 player.connection.disconnect(ForgeSenderFactory.toNativeText(component));
+                return;
             } else {
                 player.sendSystemMessage(ForgeSenderFactory.toNativeText(component));
             }
