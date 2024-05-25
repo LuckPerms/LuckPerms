@@ -38,8 +38,12 @@ import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Tristate;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,9 +53,22 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
     private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
+    private final MethodHandle disconnectApi11Profile;
+
     public SpongeConnectionListener(LPSpongePlugin plugin) {
         super(plugin);
         this.plugin = plugin;
+
+        MethodHandle disconnectApi11Profile;
+
+        try {
+            // Support for API-11 connection event changes
+            disconnectApi11Profile = MethodHandles.lookup().findVirtual(ServerSideConnectionEvent.Disconnect.class, "profile", MethodType.methodType(Optional.class));
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            disconnectApi11Profile = null;
+        }
+
+        this.disconnectApi11Profile = disconnectApi11Profile;
     }
 
     @Listener(order = Order.EARLY)
@@ -168,7 +185,19 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
 
     @Listener(order = Order.POST)
     public void onClientLeave(ServerSideConnectionEvent.Disconnect e) {
-        handleDisconnect(e.player().uniqueId());
+        if (disconnectApi11Profile == null) {
+            handleDisconnect(e.player().uniqueId());
+        }
+
+        else {
+            try {
+                @SuppressWarnings("unchecked") final Optional<GameProfile> optionalProfile = (Optional<GameProfile>) disconnectApi11Profile.invoke(e);
+
+                optionalProfile.ifPresent(profile -> handleDisconnect(profile.uniqueId()));
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
 }
