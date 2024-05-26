@@ -36,14 +36,30 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.util.Tristate;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 public class SpongeConnectionListener extends AbstractConnectionListener {
+
+    // Sponge API 11
+    private static final Method DISCONNECT_EVENT_PROFILE_METHOD;
+    static {
+        Method disconnectEventProfileMethod;
+        try {
+            disconnectEventProfileMethod = ServerSideConnectionEvent.Disconnect.class.getMethod("profile");
+        } catch (ReflectiveOperationException e) {
+            disconnectEventProfileMethod = null;
+        }
+        DISCONNECT_EVENT_PROFILE_METHOD = disconnectEventProfileMethod;
+    }
+
     private final LPSpongePlugin plugin;
 
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
@@ -168,7 +184,28 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
 
     @Listener(order = Order.POST)
     public void onClientLeave(ServerSideConnectionEvent.Disconnect e) {
-        handleDisconnect(e.player().uniqueId());
+        Identifiable player = null;
+
+        if (DISCONNECT_EVENT_PROFILE_METHOD == null) {
+            // sponge API < 11
+            player = e.player();
+
+        } else {
+            // sponge API 11+
+            try {
+                //noinspection unchecked
+                final Optional<GameProfile> profile = (Optional<GameProfile>) DISCONNECT_EVENT_PROFILE_METHOD.invoke(e);
+                if (profile.isPresent()) {
+                    player = profile.get();
+                }
+            } catch (ReflectiveOperationException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        if (player != null) {
+            handleDisconnect(player.uniqueId());
+        }
     }
 
 }
