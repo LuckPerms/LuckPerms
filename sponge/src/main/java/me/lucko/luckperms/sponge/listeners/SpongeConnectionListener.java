@@ -36,11 +36,10 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.util.Tristate;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -48,27 +47,27 @@ import java.util.Set;
 import java.util.UUID;
 
 public class SpongeConnectionListener extends AbstractConnectionListener {
+
+    // Sponge API 11
+    private static final Method DISCONNECT_EVENT_PROFILE_METHOD;
+    static {
+        Method disconnectEventProfileMethod;
+        try {
+            disconnectEventProfileMethod = ServerSideConnectionEvent.Disconnect.class.getMethod("profile");
+        } catch (ReflectiveOperationException e) {
+            disconnectEventProfileMethod = null;
+        }
+        DISCONNECT_EVENT_PROFILE_METHOD = disconnectEventProfileMethod;
+    }
+
     private final LPSpongePlugin plugin;
 
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
     private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
-    private final MethodHandle disconnectApi11Profile;
-
     public SpongeConnectionListener(LPSpongePlugin plugin) {
         super(plugin);
         this.plugin = plugin;
-
-        MethodHandle disconnectApi11Profile;
-
-        try {
-            // Support for API-11 connection event changes
-            disconnectApi11Profile = MethodHandles.lookup().findVirtual(ServerSideConnectionEvent.Disconnect.class, "profile", MethodType.methodType(Optional.class));
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-            disconnectApi11Profile = null;
-        }
-
-        this.disconnectApi11Profile = disconnectApi11Profile;
     }
 
     @Listener(order = Order.EARLY)
@@ -185,18 +184,27 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
 
     @Listener(order = Order.POST)
     public void onClientLeave(ServerSideConnectionEvent.Disconnect e) {
-        if (disconnectApi11Profile == null) {
-            handleDisconnect(e.player().uniqueId());
-        }
+        Identifiable player = null;
 
-        else {
+        if (DISCONNECT_EVENT_PROFILE_METHOD == null) {
+            // sponge API < 11
+            player = e.player();
+
+        } else {
+            // sponge API 11+
             try {
-                @SuppressWarnings("unchecked") final Optional<GameProfile> optionalProfile = (Optional<GameProfile>) disconnectApi11Profile.invoke(e);
-
-                optionalProfile.ifPresent(profile -> handleDisconnect(profile.uniqueId()));
-            } catch (Throwable ex) {
+                //noinspection unchecked
+                final Optional<GameProfile> profile = (Optional<GameProfile>) DISCONNECT_EVENT_PROFILE_METHOD.invoke(e);
+                if (profile.isPresent()) {
+                    player = profile.get();
+                }
+            } catch (ReflectiveOperationException ex) {
                 throw new RuntimeException(ex);
             }
+        }
+
+        if (player != null) {
+            handleDisconnect(player.uniqueId());
         }
     }
 
