@@ -11,7 +11,7 @@ dependencies {
     compileOnly project(':common:loader-utils')
 
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
-    compileOnly('net.kyori:adventure-platform-bukkit:4.1.0') {
+    compileOnly('net.kyori:adventure-platform-bukkit:4.3.3') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
         exclude(module: 'adventure-nbt')
