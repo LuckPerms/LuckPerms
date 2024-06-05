@@ -119,7 +119,9 @@ public class FabricPermissionsApiListener {
             String name = ((ServerCommandSource) source).getName();
             VerboseCheckTarget target = VerboseCheckTarget.internal(name);
 
-            this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.UNDEFINED);
+            if (this.plugin.getVerboseHandler() != null) {
+                this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.UNDEFINED);
+            }
             this.plugin.getPermissionRegistry().offer(permission);
         }
 
