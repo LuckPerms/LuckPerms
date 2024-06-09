@@ -25,6 +25,10 @@
 
 package me.lucko.luckperms.common.filter;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
 public class PageParameters {
 
     private final int pageSize;
@@ -41,6 +45,20 @@ public class PageParameters {
 
     public int pageNumber() {
         return this.pageNumber;
+    }
+
+    public <T> List<T> paginate(List<T> input) {
+        int fromIndex = this.pageSize * (this.pageNumber - 1);
+        if (fromIndex >= input.size()) {
+            return Collections.emptyList();
+        }
+
+        int toIndex = Math.min(fromIndex + this.pageSize, input.size());
+        return input.subList(fromIndex, toIndex);
+    }
+
+    public <T> Stream<T> paginate(Stream<T> input) {
+        return input.skip((long) this.pageSize * (this.pageNumber - 1)).limit(this.pageSize);
     }
 
 }

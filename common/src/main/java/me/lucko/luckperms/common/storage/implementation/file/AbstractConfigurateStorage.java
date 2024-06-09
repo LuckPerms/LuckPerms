@@ -177,7 +177,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
 
     @Override
     public LogPage getLogPage(FilterList<Action> filters, PageParameters page) throws Exception {
-        throw new UnsupportedOperationException();
+        return this.actionLogger.getLogPage(filters, page);
     }
 
     @Override

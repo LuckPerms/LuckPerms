@@ -31,11 +31,13 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.Sorts;
 import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
@@ -70,6 +72,7 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import org.bson.Document;
 import org.bson.UuidRepresentation;
+import org.bson.conversions.Bson;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -193,7 +196,7 @@ public class MongoStorage implements StorageImplementation {
     public LogPage getLogPage(FilterList<Action> filters, PageParameters page) throws Exception {
         LogPage.Builder log = LogPage.builder();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "action");
-        try (MongoCursor<Document> cursor = FilterMongoBuilder.page(page, c.find(ActionFilterMongoBuilder.INSTANCE.make(filters))).iterator()) {
+        try (MongoCursor<Document> cursor = ConstraintMongoBuilder.page(page, c.find(ActionFilterMongoBuilder.INSTANCE.make(filters)).sort(Sorts.descending("timestamp"))).iterator()) {
             while (cursor.hasNext()) {
                 log.add(actionFromDoc(cursor.next()));
             }

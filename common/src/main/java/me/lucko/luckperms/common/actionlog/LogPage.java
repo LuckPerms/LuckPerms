@@ -37,6 +37,10 @@ public class LogPage {
         return new LogPage.Builder();
     }
 
+    public static LogPage of(List<LoggedAction> content) {
+        return content.isEmpty() ? EMPTY : new LogPage(content);
+    }
+
     public static LogPage empty() {
         return EMPTY;
     }

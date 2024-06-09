@@ -42,6 +42,10 @@ public class Log {
         return new Builder();
     }
 
+    public static Log of(List<LoggedAction> content) {
+        return content.isEmpty() ? EMPTY : new Log(content);
+    }
+
     public static Log empty() {
         return EMPTY;
     }

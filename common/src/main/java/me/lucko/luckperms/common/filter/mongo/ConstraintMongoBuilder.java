@@ -76,7 +76,7 @@ public class ConstraintMongoBuilder {
     public static <R> FindIterable<R> page(PageParameters pageParameters, FindIterable<R> iterable) {
         int pageSize = pageParameters.pageSize();
         int pageNumber = pageParameters.pageNumber();
-        return iterable.limit(pageNumber).skip((pageNumber - 1) * pageSize);
+        return iterable.limit(pageSize).skip((pageNumber - 1) * pageSize);
     }
 
 }

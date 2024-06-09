@@ -268,7 +268,7 @@ public class SqlStorage implements StorageImplementation {
             ActionFilterSqlBuilder sqlBuilder = new ActionFilterSqlBuilder();
             sqlBuilder.builder().append(ACTION_SELECT_ALL);
             sqlBuilder.visit(filter);
-            sqlBuilder.builder().append(" ORDER BY id DESC");
+            sqlBuilder.builder().append(" ORDER BY time DESC");
             sqlBuilder.visit(page);
 
             try (PreparedStatement ps = sqlBuilder.builder().build(c, this.statementProcessor)) {

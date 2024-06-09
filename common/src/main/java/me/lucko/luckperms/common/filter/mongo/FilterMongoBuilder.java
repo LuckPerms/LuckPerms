@@ -25,12 +25,10 @@
 
 package me.lucko.luckperms.common.filter.mongo;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.model.Filters;
 import me.lucko.luckperms.common.filter.Filter;
 import me.lucko.luckperms.common.filter.FilterField;
 import me.lucko.luckperms.common.filter.FilterList;
-import me.lucko.luckperms.common.filter.PageParameters;
 import org.bson.conversions.Bson;
 
 import java.util.List;
@@ -62,12 +60,6 @@ public abstract class FilterMongoBuilder<T> extends ConstraintMongoBuilder {
 
     public Bson make(FilterList<T> filters) {
         return make(filters.operator(), filters);
-    }
-
-    public static <R> FindIterable<R> page(PageParameters pageParameters, FindIterable<R> iterable) {
-        int pageSize = pageParameters.pageSize();
-        int pageNumber = pageParameters.pageNumber();
-        return iterable.limit(pageNumber).skip((pageNumber - 1) * pageSize);
     }
 
 }

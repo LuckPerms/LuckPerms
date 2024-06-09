@@ -62,7 +62,7 @@ public final class ActionFilterMongoBuilder extends FilterMongoBuilder<Action> {
         if (value instanceof String | value instanceof UUID) {
             return value;
         } else if (value instanceof Action.Target.Type) {
-            return LoggedAction.getTypeString((Action.Target.Type) value);
+            return ((Action.Target.Type) value).name();
         } else {
             throw new IllegalArgumentException("Don't know how to map value with type: " + value.getClass().getName());
         }
