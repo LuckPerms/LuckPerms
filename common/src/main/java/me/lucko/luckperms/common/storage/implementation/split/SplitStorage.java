@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.split;
 
 import com.google.common.collect.ImmutableMap;
-import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.filter.FilterList;
@@ -43,6 +42,7 @@ import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -121,12 +121,7 @@ public class SplitStorage implements StorageImplementation {
     }
 
     @Override
-    public Log getLog() throws Exception {
-        return implFor(SplitStorageType.LOG).getLog();
-    }
-
-    @Override
-    public LogPage getLogPage(FilterList<Action> filters, PageParameters page) throws Exception {
+    public LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws Exception {
         return implFor(SplitStorageType.LOG).getLogPage(filters, page);
     }
 

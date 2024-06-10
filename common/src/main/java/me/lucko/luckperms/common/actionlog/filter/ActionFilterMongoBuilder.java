@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.actionlog.filter;
 
-import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.filter.FilterField;
 import me.lucko.luckperms.common.filter.mongo.FilterMongoBuilder;
 import net.luckperms.api.actionlog.Action;

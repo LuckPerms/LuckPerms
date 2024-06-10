@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.api.implementation;
 
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilters;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.actionlog.ActionLog;
@@ -48,7 +49,8 @@ public class ApiActionLogger implements ActionLogger {
 
     @Override
     public @NonNull CompletableFuture<ActionLog> getLog() {
-        return this.plugin.getStorage().getLog().thenApply(ApiActionLog::new);
+        return this.plugin.getStorage().getLogPage(ActionFilters.all(), null)
+                .thenApply(result -> new ApiActionLog(result.getContent()));
     }
 
     @Override

@@ -62,7 +62,7 @@ public class UserParentCommand extends ParentCommand<User, UserIdentifier> {
             .build(key -> new ReentrantLock());
 
     public UserParentCommand() {
-        super(CommandSpec.USER, "User", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<User>>builder()
+        super(CommandSpec.USER, "User", Type.TARGETED, ImmutableList.<Command<User>>builder()
                 .add(new UserInfo())
                 .add(new CommandPermission<>(HolderType.USER))
                 .add(new CommandParent<>(HolderType.USER))

@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.storage.implementation.sql;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
-import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.actionlog.filter.ActionFilterSqlBuilder;
@@ -36,9 +35,9 @@ import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateSqlBuilder;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
-import me.lucko.luckperms.common.filter.sql.ConstraintSqlBuilder;
 import me.lucko.luckperms.common.filter.FilterList;
 import me.lucko.luckperms.common.filter.PageParameters;
+import me.lucko.luckperms.common.filter.sql.ConstraintSqlBuilder;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -59,6 +58,7 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -132,6 +132,7 @@ public class SqlStorage implements StorageImplementation {
 
     private static final String ACTION_INSERT = "INSERT INTO '{prefix}actions' (time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String ACTION_SELECT_ALL = "SELECT * FROM '{prefix}actions'";
+    private static final String ACTION_COUNT = "SELECT COUNT(*) FROM '{prefix}actions'";
 
     private final LuckPermsPlugin plugin;
     
@@ -247,24 +248,23 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public Log getLog() throws SQLException {
-        final Log.Builder log = Log.builder();
+    public LogPage getLogPage(FilterList<Action> filter, @Nullable PageParameters page) throws SQLException {
+        int count = 0;
+        List<LoggedAction> content = new ArrayList<>();
+
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(ACTION_SELECT_ALL))) {
+            ActionFilterSqlBuilder countSqlBuilder = new ActionFilterSqlBuilder();
+            countSqlBuilder.builder().append(ACTION_COUNT);
+            countSqlBuilder.visit(filter);
+
+            try (PreparedStatement ps = countSqlBuilder.builder().build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        log.add(readAction(rs));
+                    if (rs.next()) {
+                        count = rs.getInt(1);
                     }
                 }
             }
-        }
-        return log.build();
-    }
 
-    @Override
-    public LogPage getLogPage(FilterList<Action> filter, PageParameters page) throws SQLException {
-        LogPage.Builder builder = LogPage.builder();
-        try (Connection c = this.connectionFactory.getConnection()) {
             ActionFilterSqlBuilder sqlBuilder = new ActionFilterSqlBuilder();
             sqlBuilder.builder().append(ACTION_SELECT_ALL);
             sqlBuilder.visit(filter);
@@ -274,12 +274,12 @@ public class SqlStorage implements StorageImplementation {
             try (PreparedStatement ps = sqlBuilder.builder().build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        builder.add(readAction(rs));
+                        content.add(readAction(rs));
                     }
                 }
             }
         }
-        return builder.build();
+        return LogPage.of(content, page, count);
     }
 
     @Override

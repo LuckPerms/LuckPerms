@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
-//@Tag("docker")
+@Tag("docker")
 public class MongoStorageTest extends AbstractStorageTest {
 
     private final GenericContainer<?> container = new GenericContainer<>(DockerImageName.parse("mongo"))

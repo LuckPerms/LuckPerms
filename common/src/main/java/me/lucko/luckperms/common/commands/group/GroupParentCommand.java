@@ -60,7 +60,7 @@ public class GroupParentCommand extends ParentCommand<Group, String> {
             .build(key -> new ReentrantLock());
 
     public GroupParentCommand() {
-        super(CommandSpec.GROUP, "Group", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<Group>>builder()
+        super(CommandSpec.GROUP, "Group", Type.TARGETED, ImmutableList.<Command<Group>>builder()
                 .add(new GroupInfo())
                 .add(new CommandPermission<>(HolderType.GROUP))
                 .add(new CommandParent<>(HolderType.GROUP))

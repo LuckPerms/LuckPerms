@@ -27,14 +27,13 @@ package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import me.lucko.luckperms.common.actionlog.filter.ActionFilters;
-import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
-import me.lucko.luckperms.common.filter.PageParameters;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilters;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.event.EventDispatcher;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PrimaryGroupHolder;
 import me.lucko.luckperms.common.model.User;
@@ -57,13 +56,13 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.PermissionNode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -121,24 +120,6 @@ public abstract class AbstractStorageTest {
 
     @Test
     public void testActionLog() throws Exception {
-        LoggedAction action = LoggedAction.build()
-                .source(UUID.randomUUID())
-                .sourceName("Test Source")
-                .targetType(Action.Target.Type.USER)
-                .target(UUID.randomUUID())
-                .targetName("Test Target")
-                .description("hello 123 hello 123")
-                .build();
-
-        this.storage.logAction(action);
-
-        Log log = this.storage.getLog();
-        assertEquals(1, log.getContent().size());
-        assertEquals(action, log.getContent().first());
-    }
-
-    @Test
-    public void testActionLogPage() throws Exception {
         UUID sourceUuid = UUID.randomUUID();
         UUID targetUuid = UUID.randomUUID();
 
@@ -192,7 +173,9 @@ public abstract class AbstractStorageTest {
                 mockAction.apply(92),
                 mockAction.apply(90)
         ), page.getContent());
-
+        List<Integer> positions = page.getNumberedContent().stream().map(LogPage.Entry::position).collect(Collectors.toList());
+        assertEquals(ImmutableList.of(1, 2, 3, 4, 5), positions);
+        assertEquals(150, page.getTotalEntries());
 
         page = this.storage.getLogPage(ActionFilters.source(sourceUuid), new PageParameters(5, 3));
         assertEquals(ImmutableList.of(
@@ -202,15 +185,28 @@ public abstract class AbstractStorageTest {
                 mockAction.apply(72),
                 mockAction.apply(70)
         ), page.getContent());
+        positions = page.getNumberedContent().stream().map(LogPage.Entry::position).collect(Collectors.toList());
+        assertEquals(ImmutableList.of(11, 12, 13, 14, 15), positions);
+        assertEquals(150, page.getTotalEntries());
+
+        page = this.storage.getLogPage(ActionFilters.source(sourceUuid), new PageParameters(5, 31));
+        assertEquals(150, page.getTotalEntries());
+        assertEquals(0, page.getContent().size());
 
         page = this.storage.getLogPage(ActionFilters.source(sourceUuid), new PageParameters(500, 1));
+        assertEquals(150, page.getTotalEntries());
         assertEquals(150, page.getContent().size());
 
-        page = this.storage.getLogPage(ActionFilters.all(), new PageParameters(500, 1));
+        page = this.storage.getLogPage(ActionFilters.source(sourceUuid), null);
+        assertEquals(150, page.getTotalEntries());
+        assertEquals(150, page.getContent().size());
+
+        page = this.storage.getLogPage(ActionFilters.all(), null);
+        assertEquals(320, page.getTotalEntries());
         assertEquals(320, page.getContent().size());
 
-        page = this.storage.getLogPage(ActionFilters.user(targetUuid), new PageParameters(500, 1));
-        assertEquals(300, page.getContent().size());
+        page = this.storage.getLogPage(ActionFilters.user(targetUuid), new PageParameters(5, 1));
+        assertEquals(300, page.getTotalEntries());
 
         page = this.storage.getLogPage(ActionFilters.group("test_group"), new PageParameters(10, 1));
         assertEquals(5, page.getContent().size());

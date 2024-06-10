@@ -25,12 +25,10 @@
 
 package me.lucko.luckperms.common.storage.implementation.file;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 import me.lucko.luckperms.common.actionlog.ActionJsonSerializer;
-import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.cache.BufferedRequest;
@@ -39,6 +37,7 @@ import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import net.luckperms.api.actionlog.Action;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -163,12 +162,15 @@ public class FileActionLogger {
         return builder.build();
     }
 
-    public Log getLog() throws IOException {
-        return Log.of(getRawLog().collect(Collectors.toList()));
-    }
+    public LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws IOException {
+        List<LoggedAction> filtered = getRawLog()
+                .filter(filters::evaluate)
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
 
-    public LogPage getLogPage(FilterList<Action> filters, PageParameters page) throws IOException {
-        return LogPage.of(page.paginate(getRawLog().filter(filters::evaluate).sorted(Comparator.reverseOrder())).collect(Collectors.toList()));
+        int size = filtered.size();
+        List<LoggedAction> paginated = page != null ? page.paginate(filtered) : filtered;
+        return LogPage.of(paginated, page, size);
     }
 
     private final class SaveBuffer extends BufferedRequest<Void> {

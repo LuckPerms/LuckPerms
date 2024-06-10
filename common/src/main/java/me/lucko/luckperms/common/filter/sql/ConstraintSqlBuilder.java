@@ -4,6 +4,7 @@ import me.lucko.luckperms.common.filter.Comparison;
 import me.lucko.luckperms.common.filter.Constraint;
 import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.storage.implementation.sql.builder.AbstractSqlBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ConstraintSqlBuilder extends AbstractSqlBuilder {
 
@@ -45,9 +46,13 @@ public class ConstraintSqlBuilder extends AbstractSqlBuilder {
         }
     }
 
-    public void visit(PageParameters pageParameters) {
-        int pageSize = pageParameters.pageSize();
-        int pageNumber = pageParameters.pageNumber();
+    public void visit(@Nullable PageParameters params) {
+        if (params == null) {
+            return;
+        }
+
+        int pageSize = params.pageSize();
+        int pageNumber = params.pageNumber();
         this.builder.append(" LIMIT " + pageSize + " OFFSET " + (pageNumber - 1) * pageSize);
     }
 

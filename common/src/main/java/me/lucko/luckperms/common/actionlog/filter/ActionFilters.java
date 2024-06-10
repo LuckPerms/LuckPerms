@@ -97,13 +97,13 @@ public final class ActionFilters {
         @Override
         public Predicate<Target.Type> similar(Target.Type value) {
             Pattern pattern = Comparison.compilePatternForLikeSyntax(value.toString());
-            return uuid -> pattern.matcher(uuid.toString()).matches();
+            return type -> pattern.matcher(type.toString()).matches();
         }
 
         @Override
         public Predicate<Target.Type> notSimilar(Target.Type value) {
             Pattern pattern = Comparison.compilePatternForLikeSyntax(value.toString());
-            return uuid -> !pattern.matcher(uuid.toString()).matches();
+            return type -> !pattern.matcher(type.toString()).matches();
         }
     };
 

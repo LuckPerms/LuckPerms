@@ -28,7 +28,6 @@ package me.lucko.luckperms.standalone.app.integration;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
-import net.kyori.ansi.ColorLevel;
 
 import java.util.Set;
 import java.util.UUID;

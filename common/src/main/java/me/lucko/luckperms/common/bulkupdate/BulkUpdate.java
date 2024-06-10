@@ -26,14 +26,12 @@
 package me.lucko.luckperms.common.bulkupdate;
 
 import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
-import me.lucko.luckperms.common.filter.Filter;
 import me.lucko.luckperms.common.filter.FilterList;
 import me.lucko.luckperms.common.model.HolderType;
 import net.luckperms.api.node.Node;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 

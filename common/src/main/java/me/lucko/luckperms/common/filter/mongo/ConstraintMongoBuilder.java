@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.filter.Comparison;
 import me.lucko.luckperms.common.filter.Constraint;
 import me.lucko.luckperms.common.filter.PageParameters;
 import org.bson.conversions.Bson;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.regex.Pattern;
 
@@ -73,9 +74,13 @@ public class ConstraintMongoBuilder {
         }
     }
 
-    public static <R> FindIterable<R> page(PageParameters pageParameters, FindIterable<R> iterable) {
-        int pageSize = pageParameters.pageSize();
-        int pageNumber = pageParameters.pageNumber();
+    public static <R> FindIterable<R> page(@Nullable PageParameters params, FindIterable<R> iterable) {
+        if (params == null) {
+            return iterable;
+        }
+
+        int pageSize = params.pageSize();
+        int pageNumber = params.pageNumber();
         return iterable.limit(pageSize).skip((pageNumber - 1) * pageSize);
     }
 

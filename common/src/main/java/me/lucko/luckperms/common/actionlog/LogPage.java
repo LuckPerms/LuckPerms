@@ -26,48 +26,82 @@
 package me.lucko.luckperms.common.actionlog;
 
 import com.google.common.collect.ImmutableList;
+import me.lucko.luckperms.common.filter.PageParameters;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class LogPage {
-    private static final LogPage EMPTY = new LogPage(ImmutableList.of());
-
-    public static LogPage.Builder builder() {
-        return new LogPage.Builder();
-    }
-
-    public static LogPage of(List<LoggedAction> content) {
-        return content.isEmpty() ? EMPTY : new LogPage(content);
-    }
-
-    public static LogPage empty() {
-        return EMPTY;
+    public static LogPage of(List<LoggedAction> content, @Nullable PageParameters params, int totalEntries) {
+        return new LogPage(content, params, totalEntries);
     }
 
     private final List<LoggedAction> content;
+    private final @Nullable PageParameters params;
+    private final int totalEntries;
 
-    LogPage(List<LoggedAction> content) {
+    LogPage(List<LoggedAction> content, @Nullable PageParameters params, int totalEntries) {
         this.content = ImmutableList.copyOf(content);
+        this.params = params;
+        this.totalEntries = totalEntries;
     }
 
     public List<LoggedAction> getContent() {
         return this.content;
     }
 
-    public static class Builder {
-        private final List<LoggedAction> content = new ArrayList<>();
+    public List<Entry<LoggedAction>> getNumberedContent() {
+        int startIndex = this.params != null
+                ? this.params.pageSize() * (this.params.pageNumber() - 1)
+                : 0;
 
-        public Builder add(LoggedAction e) {
-            this.content.add(e);
-            return this;
+        List<Entry<LoggedAction>> numberedContent = new ArrayList<>();
+        for (int i = 0; i < this.content.size(); i++) {
+            int index = startIndex + i + 1;
+            numberedContent.add(new Entry<>(index, this.content.get(i)));
+        }
+        return numberedContent;
+    }
+
+    public int getTotalEntries() {
+        return this.totalEntries;
+    }
+
+    public static final class Entry<T> {
+        private final int position;
+        private final T value;
+
+        public Entry(int position, T value) {
+            this.position = position;
+            this.value = value;
         }
 
-        public LogPage build() {
-            if (this.content.isEmpty()) {
-                return EMPTY;
-            }
-            return new LogPage(this.content);
+        public int position() {
+            return this.position;
+        }
+
+        public T value() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return this.position + ": " + this.value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Entry)) return false;
+            Entry<?> entry = (Entry<?>) o;
+            return this.position == entry.position && Objects.equals(this.value, entry.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.position, this.value);
         }
     }
 

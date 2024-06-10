@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.file;
 
 import com.google.common.collect.Iterables;
-import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
@@ -62,6 +61,7 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.Types;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -171,12 +171,7 @@ public abstract class AbstractConfigurateStorage implements StorageImplementatio
     }
 
     @Override
-    public Log getLog() throws IOException {
-        return this.actionLogger.getLog();
-    }
-
-    @Override
-    public LogPage getLogPage(FilterList<Action> filters, PageParameters page) throws Exception {
+    public LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws Exception {
         return this.actionLogger.getLogPage(filters, page);
     }
 

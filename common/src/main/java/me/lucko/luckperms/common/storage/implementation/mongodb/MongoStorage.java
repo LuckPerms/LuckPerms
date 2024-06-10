@@ -31,23 +31,20 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.Sorts;
-import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.actionlog.filter.ActionFilterMongoBuilder;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.context.MutableContextSetImpl;
-import me.lucko.luckperms.common.filter.mongo.ConstraintMongoBuilder;
 import me.lucko.luckperms.common.filter.FilterList;
-import me.lucko.luckperms.common.filter.mongo.FilterMongoBuilder;
 import me.lucko.luckperms.common.filter.PageParameters;
+import me.lucko.luckperms.common.filter.mongo.ConstraintMongoBuilder;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.Track;
@@ -73,6 +70,7 @@ import net.luckperms.api.node.NodeBuilder;
 import org.bson.Document;
 import org.bson.UuidRepresentation;
 import org.bson.conversions.Bson;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -181,27 +179,20 @@ public class MongoStorage implements StorageImplementation {
     }
 
     @Override
-    public Log getLog() {
-        Log.Builder log = Log.builder();
-        MongoCollection<Document> c = this.database.getCollection(this.prefix + "action");
-        try (MongoCursor<Document> cursor = c.find().iterator()) {
-            while (cursor.hasNext()) {
-                log.add(actionFromDoc(cursor.next()));
-            }
-        }
-        return log.build();
-    }
+    public LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws Exception {
+        Bson filter = ActionFilterMongoBuilder.INSTANCE.make(filters);
 
-    @Override
-    public LogPage getLogPage(FilterList<Action> filters, PageParameters page) throws Exception {
-        LogPage.Builder log = LogPage.builder();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "action");
-        try (MongoCursor<Document> cursor = ConstraintMongoBuilder.page(page, c.find(ActionFilterMongoBuilder.INSTANCE.make(filters)).sort(Sorts.descending("timestamp"))).iterator()) {
+        long count = c.countDocuments(filter);
+
+        List<LoggedAction> content = new ArrayList<>();
+        try (MongoCursor<Document> cursor = ConstraintMongoBuilder.page(page, c.find(filter).sort(Sorts.descending("timestamp"))).iterator()) {
             while (cursor.hasNext()) {
-                log.add(actionFromDoc(cursor.next()));
+                content.add(actionFromDoc(cursor.next()));
             }
         }
-        return log.build();
+
+        return LogPage.of(content, page, (int) count);
     }
 
     @Override

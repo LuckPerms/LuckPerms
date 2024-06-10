@@ -35,6 +35,13 @@ public class PageParameters {
     private final int pageNumber;
 
     public PageParameters(int pageSize, int pageNumber) {
+        if (pageSize < 1) {
+            throw new IllegalArgumentException("pageSize cannot be less than 1: " + pageSize);
+        }
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("pageNumber cannot be less than 1: " + pageNumber);
+        }
+
         this.pageSize = pageSize;
         this.pageNumber = pageNumber;
     }
@@ -59,6 +66,14 @@ public class PageParameters {
 
     public <T> Stream<T> paginate(Stream<T> input) {
         return input.skip((long) this.pageSize * (this.pageNumber - 1)).limit(this.pageSize);
+    }
+
+    public int getMaxPage(int totalEntries) {
+        if (totalEntries == 0) {
+            return 0;
+        }
+
+        return (totalEntries + this.pageSize - 1) / this.pageSize;
     }
 
 }

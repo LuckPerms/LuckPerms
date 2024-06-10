@@ -26,11 +26,10 @@
 package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableList;
-import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.actionlog.LogPage;
-import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -45,6 +44,7 @@ import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -136,11 +136,7 @@ public class Storage {
         return future(() -> this.implementation.logAction(entry));
     }
 
-    public CompletableFuture<Log> getLog() {
-        return future(this.implementation::getLog);
-    }
-
-    public CompletableFuture<LogPage> getLogPage(FilterList<Action> filters, PageParameters page) {
+    public CompletableFuture<LogPage> getLogPage(FilterList<Action> filters, @Nullable PageParameters page) {
         return future(() -> this.implementation.getLogPage(filters, page));
     }
 

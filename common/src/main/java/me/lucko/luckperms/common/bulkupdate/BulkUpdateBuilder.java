@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.bulkupdate;
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
 import me.lucko.luckperms.common.filter.Comparison;
-import me.lucko.luckperms.common.filter.Constraint;
 import me.lucko.luckperms.common.filter.ConstraintFactory;
 import me.lucko.luckperms.common.filter.Filter;
 import me.lucko.luckperms.common.filter.FilterList;

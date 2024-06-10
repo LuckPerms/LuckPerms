@@ -23,23 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.log;
+package me.lucko.luckperms.common.filter;
 
-import com.google.common.collect.ImmutableList;
-import me.lucko.luckperms.common.command.abstraction.Command;
-import me.lucko.luckperms.common.command.abstraction.ParentCommand;
-import me.lucko.luckperms.common.command.spec.CommandSpec;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-public class LogParentCommand extends ParentCommand<Void, Void> {
-    public LogParentCommand() {
-        super(CommandSpec.LOG, "Log", Type.NOT_TARGETED, ImmutableList.<Command<Void>>builder()
-                .add(new LogRecent())
-                .add(new LogSearch())
-                .add(new LogNotify())
-                .add(new LogUserHistory())
-                .add(new LogGroupHistory())
-                .add(new LogTrackHistory())
-                .build()
-        );
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class PageParametersTest {
+
+    @ParameterizedTest(name = "[{index}] {0} {1}")
+    @CsvSource({
+            "5, 150, 30",
+            "151, 150, 1",
+            "150, 150, 1",
+            "149, 150, 2",
+            "1, 1, 1",
+            "1, 0, 0",
+            "10, 0, 0",
+    })
+    public void testMaxPage(int pageSize, int total, int expectedMaxPage) {
+        int maxPage = new PageParameters(pageSize, 1).getMaxPage(total);
+        assertEquals(expectedMaxPage, maxPage);
     }
+
 }

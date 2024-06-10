@@ -64,10 +64,6 @@ public class BulkUpdateSqlBuilder extends FilterSqlBuilder<Node> {
         this.builder.append("DELETE FROM {table}");
     }
 
-    public void visit(List<Filter<Node, String>> filters) {
-        visit(FilterList.LogicalOperator.AND, filters);
-    }
-
     @Override
     public void visitFieldName(FilterField<Node, ?> field) {
         if (field == BulkUpdateField.PERMISSION) {

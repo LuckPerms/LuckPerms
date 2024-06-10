@@ -53,7 +53,7 @@ public class TrackParentCommand extends ParentCommand<Track, String> {
             .build(key -> new ReentrantLock());
 
     public TrackParentCommand() {
-        super(CommandSpec.TRACK, "Track", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableList.<Command<Track>>builder()
+        super(CommandSpec.TRACK, "Track", Type.TARGETED, ImmutableList.<Command<Track>>builder()
                 .add(new TrackInfo())
                 .add(new TrackEditor())
                 .add(new TrackAppend())
