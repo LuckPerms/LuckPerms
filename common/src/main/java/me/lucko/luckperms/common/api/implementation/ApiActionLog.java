@@ -37,6 +37,7 @@ import java.util.Objects;
 import java.util.SortedSet;
 import java.util.UUID;
 
+@Deprecated
 public class ApiActionLog implements ActionLog {
     private final SortedSet<Action> content;
 

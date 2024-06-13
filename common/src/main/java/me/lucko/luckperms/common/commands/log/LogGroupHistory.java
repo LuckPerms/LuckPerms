@@ -59,13 +59,13 @@ public class LogGroupHistory extends ChildCommand<Void> {
             return;
         }
 
-        PageParameters pageParams = new PageParameters(ENTRIES_PER_PAGE, args.getIntOrDefault(1, Integer.MIN_VALUE));
+        PageParameters pageParams = new PageParameters(ENTRIES_PER_PAGE, args.getIntOrDefault(1, 1));
         LogPage log = plugin.getStorage().getLogPage(ActionFilters.group(group), pageParams).join();
 
         int page = pageParams.pageNumber();
         int maxPage = pageParams.getMaxPage(log.getTotalEntries());
 
-        if (log.getContent().isEmpty()) {
+        if (log.getTotalEntries() == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return;
         }

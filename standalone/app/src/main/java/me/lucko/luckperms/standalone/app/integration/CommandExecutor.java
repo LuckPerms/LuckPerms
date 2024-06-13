@@ -33,8 +33,16 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface CommandExecutor {
 
-    CompletableFuture<Void> execute(String command);
+    CompletableFuture<Void> execute(StandaloneSender player, String command);
 
-    List<String> tabComplete(String command);
+    List<String> tabComplete(StandaloneSender player, String command);
+
+    default CompletableFuture<Void> execute(String command) {
+        return execute(StandaloneUser.INSTANCE, command);
+    }
+
+    default List<String> tabComplete(String command) {
+        return tabComplete(StandaloneUser.INSTANCE, command);
+    }
 
 }

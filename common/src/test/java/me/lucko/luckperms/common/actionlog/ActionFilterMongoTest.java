@@ -54,18 +54,18 @@ public class ActionFilterMongoTest {
                 ),
                 Arguments.of(
                         ActionFilters.user(UUID.fromString("725d585e-4ff1-4f18-acca-6ac538364080")),
-                        // {"$and": [{"target.type": "U"}, {"target.uniqueId": {"$binary": {"base64": "cl1YXk/xTxisymrFODZAgA==", "subType": "04"}}}]}
-                        "{\"$and\": [{\"target.type\": \"U\"}, {\"target.uniqueId\": {\"$binary\": {\"base64\": \"cl1YXk/xTxisymrFODZAgA==\", \"subType\": \"04\"}}}]}"
+                        // {"$and": [{"target.type": "USER"}, {"target.uniqueId": {"$binary": {"base64": "cl1YXk/xTxisymrFODZAgA==", "subType": "04"}}}]}
+                        "{\"$and\": [{\"target.type\": \"USER\"}, {\"target.uniqueId\": {\"$binary\": {\"base64\": \"cl1YXk/xTxisymrFODZAgA==\", \"subType\": \"04\"}}}]}"
                 ),
                 Arguments.of(
                         ActionFilters.group("test"),
-                        // {"$and": [{"target.type": "G"}, {"target.name": "test"}]}
-                        "{\"$and\": [{\"target.type\": \"G\"}, {\"target.name\": \"test\"}]}"
+                        // {"$and": [{"target.type": "GROUP"}, {"target.name": "test"}]}
+                        "{\"$and\": [{\"target.type\": \"GROUP\"}, {\"target.name\": \"test\"}]}"
                 ),
                 Arguments.of(
                         ActionFilters.track("test"),
-                        // {"$and": [{"target.type": "T"}, {"target.name": "test"}]}
-                        "{\"$and\": [{\"target.type\": \"T\"}, {\"target.name\": \"test\"}]}"
+                        // {"$and": [{"target.type": "TRACK"}, {"target.name": "test"}]}
+                        "{\"$and\": [{\"target.type\": \"TRACK\"}, {\"target.name\": \"test\"}]}"
                 ),
                 Arguments.of(
                         ActionFilters.search("test"),

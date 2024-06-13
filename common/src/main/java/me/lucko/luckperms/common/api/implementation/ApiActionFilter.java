@@ -23,46 +23,25 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate;
+package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.common.filter.FilterField;
-import net.luckperms.api.context.DefaultContextKeys;
-import net.luckperms.api.node.Node;
+import me.lucko.luckperms.common.filter.FilterList;
+import net.luckperms.api.actionlog.Action;
+import net.luckperms.api.actionlog.filter.ActionFilter;
 
-import java.util.Locale;
+public class ApiActionFilter implements ActionFilter {
+    private final FilterList<Action> filter;
 
-/**
- * Represents a field being used in a bulk update
- */
-public enum BulkUpdateField implements FilterField<Node, String> {
-
-    PERMISSION {
-        @Override
-        public String getValue(Node node) {
-            return node.getKey();
-        }
-    },
-
-    SERVER {
-        @Override
-        public String getValue(Node node) {
-            return node.getContexts().getAnyValue(DefaultContextKeys.SERVER_KEY).orElse("global");
-        }
-    },
-
-    WORLD {
-        @Override
-        public String getValue(Node node) {
-            return node.getContexts().getAnyValue(DefaultContextKeys.WORLD_KEY).orElse("global");
-        }
-    };
-
-    public static BulkUpdateField of(String s) {
-        try {
-            return valueOf(s.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+    public ApiActionFilter(FilterList<Action> filter) {
+        this.filter = filter;
     }
 
+    @Override
+    public boolean test(Action action) {
+        return this.filter.evaluate(action);
+    }
+
+    public FilterList<Action> getFilter() {
+        return this.filter;
+    }
 }

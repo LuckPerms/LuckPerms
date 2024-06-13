@@ -137,7 +137,7 @@ public class FileActionLogger {
         }
     }
 
-    private Stream<LoggedAction> getRawLog() throws IOException {
+    private Stream<LoggedAction> loadLog(FilterList<Action> filters) throws IOException {
         // if there is log content waiting to be written, flush immediately before trying to read
         if (this.saveBuffer.isEnqueued()) {
             this.saveBuffer.requestDirectly();
@@ -153,7 +153,10 @@ public class FileActionLogger {
             while ((line = reader.readLine()) != null) {
                 try {
                     JsonElement parsed = GsonProvider.parser().parse(line);
-                    builder.add(ActionJsonSerializer.deserialize(parsed));
+                    LoggedAction action = ActionJsonSerializer.deserialize(parsed);
+                    if (filters.evaluate(action)) {
+                        builder.add(action);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -163,10 +166,10 @@ public class FileActionLogger {
     }
 
     public LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws IOException {
-        List<LoggedAction> filtered = getRawLog()
-                .filter(filters::evaluate)
-                .sorted(Comparator.reverseOrder())
-                .collect(Collectors.toList());
+        List<LoggedAction> filtered = loadLog(filters)
+                .sorted(Comparator.comparing(LoggedAction::getTimestamp))
+                .collect(Collectors.toList())
+                .reversed();
 
         int size = filtered.size();
         List<LoggedAction> paginated = page != null ? page.paginate(filtered) : filtered;

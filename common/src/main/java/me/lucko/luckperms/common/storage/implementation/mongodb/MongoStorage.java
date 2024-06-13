@@ -186,7 +186,7 @@ public class MongoStorage implements StorageImplementation {
         long count = c.countDocuments(filter);
 
         List<LoggedAction> content = new ArrayList<>();
-        try (MongoCursor<Document> cursor = ConstraintMongoBuilder.page(page, c.find(filter).sort(Sorts.descending("timestamp"))).iterator()) {
+        try (MongoCursor<Document> cursor = ConstraintMongoBuilder.page(page, c.find(filter).sort(Sorts.descending("timestamp", "_id"))).iterator()) {
             while (cursor.hasNext()) {
                 content.add(actionFromDoc(cursor.next()));
             }

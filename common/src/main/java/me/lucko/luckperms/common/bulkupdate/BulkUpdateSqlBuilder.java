@@ -28,13 +28,9 @@ package me.lucko.luckperms.common.bulkupdate;
 import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
-import me.lucko.luckperms.common.filter.Filter;
 import me.lucko.luckperms.common.filter.FilterField;
-import me.lucko.luckperms.common.filter.FilterList;
 import me.lucko.luckperms.common.filter.sql.FilterSqlBuilder;
 import net.luckperms.api.node.Node;
-
-import java.util.List;
 
 public class BulkUpdateSqlBuilder extends FilterSqlBuilder<Node> {
 

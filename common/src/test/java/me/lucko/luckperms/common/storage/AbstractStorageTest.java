@@ -152,6 +152,7 @@ public abstract class AbstractStorageTest {
                     .targetType(Action.Target.Type.GROUP)
                     .targetName(i % 2 == 0 ? "test_group" : "dummy")
                     .description("group test " + i)
+                    .timestamp(baseTime)
                     .build());
         }
 
@@ -162,6 +163,7 @@ public abstract class AbstractStorageTest {
                     .targetType(Action.Target.Type.TRACK)
                     .targetName(i % 2 == 0 ? "test_track" : "dummy")
                     .description("track test " + i)
+                    .timestamp(baseTime)
                     .build());
         }
 
@@ -210,9 +212,17 @@ public abstract class AbstractStorageTest {
 
         page = this.storage.getLogPage(ActionFilters.group("test_group"), new PageParameters(10, 1));
         assertEquals(5, page.getContent().size());
+        assertEquals(
+                ImmutableList.of("group test 8", "group test 6", "group test 4", "group test 2", "group test 0"),
+                page.getContent().stream().map(LoggedAction::getDescription).collect(Collectors.toList())
+        );
 
         page = this.storage.getLogPage(ActionFilters.track("test_track"), new PageParameters(10, 1));
         assertEquals(5, page.getContent().size());
+        assertEquals(
+                ImmutableList.of("track test 8", "track test 6", "track test 4", "track test 2", "track test 0"),
+                page.getContent().stream().map(LoggedAction::getDescription).collect(Collectors.toList())
+        );
 
         page = this.storage.getLogPage(ActionFilters.search("hello"), new PageParameters(500, 1));
         assertEquals(300, page.getContent().size());

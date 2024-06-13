@@ -29,39 +29,45 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.standalone.LPStandalonePlugin;
-import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
+import me.lucko.luckperms.standalone.app.integration.StandaloneSender;
+import me.lucko.luckperms.standalone.app.integration.StandaloneUser;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.UUID;
 
-public class StandaloneContextManager extends ContextManager<SingletonPlayer, SingletonPlayer> {
-    private final QueryOptionsCache<SingletonPlayer> singletonCache = new QueryOptionsCache<>(SingletonPlayer.INSTANCE, this);
+public class StandaloneContextManager extends ContextManager<StandaloneSender, StandaloneSender> {
+    private final QueryOptionsCache<StandaloneSender> singletonCache = new QueryOptionsCache<>(StandaloneUser.INSTANCE, this);
 
     public StandaloneContextManager(LPStandalonePlugin plugin) {
-        super(plugin, SingletonPlayer.class, SingletonPlayer.class);
+        super(plugin, StandaloneSender.class, StandaloneSender.class);
     }
 
     @Override
-    public UUID getUniqueId(SingletonPlayer player) {
+    public UUID getUniqueId(StandaloneSender player) {
         return player.getUniqueId();
     }
 
     @Override
-    public QueryOptionsCache<SingletonPlayer> getCacheFor(SingletonPlayer subject) {
+    public QueryOptionsCache<StandaloneSender> getCacheFor(StandaloneSender subject) {
         if (subject == null) {
             throw new NullPointerException("subject");
         }
-        return this.singletonCache;
+        if (subject == StandaloneUser.INSTANCE) {
+            return this.singletonCache;
+        }
+
+        // just return a new one every time - not optimal but this case should only be hit using unit tests anyway
+        return new QueryOptionsCache<>(subject, this);
     }
 
     @Override
-    protected void invalidateCache(SingletonPlayer subject) {
+    protected void invalidateCache(StandaloneSender subject) {
         this.singletonCache.invalidate();
     }
 
     @Override
-    public QueryOptions formQueryOptions(SingletonPlayer subject, ImmutableContextSet contextSet) {
+    public QueryOptions formQueryOptions(StandaloneSender subject, ImmutableContextSet contextSet) {
         QueryOptions.Builder queryOptions = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
         return queryOptions.context(contextSet).build();
     }

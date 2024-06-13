@@ -23,46 +23,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate;
+package me.lucko.luckperms.standalone.app.integration;
 
-import me.lucko.luckperms.common.filter.FilterField;
-import net.luckperms.api.context.DefaultContextKeys;
-import net.luckperms.api.node.Node;
+import net.kyori.adventure.text.Component;
+import net.luckperms.api.util.Tristate;
 
 import java.util.Locale;
+import java.util.UUID;
 
-/**
- * Represents a field being used in a bulk update
- */
-public enum BulkUpdateField implements FilterField<Node, String> {
+public interface StandaloneSender {
+    String getName();
 
-    PERMISSION {
-        @Override
-        public String getValue(Node node) {
-            return node.getKey();
-        }
-    },
+    UUID getUniqueId();
 
-    SERVER {
-        @Override
-        public String getValue(Node node) {
-            return node.getContexts().getAnyValue(DefaultContextKeys.SERVER_KEY).orElse("global");
-        }
-    },
+    void sendMessage(Component component);
 
-    WORLD {
-        @Override
-        public String getValue(Node node) {
-            return node.getContexts().getAnyValue(DefaultContextKeys.WORLD_KEY).orElse("global");
-        }
-    };
+    Tristate getPermissionValue(String permission);
 
-    public static BulkUpdateField of(String s) {
-        try {
-            return valueOf(s.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
+    boolean hasPermission(String permission);
 
+    boolean isConsole();
+
+    Locale getLocale();
 }

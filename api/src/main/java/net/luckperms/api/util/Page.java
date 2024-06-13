@@ -23,46 +23,31 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate;
+package net.luckperms.api.util;
 
-import me.lucko.luckperms.common.filter.FilterField;
-import net.luckperms.api.context.DefaultContextKeys;
-import net.luckperms.api.node.Node;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Locale;
+import java.util.List;
 
 /**
- * Represents a field being used in a bulk update
+ * Represents a page of entries.
+ *
+ * @since 5.5
  */
-public enum BulkUpdateField implements FilterField<Node, String> {
+public interface Page<T> {
 
-    PERMISSION {
-        @Override
-        public String getValue(Node node) {
-            return node.getKey();
-        }
-    },
+    /**
+     * Gets the entries on this page.
+     *
+     * @return the entries
+     */
+    @NonNull List<T> entries();
 
-    SERVER {
-        @Override
-        public String getValue(Node node) {
-            return node.getContexts().getAnyValue(DefaultContextKeys.SERVER_KEY).orElse("global");
-        }
-    },
-
-    WORLD {
-        @Override
-        public String getValue(Node node) {
-            return node.getContexts().getAnyValue(DefaultContextKeys.WORLD_KEY).orElse("global");
-        }
-    };
-
-    public static BulkUpdateField of(String s) {
-        try {
-            return valueOf(s.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
+    /**
+     * Gets the total/overall number of entries (not just the number of entries on this page).
+     *
+     * @return the total number of entries
+     */
+    int overallSize();
 
 }

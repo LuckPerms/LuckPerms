@@ -74,7 +74,7 @@ public class LogRecent extends ChildCommand<Void> {
         LogPage log = plugin.getStorage().getLogPage(uuid == null ? ActionFilters.all() : ActionFilters.source(uuid), pageParams).join();
 
         int maxPage = pageParams.getMaxPage(log.getTotalEntries());
-        if (log.getContent().isEmpty()) {
+        if (log.getTotalEntries() == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return;
         }

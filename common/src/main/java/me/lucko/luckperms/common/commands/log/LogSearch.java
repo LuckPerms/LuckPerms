@@ -49,7 +49,7 @@ public class LogSearch extends ChildCommand<Void> {
 
     @Override
     public void execute(LuckPermsPlugin plugin, Sender sender, Void ignored, ArgumentList args, String label) {
-        int page = Integer.MIN_VALUE;
+        int page = 1;
         if (args.size() > 1) {
             try {
                 page = Integer.parseInt(args.get(args.size() - 1));
@@ -64,7 +64,7 @@ public class LogSearch extends ChildCommand<Void> {
         LogPage log = plugin.getStorage().getLogPage(ActionFilters.search(query), pageParams).join();
 
         int maxPage = pageParams.getMaxPage(log.getTotalEntries());
-        if (log.getContent().isEmpty()) {
+        if (log.getTotalEntries() == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return;
         }

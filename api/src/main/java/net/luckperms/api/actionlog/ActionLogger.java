@@ -25,9 +25,11 @@
 
 package net.luckperms.api.actionlog;
 
-import net.luckperms.api.messaging.MessagingService;
+import net.luckperms.api.actionlog.filter.ActionFilter;
+import net.luckperms.api.util.Page;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -46,43 +48,78 @@ public interface ActionLogger {
      * Gets a {@link ActionLog} instance from the plugin storage.
      *
      * @return a log instance
+     * @deprecated Use {@link #queryActions(ActionFilter)} or {@link #queryActions(ActionFilter, int, int)} instead. These methods
+     * are more efficient (they don't load the full action log into memory) and allow for pagination.
      */
+    @Deprecated
     @NonNull CompletableFuture<ActionLog> getLog();
 
     /**
-     * Submits a log entry to the plugin to be handled.
+     * Gets all actions from the action log matching the given {@code filter}.
      *
-     * <p>This method submits the log to the storage provider and broadcasts
-     * it.</p>
+     * <p>If the filter is {@code null}, all actions will be returned.</p>
      *
-     * <p>It is therefore roughly equivalent to calling
-     * {@link #submitToStorage(Action)} and {@link #broadcastAction(Action)},
-     * however, using this method is preferred to making the calls individually.</p>
+     * <p>Unlike {@link #queryActions(ActionFilter, int, int)}, this method does not implement any pagination and will return
+     * all entries at once.</p>
      *
-     * <p>If you want to submit a log entry but don't know which method to pick,
+     * @param filter the filter, optional
+     * @return the actions
+     * @since 5.5
+     */
+    @NonNull CompletableFuture<List<Action>> queryActions(@NonNull ActionFilter filter);
+
+    /**
+     * Gets a page of actions from the action log matching the given {@code filter}.
+     *
+     * <p>If the filter is {@code null}, all actions will be returned.</p>
+     *
+     * @param filter the filter, optional
+     * @param pageSize the size of the page
+     * @param pageNumber the page number
+     * @return the page of actions
+     * @since 5.5
+     */
+    @NonNull CompletableFuture<Page<Action>> queryActions(@NonNull ActionFilter filter, int pageSize, int pageNumber);
+
+    /**
+     * Submits a logged action to LuckPerms.
+     *
+     * <p>This method submits the action to the storage provider to be persisted in the action log.
+     * It also broadcasts it to administrator players on the current instance and to admins on other
+     * connected servers if a messaging service is configured.</p>
+     *
+     * <p>It is roughly equivalent to calling
+     * {@link #submitToStorage(Action)} followed by {@link #broadcastAction(Action)},
+     * however using this method is preferred to making the calls individually.</p>
+     *
+     * <p>If you want to submit an action log entry but don't know which method to pick,
      * use this one.</p>
      *
      * @param entry the entry to submit
-     * @return a future which will complete when the action is done
+     * @return a future which will complete when the action is submitted
      */
     @NonNull CompletableFuture<Void> submit(@NonNull Action entry);
 
     /**
-     * Submits a log entry to the plugins storage handler.
+     * Submits a logged action to LuckPerms and persists it in the storage backend.
+     *
+     * <p>This method does not broadcast the action or send it through the messaging service.</p>
      *
      * @param entry the entry to submit
-     * @return a future which will complete when the action is done
+     * @return a future which will complete when the action is submitted
      */
     @NonNull CompletableFuture<Void> submitToStorage(@NonNull Action entry);
 
     /**
-     * Submits a log entry to the plugins log broadcasting handler.
+     * Submits a logged action to LuckPerms and broadcasts it to administrators.
      *
-     * <p>If enabled, this method will also dispatch the log entry via the
-     * plugins {@link MessagingService}.</p>
+     * <p>The broadcast is made to administrator players on the current instance
+     * and to admins on other connected servers if a messaging service is configured.</p>
+     *
+     * <p>This method does not save the action to the plugin storage backend.</p>
      *
      * @param entry the entry to submit
-     * @return a future which will complete when the action is done
+     * @return a future which will complete when the action is broadcasted
      */
     @NonNull CompletableFuture<Void> broadcastAction(@NonNull Action entry);
 

@@ -25,6 +25,7 @@
 
 package net.luckperms.api.actionlog;
 
+import net.luckperms.api.actionlog.filter.ActionFilter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -40,7 +41,11 @@ import java.util.UUID;
  * You can add to the log using the {@link ActionLogger}, and then request an updated copy.</p>
  *
  * <p>All methods are thread safe, and return immutable and thread safe collections.</p>
+ *
+ * @deprecated Use {@link ActionLogger#queryActions(ActionFilter)} or
+ * {@link ActionLogger#queryActions(ActionFilter, int, int)} instead.
  */
+@Deprecated
 public interface ActionLog {
 
     /**
