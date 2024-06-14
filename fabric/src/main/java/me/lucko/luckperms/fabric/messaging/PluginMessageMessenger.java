@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements ServerPlayNetworking.PlayPayloadHandler<PluginMessageMessenger.PluginMessagePayload> {
-    private static final Identifier CHANNEL = new Identifier(AbstractPluginMessageMessenger.CHANNEL);
+    private static final Identifier CHANNEL = Identifier.of(AbstractPluginMessageMessenger.CHANNEL);
 
     private final LPFabricPlugin plugin;
 
