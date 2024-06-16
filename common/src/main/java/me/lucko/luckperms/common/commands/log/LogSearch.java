@@ -25,21 +25,22 @@
 
 package me.lucko.luckperms.common.commands.log;
 
-import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilters;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
 import java.util.List;
 
-public class LogSearch extends ChildCommand<Log> {
+public class LogSearch extends ChildCommand<Void> {
     private static final int ENTRIES_PER_PAGE = 10;
 
     public LogSearch() {
@@ -47,8 +48,8 @@ public class LogSearch extends ChildCommand<Log> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
-        int page = Integer.MIN_VALUE;
+    public void execute(LuckPermsPlugin plugin, Sender sender, Void ignored, ArgumentList args, String label) {
+        int page = 1;
         if (args.size() > 1) {
             try {
                 page = Integer.parseInt(args.get(args.size() - 1));
@@ -59,24 +60,13 @@ public class LogSearch extends ChildCommand<Log> {
         }
 
         final String query = String.join(" ", args);
-        Paginated<LoggedAction> content = new Paginated<>(log.getSearch(query));
+        PageParameters pageParams = new PageParameters(ENTRIES_PER_PAGE, page);
+        LogPage log = plugin.getStorage().getLogPage(ActionFilters.search(query), pageParams).join();
 
-        if (page != Integer.MIN_VALUE) {
-            showLog(page, query, sender, content);
-        } else {
-            showLog(content.getMaxPages(ENTRIES_PER_PAGE), query, sender, content);
-        }
-    }
-
-    private static void showLog(int page, String query, Sender sender, Paginated<LoggedAction> log) {
-        int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
-        if (maxPage == 0) {
+        int maxPage = pageParams.getMaxPage(log.getTotalEntries());
+        if (log.getTotalEntries() == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return;
-        }
-
-        if (page == Integer.MIN_VALUE) {
-            page = maxPage;
         }
 
         if (page < 1 || page > maxPage) {
@@ -84,11 +74,12 @@ public class LogSearch extends ChildCommand<Log> {
             return;
         }
 
-        List<Paginated.Entry<LoggedAction>> entries = log.getPage(page, ENTRIES_PER_PAGE);
+        List<LogPage.Entry<LoggedAction>> entries = log.getNumberedContent();
         Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
-        for (Paginated.Entry<LoggedAction> e : entries) {
+        for (LogPage.Entry<LoggedAction> e : entries) {
             Message.LOG_ENTRY.send(sender, e.position(), e.value());
         }
     }
+
 }

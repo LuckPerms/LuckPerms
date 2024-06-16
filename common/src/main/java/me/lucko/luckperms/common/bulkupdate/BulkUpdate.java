@@ -25,14 +25,13 @@
 
 package me.lucko.luckperms.common.bulkupdate;
 
-import me.lucko.luckperms.common.bulkupdate.action.Action;
-import me.lucko.luckperms.common.bulkupdate.query.Query;
+import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
+import me.lucko.luckperms.common.filter.FilterList;
 import me.lucko.luckperms.common.model.HolderType;
 import net.luckperms.api.node.Node;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -46,35 +45,30 @@ public final class BulkUpdate {
     private final DataType dataType;
 
     // the action to apply to the data which matches the constraints
-    private final Action action;
+    private final BulkUpdateAction action;
 
-    // a set of constraints which data must match to be acted upon
-    private final List<Query> queries;
+    // a set of filters which data must match to be acted upon
+    private final FilterList<Node> filters;
 
     // update statistics of the operation (number of nodes, users and groups affected)
     private final BulkUpdateStatistics statistics = new BulkUpdateStatistics();
     private final boolean trackStatistics;
 
-    public BulkUpdate(DataType dataType, Action action, List<Query> queries, boolean trackStatistics) {
+    public BulkUpdate(DataType dataType, BulkUpdateAction action, FilterList<Node> filters, boolean trackStatistics) {
         this.dataType = dataType;
         this.action = action;
-        this.queries = queries;
+        this.filters = filters;
         this.trackStatistics = trackStatistics;
     }
 
     /**
-     * Check to see if a Node instance satisfies the constrints of this query
+     * Check to see if a Node instance satisfies the constraints of this query
      *
      * @param node the node to check
      * @return true if satisfied
      */
-    public boolean satisfiesConstraints(Node node) {
-        for (Query query : this.queries) {
-            if (!query.isSatisfiedBy(node)) {
-                return false;
-            }
-        }
-        return true;
+    public boolean satisfiesFilters(Node node) {
+        return this.filters.evaluate(node);
     }
 
     /**
@@ -84,7 +78,7 @@ public final class BulkUpdate {
      * @return the transformed node, or null if the node should be deleted
      */
     private Node apply(Node node) {
-        if (!satisfiesConstraints(node)) {
+        if (!satisfiesFilters(node)) {
             return node; // make no change
         }
 
@@ -129,63 +123,16 @@ public final class BulkUpdate {
         return results;
     }
 
-    /**
-     * Converts this {@link BulkUpdate} to SQL syntax
-     *
-     * @return this query in SQL form
-     */
-    public PreparedStatementBuilder buildAsSql() {
-        // DELETE FROM {table} WHERE ...
-        // UPDATE {table} SET ... WHERE ...
-
-        PreparedStatementBuilder builder = new PreparedStatementBuilder();
-
-        // add the action
-        // (DELETE FROM or UPDATE)
-        this.action.appendSql(builder);
-
-        return appendConstraintsAsSql(builder);
-    }
-
-    /**
-     * Appends the constraints of this {@link BulkUpdate} to the provided statement builder in SQL syntax
-     *
-     * @param builder the statement builder to append the constraints to
-     * @return the same statement builder provided as input
-     */
-    public PreparedStatementBuilder appendConstraintsAsSql(PreparedStatementBuilder builder) {
-
-        // if there are no constraints, just return without a WHERE clause
-        if (this.queries.isEmpty()) {
-            return builder;
-        }
-
-        // append constraints
-        builder.append(" WHERE");
-        for (int i = 0; i < this.queries.size(); i++) {
-            Query query = this.queries.get(i);
-
-            builder.append(" ");
-            if (i != 0) {
-                builder.append("AND ");
-            }
-
-            query.appendSql(builder);
-        }
-
-        return builder;
-    }
-
     public DataType getDataType() {
         return this.dataType;
     }
 
-    public Action getAction() {
+    public BulkUpdateAction getAction() {
         return this.action;
     }
 
-    public List<Query> getQueries() {
-        return this.queries;
+    public FilterList<Node> getFilters() {
+        return this.filters;
     }
 
     public boolean isTrackingStatistics() {
@@ -204,12 +151,12 @@ public final class BulkUpdate {
 
         return this.getDataType() == that.getDataType() &&
                 Objects.equals(this.getAction(), that.getAction()) &&
-                Objects.equals(this.getQueries(), that.getQueries());
+                Objects.equals(this.getFilters(), that.getFilters());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDataType(), getAction(), getQueries(), isTrackingStatistics());
+        return Objects.hash(getDataType(), getAction(), getFilters(), isTrackingStatistics());
     }
 
     @Override
@@ -217,7 +164,7 @@ public final class BulkUpdate {
         return "BulkUpdate(" +
                 "dataType=" + this.getDataType() + ", " +
                 "action=" + this.getAction() + ", " +
-                "constraints=" + this.getQueries() + ", " +
+                "constraints=" + this.getFilters() + ", " +
                 "trackStatistics=" + this.isTrackingStatistics() + ")";
     }
 }

@@ -25,25 +25,26 @@
 
 package me.lucko.luckperms.common.commands.log;
 
-import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilters;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.DataConstraints;
-import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
 import java.util.List;
 import java.util.Locale;
 
-public class LogTrackHistory extends ChildCommand<Log> {
+public class LogTrackHistory extends ChildCommand<Void> {
     private static final int ENTRIES_PER_PAGE = 10;
 
     public LogTrackHistory() {
@@ -51,32 +52,21 @@ public class LogTrackHistory extends ChildCommand<Log> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Void ignored, ArgumentList args, String label) {
         String track = args.get(0).toLowerCase(Locale.ROOT);
         if (!DataConstraints.TRACK_NAME_TEST.test(track)) {
             Message.TRACK_INVALID_ENTRY.send(sender, track);
             return;
         }
+        PageParameters pageParams = new PageParameters(ENTRIES_PER_PAGE, args.getIntOrDefault(1, 1));
+        LogPage log = plugin.getStorage().getLogPage(ActionFilters.track(track), pageParams).join();
 
-        Paginated<LoggedAction> content = new Paginated<>(log.getTrackHistory(track));
+        int page = pageParams.pageNumber();
+        int maxPage = pageParams.getMaxPage(log.getTotalEntries());
 
-        int page = args.getIntOrDefault(1, Integer.MIN_VALUE);
-        if (page != Integer.MIN_VALUE) {
-            showLog(page, sender, content);
-        } else {
-            showLog(content.getMaxPages(ENTRIES_PER_PAGE), sender, content);
-        }
-    }
-
-    private static void showLog(int page, Sender sender, Paginated<LoggedAction> log) {
-        int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
-        if (maxPage == 0) {
+        if (log.getTotalEntries() == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return;
-        }
-
-        if (page == Integer.MIN_VALUE) {
-            page = maxPage;
         }
 
         if (page < 1 || page > maxPage) {
@@ -84,11 +74,11 @@ public class LogTrackHistory extends ChildCommand<Log> {
             return;
         }
 
-        List<Paginated.Entry<LoggedAction>> entries = log.getPage(page, ENTRIES_PER_PAGE);
+        List<LogPage.Entry<LoggedAction>> entries = log.getNumberedContent();
         String name = entries.stream().findAny().get().value().getTarget().getName();
         Message.LOG_HISTORY_TRACK_HEADER.send(sender, name, page, maxPage);
 
-        for (Paginated.Entry<LoggedAction> e : entries) {
+        for (LogPage.Entry<LoggedAction> e : entries) {
             Message.LOG_ENTRY.send(sender, e.position(), e.value());
         }
     }

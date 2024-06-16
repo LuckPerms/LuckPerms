@@ -23,66 +23,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.comparison;
-
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
+package me.lucko.luckperms.common.filter;
 
 import java.util.regex.Pattern;
 
 /**
- * An enumeration of standard {@link Comparison}s.
+ * A method of comparing two strings
  */
-public enum StandardComparison implements Comparison {
+public enum Comparison {
 
-    EQUAL("==", "=") {
-        @Override
-        public CompiledExpression compile(String expression) {
-            return expression::equalsIgnoreCase;
-        }
-    },
-
-    NOT_EQUAL("!=", "!=") {
-        @Override
-        public CompiledExpression compile(String expression) {
-            return string -> !expression.equalsIgnoreCase(string);
-        }
-    },
-
-    SIMILAR("~~", "LIKE") {
-        @Override
-        public CompiledExpression compile(String expression) {
-            Pattern pattern = StandardComparison.compilePatternForLikeSyntax(expression);
-            return string -> pattern.matcher(string).matches();
-        }
-    },
-
-    NOT_SIMILAR("!~", "NOT LIKE") {
-        @Override
-        public CompiledExpression compile(String expression) {
-            Pattern pattern = StandardComparison.compilePatternForLikeSyntax(expression);
-            return string -> !pattern.matcher(string).matches();
-        }
-    };
+    EQUAL("=="),
+    NOT_EQUAL("!="),
+    SIMILAR("~~"),
+    NOT_SIMILAR("!~");
 
     public static final String WILDCARD = "%";
     public static final String WILDCARD_ONE = "_";
 
     private final String symbol;
-    private final String asSql;
 
-    StandardComparison(String symbol, String asSql) {
+    Comparison(String symbol) {
         this.symbol = symbol;
-        this.asSql = asSql;
     }
 
-    @Override
+    /**
+     * Gets the symbol which represents this comparison
+     *
+     * @return the comparison symbol
+     */
     public String getSymbol() {
         return this.symbol;
-    }
-
-    @Override
-    public void appendSql(PreparedStatementBuilder builder) {
-        builder.append(this.asSql);
     }
 
     @Override
@@ -90,8 +60,8 @@ public enum StandardComparison implements Comparison {
         return this.symbol;
     }
 
-    public static StandardComparison parseComparison(String s) {
-        for (StandardComparison t : values()) {
+    public static Comparison parse(String s) {
+        for (Comparison t : values()) {
             if (t.getSymbol().equals(s)) {
                 return t;
             }
@@ -99,7 +69,7 @@ public enum StandardComparison implements Comparison {
         return null;
     }
 
-    static Pattern compilePatternForLikeSyntax(String expression) {
+    public static Pattern compilePatternForLikeSyntax(String expression) {
         expression = expression.replace(".", "\\.");
 
         // convert from SQL LIKE syntax to regex

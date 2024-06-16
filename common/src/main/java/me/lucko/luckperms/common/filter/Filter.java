@@ -23,46 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.comparison;
+package me.lucko.luckperms.common.filter;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
+public class Filter<T, FT> {
+    private final FilterField<T, FT> field;
+    private final Constraint<FT> constraint;
 
-public class Constraint {
-
-    public static Constraint of(Comparison comparison, String expression) {
-        return new Constraint(comparison, expression);
+    public Filter(FilterField<T, FT> field, Constraint<FT> constraint) {
+        this.field = field;
+        this.constraint = constraint;
     }
 
-    private final Comparison comparison;
-    private final String expressionValue;
-    private final Comparison.CompiledExpression compiledExpression;
+    public final FilterField<T, FT> field() {
+        return this.field;
+    }
 
-    private Constraint(Comparison comparison, String expression) {
-        this.comparison = comparison;
-        this.expressionValue = expression;
-        this.compiledExpression = this.comparison.compile(this.expressionValue);
+    public final Constraint<FT> constraint() {
+        return this.constraint;
     }
 
     /**
-     * Returns if the given value satisfies this constraint
+     * Returns if the given value satisfies this filter
      *
      * @param value the value
      * @return true if satisfied
      */
-    public boolean eval(String value) {
-        return this.compiledExpression.test(value);
-    }
-
-    public void appendSql(PreparedStatementBuilder builder, String field) {
-        // e.g. field LIKE ?
-        builder.append(field).append(' ');
-        this.comparison.appendSql(builder);
-        builder.append(' ');
-        builder.variable(this.expressionValue);
+    public boolean evaluate(T value) {
+        return this.constraint.evaluate(this.field.getValue(value));
     }
 
     @Override
     public String toString() {
-        return this.comparison + " " + this.expressionValue;
+        return this.field + " " + this.constraint;
     }
 }

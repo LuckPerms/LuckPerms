@@ -23,48 +23,31 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.comparison;
+package net.luckperms.api.util;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.List;
 
 /**
- * A method of comparing two strings
+ * Represents a page of entries.
+ *
+ * @since 5.5
  */
-public interface Comparison {
+public interface Page<T> {
 
     /**
-     * Gets the symbol which represents this comparison
+     * Gets the entries on this page.
      *
-     * @return the comparison symbol
+     * @return the entries
      */
-    String getSymbol();
+    @NonNull List<T> entries();
 
     /**
-     * Creates a {@link CompiledExpression} for the given expression
+     * Gets the total/overall number of entries (not just the number of entries on this page).
      *
-     * @param expression the expression
-     * @return the compiled expression
+     * @return the total number of entries
      */
-    CompiledExpression compile(String expression);
-
-    /**
-     * Returns the comparison operator in SQL form
-     */
-    void appendSql(PreparedStatementBuilder builder);
-
-    /**
-     * An instance of {@link Comparison} which is bound to an expression.
-     */
-    interface CompiledExpression {
-
-        /**
-         * Tests the expression against a given string, according to the
-         * rules of the parent {@link Comparison}.
-         *
-         * @param string the string
-         * @return if there was a match
-         */
-        boolean test(String string);
-    }
+    int overallSize();
 
 }

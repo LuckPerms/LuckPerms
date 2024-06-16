@@ -26,8 +26,10 @@
 package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableList;
-import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -36,12 +38,13 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.split.SplitStorage;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
-import me.lucko.luckperms.common.util.Throwing;
+import me.lucko.luckperms.common.util.AsyncInterface;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -51,18 +54,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 /**
  * Provides a {@link CompletableFuture} based API for interacting with a {@link StorageImplementation}.
  */
-public class Storage {
+public class Storage extends AsyncInterface {
     private final LuckPermsPlugin plugin;
     private final StorageImplementation implementation;
 
     public Storage(LuckPermsPlugin plugin, StorageImplementation implementation) {
+        super(plugin);
         this.plugin = plugin;
         this.implementation = implementation;
     }
@@ -77,32 +79,6 @@ public class Storage {
         } else {
             return Collections.singleton(this.implementation);
         }
-    }
-
-    private <T> CompletableFuture<T> future(Callable<T> supplier) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return supplier.call();
-            } catch (Exception e) {
-                if (e instanceof RuntimeException) {
-                    throw (RuntimeException) e;
-                }
-                throw new CompletionException(e);
-            }
-        }, this.plugin.getBootstrap().getScheduler().async());
-    }
-
-    private CompletableFuture<Void> future(Throwing.Runnable runnable) {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                runnable.run();
-            } catch (Exception e) {
-                if (e instanceof RuntimeException) {
-                    throw (RuntimeException) e;
-                }
-                throw new CompletionException(e);
-            }
-        }, this.plugin.getBootstrap().getScheduler().async());
     }
 
     public String getName() {
@@ -133,8 +109,8 @@ public class Storage {
         return future(() -> this.implementation.logAction(entry));
     }
 
-    public CompletableFuture<Log> getLog() {
-        return future(this.implementation::getLog);
+    public CompletableFuture<LogPage> getLogPage(FilterList<Action> filters, @Nullable PageParameters page) {
+        return future(() -> this.implementation.getLogPage(filters, page));
     }
 
     public CompletableFuture<Void> applyBulkUpdate(BulkUpdate bulkUpdate) {

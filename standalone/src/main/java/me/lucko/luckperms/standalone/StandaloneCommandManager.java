@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
-import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
+import me.lucko.luckperms.standalone.app.integration.StandaloneSender;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -43,15 +43,15 @@ public class StandaloneCommandManager extends CommandManager implements CommandE
     }
 
     @Override
-    public CompletableFuture<Void> execute(String command) {
-        Sender wrapped = this.plugin.getSenderFactory().wrap(SingletonPlayer.INSTANCE);
+    public CompletableFuture<Void> execute(StandaloneSender player, String command) {
+        Sender wrapped = this.plugin.getSenderFactory().wrap(player);
         List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(command);
         return executeCommand(wrapped, "lp", arguments);
     }
 
     @Override
-    public List<String> tabComplete(String command) {
-        Sender wrapped = this.plugin.getSenderFactory().wrap(SingletonPlayer.INSTANCE);
+    public List<String> tabComplete(StandaloneSender player, String command) {
+        Sender wrapped = this.plugin.getSenderFactory().wrap(player);
         List<String> arguments = ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(command);
         return tabCompleteCommand(wrapped, arguments);
     }

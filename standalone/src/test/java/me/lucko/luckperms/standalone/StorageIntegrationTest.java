@@ -28,8 +28,10 @@ package me.lucko.luckperms.standalone;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -182,7 +184,7 @@ public class StorageIntegrationTest {
         assertNotNull(testTrack);
         assertEquals(ImmutableList.of("default", "test"), track.getGroups());
 
-        Log actionLog = plugin.getStorage().getLog().join();
+        LogPage actionLog = plugin.getStorage().getLogPage(FilterList.empty(), new PageParameters(1000, 1)).join();
         assertTrue(actionLog.getContent().contains(exampleLogEntry));
 
         List<NodeEntry<String, Node>> groupSearchResult = plugin.getStorage().searchGroupNodes(StandardNodeMatchers.key(TEST_PERMISSION_1)).join();

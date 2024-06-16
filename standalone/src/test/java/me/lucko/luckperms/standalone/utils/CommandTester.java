@@ -26,14 +26,12 @@
 package me.lucko.luckperms.standalone.utils;
 
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
-import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
-import me.lucko.luckperms.standalone.utils.TestPluginBootstrap.TestPlugin;
-import me.lucko.luckperms.standalone.utils.TestPluginBootstrap.TestSenderFactory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.util.Tristate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellij.lang.annotations.RegExp;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,11 +55,11 @@ public final class CommandTester implements Consumer<Component>, Function<String
 
     private static final Logger LOGGER = LogManager.getLogger(CommandTester.class);
 
-    /** The test plugin */
-    private final TestPlugin plugin;
-
     /** The LuckPerms command executor */
     private final CommandExecutor executor;
+
+    /** The test player */
+    private final TestSender sender;
 
     /** The current map of permissions held by the fake executor */
     private Map<String, Tristate> permissions = null;
@@ -72,9 +70,16 @@ public final class CommandTester implements Consumer<Component>, Function<String
     /** A buffer of messages received by the test tool */
     private final List<Component> messageBuffer = Collections.synchronizedList(new ArrayList<>());
 
-    public CommandTester(TestPlugin plugin, CommandExecutor executor) {
-        this.plugin = plugin;
+    public CommandTester(CommandExecutor executor, TestSender sender) {
         this.executor = executor;
+        this.sender = sender;
+
+        this.sender.setPermissionChecker(this);
+        this.sender.addMessageSink(this);
+    }
+
+    public CommandTester(CommandExecutor executor) {
+        this(executor, new TestSender());
     }
 
     /**
@@ -138,15 +143,7 @@ public final class CommandTester implements Consumer<Component>, Function<String
      */
     public CommandTester whenRunCommand(String command) {
         LOGGER.info("Executing test command: " + command);
-
-        TestSenderFactory senderFactory = this.plugin.getSenderFactory();
-        senderFactory.setPermissionChecker(this);
-        SingletonPlayer.INSTANCE.addMessageSink(this);
-
-        this.executor.execute(command).join();
-
-        SingletonPlayer.INSTANCE.removeMessageSink(this);
-        senderFactory.resetPermissionChecker();
+        this.executor.execute(this.sender, command).join();
         return this;
     }
 
@@ -176,6 +173,23 @@ public final class CommandTester implements Consumer<Component>, Function<String
     public CommandTester thenExpectStartsWith(String expected) {
         String actual = this.renderBuffer();
         assertTrue(actual.trim().startsWith(expected.trim()), "expected '" + actual + "' to start with '" + expected + "'");
+
+        if (this.permissions != null) {
+            assertEquals(this.checkedPermissions, this.permissions.keySet());
+        }
+
+        return this.clearMessageBuffer();
+    }
+
+    /**
+     * Asserts that the current contents of the message buffer matches the given input string.
+     *
+     * @param expected the expected contents
+     * @return this
+     */
+    public CommandTester thenExpectReplacing(@RegExp String regex, String replacement, String expected) {
+        String actual = this.renderBuffer().replaceAll(regex, replacement);
+        assertEquals(expected.trim(), actual.trim());
 
         if (this.permissions != null) {
             assertEquals(this.checkedPermissions, this.permissions.keySet());

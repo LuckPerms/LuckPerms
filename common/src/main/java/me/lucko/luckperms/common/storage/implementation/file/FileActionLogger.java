@@ -29,11 +29,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 import me.lucko.luckperms.common.actionlog.ActionJsonSerializer;
-import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.cache.BufferedRequest;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import net.luckperms.api.actionlog.Action;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,11 +46,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileActionLogger {
 
@@ -130,31 +137,43 @@ public class FileActionLogger {
         }
     }
 
-    public Log getLog() throws IOException {
+    private Stream<LoggedAction> loadLog(FilterList<Action> filters) throws IOException {
         // if there is log content waiting to be written, flush immediately before trying to read
         if (this.saveBuffer.isEnqueued()) {
             this.saveBuffer.requestDirectly();
         }
 
         if (!Files.exists(this.contentFile)) {
-            return Log.empty();
+            return Stream.empty();
         }
 
-        Log.Builder log = Log.builder();
-
+        Stream.Builder<LoggedAction> builder = Stream.builder();
         try (BufferedReader reader = Files.newBufferedReader(this.contentFile, StandardCharsets.UTF_8)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
                     JsonElement parsed = GsonProvider.parser().parse(line);
-                    log.add(ActionJsonSerializer.deserialize(parsed));
+                    LoggedAction action = ActionJsonSerializer.deserialize(parsed);
+                    if (filters.evaluate(action)) {
+                        builder.add(action);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
+        return builder.build();
+    }
 
-        return log.build();
+    public LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws IOException {
+        List<LoggedAction> filtered = loadLog(filters)
+                .sorted(Comparator.comparing(LoggedAction::getTimestamp))
+                .collect(Collectors.toList())
+                .reversed();
+
+        int size = filtered.size();
+        List<LoggedAction> paginated = page != null ? page.paginate(filtered) : filtered;
+        return LogPage.of(paginated, page, size);
     }
 
     private final class SaveBuffer extends BufferedRequest<Void> {

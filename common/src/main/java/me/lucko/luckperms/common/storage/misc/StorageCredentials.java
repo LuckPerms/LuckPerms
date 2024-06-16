@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.storage.misc;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.util.Map;
 import java.util.Objects;
 
@@ -52,6 +54,10 @@ public class StorageCredentials {
         this.keepAliveTime = keepAliveTime;
         this.connectionTimeout = connectionTimeout;
         this.properties = properties;
+    }
+
+    public StorageCredentials(String address, String database, String username, String password) {
+        this(address, database, username, password, 10, 10, 1800000, 0, 5000, ImmutableMap.of());
     }
 
     public String getAddress() {

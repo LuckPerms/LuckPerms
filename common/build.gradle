@@ -4,7 +4,11 @@ plugins {
 }
 
 test {
-    useJUnitPlatform {}
+    useJUnitPlatform {
+        if (!project.hasProperty('dockerTests')) {
+            excludeTags 'docker'
+        }
+    }
 }
 
 jacocoTestReport {
@@ -15,9 +19,14 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
+    testImplementation "org.testcontainers:junit-jupiter:1.19.8"
     testImplementation 'org.mockito:mockito-core:5.11.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
     testImplementation 'com.h2database:h2:2.1.214'
+    testImplementation 'org.mongodb:mongodb-driver-legacy:4.5.0'
+    testImplementation 'org.spongepowered:configurate-yaml:3.7.2'
+    testImplementation 'org.spongepowered:configurate-hocon:3.7.2'
+    testImplementation 'me.lucko.configurate:configurate-toml:3.7'
 
     api project(':api')
     api 'org.checkerframework:checker-qual:3.12.0'

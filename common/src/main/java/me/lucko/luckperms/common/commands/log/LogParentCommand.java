@@ -26,22 +26,13 @@
 package me.lucko.luckperms.common.commands.log;
 
 import com.google.common.collect.ImmutableList;
-import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.abstraction.Command;
 import me.lucko.luckperms.common.command.abstraction.ParentCommand;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
-import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.sender.Sender;
 
-import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
-
-public class LogParentCommand extends ParentCommand<Log, Void> {
-    private final ReentrantLock lock = new ReentrantLock();
-
+public class LogParentCommand extends ParentCommand<Void, Void> {
     public LogParentCommand() {
-        super(CommandSpec.LOG, "Log", Type.NO_TARGET_ARGUMENT, ImmutableList.<Command<Log>>builder()
+        super(CommandSpec.LOG, "Log", Type.NOT_TARGETED, ImmutableList.<Command<Void>>builder()
                 .add(new LogRecent())
                 .add(new LogSearch())
                 .add(new LogNotify())
@@ -51,38 +42,4 @@ public class LogParentCommand extends ParentCommand<Log, Void> {
                 .build()
         );
     }
-
-    @Override
-    protected ReentrantLock getLockForTarget(Void target) {
-        return this.lock; // all commands target the same log, so we share a lock between all "targets"
-    }
-
-    @Override
-    protected Log getTarget(Void target, LuckPermsPlugin plugin, Sender sender) {
-        Log log = plugin.getStorage().getLog().join();
-
-        if (log == null) {
-            Message.LOG_LOAD_ERROR.send(sender);
-        }
-
-        return log;
-    }
-
-    @Override
-    protected void cleanup(Log log, LuckPermsPlugin plugin) {
-
-    }
-
-    @Override
-    protected List<String> getTargets(LuckPermsPlugin plugin) {
-        // should never be called if we specify Type.NO_TARGET_ARGUMENT in the constructor
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Void parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        // should never be called if we specify Type.NO_TARGET_ARGUMENT in the constructor
-        throw new UnsupportedOperationException();
-    }
-
 }

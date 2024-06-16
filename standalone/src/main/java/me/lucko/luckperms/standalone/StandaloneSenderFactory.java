@@ -27,53 +27,56 @@ package me.lucko.luckperms.standalone;
 
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
+import me.lucko.luckperms.standalone.app.integration.StandaloneSender;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
 
-import java.util.Locale;
 import java.util.UUID;
 
-public class StandaloneSenderFactory extends SenderFactory<LPStandalonePlugin, SingletonPlayer> {
+public class StandaloneSenderFactory extends SenderFactory<LPStandalonePlugin, StandaloneSender> {
 
     public StandaloneSenderFactory(LPStandalonePlugin plugin) {
         super(plugin);
     }
 
     @Override
-    protected String getName(SingletonPlayer sender) {
+    protected String getName(StandaloneSender sender) {
         return sender.getName();
     }
 
     @Override
-    protected UUID getUniqueId(SingletonPlayer sender) {
+    protected UUID getUniqueId(StandaloneSender sender) {
         return sender.getUniqueId();
     }
 
     @Override
-    protected void sendMessage(SingletonPlayer sender, Component message) {
-        Component rendered = TranslationManager.render(message, Locale.getDefault());
+    protected void sendMessage(StandaloneSender sender, Component message) {
+        Component rendered = TranslationManager.render(message, sender.getLocale());
         sender.sendMessage(rendered);
     }
 
     @Override
-    protected Tristate getPermissionValue(SingletonPlayer sender, String node) {
-        return Tristate.TRUE;
+    protected Tristate getPermissionValue(StandaloneSender sender, String node) {
+        return sender.getPermissionValue(node);
     }
 
     @Override
-    protected boolean hasPermission(SingletonPlayer sender, String node) {
+    protected boolean hasPermission(StandaloneSender sender, String node) {
+        return sender.hasPermission(node);
+    }
+
+    @Override
+    protected void performCommand(StandaloneSender sender, String command) {
+
+    }
+
+    @Override
+    protected boolean isConsole(StandaloneSender sender) {
+        return sender.isConsole();
+    }
+
+    @Override
+    protected boolean shouldSplitNewlines(StandaloneSender sender) {
         return true;
     }
-
-    @Override
-    protected void performCommand(SingletonPlayer sender, String command) {
-
-    }
-
-    @Override
-    protected boolean isConsole(SingletonPlayer sender) {
-        return true;
-    }
-
 }

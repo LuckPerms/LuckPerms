@@ -25,28 +25,27 @@
 
 package me.lucko.luckperms.common.bulkupdate.action;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
-import me.lucko.luckperms.common.bulkupdate.query.QueryField;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateField;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.node.Node;
 
-public class UpdateAction implements Action {
+public class UpdateAction implements BulkUpdateAction {
 
-    public static UpdateAction of(QueryField field, String value) {
+    public static UpdateAction of(BulkUpdateField field, String value) {
         return new UpdateAction(field, value);
     }
 
     // the field we're updating
-    private final QueryField field;
+    private final BulkUpdateField field;
 
     // the new value of the field
-    private final String value;
+    private final String newValue;
 
-    private UpdateAction(QueryField field, String value) {
+    private UpdateAction(BulkUpdateField field, String newValue) {
         this.field = field;
-        this.value = value;
+        this.newValue = newValue;
     }
 
     @Override
@@ -54,11 +53,19 @@ public class UpdateAction implements Action {
         return "update";
     }
 
+    public BulkUpdateField getField() {
+        return this.field;
+    }
+
+    public String getNewValue() {
+        return this.newValue;
+    }
+
     @Override
     public Node apply(Node from) {
         switch (this.field) {
             case PERMISSION:
-                return NodeBuilders.determineMostApplicable(this.value)
+                return NodeBuilders.determineMostApplicable(this.newValue)
                         .value(from.getValue())
                         .expiry(from.getExpiry())
                         .context(from.getContexts())
@@ -66,8 +73,8 @@ public class UpdateAction implements Action {
             case SERVER: {
                 MutableContextSet contexts = from.getContexts().mutableCopy();
                 contexts.removeAll(DefaultContextKeys.SERVER_KEY);
-                if (!this.value.equals("global")) {
-                    contexts.add(DefaultContextKeys.SERVER_KEY, this.value);
+                if (!this.newValue.equals("global")) {
+                    contexts.add(DefaultContextKeys.SERVER_KEY, this.newValue);
                 }
 
                 return from.toBuilder()
@@ -77,8 +84,8 @@ public class UpdateAction implements Action {
             case WORLD: {
                 MutableContextSet contexts = from.getContexts().mutableCopy();
                 contexts.removeAll(DefaultContextKeys.WORLD_KEY);
-                if (!this.value.equals("global")) {
-                    contexts.add(DefaultContextKeys.WORLD_KEY, this.value);
+                if (!this.newValue.equals("global")) {
+                    contexts.add(DefaultContextKeys.WORLD_KEY, this.newValue);
                 }
 
                 return from.toBuilder()
@@ -88,11 +95,5 @@ public class UpdateAction implements Action {
             default:
                 throw new RuntimeException();
         }
-    }
-
-    @Override
-    public void appendSql(PreparedStatementBuilder builder) {
-        builder.append("UPDATE {table} SET " + this.field.getSqlName() + "=");
-        builder.variable(this.value);
     }
 }

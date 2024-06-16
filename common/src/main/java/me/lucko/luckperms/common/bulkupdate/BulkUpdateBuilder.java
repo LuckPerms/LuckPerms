@@ -26,8 +26,12 @@
 package me.lucko.luckperms.common.bulkupdate;
 
 import com.google.common.collect.ImmutableList;
-import me.lucko.luckperms.common.bulkupdate.action.Action;
-import me.lucko.luckperms.common.bulkupdate.query.Query;
+import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
+import me.lucko.luckperms.common.filter.Comparison;
+import me.lucko.luckperms.common.filter.ConstraintFactory;
+import me.lucko.luckperms.common.filter.Filter;
+import me.lucko.luckperms.common.filter.FilterList;
+import net.luckperms.api.node.Node;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -45,18 +49,18 @@ public class BulkUpdateBuilder {
     private DataType dataType = DataType.ALL;
 
     // the action to apply to the data which matches the constraints
-    private Action action = null;
+    private BulkUpdateAction action = null;
 
     // should the operation count the number of affected nodes, users and groups
     private boolean trackStatistics = false;
 
-    // a set of constraints which data must match to be acted upon
-    private final Set<Query> queries = new LinkedHashSet<>();
+    // a set of filters which data must match to be acted upon
+    private final Set<Filter<Node, String>> filters = new LinkedHashSet<>();
 
     private BulkUpdateBuilder() {
     }
 
-    public BulkUpdateBuilder action(Action action) {
+    public BulkUpdateBuilder action(BulkUpdateAction action) {
         this.action = action;
         return this;
     }
@@ -71,8 +75,8 @@ public class BulkUpdateBuilder {
         return this;
     }
 
-    public BulkUpdateBuilder query(Query query) {
-        this.queries.add(query);
+    public BulkUpdateBuilder filter(BulkUpdateField field, Comparison comparison, String value) {
+        this.filters.add(new Filter<>(field, ConstraintFactory.STRINGS.build(comparison, value)));
         return this;
     }
 
@@ -81,7 +85,8 @@ public class BulkUpdateBuilder {
             throw new IllegalStateException("no action specified");
         }
 
-        return new BulkUpdate(this.dataType, this.action, ImmutableList.copyOf(this.queries), this.trackStatistics);
+        FilterList<Node> filters = new FilterList<>(FilterList.LogicalOperator.AND, ImmutableList.copyOf(this.filters));
+        return new BulkUpdate(this.dataType, this.action, filters, this.trackStatistics);
     }
 
     @Override
@@ -89,7 +94,7 @@ public class BulkUpdateBuilder {
         return "BulkUpdateBuilder(" +
                 "dataType=" + this.dataType + ", " +
                 "action=" + this.action + ", " +
-                "constraints=" + this.queries + ", " +
+                "constraints=" + this.filters + ", " +
                 "trackStatistics=" + this.trackStatistics + ")";
     }
 }

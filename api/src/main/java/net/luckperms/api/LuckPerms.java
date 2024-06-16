@@ -26,6 +26,7 @@
 package net.luckperms.api;
 
 import net.luckperms.api.actionlog.ActionLogger;
+import net.luckperms.api.actionlog.filter.ActionFilterFactory;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextManager;
 import net.luckperms.api.event.EventBus;
@@ -266,5 +267,15 @@ public interface LuckPerms {
      */
     @Internal
     @NonNull NodeMatcherFactory getNodeMatcherFactory();
+
+    /**
+     * Gets the {@link ActionFilterFactory}.
+     *
+     * @return the action filter factory
+     * @since 5.5
+     */
+    @Internal
+    @NonNull
+    ActionFilterFactory getActionFilterFactory();
 
 }

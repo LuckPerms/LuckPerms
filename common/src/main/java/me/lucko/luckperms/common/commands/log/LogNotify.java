@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.log;
 
-import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
@@ -43,7 +42,7 @@ import net.luckperms.api.node.Node;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LogNotify extends ChildCommand<Log> {
+public class LogNotify extends ChildCommand<Void> {
     private static final String IGNORE_NODE = "luckperms.log.notify.ignoring";
 
     public LogNotify() {
@@ -83,7 +82,7 @@ public class LogNotify extends ChildCommand<Log> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Void ignored, ArgumentList args, String label) {
         if (sender.isConsole()) {
             Message.LOG_NOTIFY_CONSOLE.send(sender);
             return;
