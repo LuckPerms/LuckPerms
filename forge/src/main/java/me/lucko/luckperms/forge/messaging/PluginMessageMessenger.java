@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements Messenger {
-    private static final ResourceLocation CHANNEL_ID = new ResourceLocation(AbstractPluginMessageMessenger.CHANNEL);
+    private static final ResourceLocation CHANNEL_ID = ResourceLocation.parse(AbstractPluginMessageMessenger.CHANNEL);
     private static final EventNetworkChannel CHANNEL = ChannelBuilder.named(CHANNEL_ID).eventNetworkChannel();
 
     private final LPForgePlugin plugin;
