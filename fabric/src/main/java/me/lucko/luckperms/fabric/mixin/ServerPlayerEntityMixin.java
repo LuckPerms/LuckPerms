@@ -70,11 +70,6 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     }
 
     @Override
-    public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache() {
-        return this.luckperms$queryOptions;
-    }
-
-    @Override
     public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(FabricContextManager contextManager) {
         if (this.luckperms$queryOptions == null) {
             this.luckperms$queryOptions = contextManager.newQueryOptionsCache((ServerPlayerEntity) (Object) this);
@@ -158,8 +153,7 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     private void luckperms_copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
         MixinUser oldMixin = (MixinUser) oldPlayer;
         this.luckperms$user = oldMixin.getLuckPermsUser();
-        this.luckperms$queryOptions = oldMixin.getQueryOptionsCache();
-        this.luckperms$queryOptions.invalidate();
+        this.getQueryOptionsCache((FabricContextManager) luckperms$user.getPlugin().getContextManager());
     }
 
     @Inject(at = @At("TAIL"), method = "worldChanged")

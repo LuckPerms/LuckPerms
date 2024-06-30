@@ -40,8 +40,6 @@ public interface MixinUser {
 
     User getLuckPermsUser();
 
-    QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache();
-
     /**
      * Gets (or creates using the manager) the objects {@link QueryOptionsCache}.
      *
