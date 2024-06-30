@@ -125,7 +125,7 @@ public class FabricConnectionListener extends AbstractConnectionListener {
         }
 
         // init permissions handler
-        ((MixinUser) player).initializePermissions(user);
+        ((MixinUser) player).luckperms$initializePermissions(user);
 
         this.plugin.getContextManager().signalContextUpdate(player);
     }

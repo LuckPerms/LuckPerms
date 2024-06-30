@@ -59,7 +59,7 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity, Ser
             throw new NullPointerException("subject");
         }
 
-        return ((MixinUser) subject).getQueryOptionsCache(this);
+        return ((MixinUser) subject).luckperms$getQueryOptionsCache(this);
     }
 
     @Override
