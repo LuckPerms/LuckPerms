@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
-import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
+import me.lucko.luckperms.standalone.app.integration.StandaloneUser;
 import me.lucko.luckperms.standalone.stub.StandaloneContextManager;
 import me.lucko.luckperms.standalone.stub.StandaloneDummyConnectionListener;
 import me.lucko.luckperms.standalone.stub.StandaloneEventBus;
@@ -162,7 +162,7 @@ public class LPStandalonePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     public Sender getConsoleSender() {
-        return getSenderFactory().wrap(SingletonPlayer.INSTANCE);
+        return getSenderFactory().wrap(StandaloneUser.INSTANCE);
     }
 
     public StandaloneSenderFactory getSenderFactory() {

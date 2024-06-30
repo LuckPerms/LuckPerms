@@ -28,11 +28,8 @@ package me.lucko.luckperms.common.commands.group;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateBuilder;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateField;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
-import me.lucko.luckperms.common.bulkupdate.query.Query;
-import me.lucko.luckperms.common.bulkupdate.query.QueryField;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -41,6 +38,7 @@ import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.command.utils.StorageAssistant;
+import me.lucko.luckperms.common.filter.Comparison;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.node.types.Inheritance;
@@ -112,8 +110,8 @@ public class GroupRename extends ChildCommand<Group> {
                         BulkUpdate operation = BulkUpdateBuilder.create()
                                 .trackStatistics(false)
                                 .dataType(me.lucko.luckperms.common.bulkupdate.DataType.ALL)
-                                .action(UpdateAction.of(QueryField.PERMISSION, Inheritance.key(newGroupName)))
-                                .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.EQUAL, Inheritance.key(target.getName()))))
+                                .action(UpdateAction.of(BulkUpdateField.PERMISSION, Inheritance.key(newGroupName)))
+                                .filter(BulkUpdateField.PERMISSION, Comparison.EQUAL, Inheritance.key(target.getName()))
                                 .build();
                         return plugin.getStorage().applyBulkUpdate(operation);
                     } else {

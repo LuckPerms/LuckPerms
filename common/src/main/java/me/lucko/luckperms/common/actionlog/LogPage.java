@@ -23,54 +23,50 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.util;
+package me.lucko.luckperms.common.actionlog;
 
 import com.google.common.collect.ImmutableList;
+import me.lucko.luckperms.common.filter.PageParameters;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * A simple pagination utility
- *
- * @param <T> the element type
- */
-public class Paginated<T> {
-    private final List<T> content;
-
-    public Paginated(Collection<T> content) {
-        this.content = ImmutableList.copyOf(content);
+public class LogPage {
+    public static LogPage of(List<LoggedAction> content, @Nullable PageParameters params, int totalEntries) {
+        return new LogPage(content, params, totalEntries);
     }
 
-    public List<T> getContent() {
+    private final List<LoggedAction> content;
+    private final @Nullable PageParameters params;
+    private final int totalEntries;
+
+    LogPage(List<LoggedAction> content, @Nullable PageParameters params, int totalEntries) {
+        this.content = ImmutableList.copyOf(content);
+        this.params = params;
+        this.totalEntries = totalEntries;
+    }
+
+    public List<LoggedAction> getContent() {
         return this.content;
     }
 
-    public int getMaxPages(int entriesPerPage) {
-        return (int) Math.ceil((double) this.content.size() / (double) entriesPerPage);
+    public List<Entry<LoggedAction>> getNumberedContent() {
+        int startIndex = this.params != null
+                ? this.params.pageSize() * (this.params.pageNumber() - 1)
+                : 0;
+
+        List<Entry<LoggedAction>> numberedContent = new ArrayList<>();
+        for (int i = 0; i < this.content.size(); i++) {
+            int index = startIndex + i + 1;
+            numberedContent.add(new Entry<>(index, this.content.get(i)));
+        }
+        return numberedContent;
     }
 
-    public List<Entry<T>> getPage(int pageNo, int pageSize) {
-        if (pageNo < 1) {
-            throw new IllegalArgumentException("pageNo cannot be less than 1: " + pageNo);
-        }
-
-        int first = (pageNo - 1) * pageSize;
-        if (this.content.size() <= first) {
-            throw new IllegalStateException("Content does not contain that many elements. (requested page: " + pageNo +
-                    ", page size: " + pageSize + ", page first index: " + first + ", content size: " + this.content.size() + ")");
-        }
-
-        int last = first + pageSize - 1;
-        List<Entry<T>> out = new ArrayList<>(pageSize);
-
-        for (int i = first; i <= last && i < this.content.size(); i++) {
-            out.add(new Entry<>(i + 1, this.content.get(i)));
-        }
-
-        return out;
+    public int getTotalEntries() {
+        return this.totalEntries;
     }
 
     public static final class Entry<T> {

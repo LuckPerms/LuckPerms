@@ -28,58 +28,57 @@ package me.lucko.luckperms.standalone.app.integration;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
-import net.kyori.ansi.ColorLevel;
+import net.luckperms.api.util.Tristate;
 
-import java.util.Set;
+import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Consumer;
 
 /**
- * Dummy/singleton player class used by the standalone plugin.
- *
- * <p>In various places (ContextManager, SenderFactory, ..) the platform "player" type is used
- * as a generic parameter. This class acts as this type for the standalone plugin.</p>
+ * The sender instance used for the console / users executing commands
+ * on a standalone instance of LuckPerms
  */
-public class SingletonPlayer {
+public class StandaloneUser implements StandaloneSender {
 
-    /** Empty UUID used by the singleton player. */
     private static final UUID UUID = new UUID(0, 0);
 
-    /** A message sink that prints the component to stdout */
-    private static final Consumer<Component> PRINT_TO_STDOUT = component -> LuckPermsApplication.LOGGER.info(ANSIComponentSerializer.ansi().serialize(component));
+    public static final StandaloneUser INSTANCE = new StandaloneUser();
 
-    /** Singleton instance */
-    public static final SingletonPlayer INSTANCE = new SingletonPlayer();
-
-    /** A set of message sinks that messages are delivered to */
-    private final Set<Consumer<Component>> messageSinks;
-
-    private SingletonPlayer() {
-        this.messageSinks = new CopyOnWriteArraySet<>();
-        this.messageSinks.add(PRINT_TO_STDOUT);
+    private StandaloneUser() {
     }
 
+    @Override
     public String getName() {
         return "StandaloneUser";
     }
 
+    @Override
     public UUID getUniqueId() {
         return UUID;
     }
 
+    @Override
     public void sendMessage(Component component) {
-        for (Consumer<Component> sink : this.messageSinks) {
-            sink.accept(component);
-        }
+        LuckPermsApplication.LOGGER.info(ANSIComponentSerializer.ansi().serialize(component));
     }
 
-    public void addMessageSink(Consumer<Component> sink) {
-        this.messageSinks.add(sink);
+    @Override
+    public Tristate getPermissionValue(String permission) {
+        return Tristate.TRUE;
     }
 
-    public void removeMessageSink(Consumer<Component> sink) {
-        this.messageSinks.remove(sink);
+    @Override
+    public boolean hasPermission(String permission) {
+        return true;
+    }
+
+    @Override
+    public boolean isConsole() {
+        return true;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return Locale.getDefault();
     }
 
 }

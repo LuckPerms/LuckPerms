@@ -28,12 +28,9 @@ package me.lucko.luckperms.common.commands.group;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateBuilder;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateField;
 import me.lucko.luckperms.common.bulkupdate.DataType;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
-import me.lucko.luckperms.common.bulkupdate.query.Query;
-import me.lucko.luckperms.common.bulkupdate.query.QueryField;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -43,6 +40,7 @@ import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.filter.Comparison;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.Group;
@@ -115,7 +113,7 @@ public class DeleteGroup extends SingleCommand {
                     .trackStatistics(false)
                     .dataType(DataType.ALL)
                     .action(DeleteAction.create())
-                    .query(Query.of(QueryField.PERMISSION, Constraint.of(StandardComparison.EQUAL, Inheritance.key(groupName))))
+                    .filter(BulkUpdateField.PERMISSION, Comparison.EQUAL, Inheritance.key(groupName))
                     .build();
             plugin.getStorage().applyBulkUpdate(operation).whenCompleteAsync((v, ex) -> {
                 if (ex != null) {

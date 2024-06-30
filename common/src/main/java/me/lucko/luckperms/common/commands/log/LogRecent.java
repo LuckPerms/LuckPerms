@@ -25,22 +25,23 @@
 
 package me.lucko.luckperms.common.commands.log;
 
-import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilters;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.util.Paginated;
 import me.lucko.luckperms.common.util.Predicates;
 
 import java.util.List;
 import java.util.UUID;
 
-public class LogRecent extends ChildCommand<Log> {
+public class LogRecent extends ChildCommand<Void> {
     private static final int ENTRIES_PER_PAGE = 10;
     
     public LogRecent() {
@@ -48,39 +49,32 @@ public class LogRecent extends ChildCommand<Log> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Log log, ArgumentList args, String label) {
-        if (args.isEmpty()) {
-            // No page or user
-            Paginated<LoggedAction> content = new Paginated<>(log.getContent());
-            showLog(content.getMaxPages(ENTRIES_PER_PAGE), false, sender, content);
-            return;
+    public void execute(LuckPermsPlugin plugin, Sender sender, Void ignored, ArgumentList args, String label) {
+        int page = 1;
+        UUID uuid = null;
+
+        if (!args.isEmpty()) {
+            int pageNo = args.getIntOrDefault(0, Integer.MIN_VALUE);
+            if (pageNo != Integer.MIN_VALUE) {
+                page = pageNo;
+            } else {
+                uuid = args.getUserTarget(0, plugin, sender);
+                if (uuid == null) {
+                    return;
+                }
+
+                pageNo = args.getIntOrDefault(1, Integer.MIN_VALUE);
+                if (pageNo != Integer.MIN_VALUE) {
+                    page = pageNo;
+                }
+            }
         }
 
-        int page = args.getIntOrDefault(0, Integer.MIN_VALUE);
-        if (page != Integer.MIN_VALUE) {
-            Paginated<LoggedAction> content = new Paginated<>(log.getContent());
-            showLog(page, false, sender, content);
-            return;
-        }
+        PageParameters pageParams = new PageParameters(ENTRIES_PER_PAGE, page);
+        LogPage log = plugin.getStorage().getLogPage(uuid == null ? ActionFilters.all() : ActionFilters.source(uuid), pageParams).join();
 
-        // User and possibly page
-        UUID uuid = args.getUserTarget(0, plugin, sender);
-        if (uuid == null) {
-            return;
-        }
-
-        Paginated<LoggedAction> content = new Paginated<>(log.getContent(uuid));
-        page = args.getIntOrDefault(1, Integer.MIN_VALUE);
-        if (page != Integer.MIN_VALUE) {
-            showLog(page, true, sender, content);
-        } else {
-            showLog(content.getMaxPages(ENTRIES_PER_PAGE), true, sender, content);
-        }
-    }
-
-    private static void showLog(int page, boolean specificUser, Sender sender, Paginated<LoggedAction> log) {
-        int maxPage = log.getMaxPages(ENTRIES_PER_PAGE);
-        if (maxPage == 0) {
+        int maxPage = pageParams.getMaxPage(log.getTotalEntries());
+        if (log.getTotalEntries() == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return;
         }
@@ -90,8 +84,8 @@ public class LogRecent extends ChildCommand<Log> {
             return;
         }
 
-        List<Paginated.Entry<LoggedAction>> entries = log.getPage(page, ENTRIES_PER_PAGE);
-        if (specificUser) {
+        List<LogPage.Entry<LoggedAction>> entries = log.getNumberedContent();
+        if (uuid != null) {
             String name = entries.stream().findAny().get().value().getSource().getName();
             if (name.contains("@")) {
                 name = name.split("@")[0];
@@ -101,8 +95,9 @@ public class LogRecent extends ChildCommand<Log> {
             Message.LOG_RECENT_HEADER.send(sender, page, maxPage);
         }
 
-        for (Paginated.Entry<LoggedAction> e : entries) {
+        for (LogPage.Entry<LoggedAction> e : entries) {
             Message.LOG_ENTRY.send(sender, e.position(), e.value());
         }
     }
+
 }

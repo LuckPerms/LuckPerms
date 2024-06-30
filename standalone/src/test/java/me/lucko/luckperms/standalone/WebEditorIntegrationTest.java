@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.util.Predicates;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.webeditor.WebEditorRequest;
 import me.lucko.luckperms.common.webeditor.WebEditorSession;
-import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
+import me.lucko.luckperms.standalone.app.integration.StandaloneUser;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
 import net.luckperms.api.model.data.DataType;
 import okhttp3.OkHttpClient;
@@ -115,7 +115,7 @@ public class WebEditorIntegrationTest {
             assertFalse(holders.isEmpty());
 
             // create a new editor session
-            Sender sender = plugin.getSenderFactory().wrap(SingletonPlayer.INSTANCE);
+            Sender sender = plugin.getSenderFactory().wrap(StandaloneUser.INSTANCE);
             WebEditorSession session = WebEditorSession.create(holders, Collections.emptyList(), sender, "lp", plugin);
             String bytebinKey = session.open();
             String bytesocksKey = session.getSocket().getSocket().channelId();

@@ -31,6 +31,8 @@ import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface InternalMessagingService {
 
     /**
@@ -60,21 +62,21 @@ public interface InternalMessagingService {
      * Uses the messaging service to inform other servers about a general
      * change.
      */
-    void pushUpdate();
+    CompletableFuture<Void> pushUpdate();
 
     /**
      * Pushes an update for a specific user.
      *
      * @param user the user
      */
-    void pushUserUpdate(User user);
+    CompletableFuture<Void> pushUserUpdate(User user);
 
     /**
      * Pushes a log entry to connected servers.
      *
      * @param logEntry the log entry
      */
-    void pushLog(Action logEntry);
+    CompletableFuture<Void> pushLog(Action logEntry);
 
     /**
      * Pushes a custom payload to connected servers.
@@ -82,6 +84,6 @@ public interface InternalMessagingService {
      * @param channelId the channel id
      * @param payload the payload
      */
-    void pushCustomPayload(String channelId, String payload);
+    CompletableFuture<Void> pushCustomPayload(String channelId, String payload);
 
 }

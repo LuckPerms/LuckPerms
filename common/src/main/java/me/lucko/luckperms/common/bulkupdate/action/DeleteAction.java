@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.common.bulkupdate.action;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import net.luckperms.api.node.Node;
 
-public class DeleteAction implements Action {
+public class DeleteAction implements BulkUpdateAction {
 
     public static DeleteAction create() {
         return new DeleteAction();
@@ -45,10 +44,5 @@ public class DeleteAction implements Action {
     @Override
     public Node apply(Node from) {
         return null; // this action just deletes nodes, so return null
-    }
-
-    @Override
-    public void appendSql(PreparedStatementBuilder builder) {
-        builder.append("DELETE FROM {table}");
     }
 }

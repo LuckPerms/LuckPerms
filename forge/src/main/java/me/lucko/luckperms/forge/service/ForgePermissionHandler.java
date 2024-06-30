@@ -52,7 +52,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ForgePermissionHandler implements IPermissionHandler {
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(LPForgeBootstrap.ID, "permission_handler");
+    public static final ResourceLocation IDENTIFIER = ResourceLocation.fromNamespaceAndPath(LPForgeBootstrap.ID, "permission_handler");
 
     private final LPForgePlugin plugin;
     private final Set<PermissionNode<?>> permissionNodes;

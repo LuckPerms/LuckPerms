@@ -27,21 +27,19 @@ package me.lucko.luckperms.standalone.utils;
 
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
-import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.standalone.LPStandaloneBootstrap;
 import me.lucko.luckperms.standalone.LPStandalonePlugin;
-import me.lucko.luckperms.standalone.StandaloneSenderFactory;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
-import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
-import net.kyori.adventure.text.Component;
-import net.luckperms.api.util.Tristate;
+import me.lucko.luckperms.standalone.app.integration.StandaloneSender;
+import me.lucko.luckperms.standalone.app.integration.StandaloneUser;
 
 import java.nio.file.Path;
-import java.util.Locale;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 /**
  * An extension standalone bootstrap for testing.
@@ -50,7 +48,7 @@ import java.util.function.Function;
  * <p>
  * <ul>
  *     <li>Dependency loading system is replaced with a no-op stub that delegates to the test classloader</li>
- *     <li>Sender factory is extended and allows for permission checks to be intercepted</li>
+ *     <li>Ability to register additional sender instances as being online</li>
  * </ul>
  * </p>
  */
@@ -81,7 +79,7 @@ public final class TestPluginBootstrap extends LPStandaloneBootstrap {
     }
 
     public static final class TestPlugin extends LPStandalonePlugin {
-        private TestSenderFactory senderFactory;
+        private final Set<StandaloneSender> onlineSenders = new CopyOnWriteArraySet<>();
 
         TestPlugin(LPStandaloneBootstrap bootstrap) {
             super(bootstrap);
@@ -93,13 +91,15 @@ public final class TestPluginBootstrap extends LPStandaloneBootstrap {
         }
 
         @Override
-        protected void setupSenderFactory() {
-            this.senderFactory = new TestSenderFactory(this);
+        public Stream<Sender> getOnlineSenders() {
+            return Stream.concat(
+                    Stream.of(StandaloneUser.INSTANCE),
+                    this.onlineSenders.stream()
+            ).map(player -> getSenderFactory().wrap(player));
         }
 
-        @Override
-        public TestSenderFactory getSenderFactory() {
-            return this.senderFactory;
+        public void addOnlineSender(StandaloneSender player) {
+            this.onlineSenders.add(player);
         }
     }
 
@@ -123,48 +123,6 @@ public final class TestPluginBootstrap extends LPStandaloneBootstrap {
         @Override
         public void close() {
 
-        }
-    }
-
-    public static final class TestSenderFactory extends StandaloneSenderFactory {
-
-        private Function<String, Tristate> permissionChecker;
-
-        public TestSenderFactory(LPStandalonePlugin plugin) {
-            super(plugin);
-        }
-
-        public void setPermissionChecker(Function<String, Tristate> permissionChecker) {
-            this.permissionChecker = permissionChecker;
-        }
-
-        public void resetPermissionChecker() {
-            this.permissionChecker = null;
-        }
-
-        @Override
-        protected boolean consoleHasAllPermissions() {
-            return false;
-        }
-
-        @Override
-        protected void sendMessage(SingletonPlayer sender, Component message) {
-            Component rendered = TranslationManager.render(message, Locale.ENGLISH);
-            sender.sendMessage(rendered);
-        }
-
-        @Override
-        protected Tristate getPermissionValue(SingletonPlayer sender, String node) {
-            return this.permissionChecker == null
-                    ? super.getPermissionValue(sender, node)
-                    : this.permissionChecker.apply(node);
-        }
-
-        @Override
-        protected boolean hasPermission(SingletonPlayer sender, String node) {
-            return this.permissionChecker == null
-                    ? super.hasPermission(sender, node)
-                    : this.permissionChecker.apply(node).asBoolean();
         }
     }
 }

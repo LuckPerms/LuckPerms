@@ -444,6 +444,11 @@ public final class ConfigKeys {
     });
 
     /**
+     * If log should be posted synchronously to storage/messaging in commands
+     */
+    public static final ConfigKey<Boolean> LOG_SYNCHRONOUSLY_IN_COMMANDS = booleanKey("log-synchronously-in-commands", false);
+
+    /**
      * If LuckPerms should automatically install translation bundles and periodically update them.
      */
     public static final ConfigKey<Boolean> AUTO_INSTALL_TRANSLATIONS = notReloadable(booleanKey("auto-install-translations", true));

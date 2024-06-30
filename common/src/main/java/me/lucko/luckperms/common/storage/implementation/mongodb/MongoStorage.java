@@ -36,10 +36,15 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
-import me.lucko.luckperms.common.actionlog.Log;
+import com.mongodb.client.model.Sorts;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilterMongoBuilder;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.context.MutableContextSetImpl;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
+import me.lucko.luckperms.common.filter.mongo.ConstraintMongoBuilder;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.Track;
@@ -64,6 +69,8 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import org.bson.Document;
 import org.bson.UuidRepresentation;
+import org.bson.conversions.Bson;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -168,79 +175,24 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public void logAction(Action entry) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "action");
-
-        Document doc = new Document()
-                .append("timestamp", entry.getTimestamp().getEpochSecond())
-                .append("source", new Document()
-                        .append("uniqueId", entry.getSource().getUniqueId())
-                        .append("name", entry.getSource().getName())
-                );
-
-        Document target = new Document()
-                .append("type", entry.getTarget().getType().name())
-                .append("name", entry.getTarget().getName());
-
-        if (entry.getTarget().getUniqueId().isPresent()) {
-            target.append("uniqueId", entry.getTarget().getUniqueId().get());
-        }
-
-        doc.append("target", target);
-        doc.append("description", entry.getDescription());
-
-        c.insertOne(doc);
+        c.insertOne(actionToDoc(entry));
     }
 
     @Override
-    public Log getLog() {
-        Log.Builder log = Log.builder();
+    public LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws Exception {
+        Bson filter = ActionFilterMongoBuilder.INSTANCE.make(filters);
+
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "action");
-        try (MongoCursor<Document> cursor = c.find().iterator()) {
+        long count = c.countDocuments(filter);
+
+        List<LoggedAction> content = new ArrayList<>();
+        try (MongoCursor<Document> cursor = ConstraintMongoBuilder.page(page, c.find(filter).sort(Sorts.descending("timestamp", "_id"))).iterator()) {
             while (cursor.hasNext()) {
-                Document d = cursor.next();
-
-                if (d.containsKey("source")) {
-                    // new format
-                    Document source = d.get("source", Document.class);
-                    Document target = d.get("target", Document.class);
-
-                    UUID targetUniqueId = null;
-                    if (target.containsKey("uniqueId")) {
-                        targetUniqueId = target.get("uniqueId", UUID.class);
-                    }
-
-                    LoggedAction e = LoggedAction.build()
-                            .timestamp(Instant.ofEpochSecond(d.getLong("timestamp")))
-                            .source(source.get("uniqueId", UUID.class))
-                            .sourceName(source.getString("name"))
-                            .targetType(LoggedAction.parseType(target.getString("type")))
-                            .target(targetUniqueId)
-                            .targetName(target.getString("name"))
-                            .description(d.getString("description"))
-                            .build();
-
-                    log.add(e);
-                } else {
-                    // old format
-                    UUID actedUuid = null;
-                    if (d.containsKey("acted")) {
-                        actedUuid = d.get("acted", UUID.class);
-                    }
-
-                    LoggedAction e = LoggedAction.build()
-                            .timestamp(Instant.ofEpochSecond(d.getLong("timestamp")))
-                            .source(d.get("actor", UUID.class))
-                            .sourceName(d.getString("actorName"))
-                            .targetType(LoggedAction.parseTypeCharacter(d.getString("type").charAt(0)))
-                            .target(actedUuid)
-                            .targetName(d.getString("actedName"))
-                            .description(d.getString("action"))
-                            .build();
-
-                    log.add(e);
-                }
+                content.add(actionFromDoc(cursor.next()));
             }
         }
-        return log.build();
+
+        return LogPage.of(content, page, (int) count);
     }
 
     @Override
@@ -253,7 +205,7 @@ public class MongoStorage implements StorageImplementation {
                     UUID uuid = getDocumentId(d);
                     Document results = processBulkUpdate(d, bulkUpdate, HolderType.USER);
                     if (results != null) {
-                        c.replaceOne(new Document("_id", uuid), results);
+                        c.replaceOne(Filters.eq("_id", uuid), results);
                     }
                 }
             }
@@ -267,7 +219,7 @@ public class MongoStorage implements StorageImplementation {
                     String holder = d.getString("_id");
                     Document results = processBulkUpdate(d, bulkUpdate, HolderType.GROUP);
                     if (results != null) {
-                        c.replaceOne(new Document("_id", holder), results);
+                        c.replaceOne(Filters.eq("_id", holder), results);
                     }
                 }
             }
@@ -294,7 +246,7 @@ public class MongoStorage implements StorageImplementation {
     public User loadUser(UUID uniqueId, String username) {
         User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-        try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUniqueId())).iterator()) {
+        try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", user.getUniqueId())).iterator()) {
             if (cursor.hasNext()) {
                 // User exists, let's load.
                 Document d = cursor.next();
@@ -309,7 +261,7 @@ public class MongoStorage implements StorageImplementation {
 
                 boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
                 if (updatedUsername | user.auditTemporaryNodes()) {
-                    c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user));
+                    c.replaceOne(Filters.eq("_id", user.getUniqueId()), userToDoc(user));
                 }
             } else {
                 if (this.plugin.getUserManager().isNonDefaultUser(user)) {
@@ -337,9 +289,9 @@ public class MongoStorage implements StorageImplementation {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
         user.normalData().discardChanges();
         if (!this.plugin.getUserManager().isNonDefaultUser(user)) {
-            c.deleteOne(new Document("_id", user.getUniqueId()));
+            c.deleteOne(Filters.eq("_id", user.getUniqueId()));
         } else {
-            c.replaceOne(new Document("_id", user.getUniqueId()), userToDoc(user), new ReplaceOptions().upsert(true));
+            c.replaceOne(Filters.eq("_id", user.getUniqueId()), userToDoc(user), new ReplaceOptions().upsert(true));
         }
     }
 
@@ -363,7 +315,7 @@ public class MongoStorage implements StorageImplementation {
     public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<UUID, N>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-        try (MongoCursor<Document> cursor = c.find().iterator()) {
+        try (MongoCursor<Document> cursor = c.find(Filters.elemMatch("permissions", ConstraintMongoBuilder.INSTANCE.make(constraint.getConstraint(), "key"))).iterator()) {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
                 UUID holder = getDocumentId(d);
@@ -384,7 +336,7 @@ public class MongoStorage implements StorageImplementation {
     public Group createAndLoadGroup(String name) {
         Group group = this.plugin.getGroupManager().getOrMake(name);
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-        try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
+        try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", group.getName())).iterator()) {
             if (cursor.hasNext()) {
                 Document d = cursor.next();
                 group.loadNodesFromStorage(nodesFromDoc(d));
@@ -398,7 +350,7 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public Optional<Group> loadGroup(String name) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-        try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
+        try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", name)).iterator()) {
             if (!cursor.hasNext()) {
                 return Optional.empty();
             }
@@ -432,20 +384,20 @@ public class MongoStorage implements StorageImplementation {
     public void saveGroup(Group group) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
         group.normalData().discardChanges();
-        c.replaceOne(new Document("_id", group.getName()), groupToDoc(group), new ReplaceOptions().upsert(true));
+        c.replaceOne(Filters.eq("_id", group.getName()), groupToDoc(group), new ReplaceOptions().upsert(true));
     }
 
     @Override
     public void deleteGroup(Group group) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-        c.deleteOne(new Document("_id", group.getName()));
+        c.deleteOne(Filters.eq("_id", group.getName()));
     }
 
     @Override
     public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws Exception {
         List<NodeEntry<String, N>> held = new ArrayList<>();
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-        try (MongoCursor<Document> cursor = c.find().iterator()) {
+        try (MongoCursor<Document> cursor = c.find(Filters.elemMatch("permissions", ConstraintMongoBuilder.INSTANCE.make(constraint.getConstraint(), "key"))).iterator()) {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
                 String holder = d.getString("_id");
@@ -466,7 +418,7 @@ public class MongoStorage implements StorageImplementation {
     public Track createAndLoadTrack(String name) {
         Track track = this.plugin.getTrackManager().getOrMake(name);
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
-        try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
+        try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", track.getName())).iterator()) {
             if (!cursor.hasNext()) {
                 c.insertOne(trackToDoc(track));
             } else {
@@ -481,7 +433,7 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public Optional<Track> loadTrack(String name) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
-        try (MongoCursor<Document> cursor = c.find(new Document("_id", name)).iterator()) {
+        try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", name)).iterator()) {
             if (!cursor.hasNext()) {
                 return Optional.empty();
             }
@@ -515,13 +467,13 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public void saveTrack(Track track) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
-        c.replaceOne(new Document("_id", track.getName()), trackToDoc(track));
+        c.replaceOne(Filters.eq("_id", track.getName()), trackToDoc(track));
     }
 
     @Override
     public void deleteTrack(Track track) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "tracks");
-        c.deleteOne(new Document("_id", track.getName()));
+        c.deleteOne(Filters.eq("_id", track.getName()));
     }
 
     @Override
@@ -534,13 +486,13 @@ public class MongoStorage implements StorageImplementation {
 
         // do the insert
         if (!username.equalsIgnoreCase(oldUsername)) {
-            c.replaceOne(new Document("_id", uniqueId), new Document("_id", uniqueId).append("name", username), new ReplaceOptions().upsert(true));
+            c.replaceOne(Filters.eq("_id", uniqueId), new Document("_id", uniqueId).append("name", username), new ReplaceOptions().upsert(true));
         }
 
         PlayerSaveResultImpl result = PlayerSaveResultImpl.determineBaseResult(username, oldUsername);
 
         Set<UUID> conflicting = new HashSet<>();
-        try (MongoCursor<Document> cursor = c.find(new Document("name", username)).iterator()) {
+        try (MongoCursor<Document> cursor = c.find(Filters.eq("name", username)).iterator()) {
             while (cursor.hasNext()) {
                 conflicting.add(getDocumentId(cursor.next()));
             }
@@ -565,7 +517,7 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public UUID getPlayerUniqueId(String username) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
-        Document doc = c.find(new Document("name", username.toLowerCase(Locale.ROOT))).first();
+        Document doc = c.find(Filters.eq("name", username.toLowerCase(Locale.ROOT))).first();
         if (doc != null) {
             return getDocumentId(doc);
         }
@@ -575,7 +527,7 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public String getPlayerName(UUID uniqueId) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "uuid");
-        Document doc = c.find(new Document("_id", uniqueId)).first();
+        Document doc = c.find(Filters.eq("_id", uniqueId)).first();
         if (doc != null) {
             String username = doc.get("name", String.class);
             if (username != null && !username.equals("null")) {
@@ -635,10 +587,9 @@ public class MongoStorage implements StorageImplementation {
     }
 
     private static Document nodeToDoc(Node node) {
-        Document document = new Document();
-
-        document.append("key", node.getKey());
-        document.append("value", node.getValue());
+        Document document = new Document()
+                .append("key", node.getKey())
+                .append("value", node.getValue());
 
         Instant expiry = node.getExpiry();
         if (expiry != null) {
@@ -697,6 +648,64 @@ public class MongoStorage implements StorageImplementation {
             map.add(doc.getString("key"), doc.getString("value"));
         }
         return map;
+    }
+
+    private static Document actionToDoc(Action action) {
+        Document source = new Document()
+                .append("uniqueId", action.getSource().getUniqueId())
+                .append("name", action.getSource().getName());
+
+        Document target = new Document()
+                .append("type", action.getTarget().getType().name())
+                .append("name", action.getTarget().getName());
+        if (action.getTarget().getUniqueId().isPresent()) {
+            target.append("uniqueId", action.getTarget().getUniqueId().get());
+        }
+
+        return new Document()
+                .append("timestamp", action.getTimestamp().getEpochSecond())
+                .append("source", source)
+                .append("target", target)
+                .append("description", action.getDescription());
+    }
+
+    private static LoggedAction actionFromDoc(Document d) {
+        if (d.containsKey("source")) {
+            // new format
+            Document source = d.get("source", Document.class);
+            Document target = d.get("target", Document.class);
+
+            UUID targetUniqueId = null;
+            if (target.containsKey("uniqueId")) {
+                targetUniqueId = target.get("uniqueId", UUID.class);
+            }
+
+            return LoggedAction.build()
+                    .timestamp(Instant.ofEpochSecond(d.getLong("timestamp")))
+                    .source(source.get("uniqueId", UUID.class))
+                    .sourceName(source.getString("name"))
+                    .targetType(LoggedAction.parseType(target.getString("type")))
+                    .target(targetUniqueId)
+                    .targetName(target.getString("name"))
+                    .description(d.getString("description"))
+                    .build();
+        } else {
+            // old format
+            UUID actedUuid = null;
+            if (d.containsKey("acted")) {
+                actedUuid = d.get("acted", UUID.class);
+            }
+
+            return LoggedAction.build()
+                    .timestamp(Instant.ofEpochSecond(d.getLong("timestamp")))
+                    .source(d.get("actor", UUID.class))
+                    .sourceName(d.getString("actorName"))
+                    .targetType(LoggedAction.parseTypeCharacter(d.getString("type").charAt(0)))
+                    .target(actedUuid)
+                    .targetName(d.getString("actedName"))
+                    .description(d.getString("action"))
+                    .build();
+        }
     }
 
 }

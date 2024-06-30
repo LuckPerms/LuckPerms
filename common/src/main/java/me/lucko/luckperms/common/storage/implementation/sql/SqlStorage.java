@@ -28,12 +28,16 @@ package me.lucko.luckperms.common.storage.implementation.sql;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
-import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilterSqlBuilder;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateSqlBuilder;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
 import me.lucko.luckperms.common.context.serializer.ContextSetJsonSerializer;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
+import me.lucko.luckperms.common.filter.sql.ConstraintSqlBuilder;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -54,6 +58,7 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -127,6 +132,7 @@ public class SqlStorage implements StorageImplementation {
 
     private static final String ACTION_INSERT = "INSERT INTO '{prefix}actions' (time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String ACTION_SELECT_ALL = "SELECT * FROM '{prefix}actions'";
+    private static final String ACTION_COUNT = "SELECT COUNT(*) FROM '{prefix}actions'";
 
     private final LuckPermsPlugin plugin;
     
@@ -242,18 +248,38 @@ public class SqlStorage implements StorageImplementation {
     }
 
     @Override
-    public Log getLog() throws SQLException {
-        final Log.Builder log = Log.builder();
+    public LogPage getLogPage(FilterList<Action> filter, @Nullable PageParameters page) throws SQLException {
+        int count = 0;
+        List<LoggedAction> content = new ArrayList<>();
+
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(ACTION_SELECT_ALL))) {
+            ActionFilterSqlBuilder countSqlBuilder = new ActionFilterSqlBuilder();
+            countSqlBuilder.builder().append(ACTION_COUNT);
+            countSqlBuilder.visit(filter);
+
+            try (PreparedStatement ps = countSqlBuilder.builder().build(c, this.statementProcessor)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        count = rs.getInt(1);
+                    }
+                }
+            }
+
+            ActionFilterSqlBuilder sqlBuilder = new ActionFilterSqlBuilder();
+            sqlBuilder.builder().append(ACTION_SELECT_ALL);
+            sqlBuilder.visit(filter);
+            sqlBuilder.builder().append(" ORDER BY time DESC, id DESC");
+            sqlBuilder.visit(page);
+
+            try (PreparedStatement ps = sqlBuilder.builder().build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        log.add(readAction(rs));
+                        content.add(readAction(rs));
                     }
                 }
             }
         }
-        return log.build();
+        return LogPage.of(content, page, count);
     }
 
     @Override
@@ -262,18 +288,20 @@ public class SqlStorage implements StorageImplementation {
 
         try (Connection c = this.connectionFactory.getConnection()) {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
-                String table = this.statementProcessor.apply("{prefix}user_permissions");
-                try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
+                Function<String, String> tableReplacement = s -> s.replace("{table}", "{prefix}user_permissions");
 
+                BulkUpdateSqlBuilder sqlBuilder = new BulkUpdateSqlBuilder();
+                sqlBuilder.visit(bulkUpdate);
+
+                try (PreparedStatement ps = sqlBuilder.builder().build(c, this.statementProcessor.compose(tableReplacement))) {
                     if (bulkUpdate.isTrackingStatistics()) {
-                        PreparedStatementBuilder builder = new PreparedStatementBuilder();
-                        builder.append(USER_PERMISSIONS_SELECT_DISTINCT);
-                        bulkUpdate.appendConstraintsAsSql(builder);
+                        BulkUpdateSqlBuilder statsSqlBuilder = new BulkUpdateSqlBuilder();
+                        statsSqlBuilder.builder().append(USER_PERMISSIONS_SELECT_DISTINCT);
+                        statsSqlBuilder.visit(bulkUpdate.getFilters());
 
-                        try (PreparedStatement lookup = builder.build(c, this.statementProcessor)) {
+                        try (PreparedStatement lookup = statsSqlBuilder.builder().build(c, this.statementProcessor)) {
                             try (ResultSet rs = lookup.executeQuery()) {
                                 Set<UUID> uuids = new HashSet<>();
-
                                 while (rs.next()) {
                                     uuids.add(Uuids.fromString(rs.getString("uuid")));
                                 }
@@ -281,7 +309,9 @@ public class SqlStorage implements StorageImplementation {
                                 stats.incrementAffectedUsers(uuids.size());
                             }
                         }
-                        stats.incrementAffectedNodes(ps.executeUpdate());
+
+                        int rowsAffected = ps.executeUpdate();
+                        stats.incrementAffectedNodes(rowsAffected);
                     } else {
                         ps.execute();
                     }
@@ -289,18 +319,20 @@ public class SqlStorage implements StorageImplementation {
             }
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
-                String table = this.statementProcessor.apply("{prefix}group_permissions");
-                try (PreparedStatement ps = bulkUpdate.buildAsSql().build(c, q -> q.replace("{table}", table))) {
+                Function<String, String> tableReplacement = s -> s.replace("{table}", "{prefix}group_permissions");
 
+                BulkUpdateSqlBuilder sqlBuilder = new BulkUpdateSqlBuilder();
+                sqlBuilder.visit(bulkUpdate);
+
+                try (PreparedStatement ps = sqlBuilder.builder().build(c, this.statementProcessor.compose(tableReplacement))) {
                     if (bulkUpdate.isTrackingStatistics()) {
-                        PreparedStatementBuilder builder = new PreparedStatementBuilder();
-                        builder.append(GROUP_PERMISSIONS_SELECT_ALL);
-                        bulkUpdate.appendConstraintsAsSql(builder);
+                        BulkUpdateSqlBuilder statsSqlBuilder = new BulkUpdateSqlBuilder();
+                        statsSqlBuilder.builder().append(GROUP_PERMISSIONS_SELECT_ALL);
+                        statsSqlBuilder.visit(bulkUpdate.getFilters());
 
-                        try (PreparedStatement lookup = builder.build(c, this.statementProcessor)) {
+                        try (PreparedStatement lookup = statsSqlBuilder.builder().build(c, this.statementProcessor)) {
                             try (ResultSet rs = lookup.executeQuery()) {
                                 Set<String> groups = new HashSet<>();
-
                                 while (rs.next()) {
                                     groups.add(rs.getString("name"));
                                 }
@@ -308,7 +340,9 @@ public class SqlStorage implements StorageImplementation {
                                 stats.incrementAffectedGroups(groups.size());
                             }
                         }
-                        stats.incrementAffectedNodes(ps.executeUpdate());
+
+                        int rowsAffected = ps.executeUpdate();
+                        stats.incrementAffectedNodes(rowsAffected);
                     } else {
                         ps.execute();
                     }
@@ -430,12 +464,14 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public <N extends Node> List<NodeEntry<UUID, N>> searchUserNodes(ConstraintNodeMatcher<N> constraint) throws SQLException {
-        PreparedStatementBuilder builder = new PreparedStatementBuilder().append(USER_PERMISSIONS_SELECT_PERMISSION);
-        constraint.getConstraint().appendSql(builder, "permission");
+        ConstraintSqlBuilder sqlBuilder = new ConstraintSqlBuilder();
+        sqlBuilder.builder().append(USER_PERMISSIONS_SELECT_PERMISSION);
+        sqlBuilder.builder().append("permission ");
+        sqlBuilder.visit(constraint.getConstraint());
 
         List<NodeEntry<UUID, N>> held = new ArrayList<>();
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = builder.build(c, this.statementProcessor)) {
+            try (PreparedStatement ps = sqlBuilder.builder().build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         UUID holder = UUID.fromString(rs.getString("uuid"));
@@ -534,12 +570,14 @@ public class SqlStorage implements StorageImplementation {
 
     @Override
     public <N extends Node> List<NodeEntry<String, N>> searchGroupNodes(ConstraintNodeMatcher<N> constraint) throws SQLException {
-        PreparedStatementBuilder builder = new PreparedStatementBuilder().append(GROUP_PERMISSIONS_SELECT_PERMISSION);
-        constraint.getConstraint().appendSql(builder, "permission");
+        ConstraintSqlBuilder sqlBuilder = new ConstraintSqlBuilder();
+        sqlBuilder.builder().append(GROUP_PERMISSIONS_SELECT_PERMISSION);
+        sqlBuilder.builder().append("permission ");
+        sqlBuilder.visit(constraint.getConstraint());
 
         List<NodeEntry<String, N>> held = new ArrayList<>();
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = builder.build(c, this.statementProcessor)) {
+            try (PreparedStatement ps = sqlBuilder.builder().build(c, this.statementProcessor)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String holder = rs.getString("name");
@@ -737,7 +775,7 @@ public class SqlStorage implements StorageImplementation {
         ps.setLong(1, action.getTimestamp().getEpochSecond());
         ps.setString(2, action.getSource().getUniqueId().toString());
         ps.setString(3, action.getSource().getName());
-        ps.setString(4, Character.toString(LoggedAction.getTypeCharacter(action.getTarget().getType())));
+        ps.setString(4, LoggedAction.getTypeString(action.getTarget().getType()));
         ps.setString(5, action.getTarget().getUniqueId().map(UUID::toString).orElse("null"));
         ps.setString(6, action.getTarget().getName());
         ps.setString(7, action.getDescription());

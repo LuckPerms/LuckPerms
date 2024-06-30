@@ -63,8 +63,8 @@ public abstract class SenderFactory<P extends LuckPermsPlugin, T> implements Aut
 
     protected abstract boolean isConsole(T sender);
 
-    protected boolean consoleHasAllPermissions() {
-        return true;
+    protected boolean shouldSplitNewlines(T sender) {
+        return isConsole(sender);
     }
 
     public final Sender wrap(T sender) {

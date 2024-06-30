@@ -29,9 +29,9 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
-import me.lucko.luckperms.standalone.app.integration.SingletonPlayer;
 import me.lucko.luckperms.standalone.utils.CommandTester;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
+import me.lucko.luckperms.standalone.utils.TestSender;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.event.log.LogNotifyEvent;
 import org.junit.jupiter.api.Test;
@@ -54,6 +54,7 @@ public class CommandsIntegrationTest {
     
     private static final Map<String, String> CONFIG = ImmutableMap.<String, String>builder()
             .put("log-notify", "false")
+            .put("commands-rate-limit", "false")
             .build();
 
     @Test
@@ -61,7 +62,7 @@ public class CommandsIntegrationTest {
         TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
             CommandExecutor executor = app.getCommandExecutor();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .givenHasPermissions("luckperms.creategroup")
                     .whenRunCommand("creategroup test")
                     .thenExpect("[LP] test was successfully created.")
@@ -97,9 +98,9 @@ public class CommandsIntegrationTest {
                             """
                     )
 
-                    .givenHasAllPermissions()
+                    .givenHasPermissions("luckperms.group.meta.set")
                     .whenRunCommand("group test meta set hello world")
-                    .clearMessageBuffer()
+                    .thenExpect("[LP] Set meta key 'hello' to 'world' for test in context global.")
 
                     .givenHasPermissions("luckperms.group.setweight")
                     .whenRunCommand("group test setweight 10")
@@ -182,7 +183,7 @@ public class CommandsIntegrationTest {
         TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
             CommandExecutor executor = app.getCommandExecutor();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .whenRunCommand("creategroup test")
                     .clearMessageBuffer()
 
@@ -262,7 +263,7 @@ public class CommandsIntegrationTest {
         TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
             CommandExecutor executor = app.getCommandExecutor();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .whenRunCommand("creategroup test")
                     .whenRunCommand("creategroup test2")
                     .whenRunCommand("creategroup test3")
@@ -321,7 +322,7 @@ public class CommandsIntegrationTest {
         TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
             CommandExecutor executor = app.getCommandExecutor();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .whenRunCommand("creategroup test")
                     .clearMessageBuffer()
 
@@ -445,7 +446,7 @@ public class CommandsIntegrationTest {
             plugin.getStorage().savePlayerData(UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d"), "Luck").join();
             plugin.getStorage().savePlayerData(UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5"), "Notch").join();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .givenHasPermissions("luckperms.user.info")
                     .whenRunCommand("user Luck info")
                     .thenExpect("""
@@ -508,7 +509,7 @@ public class CommandsIntegrationTest {
 
             plugin.getStorage().savePlayerData(UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d"), "Luck").join();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .givenHasPermissions("luckperms.user.permission.set")
                     .whenRunCommand("user Luck permission set test.node true")
                     .thenExpect("[LP] Set test.node to true for luck in context global.")
@@ -587,7 +588,7 @@ public class CommandsIntegrationTest {
 
             plugin.getStorage().savePlayerData(UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d"), "Luck").join();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .whenRunCommand("creategroup test2")
                     .whenRunCommand("creategroup test3")
                     .clearMessageBuffer()
@@ -651,7 +652,7 @@ public class CommandsIntegrationTest {
 
             plugin.getStorage().savePlayerData(UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d"), "Luck").join();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .givenHasPermissions("luckperms.user.meta.info")
                     .whenRunCommand("user Luck meta info")
                     .thenExpect("""
@@ -773,7 +774,7 @@ public class CommandsIntegrationTest {
         TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
             CommandExecutor executor = app.getCommandExecutor();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .givenHasPermissions("luckperms.createtrack")
                     .whenRunCommand("createtrack test1")
                     .thenExpect("[LP] test1 was successfully created.")
@@ -884,7 +885,7 @@ public class CommandsIntegrationTest {
 
             plugin.getStorage().savePlayerData(UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d"), "Luck").join();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .whenRunCommand("createtrack staff")
                     .whenRunCommand("createtrack premium")
 
@@ -1023,7 +1024,7 @@ public class CommandsIntegrationTest {
 
             plugin.getStorage().savePlayerData(UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d"), "Luck").join();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .whenRunCommand("creategroup test")
                     .whenRunCommand("user Luck permission set hello.world true server=survival")
                     .whenRunCommand("group test permission set hello.world true world=nether")
@@ -1045,12 +1046,12 @@ public class CommandsIntegrationTest {
                     .givenHasPermissions("luckperms.search")
                     .whenRunCommand("search ~~ group.%")
                     .thenExpect("""
-                                [LP] Searching for users and groups with permissions ~~ group.%...
-                                [LP] Found 2 entries from 2 users and 0 groups.
-                                [LP] Showing user entries:    (page 1 of 1 - 2 entries)
-                                > luck - (group.test) - true
-                                > luck - (group.default) - true
-                                """
+                            [LP] Searching for users and groups with permissions ~~ group.%...
+                            [LP] Found 2 entries from 2 users and 0 groups.
+                            [LP] Showing user entries:    (page 1 of 1 - 2 entries)
+                            > luck - (group.test) - true
+                            > luck - (group.default) - true
+                            """
                     );
         });
     }
@@ -1068,14 +1069,16 @@ public class CommandsIntegrationTest {
 
             CountDownLatch completed = new CountDownLatch(1);
 
-            SingletonPlayer.INSTANCE.addMessageSink(component -> {
+            TestSender console = new TestSender();
+            console.setConsole(true);
+            console.addMessageSink(component -> {
                 String plain = PlainTextComponentSerializer.plainText().serialize(component);
                 if (plain.contains("Bulk update completed successfully")) {
                     completed.countDown();
                 }
             });
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor, console)
                     .whenRunCommand("creategroup moderator")
                     .whenRunCommand("creategroup admin")
                     .whenRunCommand("user Luck parent add moderator server=survival")
@@ -1084,7 +1087,6 @@ public class CommandsIntegrationTest {
                     .whenRunCommand("group moderator rename mod")
                     .clearMessageBuffer()
 
-                    .givenHasPermissions("luckperms.bulkupdate")
                     .whenRunCommand("bulkupdate all update permission group.mod \"permission == group.moderator\"")
                     .thenExpectStartsWith("[LP] Running bulk update.");
 
@@ -1113,6 +1115,151 @@ public class CommandsIntegrationTest {
                     ),
                     notchUser.normalData().asSet()
             );
+
+            // test normal players are unable to use
+            new CommandTester(executor)
+                    .givenHasPermissions("luckperms.bulkupdate")
+                    .whenRunCommand("bulkupdate all update permission group.mod \"permission == group.moderator\"")
+                    .thenExpect("[LP] The bulk update command can only be used from the console.");
+        });
+    }
+
+    @Test
+    public void testLogCommands(@TempDir Path tempDir) {
+        Map<String, String> config = new HashMap<>(CONFIG);
+        config.put("log-notify", "true");
+        config.put("log-synchronously-in-commands", "true");
+
+        TestPluginProvider.use(tempDir, config, (app, bootstrap, plugin) -> {
+            CommandExecutor executor = app.getCommandExecutor();
+
+            UUID luckUniqueId = UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d");
+
+            plugin.getStorage().savePlayerData(luckUniqueId, "Luck").join();
+            plugin.getStorage().savePlayerData(UUID.fromString("069a79f4-44e9-4726-a5be-fca90e38aaf5"), "Notch").join();
+
+            TestSender testSender = new TestSender();
+            testSender.setUniqueId(luckUniqueId);
+            testSender.setName("Luck");
+
+            new CommandTester(executor, testSender)
+                    .whenRunCommand("group default permission set hello");
+
+            new CommandTester(executor)
+                    .whenRunCommand("creategroup moderator")
+                    .whenRunCommand("creategroup admin")
+                    .whenRunCommand("createtrack staff")
+                    .whenRunCommand("user Luck parent add moderator server=survival")
+                    .whenRunCommand("user Notch parent add moderator")
+                    .whenRunCommand("group admin parent add moderator")
+                    .whenRunCommand("group moderator rename mod")
+                    .whenRunCommand("user Luck permission set test.1")
+                    .whenRunCommand("user Luck permission set test.2 false")
+                    .whenRunCommand("user Luck permission set test.3 server=survival")
+                    .whenRunCommand("user Luck permission settemp test.4 true 1h")
+                    .whenRunCommand("user Luck permission settemp test.5 false 2d")
+                    .clearMessageBuffer()
+
+                    .givenHasPermissions("luckperms.log.userhistory")
+                    .whenRunCommand("log userhistory Luck")
+                    .thenExpectReplacing("\\ds ago", "1m ago", """
+                            [LP] Showing history for user luck  (page 1 of 1)
+                            [LP] #1 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission settemp test.5 false 2d
+                            [LP] #2 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission settemp test.4 true 1h
+                            [LP] #3 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission set test.3 true server=survival
+                            [LP] #4 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission set test.2 false
+                            [LP] #5 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission set test.1 true
+                            [LP] #6 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > parent add moderator server=survival
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.log.grouphistory")
+                    .whenRunCommand("log grouphistory admin")
+                    .thenExpectReplacing("\\ds ago", "1m ago", """
+                            [LP] Showing history for group admin  (page 1 of 1)
+                            [LP] #1 (1m ago) (StandaloneUser) [G] (admin)
+                            [LP] > parent add moderator
+                            [LP] #2 (1m ago) (StandaloneUser) [G] (admin)
+                            [LP] > create
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.log.trackhistory")
+                    .whenRunCommand("log trackhistory staff")
+                    .thenExpectReplacing("\\ds ago", "1m ago", """
+                            [LP] Showing history for track staff  (page 1 of 1)
+                            [LP] #1 (1m ago) (StandaloneUser) [T] (staff)
+                            [LP] > create
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.log.recent")
+                    .whenRunCommand("log recent")
+                    .thenExpectReplacing("\\ds ago", "1m ago", """
+                            [LP] Showing recent actions  (page 1 of 2)
+                            [LP] #1 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission settemp test.5 false 2d
+                            [LP] #2 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission settemp test.4 true 1h
+                            [LP] #3 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission set test.3 true server=survival
+                            [LP] #4 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission set test.2 false
+                            [LP] #5 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > permission set test.1 true
+                            [LP] #6 (1m ago) (StandaloneUser) [G] (moderator)
+                            [LP] > rename mod
+                            [LP] #7 (1m ago) (StandaloneUser) [G] (admin)
+                            [LP] > parent add moderator
+                            [LP] #8 (1m ago) (StandaloneUser) [U] (notch)
+                            [LP] > parent add moderator
+                            [LP] #9 (1m ago) (StandaloneUser) [U] (luck)
+                            [LP] > parent add moderator server=survival
+                            [LP] #10 (1m ago) (StandaloneUser) [T] (staff)
+                            [LP] > create
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.log.recent")
+                    .whenRunCommand("log recent 2")
+                    .thenExpectReplacing("\\ds ago", "1m ago", """
+                            [LP] Showing recent actions  (page 2 of 2)
+                            [LP] #11 (1m ago) (StandaloneUser) [G] (admin)
+                            [LP] > create
+                            [LP] #12 (1m ago) (StandaloneUser) [G] (moderator)
+                            [LP] > create
+                            [LP] #13 (1m ago) (Luck) [G] (default)
+                            [LP] > permission set hello true
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.log.recent")
+                    .whenRunCommand("log recent 3")
+                    .thenExpect("[LP] Invalid page number. Please enter a value between 1 and 2.")
+
+                    .givenHasPermissions("luckperms.log.search")
+                    .whenRunCommand("log search hello")
+                    .thenExpectReplacing("\\ds ago", "1m ago", """
+                            [LP] Showing recent actions for query hello  (page 1 of 1)
+                            [LP] #1 (1m ago) (Luck) [G] (default)
+                            [LP] > permission set hello true
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.log.recent")
+                    .whenRunCommand("log recent Luck")
+                    .thenExpectReplacing("\\ds ago", "1m ago", """
+                            [LP] Showing recent actions by Luck  (page 1 of 1)
+                            [LP] #1 (1m ago) (Luck) [G] (default)
+                            [LP] > permission set hello true
+                            """
+                    );
         });
     }
 
@@ -1121,7 +1268,7 @@ public class CommandsIntegrationTest {
         TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
             CommandExecutor executor = app.getCommandExecutor();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .givenHasPermissions("luckperms.user.info")
                     .whenRunCommand("user unknown info")
                     .thenExpect("[LP] A user for unknown could not be found.")
@@ -1154,7 +1301,7 @@ public class CommandsIntegrationTest {
             CommandExecutor executor = app.getCommandExecutor();
             String version = "v" + bootstrap.getVersion();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .givenHasPermissions(/* empty */)
 
                     .whenRunCommand("")
@@ -1188,7 +1335,10 @@ public class CommandsIntegrationTest {
             // by default, notifications are not sent to the user who initiated the event - override that
             app.getApi().getEventBus().subscribe(LogNotifyEvent.class, e -> e.setCancelled(false));
 
-            new CommandTester(plugin, executor)
+            TestSender sender = new TestSender();
+            plugin.addOnlineSender(sender);
+
+            new CommandTester(executor, sender)
                     .givenHasPermissions("luckperms.group.permission.set", "luckperms.log.notify")
                     .whenRunCommand("group default permission set hello.world true server=test")
                     .thenExpect("""
@@ -1208,7 +1358,7 @@ public class CommandsIntegrationTest {
         TestPluginProvider.use(tempDir, config, (app, bootstrap, plugin) -> {
             CommandExecutor executor = app.getCommandExecutor();
 
-            new CommandTester(plugin, executor)
+            new CommandTester(executor)
                     .givenHasPermissions("luckperms.group.permission.set")
                     .whenRunCommand("group default permission set hello.world true server=test")
                     .thenExpect("[LP] You do not have permission to use this command!")

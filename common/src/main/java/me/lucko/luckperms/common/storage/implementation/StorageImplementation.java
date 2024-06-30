@@ -25,8 +25,10 @@
 
 package me.lucko.luckperms.common.storage.implementation;
 
-import me.lucko.luckperms.common.actionlog.Log;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
@@ -58,7 +60,7 @@ public interface StorageImplementation {
 
     void logAction(Action entry) throws Exception;
 
-    Log getLog() throws Exception;
+    LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws Exception;
 
     void applyBulkUpdate(BulkUpdate bulkUpdate) throws Exception;
 

@@ -25,13 +25,22 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
+import me.lucko.luckperms.common.actionlog.LogDispatcher;
+import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.actionlog.filter.ActionFilters;
+import me.lucko.luckperms.common.filter.FilterList;
+import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.actionlog.ActionLog;
 import net.luckperms.api.actionlog.ActionLogger;
+import net.luckperms.api.actionlog.filter.ActionFilter;
+import net.luckperms.api.util.Page;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class ApiActionLogger implements ActionLogger {
@@ -47,22 +56,66 @@ public class ApiActionLogger implements ActionLogger {
     }
 
     @Override
+    @Deprecated
     public @NonNull CompletableFuture<ActionLog> getLog() {
-        return this.plugin.getStorage().getLog().thenApply(ApiActionLog::new);
+        return this.plugin.getStorage().getLogPage(ActionFilters.all(), null)
+                .thenApply(result -> new ApiActionLog(result.getContent()));
+    }
+
+    @Override
+    public @NonNull CompletableFuture<List<Action>> queryActions(@NonNull ActionFilter filter) {
+        return this.plugin.getStorage().getLogPage(getFilterList(filter), null).thenApply(ActionPage::new).thenApply(Page::entries);
+    }
+
+    @Override
+    public @NonNull CompletableFuture<Page<Action>> queryActions(@NonNull ActionFilter filter, int pageSize, int pageNumber) {
+        return this.plugin.getStorage().getLogPage(getFilterList(filter), new PageParameters(pageSize, pageNumber)).thenApply(ActionPage::new);
     }
 
     @Override
     public @NonNull CompletableFuture<Void> submit(@NonNull Action entry) {
-        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().dispatchFromApi((LoggedAction) entry), this.plugin.getBootstrap().getScheduler().async());
+        return this.plugin.getLogDispatcher().dispatchFromApi((LoggedAction) entry);
     }
 
     @Override
     public @NonNull CompletableFuture<Void> submitToStorage(@NonNull Action entry) {
-        return this.plugin.getStorage().logAction(entry);
+        return this.plugin.getLogDispatcher().logToStorage((LoggedAction) entry);
     }
 
     @Override
     public @NonNull CompletableFuture<Void> broadcastAction(@NonNull Action entry) {
-        return CompletableFuture.runAsync(() -> this.plugin.getLogDispatcher().broadcastFromApi((LoggedAction) entry), this.plugin.getBootstrap().getScheduler().async());
+        LogDispatcher dispatcher = this.plugin.getLogDispatcher();
+
+        CompletableFuture<Void> messagingFuture = dispatcher.logToStorage(((LoggedAction) entry));
+        dispatcher.broadcastFromApi(((LoggedAction) entry));
+        return messagingFuture;
+    }
+
+    private static FilterList<Action> getFilterList(ActionFilter filter) {
+        Objects.requireNonNull(filter, "filter");
+        if (filter instanceof ApiActionFilter) {
+            return ((ApiActionFilter) filter).getFilter();
+        } else {
+            throw new IllegalArgumentException("Unknown filter type: " + filter.getClass());
+        }
+    }
+
+    private static final class ActionPage implements Page<Action> {
+        private final LogPage page;
+
+        private ActionPage(LogPage page) {
+            this.page = page;
+        }
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        @Override
+        public @NonNull List<Action> entries() {
+            return (List) this.page.getContent();
+        }
+
+        @Override
+        public int overallSize() {
+            return this.page.getTotalEntries();
+        }
     }
 }

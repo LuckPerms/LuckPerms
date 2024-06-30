@@ -26,9 +26,6 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import com.google.common.collect.Maps;
-import me.lucko.luckperms.common.bulkupdate.comparison.Comparison;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -36,6 +33,7 @@ import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
 import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.filter.Comparison;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.node.comparator.NodeEntryComparator;
@@ -62,13 +60,13 @@ public class SearchCommand extends SingleCommand {
 
     @Override
     public void execute(LuckPermsPlugin plugin, Sender sender, ArgumentList args, String label) {
-        Comparison comparison = StandardComparison.parseComparison(args.get(0));
+        Comparison comparison = Comparison.parse(args.get(0));
         if (comparison == null) {
-            comparison = StandardComparison.EQUAL;
+            comparison = Comparison.EQUAL;
             args.add(0, "==");
         }
 
-        ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.of(Constraint.of(comparison, args.get(1)));
+        ConstraintNodeMatcher<Node> matcher = StandardNodeMatchers.key(args.get(1), comparison);
         int page = args.getIntOrDefault(2, 1);
 
         Message.SEARCH_SEARCHING.send(sender, matcher.toString());
@@ -120,7 +118,7 @@ public class SearchCommand extends SingleCommand {
         headerMessage.send(sender, page, pages.size(), results.size());
 
         for (Map.Entry<String, NodeEntry<T, Node>> ent : mappedContent) {
-            Message.SEARCH_NODE_ENTRY.send(sender, comparison != StandardComparison.EQUAL, ent.getValue().getNode(), ent.getKey(), holderType, label, sender.getPlugin());
+            Message.SEARCH_NODE_ENTRY.send(sender, comparison != Comparison.EQUAL, ent.getValue().getNode(), ent.getKey(), holderType, label, sender.getPlugin());
         }
     }
 }

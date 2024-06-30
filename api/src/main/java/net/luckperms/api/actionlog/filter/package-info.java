@@ -23,34 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.query;
-
-import java.util.Locale;
-
 /**
- * Represents a field being used in an update
+ * {@link net.luckperms.api.actionlog.Action} filters.
  */
-public enum QueryField {
-
-    PERMISSION("permission"),
-    SERVER("server"),
-    WORLD("world");
-
-    private final String sqlName;
-
-    public static QueryField of(String s) {
-        try {
-            return valueOf(s.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-
-    QueryField(String sqlName) {
-        this.sqlName = sqlName;
-    }
-
-    public String getSqlName() {
-        return this.sqlName;
-    }
-}
+package net.luckperms.api.actionlog.filter;

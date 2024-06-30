@@ -29,12 +29,14 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.commands.log.LogNotify;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import net.luckperms.api.event.log.LogBroadcastEvent;
 import net.luckperms.api.event.log.LogNotifyEvent;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 public class LogDispatcher {
@@ -64,7 +66,12 @@ public class LogDispatcher {
         return !this.plugin.getEventDispatcher().dispatchLogBroadcast(cancelled, entry, origin);
     }
 
-    private void broadcast(LoggedAction entry, LogNotifyEvent.Origin origin, Sender sender) {
+    // broadcast the entry to online players
+    private void broadcast(LoggedAction entry, LogBroadcastEvent.Origin broadcastOrigin, LogNotifyEvent.Origin origin, Sender sender) {
+        if (!shouldBroadcast(entry, broadcastOrigin)) {
+            return;
+        }
+
         this.plugin.getOnlineSenders()
                 .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                 .filter(s -> {
@@ -74,41 +81,46 @@ public class LogDispatcher {
                 .forEach(s -> Message.LOG.send(s, entry));
     }
 
-    public void dispatch(LoggedAction entry, Sender sender) {
+    // log the entry to storage
+    public CompletableFuture<Void> logToStorage(LoggedAction entry) {
         if (!this.plugin.getEventDispatcher().dispatchLogPublish(false, entry)) {
-            this.plugin.getStorage().logAction(entry);
+            return this.plugin.getStorage().logAction(entry);
+        } else {
+            return CompletableFuture.completedFuture(null);
         }
+    }
 
-        this.plugin.getMessagingService().ifPresent(service -> service.pushLog(entry));
-
-        if (shouldBroadcast(entry, LogBroadcastEvent.Origin.LOCAL)) {
-            broadcast(entry, LogNotifyEvent.Origin.LOCAL, sender);
+    // log the entry to messaging
+    public CompletableFuture<Void> logToMessaging(LoggedAction entry) {
+        InternalMessagingService messagingService = this.plugin.getMessagingService().orElse(null);
+        if (messagingService != null) {
+            return messagingService.pushLog(entry);
+        } else {
+            return CompletableFuture.completedFuture(null);
         }
+    }
+
+    // log the entry to storage and messaging, and broadcast it to online players
+    private CompletableFuture<Void> dispatch(LoggedAction entry, Sender sender, LogBroadcastEvent.Origin broadcastOrigin, LogNotifyEvent.Origin origin) {
+        CompletableFuture<Void> storageFuture = logToStorage(entry);
+        CompletableFuture<Void> messagingFuture = logToMessaging(entry);
+        broadcast(entry, broadcastOrigin, origin, sender);
+        return CompletableFuture.allOf(storageFuture, messagingFuture);
+    }
+
+    public CompletableFuture<Void> dispatch(LoggedAction entry, Sender sender) {
+        return dispatch(entry, sender, LogBroadcastEvent.Origin.LOCAL, LogNotifyEvent.Origin.LOCAL);
+    }
+
+    public CompletableFuture<Void> dispatchFromApi(LoggedAction entry) {
+        return dispatch(entry, null, LogBroadcastEvent.Origin.LOCAL_API, LogNotifyEvent.Origin.LOCAL_API);
     }
 
     public void broadcastFromApi(LoggedAction entry) {
-        this.plugin.getMessagingService().ifPresent(extendedMessagingService -> extendedMessagingService.pushLog(entry));
-
-        if (shouldBroadcast(entry, LogBroadcastEvent.Origin.LOCAL_API)) {
-            broadcast(entry, LogNotifyEvent.Origin.LOCAL_API, null);
-        }
+        broadcast(entry, LogBroadcastEvent.Origin.LOCAL_API, LogNotifyEvent.Origin.LOCAL_API, null);
     }
 
-    public void dispatchFromApi(LoggedAction entry) {
-        if (!this.plugin.getEventDispatcher().dispatchLogPublish(false, entry)) {
-            try {
-                this.plugin.getStorage().logAction(entry).get();
-            } catch (Exception e) {
-                this.plugin.getLogger().warn("Error whilst storing action", e);
-            }
-        }
-
-        broadcastFromApi(entry);
-    }
-
-    public void dispatchFromRemote(LoggedAction entry) {
-        if (shouldBroadcast(entry, LogBroadcastEvent.Origin.REMOTE)) {
-            broadcast(entry, LogNotifyEvent.Origin.REMOTE, null);
-        }
+    public void broadcastFromRemote(LoggedAction entry) {
+        broadcast(entry, LogBroadcastEvent.Origin.REMOTE, LogNotifyEvent.Origin.REMOTE, null);
     }
 }

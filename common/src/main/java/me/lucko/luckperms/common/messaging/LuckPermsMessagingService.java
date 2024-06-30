@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.messaging.message.UpdateMessageImpl;
 import me.lucko.luckperms.common.messaging.message.UserUpdateMessageImpl;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.AsyncInterface;
 import me.lucko.luckperms.common.util.ExpiringSet;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import me.lucko.luckperms.common.util.gson.JObject;
@@ -54,9 +55,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class LuckPermsMessagingService implements InternalMessagingService, IncomingMessageConsumer {
+public class LuckPermsMessagingService extends AsyncInterface implements InternalMessagingService, IncomingMessageConsumer {
     private final LuckPermsPlugin plugin;
     private final ExpiringSet<UUID> receivedMessages;
     private final PushUpdateBuffer updateBuffer;
@@ -65,6 +67,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     private final Messenger messenger;
 
     public LuckPermsMessagingService(LuckPermsPlugin plugin, MessengerProvider messengerProvider) {
+        super(plugin);
         this.plugin = plugin;
 
         this.messengerProvider = messengerProvider;
@@ -107,8 +110,8 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     }
 
     @Override
-    public void pushUpdate() {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+    public CompletableFuture<Void> pushUpdate() {
+        return future(() -> {
             UUID requestId = generatePingId();
             this.plugin.getLogger().info("[Messaging] Sending ping with id: " + requestId);
             this.messenger.sendOutgoingMessage(new UpdateMessageImpl(requestId));
@@ -116,8 +119,8 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     }
 
     @Override
-    public void pushUserUpdate(User user) {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+    public CompletableFuture<Void> pushUserUpdate(User user) {
+        return future(() -> {
             UUID requestId = generatePingId();
             this.plugin.getLogger().info("[Messaging] Sending user ping for '" + user.getPlainDisplayName() + "' with id: " + requestId);
             this.messenger.sendOutgoingMessage(new UserUpdateMessageImpl(requestId, user.getUniqueId()));
@@ -125,8 +128,8 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     }
 
     @Override
-    public void pushLog(Action logEntry) {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+    public CompletableFuture<Void> pushLog(Action logEntry) {
+        return future(() -> {
             UUID requestId = generatePingId();
 
             if (this.plugin.getEventDispatcher().dispatchLogNetworkPublish(!this.plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), requestId, logEntry)) {
@@ -139,8 +142,8 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
     }
 
     @Override
-    public void pushCustomPayload(String channelId, String payload) {
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+    public CompletableFuture<Void> pushCustomPayload(String channelId, String payload) {
+        return future(() -> {
             UUID requestId = generatePingId();
             this.messenger.sendOutgoingMessage(new CustomMessageImpl(requestId, channelId, payload));
         });
@@ -283,7 +286,7 @@ public class LuckPermsMessagingService implements InternalMessagingService, Inco
             ActionLogMessage msg = (ActionLogMessage) message;
 
             this.plugin.getEventDispatcher().dispatchLogReceive(msg.getId(), msg.getAction());
-            this.plugin.getLogDispatcher().dispatchFromRemote((LoggedAction) msg.getAction());
+            this.plugin.getLogDispatcher().broadcastFromRemote((LoggedAction) msg.getAction());
 
         } else if (message instanceof CustomMessage) {
             CustomMessage msg = (CustomMessage) message;

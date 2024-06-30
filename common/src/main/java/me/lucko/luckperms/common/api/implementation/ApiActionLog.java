@@ -25,50 +25,63 @@
 
 package me.lucko.luckperms.common.api.implementation;
 
-import me.lucko.luckperms.common.actionlog.Log;
-import me.lucko.luckperms.common.api.ApiUtils;
+import com.google.common.collect.ImmutableSortedSet;
+import me.lucko.luckperms.common.actionlog.LoggedAction;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.actionlog.ActionLog;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.UUID;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@Deprecated
 public class ApiActionLog implements ActionLog {
-    private final Log handle;
+    private final SortedSet<Action> content;
 
-    public ApiActionLog(Log handle) {
-        this.handle = handle;
+    public ApiActionLog(List<LoggedAction> content) {
+        this.content = ImmutableSortedSet.copyOf(content);
     }
 
     @Override
     public @NonNull SortedSet<Action> getContent() {
-        return (SortedSet) this.handle.getContent();
+        return this.content;
     }
 
     @Override
     public @NonNull SortedSet<Action> getContent(@NonNull UUID actor) {
         Objects.requireNonNull(actor, "actor");
-        return (SortedSet) this.handle.getContent(actor);
+        return this.content.stream()
+                .filter(e -> e.getSource().getUniqueId().equals(actor))
+                .collect(ImmutableCollectors.toSortedSet());
     }
 
     @Override
     public @NonNull SortedSet<Action> getUserHistory(@NonNull UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uuid");
-        return (SortedSet) this.handle.getUserHistory(uniqueId);
+        return this.content.stream()
+                .filter(e -> e.getTarget().getType() == Action.Target.Type.USER)
+                .filter(e -> e.getTarget().getUniqueId().isPresent() && e.getTarget().getUniqueId().get().equals(uniqueId))
+                .collect(ImmutableCollectors.toSortedSet());
     }
 
     @Override
     public @NonNull SortedSet<Action> getGroupHistory(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return (SortedSet) this.handle.getGroupHistory(ApiUtils.checkName(name));
+        return this.content.stream()
+                .filter(e -> e.getTarget().getType() == Action.Target.Type.GROUP)
+                .filter(e -> e.getTarget().getName().equals(name))
+                .collect(ImmutableCollectors.toSortedSet());
     }
 
     @Override
     public @NonNull SortedSet<Action> getTrackHistory(@NonNull String name) {
         Objects.requireNonNull(name, "name");
-        return (SortedSet) this.handle.getTrackHistory(ApiUtils.checkName(name));
+        return this.content.stream()
+                .filter(e -> e.getTarget().getType() == Action.Target.Type.TRACK)
+                .filter(e -> e.getTarget().getName().equals(name))
+                .collect(ImmutableCollectors.toSortedSet());
     }
 }

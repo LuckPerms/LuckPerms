@@ -23,38 +23,46 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.bulkupdate.action;
+package me.lucko.luckperms.common.bulkupdate;
 
-import me.lucko.luckperms.common.bulkupdate.PreparedStatementBuilder;
+import me.lucko.luckperms.common.filter.FilterField;
+import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.node.Node;
 
+import java.util.Locale;
+
 /**
- * Represents an action to be applied to a given node.
+ * Represents a field being used in a bulk update
  */
-public interface Action {
+public enum BulkUpdateField implements FilterField<Node, String> {
 
-    /**
-     * Gets the name of this action
-     *
-     * @return the name of the action
-     */
-    String getName();
+    PERMISSION {
+        @Override
+        public String getValue(Node node) {
+            return node.getKey();
+        }
+    },
 
-    /**
-     * Applies this action to the given NodeModel, and returns the result.
-     *
-     * @param from the node to base changes from
-     * @return the new nodemodel instance, or null if the node should be deleted.
-     */
-    Node apply(Node from);
+    SERVER {
+        @Override
+        public String getValue(Node node) {
+            return node.getContexts().getAnyValue(DefaultContextKeys.SERVER_KEY).orElse("global");
+        }
+    },
 
-    /**
-     * Gets this action in SQL form.
-     *
-     * Will include a placeholder for the table, as "{table}".
-     *
-     * @param builder the statement builder
-     */
-    void appendSql(PreparedStatementBuilder builder);
+    WORLD {
+        @Override
+        public String getValue(Node node) {
+            return node.getContexts().getAnyValue(DefaultContextKeys.WORLD_KEY).orElse("global");
+        }
+    };
+
+    public static BulkUpdateField of(String s) {
+        try {
+            return valueOf(s.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
 
 }

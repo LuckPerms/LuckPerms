@@ -37,7 +37,6 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class BukkitPlatformListener implements Listener {

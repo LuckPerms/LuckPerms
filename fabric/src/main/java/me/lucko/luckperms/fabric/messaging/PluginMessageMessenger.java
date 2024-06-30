@@ -29,8 +29,6 @@ import com.google.common.collect.Iterables;
 import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
@@ -39,7 +37,6 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -48,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements ServerPlayNetworking.PlayPayloadHandler<PluginMessageMessenger.PluginMessagePayload> {
-    private static final Identifier CHANNEL = new Identifier(AbstractPluginMessageMessenger.CHANNEL);
+    private static final Identifier CHANNEL = Identifier.of(AbstractPluginMessageMessenger.CHANNEL);
 
     private final LPFabricPlugin plugin;
 

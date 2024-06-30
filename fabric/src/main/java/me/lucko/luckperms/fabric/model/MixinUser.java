@@ -32,8 +32,6 @@ import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-import java.util.Locale;
-
 /**
  * Mixin interface for {@link ServerPlayerEntity} implementing {@link User} related
  * caches and functions.

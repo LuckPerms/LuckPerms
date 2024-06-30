@@ -28,15 +28,12 @@ package me.lucko.luckperms.common.commands.misc;
 import com.github.benmanes.caffeine.cache.Cache;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateBuilder;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateField;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdateSqlBuilder;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdateStatistics;
 import me.lucko.luckperms.common.bulkupdate.DataType;
 import me.lucko.luckperms.common.bulkupdate.action.DeleteAction;
 import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
-import me.lucko.luckperms.common.bulkupdate.comparison.Comparison;
-import me.lucko.luckperms.common.bulkupdate.comparison.Constraint;
-import me.lucko.luckperms.common.bulkupdate.comparison.StandardComparison;
-import me.lucko.luckperms.common.bulkupdate.query.Query;
-import me.lucko.luckperms.common.bulkupdate.query.QueryField;
 import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.abstraction.SingleCommand;
 import me.lucko.luckperms.common.command.access.CommandPermission;
@@ -44,6 +41,7 @@ import me.lucko.luckperms.common.command.spec.CommandSpec;
 import me.lucko.luckperms.common.command.utils.ArgumentException;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.filter.Comparison;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
@@ -112,7 +110,7 @@ public class BulkUpdateCommand extends SingleCommand {
                 }
 
                 String field = args.remove(0);
-                QueryField queryField = QueryField.of(field);
+                BulkUpdateField queryField = BulkUpdateField.of(field);
                 if (queryField == null) {
                     throw new ArgumentException.DetailedUsage();
                 }
@@ -131,20 +129,20 @@ public class BulkUpdateCommand extends SingleCommand {
                 return;
             }
 
-            QueryField field = QueryField.of(parts[0]);
+            BulkUpdateField field = BulkUpdateField.of(parts[0]);
             if (field == null) {
                 Message.BULK_UPDATE_INVALID_CONSTRAINT.send(sender, constraint);
                 return;
             }
 
-            Comparison comparison = StandardComparison.parseComparison(parts[1]);
+            Comparison comparison = Comparison.parse(parts[1]);
             if (comparison == null) {
                 Message.BULK_UPDATE_INVALID_COMPARISON.send(sender, parts[1]);
                 return;
             }
 
             String expr = parts[2];
-            bulkUpdateBuilder.query(Query.of(field, Constraint.of(comparison, expr)));
+            bulkUpdateBuilder.filter(field, comparison, expr);
         }
 
         BulkUpdate bulkUpdate = bulkUpdateBuilder.build();
@@ -155,7 +153,11 @@ public class BulkUpdateCommand extends SingleCommand {
             String id = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
             this.pendingOperations.put(id, bulkUpdate);
 
-            Message.BULK_UPDATE_QUEUED.send(sender, bulkUpdate.buildAsSql().toReadableString().replace("{table}", bulkUpdate.getDataType().getName()));
+            BulkUpdateSqlBuilder sqlBuilder = new BulkUpdateSqlBuilder();
+            sqlBuilder.visit(bulkUpdate);
+            String readableSql = sqlBuilder.builder().toReadableString().replace("{table}", bulkUpdate.getDataType().getName());
+
+            Message.BULK_UPDATE_QUEUED.send(sender, readableSql);
             Message.BULK_UPDATE_CONFIRM.send(sender, label, id);
         }
     }

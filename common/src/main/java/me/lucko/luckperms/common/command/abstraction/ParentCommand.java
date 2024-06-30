@@ -86,39 +86,44 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
             return;
         }
 
-        final String targetArgument = args.get(0);
-        I targetId = null;
-        if (this.type == Type.TAKES_ARGUMENT_FOR_TARGET) {
-            targetId = parseTarget(targetArgument, plugin, sender);
+        if (this.type == Type.TARGETED) {
+            final String targetArgument = args.get(0);
+            I targetId = parseTarget(targetArgument, plugin, sender);
             if (targetId == null) {
                 return;
             }
-        }
 
-        ReentrantLock lock = getLockForTarget(targetId);
-        lock.lock();
-        try {
-            T target = getTarget(targetId, plugin, sender);
-            if (target == null) {
-                return;
-            }
-
+            ReentrantLock lock = getLockForTarget(targetId);
+            lock.lock();
             try {
-                sub.execute(plugin, sender, target, args.subList(this.type.minArgs, args.size()), label);
+                T target = getTarget(targetId, plugin, sender);
+                if (target == null) {
+                    return;
+                }
+
+                try {
+                    sub.execute(plugin, sender, target, args.subList(this.type.minArgs, args.size()), label);
+                } catch (CommandException e) {
+                    e.handle(sender, label, sub);
+                }
+
+                cleanup(target, plugin);
+            } finally {
+                lock.unlock();
+            }
+        } else {
+            try {
+                sub.execute(plugin, sender, null, args.subList(this.type.minArgs, args.size()), label);
             } catch (CommandException e) {
                 e.handle(sender, label, sub);
             }
-
-            cleanup(target, plugin);
-        } finally {
-            lock.unlock();
         }
     }
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         switch (this.type) {
-            case TAKES_ARGUMENT_FOR_TARGET:
+            case TARGETED:
                 return TabCompleter.create()
                         .at(0, CompletionSupplier.startsWith(() -> getTargets(plugin).stream()))
                         .at(1, CompletionSupplier.startsWith(() -> getChildren().stream()
@@ -133,7 +138,7 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
                                 .orElse(Collections.emptyList())
                         )
                         .complete(args);
-            case NO_TARGET_ARGUMENT:
+            case NOT_TARGETED:
                 return TabCompleter.create()
                         .at(0, CompletionSupplier.startsWith(() -> getChildren().stream()
                                 .filter(s -> s.isAuthorized(sender))
@@ -178,21 +183,31 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
         return getChildren().stream().anyMatch(sc -> sc.isAuthorized(sender));
     }
 
-    protected abstract List<String> getTargets(LuckPermsPlugin plugin);
+    protected List<String> getTargets(LuckPermsPlugin plugin) {
+        throw new UnsupportedOperationException();
+    }
 
-    protected abstract I parseTarget(String target, LuckPermsPlugin plugin, Sender sender);
+    protected I parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        throw new UnsupportedOperationException();
+    }
 
-    protected abstract ReentrantLock getLockForTarget(I target);
+    protected ReentrantLock getLockForTarget(I target) {
+        throw new UnsupportedOperationException();
+    }
 
-    protected abstract T getTarget(I target, LuckPermsPlugin plugin, Sender sender);
+    protected T getTarget(I target, LuckPermsPlugin plugin, Sender sender) {
+        throw new UnsupportedOperationException();
+    }
 
-    protected abstract void cleanup(T t, LuckPermsPlugin plugin);
+    protected void cleanup(T t, LuckPermsPlugin plugin) {
+        throw new UnsupportedOperationException();
+    }
 
     public enum Type {
         // e.g. /lp log sub-command....
-        NO_TARGET_ARGUMENT(0),
+        NOT_TARGETED(0),
         // e.g. /lp user <USER> sub-command....
-        TAKES_ARGUMENT_FOR_TARGET(1);
+        TARGETED(1);
 
         private final int cmdIndex;
         private final int minArgs;
