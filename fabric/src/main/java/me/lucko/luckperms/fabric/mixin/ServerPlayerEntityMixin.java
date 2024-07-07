@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
-import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
@@ -160,10 +159,5 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     private void luckperms$copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
         MixinUser oldMixin = (MixinUser) oldPlayer;
         luckperms$initializePermissions(oldMixin.luckperms$getUser());
-    }
-
-    @Inject(at = @At("TAIL"), method = "worldChanged")
-    private void luckperms$onChangeDimension(ServerWorld targetWorld, CallbackInfo ci) {
-        PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getServerWorld(), targetWorld, (ServerPlayerEntity) (Object) this);
     }
 }

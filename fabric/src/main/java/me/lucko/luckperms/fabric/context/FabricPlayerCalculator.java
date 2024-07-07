@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.util.EnumNamer;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
-import me.lucko.luckperms.fabric.event.PlayerChangeWorldCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
@@ -67,7 +67,7 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
     }
 
     public void registerListeners() {
-        PlayerChangeWorldCallback.EVENT.register(this::onWorldChange);
+        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(this::onWorldChange);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
         return key.toString();
     }
 
-    private void onWorldChange(ServerWorld origin, ServerWorld destination, ServerPlayerEntity player) {
+    private void onWorldChange(ServerPlayerEntity player, ServerWorld origin, ServerWorld destination) {
         if (this.world) {
             this.plugin.getContextManager().invalidateCache(player);
             this.plugin.getContextManager().signalContextUpdate(player);
