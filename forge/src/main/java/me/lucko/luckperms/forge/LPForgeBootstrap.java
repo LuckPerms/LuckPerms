@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.forge.util.ForgeEventBusFacade;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
@@ -80,7 +79,7 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
     /**
      * A scheduler adapter for the platform
      */
-    private final SchedulerAdapter schedulerAdapter;
+    private final ForgeSchedulerAdapter schedulerAdapter;
 
     /**
      * The plugin class path appender
@@ -133,7 +132,7 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
     }
 
     @Override
-    public SchedulerAdapter getScheduler() {
+    public ForgeSchedulerAdapter getScheduler() {
         return this.schedulerAdapter;
     }
 

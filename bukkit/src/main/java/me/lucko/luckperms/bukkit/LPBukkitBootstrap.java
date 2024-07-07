@@ -102,7 +102,9 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
         this.loader = loader;
 
         this.logger = new JavaPluginLogger(loader.getLogger());
-        this.schedulerAdapter = new BukkitSchedulerAdapter(this);
+        this.schedulerAdapter = isFolia()
+                ? new FoliaSchedulerAdapter(this)
+                : new BukkitSchedulerAdapter(this);
         this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
         this.console = new NullSafeConsoleCommandSender(getServer());
         this.plugin = new LPBukkitPlugin(this);
@@ -175,7 +177,7 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
             this.plugin.enable();
 
             // schedule a task to update the 'serverStarting' flag
-            getServer().getScheduler().runTask(this.loader, () -> this.serverStarting = false);
+            this.schedulerAdapter.sync(() -> this.serverStarting = false);
         } finally {
             this.enableLatch.countDown();
         }
@@ -309,6 +311,15 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
             return false;
         } catch (ClassNotFoundException e) {
             return true;
+        }
+    }
+
+    private static boolean isFolia() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.scheduler.RegionScheduler");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 }

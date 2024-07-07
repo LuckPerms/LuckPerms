@@ -58,7 +58,7 @@ public class AsyncConfigurationTask implements ConfigurationTask {
                 this.plugin.getLogger().warn("Configuration task threw an exception", e);
             }
             ctx.finish(type());
-        }, this.plugin.getBootstrap().getScheduler().sync()); // do we need to call this sync?
+        }, this.plugin.getBootstrap().getScheduler()::sync); // do we need to call this sync?
     }
 
     @Override
