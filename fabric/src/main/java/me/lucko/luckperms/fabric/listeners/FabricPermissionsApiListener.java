@@ -111,7 +111,7 @@ public class FabricPermissionsApiListener {
     }
 
     private TriState playerPermissionCheck(ServerPlayerEntity player, String permission) {
-        return fabricTristate(((MixinUser) player).hasPermission(permission));
+        return fabricTristate(((MixinUser) player).luckperms$hasPermission(permission));
     }
 
     private TriState otherPermissionCheck(CommandSource source, String permission) {
@@ -127,7 +127,7 @@ public class FabricPermissionsApiListener {
     }
 
     private Optional<String> playerGetOption(ServerPlayerEntity player, String key) {
-        return Optional.ofNullable(((MixinUser) player).getOption(key));
+        return Optional.ofNullable(((MixinUser) player).luckperms$getOption(key));
     }
 
     private Optional<String> otherGetOption(CommandSource source, String key) {

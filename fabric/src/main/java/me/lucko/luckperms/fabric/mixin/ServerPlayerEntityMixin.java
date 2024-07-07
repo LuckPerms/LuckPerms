@@ -39,6 +39,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -53,29 +54,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ServerPlayerEntityMixin implements MixinUser {
 
     /** Cache a reference to the LP {@link User} instance loaded for this player */
+    @Unique
     private User luckperms$user;
 
     /**
      * Hold a QueryOptionsCache instance on the player itself, so we can just cast instead of
      * having to maintain a map of Player->Cache.
      */
+    @Unique
     private QueryOptionsCache<ServerPlayerEntity> luckperms$queryOptions;
 
     // Used by PlayerChangeWorldCallback hook below.
     @Shadow public abstract ServerWorld getServerWorld();
 
     @Override
-    public User getLuckPermsUser() {
+    public User luckperms$getUser() {
         return this.luckperms$user;
     }
 
     @Override
-    public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache() {
-        return this.luckperms$queryOptions;
-    }
-
-    @Override
-    public QueryOptionsCache<ServerPlayerEntity> getQueryOptionsCache(FabricContextManager contextManager) {
+    public QueryOptionsCache<ServerPlayerEntity> luckperms$getQueryOptionsCache(FabricContextManager contextManager) {
         if (this.luckperms$queryOptions == null) {
             this.luckperms$queryOptions = contextManager.newQueryOptionsCache((ServerPlayerEntity) (Object) this);
         }
@@ -83,17 +81,21 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     }
 
     @Override
-    public void initializePermissions(User user) {
+    public void luckperms$initializePermissions(User user) {
+        if (user == null) {
+            return;
+        }
+
         this.luckperms$user = user;
 
         // ensure query options cache is initialised too.
         if (this.luckperms$queryOptions == null) {
-            this.getQueryOptionsCache((FabricContextManager) user.getPlugin().getContextManager());
+            this.luckperms$getQueryOptionsCache((FabricContextManager) user.getPlugin().getContextManager());
         }
     }
 
     @Override
-    public Tristate hasPermission(String permission) {
+    public Tristate luckperms$hasPermission(String permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -101,11 +103,11 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
             // "fake" players will have our mixin, but won't have been initialised.
             return Tristate.UNDEFINED;
         }
-        return hasPermission(permission, this.luckperms$queryOptions.getQueryOptions());
+        return luckperms$hasPermission(permission, this.luckperms$queryOptions.getQueryOptions());
     }
 
     @Override
-    public Tristate hasPermission(String permission, QueryOptions queryOptions) {
+    public Tristate luckperms$hasPermission(String permission, QueryOptions queryOptions) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
@@ -124,7 +126,7 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     }
 
     @Override
-    public String getOption(String key) {
+    public String luckperms$getOption(String key) {
         if (key == null) {
             throw new NullPointerException("key");
         }
@@ -132,11 +134,11 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
             // "fake" players will have our mixin, but won't have been initialised.
             return null;
         }
-        return getOption(key, this.luckperms$queryOptions.getQueryOptions());
+        return luckperms$getOption(key, this.luckperms$queryOptions.getQueryOptions());
     }
 
     @Override
-    public String getOption(String key, QueryOptions queryOptions) {
+    public String luckperms$getOption(String key, QueryOptions queryOptions) {
         if (key == null) {
             throw new NullPointerException("key");
         }
@@ -155,15 +157,13 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     }
 
     @Inject(at = @At("TAIL"), method = "copyFrom")
-    private void luckperms_copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
+    private void luckperms$copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
         MixinUser oldMixin = (MixinUser) oldPlayer;
-        this.luckperms$user = oldMixin.getLuckPermsUser();
-        this.luckperms$queryOptions = oldMixin.getQueryOptionsCache();
-        this.luckperms$queryOptions.invalidate();
+        luckperms$initializePermissions(oldMixin.luckperms$getUser());
     }
 
     @Inject(at = @At("TAIL"), method = "worldChanged")
-    private void luckperms_onChangeDimension(ServerWorld targetWorld, CallbackInfo ci) {
+    private void luckperms$onChangeDimension(ServerWorld targetWorld, CallbackInfo ci) {
         PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getServerWorld(), targetWorld, (ServerPlayerEntity) (Object) this);
     }
 }
