@@ -92,10 +92,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     // init during load
     private DependencyManager dependencyManager;
     private TranslationManager translationManager;
+    private PermissionRegistry permissionRegistry;
+    private VerboseHandler verboseHandler;
 
     // init during enable
-    private VerboseHandler verboseHandler;
-    private PermissionRegistry permissionRegistry;
     private LogDispatcher logDispatcher;
     private LuckPermsConfiguration configuration;
     private OkHttpClient httpClient;
@@ -129,6 +129,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load some utilities early
         this.permissionRegistry = new PermissionRegistry(getBootstrap().getScheduler());
+        this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
     }
 
     public final void enable() {
@@ -138,8 +139,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // send the startup banner
         Message.STARTUP_BANNER.send(getConsoleSender(), getBootstrap());
 
-        // load some utilities early
-        this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
+        // setup log dispatcher instance early
         this.logDispatcher = new LogDispatcher(this);
 
         // load configuration
