@@ -31,6 +31,8 @@ import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcesso
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import net.luckperms.api.util.Tristate;
 
+import java.util.EnumSet;
+
 /**
  * Permission Processor for Bukkits "default" permission system.
  */
@@ -39,19 +41,28 @@ public class DefaultPermissionMapProcessor extends AbstractPermissionProcessor i
 
     private final LPBukkitPlugin plugin;
     private final boolean isOp;
+    private final EnumSet<DefaultRule> defaultRules;
 
-    public DefaultPermissionMapProcessor(LPBukkitPlugin plugin, boolean isOp) {
+    public DefaultPermissionMapProcessor(LPBukkitPlugin plugin, boolean isOp, EnumSet<DefaultRule> defaultRules) {
         this.plugin = plugin;
         this.isOp = isOp;
+        this.defaultRules = defaultRules;
     }
 
     @Override
     public TristateResult hasPermission(String permission) {
         Tristate t = this.plugin.getDefaultPermissionMap().lookupDefaultPermission(permission, this.isOp);
         if (t != Tristate.UNDEFINED) {
-            return RESULT_FACTORY.result(t);
+            return RESULT_FACTORY.result(applyDefaultRules(t, this.isOp));
         }
 
         return TristateResult.UNDEFINED;
+    }
+
+    private Tristate applyDefaultRules(Tristate prev, boolean isOp) {
+        for (DefaultRule defaultRule : defaultRules) {
+            prev = defaultRule.process(prev, isOp);
+        }
+        return prev;
     }
 }

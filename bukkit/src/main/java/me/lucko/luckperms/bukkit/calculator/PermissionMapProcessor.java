@@ -31,6 +31,9 @@ import me.lucko.luckperms.common.calculator.processor.AbstractOverrideWildcardPr
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import net.luckperms.api.util.Tristate;
 import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
+
+import java.util.EnumSet;
 
 /**
  * Permission Processor for Bukkits "default" permission system.
@@ -40,11 +43,13 @@ public class PermissionMapProcessor extends AbstractOverrideWildcardProcessor im
 
     private final LPBukkitPlugin plugin;
     private final boolean isOp;
+    private final EnumSet<DefaultRule> defaultRules;
 
-    public PermissionMapProcessor(LPBukkitPlugin plugin, boolean overrideWildcards, boolean isOp) {
+    public PermissionMapProcessor(LPBukkitPlugin plugin, boolean overrideWildcards, boolean isOp, EnumSet<DefaultRule> defaultRules) {
         super(overrideWildcards);
         this.plugin = plugin;
         this.isOp = isOp;
+        this.defaultRules = defaultRules;
     }
 
     @Override
@@ -53,6 +58,13 @@ public class PermissionMapProcessor extends AbstractOverrideWildcardProcessor im
         if (defPerm == null) {
             return TristateResult.UNDEFINED;
         }
-        return RESULT_FACTORY.result(Tristate.of(defPerm.getDefault().getValue(this.isOp)));
+        return RESULT_FACTORY.result(applyDefaultRules(Tristate.of(defPerm.getDefault().getValue(this.isOp)), this.isOp));
+    }
+
+    private Tristate applyDefaultRules(Tristate prev, boolean isOp) {
+        for (DefaultRule defaultRule : defaultRules) {
+            prev = defaultRule.process(prev, isOp);
+        }
+        return prev;
     }
 }

@@ -550,6 +550,18 @@ apply-bukkit-child-permissions: true
 # - If this option is set to false, LuckPerms will ignore these defaults.
 apply-bukkit-default-permissions: true
 
+# More advanced settings for Bukkit default permissions.
+#
+# - Available options are:
+#   => ignore-true : Ignore default permissions which are set to true
+#   => ignore-false : Ignore default permissions which are set to false
+#   => ignore-op : Ignore default permissions which are set to op
+#   => ignore-not-op : Ignore default permissions which are set to not op
+#
+# - All configured options are chained together for the final result.
+# - An empty list means no rules, which is default behaviour.
+bukkit-default-rules: []
+
 # If the plugin should apply attachment permissions.
 #
 # - Other plugins on the server are able to add their own "permission attachments" to players.
