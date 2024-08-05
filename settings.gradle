@@ -1,5 +1,6 @@
 pluginManagement {
     repositories {
+        gradlePluginPortal()
         maven {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
@@ -8,7 +9,6 @@ pluginManagement {
             name = 'Forge'
             url = 'https://maven.minecraftforge.net/'
         }
-        gradlePluginPortal()
     }
 }
 
@@ -28,6 +28,9 @@ include (
         'bungee',
         'bungee:loader',
         'fabric',
+        'neoforge',
+        'neoforge:loader',
+        'neoforge:neoforge-api',
         'forge',
         'forge:loader',
         'forge:forge-api',
