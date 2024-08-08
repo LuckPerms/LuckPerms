@@ -76,6 +76,7 @@ public interface Platform {
         NUKKIT("Nukkit"),
         VELOCITY("Velocity"),
         FABRIC("Fabric"),
+        NEOFORGE("NeoForge"),
         FORGE("Forge"),
         STANDALONE("Standalone");
 

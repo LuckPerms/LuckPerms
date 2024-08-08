@@ -1,0 +1,93 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import net.neoforged.moddevgradle.internal.RunGameTask
+
+plugins {
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.moddevgradle)
+    id("java-library")
+}
+
+sourceCompatibility = 17
+targetCompatibility = 21
+
+neoForge {
+    version = project.neoForgeVersion
+
+    validateAccessTransformers = true
+
+    runs {
+        client {
+            client()
+            mods.set(new HashSet()) // Work around classpath issues by using the production jar for dev runs
+        }
+        server {
+            server()
+            mods.set(new HashSet()) // Work around classpath issues by using the production jar for dev runs
+        }
+    }
+}
+
+// Work around classpath issues by using the production jar for dev runs
+tasks.withType(RunGameTask).configureEach {
+    dependsOn(tasks.shadowJar)
+    doFirst {
+        File jar = file("run/mods/main.jar")
+        jar.parentFile.mkdirs()
+        Files.copy(tasks.shadowJar.archiveFile.get().asFile.toPath(), jar.toPath(), StandardCopyOption.REPLACE_EXISTING)
+    }
+}
+
+Configuration shade = configurations.create('shade')
+configurations.implementation {
+    extendsFrom configurations.shade
+}
+
+dependencies {
+    add('shade', project(':api'))
+    add('shade', project(':common:loader-utils'))
+    add('shade', project(':neoforge:neoforge-api'))
+}
+
+build {
+    dependsOn(":neoforge:build")
+    dependsOn(":neoforge:neoforge-api:build")
+}
+
+jar {
+    manifest {
+        attributes(
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'Implementation-Title': 'LuckPerms',
+                'Implementation-Vendor': 'LuckPerms',
+                'Implementation-Version': project.ext.fullVersion,
+                'Specification-Title': 'luckperms',
+                'Specification-Vendor': 'LuckPerms',
+                'Specification-Version': '1'
+        )
+    }
+}
+
+processResources {
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand 'version': project.ext.fullVersion
+    }
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-NeoForge-${project.ext.fullVersion}.jar"
+    configurations = [shade]
+
+    from {
+        project(':neoforge').tasks.shadowJar.archiveFile
+    }
+
+    dependencies {
+        include(dependency('net.luckperms:.*'))
+        include(dependency('me.lucko.luckperms:.*'))
+    }
+}
+
+artifacts {
+    archives shadowJar
+}

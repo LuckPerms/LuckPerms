@@ -1,0 +1,16 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+issueTrackerURL="https://github.com/LuckPerms/LuckPerms/issues"
+showAsResourcePack=false
+
+[[mods]]
+    modId="luckperms"
+    version="${version}"
+    displayName="LuckPerms"
+    displayURL="https://luckperms.net/"
+    logoFile="luckperms.png"
+    credits="Luck"
+    authors="Luck"
+    description="A permissions plugin for Minecraft servers."
+    displayTest="IGNORE_ALL_VERSION"
