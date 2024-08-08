@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
 
 public class NeoForgeEventBus extends AbstractEventBus<ModContainer> {
     public NeoForgeEventBus(LuckPermsPlugin plugin, LuckPermsApiProvider apiProvider) {
@@ -37,14 +36,12 @@ public class NeoForgeEventBus extends AbstractEventBus<ModContainer> {
     }
 
     @Override
-    protected ModContainer checkPlugin(Object mod) throws IllegalArgumentException {
-        // TODO: This API doesn't exist anymore. Should we require passing the ModContainer/IModInfo instead?
-        // ModContainer modContainer = ModList.get().getModContainerByObject(mod).orElse(null);
-        // if (modContainer != null) {
-        //     return modContainer;
-        // }
+    protected ModContainer checkPlugin(Object modContainer) throws IllegalArgumentException {
+        if (modContainer instanceof ModContainer container) {
+            return container;
+        }
 
-        throw new IllegalArgumentException("Object " + mod + " (" + mod.getClass().getName() + ") is not a ModContainer.");
+        throw new IllegalArgumentException("Object " + modContainer + " (" + modContainer.getClass().getName() + ") is not a ModContainer.");
     }
 
 }
