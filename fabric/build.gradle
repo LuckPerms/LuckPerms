@@ -13,8 +13,8 @@ repositories {
 
 dependencies {
     // https://modmuss50.me/fabric.html
-    minecraft 'com.mojang:minecraft:1.21'
-    mappings 'net.fabricmc:yarn:1.21+build.1'
+    minecraft 'com.mojang:minecraft:1.21.1'
+    mappings 'net.fabricmc:yarn:1.21.1+build.3:v2'
     modImplementation 'net.fabricmc:fabric-loader:0.15.11'
 
     Set<String> apiModules = [
@@ -26,7 +26,7 @@ dependencies {
     ]
 
     apiModules.forEach {
-        modImplementation(fabricApi.module(it, '0.100.1+1.21'))
+        modImplementation(fabricApi.module(it, '0.102.1+1.21.1'))
     }
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.3.1'))

@@ -77,7 +77,7 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
     protected void sendMessage(ServerCommandSource sender, Component message) {
         final Locale locale;
         if (sender.getEntity() instanceof ServerPlayerEntity) {
-            String language = ((ServerPlayerEntity) sender.getEntity()).getClientOptions().comp_1951();
+            String language = ((ServerPlayerEntity) sender.getEntity()).getClientOptions().language();
             locale = language == null ? null : TranslationManager.parseLocale(language);
         } else {
             locale = null;
