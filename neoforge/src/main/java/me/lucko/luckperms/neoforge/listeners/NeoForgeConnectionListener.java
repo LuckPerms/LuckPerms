@@ -81,7 +81,7 @@ public class NeoForgeConnectionListener extends AbstractConnectionListener {
 
         event.register(new AsyncConfigurationTask(this.plugin, USER_LOGIN_TASK_TYPE, () -> CompletableFuture.runAsync(() -> {
             onPlayerNegotiationAsync(event.getListener().getConnection(), uniqueId, username);
-        }, this.plugin.getBootstrap().getScheduler().async())));
+        }, this.plugin.getBootstrap().getScheduler().async()), event.getListener()));
     }
 
     private void onPlayerNegotiationAsync(Connection connection, UUID uniqueId, String username) {

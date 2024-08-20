@@ -27,6 +27,7 @@ package me.lucko.luckperms.neoforge.util;
 
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.minecraft.server.network.ConfigurationTask;
 
 import java.util.concurrent.CompletableFuture;
@@ -37,11 +38,13 @@ public class AsyncConfigurationTask implements ConfigurationTask {
     private final LPNeoForgePlugin plugin;
     private final Type type;
     private final Supplier<CompletableFuture<?>> task;
+    private final ServerConfigurationPacketListener listener;
 
-    public AsyncConfigurationTask(LPNeoForgePlugin plugin, Type type, Supplier<CompletableFuture<?>> task) {
+    public AsyncConfigurationTask(LPNeoForgePlugin plugin, Type type, Supplier<CompletableFuture<?>> task, ServerConfigurationPacketListener listener) {
         this.plugin = plugin;
         this.type = type;
         this.task = task;
+        this.listener = listener;
     }
 
     @Override
@@ -52,6 +55,9 @@ public class AsyncConfigurationTask implements ConfigurationTask {
                 this.plugin.getLogger().warn("Configuration task threw an exception", e);
             }
         }).join();
+        // NeoForge: Notify Minecraft that we are done, and you can move on to next configuration task,
+        // so that the login process won't stall.
+        this.listener.finishCurrentTask(this.type);
     }
 
     @Override
