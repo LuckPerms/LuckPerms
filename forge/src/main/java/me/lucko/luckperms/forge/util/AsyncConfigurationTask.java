@@ -38,27 +38,23 @@ import java.util.function.Supplier;
 public class AsyncConfigurationTask implements ConfigurationTask {
     private final LPForgePlugin plugin;
     private final Type type;
-    private final Function<ConfigurationTaskContext, CompletableFuture<?>> task;
+    private final Runnable task;
 
-    public AsyncConfigurationTask(LPForgePlugin plugin, Type type, Function<ConfigurationTaskContext, CompletableFuture<?>> task) {
+    public AsyncConfigurationTask(LPForgePlugin plugin, Type type, Runnable task) {
         this.plugin = plugin;
         this.type = type;
         this.task = task;
     }
 
-    public AsyncConfigurationTask(LPForgePlugin plugin, Type type, Supplier<CompletableFuture<?>> task) {
-        this(plugin, type, c -> task.get());
-    }
-
     @Override
     public void start(ConfigurationTaskContext ctx) {
-        CompletableFuture<?> future = this.task.apply(ctx);
+        CompletableFuture<Void> future = CompletableFuture.runAsync(this.task, this.plugin.getBootstrap().getScheduler().async());
         future.whenCompleteAsync((o, e) -> {
             if (e != null) {
                 this.plugin.getLogger().warn("Configuration task threw an exception", e);
             }
-            ctx.finish(type());
-        }, this.plugin.getBootstrap().getScheduler().sync()); // do we need to call this sync?
+            ctx.finish(this.type);
+        });
     }
 
     @Override

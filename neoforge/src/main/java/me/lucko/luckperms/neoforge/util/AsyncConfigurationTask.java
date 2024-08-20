@@ -27,6 +27,7 @@ package me.lucko.luckperms.neoforge.util;
 
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.minecraft.server.network.ConfigurationTask;
 
 import java.util.concurrent.CompletableFuture;
@@ -36,22 +37,25 @@ import java.util.function.Supplier;
 public class AsyncConfigurationTask implements ConfigurationTask {
     private final LPNeoForgePlugin plugin;
     private final Type type;
-    private final Supplier<CompletableFuture<?>> task;
+    private final Runnable task;
+    private final ServerConfigurationPacketListener listener;
 
-    public AsyncConfigurationTask(LPNeoForgePlugin plugin, Type type, Supplier<CompletableFuture<?>> task) {
+    public AsyncConfigurationTask(LPNeoForgePlugin plugin, Type type, Runnable task, ServerConfigurationPacketListener listener) {
         this.plugin = plugin;
         this.type = type;
         this.task = task;
+        this.listener = listener;
     }
 
     @Override
     public void start(Consumer<Packet<?>> send) {
-        CompletableFuture<?> future = this.task.get();
+        CompletableFuture<Void> future = CompletableFuture.runAsync(this.task, this.plugin.getBootstrap().getScheduler().async());
         future.whenCompleteAsync((o, e) -> {
             if (e != null) {
                 this.plugin.getLogger().warn("Configuration task threw an exception", e);
             }
-        }).join();
+            this.listener.finishCurrentTask(this.type);
+        });
     }
 
     @Override

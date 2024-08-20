@@ -79,9 +79,13 @@ public class NeoForgeConnectionListener extends AbstractConnectionListener {
             this.plugin.getLogger().info("Processing pre-login (sync phase) for " + uniqueId + " - " + username);
         }
 
-        event.register(new AsyncConfigurationTask(this.plugin, USER_LOGIN_TASK_TYPE, () -> CompletableFuture.runAsync(() -> {
-            onPlayerNegotiationAsync(event.getListener().getConnection(), uniqueId, username);
-        }, this.plugin.getBootstrap().getScheduler().async())));
+        AsyncConfigurationTask task = new AsyncConfigurationTask(
+                this.plugin,
+                USER_LOGIN_TASK_TYPE,
+                () -> onPlayerNegotiationAsync(event.getListener().getConnection(), uniqueId, username),
+                event.getListener()
+        );
+        event.register(task);
     }
 
     private void onPlayerNegotiationAsync(Connection connection, UUID uniqueId, String username) {
