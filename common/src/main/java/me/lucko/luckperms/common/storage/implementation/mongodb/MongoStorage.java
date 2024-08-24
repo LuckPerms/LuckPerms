@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.storage.implementation.mongodb;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
@@ -586,7 +587,8 @@ public class MongoStorage implements StorageImplementation {
         return new Document("_id", track.getName()).append("groups", track.getGroups());
     }
 
-    private static Document nodeToDoc(Node node) {
+    @VisibleForTesting
+    static Document nodeToDoc(Node node) {
         Document document = new Document()
                 .append("key", node.getKey())
                 .append("value", node.getValue());
@@ -603,7 +605,8 @@ public class MongoStorage implements StorageImplementation {
         return document;
     }
 
-    private static Node nodeFromDoc(Document document) {
+    @VisibleForTesting
+    static Node nodeFromDoc(Document document) {
         String key = document.containsKey("permission") ? document.getString("permission") : document.getString("key");
 
         if (key == null || key.isEmpty()) {
@@ -622,7 +625,7 @@ public class MongoStorage implements StorageImplementation {
         }
 
         if (document.containsKey("expiry")) {
-            builder.expiry((long) document.get("expiry"));
+            builder.expiry(((Number) document.get("expiry")).longValue());
         }
 
         if (document.containsKey("context") && document.get("context") instanceof List) {
