@@ -32,9 +32,11 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Mod(value = "luckperms")
@@ -59,6 +61,12 @@ public class NeoForgeLoaderPlugin implements Supplier<ModContainer> {
 
         this.loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
         modBus.addListener(this::onCommonSetup);
+
+        try {
+            modBus.addListener((Consumer<RegisterEvent>)this.loader.loadClass("me.lucko.luckperms.neoforge.attachments.UserAttachmentRegister").newInstance());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

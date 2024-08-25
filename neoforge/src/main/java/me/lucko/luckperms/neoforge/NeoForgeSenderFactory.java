@@ -33,8 +33,8 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-import me.lucko.luckperms.neoforge.capabilities.UserCapability;
-import me.lucko.luckperms.neoforge.capabilities.UserCapabilityImpl;
+import me.lucko.luckperms.neoforge.attachments.UserAttachment;
+import me.lucko.luckperms.neoforge.attachments.UserAttachmentImpl;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
@@ -75,7 +75,7 @@ public class NeoForgeSenderFactory extends SenderFactory<LPNeoForgePlugin, Comma
         Locale locale;
         if (sender.getEntity() instanceof ServerPlayer) {
             ServerPlayer player = (ServerPlayer) sender.getEntity();
-            UserCapabilityImpl user = UserCapabilityImpl.get(player);
+            UserAttachmentImpl user = UserAttachmentImpl.get(player);
             locale = user.getLocale(player);
         } else {
             locale = null;
@@ -88,7 +88,7 @@ public class NeoForgeSenderFactory extends SenderFactory<LPNeoForgePlugin, Comma
     protected Tristate getPermissionValue(CommandSourceStack commandSource, String node) {
         if (commandSource.getEntity() instanceof ServerPlayer) {
             ServerPlayer player = (ServerPlayer) commandSource.getEntity();
-            UserCapability user = UserCapabilityImpl.get(player);
+            UserAttachment user = UserAttachmentImpl.get(player);
             return user.checkPermission(node);
         }
 

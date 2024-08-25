@@ -23,31 +23,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge.capabilities;
+package me.lucko.luckperms.neoforge.attachments;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
-public class UserCapabilityListener {
-
-    @SubscribeEvent
-    public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerEntity(
-                UserCapability.CAPABILITY,
-                EntityType.PLAYER,
-                (player, ctx) -> {
-                    if (!(player instanceof ServerPlayer)) {
-                        // Don't attach to LocalPlayer
-                        return null;
-                    }
-                    return new UserCapabilityImpl();
-                }
-        );
-    }
+public class UserAttachmentListener {
 
     @SubscribeEvent
     public void onPlayerClone(PlayerEvent.Clone event) {
@@ -55,8 +37,8 @@ public class UserCapabilityListener {
         Player currentPlayer = event.getEntity();
 
         try {
-            UserCapabilityImpl previous = UserCapabilityImpl.get(previousPlayer);
-            UserCapabilityImpl current = UserCapabilityImpl.get(currentPlayer);
+            UserAttachmentImpl previous = UserAttachmentImpl.get(previousPlayer);
+            UserAttachmentImpl current = UserAttachmentImpl.get(currentPlayer);
 
             current.initialise(previous);
             previous.invalidate();

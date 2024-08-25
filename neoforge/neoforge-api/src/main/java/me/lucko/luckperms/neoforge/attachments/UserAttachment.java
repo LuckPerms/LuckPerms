@@ -23,28 +23,30 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge.capabilities;
+package me.lucko.luckperms.neoforge.attachments;
 
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.capabilities.EntityCapability;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 /**
- * A NeoForge {@link EntityCapability} that attaches LuckPerms functionality onto {@link ServerPlayer}s.
+ * A NeoForge {@link AttachmentType Data Attachment} that attaches LuckPerms functionality onto {@link ServerPlayer}s.
  */
-public interface UserCapability {
+public interface UserAttachment {
 
     /**
-     * The identifier used for the capability
+     * The identifier used for the attachment
      */
     ResourceLocation IDENTIFIER = ResourceLocation.fromNamespaceAndPath("luckperms", "user");
 
     /**
-     * The capability instance.
+     * The attachment type instance; used for querying the actual {@link UserAttachment} instance.
      */
-    EntityCapability<UserCapability, Void> CAPABILITY = EntityCapability.createVoid(IDENTIFIER, UserCapability.class);
+    DeferredHolder<AttachmentType<?>, AttachmentType<UserAttachment>> TYPE = DeferredHolder.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, IDENTIFIER);
 
     /**
      * Checks for a permission.
