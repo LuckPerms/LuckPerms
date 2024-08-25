@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge.capabilities;
+package me.lucko.luckperms.neoforge.attachments;
 
 import java.util.Optional;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
@@ -41,30 +41,35 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
-public class UserCapabilityImpl implements UserCapability {
+public class UserAttachmentImpl implements UserAttachment {
 
-    private static Optional<UserCapability> getCapability(Player player) {
-        return Optional.ofNullable(player.getCapability(CAPABILITY));
+    private static Optional<UserAttachment> getUserAttachment(Player player) {
+        if (player instanceof ServerPlayer) {
+            // getData() will create and cache a new instance using our factory method.
+            // Therefore, this return value should never be null.
+            return Optional.of(player.getData(UserAttachment.TYPE));
+        }
+        return Optional.empty();
     }
 
     /**
-     * Gets a {@link UserCapability} for a given {@link ServerPlayer}.
+     * Gets a {@link UserAttachment} for a given {@link ServerPlayer}.
      *
      * @param player the player
      * @return the capability
      */
-    public static @NotNull UserCapabilityImpl get(@NotNull Player player) {
-        return (UserCapabilityImpl) getCapability(player).orElseThrow(() -> new IllegalStateException("Capability missing for " + player.getUUID()));
+    public static @NotNull UserAttachmentImpl get(@NotNull Player player) {
+        return (UserAttachmentImpl) getUserAttachment(player).orElseThrow(() -> new IllegalStateException("Attachment missing for " + player.getUUID()));
     }
 
     /**
-     * Gets a {@link UserCapability} for a given {@link ServerPlayer}.
+     * Gets a {@link UserAttachment} for a given {@link ServerPlayer}.
      *
      * @param player the player
      * @return the capability, or null
      */
-    public static @Nullable UserCapabilityImpl getNullable(@NotNull Player player) {
-        return (UserCapabilityImpl) getCapability(player).orElse(null);
+    public static @Nullable UserAttachmentImpl getNullable(@NotNull Player player) {
+        return (UserAttachmentImpl) getUserAttachment(player).orElse(null);
     }
 
     private boolean initialised = false;
@@ -75,11 +80,11 @@ public class UserCapabilityImpl implements UserCapability {
     private String language;
     private Locale locale;
 
-    public UserCapabilityImpl() {
+    public UserAttachmentImpl() {
 
     }
 
-    public void initialise(UserCapabilityImpl previous) {
+    public void initialise(UserAttachmentImpl previous) {
         this.user = previous.user;
         this.queryOptionsCache = previous.queryOptionsCache;
         this.language = previous.language;

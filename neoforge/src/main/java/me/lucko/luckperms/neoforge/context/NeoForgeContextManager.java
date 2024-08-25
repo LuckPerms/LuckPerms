@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.context.manager.ContextManager;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
-import me.lucko.luckperms.neoforge.capabilities.UserCapabilityImpl;
+import me.lucko.luckperms.neoforge.attachments.UserAttachmentImpl;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
@@ -55,7 +55,7 @@ public class NeoForgeContextManager extends ContextManager<ServerPlayer, ServerP
             throw new NullPointerException("subject");
         }
 
-        return UserCapabilityImpl.get(subject).getQueryOptionsCache();
+        return UserAttachmentImpl.get(subject).getQueryOptionsCache();
     }
 
     @Override
@@ -70,7 +70,7 @@ public class NeoForgeContextManager extends ContextManager<ServerPlayer, ServerP
 
     @Override
     public void invalidateCache(ServerPlayer subject) {
-        UserCapabilityImpl capability = UserCapabilityImpl.getNullable(subject);
+        UserAttachmentImpl capability = UserAttachmentImpl.getNullable(subject);
         if (capability != null) {
             capability.getQueryOptionsCache().invalidate();
         }
