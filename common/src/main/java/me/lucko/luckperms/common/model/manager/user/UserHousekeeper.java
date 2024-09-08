@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.ExpiringSet;
 
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -41,16 +42,16 @@ public class UserHousekeeper implements Runnable {
     private final UserManager<?> userManager;
 
     // contains the uuids of users who have recently logged in / out
-    private final ExpiringSet<UUID> recentlyUsed;
+    private final Set<UUID> recentlyUsed;
 
     // contains the uuids of users who have recently been retrieved from the API
-    private final ExpiringSet<UUID> recentlyUsedApi;
+    private final Set<UUID> recentlyUsedApi;
 
     public UserHousekeeper(LuckPermsPlugin plugin, UserManager<?> userManager, TimeoutSettings timeoutSettings) {
         this.plugin = plugin;
         this.userManager = userManager;
-        this.recentlyUsed = new ExpiringSet<>(timeoutSettings.duration, timeoutSettings.unit);
-        this.recentlyUsedApi = new ExpiringSet<>(5, TimeUnit.MINUTES);
+        this.recentlyUsed = ExpiringSet.newExpiringSet(timeoutSettings.duration, timeoutSettings.unit);
+        this.recentlyUsedApi = ExpiringSet.newExpiringSet(5, TimeUnit.MINUTES);
     }
 
     // called when a player attempts a connection or logs out

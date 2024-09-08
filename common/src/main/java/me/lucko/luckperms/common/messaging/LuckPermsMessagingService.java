@@ -54,13 +54,14 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class LuckPermsMessagingService extends AsyncInterface implements InternalMessagingService, IncomingMessageConsumer {
     private final LuckPermsPlugin plugin;
-    private final ExpiringSet<UUID> receivedMessages;
+    private final Set<UUID> receivedMessages;
     private final PushUpdateBuffer updateBuffer;
 
     private final MessengerProvider messengerProvider;
@@ -74,7 +75,7 @@ public class LuckPermsMessagingService extends AsyncInterface implements Interna
         this.messenger = messengerProvider.obtain(this);
         Objects.requireNonNull(this.messenger, "messenger");
 
-        this.receivedMessages = new ExpiringSet<>(5, TimeUnit.MINUTES);
+        this.receivedMessages = ExpiringSet.newExpiringSet(5, TimeUnit.MINUTES);
         this.updateBuffer = new PushUpdateBuffer(plugin);
     }
 

@@ -25,36 +25,21 @@
 
 package me.lucko.luckperms.common.util;
 
-import com.github.benmanes.caffeine.cache.Cache;
-
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-/**
- * A simple expiring set implementation using Caffeine caches
- *
- * @param <E> element type
- */
-public class ExpiringSet<E> {
-    private final Cache<E, Long> cache;
-    private final long lifetime;
+public final class ExpiringSet {
+    private ExpiringSet() {}
 
-    public ExpiringSet(long duration, TimeUnit unit) {
-        this.cache = CaffeineFactory.newBuilder().expireAfterWrite(duration, unit).build();
-        this.lifetime = unit.toMillis(duration);
+    /**
+     * An expiring set using Caffeine caches
+     *
+     * @param <E> the element type
+     * @return a new expiring set
+     */
+    public static <E> Set<E> newExpiringSet(long duration, TimeUnit unit) {
+        return Collections.newSetFromMap(CaffeineFactory.newBuilder().expireAfterWrite(duration, unit).<E, Boolean>build().asMap());
     }
 
-    public boolean add(E item) {
-        boolean present = contains(item);
-        this.cache.put(item, System.currentTimeMillis() + this.lifetime);
-        return !present;
-    }
-
-    public boolean contains(E item) {
-        Long timeout = this.cache.getIfPresent(item);
-        return timeout != null && timeout > System.currentTimeMillis();
-    }
-
-    public void remove(E item) {
-        this.cache.invalidate(item);
-    }
 }
