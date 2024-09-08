@@ -79,6 +79,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -101,7 +102,7 @@ public class CommandManager {
             .build()
     );
     private final AtomicBoolean executingCommand = new AtomicBoolean(false);
-    private final ExpiringSet<UUID> playerRateLimit = new ExpiringSet<>(500, TimeUnit.MILLISECONDS);
+    private final Set<UUID> playerRateLimit = ExpiringSet.newExpiringSet(500, TimeUnit.MILLISECONDS);
     private final TabCompletions tabCompletions;
     private final Map<String, Command<?>> mainCommands;
 
