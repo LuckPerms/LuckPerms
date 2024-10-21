@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -97,7 +98,7 @@ public class FileWatcher extends AbstractFileWatcher {
         private final Path path;
 
         /** A set of files which have been modified recently */
-        private final ExpiringSet<String> recentlyModifiedFiles = new ExpiringSet<>(4, TimeUnit.SECONDS);
+        private final Set<String> recentlyModifiedFiles = ExpiringSet.newExpiringSet(4, TimeUnit.SECONDS);
 
         /** The listener callback functions */
         private final List<Consumer<Path>> callbacks = new CopyOnWriteArrayList<>();
