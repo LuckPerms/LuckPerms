@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.model.HolderType;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 public class BukkitCalculatorFactory implements CalculatorFactory {
@@ -74,8 +75,9 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
         boolean op = queryOptions.option(BukkitContextManager.OP_OPTION).orElse(false);
         if (metadata.getHolderType() == HolderType.USER && this.plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
             boolean overrideWildcards = this.plugin.getConfiguration().get(ConfigKeys.APPLY_DEFAULT_NEGATIONS_BEFORE_WILDCARDS);
-            processors.add(new DefaultPermissionMapProcessor(this.plugin, op));
-            processors.add(new PermissionMapProcessor(this.plugin, overrideWildcards, op));
+            EnumSet<DefaultRule> defaultRules = DefaultRule.parse(this.plugin.getConfiguration().get(ConfigKeys.BUKKIT_DEFAULT_RULES));
+            processors.add(new DefaultPermissionMapProcessor(this.plugin, op, defaultRules));
+            processors.add(new PermissionMapProcessor(this.plugin, overrideWildcards, op, defaultRules));
         }
 
         if (op) {
