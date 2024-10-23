@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.webeditor.socket.listener;
 
 import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
-import me.lucko.luckperms.common.webeditor.socket.CryptographyUtils;
+import me.lucko.luckperms.common.webeditor.socket.SignatureAlgorithm;
 import me.lucko.luckperms.common.webeditor.socket.SocketMessageType;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 import okhttp3.Response;
@@ -126,7 +126,7 @@ public class WebEditorSocketListener extends WebSocketListener {
 
         // check signature to ensure the message is from the connected editor
         PublicKey remotePublicKey = this.socket.getRemotePublicKey();
-        boolean verified = remotePublicKey != null && CryptographyUtils.verify(remotePublicKey, innerMsg, signature);
+        boolean verified = remotePublicKey != null && SignatureAlgorithm.INSTANCE.verify(remotePublicKey, innerMsg, signature);
 
         // parse the inner message
         JsonObject msg = GsonProvider.parser().parse(innerMsg).getAsJsonObject();

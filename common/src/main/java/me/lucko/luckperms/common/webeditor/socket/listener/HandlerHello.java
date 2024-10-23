@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.webeditor.socket.listener;
 
 import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.webeditor.socket.CryptographyUtils;
+import me.lucko.luckperms.common.webeditor.socket.SignatureAlgorithm;
 import me.lucko.luckperms.common.webeditor.socket.SocketMessageType;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 import me.lucko.luckperms.common.webeditor.store.RemoteSession;
@@ -73,7 +73,7 @@ public class HandlerHello implements Handler {
         String nonce = getStringOrThrow(msg, "nonce");
         String sessionId = getStringOrThrow(msg, "sessionId");
         String browser = msg.get("browser").getAsString();
-        PublicKey remotePublicKey = CryptographyUtils.parsePublicKey(msg.get("publicKey").getAsString());
+        PublicKey remotePublicKey = SignatureAlgorithm.INSTANCE.parsePublicKey(msg.get("publicKey").getAsString());
 
         // check if the public keys are the same
         // (this allows the same editor to re-connect, but prevents new connections)

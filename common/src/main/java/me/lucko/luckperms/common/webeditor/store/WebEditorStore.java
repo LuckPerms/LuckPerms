@@ -29,7 +29,7 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.webeditor.socket.CryptographyUtils;
+import me.lucko.luckperms.common.webeditor.socket.SignatureAlgorithm;
 
 import java.security.KeyPair;
 import java.util.concurrent.CompletableFuture;
@@ -51,7 +51,7 @@ public class WebEditorStore {
         this.keystore = new WebEditorKeystore(plugin.getBootstrap().getConfigDirectory().resolve("editor-keystore.json"));
 
         Supplier<CompletableFuture<KeyPair>> keyPair = () -> CompletableFuture.supplyAsync(
-                CryptographyUtils::generateKeyPair,
+                SignatureAlgorithm.INSTANCE::generateKeyPair,
                 plugin.getBootstrap().getScheduler().async()
         );
 

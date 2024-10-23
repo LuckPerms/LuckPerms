@@ -37,10 +37,70 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 /**
- * Utilities for public/private key crypto used by the web editor socket connection.
+ * The signature algorithm & public/private key crypto logic used by the web editor socket connection.
  */
-public final class CryptographyUtils {
-    private CryptographyUtils() {}
+public enum SignatureAlgorithm {
+    V1_RSA(1, "RSA", "SHA256withRSA") {
+        @Override
+        public KeyPair generateKeyPair() {
+            try {
+                KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+                generator.initialize(4096);
+                return generator.generateKeyPair();
+            } catch (Exception e) {
+                throw new RuntimeException("Exception generating keypair", e);
+            }
+        }
+    },
+    V2_ECDSA(2, "EC", "SHA256withECDSAinP1363Format") {
+        @Override
+        public KeyPair generateKeyPair() {
+            try {
+                KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
+                generator.initialize(new ECGenParameterSpec("secp256r1"));
+                return generator.generateKeyPair();
+            } catch (Exception e) {
+                throw new RuntimeException("Exception generating keypair", e);
+            }
+        }
+    };
+
+    /**
+     * The selected {@link SignatureAlgorithm} for the current environment.
+     */
+    public static final SignatureAlgorithm INSTANCE;
+
+    static {
+        // select an instance to use based on the available algorithms
+        SignatureAlgorithm instance = V1_RSA;
+        try {
+            KeyPairGenerator.getInstance(V2_ECDSA.keyFactoryAlgorithm);
+            Signature.getInstance(V2_ECDSA.signatureAlgorithm);
+            instance = V2_ECDSA;
+        } catch (Exception e) {
+            // ignore
+        }
+        INSTANCE = instance;
+    }
+
+    private final int protocolVersion;
+    private final String keyFactoryAlgorithm;
+    private final String signatureAlgorithm;
+
+    SignatureAlgorithm(int protocolVersion, String keyFactoryAlgorithm, String signatureAlgorithm) {
+        this.protocolVersion = protocolVersion;
+        this.keyFactoryAlgorithm = keyFactoryAlgorithm;
+        this.signatureAlgorithm = signatureAlgorithm;
+    }
+
+    /**
+     * Gets the corresponding protocol version
+     *
+     * @return the protocol version
+     */
+    public int protocolVersion() {
+        return this.protocolVersion;
+    }
 
     /**
      * Parse a public key from the given string.
@@ -49,11 +109,11 @@ public final class CryptographyUtils {
      * @return the parsed public key
      * @throws IllegalArgumentException if the input was invalid
      */
-    public static PublicKey parsePublicKey(String base64String) throws IllegalArgumentException {
+    public PublicKey parsePublicKey(String base64String) throws IllegalArgumentException {
         try {
             byte[] bytes = Base64.getDecoder().decode(base64String);
             X509EncodedKeySpec spec = new X509EncodedKeySpec(bytes);
-            KeyFactory rsa = KeyFactory.getInstance("EC");
+            KeyFactory rsa = KeyFactory.getInstance(this.keyFactoryAlgorithm);
             return rsa.generatePublic(spec);
         } catch (Exception e) {
             throw new IllegalArgumentException("Exception parsing public key", e);
@@ -65,15 +125,7 @@ public final class CryptographyUtils {
      *
      * @return the generated key pair
      */
-    public static KeyPair generateKeyPair() {
-        try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
-            generator.initialize(new ECGenParameterSpec("secp256r1"));
-            return generator.generateKeyPair();
-        } catch (Exception e) {
-            throw new RuntimeException("Exception generating keypair", e);
-        }
-    }
+    public abstract KeyPair generateKeyPair();
 
     /**
      * Signs {@code msg} using the given {@link PrivateKey}.
@@ -82,9 +134,9 @@ public final class CryptographyUtils {
      * @param msg the message
      * @return a base64 string containing the signature
      */
-    public static String sign(PrivateKey privateKey, String msg) {
+    public String sign(PrivateKey privateKey, String msg) {
         try {
-            Signature sign = Signature.getInstance("SHA256withECDSAinP1363Format");
+            Signature sign = Signature.getInstance(this.signatureAlgorithm);
             sign.initSign(privateKey);
             sign.update(msg.getBytes(StandardCharsets.UTF_8));
 
@@ -103,9 +155,9 @@ public final class CryptographyUtils {
      * @param signatureBase64 the provided signature
      * @return true if the signature is ok
      */
-    public static boolean verify(PublicKey publicKey, String msg, String signatureBase64) {
+    public boolean verify(PublicKey publicKey, String msg, String signatureBase64) {
         try {
-            Signature sign = Signature.getInstance("SHA256withECDSAinP1363Format");
+            Signature sign = Signature.getInstance(this.signatureAlgorithm);
             sign.initVerify(publicKey);
             sign.update(msg.getBytes(StandardCharsets.UTF_8));
 
