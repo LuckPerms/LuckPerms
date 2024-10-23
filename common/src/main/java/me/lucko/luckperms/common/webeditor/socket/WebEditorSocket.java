@@ -47,7 +47,7 @@ import java.util.concurrent.TimeoutException;
 
 public class WebEditorSocket {
 
-    private static final int PROTOCOL_VERSION = 1;
+    private static final int PROTOCOL_VERSION = 2;
 
     /** The plugin */
     private final LuckPermsPlugin plugin;

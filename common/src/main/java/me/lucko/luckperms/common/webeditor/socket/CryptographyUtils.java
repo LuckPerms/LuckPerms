@@ -32,6 +32,7 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
@@ -52,7 +53,7 @@ public final class CryptographyUtils {
         try {
             byte[] bytes = Base64.getDecoder().decode(base64String);
             X509EncodedKeySpec spec = new X509EncodedKeySpec(bytes);
-            KeyFactory rsa = KeyFactory.getInstance("RSA");
+            KeyFactory rsa = KeyFactory.getInstance("EC");
             return rsa.generatePublic(spec);
         } catch (Exception e) {
             throw new IllegalArgumentException("Exception parsing public key", e);
@@ -66,8 +67,8 @@ public final class CryptographyUtils {
      */
     public static KeyPair generateKeyPair() {
         try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(4096);
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
+            generator.initialize(new ECGenParameterSpec("secp256r1"));
             return generator.generateKeyPair();
         } catch (Exception e) {
             throw new RuntimeException("Exception generating keypair", e);
@@ -83,7 +84,7 @@ public final class CryptographyUtils {
      */
     public static String sign(PrivateKey privateKey, String msg) {
         try {
-            Signature sign = Signature.getInstance("SHA256withRSA");
+            Signature sign = Signature.getInstance("SHA256withECDSAinP1363Format");
             sign.initSign(privateKey);
             sign.update(msg.getBytes(StandardCharsets.UTF_8));
 
@@ -104,7 +105,7 @@ public final class CryptographyUtils {
      */
     public static boolean verify(PublicKey publicKey, String msg, String signatureBase64) {
         try {
-            Signature sign = Signature.getInstance("SHA256withRSA");
+            Signature sign = Signature.getInstance("SHA256withECDSAinP1363Format");
             sign.initVerify(publicKey);
             sign.update(msg.getBytes(StandardCharsets.UTF_8));
 
