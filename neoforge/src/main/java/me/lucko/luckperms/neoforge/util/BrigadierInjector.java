@@ -32,8 +32,8 @@ import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
-import me.lucko.luckperms.neoforge.capabilities.UserCapability;
-import me.lucko.luckperms.neoforge.capabilities.UserCapabilityImpl;
+import me.lucko.luckperms.neoforge.attachments.UserAttachment;
+import me.lucko.luckperms.neoforge.attachments.UserAttachmentImpl;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
@@ -152,7 +152,7 @@ public final class BrigadierInjector {
                     }
                     state = user.getCachedData().getPermissionData().checkPermission(permission);
                 } else {
-                    UserCapability user = UserCapabilityImpl.get(player);
+                    UserAttachment user = UserAttachmentImpl.get(player);
                     state = user.checkPermission(this.permission);
                 }
 
