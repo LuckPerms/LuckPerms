@@ -100,7 +100,7 @@ public class NeoForgePlayerCalculator implements ContextCalculator<ServerPlayer>
 
         MinecraftServer server = this.plugin.getBootstrap().getServer().orElse(null);
         if (this.dimensionType && server != null) {
-            server.registryAccess().registry(Registries.DIMENSION_TYPE).ifPresent(registry -> {
+            server.registryAccess().lookup(Registries.DIMENSION_TYPE).ifPresent(registry -> {
                 for (ResourceLocation resourceLocation : registry.keySet()) {
                     builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(resourceLocation));
                 }
