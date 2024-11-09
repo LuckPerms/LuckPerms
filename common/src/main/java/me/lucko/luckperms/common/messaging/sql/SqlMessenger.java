@@ -86,6 +86,6 @@ public class SqlMessenger extends AbstractSqlMessenger {
 
     @Override
     protected String getTableName() {
-        return this.sqlStorage.getStatementProcessor().apply("{prefix}messenger");
+        return this.sqlStorage.getStatementProcessor().process("{prefix}messenger");
     }
 }

@@ -25,22 +25,59 @@
 
 package me.lucko.luckperms.common.storage;
 
+import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
+import me.lucko.luckperms.common.storage.implementation.sql.StatementProcessor;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
+import me.lucko.luckperms.common.storage.implementation.sql.connection.file.H2ConnectionFactory;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.file.NonClosableConnection;
+import net.luckperms.api.actionlog.Action;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.function.Function;
+import java.time.Instant;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SqlStorageTest extends AbstractStorageTest {
 
     @Override
     protected StorageImplementation makeStorage(LuckPermsPlugin plugin) throws Exception {
         return new SqlStorage(plugin, new TestH2ConnectionFactory(), "luckperms_");
+    }
+
+    @Test
+    public void testRecreateTables() throws Exception {
+        SqlStorage sql = (SqlStorage) this.storage;
+
+        LoggedAction testAction = LoggedAction.build()
+                .source(UUID.randomUUID())
+                .sourceName("Test")
+                .targetType(Action.Target.Type.TRACK)
+                .targetName("test")
+                .description("test ")
+                .timestamp(Instant.now())
+                .build();
+
+        // perform an action - ensure it works
+        this.storage.logAction(testAction);
+
+        // delete the table
+        try (Connection c = sql.getConnectionFactory().getConnection()) {
+            c.createStatement().execute("DROP TABLE `luckperms_actions`");
+        }
+
+        // perform the action again - expect an exception
+        assertThrows(SQLException.class, () -> this.storage.logAction(testAction));
+
+        // recreate the table & repeat the action, ensure it works
+        this.storage.init();
+        this.storage.logAction(testAction);
     }
 
     private static class TestH2ConnectionFactory implements ConnectionFactory {
@@ -73,11 +110,8 @@ public class SqlStorageTest extends AbstractStorageTest {
         }
 
         @Override
-        public Function<String, String> getStatementProcessor() {
-            return s -> s.replace('\'', '`')
-                    .replace("LIKE", "ILIKE")
-                    .replace("value", "`value`")
-                    .replace("``value``", "`value`");
+        public StatementProcessor getStatementProcessor() {
+            return H2ConnectionFactory.STATEMENT_PROCESSOR;
         }
 
         @Override

@@ -27,10 +27,10 @@ package me.lucko.luckperms.common.storage.implementation.sql.connection;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageMetadata;
+import me.lucko.luckperms.common.storage.implementation.sql.StatementProcessor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.function.Function;
 
 public interface ConnectionFactory {
 
@@ -42,7 +42,7 @@ public interface ConnectionFactory {
 
     StorageMetadata getMeta();
 
-    Function<String, String> getStatementProcessor();
+    StatementProcessor getStatementProcessor();
 
     Connection getConnection() throws SQLException;
 

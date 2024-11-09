@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.neoforge.capabilities;
 
-import java.util.Optional;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
 import me.lucko.luckperms.common.locale.TranslationManager;
@@ -40,6 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
+import java.util.Optional;
 
 public class UserCapabilityImpl implements UserCapability {
 

@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.storage.implementation.sql.connection.file;
 
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.implementation.sql.StatementProcessor;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -38,9 +39,14 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Properties;
-import java.util.function.Function;
 
 public class H2ConnectionFactory extends FlatfileConnectionFactory {
+    public static final StatementProcessor STATEMENT_PROCESSOR = s -> s
+            .replace('\'', '`')
+            .replace("LIKE", "ILIKE")
+            .replace("value", "`value`")
+            .replace("``value``", "`value`");
+
     private Constructor<?> connectionConstructor;
 
     public H2ConnectionFactory(Path file) {
@@ -91,11 +97,8 @@ public class H2ConnectionFactory extends FlatfileConnectionFactory {
     }
 
     @Override
-    public Function<String, String> getStatementProcessor() {
-        return s -> s.replace('\'', '`')
-                .replace("LIKE", "ILIKE")
-                .replace("value", "`value`")
-                .replace("``value``", "`value`");
+    public StatementProcessor getStatementProcessor() {
+        return STATEMENT_PROCESSOR;
     }
 
     /**

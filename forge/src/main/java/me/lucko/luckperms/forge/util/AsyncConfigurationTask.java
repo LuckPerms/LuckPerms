@@ -32,8 +32,6 @@ import net.minecraftforge.network.config.ConfigurationTaskContext;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class AsyncConfigurationTask implements ConfigurationTask {
     private final LPForgePlugin plugin;

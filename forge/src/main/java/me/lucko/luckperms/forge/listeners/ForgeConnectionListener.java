@@ -49,7 +49,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class ForgeConnectionListener extends AbstractConnectionListener {
     private static final ConfigurationTask.Type USER_LOGIN_TASK_TYPE = new ConfigurationTask.Type("luckperms:user_login");

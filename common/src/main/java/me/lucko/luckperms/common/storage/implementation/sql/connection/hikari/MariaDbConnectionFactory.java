@@ -25,9 +25,8 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
+import me.lucko.luckperms.common.storage.implementation.sql.StatementProcessor;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
-
-import java.util.function.Function;
 
 public class MariaDbConnectionFactory extends DriverBasedHikariConnectionFactory {
     public MariaDbConnectionFactory(StorageCredentials configuration) {
@@ -55,7 +54,7 @@ public class MariaDbConnectionFactory extends DriverBasedHikariConnectionFactory
     }
 
     @Override
-    public Function<String, String> getStatementProcessor() {
-        return s -> s.replace('\'', '`'); // use backticks for quotes
+    public StatementProcessor getStatementProcessor() {
+        return StatementProcessor.USE_BACKTICKS;
     }
 }

@@ -35,13 +35,13 @@ import me.lucko.luckperms.neoforge.util.BrigadierInjector;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.players.ServerOpList;
-
-import java.io.IOException;
-import java.util.Locale;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.CommandEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+
+import java.io.IOException;
+import java.util.Locale;
 
 public class NeoForgePlatformListener {
     private final LPNeoForgePlugin plugin;

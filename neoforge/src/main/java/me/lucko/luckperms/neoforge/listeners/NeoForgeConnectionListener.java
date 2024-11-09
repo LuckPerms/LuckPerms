@@ -31,8 +31,8 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
-import me.lucko.luckperms.neoforge.NeoForgeSenderFactory;
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
+import me.lucko.luckperms.neoforge.NeoForgeSenderFactory;
 import me.lucko.luckperms.neoforge.capabilities.UserCapabilityImpl;
 import me.lucko.luckperms.neoforge.util.AsyncConfigurationTask;
 import net.kyori.adventure.text.Component;
@@ -42,13 +42,12 @@ import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
-
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
+
+import java.util.UUID;
 
 public class NeoForgeConnectionListener extends AbstractConnectionListener {
     private static final ConfigurationTask.Type USER_LOGIN_TASK_TYPE = new ConfigurationTask.Type("luckperms:user_login");

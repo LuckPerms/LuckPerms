@@ -25,12 +25,13 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.builder;
 
+import me.lucko.luckperms.common.storage.implementation.sql.StatementProcessor;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 public class PreparedStatementBuilder {
     private final StringBuilder sb = new StringBuilder();
@@ -56,10 +57,10 @@ public class PreparedStatementBuilder {
         return this;
     }
 
-    public PreparedStatement build(Connection connection, Function<String, String> mapping) throws SQLException {
+    public PreparedStatement build(Connection connection, StatementProcessor processor) throws SQLException {
         PreparedStatement statement = null;
         try {
-            statement = connection.prepareStatement(mapping.apply(this.sb.toString()));
+            statement = connection.prepareStatement(processor.process(this.sb.toString()));
             for (int i = 0; i < this.variables.size(); i++) {
                 String var = this.variables.get(i);
                 statement.setString(i + 1, var);

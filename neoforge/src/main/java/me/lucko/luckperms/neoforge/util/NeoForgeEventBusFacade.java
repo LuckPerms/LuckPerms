@@ -31,6 +31,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.event.IModBusEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.LambdaMetafactory;
@@ -44,7 +45,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * A utility for registering Forge listeners for methods in a jar-in-jar.

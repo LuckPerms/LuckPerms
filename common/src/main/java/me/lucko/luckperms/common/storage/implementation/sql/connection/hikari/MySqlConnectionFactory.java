@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
+import me.lucko.luckperms.common.storage.implementation.sql.StatementProcessor;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 
 import java.util.Map;
-import java.util.function.Function;
 
 public class MySqlConnectionFactory extends DriverBasedHikariConnectionFactory {
     public MySqlConnectionFactory(StorageCredentials configuration) {
@@ -80,7 +80,7 @@ public class MySqlConnectionFactory extends DriverBasedHikariConnectionFactory {
     }
 
     @Override
-    public Function<String, String> getStatementProcessor() {
-        return s -> s.replace('\'', '`'); // use backticks for quotes
+    public StatementProcessor getStatementProcessor() {
+        return StatementProcessor.USE_BACKTICKS;
     }
 }

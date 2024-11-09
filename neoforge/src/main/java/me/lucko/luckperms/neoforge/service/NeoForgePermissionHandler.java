@@ -39,17 +39,17 @@ import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.server.permission.handler.IPermissionHandler;
+import net.neoforged.neoforge.server.permission.nodes.PermissionDynamicContext;
+import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
+import net.neoforged.neoforge.server.permission.nodes.PermissionType;
+import net.neoforged.neoforge.server.permission.nodes.PermissionTypes;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import net.neoforged.neoforge.server.permission.handler.IPermissionHandler;
-import net.neoforged.neoforge.server.permission.nodes.PermissionDynamicContext;
-import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
-import net.neoforged.neoforge.server.permission.nodes.PermissionType;
-import net.neoforged.neoforge.server.permission.nodes.PermissionTypes;
 
 public class NeoForgePermissionHandler implements IPermissionHandler {
     public static final ResourceLocation IDENTIFIER = ResourceLocation.fromNamespaceAndPath(LPNeoForgeBootstrap.ID, "permission_handler");

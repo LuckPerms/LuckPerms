@@ -88,7 +88,7 @@ public abstract class AbstractStorageTest {
     @Mock protected LuckPermsBootstrap bootstrap;
     @Mock protected LuckPermsConfiguration configuration;
 
-    private StorageImplementation storage;
+    protected StorageImplementation storage;
 
     @BeforeEach
     public final void setupMocksAndStorage() throws Exception {

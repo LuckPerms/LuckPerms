@@ -23,49 +23,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
+package me.lucko.luckperms.common.storage.implementation.sql;
 
-import me.lucko.luckperms.common.storage.implementation.sql.StatementProcessor;
-import me.lucko.luckperms.common.storage.misc.StorageCredentials;
+import java.util.Objects;
 
-import java.util.Map;
+public interface StatementProcessor {
 
-public class PostgresConnectionFactory extends DriverBasedHikariConnectionFactory {
-    public PostgresConnectionFactory(StorageCredentials configuration) {
-        super(configuration);
+    StatementProcessor USE_BACKTICKS = s -> s.replace('\'', '`');
+
+    StatementProcessor USE_DOUBLE_QUOTES = s -> s.replace('\'', '"');
+
+    String process(String statement);
+
+    default StatementProcessor compose(StatementProcessor before) {
+        Objects.requireNonNull(before);
+        return s -> process(before.process(s));
     }
 
-    @Override
-    public String getImplementationName() {
-        return "PostgreSQL";
-    }
-
-    @Override
-    protected String defaultPort() {
-        return "5432";
-    }
-
-    @Override
-    protected String driverClassName() {
-        return "org.postgresql.Driver";
-    }
-
-    @Override
-    protected String driverJdbcIdentifier() {
-        return "postgresql";
-    }
-
-    @Override
-    protected void overrideProperties(Map<String, Object> properties) {
-        super.overrideProperties(properties);
-
-        // remove the default config properties which don't exist for PostgreSQL
-        properties.remove("useUnicode");
-        properties.remove("characterEncoding");
-    }
-
-    @Override
-    public StatementProcessor getStatementProcessor() {
-        return StatementProcessor.USE_DOUBLE_QUOTES;
-    }
 }

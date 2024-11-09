@@ -1,6 +1,7 @@
+import net.neoforged.moddevgradle.internal.RunGameTask
+
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import net.neoforged.moddevgradle.internal.RunGameTask
 
 plugins {
     alias(libs.plugins.shadow)

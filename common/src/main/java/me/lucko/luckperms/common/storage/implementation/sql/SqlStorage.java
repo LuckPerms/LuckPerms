@@ -80,7 +80,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SqlStorage implements StorageImplementation {
@@ -137,7 +136,7 @@ public class SqlStorage implements StorageImplementation {
     private final LuckPermsPlugin plugin;
     
     private final ConnectionFactory connectionFactory;
-    private final Function<String, String> statementProcessor;
+    private final StatementProcessor statementProcessor;
 
     public SqlStorage(LuckPermsPlugin plugin, ConnectionFactory connectionFactory, String tablePrefix) {
         this.plugin = plugin;
@@ -159,7 +158,7 @@ public class SqlStorage implements StorageImplementation {
         return this.connectionFactory;
     }
 
-    public Function<String, String> getStatementProcessor() {
+    public StatementProcessor getStatementProcessor() {
         return this.statementProcessor;
     }
 
@@ -167,28 +166,30 @@ public class SqlStorage implements StorageImplementation {
     public void init() throws Exception {
         this.connectionFactory.init(this.plugin);
 
-        boolean tableExists;
+        List<String> tables;
         try (Connection c = this.connectionFactory.getConnection()) {
-            tableExists = tableExists(c, this.statementProcessor.apply("{prefix}user_permissions"));
+            tables = listTables(c);
         }
-
-        if (!tableExists) {
-            applySchema();
-        }
+        applySchema(tables);
     }
 
-    private void applySchema() throws IOException, SQLException {
-        List<String> statements;
-
+    private void applySchema(List<String> existingTables) throws IOException, SQLException {
         String schemaFileName = "me/lucko/luckperms/schema/" + this.connectionFactory.getImplementationName().toLowerCase(Locale.ROOT) + ".sql";
+
+        List<String> statements;
         try (InputStream is = this.plugin.getBootstrap().getResourceStream(schemaFileName)) {
             if (is == null) {
                 throw new IOException("Couldn't locate schema file for " + this.connectionFactory.getImplementationName());
             }
 
             statements = SchemaReader.getStatements(is).stream()
-                    .map(this.statementProcessor)
+                    .map(this.statementProcessor::process)
                     .collect(Collectors.toList());
+        }
+
+        statements = SchemaReader.filterStatements(statements, existingTables);
+        if (statements.isEmpty()) {
+            return;
         }
 
         try (Connection connection = this.connectionFactory.getConnection()) {
@@ -240,7 +241,7 @@ public class SqlStorage implements StorageImplementation {
     @Override
     public void logAction(Action entry) throws SQLException {
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(ACTION_INSERT))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(ACTION_INSERT))) {
                 writeAction(entry, ps);
                 ps.execute();
             }
@@ -288,7 +289,7 @@ public class SqlStorage implements StorageImplementation {
 
         try (Connection c = this.connectionFactory.getConnection()) {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
-                Function<String, String> tableReplacement = s -> s.replace("{table}", "{prefix}user_permissions");
+                StatementProcessor tableReplacement = s -> s.replace("{table}", "{prefix}user_permissions");
 
                 BulkUpdateSqlBuilder sqlBuilder = new BulkUpdateSqlBuilder();
                 sqlBuilder.visit(bulkUpdate);
@@ -319,7 +320,7 @@ public class SqlStorage implements StorageImplementation {
             }
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
-                Function<String, String> tableReplacement = s -> s.replace("{table}", "{prefix}group_permissions");
+                StatementProcessor tableReplacement = s -> s.replace("{table}", "{prefix}group_permissions");
 
                 BulkUpdateSqlBuilder sqlBuilder = new BulkUpdateSqlBuilder();
                 sqlBuilder.visit(bulkUpdate);
@@ -448,7 +449,7 @@ public class SqlStorage implements StorageImplementation {
     public Set<UUID> getUniqueUsers() throws SQLException {
         Set<UUID> uuids = new HashSet<>();
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT_DISTINCT))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(USER_PERMISSIONS_SELECT_DISTINCT))) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         UUID uuid = Uuids.fromString(rs.getString("uuid"));
@@ -496,7 +497,7 @@ public class SqlStorage implements StorageImplementation {
     public Group createAndLoadGroup(String name) throws SQLException {
         String query = GROUP_INSERT.getOrDefault(this.connectionFactory.getImplementationName(), GROUP_INSERT_DEFAULT);
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(query))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(query))) {
                 ps.setString(1, name);
                 ps.execute();
             }
@@ -559,7 +560,7 @@ public class SqlStorage implements StorageImplementation {
         try (Connection c = this.connectionFactory.getConnection()) {
             deleteGroupPermissions(c, group.getName());
 
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_DELETE))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(GROUP_DELETE))) {
                 ps.setString(1, group.getName());
                 ps.execute();
             }
@@ -662,7 +663,7 @@ public class SqlStorage implements StorageImplementation {
     @Override
     public void deleteTrack(Track track) throws SQLException {
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_DELETE))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(TRACK_DELETE))) {
                 ps.setString(1, track.getName());
                 ps.execute();
             }
@@ -679,7 +680,7 @@ public class SqlStorage implements StorageImplementation {
         try (Connection c = this.connectionFactory.getConnection()) {
             SqlPlayerData existingPlayerData = selectPlayerData(c, uniqueId);
             if (existingPlayerData == null) {
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_INSERT))) {
                     ps.setString(1, uniqueId.toString());
                     ps.setString(2, username);
                     ps.setString(3, GroupManager.DEFAULT_GROUP_NAME);
@@ -688,7 +689,7 @@ public class SqlStorage implements StorageImplementation {
             } else {
                 oldUsername = existingPlayerData.username;
                 if (!username.equals(oldUsername)) {
-                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_USERNAME_FOR_UUID))) {
+                    try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_UPDATE_USERNAME_FOR_UUID))) {
                         ps.setString(1, username);
                         ps.setString(2, uniqueId.toString());
                         ps.execute();
@@ -701,7 +702,7 @@ public class SqlStorage implements StorageImplementation {
 
         Set<UUID> conflicting = new HashSet<>();
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_ALL_UUIDS_BY_USERNAME))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_SELECT_ALL_UUIDS_BY_USERNAME))) {
                 ps.setString(1, username);
                 ps.setString(2, uniqueId.toString());
                 try (ResultSet rs = ps.executeQuery()) {
@@ -715,7 +716,7 @@ public class SqlStorage implements StorageImplementation {
         if (!conflicting.isEmpty()) {
             // remove the mappings for conflicting uuids
             try (Connection c = this.connectionFactory.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_DELETE_ALL_UUIDS_BY_USERNAME))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_DELETE_ALL_UUIDS_BY_USERNAME))) {
                     ps.setString(1, username);
                     ps.setString(2, uniqueId.toString());
                     ps.execute();
@@ -730,7 +731,7 @@ public class SqlStorage implements StorageImplementation {
     @Override
     public void deletePlayerData(UUID uniqueId) throws SQLException {
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_DELETE))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_DELETE))) {
                 ps.setString(1, uniqueId.toString());
                 ps.execute();
             }
@@ -741,7 +742,7 @@ public class SqlStorage implements StorageImplementation {
     public UUID getPlayerUniqueId(String username) throws SQLException {
         username = username.toLowerCase(Locale.ROOT);
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_UUID_BY_USERNAME))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_SELECT_UUID_BY_USERNAME))) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -756,7 +757,7 @@ public class SqlStorage implements StorageImplementation {
     @Override
     public String getPlayerName(UUID uniqueId) throws SQLException {
         try (Connection c = this.connectionFactory.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_USERNAME_BY_UUID))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_SELECT_USERNAME_BY_UUID))) {
                 ps.setString(1, uniqueId.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -872,7 +873,7 @@ public class SqlStorage implements StorageImplementation {
             }
 
             if (!deleteRows.isEmpty()) {
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(deleteSpecificQuery))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(deleteSpecificQuery))) {
                     for (Long id : deleteRows) {
                         ps.setLong(1, id);
                         ps.addBatch();
@@ -881,7 +882,7 @@ public class SqlStorage implements StorageImplementation {
                 }
             }
             if (!deleteNodes.isEmpty()) {
-                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(deleteQuery))) {
+                try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(deleteQuery))) {
                     for (Node node : deleteNodes) {
                         ps.setString(1, holder);
                         writeNode(node, ps);
@@ -893,7 +894,7 @@ public class SqlStorage implements StorageImplementation {
         }
 
         if (!add.isEmpty()) {
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(insertQuery))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(insertQuery))) {
                 for (Node node : add) {
                     ps.setString(1, holder);
                     writeNode(node, ps);
@@ -906,7 +907,7 @@ public class SqlStorage implements StorageImplementation {
 
     private List<Node> selectUserPermissions(Connection c, UUID user) throws SQLException {
         List<Node> nodes = new ArrayList<>();
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_SELECT))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(USER_PERMISSIONS_SELECT))) {
             ps.setString(1, user.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -921,7 +922,7 @@ public class SqlStorage implements StorageImplementation {
     }
 
     private SqlPlayerData selectPlayerData(Connection c, UUID user) throws SQLException {
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_BY_UUID))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_SELECT_BY_UUID))) {
             ps.setString(1, user.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -982,15 +983,15 @@ public class SqlStorage implements StorageImplementation {
 
         // we don't want to use preparedstatements because the parameter length is variable
         // safe to do string concat/replacement because the UUID.toString value isn't injectable
-        return this.statementProcessor.apply(baseQuery) + param;
+        return this.statementProcessor.process(baseQuery) + param;
     }
 
     private void deleteUser(Connection c, UUID user) throws SQLException {
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(USER_PERMISSIONS_DELETE))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(USER_PERMISSIONS_DELETE))) {
             ps.setString(1, user.toString());
             ps.execute();
         }
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
             ps.setString(1, GroupManager.DEFAULT_GROUP_NAME);
             ps.setString(2, user.toString());
             ps.execute();
@@ -999,7 +1000,7 @@ public class SqlStorage implements StorageImplementation {
 
     private void insertPlayerData(Connection c, UUID user, SqlPlayerData data) throws SQLException {
         boolean hasPrimaryGroupSaved;
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_SELECT_PRIMARY_GROUP_BY_UUID))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_SELECT_PRIMARY_GROUP_BY_UUID))) {
             ps.setString(1, user.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 hasPrimaryGroupSaved = rs.next();
@@ -1008,14 +1009,14 @@ public class SqlStorage implements StorageImplementation {
 
         if (hasPrimaryGroupSaved) {
             // update
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_UPDATE_PRIMARY_GROUP_BY_UUID))) {
                 ps.setString(1, data.primaryGroup);
                 ps.setString(2, user.toString());
                 ps.execute();
             }
         } else {
             // insert
-            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(PLAYER_INSERT))) {
+            try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(PLAYER_INSERT))) {
                 ps.setString(1, user.toString());
                 ps.setString(2, data.username);
                 ps.setString(3, data.primaryGroup);
@@ -1026,7 +1027,7 @@ public class SqlStorage implements StorageImplementation {
 
     private Set<String> selectGroups(Connection c) throws SQLException {
         Set<String> groups = new HashSet<>();
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_SELECT_ALL))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(GROUP_SELECT_ALL))) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     groups.add(rs.getString("name").toLowerCase(Locale.ROOT));
@@ -1038,7 +1039,7 @@ public class SqlStorage implements StorageImplementation {
 
     private List<Node> selectGroupPermissions(Connection c, String group) throws SQLException {
         List<Node> nodes = new ArrayList<>();
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(GROUP_PERMISSIONS_SELECT))) {
             ps.setString(1, group);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -1053,7 +1054,7 @@ public class SqlStorage implements StorageImplementation {
     }
 
     private void selectAllGroupPermissions(Map<String, Collection<Node>> nodes, Connection c) throws SQLException {
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_SELECT_ALL))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(GROUP_PERMISSIONS_SELECT_ALL))) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String holder = rs.getString("name");
@@ -1070,7 +1071,7 @@ public class SqlStorage implements StorageImplementation {
     }
 
     private void deleteGroupPermissions(Connection c, String group) throws SQLException {
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(GROUP_PERMISSIONS_DELETE))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(GROUP_PERMISSIONS_DELETE))) {
             ps.setString(1, group);
             ps.execute();
         }
@@ -1078,7 +1079,7 @@ public class SqlStorage implements StorageImplementation {
 
     private List<String> selectTrack(Connection c, String name) throws SQLException {
         String groups;
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_SELECT))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(TRACK_SELECT))) {
             ps.setString(1, name);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -1093,7 +1094,7 @@ public class SqlStorage implements StorageImplementation {
 
     private void insertTrack(Connection c, String name, List<String> groups) throws SQLException {
         String json = GsonProvider.normal().toJson(groups);
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_INSERT))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(TRACK_INSERT))) {
             ps.setString(1, name);
             ps.setString(2, json);
             ps.execute();
@@ -1102,7 +1103,7 @@ public class SqlStorage implements StorageImplementation {
 
     private void updateTrack(Connection c, String name, List<String> groups) throws SQLException {
         String json = GsonProvider.normal().toJson(groups);
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_UPDATE))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(TRACK_UPDATE))) {
             ps.setString(1, json);
             ps.setString(2, name);
             ps.execute();
@@ -1111,7 +1112,7 @@ public class SqlStorage implements StorageImplementation {
 
     private Set<String> selectTracks(Connection c) throws SQLException {
         Set<String> tracks = new HashSet<>();
-        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.apply(TRACK_SELECT_ALL))) {
+        try (PreparedStatement ps = c.prepareStatement(this.statementProcessor.process(TRACK_SELECT_ALL))) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     tracks.add(rs.getString("name").toLowerCase(Locale.ROOT));
@@ -1121,15 +1122,14 @@ public class SqlStorage implements StorageImplementation {
         return tracks;
     }
 
-    private static boolean tableExists(Connection connection, String table) throws SQLException {
+    private static List<String> listTables(Connection connection) throws SQLException {
+        List<String> tables = new ArrayList<>();
         try (ResultSet rs = connection.getMetaData().getTables(connection.getCatalog(), null, "%", null)) {
             while (rs.next()) {
-                if (rs.getString(3).equalsIgnoreCase(table)) {
-                    return true;
-                }
+                tables.add(rs.getString(3).toLowerCase(Locale.ROOT));
             }
-            return false;
         }
+        return tables;
     }
 
     private static final class SqlPlayerData {
