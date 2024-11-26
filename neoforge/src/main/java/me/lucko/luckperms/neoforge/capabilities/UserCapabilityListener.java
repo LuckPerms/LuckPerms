@@ -25,14 +25,18 @@
 
 package me.lucko.luckperms.neoforge.capabilities;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 public class UserCapabilityListener {
+
+    private final Map<UUID, UserCapabilityImpl> userCapabilityMap = new HashMap<>();
 
     @SubscribeEvent
     public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
@@ -44,26 +48,14 @@ public class UserCapabilityListener {
                         // Don't attach to LocalPlayer
                         return null;
                     }
-                    return new UserCapabilityImpl();
+                    UserCapabilityImpl userCapability = userCapabilityMap.get(player.getUUID());
+                    if (userCapability == null) {
+                        userCapability = new UserCapabilityImpl();
+                        userCapabilityMap.put(player.getUUID(), userCapability);
+                    }
+                    return userCapability;
                 }
         );
-    }
-
-    @SubscribeEvent
-    public void onPlayerClone(PlayerEvent.Clone event) {
-        Player previousPlayer = event.getOriginal();
-        Player currentPlayer = event.getEntity();
-
-        try {
-            UserCapabilityImpl previous = UserCapabilityImpl.get(previousPlayer);
-            UserCapabilityImpl current = UserCapabilityImpl.get(currentPlayer);
-
-            current.initialise(previous);
-            previous.invalidate();
-            current.getQueryOptionsCache().invalidate();
-        } catch (IllegalStateException e) {
-            // continue on if we cannot copy original data
-        }
     }
 
 }
