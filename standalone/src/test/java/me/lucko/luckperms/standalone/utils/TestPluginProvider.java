@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.standalone.utils;
 
+import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
 import me.lucko.luckperms.standalone.utils.TestPluginBootstrap.TestPlugin;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.nio.file.Path;
 import java.util.HashMap;

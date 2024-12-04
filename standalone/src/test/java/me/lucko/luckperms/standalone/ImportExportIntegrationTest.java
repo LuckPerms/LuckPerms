@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.standalone;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.commands.misc.ExportCommand;
@@ -38,8 +40,6 @@ import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 
 import java.io.BufferedReader;
 import java.io.IOException;

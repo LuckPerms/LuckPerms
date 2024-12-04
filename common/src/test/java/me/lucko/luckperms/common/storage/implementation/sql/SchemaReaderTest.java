@@ -25,15 +25,18 @@
 
 package me.lucko.luckperms.common.storage.implementation.sql;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SchemaReaderTest {
 
@@ -109,6 +112,27 @@ public class SchemaReaderTest {
                 "CREATE TABLE \"{prefix}actions\" ( \"id\" SERIAL PRIMARY KEY NOT NULL, \"time\" BIGINT NOT NULL, \"actor_uuid\" VARCHAR(36) NOT NULL, \"actor_name\" VARCHAR(100) NOT NULL, \"type\" CHAR(1) NOT NULL, \"acted_uuid\" VARCHAR(36) NOT NULL, \"acted_name\" VARCHAR(36) NOT NULL, \"action\" VARCHAR(300) NOT NULL)",
                 "CREATE TABLE \"{prefix}tracks\" ( \"name\" VARCHAR(36) PRIMARY KEY NOT NULL, \"groups\" TEXT NOT NULL)"
         ), readStatements("postgresql"));
+    }
+
+    @Test
+    public void testTableFromStatement() throws IOException {
+        Set<String> allowedTables = ImmutableSet.of(
+                "luckperms_user_permissions",
+                "luckperms_group_permissions",
+                "luckperms_players",
+                "luckperms_groups",
+                "luckperms_actions",
+                "luckperms_tracks"
+        );
+
+        for (String type : new String[]{"h2", "mariadb", "mysql", "postgresql", "sqlite"}) {
+            List<String> tables = readStatements(type).stream()
+                    .map(s -> s.replace("{prefix}", "luckperms_"))
+                    .map(SchemaReader::tableFromStatement)
+                    .collect(Collectors.toList());
+
+            assertTrue(allowedTables.containsAll(tables));
+        }
     }
 
     @Test
