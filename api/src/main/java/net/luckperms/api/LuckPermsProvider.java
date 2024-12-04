@@ -79,7 +79,8 @@ public final class LuckPermsProvider {
                 "  a) the LuckPerms plugin is not installed or it failed to enable\n" +
                 "  b) the plugin in the stacktrace does not declare a dependency on LuckPerms\n" +
                 "  c) the plugin in the stacktrace is retrieving the API before the plugin 'enable' phase\n" +
-                "     (call the #get method in onEnable, not the constructor!)\n";
+                "     (call the #get method in onEnable, not the constructor!)\n" +
+                "  d) the plugin in the stacktrace is incorrectly 'shading' the LuckPerms API into its jar\n";
 
         NotLoadedException() {
             super(MESSAGE);
