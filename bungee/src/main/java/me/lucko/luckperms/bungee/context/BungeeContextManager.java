@@ -25,25 +25,13 @@
 
 package me.lucko.luckperms.bungee.context;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.lucko.luckperms.bungee.LPBungeePlugin;
-import me.lucko.luckperms.common.context.manager.ContextManager;
-import me.lucko.luckperms.common.context.manager.InlineQueryOptionsSupplier;
-import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
-import me.lucko.luckperms.common.util.CaffeineFactory;
-import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.query.QueryOptions;
+import me.lucko.luckperms.common.context.manager.InlineContextManager;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-public class BungeeContextManager extends ContextManager<ProxiedPlayer, ProxiedPlayer> {
-
-    private final LoadingCache<ProxiedPlayer, QueryOptions> contextsCache = CaffeineFactory.newBuilder()
-            .expireAfterWrite(50, TimeUnit.MILLISECONDS)
-            .build(this::calculate);
-
+public class BungeeContextManager extends InlineContextManager<ProxiedPlayer, ProxiedPlayer> {
     public BungeeContextManager(LPBungeePlugin plugin) {
         super(plugin, ProxiedPlayer.class, ProxiedPlayer.class);
     }
@@ -52,35 +40,4 @@ public class BungeeContextManager extends ContextManager<ProxiedPlayer, ProxiedP
     public UUID getUniqueId(ProxiedPlayer player) {
         return player.getUniqueId();
     }
-
-    @Override
-    public QueryOptionsSupplier getCacheFor(ProxiedPlayer subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
-        return new InlineQueryOptionsSupplier<>(subject, this.contextsCache);
-    }
-
-    // override getContext, getQueryOptions and invalidateCache to skip the QueryOptionsSupplier
-    @Override
-    public ImmutableContextSet getContext(ProxiedPlayer subject) {
-        return getQueryOptions(subject).context();
-    }
-
-    @Override
-    public QueryOptions getQueryOptions(ProxiedPlayer subject) {
-        return this.contextsCache.get(subject);
-    }
-
-    @Override
-    protected void invalidateCache(ProxiedPlayer subject) {
-        this.contextsCache.invalidate(subject);
-    }
-
-    @Override
-    public QueryOptions formQueryOptions(ProxiedPlayer subject, ImmutableContextSet contextSet) {
-        return formQueryOptions(contextSet);
-    }
-
 }

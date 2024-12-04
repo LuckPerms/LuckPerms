@@ -30,7 +30,6 @@ include (
         'fabric',
         'neoforge',
         'neoforge:loader',
-        'neoforge:neoforge-api',
         'forge',
         'forge:loader',
         'forge:forge-api',

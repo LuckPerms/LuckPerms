@@ -47,12 +47,10 @@ configurations.implementation {
 dependencies {
     add('shade', project(':api'))
     add('shade', project(':common:loader-utils'))
-    add('shade', project(':neoforge:neoforge-api'))
 }
 
 build {
     dependsOn(":neoforge:build")
-    dependsOn(":neoforge:neoforge-api:build")
 }
 
 jar {

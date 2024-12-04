@@ -25,31 +25,20 @@
 
 package me.lucko.luckperms.sponge.context;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import me.lucko.luckperms.common.context.manager.ContextManager;
-import me.lucko.luckperms.common.context.manager.InlineQueryOptionsSupplier;
-import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
-import me.lucko.luckperms.common.util.CaffeineFactory;
+import me.lucko.luckperms.common.context.manager.InlineContextManager;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.model.ContextCalculatorProxy;
 import me.lucko.luckperms.sponge.service.model.TemporaryCauseHolderSubject;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
-import net.luckperms.api.query.QueryOptions;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-public class SpongeContextManager extends ContextManager<Subject, ServerPlayer> {
-
-    private final LoadingCache<Subject, QueryOptions> contextsCache = CaffeineFactory.newBuilder()
-            .expireAfterWrite(50, TimeUnit.MILLISECONDS)
-            .build(this::calculate);
+public class SpongeContextManager extends InlineContextManager<Subject, ServerPlayer> {
 
     public SpongeContextManager(LPSpongePlugin plugin) {
         super(plugin, Subject.class, ServerPlayer.class);
@@ -85,35 +74,5 @@ public class SpongeContextManager extends ContextManager<Subject, ServerPlayer> 
     @Override
     public UUID getUniqueId(ServerPlayer player) {
         return player.uniqueId();
-    }
-
-    @Override
-    public QueryOptionsSupplier getCacheFor(Subject subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
-        return new InlineQueryOptionsSupplier<>(subject, this.contextsCache);
-    }
-
-    // override getContext, getQueryOptions and invalidateCache to skip the QueryOptionsSupplier
-    @Override
-    public ImmutableContextSet getContext(Subject subject) {
-        return getQueryOptions(subject).context();
-    }
-
-    @Override
-    public QueryOptions getQueryOptions(Subject subject) {
-        return this.contextsCache.get(subject);
-    }
-
-    @Override
-    protected void invalidateCache(Subject subject) {
-        this.contextsCache.invalidate(subject);
-    }
-
-    @Override
-    public QueryOptions formQueryOptions(Subject subject, ImmutableContextSet contextSet) {
-        return formQueryOptions(contextSet);
     }
 }

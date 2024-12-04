@@ -48,7 +48,8 @@ import java.util.function.Predicate;
 /**
  * Base implementation of {@link ContextManager} which caches content lookups.
  *
- * @param <S> the calculator type
+ * @param <S> the subject type
+ * @param <P> the player type
  */
 public abstract class ContextManager<S, P extends S> {
 

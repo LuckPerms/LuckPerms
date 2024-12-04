@@ -25,25 +25,13 @@
 
 package me.lucko.luckperms.velocity.context;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.velocitypowered.api.proxy.Player;
-import me.lucko.luckperms.common.context.manager.ContextManager;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
-import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
-import me.lucko.luckperms.common.util.CaffeineFactory;
+import me.lucko.luckperms.common.context.manager.InlineContextManager;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
-import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.query.QueryOptions;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-public class VelocityContextManager extends ContextManager<Player, Player> {
-
-    private final LoadingCache<Player, QueryOptionsCache<Player>> subjectCaches = CaffeineFactory.newBuilder()
-            .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build(key -> new QueryOptionsCache<>(key, this));
-
+public class VelocityContextManager extends InlineContextManager<Player, Player> {
     public VelocityContextManager(LPVelocityPlugin plugin) {
         super(plugin, Player.class, Player.class);
     }
@@ -51,27 +39,5 @@ public class VelocityContextManager extends ContextManager<Player, Player> {
     @Override
     public UUID getUniqueId(Player player) {
         return player.getUniqueId();
-    }
-
-    @Override
-    public QueryOptionsSupplier getCacheFor(Player subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
-        return this.subjectCaches.get(subject);
-    }
-
-    @Override
-    protected void invalidateCache(Player subject) {
-        QueryOptionsCache<Player> cache = this.subjectCaches.getIfPresent(subject);
-        if (cache != null) {
-            cache.invalidate();
-        }
-    }
-
-    @Override
-    public QueryOptions formQueryOptions(Player subject, ImmutableContextSet contextSet) {
-        return formQueryOptions(contextSet);
     }
 }

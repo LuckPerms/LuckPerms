@@ -28,15 +28,15 @@ package me.lucko.luckperms.neoforge;
 import com.mojang.brigadier.ParseResults;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.locale.TranslationManager;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-import me.lucko.luckperms.neoforge.capabilities.UserCapability;
-import me.lucko.luckperms.neoforge.capabilities.UserCapabilityImpl;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -72,24 +72,22 @@ public class NeoForgeSenderFactory extends SenderFactory<LPNeoForgePlugin, Comma
 
     @Override
     protected void sendMessage(CommandSourceStack sender, Component message) {
-        Locale locale;
-        if (sender.getEntity() instanceof ServerPlayer) {
-            ServerPlayer player = (ServerPlayer) sender.getEntity();
-            UserCapabilityImpl user = UserCapabilityImpl.get(player);
-            locale = user.getLocale(player);
-        } else {
-            locale = null;
-        }
-
+        Locale locale = sender.getEntity() instanceof ServerPlayer player
+                ? TranslationManager.parseLocale(player.getLanguage())
+                : null;
         sender.sendSuccess(() -> toNativeText(TranslationManager.render(message, locale)), false);
     }
 
     @Override
     protected Tristate getPermissionValue(CommandSourceStack commandSource, String node) {
-        if (commandSource.getEntity() instanceof ServerPlayer) {
-            ServerPlayer player = (ServerPlayer) commandSource.getEntity();
-            UserCapability user = UserCapabilityImpl.get(player);
-            return user.checkPermission(node);
+        if (commandSource.getEntity() instanceof ServerPlayer player) {
+            User user = getPlugin().getUserManager().getIfLoaded(player.getUUID());
+            if (user == null) {
+                return Tristate.UNDEFINED;
+            }
+
+            QueryOptions queryOptions = getPlugin().getContextManager().getQueryOptions(player);
+            return user.getCachedData().getPermissionData(queryOptions).checkPermission(node, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
         }
 
         VerboseCheckTarget target = VerboseCheckTarget.internal(commandSource.getTextName());

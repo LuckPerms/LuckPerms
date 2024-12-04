@@ -26,10 +26,8 @@
 package me.lucko.luckperms.neoforge.context;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.manager.ContextManager;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.InlineContextManager;
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
-import me.lucko.luckperms.neoforge.capabilities.UserCapabilityImpl;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
@@ -37,7 +35,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
-public class NeoForgeContextManager extends ContextManager<ServerPlayer, ServerPlayer> {
+public class NeoForgeContextManager extends InlineContextManager<ServerPlayer, ServerPlayer> {
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
     public NeoForgeContextManager(LPNeoForgePlugin plugin) {
@@ -50,15 +48,6 @@ public class NeoForgeContextManager extends ContextManager<ServerPlayer, ServerP
     }
 
     @Override
-    public QueryOptionsCache<ServerPlayer> getCacheFor(ServerPlayer subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
-        return UserCapabilityImpl.get(subject).getQueryOptionsCache();
-    }
-
-    @Override
     public QueryOptions formQueryOptions(ServerPlayer subject, ImmutableContextSet contextSet) {
         QueryOptions.Builder builder = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
         if (subject.getServer() != null && subject.getServer().isSingleplayerOwner(subject.getGameProfile())) {
@@ -67,13 +56,4 @@ public class NeoForgeContextManager extends ContextManager<ServerPlayer, ServerP
 
         return builder.context(contextSet).build();
     }
-
-    @Override
-    public void invalidateCache(ServerPlayer subject) {
-        UserCapabilityImpl capability = UserCapabilityImpl.getNullable(subject);
-        if (capability != null) {
-            capability.getQueryOptionsCache().invalidate();
-        }
-    }
-
 }

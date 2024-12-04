@@ -32,8 +32,7 @@ import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
-import me.lucko.luckperms.neoforge.capabilities.UserCapability;
-import me.lucko.luckperms.neoforge.capabilities.UserCapabilityImpl;
+import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
@@ -140,21 +139,15 @@ public final class BrigadierInjector {
 
         @Override
         public boolean test(CommandSourceStack source) {
-            if (source.getEntity() instanceof ServerPlayer) {
-                ServerPlayer player = (ServerPlayer) source.getEntity();
-                Tristate state = Tristate.UNDEFINED;
-                // If player is still connecting and has not been added to world then check LP user directly
-                if (!player.isAddedToLevel()) {
-                    User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
-                    if (user == null) {
-                        // Should never happen but just in case...
-                        return false;
-                    }
-                    state = user.getCachedData().getPermissionData().checkPermission(permission);
-                } else {
-                    UserCapability user = UserCapabilityImpl.get(player);
-                    state = user.checkPermission(this.permission);
+            if (source.getEntity() instanceof ServerPlayer player) {
+
+                User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
+                if (user == null) {
+                    return false;
                 }
+
+                QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
+                Tristate state = user.getCachedData().getPermissionData(queryOptions).checkPermission(this.permission);
 
                 if (state != Tristate.UNDEFINED) {
                     return state.asBoolean() && this.delegate.test(source.withPermission(4));

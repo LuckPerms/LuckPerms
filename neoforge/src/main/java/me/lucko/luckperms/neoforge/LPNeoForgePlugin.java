@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.sender.DummyConsoleSender;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.neoforge.calculator.NeoForgeCalculatorFactory;
-import me.lucko.luckperms.neoforge.capabilities.UserCapabilityListener;
 import me.lucko.luckperms.neoforge.context.NeoForgeContextManager;
 import me.lucko.luckperms.neoforge.context.NeoForgePlayerCalculator;
 import me.lucko.luckperms.neoforge.listeners.NeoForgeAutoOpListener;
@@ -92,9 +91,6 @@ public class LPNeoForgePlugin extends AbstractLuckPermsPlugin {
 
         NeoForgePlatformListener platformListener = new NeoForgePlatformListener(this);
         this.bootstrap.registerListeners(platformListener);
-
-        UserCapabilityListener userCapabilityListener = new UserCapabilityListener();
-        this.bootstrap.registerListeners(userCapabilityListener);
 
         NeoForgePermissionHandlerListener permissionHandlerListener = new NeoForgePermissionHandlerListener(this);
         this.bootstrap.registerListeners(permissionHandlerListener);
