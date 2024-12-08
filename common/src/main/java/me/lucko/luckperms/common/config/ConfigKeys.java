@@ -586,6 +586,16 @@ public final class ConfigKeys {
     }));
 
     /**
+     * The REST storage URL
+     */
+    public static final ConfigKey<String> REST_STORAGE_URL = notReloadable(stringKey("data.rest-url", "http://localhost:8080/"));
+
+    /**
+     * The REST storage auth key
+     */
+    public static final ConfigKey<String> REST_STORAGE_AUTH_KEY = notReloadable(stringKey("data.rest-auth-key", ""));
+
+    /**
      * The name of the storage method being used
      */
     public static final ConfigKey<StorageType> STORAGE_METHOD = notReloadable(key(c -> {
