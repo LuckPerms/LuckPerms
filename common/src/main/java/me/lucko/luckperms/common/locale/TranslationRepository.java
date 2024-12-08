@@ -88,7 +88,7 @@ public class TranslationRepository {
             return; // skip
         }
 
-        this.plugin.getBootstrap().getScheduler().executeAsync(() -> {
+        this.plugin.getBootstrap().getScheduler().async(() -> {
             // cleanup old translation files
             clearDirectory(this.plugin.getTranslationManager().getTranslationsDirectory(), Files::isRegularFile);
 

@@ -28,6 +28,7 @@ package me.lucko.luckperms.sponge;
 import com.google.common.base.Suppliers;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Iterators;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.scheduler.ScheduledTask;
@@ -64,18 +65,22 @@ public class SpongeSchedulerAdapter implements SchedulerAdapter {
         this.sync = Suppliers.memoize(() -> getSyncScheduler().executor(this.pluginContainer));
     }
 
+    public Scheduler getSyncScheduler() {
+        return this.game.server().scheduler();
+    }
+
+    public void sync(Runnable task) {
+        this.sync.get().execute(task);
+    }
+
+    @Override
+    public void sync(Sender ctx, Runnable task) {
+        this.sync.get().execute(task);
+    }
+
     @Override
     public Executor async() {
         return this.async;
-    }
-
-    @Override
-    public Executor sync() {
-        return this.sync.get();
-    }
-
-    public Scheduler getSyncScheduler() {
-        return this.game.server().scheduler();
     }
 
     private SchedulerTask submitAsyncTask(Runnable runnable, Consumer<Task.Builder> config) {
