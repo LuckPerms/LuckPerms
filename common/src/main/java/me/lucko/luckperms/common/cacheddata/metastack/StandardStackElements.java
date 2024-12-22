@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.metastacking;
+package me.lucko.luckperms.common.cacheddata.metastack;
 
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -220,8 +220,11 @@ public final class StandardStackElements {
         @Override
         public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
             Track track = this.plugin.getTrackManager().getIfLoaded(this.trackName);
+            if (track == null) {
+                return false;
+            }
             PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
-            return track != null && origin.getType().equals(PermissionHolder.Identifier.GROUP_TYPE) && track.containsGroup(origin.getName());
+            return origin.getType().equals(PermissionHolder.Identifier.GROUP_TYPE) && track.containsGroup(origin.getName());
         }
 
         @Override
@@ -250,8 +253,11 @@ public final class StandardStackElements {
         @Override
         public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
             Track track = this.plugin.getTrackManager().getIfLoaded(this.trackName);
+            if (track == null) {
+                return false;
+            }
             PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
-            return track != null && !track.containsGroup(origin.getName());
+            return !(origin.getType().equals(PermissionHolder.Identifier.GROUP_TYPE) && track.containsGroup(origin.getName()));
         }
 
         @Override
@@ -305,7 +311,7 @@ public final class StandardStackElements {
         @Override
         public boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current) {
             PermissionHolder.Identifier origin = node.metadata(InheritanceOriginMetadata.KEY).getOrigin();
-            return !this.groupName.equals(origin.getName());
+            return !(origin.getType().equals(PermissionHolder.Identifier.GROUP_TYPE) && this.groupName.equals(origin.getName()));
         }
 
         @Override

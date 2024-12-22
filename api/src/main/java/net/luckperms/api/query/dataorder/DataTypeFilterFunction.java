@@ -48,7 +48,7 @@ public interface DataTypeFilterFunction {
 
     /**
      * Creates a {@link DataTypeFilterFunction} that always returns the given
-     * {@code predicate}.
+     * {@code predicate} (commonly one of the values in {@link DataTypeFilter}).
      *
      * @param predicate the predicate
      * @return the data type filter function

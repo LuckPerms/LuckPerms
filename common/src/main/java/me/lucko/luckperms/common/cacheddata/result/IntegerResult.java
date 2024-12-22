@@ -25,30 +25,23 @@
 
 package me.lucko.luckperms.common.cacheddata.result;
 
-import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.WeightNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents the result of an integer meta lookup
  *
  * @param <N> the node type
  */
-public final class IntegerResult<N extends Node> implements Result<Integer, N> {
+public final class IntegerResult<N extends Node> extends AbstractResult<Integer, N, IntegerResult<N>> {
 
     /** The result */
     private final int result;
-    /** The node that caused the result */
-    private final N node;
-    /** A reference to another result that this one overrides */
-    private IntegerResult<N> overriddenResult;
 
     public IntegerResult(int result, N node, IntegerResult<N> overriddenResult) {
+        super(node, overriddenResult);
         this.result = result;
-        this.node = node;
-        this.overriddenResult = overriddenResult;
     }
 
     @Override
@@ -71,19 +64,6 @@ public final class IntegerResult<N extends Node> implements Result<Integer, N> {
             }
             return result;
         }
-    }
-
-    @Override
-    public @Nullable N node() {
-        return this.node;
-    }
-
-    public @Nullable IntegerResult<N> overriddenResult() {
-        return this.overriddenResult;
-    }
-
-    public void setOverriddenResult(IntegerResult<N> overriddenResult) {
-        this.overriddenResult = overriddenResult;
     }
 
     public boolean isNull() {

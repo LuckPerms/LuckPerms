@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.metastacking;
+package me.lucko.luckperms.common.cacheddata.metastack;
 
 import com.google.common.collect.ImmutableList;
 import net.luckperms.api.metastacking.DuplicateRemovalFunction;

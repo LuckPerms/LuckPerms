@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.cacheddata.result;
 
-import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.MetaNode;
@@ -36,37 +35,19 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * @param <N> the node type
  */
-public final class StringResult<N extends Node> implements Result<String, N> {
+public final class StringResult<N extends Node> extends AbstractResult<String, N, StringResult<N>> {
 
     /** The result, nullable */
     private final String result;
-    /** The node that caused the result */
-    private final N node;
-    /** A reference to another result that this one overrides */
-    private StringResult<N> overriddenResult;
 
     public StringResult(String result, N node, StringResult<N> overriddenResult) {
+        super(node, overriddenResult);
         this.result = result;
-        this.node = node;
-        this.overriddenResult = overriddenResult;
     }
 
     @Override
     public @Nullable String result() {
         return this.result;
-    }
-
-    @Override
-    public @Nullable N node() {
-        return this.node;
-    }
-
-    public @Nullable StringResult<N> overriddenResult() {
-        return this.overriddenResult;
-    }
-
-    public void setOverriddenResult(StringResult<N> overriddenResult) {
-        this.overriddenResult = overriddenResult;
     }
 
     public StringResult<N> copy() {

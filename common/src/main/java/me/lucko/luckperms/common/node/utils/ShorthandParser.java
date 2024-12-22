@@ -210,12 +210,17 @@ public enum ShorthandParser {
      * Implements an iterator over a given range of ints.
      */
     private abstract static class RangeIterator implements Iterator<String> {
+        private static final int MAX_RANGE = 250;
+
         private final int max;
         private int next;
 
         RangeIterator(int a, int b) {
             this.max = Math.max(a, b);
             this.next = Math.min(a, b);
+            if ((this.max - this.next) > MAX_RANGE) {
+                throw new IllegalArgumentException("Range too large");
+            }
         }
 
         protected abstract String toString(int i);

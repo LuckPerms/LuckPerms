@@ -26,35 +26,20 @@
 package me.lucko.luckperms.common.treeview;
 
 import com.google.common.base.Splitter;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Stores a collection of all permissions known to the platform.
  */
-public class PermissionRegistry implements AutoCloseable {
+public class PermissionRegistry {
     private static final Splitter DOT_SPLIT = Splitter.on('.').omitEmptyStrings();
 
     /** The root node in the tree */
-    private final TreeNode rootNode;
-    /** A queue of permission strings to be added to the tree */
-    private final Queue<String> queue;
-    /** The tick task */
-    private final SchedulerTask task;
-
-    public PermissionRegistry(SchedulerAdapter scheduler) {
-        this.rootNode = new TreeNode();
-        this.queue = new ConcurrentLinkedQueue<>();
-        this.task = scheduler.asyncRepeating(this::tick, 1, TimeUnit.SECONDS);
-    }
+    private final TreeNode rootNode = new TreeNode();
 
     public TreeNode getRootNode() {
         return this.rootNode;
@@ -66,33 +51,33 @@ public class PermissionRegistry implements AutoCloseable {
                 .collect(ImmutableCollectors.toList());
     }
 
+    /**
+     * Offer a permission to the registry (to be potentially inserted asynchronously).
+     *
+     * @param permission the permission
+     */
     public void offer(String permission) {
+        insert(permission);
+    }
+
+    /**
+     * Insert a permission into the registry.
+     *
+     * @param permission the permission
+     */
+    public void insert(String permission) {
         if (permission == null) {
             throw new NullPointerException("permission");
         }
-        this.queue.offer(permission);
-    }
 
-    private void tick() {
-        for (String e; (e = this.queue.poll()) != null; ) {
-            insert(e);
-        }
-    }
-
-    @Override
-    public void close() {
-        this.task.cancel();
-    }
-
-    public void insert(String permission) {
         try {
             doInsert(permission);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            // ignore
         }
     }
 
-    private void doInsert(String permission) {
+    protected void doInsert(String permission) {
         permission = permission.toLowerCase(Locale.ROOT);
 
         // split the permission up into parts

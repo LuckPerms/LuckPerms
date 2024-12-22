@@ -26,7 +26,10 @@
 package me.lucko.luckperms.common.node;
 
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.node.types.Meta;
 import me.lucko.luckperms.common.node.types.Permission;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
@@ -58,6 +61,18 @@ public class NodeTest {
         assertNull(node.getExpiryDuration());
         assertFalse(node.hasExpired());
         assertFalse(node.hasExpiry());
+    }
+
+    @Test
+    public void testEscaping() {
+        Node node = Meta.builder("hel.lo", "wo.rld").build();
+        assertEquals("meta.hel\\.lo.wo\\.rld", node.getKey());
+
+        node = Prefix.builder("hel.lo", 100).build();
+        assertEquals("prefix.100.hel\\.lo", node.getKey());
+
+        node = Suffix.builder("hel.lo", 100).build();
+        assertEquals("suffix.100.hel\\.lo", node.getKey());
     }
 
     @Test

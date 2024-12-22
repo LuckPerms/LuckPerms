@@ -26,47 +26,37 @@
 package me.lucko.luckperms.common.query;
 
 import net.luckperms.api.query.Flag;
+import net.luckperms.api.query.QueryMode;
+import net.luckperms.api.query.QueryOptions;
+import org.junit.jupiter.api.Test;
 
-import java.util.EnumSet;
-import java.util.Set;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-final class FlagUtils {
-    private FlagUtils() {}
+public class QueryOptionsTest {
 
-    private static final EnumSet<Flag> ALL_FLAGS_SET = EnumSet.allOf(Flag.class);
-    private static final int ALL_FLAGS_SIZE = ALL_FLAGS_SET.size();
-    static final byte ALL_FLAGS = toByte0(ALL_FLAGS_SET);
+    @Test
+    public void testFlags() {
+        QueryOptions options = new QueryOptionsBuilderImpl(QueryMode.CONTEXTUAL).build();
+        assertSame(QueryOptionsImpl.DEFAULT_CONTEXTUAL, options);
+        assertEquals(Flag.values().length, options.flags().size());
 
-    /* bitwise utility methods */
-
-    static boolean read(byte b, Flag setting) {
-        return (b >> setting.ordinal() & 1) == 1;
-    }
-
-    static byte toByte(Set<Flag> settings) {
-        // fast path for the default set of flags.
-        if (settings.size() == ALL_FLAGS_SIZE) {
-            return ALL_FLAGS;
+        for (Flag flag : Flag.values()) {
+            assertTrue(options.flag(flag));
         }
-        return toByte0(settings);
-    }
 
-    private static byte toByte0(Set<Flag> settings) {
-        byte b = 0;
-        for (Flag setting : settings) {
-            b |= (byte) (1 << setting.ordinal());
-        }
-        return b;
-    }
+        options = new QueryOptionsBuilderImpl(QueryMode.CONTEXTUAL).flag(Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT, false).build();
+        assertEquals(Flag.values().length - 1, options.flags().size());
 
-    static Set<Flag> toSet(byte b) {
-        EnumSet<Flag> settings = EnumSet.noneOf(Flag.class);
-        for (Flag setting : Flag.values()) {
-            if (read(b, setting)) {
-                settings.add(setting);
+        for (Flag flag : Flag.values()) {
+            if (flag == Flag.APPLY_INHERITANCE_NODES_WITHOUT_WORLD_CONTEXT) {
+                assertFalse(options.flag(flag));
+            } else {
+                assertTrue(options.flag(flag));
             }
         }
-        return settings;
     }
-    
+
 }

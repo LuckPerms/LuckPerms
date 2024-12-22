@@ -78,6 +78,21 @@ public class FilterMongoTest {
                         ),
                         // {"$or": [{"foo": "hello"}, {"bar": "world"}]}
                         "{\"$or\": [{\"foo\": \"hello\"}, {\"bar\": \"world\"}]}"
+                ),
+                Arguments.of(
+                        FilterList.or(
+                                TestField.FOO.isEqualTo("hello", ConstraintFactory.STRINGS),
+                                TestField.BAR.isNotEqualTo("world", ConstraintFactory.STRINGS),
+                                TestField.BAZ.isSimilarTo("abc%xyz", ConstraintFactory.STRINGS),
+                                TestField.BAZ.isNotSimilarTo("a_c", ConstraintFactory.STRINGS)
+                        ),
+                        // {"$or": [
+                        //   {"foo": "hello"},
+                        //   {"bar": {"$ne": "world"}},
+                        //   {"baz": {"$regularExpression": {"pattern": "abc.*xyz", "options": "i"}}},
+                        //   {"baz": {"$not": {"$regularExpression": {"pattern": "a.c", "options": "i"}}}}
+                        // ]}
+                        "{\"$or\": [{\"foo\": \"hello\"}, {\"bar\": {\"$ne\": \"world\"}}, {\"baz\": {\"$regularExpression\": {\"pattern\": \"abc.*xyz\", \"options\": \"i\"}}}, {\"baz\": {\"$not\": {\"$regularExpression\": {\"pattern\": \"a.c\", \"options\": \"i\"}}}}]}"
                 )
         );
     }
@@ -94,7 +109,7 @@ public class FilterMongoTest {
     }
 
     private enum TestField implements FilterField<Object, String> {
-        FOO, BAR;
+        FOO, BAR, BAZ;
 
         @Override
         public String getValue(Object object) {

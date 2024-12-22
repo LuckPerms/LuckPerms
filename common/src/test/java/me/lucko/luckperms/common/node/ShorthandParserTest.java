@@ -31,8 +31,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ShorthandParserTest {
 
@@ -40,10 +43,12 @@ public class ShorthandParserTest {
         return Stream.of(
                 // numeric range
                 Arguments.of("{2-4}", new String[]{"2", "3", "4"}),
+                Arguments.of("{4-2}", new String[]{"2", "3", "4"}),
 
                 // character range
                 Arguments.of("{a-d}", new String[]{"a", "b", "c", "d"}),
                 Arguments.of("{A-D}", new String[]{"A", "B", "C", "D"}),
+                Arguments.of("{D-A}", new String[]{"A", "B", "C", "D"}),
 
                 // list
                 Arguments.of("{aa,bb,cc}", new String[]{"aa", "bb", "cc"}),
@@ -66,6 +71,17 @@ public class ShorthandParserTest {
     @MethodSource
     public void testParse(String shorthand, String[] expected) {
         Assertions.assertEquals(ImmutableSet.copyOf(expected), ShorthandParser.expandShorthand(shorthand));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "{1-1000}",
+            "{1000-1}",
+            "{!-က}",
+            "{က-!}",
+    })
+    public void testTooManyElements(String shorthand) {
+        assertTrue(ShorthandParser.expandShorthand(shorthand).size() <= 1);
     }
 
 }

@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -114,7 +115,7 @@ public abstract class GenericChildCommand {
                     .collect(Collectors.toList());
 
             builder.append(Component.text(" - ", NamedTextColor.DARK_AQUA))
-                    .append(Component.join(Component.space(), argUsages))
+                    .append(Component.join(JoinConfiguration.separator(Component.space()), argUsages))
                     .build();
         }
 

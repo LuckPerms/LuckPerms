@@ -61,6 +61,7 @@ import me.lucko.luckperms.common.storage.misc.DataConstraints;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.SyncTask;
+import me.lucko.luckperms.common.treeview.AsyncPermissionRegistry;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
@@ -92,7 +93,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     // init during load
     private DependencyManager dependencyManager;
     private TranslationManager translationManager;
-    private PermissionRegistry permissionRegistry;
+    private AsyncPermissionRegistry permissionRegistry;
     private VerboseHandler verboseHandler;
 
     // init during enable
@@ -128,7 +129,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.translationManager.reload();
 
         // load some utilities early
-        this.permissionRegistry = new PermissionRegistry(getBootstrap().getScheduler());
+        this.permissionRegistry = new AsyncPermissionRegistry(getBootstrap().getScheduler());
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
     }
 

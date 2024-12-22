@@ -43,6 +43,7 @@ import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent;
 import me.lucko.luckperms.common.verbose.event.VerboseEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
@@ -222,7 +223,7 @@ public class VerboseListener {
         }
 
         // send the message
-        HoverEvent<Component> hoverEvent = HoverEvent.showText(Component.join(Component.newline(), hover));
+        HoverEvent<Component> hoverEvent = HoverEvent.showText(Component.join(JoinConfiguration.newlines(), hover));
         this.notifiedSender.sendMessage(component.hoverEvent(hoverEvent));
     }
 

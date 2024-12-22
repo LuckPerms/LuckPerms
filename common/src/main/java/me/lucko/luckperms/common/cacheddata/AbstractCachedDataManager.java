@@ -193,7 +193,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         }
 
         public void cleanup() {
-            this.cache.values().removeIf(value -> ((UsageTracked) value).usedSince(TimeUnit.MINUTES.toMillis(2)));
+            this.cache.values().removeIf(value -> !((UsageTracked) value).usedInTheLast(2, TimeUnit.MINUTES));
         }
 
         @Override

@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.sender;
 import com.google.common.collect.Iterables;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.util.Tristate;
 
@@ -155,7 +156,7 @@ public final class AbstractSender<T> implements Sender {
                     case 1:
                         return input.get(0);
                     default:
-                        return Component.join(Component.empty(), input);
+                        return Component.join(JoinConfiguration.separator(Component.empty()), input);
                 }
             });
         }

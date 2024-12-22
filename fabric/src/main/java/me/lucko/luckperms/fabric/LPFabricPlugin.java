@@ -51,7 +51,7 @@ import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.ModContainer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.MinecraftServer;
@@ -244,7 +244,7 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
                 .orElseGet(() -> new DummyConsoleSender(this) {
                     @Override
                     public void sendMessage(Component message) {
-                        LPFabricPlugin.this.bootstrap.getPluginLogger().info(PlainComponentSerializer.plain().serialize(TranslationManager.render(message)));
+                        LPFabricPlugin.this.bootstrap.getPluginLogger().info(PlainTextComponentSerializer.plainText().serialize(TranslationManager.render(message)));
                     }
                 });
     }

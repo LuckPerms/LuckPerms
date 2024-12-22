@@ -25,20 +25,30 @@
 
 package me.lucko.luckperms.common.cacheddata;
 
-import com.google.common.annotations.VisibleForTesting;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-public abstract class UsageTracked {
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    @VisibleForTesting
-    protected long lastUsed = System.currentTimeMillis();
+public class UsageTrackedTest {
 
-    public void recordUsage() {
-        this.lastUsed = System.currentTimeMillis();
+    @Test
+    public void testUsedRecently() {
+        TestUsageTracked usageTracked = new TestUsageTracked();
+        assertTrue(usageTracked.usedInTheLast(1, TimeUnit.MINUTES));
+        usageTracked.recordUsage();
+        assertTrue(usageTracked.usedInTheLast(1, TimeUnit.MINUTES));
+
+        usageTracked.setLastUsed(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1));
+        assertFalse(usageTracked.usedInTheLast(1, TimeUnit.MINUTES));
     }
 
-    public boolean usedInTheLast(long duration, TimeUnit unit) {
-        return this.lastUsed > System.currentTimeMillis() - unit.toMillis(duration);
+    static final class TestUsageTracked extends UsageTracked {
+        void setLastUsed(long lastUsed) {
+            this.lastUsed = lastUsed;
+        }
     }
+
 }

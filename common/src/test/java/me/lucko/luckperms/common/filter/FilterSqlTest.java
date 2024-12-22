@@ -73,6 +73,16 @@ public class FilterSqlTest {
                         ),
                         " WHERE foo = hello OR bar = world",
                         " WHERE foo = ? OR bar = ?"
+                ),
+                Arguments.of(
+                        FilterList.or(
+                                TestField.FOO.isEqualTo("hello", ConstraintFactory.STRINGS),
+                                TestField.BAR.isNotEqualTo("world", ConstraintFactory.STRINGS),
+                                TestField.BAZ.isSimilarTo("abc%xyz", ConstraintFactory.STRINGS),
+                                TestField.BAZ.isNotSimilarTo("a_c", ConstraintFactory.STRINGS)
+                        ),
+                        " WHERE foo = hello OR bar != world OR baz LIKE abc%xyz OR baz NOT LIKE a_c",
+                        " WHERE foo = ? OR bar != ? OR baz LIKE ? OR baz NOT LIKE ?"
                 )
         );
     }
@@ -80,7 +90,7 @@ public class FilterSqlTest {
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource
     public void testQueries(FilterList<Object> filters, String expectedSql, String expectedSqlParams) {
-        TestFilterMongoBuilder sqlBuilder = new TestFilterMongoBuilder();
+        FilterSqlBuilder<Object> sqlBuilder = new TestFilterSqlBuilder();
         sqlBuilder.visit(filters);
 
         System.out.println(sqlBuilder.builder().toReadableString());
@@ -91,7 +101,7 @@ public class FilterSqlTest {
     }
 
     private enum TestField implements FilterField<Object, String> {
-        FOO, BAR;
+        FOO, BAR, BAZ;
 
         @Override
         public String getValue(Object object) {
@@ -104,7 +114,7 @@ public class FilterSqlTest {
         }
     }
 
-    private static final class TestFilterMongoBuilder extends FilterSqlBuilder<Object> {
+    private static final class TestFilterSqlBuilder extends FilterSqlBuilder<Object> {
 
         @Override
         public void visitFieldName(FilterField<Object, ?> field) {

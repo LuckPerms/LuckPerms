@@ -23,22 +23,48 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.cacheddata;
+package me.lucko.luckperms.common.treeview;
 
-import com.google.common.annotations.VisibleForTesting;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-public abstract class UsageTracked {
+public class AsyncPermissionRegistry extends PermissionRegistry implements AutoCloseable {
 
-    @VisibleForTesting
-    protected long lastUsed = System.currentTimeMillis();
+    /** A queue of permission strings to be added to the tree */
+    private final Queue<String> queue;
+    /** The tick task */
+    private final SchedulerTask task;
 
-    public void recordUsage() {
-        this.lastUsed = System.currentTimeMillis();
+    public AsyncPermissionRegistry(SchedulerAdapter scheduler) {
+        this.queue = new ConcurrentLinkedQueue<>();
+        this.task = scheduler.asyncRepeating(this::tick, 1, TimeUnit.SECONDS);
     }
 
-    public boolean usedInTheLast(long duration, TimeUnit unit) {
-        return this.lastUsed > System.currentTimeMillis() - unit.toMillis(duration);
+    @Override
+    public void offer(String permission) {
+        if (permission == null) {
+            throw new NullPointerException("permission");
+        }
+        this.queue.offer(permission);
     }
+
+    private void tick() {
+        for (String e; (e = this.queue.poll()) != null; ) {
+            try {
+                doInsert(e);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        this.task.cancel();
+    }
+
 }

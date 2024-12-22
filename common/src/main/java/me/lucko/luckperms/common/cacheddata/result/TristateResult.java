@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.cacheddata.result;
 
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -36,31 +35,22 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Represents the result of a {@link PermissionCalculator} lookup.
  */
-public final class TristateResult implements Result<Tristate, Node> {
+public final class TristateResult extends AbstractResult<Tristate, Node, TristateResult> {
 
     /** The result */
     private final Tristate result;
-    /** The node that caused the result */
-    private final Node node;
     /** The permission processor that provided the result */
     private final Class<? extends PermissionProcessor> processorClass;
-    /** A reference to another result that this one overrides */
-    private TristateResult overriddenResult;
 
     private TristateResult(Tristate result, Node node, Class<? extends PermissionProcessor> processorClass) {
+        super(node, null);
         this.result = result;
-        this.node = node;
         this.processorClass = processorClass;
     }
 
     @Override
     public @NonNull Tristate result() {
         return this.result;
-    }
-
-    @Override
-    public @Nullable Node node() {
-        return this.node;
     }
 
     public @Nullable Class<? extends PermissionProcessor> processorClass() {
@@ -77,14 +67,6 @@ public final class TristateResult implements Result<Tristate, Node> {
         } else {
             return this.processorClass.getName();
         }
-    }
-
-    public @Nullable TristateResult overriddenResult() {
-        return this.overriddenResult;
-    }
-
-    public void setOverriddenResult(TristateResult overriddenResult) {
-        this.overriddenResult = overriddenResult;
     }
 
     @Override

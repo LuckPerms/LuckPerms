@@ -23,22 +23,35 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.cacheddata;
+package me.lucko.luckperms.common.cacheddata.result;
 
-import com.google.common.annotations.VisibleForTesting;
+import net.luckperms.api.cacheddata.Result;
+import net.luckperms.api.node.Node;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.concurrent.TimeUnit;
+public abstract class AbstractResult<T, N extends Node, S extends AbstractResult<T, N, S>> implements Result<T, N> {
 
-public abstract class UsageTracked {
+    /** The node that caused the result */
+    protected final N node;
+    /** A reference to another result that this one overrides */
+    protected S overriddenResult;
 
-    @VisibleForTesting
-    protected long lastUsed = System.currentTimeMillis();
-
-    public void recordUsage() {
-        this.lastUsed = System.currentTimeMillis();
+    public AbstractResult(N node, S overriddenResult) {
+        this.node = node;
+        this.overriddenResult = overriddenResult;
     }
 
-    public boolean usedInTheLast(long duration, TimeUnit unit) {
-        return this.lastUsed > System.currentTimeMillis() - unit.toMillis(duration);
+    @Override
+    public final @Nullable N node() {
+        return this.node;
     }
+
+    public final @Nullable S overriddenResult() {
+        return this.overriddenResult;
+    }
+
+    public final void setOverriddenResult(S overriddenResult) {
+        this.overriddenResult = overriddenResult;
+    }
+
 }

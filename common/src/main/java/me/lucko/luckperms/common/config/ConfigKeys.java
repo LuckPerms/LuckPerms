@@ -28,14 +28,14 @@ package me.lucko.luckperms.common.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import me.lucko.luckperms.common.cacheddata.metastack.SimpleMetaStackDefinition;
+import me.lucko.luckperms.common.cacheddata.metastack.StandardStackElements;
 import me.lucko.luckperms.common.cacheddata.type.SimpleMetaValueSelector;
 import me.lucko.luckperms.common.config.generic.KeyedConfiguration;
 import me.lucko.luckperms.common.config.generic.key.ConfigKey;
 import me.lucko.luckperms.common.config.generic.key.SimpleConfigKey;
 import me.lucko.luckperms.common.context.calculator.WorldNameRewriter;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
-import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
-import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.model.PrimaryGroupHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsBuilderImpl;
@@ -370,16 +370,16 @@ public final class ConfigKeys {
     /**
      * Creates a new prefix MetaStack element based upon the configured values.
      */
-    public static final ConfigKey<MetaStackDefinition> PREFIX_FORMATTING_OPTIONS = key(l -> {
-        List<String> format = l.getStringList("meta-formatting.prefix.format", new ArrayList<>());
+    public static final ConfigKey<MetaStackDefinition> PREFIX_FORMATTING_OPTIONS = key(c -> {
+        List<String> format = c.getStringList("meta-formatting.prefix.format", new ArrayList<>());
         if (format.isEmpty()) {
             format.add("highest");
         }
-        String startSpacer = l.getString("meta-formatting.prefix.start-spacer", "");
-        String middleSpacer = l.getString("meta-formatting.prefix.middle-spacer", " ");
-        String endSpacer = l.getString("meta-formatting.prefix.end-spacer", "");
+        String startSpacer = c.getString("meta-formatting.prefix.start-spacer", "");
+        String middleSpacer = c.getString("meta-formatting.prefix.middle-spacer", " ");
+        String endSpacer = c.getString("meta-formatting.prefix.end-spacer", "");
         DuplicateRemovalFunction duplicateRemovalFunction;
-        switch (l.getString("meta-formatting.prefix.duplicates", "").toLowerCase(Locale.ROOT)) {
+        switch (c.getString("meta-formatting.prefix.duplicates", "").toLowerCase(Locale.ROOT)) {
             case "first-only":
                 duplicateRemovalFunction = DuplicateRemovalFunction.FIRST_ONLY;
                 break;
@@ -391,22 +391,22 @@ public final class ConfigKeys {
                 break;
         }
 
-        return new SimpleMetaStackDefinition(StandardStackElements.parseList(l.getPlugin(), format), duplicateRemovalFunction, startSpacer, middleSpacer, endSpacer);
+        return new SimpleMetaStackDefinition(StandardStackElements.parseList(c.getPlugin(), format), duplicateRemovalFunction, startSpacer, middleSpacer, endSpacer);
     });
 
     /**
      * Creates a new suffix MetaStack element based upon the configured values.
      */
-    public static final ConfigKey<MetaStackDefinition> SUFFIX_FORMATTING_OPTIONS = key(l -> {
-        List<String> format = l.getStringList("meta-formatting.suffix.format", new ArrayList<>());
+    public static final ConfigKey<MetaStackDefinition> SUFFIX_FORMATTING_OPTIONS = key(c -> {
+        List<String> format = c.getStringList("meta-formatting.suffix.format", new ArrayList<>());
         if (format.isEmpty()) {
             format.add("highest");
         }
-        String startSpacer = l.getString("meta-formatting.suffix.start-spacer", "");
-        String middleSpacer = l.getString("meta-formatting.suffix.middle-spacer", " ");
-        String endSpacer = l.getString("meta-formatting.suffix.end-spacer", "");
+        String startSpacer = c.getString("meta-formatting.suffix.start-spacer", "");
+        String middleSpacer = c.getString("meta-formatting.suffix.middle-spacer", " ");
+        String endSpacer = c.getString("meta-formatting.suffix.end-spacer", "");
         DuplicateRemovalFunction duplicateRemovalFunction;
-        switch (l.getString("meta-formatting.suffix.duplicates", "").toLowerCase(Locale.ROOT)) {
+        switch (c.getString("meta-formatting.suffix.duplicates", "").toLowerCase(Locale.ROOT)) {
             case "first-only":
                 duplicateRemovalFunction = DuplicateRemovalFunction.FIRST_ONLY;
                 break;
@@ -418,7 +418,7 @@ public final class ConfigKeys {
                 break;
         }
 
-        return new SimpleMetaStackDefinition(StandardStackElements.parseList(l.getPlugin(), format), duplicateRemovalFunction, startSpacer, middleSpacer, endSpacer);
+        return new SimpleMetaStackDefinition(StandardStackElements.parseList(c.getPlugin(), format), duplicateRemovalFunction, startSpacer, middleSpacer, endSpacer);
     });
 
     /**

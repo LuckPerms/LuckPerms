@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.service.model.calculated;
 
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
-import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
@@ -203,7 +202,7 @@ public abstract class CalculatedSubject implements LPSubject {
 
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
-        return Optional.ofNullable(((MetaCache) this.cachedData.getMetaData(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(contexts).build())).getMetaValue(key, CheckOrigin.PLATFORM_API).result());
+        return Optional.ofNullable(this.cachedData.getMetaData(QueryOptionsImpl.DEFAULT_CONTEXTUAL.toBuilder().context(contexts).build()).getMetaValue(key, CheckOrigin.PLATFORM_API).result());
     }
 
     @Override

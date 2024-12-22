@@ -139,7 +139,9 @@ public class NodeParseTest {
             "prefix.0.hello, 0, hello",
             "prefix.100.hello world, 100, hello world",
             "prefix.100.HELLO world &123, 100, HELLO world &123",
-            "prefix.100., 100, ''"
+            "prefix.100., 100, ''",
+            "prefix.100.hello\\.world, 100, hello.world",
+            "prefix.100.hello.world, 100, hello.world",
     })
     public void testPrefix(String key, int expectedPriority, String expectedValue) {
         Prefix.Builder builder = Prefix.parse(key);
@@ -157,7 +159,8 @@ public class NodeParseTest {
             "prefix.",
             "prefix.hello",
             "prefix.100",
-            "prefix.hello.hello"
+            "prefix.hello.hello",
+            "suffix.100.hello"
     })
     public void testPrefixFail(String key) {
         Prefix.Builder builder = Prefix.parse(key);
@@ -171,7 +174,9 @@ public class NodeParseTest {
             "suffix.0.hello, 0, hello",
             "suffix.100.hello world, 100, hello world",
             "suffix.100.HELLO world &123, 100, HELLO world &123",
-            "suffix.100., 100, ''"
+            "suffix.100., 100, ''",
+            "suffix.100.hello\\.world, 100, hello.world",
+            "suffix.100.hello.world, 100, hello.world",
     })
     public void testSuffix(String key, int expectedPriority, String expectedValue) {
         Suffix.Builder builder = Suffix.parse(key);
@@ -189,7 +194,8 @@ public class NodeParseTest {
             "suffix.",
             "suffix.hello",
             "suffix.100",
-            "suffix.hello.hello"
+            "suffix.hello.hello",
+            "prefix.100.hello"
     })
     public void testSuffixFail(String key) {
         Suffix.Builder builder = Suffix.parse(key);
@@ -200,7 +206,10 @@ public class NodeParseTest {
     @CsvSource({
             "meta.k.v, k, v",
             "meta.hello.world, hello, world",
-            "meta.hello., hello, ''"
+            "meta.hello., hello, ''",
+            "meta.a\\.b.hel\\.lo, a.b, hel.lo",
+            "meta.a\\\\.b.hel\\.lo, a\\.b, hel.lo",
+            "meta.a.b.c, a, b.c"
     })
     public void testMeta(String key, String expectedKey, String expectedValue) {
         Meta.Builder builder = Meta.parse(key);

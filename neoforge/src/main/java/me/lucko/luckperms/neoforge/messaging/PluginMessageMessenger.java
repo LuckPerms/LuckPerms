@@ -99,6 +99,7 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
         taskRef.set(task);
     }
 
+    @SuppressWarnings("EmptyMethod")
     public static void registerChannel() {
         // do nothing - the channels are registered in the static initializer, we just
         // need to make sure that is called (which it will be if this method runs)

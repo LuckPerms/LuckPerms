@@ -138,7 +138,7 @@ public enum DependencyRepository {
     }
 
     /**
-     * Downloads the the {@code dependency} to the {@code file}, ensuring the
+     * Downloads the {@code dependency} to the {@code file}, ensuring the
      * downloaded bytes match the checksum.
      *
      * @param dependency the dependency to download
