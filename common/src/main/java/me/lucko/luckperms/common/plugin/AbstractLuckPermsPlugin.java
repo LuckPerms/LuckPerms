@@ -229,7 +229,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.apiProvider = new LuckPermsApiProvider(this);
         this.apiProvider.ensureApiWasLoadedByPlugin();
         this.eventDispatcher = new EventDispatcher(provideEventBus(this.apiProvider));
-        getBootstrap().getScheduler().executeAsync(GeneratedEventClass::preGenerate);
+        getBootstrap().getScheduler().async(GeneratedEventClass::preGenerate);
         ApiRegistrationUtil.registerProvider(this.apiProvider);
         registerApiOnPlatform(this.apiProvider);
 

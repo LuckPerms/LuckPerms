@@ -80,7 +80,7 @@ public class FabricAutoOpListener implements LuckPermsEventListener {
         if (callerIsSync) {
             setOp(player, value);
         } else {
-            this.plugin.getBootstrap().getScheduler().executeSync(() -> setOp(player, value));
+            this.plugin.getBootstrap().getScheduler().sync(() -> setOp(player, value));
         }
     }
 
