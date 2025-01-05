@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy.api8;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
@@ -130,6 +130,6 @@ public final class PermissionDescriptionProxy implements PermissionDescription, 
 
     @Override
     public String toString() {
-        return "luckperms.api8.PermissionDescriptionProxy(handle=" + this.handle + ")";
+        return "luckperms.PermissionDescriptionProxy(handle=" + this.handle + ")";
     }
 }

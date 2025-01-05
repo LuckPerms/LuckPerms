@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy.api8;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.common.util.CompletableFutures;
@@ -49,7 +49,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("unchecked")
 public final class SubjectDataProxy implements SubjectData, LPProxiedServiceObject {
     private final LPPermissionService service;
     private final LPSubjectReference ref;
@@ -77,7 +76,7 @@ public final class SubjectDataProxy implements SubjectData, LPProxiedServiceObje
         return !this.enduring;
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public @NonNull Map<Set<Context>, Map<String, Boolean>> allPermissions() {
         return (Map) handle().thenApply(handle -> handle.getAllPermissions().entrySet().stream()
@@ -148,7 +147,7 @@ public final class SubjectDataProxy implements SubjectData, LPProxiedServiceObje
         return handle().thenCompose(handle -> handle.clearPermissions(CompatibilityUtil.convertContexts(contexts)));
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public @NonNull Map<Set<Context>, List<org.spongepowered.api.service.permission.SubjectReference>> allParents() {
         return (Map) handle().thenApply(handle -> handle.getAllParents().entrySet().stream()
@@ -158,7 +157,7 @@ public final class SubjectDataProxy implements SubjectData, LPProxiedServiceObje
                 ))).join();
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public @NonNull List<org.spongepowered.api.service.permission.SubjectReference> parents(@NonNull Set<Context> contexts) {
         return (List) handle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts))).join();
@@ -189,7 +188,7 @@ public final class SubjectDataProxy implements SubjectData, LPProxiedServiceObje
         return handle().thenCompose(handle -> handle.clearParents(CompatibilityUtil.convertContexts(contexts)));
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public @NonNull Map<Set<Context>, Map<String, String>> allOptions() {
         return (Map) handle().thenApply(handle -> handle.getAllOptions().entrySet().stream()
@@ -253,6 +252,6 @@ public final class SubjectDataProxy implements SubjectData, LPProxiedServiceObje
 
     @Override
     public String toString() {
-        return "luckperms.api8.SubjectDataProxy(ref=" + this.ref + ", enduring=" + this.enduring + ")";
+        return "luckperms.SubjectDataProxy(ref=" + this.ref + ", enduring=" + this.enduring + ")";
     }
 }

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy.api8;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;

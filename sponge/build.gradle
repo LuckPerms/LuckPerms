@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.shadow)
 }
 
+sourceCompatibility = 17
+targetCompatibility = 21
+
 repositories {
     maven { url 'https://repo.spongepowered.org/repository/maven-public/' }
 }
@@ -9,15 +12,16 @@ repositories {
 dependencies {
     implementation project(':common')
     implementation project(':sponge:sponge-service')
-    implementation project(':sponge:sponge-service-api8')
+    implementation project(':sponge:sponge-service-proxy')
     compileOnly project(':common:loader-utils')
 
-    compileOnly('org.spongepowered:spongeapi:8.0.0') {
+    compileOnly('org.spongepowered:spongeapi:12.0.0') {
         exclude(module: 'configurate-core')
         exclude(module: 'configurate-hocon')
         exclude(module: 'configurate-gson')
         exclude(module: 'configurate-yaml')
     }
+    compileOnly 'com.google.guava:guava:33.3.1-jre'
 }
 
 processResources {

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy.api8;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import me.lucko.luckperms.sponge.service.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -49,7 +49,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("unchecked")
 public final class SubjectProxy implements Subject, LPProxiedSubject, LPProxiedServiceObject {
     private final LPPermissionService service;
     private final LPSubjectReference ref;
@@ -169,6 +168,6 @@ public final class SubjectProxy implements Subject, LPProxiedSubject, LPProxiedS
 
     @Override
     public String toString() {
-        return "luckperms.api8.SubjectProxy(ref=" + this.ref + ")";
+        return "luckperms.SubjectProxy(ref=" + this.ref + ")";
     }
 }

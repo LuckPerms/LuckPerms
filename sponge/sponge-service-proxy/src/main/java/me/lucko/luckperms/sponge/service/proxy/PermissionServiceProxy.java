@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy.api8;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
@@ -169,6 +169,6 @@ public final class PermissionServiceProxy implements PermissionAndContextService
 
     @Override
     public String toString() {
-        return "luckperms.api8.PermissionServiceProxy(handle=" + this.handle + ")";
+        return "luckperms.PermissionServiceProxy(handle=" + this.handle + ")";
     }
 }

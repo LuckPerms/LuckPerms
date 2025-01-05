@@ -77,26 +77,20 @@ public final class CompatibilityUtil {
 
     public static org.spongepowered.api.util.Tristate convertTristate(Tristate tristate) {
         Objects.requireNonNull(tristate, "tristate");
-        switch (tristate) {
-            case TRUE:
-                return org.spongepowered.api.util.Tristate.TRUE;
-            case FALSE:
-                return org.spongepowered.api.util.Tristate.FALSE;
-            default:
-                return org.spongepowered.api.util.Tristate.UNDEFINED;
-        }
+        return switch (tristate) {
+            case TRUE -> org.spongepowered.api.util.Tristate.TRUE;
+            case FALSE -> org.spongepowered.api.util.Tristate.FALSE;
+            default -> org.spongepowered.api.util.Tristate.UNDEFINED;
+        };
     }
 
     public static Tristate convertTristate(org.spongepowered.api.util.Tristate tristate) {
         Objects.requireNonNull(tristate, "tristate");
-        switch (tristate) {
-            case TRUE:
-                return Tristate.TRUE;
-            case FALSE:
-                return Tristate.FALSE;
-            default:
-                return Tristate.UNDEFINED;
-        }
+        return switch (tristate) {
+            case TRUE -> Tristate.TRUE;
+            case FALSE -> Tristate.FALSE;
+            default -> Tristate.UNDEFINED;
+        };
     }
 
 }

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy.api8;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPProxiedServiceObject;
@@ -43,7 +43,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-@SuppressWarnings("unchecked")
 public final class SubjectCollectionProxy implements SubjectCollection, LPProxiedServiceObject {
     private final LPSubjectCollection handle;
 
@@ -86,7 +85,7 @@ public final class SubjectCollectionProxy implements SubjectCollection, LPProxie
         return this.handle.getLoadedSubjects().stream().map(LPSubject::sponge).collect(ImmutableCollectors.toSet());
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public @NonNull CompletableFuture<Set<String>> allIdentifiers() {
         return (CompletableFuture) this.handle.getAllIdentifiers();
@@ -102,13 +101,13 @@ public final class SubjectCollectionProxy implements SubjectCollection, LPProxie
         return this.handle.getService().getReferenceFactory().obtain(identifier(), subjectIdentifier);
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public @NonNull CompletableFuture<Map<SubjectReference, Boolean>> allWithPermission(@NonNull String s) {
         return (CompletableFuture) this.handle.getAllWithPermission(s);
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public @NonNull CompletableFuture<Map<SubjectReference, Boolean>> allWithPermission(@NonNull String s, @NonNull Cause cause) {
         return (CompletableFuture) this.handle.getAllWithPermission(this.handle.getService().getContextsForCause(cause), s);
@@ -154,7 +153,7 @@ public final class SubjectCollectionProxy implements SubjectCollection, LPProxie
 
     @Override
     public String toString() {
-        return "luckperms.api8.SubjectCollectionProxy(handle=" + this.handle + ")";
+        return "luckperms.SubjectCollectionProxy(handle=" + this.handle + ")";
     }
 
 }

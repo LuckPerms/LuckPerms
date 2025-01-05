@@ -31,8 +31,11 @@ import me.lucko.luckperms.sponge.LPSpongePlugin;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.EngineConnectionSide;
+import org.spongepowered.api.network.EngineConnectionState;
+import org.spongepowered.api.network.ServerConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
@@ -46,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * An implementation of {@link Messenger} using the plugin messaging channels.
  */
-public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements RawPlayDataHandler<ServerSideConnection> {
+public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements RawPlayDataHandler<ServerConnectionState.Game> {
     private static final ResourceKey CHANNEL = ResourceKey.resolve(AbstractPluginMessageMessenger.CHANNEL);
 
     private final LPSpongePlugin plugin;
@@ -60,7 +63,7 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
 
     public void init() {
         this.channel = this.plugin.getBootstrap().getGame().channelManager().ofType(CHANNEL, RawDataChannel.class);
-        this.channel.play().addHandler(EngineConnectionSide.SERVER, this);
+        this.channel.play().addHandler(ServerConnectionState.Game.class, this);
     }
 
     @Override
@@ -102,7 +105,7 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
     }
 
     @Override
-    public void handlePayload(ChannelBuf channelBuf, ServerSideConnection connection) {
+    public void handlePayload(ChannelBuf channelBuf, ServerConnectionState.Game state) {
         byte[] buf = channelBuf.readBytes(channelBuf.available());
         handleIncomingMessage(buf);
     }

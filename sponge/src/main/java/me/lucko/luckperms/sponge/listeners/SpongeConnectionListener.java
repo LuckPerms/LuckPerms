@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;
@@ -47,18 +48,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class SpongeConnectionListener extends AbstractConnectionListener {
-
-    // Sponge API 11
-    private static final Method DISCONNECT_EVENT_PROFILE_METHOD;
-    static {
-        Method disconnectEventProfileMethod;
-        try {
-            disconnectEventProfileMethod = ServerSideConnectionEvent.Disconnect.class.getMethod("profile");
-        } catch (ReflectiveOperationException e) {
-            disconnectEventProfileMethod = null;
-        }
-        DISCONNECT_EVENT_PROFILE_METHOD = disconnectEventProfileMethod;
-    }
 
     private final LPSpongePlugin plugin;
 
@@ -184,28 +173,8 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
 
     @Listener(order = Order.POST)
     public void onClientLeave(ServerSideConnectionEvent.Disconnect e) {
-        Identifiable player = null;
-
-        if (DISCONNECT_EVENT_PROFILE_METHOD == null) {
-            // sponge API < 11
-            player = e.player();
-
-        } else {
-            // sponge API 11+
-            try {
-                //noinspection unchecked
-                final Optional<GameProfile> profile = (Optional<GameProfile>) DISCONNECT_EVENT_PROFILE_METHOD.invoke(e);
-                if (profile.isPresent()) {
-                    player = profile.get();
-                }
-            } catch (ReflectiveOperationException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-
-        if (player != null) {
-            handleDisconnect(player.uniqueId());
-        }
+        Optional<GameProfile> profile = e.profile();
+        profile.ifPresent(p -> handleDisconnect(p.uniqueId()));
     }
 
 }

@@ -44,8 +44,7 @@ abstract class AbstractForwardingContextSet extends AbstractSet<Context> impleme
 
     @Override
     public boolean contains(Object o) {
-        if (o instanceof Context) {
-            Context context = (Context) o;
+        if (o instanceof Context context) {
             return !context.getKey().isEmpty() && !context.getValue().isEmpty() && delegate().contains(context.getKey(), context.getValue());
         }
         return false;

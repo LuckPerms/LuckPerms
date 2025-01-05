@@ -2,12 +2,15 @@ plugins {
     alias(libs.plugins.shadow)
 }
 
+sourceCompatibility = 17
+targetCompatibility = 21
+
 repositories {
     maven { url 'https://repo.spongepowered.org/repository/maven-public/' }
 }
 
 dependencies {
-    compileOnly 'org.spongepowered:spongeapi:8.0.0'
+    compileOnly 'org.spongepowered:spongeapi:12.0.0'
 
     implementation project(':api')
     implementation project(':common:loader-utils')

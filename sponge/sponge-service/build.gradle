@@ -2,15 +2,17 @@ repositories {
     maven { url 'https://repo.spongepowered.org/repository/maven-public/' }
 }
 
+sourceCompatibility = 17
+targetCompatibility = 21
+
 dependencies {
     implementation project(':common')
 
-    compileOnly('org.spongepowered:spongeapi:8.0.0') {
+    compileOnly('org.spongepowered:spongeapi:12.0.0') {
         exclude(module: 'configurate-core')
         exclude(module: 'configurate-hocon')
         exclude(module: 'configurate-gson')
         exclude(module: 'configurate-yaml')
     }
-    compileOnly 'com.google.guava:guava:21.0'
 }
 
