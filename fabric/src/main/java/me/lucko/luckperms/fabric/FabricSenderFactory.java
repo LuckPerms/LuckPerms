@@ -58,7 +58,7 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     @Override
     protected UUID getUniqueId(ServerCommandSource commandSource) {
-        if (isConsole(commandSource) || commandSource.getEntity() != null) {
+        if (isConsole(commandSource) || commandSource.getEntity() == null) {
             return Sender.CONSOLE_UUID;
         }
         return commandSource.getEntity().getUuid();
