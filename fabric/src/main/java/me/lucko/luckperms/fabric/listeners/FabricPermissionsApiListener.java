@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.cacheddata.type.MonitoredMetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
@@ -115,15 +116,19 @@ public class FabricPermissionsApiListener {
     }
 
     private TriState otherPermissionCheck(CommandSource source, String permission) {
+        Tristate result = Tristate.UNDEFINED;
         if (source instanceof ServerCommandSource) {
-            String name = ((ServerCommandSource) source).getName();
-            VerboseCheckTarget target = VerboseCheckTarget.internal(name);
+            Sender sender = this.plugin.getSenderFactory().wrap((ServerCommandSource) source);
+            if (sender.isConsole()) {
+                result = Tristate.TRUE;
+            }
+            VerboseCheckTarget target = VerboseCheckTarget.internal(sender.getName());
 
-            this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.UNDEFINED);
+            this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.forMonitoredResult(result));
             this.plugin.getPermissionRegistry().offer(permission);
         }
 
-        return TriState.DEFAULT;
+        return fabricTristate(result);
     }
 
     private Optional<String> playerGetOption(ServerPlayerEntity player, String key) {
