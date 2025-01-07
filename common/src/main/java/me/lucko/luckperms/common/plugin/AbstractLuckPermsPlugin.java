@@ -131,11 +131,12 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // load some utilities early
         this.permissionRegistry = new AsyncPermissionRegistry(getBootstrap().getScheduler());
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
+
+        // load the sender factory instance
+        setupSenderFactory();
     }
 
     public final void enable() {
-        // load the sender factory instance
-        setupSenderFactory();
 
         // send the startup banner
         Message.STARTUP_BANNER.send(getConsoleSender(), getBootstrap());
