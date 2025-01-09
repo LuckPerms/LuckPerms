@@ -71,6 +71,10 @@ public class FabricPermissionsApiListener {
 
     private @NonNull TriState onPermissionCheck(CommandSource source, String permission) {
         if (source instanceof ServerCommandSource) {
+            Sender sender = this.plugin.getSenderFactory().wrap((ServerCommandSource) source);
+            if (sender.isConsole()) {
+                return TriState.TRUE;
+            }
             Entity entity = ((ServerCommandSource) source).getEntity();
             if (entity instanceof ServerPlayerEntity) {
                 return playerPermissionCheck((ServerPlayerEntity) entity, permission);
@@ -116,19 +120,15 @@ public class FabricPermissionsApiListener {
     }
 
     private TriState otherPermissionCheck(CommandSource source, String permission) {
-        Tristate result = Tristate.UNDEFINED;
         if (source instanceof ServerCommandSource) {
-            Sender sender = this.plugin.getSenderFactory().wrap((ServerCommandSource) source);
-            if (sender.isConsole()) {
-                result = Tristate.TRUE;
-            }
-            VerboseCheckTarget target = VerboseCheckTarget.internal(sender.getName());
+            String name = ((ServerCommandSource) source).getName();
+            VerboseCheckTarget target = VerboseCheckTarget.internal(name);
 
-            this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.forMonitoredResult(result));
+            this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.UNDEFINED);
             this.plugin.getPermissionRegistry().offer(permission);
         }
 
-        return fabricTristate(result);
+        return TriState.DEFAULT;
     }
 
     private Optional<String> playerGetOption(ServerPlayerEntity player, String key) {
