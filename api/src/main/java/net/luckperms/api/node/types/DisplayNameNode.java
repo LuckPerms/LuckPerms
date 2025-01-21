@@ -63,6 +63,7 @@ public interface DisplayNameNode extends ScopedNode<DisplayNameNode, DisplayName
      *
      * @param displayName the display name to set
      * @return the builder
+     * @throws IllegalArgumentException if {@code displayName} is empty
      */
     static @NonNull Builder builder(@NonNull String displayName) {
         return builder().displayName(displayName);
