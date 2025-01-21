@@ -202,11 +202,11 @@ public class LPNukkitPlugin extends AbstractLuckPermsPlugin {
 
         // Load any online users (in the case of a reload)
         for (Player player : this.bootstrap.getServer().getOnlinePlayers().values()) {
-            this.bootstrap.getScheduler().executeAsync(() -> {
+            this.bootstrap.getScheduler().async(() -> {
                 try {
                     User user = this.connectionListener.loadUser(player.getUniqueId(), player.getName());
                     if (user != null) {
-                        this.bootstrap.getScheduler().executeSync(() -> {
+                        this.bootstrap.getScheduler().sync(() -> {
                             try {
                                 LuckPermsPermissible lpPermissible = new LuckPermsPermissible(player, user, this);
                                 PermissibleInjector.inject(player, lpPermissible);
