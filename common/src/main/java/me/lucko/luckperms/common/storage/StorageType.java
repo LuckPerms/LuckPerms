@@ -51,6 +51,9 @@ public enum StorageType {
     SQLITE("SQLite", "sqlite"),
     H2("H2", "h2"),
 
+    // REST
+    REST("REST", "rest"),
+
     // Custom
     CUSTOM("Custom", "custom");
 

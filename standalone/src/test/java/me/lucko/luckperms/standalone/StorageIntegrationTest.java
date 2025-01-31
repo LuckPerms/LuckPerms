@@ -58,7 +58,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -358,6 +362,35 @@ public class StorageIntegrationTest {
                     .put("data.database", "minecraft")
                     .put("data.username", "")
                     .put("data.password", "")
+                    .build();
+
+            TestPluginProvider.use(tempDir, config, StorageIntegrationTest::testStorage);
+        }
+    }
+
+    @Nested
+    @Tag("docker")
+    class Rest {
+
+        @Container
+        private final GenericContainer<?> container = new GenericContainer<>(DockerImageName.parse("ghcr.io/luckperms/rest-api"))
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(StorageIntegrationTest.class)))
+                .withExposedPorts(8080)
+                .waitingFor(new WaitAllStrategy()
+                        .withStrategy(Wait.forListeningPort())
+                        .withStrategy(Wait.forLogMessage(".*Successfully enabled.*", 1))
+                );
+
+        @Test
+        public void testRest(@TempDir Path tempDir) {
+            assertTrue(this.container.isRunning());
+
+            String host = this.container.getHost();
+            Integer port = this.container.getFirstMappedPort();
+
+            Map<String, String> config = ImmutableMap.<String, String>builder()
+                    .put("storage-method", "rest")
+                    .put("data.rest-url", "http://" + host + ":" + port + "/")
                     .build();
 
             TestPluginProvider.use(tempDir, config, StorageIntegrationTest::testStorage);
