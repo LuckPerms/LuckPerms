@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.config.generic.adapter.EnvironmentVariableConfigAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.FileSecretConfigAdapter;
 import me.lucko.luckperms.common.config.generic.adapter.MultiConfigurationAdapter;
 import me.lucko.luckperms.common.config.generic.adapter.SystemPropertyConfigAdapter;
 import me.lucko.luckperms.common.context.calculator.ConfigurationContextCalculator;
@@ -147,6 +148,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         getLogger().info("Loading configuration...");
         ConfigurationAdapter configFileAdapter = provideConfigurationAdapter();
         this.configuration = new LuckPermsConfiguration(this, new MultiConfigurationAdapter(this,
+                new FileSecretConfigAdapter(this),
                 new SystemPropertyConfigAdapter(this),
                 new EnvironmentVariableConfigAdapter(this),
                 configFileAdapter
