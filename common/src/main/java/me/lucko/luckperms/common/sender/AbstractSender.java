@@ -67,6 +67,10 @@ public final class AbstractSender<T> implements Sender {
         return this.plugin;
     }
 
+    public T getSender() {
+        return this.sender;
+    }
+
     @Override
     public UUID getUniqueId() {
         return this.uniqueId;

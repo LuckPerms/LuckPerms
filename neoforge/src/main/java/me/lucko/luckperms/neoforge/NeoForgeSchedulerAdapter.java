@@ -25,21 +25,26 @@
 
 package me.lucko.luckperms.neoforge;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.common.plugin.scheduler.JavaSchedulerAdapter;
+import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.concurrent.Executor;
 
-public class NeoForgeSchedulerAdapter extends AbstractJavaScheduler {
-    private final Executor sync;
+public class NeoForgeSchedulerAdapter extends JavaSchedulerAdapter {
+    private final Executor syncExecutor;
 
     public NeoForgeSchedulerAdapter(LPNeoForgeBootstrap bootstrap) {
         super(bootstrap);
-        this.sync = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).executeBlocking(r);
+        this.syncExecutor = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).executeBlocking(r);
+    }
+
+    public void sync(Runnable task) {
+        this.syncExecutor.execute(task);
     }
 
     @Override
-    public Executor sync() {
-        return this.sync;
+    public void sync(Sender ctx, Runnable task) {
+        this.syncExecutor.execute(task);
     }
 
 }
