@@ -206,7 +206,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         this.syncTaskBuffer = new SyncTask.Buffer(this);
 
         // register commands
-        registerCommands();
+        if (skipCommandRegistration()) {
+            getLogger().warn("LuckPerms commands are disabled in the configuration for both console and players. Skipping command registration.");
+        } else {
+            registerCommands();
+        }
 
         // load internal managers
         getLogger().info("Loading internal permission managers...");
@@ -384,6 +388,11 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         }
 
         return configFile;
+    }
+
+    protected boolean skipCommandRegistration() {
+        return getConfiguration().get(ConfigKeys.DISABLE_LUCKPERMS_COMMANDS_CONSOLE) &&
+                getConfiguration().get(ConfigKeys.DISABLE_LUCKPERMS_COMMANDS_PLAYERS);
     }
 
     @Override

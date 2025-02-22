@@ -179,6 +179,13 @@ public interface Message {
             .color(GRAY)
     );
 
+    Args0 COMMANDS_DISABLED = () -> prefixed(translatable()
+            // "&3LuckPerms commands are disabled."
+            .key("luckperms.commandsystem.commands-disabled")
+            .color(DARK_AQUA)
+            .append(FULL_STOP)
+    );
+
     Args2<String, String> FIRST_TIME_SETUP = (label, username) -> joinNewline(
             // "&3It seems that no permissions have been setup yet!"
             // "&3Before you can use any of the LuckPerms commands in-game, you need to use the console to give yourself access."
