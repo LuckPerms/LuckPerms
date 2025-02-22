@@ -132,9 +132,7 @@ public interface Sender {
      * @param permission the permission to check for
      * @return true if the sender has the permission
      */
-    default boolean hasPermission(CommandPermission permission) {
-        return hasPermission(permission.getPermission());
-    }
+    boolean hasPermission(CommandPermission permission);
 
     /**
      * Makes the sender perform a command.

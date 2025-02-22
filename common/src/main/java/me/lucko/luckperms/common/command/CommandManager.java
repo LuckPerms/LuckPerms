@@ -160,6 +160,15 @@ public class CommandManager {
             return CompletableFuture.completedFuture(null);
         }
 
+        boolean commandsDisabled = sender.isConsole()
+                ? this.plugin.getConfiguration().get(ConfigKeys.DISABLE_LUCKPERMS_COMMANDS_CONSOLE)
+                : this.plugin.getConfiguration().get(ConfigKeys.DISABLE_LUCKPERMS_COMMANDS_PLAYERS);
+
+        if (commandsDisabled) {
+            Message.COMMANDS_DISABLED.send(sender);
+            return CompletableFuture.completedFuture(null);
+        }
+
         SchedulerAdapter scheduler = this.plugin.getBootstrap().getScheduler();
         List<String> argsCopy = new ArrayList<>(args);
 
@@ -286,6 +295,14 @@ public class CommandManager {
     }
 
     public List<String> tabCompleteCommand(Sender sender, List<String> arguments) {
+        boolean commandsDisabled = sender.isConsole()
+                ? this.plugin.getConfiguration().get(ConfigKeys.DISABLE_LUCKPERMS_COMMANDS_CONSOLE)
+                : this.plugin.getConfiguration().get(ConfigKeys.DISABLE_LUCKPERMS_COMMANDS_PLAYERS);
+
+        if (commandsDisabled) {
+            return Collections.emptyList();
+        }
+
         applyConvenienceAliases(arguments, false);
 
         final List<Command<?>> mains = this.mainCommands.values().stream()

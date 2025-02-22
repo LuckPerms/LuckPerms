@@ -26,6 +26,9 @@
 package me.lucko.luckperms.common.sender;
 
 import com.google.common.collect.Iterables;
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.config.generic.key.ConfigKey;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -96,6 +99,19 @@ public final class AbstractSender<T> implements Sender {
     @Override
     public boolean hasPermission(String permission) {
         return isConsole() || this.factory.hasPermission(this.sender, permission);
+    }
+
+    @Override
+    public boolean hasPermission(CommandPermission permission) {
+        boolean readOnlyMode = isConsole()
+                ? this.plugin.getConfiguration().get(ConfigKeys.READ_ONLY_MODE_CONSOLE)
+                : this.plugin.getConfiguration().get(ConfigKeys.READ_ONLY_MODE_PLAYERS);
+
+        if (readOnlyMode && !permission.isReadOnly()) {
+            return false;
+        }
+
+        return hasPermission(permission.getPermission());
     }
 
     @Override
