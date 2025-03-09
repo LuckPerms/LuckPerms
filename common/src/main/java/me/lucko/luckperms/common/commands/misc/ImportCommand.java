@@ -130,7 +130,7 @@ public class ImportCommand extends SingleCommand {
             }
         }
 
-        Importer importer = new Importer(plugin, sender, data, !args.contains("--replace"));
+        Importer importer = new Importer(plugin, sender, data, !args.remove("--replace"), args.getContextOrEmpty(1));
 
         // Run the importer in its own thread.
         plugin.getBootstrap().getScheduler().executeAsync(() -> {
