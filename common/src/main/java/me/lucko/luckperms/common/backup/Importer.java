@@ -30,6 +30,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.HolderType;
@@ -70,6 +71,7 @@ public class Importer implements Runnable {
     private final Set<Sender> notify;
     private final JsonObject data;
     private final boolean merge;
+    private final boolean mergeExistingNodeEntries;
 
     public Importer(LuckPermsPlugin plugin, Sender executor, JsonObject data, boolean merge) {
         this.plugin = plugin;
@@ -81,6 +83,7 @@ public class Importer implements Runnable {
         }
         this.data = data;
         this.merge = merge;
+        this.mergeExistingNodeEntries = plugin.getConfiguration().get(ConfigKeys.USE_EXISTING_NODE_ENTRIES_ON_IMPORT);
     }
 
     private static final class UserData {
@@ -98,7 +101,11 @@ public class Importer implements Runnable {
     private void processGroup(String groupName, Set<Node> nodes) {
         Group group = this.plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
         if (this.merge) {
-            group.mergeNodes(DataType.NORMAL, nodes);
+            if (this.mergeExistingNodeEntries) {
+                group.deepMergeNodes(DataType.NORMAL, nodes);
+            } else {
+                group.mergeNodes(DataType.NORMAL, nodes);
+            }
         } else {
             group.setNodes(DataType.NORMAL, nodes, false);
         }
@@ -117,7 +124,11 @@ public class Importer implements Runnable {
             user.getPrimaryGroup().setStoredValue(userData.primaryGroup);
         }
         if (this.merge) {
-            user.mergeNodes(DataType.NORMAL, userData.nodes);
+            if (this.mergeExistingNodeEntries) {
+                user.deepMergeNodes(DataType.NORMAL, userData.nodes);
+            } else {
+                user.mergeNodes(DataType.NORMAL, userData.nodes);
+            }
         } else {
             user.setNodes(DataType.NORMAL, userData.nodes, false);
         }

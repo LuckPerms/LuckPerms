@@ -163,6 +163,12 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> DISABLE_BULKUPDATE = booleanKey("disable-bulkupdate", false);
 
     /**
+     * If LuckPerms should attempt to merge into existing permission nodes when importing data when the effective result would be the same.
+     * If this is false, the plugin will always create new permission nodes for each entry in the import data.
+     */
+    public static final ConfigKey<Boolean> USE_EXISTING_NODE_ENTRIES_ON_IMPORT = booleanKey("use-existing-node-entries-on-import", false);
+
+    /**
      * If LuckPerms should produce extra logging output when it handles logins.
      */
     public static final ConfigKey<Boolean> DEBUG_LOGINS = booleanKey("debug-logins", false);
