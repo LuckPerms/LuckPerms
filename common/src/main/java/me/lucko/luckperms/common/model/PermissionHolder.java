@@ -254,9 +254,15 @@ public abstract class PermissionHolder {
         for (Node existing : existingData) {
             Set<Node> toCombine = new HashSet<>();
             for (Node node : set) {
-                if (existing.equals(node, NodeEqualityPredicate.IGNORE_CONTEXT)) {
-                    toCombine.add(node);
+                if (!existing.equals(node, NodeEqualityPredicate.IGNORE_CONTEXT)) {
+                    continue;
                 }
+                Set<String> existingKeys = existing.getContexts().toMap().keySet();
+                Set<String> keys = node.getContexts().toMap().keySet();
+                if (!existingKeys.equals(keys)) {
+                    continue;
+                }
+                toCombine.add(node);
             }
             if (toCombine.isEmpty()) {
                 continue;
