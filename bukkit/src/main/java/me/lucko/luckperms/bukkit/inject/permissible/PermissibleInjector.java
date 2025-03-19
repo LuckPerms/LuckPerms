@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.PermissionAttachment;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -159,6 +160,19 @@ public final class PermissibleInjector {
                 HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, newPb);
             }
         }
+    }
+
+    public static @Nullable LuckPermsPermissible get(Player player) {
+        PermissibleBase permissibleBase;
+        try {
+            permissibleBase = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
+        if (permissibleBase instanceof LuckPermsPermissible) {
+            return (LuckPermsPermissible) permissibleBase;
+        }
+        return null;
     }
 
     public static void checkInjected(Player player, PluginLogger logger) {

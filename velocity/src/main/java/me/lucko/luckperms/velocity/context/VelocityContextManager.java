@@ -26,12 +26,12 @@
 package me.lucko.luckperms.velocity.context;
 
 import com.velocitypowered.api.proxy.Player;
-import me.lucko.luckperms.common.context.manager.InlineContextManager;
+import me.lucko.luckperms.common.context.manager.SimpleContextManager;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
 
 import java.util.UUID;
 
-public class VelocityContextManager extends InlineContextManager<Player, Player> {
+public class VelocityContextManager extends SimpleContextManager<Player, Player> {
     public VelocityContextManager(LPVelocityPlugin plugin) {
         super(plugin, Player.class, Player.class);
     }

@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
+import me.lucko.luckperms.velocity.context.VelocityContextManager;
 import me.lucko.luckperms.velocity.service.PlayerPermissionProvider;
 import me.lucko.luckperms.velocity.util.AdventureCompat;
 
@@ -90,7 +91,8 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
             try {
                 User user = loadUser(p.getUniqueId(), p.getUsername());
                 recordConnection(p.getUniqueId());
-                e.setProvider(new PlayerPermissionProvider(p, user, this.plugin.getContextManager().getCacheFor(p)));
+                VelocityContextManager contextManager = this.plugin.getContextManager();
+                e.setProvider(new PlayerPermissionProvider(p, user, contextManager::getQueryOptions));
                 this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(p.getUniqueId(), p.getUsername(), user);
             } catch (Exception ex) {
                 this.plugin.getLogger().severe("Exception occurred whilst loading data for " + p.getUniqueId() + " - " + p.getUsername(), ex);

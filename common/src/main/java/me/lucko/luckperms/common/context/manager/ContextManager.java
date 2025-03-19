@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
- * Base implementation of {@link ContextManager} which caches content lookups.
+ * Base implementation of {@link ContextManager}.
  *
  * @param <S> the subject type
  * @param <P> the player type
@@ -78,14 +78,10 @@ public abstract class ContextManager<S, P extends S> {
 
     public abstract UUID getUniqueId(P player);
 
-    public abstract QueryOptionsSupplier getCacheFor(S subject);
-
-    public QueryOptions getQueryOptions(S subject) {
-        return getCacheFor(subject).getQueryOptions();
-    }
+    public abstract QueryOptions getQueryOptions(S subject);
 
     public ImmutableContextSet getContext(S subject) {
-        return getCacheFor(subject).getContextSet();
+        return getQueryOptions(subject).context();
     }
 
     public QueryOptions getStaticQueryOptions() {
@@ -96,11 +92,13 @@ public abstract class ContextManager<S, P extends S> {
         return getStaticQueryOptions().context();
     }
 
-    public QueryOptions formQueryOptions(ImmutableContextSet contextSet) {
-        return this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder().context(contextSet).build();
+    public void customizeStaticQueryOptions(QueryOptions.Builder builder) {
+        // overridden
     }
 
-    public abstract QueryOptions formQueryOptions(S subject, ImmutableContextSet contextSet);
+    public void customizeQueryOptions(S subject, QueryOptions.Builder builder) {
+        // overridden
+    }
 
     public void signalContextUpdate(S subject) {
         if (subject == null) {
@@ -114,7 +112,7 @@ public abstract class ContextManager<S, P extends S> {
         this.plugin.getEventDispatcher().dispatchContextUpdate(subject);
     }
 
-    protected abstract void invalidateCache(S subject);
+    public abstract void invalidateCache(S subject);
 
     public void registerCalculator(ContextCalculator<? super S> calculator) {
         String calculatorClass = calculator.getClass().getName();
@@ -158,7 +156,9 @@ public abstract class ContextManager<S, P extends S> {
             callContextCalculator(calculator, subject, consumer);
         }
 
-        return formQueryOptions(subject, accumulator.build());
+        QueryOptions.Builder builder = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder().context(accumulator.build());
+        customizeQueryOptions(subject, builder);
+        return builder.build();
     }
 
     private QueryOptions calculateStatic() {
@@ -169,7 +169,9 @@ public abstract class ContextManager<S, P extends S> {
             callStaticContextCalculator(calculator, consumer);
         }
 
-        return formQueryOptions(accumulator.build());
+        QueryOptions.Builder builder = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder().context(accumulator.build());
+        customizeStaticQueryOptions(builder);
+        return builder.build();
     }
 
     public ImmutableContextSet getPotentialContexts() {

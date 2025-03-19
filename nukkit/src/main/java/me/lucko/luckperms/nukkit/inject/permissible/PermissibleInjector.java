@@ -28,6 +28,7 @@ package me.lucko.luckperms.nukkit.inject.permissible;
 import cn.nukkit.Player;
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.PermissionAttachment;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Set;
@@ -139,6 +140,19 @@ public final class PermissibleInjector {
                 PLAYER_PERMISSIBLE_FIELD.set(player, newPb);
             }
         }
+    }
+
+    public static @Nullable LuckPermsPermissible get(Player player) {
+        PermissibleBase permissibleBase;
+        try {
+            permissibleBase = (PermissibleBase) PLAYER_PERMISSIBLE_FIELD.get(player);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
+        if (permissibleBase instanceof LuckPermsPermissible) {
+            return (LuckPermsPermissible) permissibleBase;
+        }
+        return null;
     }
 
 }

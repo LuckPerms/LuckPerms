@@ -27,7 +27,7 @@ package me.lucko.luckperms.fabric.mixin;
 
 import me.lucko.luckperms.common.cacheddata.type.MetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
@@ -61,7 +61,7 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
      * having to maintain a map of Player->Cache.
      */
     @Unique
-    private QueryOptionsCache<ServerPlayerEntity> luckperms$queryOptions;
+    private QueryOptionsSupplier luckperms$queryOptions;
 
     // Used by PlayerChangeWorldCallback hook below.
     @Shadow public abstract ServerWorld getServerWorld();
@@ -72,9 +72,9 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     }
 
     @Override
-    public QueryOptionsCache<ServerPlayerEntity> luckperms$getQueryOptionsCache(FabricContextManager contextManager) {
+    public QueryOptionsSupplier luckperms$getQueryOptionsCache(FabricContextManager contextManager) {
         if (this.luckperms$queryOptions == null) {
-            this.luckperms$queryOptions = contextManager.newQueryOptionsCache((ServerPlayerEntity) (Object) this);
+            this.luckperms$queryOptions = contextManager.createQueryOptionsSupplier((ServerPlayerEntity) (Object) this);
         }
         return this.luckperms$queryOptions;
     }

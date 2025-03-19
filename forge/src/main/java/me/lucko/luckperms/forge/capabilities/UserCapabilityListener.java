@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.forge.capabilities;
 
+import me.lucko.luckperms.forge.LPForgePlugin;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -40,6 +41,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class UserCapabilityListener {
+
+    private final LPForgePlugin plugin;
+
+    public UserCapabilityListener(LPForgePlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @SubscribeEvent
     public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
@@ -60,13 +67,17 @@ public class UserCapabilityListener {
         Player previousPlayer = event.getOriginal();
         Player currentPlayer = event.getEntity();
 
+        if (!(currentPlayer instanceof ServerPlayer)) {
+           return;
+        }
+
         previousPlayer.reviveCaps();
         try {
             UserCapabilityImpl previous = UserCapabilityImpl.get(previousPlayer);
             UserCapabilityImpl current = UserCapabilityImpl.get(currentPlayer);
 
-            current.initialise(previous);
-            current.getQueryOptionsCache().invalidate();
+            current.initialise(previous, ((ServerPlayer) currentPlayer), this.plugin);
+            current.getQueryOptionsSupplier().invalidateCache();
         } catch (IllegalStateException e) {
             // continue on if we cannot copy original data
         } finally {

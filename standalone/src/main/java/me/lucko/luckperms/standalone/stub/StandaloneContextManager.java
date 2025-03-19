@@ -25,20 +25,13 @@
 
 package me.lucko.luckperms.standalone.stub;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.manager.ContextManager;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.SimpleContextManager;
 import me.lucko.luckperms.standalone.LPStandalonePlugin;
 import me.lucko.luckperms.standalone.app.integration.StandaloneSender;
-import me.lucko.luckperms.standalone.app.integration.StandaloneUser;
-import net.luckperms.api.context.ImmutableContextSet;
-import net.luckperms.api.query.QueryOptions;
 
 import java.util.UUID;
 
-public class StandaloneContextManager extends ContextManager<StandaloneSender, StandaloneSender> {
-    private final QueryOptionsCache<StandaloneSender> singletonCache = new QueryOptionsCache<>(StandaloneUser.INSTANCE, this);
-
+public class StandaloneContextManager extends SimpleContextManager<StandaloneSender, StandaloneSender> {
     public StandaloneContextManager(LPStandalonePlugin plugin) {
         super(plugin, StandaloneSender.class, StandaloneSender.class);
     }
@@ -46,29 +39,5 @@ public class StandaloneContextManager extends ContextManager<StandaloneSender, S
     @Override
     public UUID getUniqueId(StandaloneSender player) {
         return player.getUniqueId();
-    }
-
-    @Override
-    public QueryOptionsCache<StandaloneSender> getCacheFor(StandaloneSender subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-        if (subject == StandaloneUser.INSTANCE) {
-            return this.singletonCache;
-        }
-
-        // just return a new one every time - not optimal but this case should only be hit using unit tests anyway
-        return new QueryOptionsCache<>(subject, this);
-    }
-
-    @Override
-    protected void invalidateCache(StandaloneSender subject) {
-        this.singletonCache.invalidate();
-    }
-
-    @Override
-    public QueryOptions formQueryOptions(StandaloneSender subject, ImmutableContextSet contextSet) {
-        QueryOptions.Builder queryOptions = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
-        return queryOptions.context(contextSet).build();
     }
 }

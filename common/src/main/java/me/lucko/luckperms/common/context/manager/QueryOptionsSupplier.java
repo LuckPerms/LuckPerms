@@ -39,4 +39,6 @@ public interface QueryOptionsSupplier {
         return getQueryOptions().context();
     }
 
+    void invalidateCache();
+
 }

@@ -25,23 +25,24 @@
 
 package me.lucko.luckperms.velocity.service;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.velocitypowered.api.permission.PermissionFunction;
 import com.velocitypowered.api.permission.PermissionProvider;
 import com.velocitypowered.api.permission.PermissionSubject;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.Player;
-import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
+import net.luckperms.api.query.QueryOptions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class PlayerPermissionProvider implements PermissionProvider, PermissionFunction {
     private final Player player;
     private final User user;
-    private final QueryOptionsSupplier queryOptionsSupplier;
+    private final Function<Player, QueryOptions> queryOptionsSupplier;
 
-    public PlayerPermissionProvider(Player player, User user, QueryOptionsSupplier queryOptionsSupplier) {
+    public PlayerPermissionProvider(Player player, User user, Function<Player, QueryOptions> queryOptionsSupplier) {
         this.player = player;
         this.user = user;
         this.queryOptionsSupplier = queryOptionsSupplier;
@@ -55,6 +56,7 @@ public class PlayerPermissionProvider implements PermissionProvider, PermissionF
 
     @Override
     public @NonNull Tristate getPermissionValue(@NonNull String permission) {
-        return CompatibilityUtil.convertTristate(this.user.getCachedData().getPermissionData(this.queryOptionsSupplier.getQueryOptions()).checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result());
+        QueryOptions queryOptions = this.queryOptionsSupplier.apply(this.player);
+        return CompatibilityUtil.convertTristate(this.user.getCachedData().getPermissionData(queryOptions).checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result());
     }
 }
