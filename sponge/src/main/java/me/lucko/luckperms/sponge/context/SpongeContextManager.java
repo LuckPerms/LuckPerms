@@ -25,20 +25,23 @@
 
 package me.lucko.luckperms.sponge.context;
 
-import me.lucko.luckperms.common.context.manager.InlineContextManager;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.context.manager.SimpleContextManager;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.model.ContextCalculatorProxy;
 import me.lucko.luckperms.sponge.service.model.TemporaryCauseHolderSubject;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
+import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.StaticContextCalculator;
+import net.luckperms.api.query.QueryOptions;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.UUID;
 
-public class SpongeContextManager extends InlineContextManager<Subject, ServerPlayer> {
+public class SpongeContextManager extends SimpleContextManager<Subject, ServerPlayer> {
 
     public SpongeContextManager(LPSpongePlugin plugin) {
         super(plugin, Subject.class, ServerPlayer.class);
@@ -75,4 +78,11 @@ public class SpongeContextManager extends InlineContextManager<Subject, ServerPl
     public UUID getUniqueId(ServerPlayer player) {
         return player.uniqueId();
     }
+
+    public QueryOptions formQueryOptions(ContextSet contexts) {
+        QueryOptions.Builder builder = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder().context(contexts);
+        customizeStaticQueryOptions(builder);
+        return builder.build();
+    }
+
 }

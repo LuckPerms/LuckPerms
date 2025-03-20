@@ -25,17 +25,15 @@
 
 package me.lucko.luckperms.neoforge.context;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.manager.InlineContextManager;
+import me.lucko.luckperms.common.context.manager.SimpleContextManager;
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
-public class NeoForgeContextManager extends InlineContextManager<ServerPlayer, ServerPlayer> {
+public class NeoForgeContextManager extends SimpleContextManager<ServerPlayer, ServerPlayer> {
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
     public NeoForgeContextManager(LPNeoForgePlugin plugin) {
@@ -48,12 +46,9 @@ public class NeoForgeContextManager extends InlineContextManager<ServerPlayer, S
     }
 
     @Override
-    public QueryOptions formQueryOptions(ServerPlayer subject, ImmutableContextSet contextSet) {
-        QueryOptions.Builder builder = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
+    public void customizeQueryOptions(ServerPlayer subject, QueryOptions.Builder builder) {
         if (subject.getServer() != null && subject.getServer().isSingleplayerOwner(subject.getGameProfile())) {
             builder.option(INTEGRATED_SERVER_OWNER, true);
         }
-
-        return builder.context(contextSet).build();
     }
 }
