@@ -576,3 +576,10 @@ disable-bulkupdate: false
 #
 # - When this happens, the plugin will set their primary group back to default.
 prevent-primary-group-removal: false
+
+# If LuckPerms should attempt to merge into existing permission nodes when importing data when the 
+# effective result would be the same.
+#
+# - Useful if you are importing data from multiple sources with overlapping permissions.
+# - Note that this will cause the import process to be slower.
+use-existing-node-entries-on-import: false

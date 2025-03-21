@@ -38,6 +38,15 @@ public enum NodeEquality {
                     o1.getContexts().equals(o2.getContexts());
         }
     },
+    KEY_VALUE_EXPIRY {
+        @Override
+        public boolean equals(AbstractNode<?, ?> o1, AbstractNode<?, ?> o2) {
+            return o1 == o2 ||
+                    o1.key.equals(o2.key) &&
+                    o1.value == o2.value &&
+                    o1.expireAt == o2.expireAt;
+        }
+    },
     KEY_EXPIRY_CONTEXTS {
         @Override
         public boolean equals(AbstractNode<?, ?> o1, AbstractNode<?, ?> o2) {
@@ -101,6 +110,8 @@ public enum NodeEquality {
             return NodeEquality.KEY_CONTEXTS;
         } else if (equalityPredicate == NodeEqualityPredicate.ONLY_KEY) {
             return NodeEquality.KEY;
+        } else if (equalityPredicate == NodeEqualityPredicate.IGNORE_CONTEXT) {
+            return NodeEquality.KEY_VALUE_EXPIRY;
         } else {
             return null;
         }
