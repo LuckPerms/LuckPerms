@@ -1407,4 +1407,42 @@ public class CommandsIntegrationTest {
         });
     }
 
+    @Test
+    public void testReadOnlyMode(@TempDir Path tempDir) {
+        Map<String, String> config = new HashMap<>(CONFIG);
+        config.put("commands-read-only-mode.players", "true");
+
+        TestPluginProvider.use(tempDir, config, (app, bootstrap, plugin) -> {
+            CommandExecutor executor = app.getCommandExecutor();
+
+            new CommandTester(executor)
+                    .givenHasPermissions("luckperms.group.permission.info")
+                    .whenRunCommand("group default permission info")
+                    .thenExpect("[LP] default does not have any permissions set.")
+
+                    .givenHasPermissions("luckperms.group.permission.info", "luckperms.group.permission.set")
+                    .whenRunCommand("group default permission set test true")
+                    .thenExpect("[LP] You do not have permission to use this command!", false)
+
+                    .givenHasAllPermissions()
+                    .whenRunCommand("group default permission set test true")
+                    .thenExpect("[LP] You do not have permission to use this command!");
+        });
+    }
+
+    @Test
+    public void testCommandsDisabled(@TempDir Path tempDir) {
+        Map<String, String> config = new HashMap<>(CONFIG);
+        config.put("disable-luckperms-commands.players", "true");
+
+        TestPluginProvider.use(tempDir, config, (app, bootstrap, plugin) -> {
+            CommandExecutor executor = app.getCommandExecutor();
+
+            new CommandTester(executor)
+                    .givenHasAllPermissions()
+                    .whenRunCommand("info")
+                    .thenExpect("[LP] LuckPerms commands are disabled.");
+        });
+    }
+
 }
