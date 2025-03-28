@@ -40,6 +40,8 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.CompletableFutures;
 import me.lucko.luckperms.common.util.Uuids;
+import net.luckperms.api.context.ContextSet;
+import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
@@ -70,8 +72,9 @@ public class Importer implements Runnable {
     private final Set<Sender> notify;
     private final JsonObject data;
     private final boolean merge;
+    private final ContextSet context;
 
-    public Importer(LuckPermsPlugin plugin, Sender executor, JsonObject data, boolean merge) {
+    public Importer(LuckPermsPlugin plugin, Sender executor, JsonObject data, boolean merge, ContextSet context) {
         this.plugin = plugin;
 
         if (executor.isConsole()) {
@@ -81,6 +84,7 @@ public class Importer implements Runnable {
         }
         this.data = data;
         this.merge = merge;
+        this.context = context;
     }
 
     private static final class UserData {
@@ -133,9 +137,26 @@ public class Importer implements Runnable {
         }
     }
 
+    private Set<Node> deserializeNodes(JsonArray arr) {
+        Set<Node> nodes = new HashSet<>();
+        for (JsonElement entry : arr) {
+            Node node = NodeJsonSerializer.deserializeNode(entry);
+            if (node == null) {
+                continue;
+            }
+            if (!this.context.isEmpty()) {
+                MutableContextSet mutableContext = node.getContexts().mutableCopy();
+                mutableContext.addAll(this.context);
+                node = node.toBuilder().withContext(mutableContext).build();
+            }
+            nodes.add(node);
+        }
+        return nodes;
+    }
+
     private void parseExportData(Map<String, Set<Node>> groups, Map<String, List<String>> tracks, Map<UUID, UserData> users) {
         for (Map.Entry<String, JsonElement> group : getDataSection("groups")) {
-            groups.put(group.getKey(), NodeJsonSerializer.deserializeNodes(group.getValue().getAsJsonObject().get("nodes").getAsJsonArray()));
+            groups.put(group.getKey(), deserializeNodes(group.getValue().getAsJsonObject().get("nodes").getAsJsonArray()));
         }
         for (Map.Entry<String, JsonElement> track : getDataSection("tracks")) {
             JsonArray trackGroups = track.getValue().getAsJsonObject().get("groups").getAsJsonArray();
@@ -149,7 +170,7 @@ public class Importer implements Runnable {
             UUID uuid = UUID.fromString(user.getKey());
             String username = null;
             String primaryGroup = null;
-            Set<Node> nodes = NodeJsonSerializer.deserializeNodes(jsonData.get("nodes").getAsJsonArray());
+            Set<Node> nodes = deserializeNodes(jsonData.get("nodes").getAsJsonArray());
 
             if (jsonData.has("username")) {
                 username = jsonData.get("username").getAsString();
@@ -171,7 +192,7 @@ public class Importer implements Runnable {
             String id = jsonData.get("id").getAsString();
 
             if (type == HolderType.GROUP) {
-                groups.put(id, NodeJsonSerializer.deserializeNodes(jsonData.get("nodes").getAsJsonArray()));
+                groups.put(id, deserializeNodes(jsonData.get("nodes").getAsJsonArray()));
             } else {
                 UUID uuid = UUID.fromString(id);
                 String username = null;
@@ -181,7 +202,7 @@ public class Importer implements Runnable {
                     username = displayName;
                 }
 
-                Set<Node> nodes = NodeJsonSerializer.deserializeNodes(jsonData.get("nodes").getAsJsonArray());
+                Set<Node> nodes = deserializeNodes(jsonData.get("nodes").getAsJsonArray());
                 users.put(uuid, new UserData(username, null, nodes));
             }
         }
