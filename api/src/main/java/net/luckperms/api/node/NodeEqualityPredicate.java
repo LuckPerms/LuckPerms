@@ -156,4 +156,16 @@ public interface NodeEqualityPredicate {
      */
     NodeEqualityPredicate IGNORE_VALUE_OR_IF_TEMPORARY = new DummyNodeEqualityPredicate("IGNORE_VALUE_OR_IF_TEMPORARY");
 
+    /**
+     * All attributes must match, except for the {@link Node#getContexts() context}, which is ignored.
+     * 
+     * <p>Returns true if: (and)</p>
+     * <p></p>
+     * <ul>
+     * <li>{@link Node#getKey() key} = key</li>
+     * <li>{@link Node#getValue() value} = value</li>
+     * <li>{@link Node#getExpiry() expiry} = expiry</li>
+     * </ul>
+     */
+    NodeEqualityPredicate IGNORE_CONTEXT = new DummyNodeEqualityPredicate("IGNORE_CONTEXT");
 }
