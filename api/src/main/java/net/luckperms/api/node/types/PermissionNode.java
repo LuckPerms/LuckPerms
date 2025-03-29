@@ -88,6 +88,7 @@ public interface PermissionNode extends ScopedNode<PermissionNode, PermissionNod
      *
      * @param permission the permission to set
      * @return the builder
+     * @throws IllegalArgumentException if {@code permission} is empty
      */
     static @NonNull Builder builder(@NonNull String permission) {
         return builder().permission(permission);
