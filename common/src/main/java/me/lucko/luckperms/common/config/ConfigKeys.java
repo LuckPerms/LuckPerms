@@ -285,6 +285,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> APPLY_BUKKIT_DEFAULT_PERMISSIONS = notReloadable(booleanKey("apply-bukkit-default-permissions", true));
 
     /**
+     * More complex default rules for bukkit. Requires apply-bukkit-default-permissions to be true. This setting is ignored on other platforms.
+     */
+    public static final ConfigKey<List<String>> BUKKIT_DEFAULT_RULES = notReloadable(stringListKey("bukkit-default-rules", ImmutableList.of()));
+
+    /**
      * If Bukkit attachment permissions are being applied. This setting is ignored on other platforms.
      */
     public static final ConfigKey<Boolean> APPLY_BUKKIT_ATTACHMENT_PERMISSIONS = notReloadable(booleanKey("apply-bukkit-attachment-permissions", true));
