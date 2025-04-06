@@ -95,6 +95,7 @@ data:
   # - The standard DB engine port is used by default
   #   (MySQL: 3306, PostgreSQL: 5432, MongoDB: 27017)
   # - Specify as "host:port" if differs
+ # With IPv6, care must be taken to ensure that [IPv6] is used
   address: localhost
 
   # The name of the database to store LuckPerms data in.
