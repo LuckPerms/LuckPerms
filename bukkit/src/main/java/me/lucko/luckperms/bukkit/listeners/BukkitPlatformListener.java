@@ -44,19 +44,22 @@ import java.util.regex.Pattern;
 public class BukkitPlatformListener implements Listener {
     private static final Pattern OP_COMMAND_PATTERN = Pattern.compile("^/?(\\w+:)?(deop|op)( .*)?$", Pattern.CASE_INSENSITIVE);
 
+    private static final boolean PLUGIN_DESCRIPTION_FILE_PROVIDES_SUPPORTED;
+
+    static {
+        boolean supported = false;
+        try {
+            PluginDescriptionFile.class.getMethod("getProvides");
+            supported = true;
+        } catch (NoSuchMethodException ignored) {
+        }
+        PLUGIN_DESCRIPTION_FILE_PROVIDES_SUPPORTED = supported;
+    }
+
     private final LPBukkitPlugin plugin;
-    private final boolean supportsProvides;
 
     public BukkitPlatformListener(LPBukkitPlugin plugin) {
         this.plugin = plugin;
-
-        boolean provides = false;
-        try {
-            PluginDescriptionFile.class.getMethod("getProvides");
-            provides = true;
-        } catch (NoSuchMethodException ignored) {}
-        this.supportsProvides = provides;
-
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -91,7 +94,11 @@ public class BukkitPlatformListener implements Listener {
 
     @EventHandler
     public void onPluginEnable(PluginEnableEvent e) {
-        if (e.getPlugin().getName().equalsIgnoreCase("Vault") || (supportsProvides && e.getPlugin().getDescription().getProvides().contains("Vault"))) {
+        Plugin p = e.getPlugin();
+        boolean shouldHook = p.getName().equalsIgnoreCase("Vault") ||
+                (PLUGIN_DESCRIPTION_FILE_PROVIDES_SUPPORTED && p.getDescription().getProvides().contains("Vault"));
+
+        if (shouldHook) {
             this.plugin.tryVaultHook(true);
         }
     }
