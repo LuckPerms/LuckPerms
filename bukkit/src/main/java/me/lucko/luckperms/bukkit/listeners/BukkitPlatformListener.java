@@ -36,6 +36,8 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
 
 import java.util.regex.Pattern;
 
@@ -43,9 +45,18 @@ public class BukkitPlatformListener implements Listener {
     private static final Pattern OP_COMMAND_PATTERN = Pattern.compile("^/?(\\w+:)?(deop|op)( .*)?$", Pattern.CASE_INSENSITIVE);
 
     private final LPBukkitPlugin plugin;
+    private final boolean supportsProvides;
 
     public BukkitPlatformListener(LPBukkitPlugin plugin) {
         this.plugin = plugin;
+
+        boolean provides = false;
+        try {
+            PluginDescriptionFile.class.getMethod("getProvides");
+            provides = true;
+        } catch (NoSuchMethodException ignored) {}
+        this.supportsProvides = provides;
+
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -80,7 +91,7 @@ public class BukkitPlatformListener implements Listener {
 
     @EventHandler
     public void onPluginEnable(PluginEnableEvent e) {
-        if (e.getPlugin().getName().equalsIgnoreCase("Vault")) {
+        if (e.getPlugin().getName().equalsIgnoreCase("Vault") || (supportsProvides && e.getPlugin().getDescription().getProvides().contains("Vault"))) {
             this.plugin.tryVaultHook(true);
         }
     }
