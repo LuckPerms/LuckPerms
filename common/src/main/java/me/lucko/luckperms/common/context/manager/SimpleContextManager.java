@@ -28,63 +28,27 @@ package me.lucko.luckperms.common.context.manager;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.CaffeineFactory;
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.concurrent.TimeUnit;
 
-public abstract class InlineContextManager<S, P extends S> extends ContextManager<S, P> {
+public abstract class SimpleContextManager<S, P extends S> extends ContextManager<S, P> {
 
     private final LoadingCache<S, QueryOptions> contextsCache = CaffeineFactory.newBuilder()
             .expireAfterWrite(50, TimeUnit.MILLISECONDS)
             .build(this::calculate);
 
-    protected InlineContextManager(LuckPermsPlugin plugin, Class<S> subjectClass, Class<P> playerClass) {
+    protected SimpleContextManager(LuckPermsPlugin plugin, Class<S> subjectClass, Class<P> playerClass) {
         super(plugin, subjectClass, playerClass);
     }
 
     @Override
-    public final QueryOptionsSupplier getCacheFor(S subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
-        return new InlineQueryOptionsSupplier<>(subject, this.contextsCache);
-    }
-
-    // override getContext, getQueryOptions and invalidateCache to skip the QueryOptionsSupplier
-    @Override
-    public final ImmutableContextSet getContext(S subject) {
-        return getQueryOptions(subject).context();
-    }
-
-    @Override
-    public final QueryOptions getQueryOptions(S subject) {
+    public QueryOptions getQueryOptions(S subject) {
         return this.contextsCache.get(subject);
     }
 
     @Override
-    protected final void invalidateCache(S subject) {
+    public void invalidateCache(S subject) {
         this.contextsCache.invalidate(subject);
-    }
-
-    @Override
-    public QueryOptions formQueryOptions(S subject, ImmutableContextSet contextSet) {
-        return formQueryOptions(contextSet);
-    }
-
-    private static final class InlineQueryOptionsSupplier<T> implements QueryOptionsSupplier {
-        private final T key;
-        private final LoadingCache<T, QueryOptions> cache;
-
-        InlineQueryOptionsSupplier(T key, LoadingCache<T, QueryOptions> cache) {
-            this.key = key;
-            this.cache = cache;
-        }
-
-        @Override
-        public QueryOptions getQueryOptions() {
-            return this.cache.get(this.key);
-        }
     }
 }

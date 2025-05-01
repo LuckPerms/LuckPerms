@@ -19,26 +19,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: validate gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
+      - name: Validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v3
 
-      - uses: actions/setup-java@v3
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Run build and tests with Gradle wrapper
         run: ./gradlew test build -PdockerTests
 
       - name: Publish test report
-        uses: mikepenz/action-junit-report@v3
+        uses: mikepenz/action-junit-report@v5
         if: success() || failure()
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
@@ -46,7 +47,7 @@ jobs:
           detailed_summary: true
 
       - name: Upload all artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jars
           path: |
@@ -61,7 +62,7 @@ jobs:
             standalone/loader/build/libs/LuckPerms-Standalone-*.jar
 
       - name: Upload standalone artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: standalone-binary
           path: standalone/loader/build/libs/LuckPerms-Standalone-*.jar
@@ -76,12 +77,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Retrieve saved standalone jar artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: standalone-binary
           path: standalone/docker/
@@ -90,13 +91,13 @@ jobs:
         run: mv standalone/docker/LuckPerms-Standalone-*.jar standalone/docker/luckperms-standalone.jar
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -108,7 +109,7 @@ jobs:
 
       - name: Extract metadata for Docker
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: |
@@ -121,7 +122,7 @@ jobs:
             type=raw,enable=${{ github.ref == 'refs/heads/master' }},value=${{ env.luckperms_version }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: standalone/docker/
           platforms: linux/amd64,linux/arm64

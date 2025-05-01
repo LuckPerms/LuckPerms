@@ -82,7 +82,7 @@ public class ForgePermissionHandler implements IPermissionHandler {
 
         if (capability != null) {
             User user = capability.getUser();
-            QueryOptions queryOptions = capability.getQueryOptionsCache().getQueryOptions();
+            QueryOptions queryOptions = capability.getQueryOptionsSupplier().getQueryOptions();
 
             T value = getPermissionValue(user, queryOptions, node, context);
             if (value != null) {

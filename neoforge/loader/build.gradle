@@ -20,11 +20,11 @@ neoForge {
     runs {
         client {
             client()
-            mods.set(new HashSet()) // Work around classpath issues by using the production jar for dev runs
+            //mods.set(new HashSet()) // Work around classpath issues by using the production jar for dev runs
         }
         server {
             server()
-            mods.set(new HashSet()) // Work around classpath issues by using the production jar for dev runs
+            //mods.set(new HashSet()) // Work around classpath issues by using the production jar for dev runs
         }
     }
 }

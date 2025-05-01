@@ -25,19 +25,19 @@
 
 package me.lucko.luckperms.fabric.context;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.manager.ContextManager;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.DetachedContextManager;
+import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.fabric.model.MixinUser;
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Objects;
 import java.util.UUID;
 
-public class FabricContextManager extends ContextManager<ServerPlayerEntity, ServerPlayerEntity> {
+public class FabricContextManager extends DetachedContextManager<ServerPlayerEntity, ServerPlayerEntity> {
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
     public FabricContextManager(LuckPermsPlugin plugin) {
@@ -49,32 +49,17 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity, Ser
         return player.getUuid();
     }
 
-    public QueryOptionsCache<ServerPlayerEntity> newQueryOptionsCache(ServerPlayerEntity player) {
-        return new QueryOptionsCache<>(player, this);
-    }
-
     @Override
-    public QueryOptionsCache<ServerPlayerEntity> getCacheFor(ServerPlayerEntity subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
+    public @Nullable QueryOptionsSupplier getQueryOptionsSupplier(ServerPlayerEntity subject) {
+        Objects.requireNonNull(subject, "subject");
         return ((MixinUser) subject).luckperms$getQueryOptionsCache(this);
     }
 
     @Override
-    public void invalidateCache(ServerPlayerEntity subject) {
-        getCacheFor(subject).invalidate();
-    }
-
-    @Override
-    public QueryOptions formQueryOptions(ServerPlayerEntity subject, ImmutableContextSet contextSet) {
-        QueryOptions.Builder queryOptions = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
+    public void customizeQueryOptions(ServerPlayerEntity subject, QueryOptions.Builder builder) {
         if (subject.getServer().isHost(subject.getGameProfile())) {
-            queryOptions.option(INTEGRATED_SERVER_OWNER, true);
+            builder.option(INTEGRATED_SERVER_OWNER, true);
         }
-
-        return queryOptions.context(contextSet).build();
     }
 
 }

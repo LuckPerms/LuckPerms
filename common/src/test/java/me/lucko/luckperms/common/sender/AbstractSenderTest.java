@@ -23,32 +23,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge.context;
+package me.lucko.luckperms.common.sender;
 
-import me.lucko.luckperms.common.context.manager.SimpleContextManager;
-import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
-import net.luckperms.api.query.OptionKey;
-import net.luckperms.api.query.QueryOptions;
-import net.minecraft.server.level.ServerPlayer;
+import me.lucko.luckperms.common.locale.Message;
+import net.kyori.adventure.text.Component;
+import com.google.common.collect.ImmutableList;
+import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
+import java.util.List;
 
-public class NeoForgeContextManager extends SimpleContextManager<ServerPlayer, ServerPlayer> {
-    public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    public NeoForgeContextManager(LPNeoForgePlugin plugin) {
-        super(plugin, ServerPlayer.class, ServerPlayer.class);
+public class AbstractSenderTest {
+
+    @Test
+    public void testSplitNewlines() {
+        Component component = Message.joinNewline(
+                Component.text("hello"),
+                Component.text("world"),
+                Message.joinNewline(
+                        Component.text("foo"),
+                        Component.text("bar")
+                )
+        );
+
+        List<Component> components = ImmutableList.copyOf(AbstractSender.splitNewlines(component));
+        assertEquals(4, components.size());
+        assertEquals(Component.text("hello"), components.get(0));
+        assertEquals(Component.text("world"), components.get(1));
+        assertEquals(Component.text("foo"), components.get(2));
+        assertEquals(Component.text("bar"), components.get(3));
     }
 
-    @Override
-    public UUID getUniqueId(ServerPlayer player) {
-        return player.getUUID();
-    }
-
-    @Override
-    public void customizeQueryOptions(ServerPlayer subject, QueryOptions.Builder builder) {
-        if (subject.getServer() != null && subject.getServer().isSingleplayerOwner(subject.getGameProfile())) {
-            builder.option(INTEGRATED_SERVER_OWNER, true);
-        }
-    }
 }

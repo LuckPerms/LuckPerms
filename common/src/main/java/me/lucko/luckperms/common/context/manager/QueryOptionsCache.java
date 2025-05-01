@@ -37,11 +37,11 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> the player type
  */
-public final class QueryOptionsCache<T> extends ExpiringCache<QueryOptions> implements QueryOptionsSupplier {
+final class QueryOptionsCache<T> extends ExpiringCache<QueryOptions> implements QueryOptionsSupplier {
     private final T subject;
     private final ContextManager<T, ?> contextManager;
 
-    public QueryOptionsCache(T subject, ContextManager<T, ?> contextManager) {
+    QueryOptionsCache(T subject, ContextManager<T, ?> contextManager) {
         super(50L, TimeUnit.MILLISECONDS); // expire roughly every tick
         this.subject = subject;
         this.contextManager = contextManager;
@@ -60,5 +60,10 @@ public final class QueryOptionsCache<T> extends ExpiringCache<QueryOptions> impl
     @Override
     public ImmutableContextSet getContextSet() {
         return get().context();
+    }
+
+    @Override
+    public void invalidateCache() {
+        invalidate();
     }
 }

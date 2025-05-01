@@ -26,44 +26,24 @@
 package me.lucko.luckperms.nukkit.context;
 
 import cn.nukkit.Player;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.manager.ContextManager;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
-import me.lucko.luckperms.common.util.CaffeineFactory;
+import me.lucko.luckperms.common.context.manager.DetachedContextManager;
+import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-import net.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.nukkit.inject.permissible.LuckPermsPermissible;
+import me.lucko.luckperms.nukkit.inject.permissible.PermissibleInjector;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-public class NukkitContextManager extends ContextManager<Player, Player> {
+public class NukkitContextManager extends DetachedContextManager<Player, Player> {
 
     public static final OptionKey<Boolean> OP_OPTION = OptionKey.of("op", Boolean.class);
 
-    // cache the creation of ContextsCache instances for online players with no expiry
-    private final LoadingMap<Player, QueryOptionsCache<Player>> onlineSubjectCaches = LoadingMap.of(key -> new QueryOptionsCache<>(key, this));
-
-    // cache the creation of ContextsCache instances for offline players with a 1m expiry
-    private final LoadingCache<Player, QueryOptionsCache<Player>> offlineSubjectCaches = CaffeineFactory.newBuilder()
-            .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build(key -> {
-                QueryOptionsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(key);
-                if (cache != null) {
-                    return cache;
-                }
-                return new QueryOptionsCache<>(key, this);
-            });
-
     public NukkitContextManager(LPNukkitPlugin plugin) {
         super(plugin, Player.class, Player.class);
-    }
-
-    public void onPlayerQuit(Player player) {
-        this.onlineSubjectCaches.remove(player);
     }
 
     @Override
@@ -72,38 +52,19 @@ public class NukkitContextManager extends ContextManager<Player, Player> {
     }
 
     @Override
-    public QueryOptionsCache<Player> getCacheFor(Player subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
+    public @Nullable QueryOptionsSupplier getQueryOptionsSupplier(Player subject) {
+        Objects.requireNonNull(subject, "subject");
+        LuckPermsPermissible permissible = PermissibleInjector.get(subject);
+        if (permissible != null) {
+            return permissible.getQueryOptionsSupplier();
         }
-
-        if (subject.isOnline()) {
-            return this.onlineSubjectCaches.get(subject);
-        } else {
-            return this.offlineSubjectCaches.get(subject);
-        }
+        return null;
     }
 
     @Override
-    protected void invalidateCache(Player subject) {
-        QueryOptionsCache<Player> cache = this.onlineSubjectCaches.getIfPresent(subject);
-        if (cache != null) {
-            cache.invalidate();
-        }
-
-        cache = this.offlineSubjectCaches.getIfPresent(subject);
-        if (cache != null) {
-            cache.invalidate();
-        }
-    }
-
-    @Override
-    public QueryOptions formQueryOptions(Player subject, ImmutableContextSet contextSet) {
-        QueryOptions.Builder queryOptions = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
+    public void customizeQueryOptions(Player subject, QueryOptions.Builder builder) {
         if (subject.isOp()) {
-            queryOptions.option(OP_OPTION, true);
+            builder.option(OP_OPTION, true);
         }
-
-        return queryOptions.context(contextSet).build();
     }
 }

@@ -26,12 +26,12 @@
 package me.lucko.luckperms.bungee.context;
 
 import me.lucko.luckperms.bungee.LPBungeePlugin;
-import me.lucko.luckperms.common.context.manager.InlineContextManager;
+import me.lucko.luckperms.common.context.manager.SimpleContextManager;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
-public class BungeeContextManager extends InlineContextManager<ProxiedPlayer, ProxiedPlayer> {
+public class BungeeContextManager extends SimpleContextManager<ProxiedPlayer, ProxiedPlayer> {
     public BungeeContextManager(LPBungeePlugin plugin) {
         super(plugin, ProxiedPlayer.class, ProxiedPlayer.class);
     }

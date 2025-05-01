@@ -215,9 +215,6 @@ public class NukkitConnectionListener extends AbstractConnectionListener impleme
             if (this.plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) {
                 player.setOp(false);
             }
-
-            // remove their contexts cache
-            this.plugin.getContextManager().onPlayerQuit(player);
         }, 1, true);
     }
 

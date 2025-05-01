@@ -25,19 +25,19 @@
 
 package me.lucko.luckperms.forge.context;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.manager.ContextManager;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.DetachedContextManager;
+import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.forge.LPForgePlugin;
 import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
-import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.level.ServerPlayer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Objects;
 import java.util.UUID;
 
-public class ForgeContextManager extends ContextManager<ServerPlayer, ServerPlayer> {
+public class ForgeContextManager extends DetachedContextManager<ServerPlayer, ServerPlayer> {
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
     public ForgeContextManager(LPForgePlugin plugin) {
@@ -50,29 +50,19 @@ public class ForgeContextManager extends ContextManager<ServerPlayer, ServerPlay
     }
 
     @Override
-    public QueryOptionsCache<ServerPlayer> getCacheFor(ServerPlayer subject) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-
-        return UserCapabilityImpl.get(subject).getQueryOptionsCache();
-    }
-
-    @Override
-    public QueryOptions formQueryOptions(ServerPlayer subject, ImmutableContextSet contextSet) {
-        QueryOptions.Builder builder = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
-        if (subject.getServer() != null && subject.getServer().isSingleplayerOwner(subject.getGameProfile())) {
-            builder.option(INTEGRATED_SERVER_OWNER, true);
-        }
-
-        return builder.context(contextSet).build();
-    }
-
-    @Override
-    public void invalidateCache(ServerPlayer subject) {
+    public @Nullable QueryOptionsSupplier getQueryOptionsSupplier(ServerPlayer subject) {
+        Objects.requireNonNull(subject, "subject");
         UserCapabilityImpl capability = UserCapabilityImpl.getNullable(subject);
         if (capability != null) {
-            capability.getQueryOptionsCache().invalidate();
+            return capability.getQueryOptionsSupplier();
+        }
+        return null;
+    }
+
+    @Override
+    public void customizeQueryOptions(ServerPlayer subject, QueryOptions.Builder builder) {
+        if (subject.getServer() != null && subject.getServer().isSingleplayerOwner(subject.getGameProfile())) {
+            builder.option(INTEGRATED_SERVER_OWNER, true);
         }
     }
 

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.fabric.model;
 
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 import net.luckperms.api.query.QueryOptions;
@@ -41,12 +41,12 @@ public interface MixinUser {
     User luckperms$getUser();
 
     /**
-     * Gets (or creates using the manager) the objects {@link QueryOptionsCache}.
+     * Gets (or creates using the manager) the objects {@link QueryOptionsSupplier}.
      *
      * @param contextManager the contextManager
      * @return the cache
      */
-    QueryOptionsCache<ServerPlayerEntity> luckperms$getQueryOptionsCache(FabricContextManager contextManager);
+    QueryOptionsSupplier luckperms$getQueryOptionsCache(FabricContextManager contextManager);
 
     /**
      * Initialises permissions for this player using the given {@link User}.

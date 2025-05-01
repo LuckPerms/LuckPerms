@@ -35,7 +35,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.manager.QueryOptionsCache;
+import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
@@ -93,7 +93,7 @@ public class LuckPermsPermissible extends PermissibleBase {
     private final LPNukkitPlugin plugin;
 
     // caches context lookups for the player
-    private final QueryOptionsCache<Player> queryOptionsSupplier;
+    private final QueryOptionsSupplier queryOptionsSupplier;
 
     // the players previous permissible. (the one they had before this one was injected)
     private PermissibleBase oldPermissible = null;
@@ -110,7 +110,7 @@ public class LuckPermsPermissible extends PermissibleBase {
         this.user = Objects.requireNonNull(user, "user");
         this.player = Objects.requireNonNull(player, "player");
         this.plugin = Objects.requireNonNull(plugin, "plugin");
-        this.queryOptionsSupplier = plugin.getContextManager().getCacheFor(player);
+        this.queryOptionsSupplier = plugin.getContextManager().createQueryOptionsSupplier(player);
 
         injectFakeAttachmentsList();
     }
@@ -276,7 +276,7 @@ public class LuckPermsPermissible extends PermissibleBase {
         // the query options cache when op status changes.
         // (#invalidate is a fast call)
         if (this.queryOptionsSupplier != null) { // this method is called by the super class constructor, before this class has fully initialised
-            this.queryOptionsSupplier.invalidate();
+            this.queryOptionsSupplier.invalidateCache();
         }
 
         // but we don't need to do anything else in this method, unlike the Nukkit impl.
@@ -297,6 +297,10 @@ public class LuckPermsPermissible extends PermissibleBase {
 
     public LPNukkitPlugin getPlugin() {
         return this.plugin;
+    }
+
+    public QueryOptionsSupplier getQueryOptionsSupplier() {
+        return this.queryOptionsSupplier;
     }
 
     PermissibleBase getOldPermissible() {
