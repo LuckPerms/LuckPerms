@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.common.NeoForgeConfig;
+import net.neoforged.neoforge.common.config.NeoForgeServerConfig;
 import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent;
 import net.neoforged.neoforge.server.permission.handler.DefaultPermissionHandler;
 import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
@@ -45,7 +45,7 @@ public class NeoForgePermissionHandlerListener {
     @SubscribeEvent
     public void onPermissionGatherHandler(PermissionGatherEvent.Handler event) {
         // Override the default permission handler with LuckPerms
-        ModConfigSpec.ConfigValue<String> permissionHandler = NeoForgeConfig.SERVER.permissionHandler;
+        ModConfigSpec.ConfigValue<String> permissionHandler = NeoForgeServerConfig.INSTANCE.permissionHandler;
         if (permissionHandler.get().equals(DefaultPermissionHandler.IDENTIFIER.toString())) {
             permissionHandler.set(NeoForgePermissionHandler.IDENTIFIER.toString());
         }
