@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.model;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import me.lucko.luckperms.common.cacheddata.HolderCachedDataManager;
 import me.lucko.luckperms.common.cacheddata.result.IntegerResult;
@@ -45,6 +46,7 @@ import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.data.TemporaryNodeMergeStrategy;
 import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
@@ -60,10 +62,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.IntFunction;
@@ -241,6 +245,35 @@ public abstract class PermissionHolder {
     }
 
     public void mergeNodes(DataType type, Iterable<? extends Node> set) {
+        getData(type).addAll(set);
+        invalidateCache();
+    }
+
+    public void deepMergeNodes(DataType type, Set<Node> set) {
+        ImmutableSet<Node> existingData = getData(type).asImmutableSet();
+        for (Node existing : existingData) {
+            Set<Node> toCombine = new HashSet<>();
+            for (Node node : set) {
+                if (!existing.equals(node, NodeEqualityPredicate.IGNORE_CONTEXT)) {
+                    continue;
+                }
+                Set<String> existingKeys = existing.getContexts().toMap().keySet();
+                Set<String> keys = node.getContexts().toMap().keySet();
+                if (!existingKeys.equals(keys)) {
+                    continue;
+                }
+                toCombine.add(node);
+            }
+            if (toCombine.isEmpty()) {
+                continue;
+            }
+            NodeBuilder<?, ?> combined = existing.toBuilder();
+            for (Node node : toCombine) {
+                combined.withContext(node.getContexts());
+            }
+            getData(type).removeThenAdd(existing, combined.build());
+            set.removeAll(toCombine);
+        }
         getData(type).addAll(set);
         invalidateCache();
     }
