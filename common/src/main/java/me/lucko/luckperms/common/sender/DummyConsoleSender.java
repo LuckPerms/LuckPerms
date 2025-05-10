@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.sender;
 
+import me.lucko.luckperms.common.command.access.CommandPermission;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.luckperms.api.util.Tristate;
 
@@ -44,6 +46,16 @@ public abstract class DummyConsoleSender implements Sender {
 
     @Override
     public boolean hasPermission(String permission) {
+        return true;
+    }
+
+    @Override
+    public boolean hasPermission(CommandPermission permission) {
+        boolean readOnlyMode = this.platform.getConfiguration().get(ConfigKeys.READ_ONLY_MODE_CONSOLE);
+        if (readOnlyMode && !permission.isReadOnly()) {
+            return false;
+        }
+
         return true;
     }
 

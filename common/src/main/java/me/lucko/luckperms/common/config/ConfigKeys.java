@@ -247,6 +247,26 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> REQUIRE_SENDER_GROUP_MEMBERSHIP_TO_MODIFY = booleanKey("require-sender-group-membership-to-modify", false);
 
     /**
+     * If the plugin is in read-only mode for players
+     */
+    public static final ConfigKey<Boolean> READ_ONLY_MODE_PLAYERS = booleanKey("commands-read-only-mode.players", false);
+
+    /**
+     * If the plugin is in read-only mode for the server console
+     */
+    public static final ConfigKey<Boolean> READ_ONLY_MODE_CONSOLE = booleanKey("commands-read-only-mode.console", false);
+
+    /**
+     * If LuckPerms commands are disabled for players
+     */
+    public static final ConfigKey<Boolean> DISABLE_LUCKPERMS_COMMANDS_PLAYERS = booleanKey("disable-luckperms-commands.players", false);
+
+    /**
+     * If LuckPerms commands are disabled for the server console
+     */
+    public static final ConfigKey<Boolean> DISABLE_LUCKPERMS_COMMANDS_CONSOLE = booleanKey("disable-luckperms-commands.console", false);
+
+    /**
      * If wildcards are being applied
      */
     public static final ConfigKey<Boolean> APPLYING_WILDCARDS = notReloadable(booleanKey("apply-wildcards", true));

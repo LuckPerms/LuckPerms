@@ -154,10 +154,21 @@ public final class CommandTester implements Consumer<Component>, Function<String
      * @return this
      */
     public CommandTester thenExpect(String expected) {
+        return thenExpect(expected, true);
+    }
+
+    /**
+     * Asserts that the current contents of the message buffer matches the given input string.
+     *
+     * @param expected the expected contents
+     * @param checkPermissions whether to assert that the exact permissions were checked
+     * @return this
+     */
+    public CommandTester thenExpect(String expected, boolean checkPermissions) {
         String actual = this.renderBuffer();
         assertEquals(expected.trim(), actual.trim());
 
-        if (this.permissions != null) {
+        if (checkPermissions && this.permissions != null) {
             assertEquals(this.checkedPermissions, this.permissions.keySet());
         }
 
