@@ -30,7 +30,6 @@ import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -73,7 +72,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
     /**
      * A scheduler adapter for the platform
      */
-    private final SchedulerAdapter schedulerAdapter;
+    private final FabricSchedulerAdapter schedulerAdapter;
 
     /**
      * The plugin class path appender
@@ -116,7 +115,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
     }
 
     @Override
-    public SchedulerAdapter getScheduler() {
+    public FabricSchedulerAdapter getScheduler() {
         return this.schedulerAdapter;
     }
 

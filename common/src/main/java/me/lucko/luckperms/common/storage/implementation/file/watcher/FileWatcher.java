@@ -58,7 +58,7 @@ public class FileWatcher extends AbstractFileWatcher {
         this.basePath = basePath;
 
         super.registerRecursively(basePath);
-        plugin.getBootstrap().getScheduler().executeAsync(super::runEventProcessingLoop);
+        plugin.getBootstrap().getScheduler().async(super::runEventProcessingLoop);
     }
 
     /**
