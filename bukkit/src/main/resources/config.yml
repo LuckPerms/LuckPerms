@@ -689,7 +689,7 @@ debug-logins: false
 #
 # - Note that due to the design of the storage implementation, usernames must still be 16 characters
 #   or less.
-allow-invalid-usernames: false
+allow-invalid-usernames: true
 
 # If LuckPerms should not require users to confirm bulkupdate operations.
 #
