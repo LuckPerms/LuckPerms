@@ -13,7 +13,7 @@ subprojects {
     apply plugin: 'org.cadixdev.licenser'
 
     group = 'me.lucko.luckperms'
-    version = '5.4-SNAPSHOT'
+    version = '5.5-SNAPSHOT'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -52,7 +52,7 @@ subprojects {
     }
 
     project.ext.majorVersion = '5'
-    project.ext.minorVersion = '4'
+    project.ext.minorVersion = '5'
     project.ext.patchVersion = determinePatchVersion()
     project.ext.apiVersion = project.ext.majorVersion + '.' + project.ext.minorVersion
     project.ext.fullVersion = project.ext.apiVersion + '.' + project.ext.patchVersion

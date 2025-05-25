@@ -1,5 +1,5 @@
 group = 'net.luckperms'
-project.version = '5.4'
+project.version = '5.5'
 
 jar {
     manifest {
@@ -8,8 +8,8 @@ jar {
 }
 
 dependencies {
-    compileOnly 'org.checkerframework:checker-qual:3.21.2'
-    compileOnly 'org.jetbrains:annotations:23.1.0'
+    compileOnly 'org.checkerframework:checker-qual:3.49.3'
+    compileOnly 'org.jetbrains:annotations:26.0.2'
 }
 
 // Only used occasionally for deployment - not needed for normal builds.
@@ -24,13 +24,13 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         options.charSet = 'UTF-8'
         options.links(
                 'https://checkerframework.org/api/',
-                'https://javadoc.io/static/org.jetbrains/annotations/23.0.0/'
+                'https://javadoc.io/static/org.jetbrains/annotations/26.0.2/'
         )
         options.addStringOption('Xdoclint:none', '-quiet')
         options.addStringOption('-since', '5.0,5.1,5.2,5.3,5.4,5.5')
 
         if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
-            options.links.add('https://docs.oracle.com/en/java/javase/11/docs/api/')
+            options.links.add('https://docs.oracle.com/en/java/javase/21/docs/api/')
         } else {
             options.links.add('https://docs.oracle.com/javase/8/docs/api/')
         }
@@ -63,7 +63,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
 
                 pom {
                     name = 'LuckPerms API'
-                    description = 'A permissions plugin for Minecraft servers.'
+                    description = 'A permissions manager for Minecraft servers.'
                     url = 'https://luckperms.net'
 
                     licenses {
