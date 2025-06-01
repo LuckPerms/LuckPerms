@@ -5,6 +5,7 @@
   "mixins": [
     "CommandManagerMixin",
     "ServerCommandSourceAccessor",
+    "ServerConfigurationNetworkHandlerMixin",
     "ServerLoginNetworkHandlerAccessor",
     "ServerPlayerEntityMixin"
   ],
