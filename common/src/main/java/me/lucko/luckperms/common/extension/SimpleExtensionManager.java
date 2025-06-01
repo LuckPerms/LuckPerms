@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.extension;
 
 import com.google.gson.JsonObject;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.plugin.classpath.URLClassLoaderAccess;
 import me.lucko.luckperms.common.util.gson.GsonProvider;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.extension.Extension;
@@ -115,7 +114,6 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
         }
 
         String className;
-        boolean useParentClassLoader = false;
         try (JarFile jar = new JarFile(path.toFile())) {
             JarEntry extensionJarEntry = jar.getJarEntry("extension.json");
             if (extensionJarEntry == null) {
@@ -128,8 +126,14 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
                     JsonObject parsed = GsonProvider.parser().parse(reader).getAsJsonObject();
                     className = parsed.get("class").getAsString();
+
+                    // check for deprecated flags
                     if (parsed.has("useParentClassLoader")) {
-                        useParentClassLoader = parsed.get("useParentClassLoader").getAsBoolean();
+                        boolean useParentClassLoader = parsed.get("useParentClassLoader").getAsBoolean();
+                        if (useParentClassLoader) {
+                            this.plugin.getLogger().warn("Extension '" + className + "' specifies the 'useParentClassLoader' extension flag, which has been deprecated/removed. " +
+                                    "The extension will be loaded using the classloader of the LuckPerms plugin, and not the classloader of the platform, which may break functionality.");
+                        }
                     }
                 }
             }
@@ -139,15 +143,7 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
             throw new IllegalArgumentException("class is null");
         }
 
-        if (useParentClassLoader && isJarInJar()) {
-            try {
-                addJarToParentClasspath(path);
-            } catch (Throwable e) {
-                throw new RuntimeException("Exception whilst classloading extension", e);
-            }
-        } else {
-            this.plugin.getBootstrap().getClassPathAppender().addJarToClasspath(path);
-        }
+        this.plugin.getBootstrap().getClassPathAppender().addJarToClasspath(path);
 
         Class<? extends Extension> extensionClass;
         try {
@@ -189,21 +185,6 @@ public class SimpleExtensionManager implements ExtensionManager, AutoCloseable {
     @Override
     public @NonNull Collection<Extension> getLoadedExtensions() {
         return this.extensions.stream().map(e -> e.instance).collect(Collectors.toSet());
-    }
-
-    private static boolean isJarInJar() {
-        String thisClassLoaderName = SimpleExtensionManager.class.getClassLoader().getClass().getName();
-        return thisClassLoaderName.equals("me.lucko.luckperms.common.loader.JarInJarClassLoader");
-    }
-
-    @Deprecated
-    private static void addJarToParentClasspath(Path path) throws Exception {
-        ClassLoader parentClassLoader = SimpleExtensionManager.class.getClassLoader().getParent();
-        if (!(parentClassLoader instanceof URLClassLoader)) {
-            throw new RuntimeException("useParentClassLoader is true but parent is not a URLClassLoader");
-        }
-
-        URLClassLoaderAccess.create(((URLClassLoader) parentClassLoader)).addURL(path.toUri().toURL());
     }
 
     private static final class LoadedExtension {

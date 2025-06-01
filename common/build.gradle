@@ -25,7 +25,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.18.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.18.0'
 
-    testImplementation 'com.h2database:h2:2.3.232'
+    testImplementation 'com.h2database:h2:2.1.214'
     testImplementation 'org.mongodb:mongodb-driver-legacy:5.5.0'
     testImplementation 'org.spongepowered:configurate-yaml:3.7.3'
     testImplementation 'org.spongepowered:configurate-hocon:3.7.3'
@@ -97,7 +97,7 @@ dependencies {
         transitive = false
     }
     compileOnly 'com.zaxxer:HikariCP:6.3.0'
-    compileOnly 'redis.clients:jedis:6.0.0'
+    compileOnly 'redis.clients:jedis:5.2.0'
     compileOnly 'io.nats:jnats:2.21.1'
     compileOnly 'com.rabbitmq:amqp-client:5.25.0'
     compileOnly 'org.mongodb:mongodb-driver-legacy:5.5.0'

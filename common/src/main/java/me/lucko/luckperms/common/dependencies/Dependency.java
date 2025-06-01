@@ -171,8 +171,8 @@ public enum Dependency {
     H2_DRIVER(
             "com.h2database",
             "h2",
-            "2.3.232",
-            "ja5i0i24mCw9yzgm7bnHJ8XTAgY6Z+731j2C3kAfB9M="
+            "2.1.214",
+            "1iPNwPYdIYz1SajQnxw5H/kQlhFrIuJHVHX85PvnK9A="
             // we don't apply relocations to h2 - it gets loaded via
             // an isolated classloader
     ),
@@ -238,8 +238,8 @@ public enum Dependency {
     JEDIS(
             "redis.clients",
             "jedis",
-            "6.0.0",
-            "ZJq2D7GDoNQa7nAsfhCTsClsedbEp3N2j2V3qXhk8kU=",
+            "5.2.0",
+            "3U+9osED8xmrSVrbK8GQYTmEB0bP1MZrJ3ENGvmDgtQ=",
             Relocation.of("jedis", "redis{}clients{}jedis"),
             Relocation.of("commonspool2", "org{}apache{}commons{}pool2")
     ),
