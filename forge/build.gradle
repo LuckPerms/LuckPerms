@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.forgegradle)
 }
 
-sourceCompatibility = 17
+sourceCompatibility = 21
 targetCompatibility = 21
 
 blossom {

@@ -17,18 +17,20 @@ jacocoTestReport {
 
 dependencies {
     testImplementation 'org.slf4j:slf4j-simple:1.7.36'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.1'
-    testImplementation 'org.testcontainers:junit-jupiter:1.20.4'
-    testImplementation 'org.mockito:mockito-core:5.11.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
-    testImplementation 'com.h2database:h2:2.1.214'
-    testImplementation 'org.mongodb:mongodb-driver-legacy:4.5.0'
-    testImplementation 'org.spongepowered:configurate-yaml:3.7.2'
-    testImplementation 'org.spongepowered:configurate-hocon:3.7.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    testImplementation 'org.testcontainers:junit-jupiter:1.21.1'
+    testImplementation 'org.mockito:mockito-core:5.18.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.18.0'
+
+    testImplementation 'com.h2database:h2:2.3.232'
+    testImplementation 'org.mongodb:mongodb-driver-legacy:5.5.0'
+    testImplementation 'org.spongepowered:configurate-yaml:3.7.3'
+    testImplementation 'org.spongepowered:configurate-hocon:3.7.3'
     testImplementation 'me.lucko.configurate:configurate-toml:3.7'
-    testImplementation 'net.luckperms:rest-api-java-client:0.1-SNAPSHOT'
+    testImplementation 'net.luckperms:rest-api-java-client:0.1'
 
     api project(':api')
     api 'org.checkerframework:checker-qual:3.12.0'
@@ -74,32 +76,32 @@ dependencies {
     api 'com.google.code.gson:gson:2.7'
     api 'com.google.guava:guava:19.0'
 
-    api 'com.github.ben-manes.caffeine:caffeine:2.9.0'
+    api 'com.github.ben-manes.caffeine:caffeine:3.2.0'
     api 'com.squareup.okhttp3:okhttp:3.14.9'
-    api 'com.squareup.okio:okio:1.17.5'
-    api 'net.bytebuddy:byte-buddy:1.10.22'
+    api 'com.squareup.okio:okio:1.17.6'
+    api 'net.bytebuddy:byte-buddy:1.17.5'
 
-    api('org.spongepowered:configurate-core:3.7.2') {
+    api('org.spongepowered:configurate-core:3.7.3') {
         transitive = false
     }
-    api('org.spongepowered:configurate-yaml:3.7.2') {
+    api('org.spongepowered:configurate-yaml:3.7.3') {
         transitive = false
     }
-    api('org.spongepowered:configurate-gson:3.7.2') {
+    api('org.spongepowered:configurate-gson:3.7.3') {
         transitive = false
     }
-    api('org.spongepowered:configurate-hocon:3.7.2') {
+    api('org.spongepowered:configurate-hocon:3.7.3') {
         transitive = false
     }
     api('me.lucko.configurate:configurate-toml:3.7') {
         transitive = false
     }
-    compileOnly 'com.zaxxer:HikariCP:4.0.3'
-    compileOnly 'redis.clients:jedis:4.4.3'
-    compileOnly 'io.nats:jnats:2.16.4'
-    compileOnly 'com.rabbitmq:amqp-client:5.12.0'
-    compileOnly 'org.mongodb:mongodb-driver-legacy:4.5.0'
-    compileOnly 'org.postgresql:postgresql:42.6.0'
-    compileOnly 'org.yaml:snakeyaml:1.28'
-    compileOnly 'net.luckperms:rest-api-java-client:0.1-SNAPSHOT'
+    compileOnly 'com.zaxxer:HikariCP:6.3.0'
+    compileOnly 'redis.clients:jedis:6.0.0'
+    compileOnly 'io.nats:jnats:2.21.1'
+    compileOnly 'com.rabbitmq:amqp-client:5.25.0'
+    compileOnly 'org.mongodb:mongodb-driver-legacy:5.5.0'
+    compileOnly 'org.postgresql:postgresql:42.7.6'
+    compileOnly 'org.yaml:snakeyaml:1.33'
+    compileOnly 'net.luckperms:rest-api-java-client:0.1'
 }

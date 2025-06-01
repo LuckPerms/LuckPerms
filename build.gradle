@@ -15,8 +15,8 @@ subprojects {
     group = 'me.lucko.luckperms'
     version = '5.5-SNAPSHOT'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'

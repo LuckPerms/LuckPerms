@@ -9,7 +9,7 @@ plugins {
     id("java-library")
 }
 
-sourceCompatibility = 17
+sourceCompatibility = 21
 targetCompatibility = 21
 
 neoForge {
