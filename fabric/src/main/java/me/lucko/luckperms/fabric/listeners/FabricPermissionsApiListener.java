@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.cacheddata.type.MonitoredMetaCache;
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
+import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
@@ -70,6 +71,10 @@ public class FabricPermissionsApiListener {
 
     private @NonNull TriState onPermissionCheck(CommandSource source, String permission) {
         if (source instanceof ServerCommandSource) {
+            Sender sender = this.plugin.getSenderFactory().wrap((ServerCommandSource) source);
+            if (sender.isConsole()) {
+                return TriState.TRUE;
+            }
             Entity entity = ((ServerCommandSource) source).getEntity();
             if (entity instanceof ServerPlayerEntity) {
                 return playerPermissionCheck((ServerPlayerEntity) entity, permission);
