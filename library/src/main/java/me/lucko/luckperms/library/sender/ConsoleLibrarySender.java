@@ -82,4 +82,9 @@ public class ConsoleLibrarySender implements LibrarySender {
         return manager.getConsoleLocale();
     }
 
+    @Override
+    public boolean shouldSplitNewlines() {
+        return manager.shouldConsoleSplitNewlines();
+    }
+
 }

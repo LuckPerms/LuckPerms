@@ -27,11 +27,13 @@ package me.lucko.luckperms.library;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
@@ -107,6 +109,36 @@ public class LuckPermsLibrary implements AutoCloseable {
     public void playerDisconnected(UUID uuid) {
         plugin.getConnectionListener().handleDisconnect(uuid);
         playerSenders.remove(uuid);
+    }
+
+    /**
+     * @param command Does not include lp or the slash
+     */
+    public CompletableFuture<Void> execFromConsole(String command) {
+        return execFromConsole(ArgumentTokenizer.EXECUTE.tokenizeInput(command));
+    }
+
+    /**
+     * @param command Does not include lp or the slash
+     */
+    public CompletableFuture<Void> execFromConsole(List<String> command) {
+        return plugin.getCommandManager().executeCommand(plugin.getSenderFactory().wrap(consoleSender), "lp", command);
+    }
+
+    /**
+     * @param player The player that is executing the command - must be joined with {@link #playerJoined(UUID, String)}
+     * @param command Does not include lp or the slash
+     */
+    public CompletableFuture<Void> execFromPlayer(UUID player, String command) {
+        return execFromPlayer(player, ArgumentTokenizer.EXECUTE.tokenizeInput(command));
+    }
+
+    /**
+     * @param player The player that is executing the command - must be joined with {@link #playerJoined(UUID, String)}
+     * @param command Does not include lp or the slash
+     */
+    public CompletableFuture<Void> execFromPlayer(UUID player, List<String> command) {
+        return plugin.getCommandManager().executeCommand(plugin.getSenderFactory().wrap(playerSenders.get(player)), "lp", command);
     }
 
     public LuckPermsBootstrap getBootstrap() {

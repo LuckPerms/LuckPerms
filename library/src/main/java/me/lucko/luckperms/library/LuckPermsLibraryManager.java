@@ -55,12 +55,20 @@ public interface LuckPermsLibraryManager {
         return Locale.getDefault();
     }
 
+    public default boolean shouldConsoleSplitNewlines() {
+        return false;
+    }
+
     public void onConsoleMessage(Component message);
 
     public void performConsoleCommand(String command);
 
     public default Locale getPlayerLocale(UUID player) {
         return Locale.getDefault();
+    }
+
+    public default boolean shouldPlayerSplitNewlines(UUID player) {
+        return true;
     }
 
     public void onPlayerMessage(UUID player, Component message);

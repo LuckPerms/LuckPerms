@@ -47,4 +47,6 @@ public interface LibrarySender {
     boolean isConsole();
 
     Locale getLocale();
+
+    boolean shouldSplitNewlines();
 }

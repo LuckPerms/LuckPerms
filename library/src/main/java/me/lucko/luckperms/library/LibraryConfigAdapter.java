@@ -25,23 +25,18 @@
 
 package me.lucko.luckperms.library;
 
-import java.nio.file.Path;
-
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-public class LibraryConfigAdapter extends ConfigurateConfigAdapter {
-    private final LuckPermsLibraryManager manager;
-
+public class LibraryConfigAdapter extends ConfigurateConfigAdapter<LuckPermsLibraryManager> {
     public LibraryConfigAdapter(LuckPermsLibraryManager manager, LuckPermsPlugin plugin) {
-        super(plugin, null);
-        this.manager = manager;
+        super(plugin, manager);
     }
 
     @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
+    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(LuckPermsLibraryManager manager) {
         return manager.createConfigLoader();
     }
 }

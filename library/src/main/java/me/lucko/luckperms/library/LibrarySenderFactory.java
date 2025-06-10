@@ -77,6 +77,6 @@ public class LibrarySenderFactory extends SenderFactory<LPLibraryPlugin, Library
 
     @Override
     protected boolean shouldSplitNewlines(LibrarySender sender) {
-        return true;
+        return sender.shouldSplitNewlines();
     }
 }

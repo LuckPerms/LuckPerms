@@ -87,4 +87,9 @@ public class PlayerLibrarySender implements LibrarySender {
         return manager.getPlayerLocale(uuid);
     }
 
+    @Override
+    public boolean shouldSplitNewlines() {
+        return manager.shouldPlayerSplitNewlines(uuid);
+    }
+
 }

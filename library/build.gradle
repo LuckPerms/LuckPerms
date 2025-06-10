@@ -9,6 +9,15 @@ targetCompatibility = 17
 dependencies {
     implementation project(':common')
     compileOnly project(':common:loader-utils')
+
+    testImplementation('net.kyori:adventure-text-serializer-ansi:4.21.0') {
+        exclude(module: 'adventure-bom')
+        exclude(module: 'adventure-api')
+        exclude(module: 'annotations')
+    }
+    testImplementation('net.kyori:ansi:1.1.1') {
+        exclude(module: 'annotations')
+    }
 }
 
 shadowJar {
