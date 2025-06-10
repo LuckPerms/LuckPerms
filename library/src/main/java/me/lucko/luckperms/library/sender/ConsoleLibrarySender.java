@@ -23,29 +23,63 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.comparator;
+package me.lucko.luckperms.library.sender;
 
-import me.lucko.luckperms.common.storage.misc.NodeEntry;
-import net.luckperms.api.node.Node;
+import java.util.Locale;
+import java.util.UUID;
 
-import java.util.Comparator;
+import me.lucko.luckperms.library.LuckPermsLibraryManager;
+import net.kyori.adventure.text.Component;
+import net.luckperms.api.util.Tristate;
 
-public class NodeEntryComparator<T extends Comparable<T>> implements Comparator<NodeEntry<T, ?>> {
+public class ConsoleLibrarySender implements LibrarySender {
 
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> normal() {
-        return new NodeEntryComparator<>();
-    }
+    private static final UUID UUID = new UUID(0, 0);
 
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> reverse() {
-        return NodeEntryComparator.<T, N>normal().reversed();
+    private final LuckPermsLibraryManager manager;
+
+    public ConsoleLibrarySender(LuckPermsLibraryManager manager) {
+        this.manager = manager;
     }
 
     @Override
-    public int compare(NodeEntry<T, ?> o1, NodeEntry<T, ?> o2) {
-        int i = NodeWithContextComparator.normal().compare(o1.getNode(), o2.getNode());
-        if (i != 0) {
-            return i;
-        }
-        return o1.getHolder().compareTo(o2.getHolder());
+    public String getName() {
+        return "Console";
     }
+
+    @Override
+    public UUID getUniqueId() {
+        return UUID;
+    }
+
+    @Override
+    public void sendMessage(Component component) {
+        manager.onConsoleMessage(component);
+    }
+
+    @Override
+    public Tristate getPermissionValue(String permission) {
+        return Tristate.TRUE;
+    }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        return true;
+    }
+
+    @Override
+    public void performCommand(String command) {
+        manager.performConsoleCommand(command);
+    }
+
+    @Override
+    public boolean isConsole() {
+        return true;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return manager.getConsoleLocale();
+    }
+
 }

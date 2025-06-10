@@ -23,29 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.comparator;
+package me.lucko.luckperms.library.stub;
 
-import me.lucko.luckperms.common.storage.misc.NodeEntry;
-import net.luckperms.api.node.Node;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.event.AbstractEventBus;
+import me.lucko.luckperms.library.LPLibraryPlugin;
 
-import java.util.Comparator;
-
-public class NodeEntryComparator<T extends Comparable<T>> implements Comparator<NodeEntry<T, ?>> {
-
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> normal() {
-        return new NodeEntryComparator<>();
-    }
-
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> reverse() {
-        return NodeEntryComparator.<T, N>normal().reversed();
+public class LibraryEventBus extends AbstractEventBus<Object> {
+    public LibraryEventBus(LPLibraryPlugin plugin, LuckPermsApiProvider apiProvider) {
+        super(plugin, apiProvider);
     }
 
     @Override
-    public int compare(NodeEntry<T, ?> o1, NodeEntry<T, ?> o2) {
-        int i = NodeWithContextComparator.normal().compare(o1.getNode(), o2.getNode());
-        if (i != 0) {
-            return i;
-        }
-        return o1.getHolder().compareTo(o2.getHolder());
+    protected Object checkPlugin(Object plugin) throws IllegalArgumentException {
+        return plugin;
     }
+
 }

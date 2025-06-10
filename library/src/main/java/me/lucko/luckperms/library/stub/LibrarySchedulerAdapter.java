@@ -23,29 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.comparator;
+package me.lucko.luckperms.library.stub;
 
-import me.lucko.luckperms.common.storage.misc.NodeEntry;
-import net.luckperms.api.node.Node;
+import java.util.concurrent.Executor;
 
-import java.util.Comparator;
+import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.library.LPLibraryBootstrap;
 
-public class NodeEntryComparator<T extends Comparable<T>> implements Comparator<NodeEntry<T, ?>> {
+public class LibrarySchedulerAdapter extends AbstractJavaScheduler {
 
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> normal() {
-        return new NodeEntryComparator<>();
-    }
-
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> reverse() {
-        return NodeEntryComparator.<T, N>normal().reversed();
+    public LibrarySchedulerAdapter(LPLibraryBootstrap bootstrap) {
+        super(bootstrap);
     }
 
     @Override
-    public int compare(NodeEntry<T, ?> o1, NodeEntry<T, ?> o2) {
-        int i = NodeWithContextComparator.normal().compare(o1.getNode(), o2.getNode());
-        if (i != 0) {
-            return i;
-        }
-        return o1.getHolder().compareTo(o2.getHolder());
+    public Executor sync() {
+        return this.async();
     }
+
 }

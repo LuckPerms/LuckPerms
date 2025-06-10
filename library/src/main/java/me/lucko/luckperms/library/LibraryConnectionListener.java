@@ -23,29 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.comparator;
+package me.lucko.luckperms.library;
 
-import me.lucko.luckperms.common.storage.misc.NodeEntry;
-import net.luckperms.api.node.Node;
+import java.util.UUID;
 
-import java.util.Comparator;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 
-public class NodeEntryComparator<T extends Comparable<T>> implements Comparator<NodeEntry<T, ?>> {
+public class LibraryConnectionListener extends AbstractConnectionListener {
 
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> normal() {
-        return new NodeEntryComparator<>();
-    }
-
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> reverse() {
-        return NodeEntryComparator.<T, N>normal().reversed();
+    public LibraryConnectionListener(LuckPermsPlugin plugin) {
+        super(plugin);
     }
 
     @Override
-    public int compare(NodeEntry<T, ?> o1, NodeEntry<T, ?> o2) {
-        int i = NodeWithContextComparator.normal().compare(o1.getNode(), o2.getNode());
-        if (i != 0) {
-            return i;
-        }
-        return o1.getHolder().compareTo(o2.getHolder());
+    public void recordConnection(UUID uniqueId) {
+        super.recordConnection(uniqueId);
     }
+
 }

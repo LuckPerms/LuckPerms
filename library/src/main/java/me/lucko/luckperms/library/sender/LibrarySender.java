@@ -23,29 +23,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.node.comparator;
+package me.lucko.luckperms.library.sender;
 
-import me.lucko.luckperms.common.storage.misc.NodeEntry;
-import net.luckperms.api.node.Node;
+import java.util.Locale;
+import java.util.UUID;
 
-import java.util.Comparator;
+import net.kyori.adventure.text.Component;
+import net.luckperms.api.util.Tristate;
 
-public class NodeEntryComparator<T extends Comparable<T>> implements Comparator<NodeEntry<T, ?>> {
+public interface LibrarySender {
+    String getName();
 
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> normal() {
-        return new NodeEntryComparator<>();
-    }
+    UUID getUniqueId();
 
-    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> reverse() {
-        return NodeEntryComparator.<T, N>normal().reversed();
-    }
+    void sendMessage(Component component);
 
-    @Override
-    public int compare(NodeEntry<T, ?> o1, NodeEntry<T, ?> o2) {
-        int i = NodeWithContextComparator.normal().compare(o1.getNode(), o2.getNode());
-        if (i != 0) {
-            return i;
-        }
-        return o1.getHolder().compareTo(o2.getHolder());
-    }
+    Tristate getPermissionValue(String permission);
+
+    boolean hasPermission(String permission);
+
+    void performCommand(String command);
+
+    boolean isConsole();
+
+    Locale getLocale();
 }
