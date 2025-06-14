@@ -23,24 +23,30 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge;
+package me.lucko.luckperms.library.sender;
 
-import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+import java.util.Locale;
+import java.util.UUID;
 
-import java.nio.file.Path;
+import net.kyori.adventure.text.Component;
+import net.luckperms.api.util.Tristate;
 
-public class NeoForgeConfigAdapter extends ConfigurateConfigAdapter<Path> {
-    public NeoForgeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
-    }
+public interface LibrarySender {
+    String getName();
 
-    @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
-    }
+    UUID getUniqueId();
 
+    void sendMessage(Component component);
+
+    Tristate getPermissionValue(String permission);
+
+    boolean hasPermission(String permission);
+
+    void performCommand(String command);
+
+    boolean isConsole();
+
+    Locale getLocale();
+
+    boolean shouldSplitNewlines();
 }
