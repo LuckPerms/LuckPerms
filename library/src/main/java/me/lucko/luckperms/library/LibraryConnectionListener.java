@@ -23,24 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge;
+package me.lucko.luckperms.library;
 
-import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
+import java.util.UUID;
+
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 
-import java.nio.file.Path;
+public class LibraryConnectionListener extends AbstractConnectionListener {
 
-public class NeoForgeConfigAdapter extends ConfigurateConfigAdapter<Path> {
-    public NeoForgeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
+    public LibraryConnectionListener(LuckPermsPlugin plugin) {
+        super(plugin);
     }
 
     @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
+    public void recordConnection(UUID uniqueId) {
+        super.recordConnection(uniqueId);
     }
 
 }

@@ -23,24 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge;
+package me.lucko.luckperms.library.stub;
 
-import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+import java.util.concurrent.Executor;
 
-import java.nio.file.Path;
+import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.library.LPLibraryBootstrap;
 
-public class NeoForgeConfigAdapter extends ConfigurateConfigAdapter<Path> {
-    public NeoForgeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
+public class LibrarySchedulerAdapter extends AbstractJavaScheduler {
+
+    public LibrarySchedulerAdapter(LPLibraryBootstrap bootstrap) {
+        super(bootstrap);
     }
 
     @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
+    public Executor sync() {
+        return this.async();
     }
 
 }
