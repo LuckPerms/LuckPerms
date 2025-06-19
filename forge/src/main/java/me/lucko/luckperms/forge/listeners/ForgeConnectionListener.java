@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.forge.ForgeSenderFactory;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
 import me.lucko.luckperms.forge.util.AsyncConfigurationTask;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
@@ -146,9 +145,6 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
             }
         }
 
-        // initialise capability
-        UserCapabilityImpl userCapability = UserCapabilityImpl.get(player);
-        userCapability.initialise(user, player, this.plugin);
         this.plugin.getContextManager().signalContextUpdate(player);
     }
 
