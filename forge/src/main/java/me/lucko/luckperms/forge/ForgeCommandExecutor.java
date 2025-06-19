@@ -37,6 +37,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 
 import java.util.List;
@@ -63,6 +64,12 @@ public class ForgeCommandExecutor extends BrigadierCommandExecutor<CommandSource
             command.addChild(argument);
             event.getDispatcher().getRoot().addChild(command);
         }
+    }
+
+    // not used - workaround for the idiotic Forge limitation that requires listeners using the @SubscribeEvent annotation to have at least two listener methods
+    @SubscribeEvent
+    public void onServerStarted(ServerStartedEvent event) {
+
     }
 
     @Override
