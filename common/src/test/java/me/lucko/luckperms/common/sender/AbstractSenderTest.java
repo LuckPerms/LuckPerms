@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.sender;
 
+import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.locale.Message;
 import net.kyori.adventure.text.Component;
-import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

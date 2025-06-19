@@ -29,16 +29,14 @@ import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 @Mod(value = "luckperms")
@@ -48,15 +46,14 @@ public class ForgeLoaderPlugin implements Supplier<ModContainer> {
     private static final String JAR_NAME = "luckperms-forge.jarinjar";
     private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.forge.LPForgeBootstrap";
 
-    private final ModContainer container;
+    private final FMLModContainer container;
 
     private JarInJarClassLoader loader;
     private LoaderBootstrap plugin;
 
-    public ForgeLoaderPlugin() {
-        this.container = ModList.get().getModContainerByObject(this).orElse(null);
-
-        markAsNotRequiredClientSide();
+    public ForgeLoaderPlugin(FMLJavaModLoadingContext ctx) {
+        this.container = ctx.getContainer();
+        ctx.registerDisplayTest(IExtensionPoint.DisplayTest.IGNORE_SERVER_VERSION);
 
         if (FMLEnvironment.dist.isClient()) {
             LOGGER.info("Skipping LuckPerms init (not supported on the client!)");
@@ -64,7 +61,7 @@ public class ForgeLoaderPlugin implements Supplier<ModContainer> {
         }
 
         this.loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);
+        FMLCommonSetupEvent.getBus(ctx.getModBusGroup()).addListener(this::onCommonSetup);
     }
 
     @Override
@@ -75,23 +72,6 @@ public class ForgeLoaderPlugin implements Supplier<ModContainer> {
     public void onCommonSetup(FMLCommonSetupEvent event) {
         this.plugin = this.loader.instantiatePlugin(BOOTSTRAP_CLASS, Supplier.class, this);
         this.plugin.onLoad();
-    }
-
-    private static void markAsNotRequiredClientSide() {
-        try {
-            // workaround as we don't compile against java 17
-            ModLoadingContext.class.getDeclaredMethod("registerExtensionPoint", Class.class, Supplier.class)
-                    .invoke(
-                            ModLoadingContext.get(),
-                            IExtensionPoint.DisplayTest.class,
-                            (Supplier<?>) () -> new IExtensionPoint.DisplayTest(
-                                    () -> IExtensionPoint.DisplayTest.IGNORESERVERONLY,
-                                    (a, b) -> true
-                            )
-                    );
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
 }

@@ -26,6 +26,7 @@
 package me.lucko.luckperms.forge;
 
 import com.mojang.brigadier.ParseResults;
+import com.mojang.serialization.JsonOps;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
@@ -41,7 +42,7 @@ import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.chat.Component.Serializer;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.rcon.RconConsoleSource;
 import net.minecraft.world.entity.player.Player;
@@ -118,7 +119,10 @@ public class ForgeSenderFactory extends SenderFactory<LPForgePlugin, CommandSour
     }
 
     public static net.minecraft.network.chat.Component toNativeText(Component component) {
-        return Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(component), RegistryAccess.EMPTY);
+        return ComponentSerialization.CODEC.decode(
+                RegistryAccess.EMPTY.createSerializationContext(JsonOps.INSTANCE),
+                GsonComponentSerializer.gson().serializeToTree(component)
+        ).getOrThrow(IllegalArgumentException::new).getFirst();
     }
 
 }
