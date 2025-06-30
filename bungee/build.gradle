@@ -6,7 +6,9 @@ dependencies {
     implementation project(':common')
     compileOnly project(':common:loader-utils')
 
-    compileOnly 'net.md-5:bungeecord-api:1.16-R0.4'
+    compileOnly('net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT') {
+        exclude(module: 'bungeecord-protocol')
+    }
     compileOnly('net.kyori:adventure-platform-bungeecord:4.4.0') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
