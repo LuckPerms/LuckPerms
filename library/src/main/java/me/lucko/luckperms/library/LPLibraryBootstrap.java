@@ -35,7 +35,6 @@ import java.util.concurrent.CountDownLatch;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
-import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.library.sender.PlayerLibrarySender;
 import me.lucko.luckperms.library.stub.LibrarySchedulerAdapter;
@@ -61,7 +60,7 @@ public class LPLibraryBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
 
         this.logger = manager.getLogger();
         this.schedulerAdapter = new LibrarySchedulerAdapter(this);
-        this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader()); // TODO
+        this.classPathAppender = new URLClassLoaderClassPathAppender();
         this.plugin = new LPLibraryPlugin(manager, library, this);
     }
 

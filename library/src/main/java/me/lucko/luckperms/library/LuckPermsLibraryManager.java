@@ -29,15 +29,27 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import net.kyori.adventure.text.Component;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 public interface LuckPermsLibraryManager {
+    /**
+     * @return If the default dependencies are excluded in gradle (transitive = false), then this should be true
+     */
+    public default boolean shouldLoadDefaultDependencies() {
+        return false;
+    }
+
+    public default void modifyDependencies(Set<Dependency> dependencies) {
+    }
+
     public PluginLogger getLogger();
 
     public String getServerBrand();

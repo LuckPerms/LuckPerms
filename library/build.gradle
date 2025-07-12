@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.blossom)
-    alias(libs.plugins.shadow)
 }
 
 sourceCompatibility = 17
@@ -8,7 +7,9 @@ targetCompatibility = 17
 
 dependencies {
     implementation project(':common')
-    compileOnly project(':common:loader-utils')
+    implementation project(':common:loader-utils')
+
+    implementation 'org.yaml:snakeyaml:1.33'
 
     testImplementation('net.kyori:adventure-text-serializer-ansi:4.21.0') {
         exclude(module: 'adventure-bom')
@@ -20,38 +21,17 @@ dependencies {
     }
 }
 
-shadowJar {
-    archiveFileName = 'luckperms-library.jarinjar'
-
-    dependencies {
-        include(dependency('me.lucko.luckperms:.*'))
-    }
-
-    relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
-    relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
-    relocate 'okio', 'me.lucko.luckperms.lib.okio'
-    relocate 'okhttp3', 'me.lucko.luckperms.lib.okhttp3'
-    relocate 'net.bytebuddy', 'me.lucko.luckperms.lib.bytebuddy'
-    relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
-    relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
-    relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
-    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
-    relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
-    relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
-    relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
-    relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
-    relocate 'io.nats.client', 'me.lucko.luckperms.lib.nats'
-    relocate 'com.rabbitmq', 'me.lucko.luckperms.lib.rabbitmq'
-    relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
-    relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
-    relocate 'org.yaml.snakeyaml', 'me.lucko.luckperms.lib.yaml'
-}
-
-artifacts {
-    archives shadowJar
-}
-
 blossom {
     replaceTokenIn('src/main/java/me/lucko/luckperms/library/LPLibraryBootstrap.java')
     replaceToken '@version@', project.ext.fullVersion
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            groupId 'net.luckperms'
+            artifactId 'library'
+        }
+    }
 }

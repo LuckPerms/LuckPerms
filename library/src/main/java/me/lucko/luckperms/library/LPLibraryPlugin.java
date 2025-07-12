@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.library;
 
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -62,7 +63,7 @@ public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
     private StandardGroupManager groupManager;
     private StandardTrackManager trackManager;
     private LibraryContextManager contextManager;
-    
+
     public LPLibraryPlugin(LuckPermsLibraryManager manager, LuckPermsLibrary library, LPLibraryBootstrap bootstrap) {
         this.manager = manager;
         this.library = library;
@@ -80,12 +81,18 @@ public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected Set<Dependency> getGlobalDependencies() { // TODO
-        Set<Dependency> dependencies = super.getGlobalDependencies();
-        dependencies.remove(Dependency.ADVENTURE);
-        dependencies.add(Dependency.CONFIGURATE_CORE);
-        dependencies.add(Dependency.CONFIGURATE_YAML);
-        dependencies.add(Dependency.SNAKEYAML);
+    protected Set<Dependency> getGlobalDependencies() {
+        Set<Dependency> dependencies;
+        if (manager.shouldLoadDefaultDependencies()) {
+            dependencies = super.getGlobalDependencies();
+            dependencies.remove(Dependency.ADVENTURE);
+            dependencies.add(Dependency.CONFIGURATE_CORE);
+            dependencies.add(Dependency.CONFIGURATE_YAML);
+            dependencies.add(Dependency.SNAKEYAML);
+        } else {
+            dependencies = EnumSet.noneOf(Dependency.class);
+        }
+        manager.modifyDependencies(dependencies);
         return dependencies;
     }
 

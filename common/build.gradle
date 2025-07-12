@@ -105,3 +105,13 @@ dependencies {
     compileOnly 'org.yaml:snakeyaml:1.33'
     compileOnly 'net.luckperms:rest-api-java-client:0.1'
 }
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            groupId 'me.lucko.luckperms'
+            artifactId 'common'
+        }
+    }
+}
