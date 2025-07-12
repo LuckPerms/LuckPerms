@@ -44,6 +44,8 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.library.stub.LibraryCommandManager;
+import me.lucko.luckperms.library.stub.LibraryConfigAdapter;
+import me.lucko.luckperms.library.stub.LibraryConnectionListener;
 import me.lucko.luckperms.library.stub.LibraryContextManager;
 import me.lucko.luckperms.library.stub.LibraryEventBus;
 import me.lucko.luckperms.library.stub.LibraryMessagingFactory;
@@ -98,7 +100,7 @@ public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new LibraryConfigAdapter(manager, this);
+        return new LibraryConfigAdapter(this, () -> manager.createConfigLoader(this::resolveConfig));
     }
 
     @Override

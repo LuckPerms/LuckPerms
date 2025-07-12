@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
 import me.lucko.luckperms.library.LPLibraryBootstrap;
 
 public class LibrarySchedulerAdapter extends AbstractJavaScheduler {
-
     public LibrarySchedulerAdapter(LPLibraryBootstrap bootstrap) {
         super(bootstrap);
     }
@@ -40,5 +39,4 @@ public class LibrarySchedulerAdapter extends AbstractJavaScheduler {
     public Executor sync() {
         return this.async();
     }
-
 }

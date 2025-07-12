@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.library;
+package me.lucko.luckperms.library.stub;
 
 import java.util.UUID;
 
@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 
 public class LibraryConnectionListener extends AbstractConnectionListener {
-
     public LibraryConnectionListener(LuckPermsPlugin plugin) {
         super(plugin);
     }
@@ -40,5 +39,4 @@ public class LibraryConnectionListener extends AbstractConnectionListener {
     public void recordConnection(UUID uniqueId) {
         super.recordConnection(uniqueId);
     }
-
 }

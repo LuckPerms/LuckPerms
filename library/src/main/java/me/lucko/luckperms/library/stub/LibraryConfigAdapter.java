@@ -23,20 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.library;
+package me.lucko.luckperms.library.stub;
+
+import java.util.function.Supplier;
 
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.library.LPLibraryPlugin;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-public class LibraryConfigAdapter extends ConfigurateConfigAdapter<LuckPermsLibraryManager> {
-    public LibraryConfigAdapter(LuckPermsLibraryManager manager, LuckPermsPlugin plugin) {
-        super(plugin, manager);
+public class LibraryConfigAdapter extends ConfigurateConfigAdapter<Supplier<ConfigurationLoader<? extends ConfigurationNode>>> {
+    public LibraryConfigAdapter(LPLibraryPlugin plugin, Supplier<ConfigurationLoader<? extends ConfigurationNode>> impl) {
+        super(plugin, impl);
     }
 
     @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(LuckPermsLibraryManager manager) {
-        return manager.createConfigLoader();
+    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Supplier<ConfigurationLoader<? extends ConfigurationNode>> impl) {
+        return impl.get();
     }
 }

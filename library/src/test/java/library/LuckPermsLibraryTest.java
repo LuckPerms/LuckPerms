@@ -25,9 +25,6 @@
 
 package library;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -37,9 +34,6 @@ import me.lucko.luckperms.library.LuckPermsLibraryManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.kyori.ansi.ColorLevel;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 public class LuckPermsLibraryTest implements LuckPermsLibraryManager, PluginLogger {
 
@@ -79,11 +73,6 @@ public class LuckPermsLibraryTest implements LuckPermsLibraryManager, PluginLogg
     @Override
     public Path getDataDirectory() {
         return Path.of("data");
-    }
-
-    @Override
-    public ConfigurationLoader<? extends ConfigurationNode> createConfigLoader() {
-        return YAMLConfigurationLoader.builder().setSource(() -> new BufferedReader(new InputStreamReader(InputStream.nullInputStream()))).build();
     }
 
     @Override

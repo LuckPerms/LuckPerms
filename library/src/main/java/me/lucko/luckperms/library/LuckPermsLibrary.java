@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.library.sender.ConsoleLibrarySender;
 import me.lucko.luckperms.library.sender.PlayerLibrarySender;
+import me.lucko.luckperms.library.stub.LibraryConnectionListener;
 import me.lucko.luckperms.library.stub.LibraryContextManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;

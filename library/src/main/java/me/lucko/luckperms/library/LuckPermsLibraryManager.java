@@ -31,13 +31,16 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.dependencies.Dependency;
+import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import net.kyori.adventure.text.Component;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 public interface LuckPermsLibraryManager {
     /**
@@ -58,7 +61,13 @@ public interface LuckPermsLibraryManager {
 
     public Path getDataDirectory();
 
-    public ConfigurationLoader<? extends ConfigurationNode> createConfigLoader();
+    /**
+     * @param resolveConfig Calls {@link AbstractLuckPermsPlugin#resolveConfig}
+     * @return
+     */
+    public default ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(Function<String, Path> resolveConfig) {
+        return YAMLConfigurationLoader.builder().setPath(resolveConfig.apply("config.yml")).build();
+    }
 
     public default void modifyPermissionCalculator(List<PermissionProcessor> processors) {
     }
