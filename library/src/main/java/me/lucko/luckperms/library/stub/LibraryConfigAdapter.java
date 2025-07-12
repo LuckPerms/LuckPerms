@@ -23,24 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge;
+package me.lucko.luckperms.library.stub;
+
+import java.util.function.Supplier;
 
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.library.LPLibraryPlugin;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
-import java.nio.file.Path;
-
-public class NeoForgeConfigAdapter extends ConfigurateConfigAdapter<Path> {
-    public NeoForgeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
+public class LibraryConfigAdapter extends ConfigurateConfigAdapter<Supplier<ConfigurationLoader<? extends ConfigurationNode>>> {
+    public LibraryConfigAdapter(LPLibraryPlugin plugin, Supplier<ConfigurationLoader<? extends ConfigurationNode>> impl) {
+        super(plugin, impl);
     }
 
     @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
+    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Supplier<ConfigurationLoader<? extends ConfigurationNode>> impl) {
+        return impl.get();
     }
-
 }

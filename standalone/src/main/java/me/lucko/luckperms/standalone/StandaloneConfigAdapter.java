@@ -34,7 +34,7 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.nio.file.Path;
 
-public class StandaloneConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
+public class StandaloneConfigAdapter extends ConfigurateConfigAdapter<Path> implements ConfigurationAdapter {
     public StandaloneConfigAdapter(LuckPermsPlugin plugin, Path path) {
         super(plugin, path);
     }

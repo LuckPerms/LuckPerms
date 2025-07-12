@@ -23,24 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge;
+package me.lucko.luckperms.library.stub;
 
-import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.event.AbstractEventBus;
+import me.lucko.luckperms.library.LPLibraryPlugin;
 
-import java.nio.file.Path;
-
-public class NeoForgeConfigAdapter extends ConfigurateConfigAdapter<Path> {
-    public NeoForgeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
+public class LibraryEventBus extends AbstractEventBus<Object> {
+    public LibraryEventBus(LPLibraryPlugin plugin, LuckPermsApiProvider apiProvider) {
+        super(plugin, apiProvider);
     }
 
     @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
+    protected Object checkPlugin(Object plugin) throws IllegalArgumentException {
+        return plugin;
     }
 
 }

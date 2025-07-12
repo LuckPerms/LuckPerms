@@ -23,24 +23,40 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge;
+package me.lucko.luckperms.library;
 
-import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 
-public class NeoForgeConfigAdapter extends ConfigurateConfigAdapter<Path> {
-    public NeoForgeConfigAdapter(LuckPermsPlugin plugin, Path path) {
-        super(plugin, path);
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+
+public class URLClassLoaderClassPathAppender implements ClassPathAppender {
+
+    private static class AppendableURLClassLoader extends URLClassLoader {
+        public AppendableURLClassLoader() {
+            super(new URL[0]);
+        }
+        @Override
+        public void addURL(URL url) { // Increase visibility
+            super.addURL(url);
+        }
+    }
+
+    private final AppendableURLClassLoader loader;
+
+    public URLClassLoaderClassPathAppender() {
+        loader = new AppendableURLClassLoader();
     }
 
     @Override
-    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
-        return HoconConfigurationLoader.builder().setPath(path).build();
+    public void addJarToClasspath(Path file) {
+        try {
+            loader.addURL(file.toUri().toURL());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
