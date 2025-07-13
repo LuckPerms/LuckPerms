@@ -25,15 +25,15 @@
 
 package library;
 
-import java.nio.file.Path;
-import java.util.UUID;
-
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.library.LuckPermsLibrary;
 import me.lucko.luckperms.library.LuckPermsLibraryManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.kyori.ansi.ColorLevel;
+
+import java.nio.file.Path;
+import java.util.UUID;
 
 public class LuckPermsLibraryTest implements LuckPermsLibraryManager, PluginLogger {
 

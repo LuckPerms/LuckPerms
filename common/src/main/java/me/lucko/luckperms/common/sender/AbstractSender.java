@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.sender;
 import com.google.common.collect.Iterables;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.generic.key.ConfigKey;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;

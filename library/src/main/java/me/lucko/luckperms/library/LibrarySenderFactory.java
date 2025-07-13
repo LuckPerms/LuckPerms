@@ -25,13 +25,13 @@
 
 package me.lucko.luckperms.library;
 
-import java.util.UUID;
-
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.library.sender.LibrarySender;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
+
+import java.util.UUID;
 
 public class LibrarySenderFactory extends SenderFactory<LPLibraryPlugin, LibrarySender> {
 

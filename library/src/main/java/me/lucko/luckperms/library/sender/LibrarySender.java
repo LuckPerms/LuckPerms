@@ -25,11 +25,11 @@
 
 package me.lucko.luckperms.library.sender;
 
-import java.util.Locale;
-import java.util.UUID;
-
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
+
+import java.util.Locale;
+import java.util.UUID;
 
 public interface LibrarySender {
     String getName();

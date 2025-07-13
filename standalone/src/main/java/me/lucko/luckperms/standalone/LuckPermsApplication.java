@@ -25,19 +25,18 @@
 
 package me.lucko.luckperms.standalone;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.library.LuckPermsLibrary;
 import me.lucko.luckperms.library.LuckPermsLibraryDependencies;
 import me.lucko.luckperms.standalone.utils.DockerCommandSocket;
 import me.lucko.luckperms.standalone.utils.HeartbeatHttpServer;
 import me.lucko.luckperms.standalone.utils.TerminalInterface;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The LuckPerms standalone application.

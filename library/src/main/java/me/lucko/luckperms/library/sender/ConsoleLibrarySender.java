@@ -25,13 +25,13 @@
 
 package me.lucko.luckperms.library.sender;
 
-import java.util.Locale;
-import java.util.UUID;
-import java.util.function.Supplier;
-
 import me.lucko.luckperms.library.LuckPermsLibraryManager;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.util.Tristate;
+
+import java.util.Locale;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 public class ConsoleLibrarySender implements LibrarySender {
 

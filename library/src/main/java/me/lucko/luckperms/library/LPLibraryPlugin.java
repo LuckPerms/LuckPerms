@@ -25,12 +25,6 @@
 
 package me.lucko.luckperms.library;
 
-import java.util.EnumSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
@@ -52,6 +46,12 @@ import me.lucko.luckperms.library.stub.LibraryEventBus;
 import me.lucko.luckperms.library.stub.LibraryMessagingFactory;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
+
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
 

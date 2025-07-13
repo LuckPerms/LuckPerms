@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.library.stub;
 
-import java.util.concurrent.Executor;
-
 import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
 import me.lucko.luckperms.library.LPLibraryBootstrap;
+
+import java.util.concurrent.Executor;
 
 public class LibrarySchedulerAdapter extends AbstractJavaScheduler {
     public LibrarySchedulerAdapter(LPLibraryBootstrap bootstrap) {

@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.standalone.loader;
 
+import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 
 /**
  * Loader bootstrap for LuckPerms running as a "standalone" app.

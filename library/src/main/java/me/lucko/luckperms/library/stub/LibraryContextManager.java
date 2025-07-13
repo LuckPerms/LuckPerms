@@ -25,12 +25,12 @@
 
 package me.lucko.luckperms.library.stub;
 
-import java.util.UUID;
-
 import me.lucko.luckperms.common.context.manager.SimpleContextManager;
 import me.lucko.luckperms.library.LPLibraryPlugin;
 import me.lucko.luckperms.library.sender.LibrarySender;
 import me.lucko.luckperms.library.sender.PlayerLibrarySender;
+
+import java.util.UUID;
 
 public class LibraryContextManager extends SimpleContextManager<LibrarySender, PlayerLibrarySender> {
     public LibraryContextManager(LPLibraryPlugin plugin) {

@@ -25,15 +25,14 @@
 
 package me.lucko.luckperms.standalone.utils;
 
-import java.util.List;
-
+import me.lucko.luckperms.standalone.LuckPermsApplication;
+import net.minecrell.terminalconsole.SimpleTerminalConsole;
 import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.ParsedLine;
 
-import me.lucko.luckperms.standalone.LuckPermsApplication;
-import net.minecrell.terminalconsole.SimpleTerminalConsole;
+import java.util.List;
 
 /**
  * The terminal/console-style interface presented to the user.

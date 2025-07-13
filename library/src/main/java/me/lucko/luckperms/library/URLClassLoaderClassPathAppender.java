@@ -25,13 +25,13 @@
 
 package me.lucko.luckperms.library;
 
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
-
-import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 
 public class URLClassLoaderClassPathAppender implements ClassPathAppender {
 

@@ -25,13 +25,13 @@
 
 package me.lucko.luckperms.standalone;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
-
 import me.lucko.luckperms.library.LuckPermsLibraryManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 public class StandaloneLibraryManager implements LuckPermsLibraryManager {
 

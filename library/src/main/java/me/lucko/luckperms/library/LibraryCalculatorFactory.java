@@ -25,10 +25,6 @@
 
 package me.lucko.luckperms.library;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
-
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
@@ -39,6 +35,10 @@ import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import net.luckperms.api.query.QueryOptions;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class LibraryCalculatorFactory implements CalculatorFactory {
     private final Supplier<LuckPermsLibraryManager> manager;

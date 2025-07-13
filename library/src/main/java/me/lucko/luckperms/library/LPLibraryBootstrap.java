@@ -25,14 +25,6 @@
 
 package me.lucko.luckperms.library;
 
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.function.Supplier;
-
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
@@ -40,6 +32,14 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.library.sender.PlayerLibrarySender;
 import me.lucko.luckperms.library.stub.LibrarySchedulerAdapter;
 import net.luckperms.api.platform.Platform;
+
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Supplier;
 
 public class LPLibraryBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
 

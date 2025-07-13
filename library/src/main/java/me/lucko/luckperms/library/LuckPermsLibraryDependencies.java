@@ -1,9 +1,9 @@
 package me.lucko.luckperms.library;
 
+import me.lucko.luckperms.common.dependencies.Dependency;
+
 import java.util.Set;
 import java.util.function.Consumer;
-
-import me.lucko.luckperms.common.dependencies.Dependency;
 
 /**
  * loadDefault: Use if the default dependencies are not packaged (they are included in the library module)<br>

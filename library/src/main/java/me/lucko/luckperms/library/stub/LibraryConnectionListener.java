@@ -25,10 +25,10 @@
 
 package me.lucko.luckperms.library.stub;
 
-import java.util.UUID;
-
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
+
+import java.util.UUID;
 
 public class LibraryConnectionListener extends AbstractConnectionListener {
     public LibraryConnectionListener(LuckPermsPlugin plugin) {
