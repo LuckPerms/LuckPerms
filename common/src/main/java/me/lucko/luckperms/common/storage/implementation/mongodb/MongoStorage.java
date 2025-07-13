@@ -140,7 +140,7 @@ public class MongoStorage implements StorageImplementation {
                 this.mongoClient = new MongoClient(address, credential, options.build());
             }
         }
-        
+
         this.database = this.mongoClient.getDatabase(this.configuration.getDatabase());
     }
 

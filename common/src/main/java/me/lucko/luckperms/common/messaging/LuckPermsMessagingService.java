@@ -282,7 +282,7 @@ public class LuckPermsMessagingService extends AsyncInterface implements Interna
             this.plugin.getLogger().info("[Messaging] Received user update ping for '" + user.getPlainDisplayName() + "' with id: " + msgId);
             this.plugin.getStorage().loadUser(user.getUniqueId(), null)
                     .thenRunAsync(() -> this.plugin.getEventDispatcher().dispatchNetworkPostSync(msgId, SyncType.SPECIFIC_USER, true, userUniqueId));
-            
+
         } else if (message instanceof ActionLogMessage) {
             ActionLogMessage msg = (ActionLogMessage) message;
 

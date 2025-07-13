@@ -100,7 +100,7 @@ public interface Message {
     TextComponent OPEN_BRACKET = Component.text('(');
     TextComponent CLOSE_BRACKET = Component.text(')');
     TextComponent FULL_STOP = Component.text('.');
-    
+
     Component PREFIX_COMPONENT = text()
             .color(GRAY)
             .append(text('['))
