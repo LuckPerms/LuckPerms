@@ -28,7 +28,6 @@ package me.lucko.luckperms.library;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -56,8 +55,7 @@ import net.luckperms.api.query.QueryOptions;
 
 public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
 
-    private final boolean loadDefaultDependencies;
-    private final Consumer<Set<Dependency>> modifyDependencies;
+    private final LuckPermsLibraryDependencies dependencies;
     private final Supplier<LuckPermsLibraryManager> manager;
     private final LuckPermsLibrary library;
     private final LPLibraryBootstrap bootstrap;
@@ -70,10 +68,9 @@ public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
     private StandardTrackManager trackManager;
     private LibraryContextManager contextManager;
 
-    public LPLibraryPlugin(boolean loadDefaultDependencies, Consumer<Set<Dependency>> modifyDependencies,
-            Supplier<LuckPermsLibraryManager> manager, LuckPermsLibrary library, LPLibraryBootstrap bootstrap) {
-        this.loadDefaultDependencies = loadDefaultDependencies;
-        this.modifyDependencies = modifyDependencies;
+    public LPLibraryPlugin(LuckPermsLibraryDependencies dependencies, Supplier<LuckPermsLibraryManager> manager,
+            LuckPermsLibrary library, LPLibraryBootstrap bootstrap) {
+        this.dependencies = dependencies;
         this.manager = manager;
         this.library = library;
         this.bootstrap = bootstrap;
@@ -92,7 +89,7 @@ public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies;
-        if (loadDefaultDependencies) {
+        if (this.dependencies.isLoadDefault()) {
             dependencies = super.getGlobalDependencies();
             dependencies.remove(Dependency.ADVENTURE);
             dependencies.add(Dependency.CONFIGURATE_CORE);
@@ -101,8 +98,8 @@ public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
         } else {
             dependencies = EnumSet.noneOf(Dependency.class);
         }
-        if (modifyDependencies != null)
-            modifyDependencies.accept(dependencies);
+        if (this.dependencies.getModifier() != null)
+            this.dependencies.getModifier().accept(dependencies);
         return dependencies;
     }
 

@@ -25,17 +25,6 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import com.google.common.collect.ImmutableSet;
-import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
-import me.lucko.luckperms.common.dependencies.relocation.Relocation;
-import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
-import me.lucko.luckperms.common.storage.StorageType;
-import me.lucko.luckperms.common.util.MoreFiles;
-import net.luckperms.api.platform.Platform;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -51,11 +40,26 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+
+import com.google.common.collect.ImmutableSet;
+
+import me.lucko.luckperms.common.dependencies.classloader.IsolatedClassLoader;
+import me.lucko.luckperms.common.dependencies.relocation.Relocation;
+import me.lucko.luckperms.common.dependencies.relocation.RelocationHandler;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.storage.StorageType;
+import me.lucko.luckperms.common.util.MoreFiles;
+import net.luckperms.api.platform.Platform;
+
 /**
  * Loads and manages runtime dependencies for the plugin.
  */
 public class DependencyManagerImpl implements DependencyManager {
 
+	/** Stops the loading of storage dependencies and marks them as loaded once resolved */
+	private final boolean storageDependenciesAlreadyLoaded;
     /** A registry containing plugin specific behaviour for dependencies. */
     private final DependencyRegistry registry;
     /** The path where library jars are cached. */
@@ -73,6 +77,7 @@ public class DependencyManagerImpl implements DependencyManager {
     private @MonotonicNonNull RelocationHandler relocationHandler = null;
 
     public DependencyManagerImpl(LuckPermsPlugin plugin) {
+    	this.storageDependenciesAlreadyLoaded = plugin.getBootstrap().isStorageDependenciesAlreadyLoaded();
         this.registry = new DependencyRegistry(plugin.getBootstrap().getType());
         this.cacheDirectory = setupCacheDirectory(plugin);
         this.classPathAppender = plugin.getBootstrap().getClassPathAppender();
@@ -80,6 +85,7 @@ public class DependencyManagerImpl implements DependencyManager {
     }
 
     public DependencyManagerImpl(Path cacheDirectory, Executor executor) { // standalone pre-loader
+    	this.storageDependenciesAlreadyLoaded = false;
         this.registry = new DependencyRegistry(Platform.Type.STANDALONE);
         this.cacheDirectory = cacheDirectory;
         this.classPathAppender = null;
@@ -111,6 +117,7 @@ public class DependencyManagerImpl implements DependencyManager {
 
             URL[] urls = set.stream()
                     .map(this.loaded::get)
+                    .filter(file -> file != null)
                     .map(file -> {
                         try {
                             return file.toUri().toURL();
@@ -120,6 +127,10 @@ public class DependencyManagerImpl implements DependencyManager {
                     })
                     .toArray(URL[]::new);
 
+            if (urls.length == 0) { // Already loaded storage dependencies
+                return getClass().getClassLoader();
+            }
+
             classLoader = new IsolatedClassLoader(urls);
             this.loaders.put(set, classLoader);
             return classLoader;
@@ -128,7 +139,13 @@ public class DependencyManagerImpl implements DependencyManager {
 
     @Override
     public void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats) {
-        loadDependencies(this.registry.resolveStorageDependencies(storageTypes, redis, rabbitmq, nats));
+    	Set<Dependency> dependencies = this.registry.resolveStorageDependencies(storageTypes, redis, rabbitmq, nats);
+    	if (storageDependenciesAlreadyLoaded) {
+    		for (Dependency dependency : dependencies)
+    			loaded.put(dependency, null);
+    	} else {
+    		loadDependencies(dependencies);
+    	}
     }
 
     @Override

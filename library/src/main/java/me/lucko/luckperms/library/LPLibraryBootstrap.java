@@ -29,13 +29,10 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
@@ -46,6 +43,7 @@ import net.luckperms.api.platform.Platform;
 
 public class LPLibraryBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
 
+    private final LuckPermsLibraryDependencies dependencies;
     private final PluginLogger logger;
     private final Supplier<LuckPermsLibraryManager> manager;
     private final LuckPermsLibrary library;
@@ -58,15 +56,16 @@ public class LPLibraryBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
     private final CountDownLatch loadLatch = new CountDownLatch(1);
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
-    public LPLibraryBootstrap(boolean loadDefaultDependencies, Consumer<Set<Dependency>> modifyDependencies,
-            PluginLogger logger, Supplier<LuckPermsLibraryManager> manager, LuckPermsLibrary library) {
+    public LPLibraryBootstrap(LuckPermsLibraryDependencies dependencies, PluginLogger logger,
+            Supplier<LuckPermsLibraryManager> manager, LuckPermsLibrary library) {
+        this.dependencies = dependencies;
         this.logger = logger;
         this.manager = manager;
         this.library = library;
 
         this.schedulerAdapter = new LibrarySchedulerAdapter(this);
         this.classPathAppender = new URLClassLoaderClassPathAppender();
-        this.plugin = new LPLibraryPlugin(loadDefaultDependencies, modifyDependencies, manager, library, this);
+        this.plugin = new LPLibraryPlugin(dependencies, manager, library, this);
     }
 
     public LPLibraryPlugin getPlugin() {
@@ -88,6 +87,11 @@ public class LPLibraryBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
     @Override
     public ClassPathAppender getClassPathAppender() {
         return this.classPathAppender;
+    }
+
+    @Override
+    public boolean isStorageDependenciesAlreadyLoaded() {
+        return !dependencies.isLoadStorage();
     }
 
     // lifecycle

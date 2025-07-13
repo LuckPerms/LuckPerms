@@ -30,16 +30,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.google.common.base.Suppliers;
 
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
-import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
@@ -65,31 +62,30 @@ public class LuckPermsLibrary implements AutoCloseable {
     private final Map<UUID, PlayerLibrarySender> playerSenders;
 
     /**
-     * @param loadDefaultDependencies If the default dependencies are not packaged
-     * (transitive = false), then this should be true
-     * @param modifyDependencies Add or remove dependencies (can be null)
+     * @param dependencies
+     * @param logger
      * @param manager
-     * @see #LuckPermsLibrary(Supplier)
+     * @see #LuckPermsLibrary(PluginLogger, LuckPermsLibraryManager)
      */
-    public LuckPermsLibrary(boolean loadDefaultDependencies, Consumer<Set<Dependency>> modifyDependencies,
-            PluginLogger logger, Supplier<LuckPermsLibraryManager> manager) {
+    public LuckPermsLibrary(LuckPermsLibraryDependencies dependencies, PluginLogger logger, Supplier<LuckPermsLibraryManager> manager) {
         manager = Suppliers.memoize(manager::get)::get;
 
         this.manager = manager;
-        this.bootstrap = new LPLibraryBootstrap(loadDefaultDependencies, modifyDependencies, logger, manager, this);
+        this.bootstrap = new LPLibraryBootstrap(dependencies, logger, manager, this);
         this.plugin = bootstrap.getPlugin();
 
         consoleSender = new ConsoleLibrarySender(manager);
         playerSenders = new HashMap<>();
     }
     /**
-     * This doesn't load the default dependencies automatically, so this is recommended
-     * if you are including the transitive dependencies from the library module
+     * This uses {@link LuckPermsLibraryDependencies#loadOnlyStorage()}, which is recommended if you simply included
+     * the library module without excluding transitive dependencies or manually including storage dependencies
+     * @param logger
      * @param manager
-     * @see #LuckPermsLibrary(boolean, Consumer, Supplier)
+     * @see #LuckPermsLibrary(LuckPermsLibraryDependencies, PluginLogger, Supplier)
      */
     public LuckPermsLibrary(PluginLogger logger, LuckPermsLibraryManager manager) {
-        this(false, null, logger, () -> manager);
+        this(LuckPermsLibraryDependencies.loadOnlyStorage(), logger, () -> manager);
     }
 
     public void start() {

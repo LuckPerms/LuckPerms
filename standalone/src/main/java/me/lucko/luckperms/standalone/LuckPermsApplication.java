@@ -34,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.library.LuckPermsLibrary;
+import me.lucko.luckperms.library.LuckPermsLibraryDependencies;
 import me.lucko.luckperms.standalone.utils.DockerCommandSocket;
 import me.lucko.luckperms.standalone.utils.HeartbeatHttpServer;
 import me.lucko.luckperms.standalone.utils.TerminalInterface;
@@ -61,7 +62,8 @@ public class LuckPermsApplication implements AutoCloseable {
      * Start the app
      */
     public LuckPermsApplication(String[] args) {
-    	library = new LuckPermsLibrary(true, null, new Log4jPluginLogger(LOGGER), StandaloneLibraryManager::new);
+    	library = new LuckPermsLibrary(
+    			LuckPermsLibraryDependencies.loadAll(), new Log4jPluginLogger(LOGGER), StandaloneLibraryManager::new);
     	library.start();
 
         TerminalInterface terminal = new TerminalInterface(this);
