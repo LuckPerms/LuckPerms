@@ -45,10 +45,6 @@ import java.util.concurrent.Executors;
  */
 public class StandaloneDependencyPreloader {
 
-    public static void main(String[] args) throws Exception {
-        main();
-    }
-
     public static void main() throws Exception {
         Path cacheDirectory = Paths.get("data").resolve("libs");
         MoreFiles.createDirectoriesIfNotExists(cacheDirectory);

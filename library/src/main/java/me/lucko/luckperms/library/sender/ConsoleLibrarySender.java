@@ -27,6 +27,7 @@ package me.lucko.luckperms.library.sender;
 
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import me.lucko.luckperms.library.LuckPermsLibraryManager;
 import net.kyori.adventure.text.Component;
@@ -36,9 +37,9 @@ public class ConsoleLibrarySender implements LibrarySender {
 
     private static final UUID UUID = new UUID(0, 0);
 
-    private final LuckPermsLibraryManager manager;
+    private final Supplier<LuckPermsLibraryManager> manager;
 
-    public ConsoleLibrarySender(LuckPermsLibraryManager manager) {
+    public ConsoleLibrarySender(Supplier<LuckPermsLibraryManager> manager) {
         this.manager = manager;
     }
 
@@ -54,7 +55,7 @@ public class ConsoleLibrarySender implements LibrarySender {
 
     @Override
     public void sendMessage(Component component) {
-        manager.onConsoleMessage(component);
+        manager.get().onConsoleMessage(component);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class ConsoleLibrarySender implements LibrarySender {
 
     @Override
     public void performCommand(String command) {
-        manager.performConsoleCommand(command);
+        manager.get().performConsoleCommand(command);
     }
 
     @Override
@@ -79,12 +80,12 @@ public class ConsoleLibrarySender implements LibrarySender {
 
     @Override
     public Locale getLocale() {
-        return manager.getConsoleLocale();
+        return manager.get().getConsoleLocale();
     }
 
     @Override
     public boolean shouldSplitNewlines() {
-        return manager.shouldConsoleSplitNewlines();
+        return manager.get().shouldConsoleSplitNewlines();
     }
 
 }

@@ -30,13 +30,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import com.google.common.base.Suppliers;
 
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.library.sender.ConsoleLibrarySender;
 import me.lucko.luckperms.library.sender.PlayerLibrarySender;
@@ -48,7 +55,7 @@ import net.luckperms.api.util.Tristate;
 
 public class LuckPermsLibrary implements AutoCloseable {
 
-    private final LuckPermsLibraryManager manager;
+    private final Supplier<LuckPermsLibraryManager> manager;
 
     private final LPLibraryBootstrap bootstrap;
     private final LPLibraryPlugin plugin;
@@ -57,13 +64,32 @@ public class LuckPermsLibrary implements AutoCloseable {
     private final ConsoleLibrarySender consoleSender;
     private final Map<UUID, PlayerLibrarySender> playerSenders;
 
-    public LuckPermsLibrary(LuckPermsLibraryManager manager) {
+    /**
+     * @param loadDefaultDependencies If the default dependencies are not packaged
+     * (transitive = false), then this should be true
+     * @param modifyDependencies Add or remove dependencies (can be null)
+     * @param manager
+     * @see #LuckPermsLibrary(Supplier)
+     */
+    public LuckPermsLibrary(boolean loadDefaultDependencies, Consumer<Set<Dependency>> modifyDependencies,
+            PluginLogger logger, Supplier<LuckPermsLibraryManager> manager) {
+        manager = Suppliers.memoize(manager::get)::get;
+
         this.manager = manager;
-        this.bootstrap = new LPLibraryBootstrap(manager, this);
+        this.bootstrap = new LPLibraryBootstrap(loadDefaultDependencies, modifyDependencies, logger, manager, this);
         this.plugin = bootstrap.getPlugin();
 
         consoleSender = new ConsoleLibrarySender(manager);
         playerSenders = new HashMap<>();
+    }
+    /**
+     * This doesn't load the default dependencies automatically, so this is recommended
+     * if you are including the transitive dependencies from the library module
+     * @param manager
+     * @see #LuckPermsLibrary(boolean, Consumer, Supplier)
+     */
+    public LuckPermsLibrary(PluginLogger logger, LuckPermsLibraryManager manager) {
+        this(false, null, logger, () -> manager);
     }
 
     public void start() {
@@ -122,8 +148,22 @@ public class LuckPermsLibrary implements AutoCloseable {
     /**
      * @param command Does not include lp or the slash
      */
+    public List<String> tabCompleteFromConsole(String command) {
+        return tabCompleteFromConsole(ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(command));
+    }
+
+    /**
+     * @param command Does not include lp or the slash
+     */
     public CompletableFuture<Void> execFromConsole(List<String> command) {
         return plugin.getCommandManager().executeCommand(plugin.getSenderFactory().wrap(consoleSender), "lp", command);
+    }
+
+    /**
+     * @param command Does not include lp or the slash
+     */
+    public List<String> tabCompleteFromConsole(List<String> command) {
+        return plugin.getCommandManager().tabCompleteCommand(plugin.getSenderFactory().wrap(consoleSender), command);
     }
 
     /**
@@ -135,11 +175,27 @@ public class LuckPermsLibrary implements AutoCloseable {
     }
 
     /**
+     * @param player The player that is typing the command - must be joined with {@link #playerJoined(UUID, String)}
+     * @param command Does not include lp or the slash
+     */
+    public List<String> tabCompleteFromPlayer(UUID player, String command) {
+        return tabCompleteFromPlayer(player, ArgumentTokenizer.TAB_COMPLETE.tokenizeInput(command));
+    }
+
+    /**
      * @param player The player that is executing the command - must be joined with {@link #playerJoined(UUID, String)}
      * @param command Does not include lp or the slash
      */
     public CompletableFuture<Void> execFromPlayer(UUID player, List<String> command) {
         return plugin.getCommandManager().executeCommand(plugin.getSenderFactory().wrap(playerSenders.get(player)), "lp", command);
+    }
+
+    /**
+     * @param player The player that is typing the command - must be joined with {@link #playerJoined(UUID, String)}
+     * @param command Does not include lp or the slash
+     */
+    public List<String> tabCompleteFromPlayer(UUID player, List<String> command) {
+        return plugin.getCommandManager().tabCompleteCommand(plugin.getSenderFactory().wrap(playerSenders.get(player)), command);
     }
 
     public LuckPermsBootstrap getBootstrap() {

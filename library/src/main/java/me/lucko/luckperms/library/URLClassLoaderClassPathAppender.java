@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.library;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -56,6 +57,15 @@ public class URLClassLoaderClassPathAppender implements ClassPathAppender {
             loader.addURL(file.toUri().toURL());
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            loader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

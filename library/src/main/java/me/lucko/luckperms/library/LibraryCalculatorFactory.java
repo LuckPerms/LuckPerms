@@ -27,6 +27,7 @@ package me.lucko.luckperms.library;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
@@ -40,10 +41,10 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import net.luckperms.api.query.QueryOptions;
 
 public class LibraryCalculatorFactory implements CalculatorFactory {
-    private final LuckPermsLibraryManager manager;
+    private final Supplier<LuckPermsLibraryManager> manager;
     private final LPLibraryPlugin plugin;
 
-    public LibraryCalculatorFactory(LuckPermsLibraryManager manager, LPLibraryPlugin plugin) {
+    public LibraryCalculatorFactory(Supplier<LuckPermsLibraryManager> manager, LPLibraryPlugin plugin) {
         this.manager = manager;
         this.plugin = plugin;
     }
@@ -66,7 +67,7 @@ public class LibraryCalculatorFactory implements CalculatorFactory {
             processors.add(new SpongeWildcardProcessor());
         }
 
-        manager.modifyPermissionCalculator(processors);
+        manager.get().modifyPermissionCalculator(processors);
 
         return new PermissionCalculator(this.plugin, metadata, processors);
     }

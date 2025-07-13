@@ -23,20 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.standalone.app;
-
-import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
-import me.lucko.luckperms.standalone.app.integration.ShutdownCallback;
-import me.lucko.luckperms.standalone.app.utils.DockerCommandSocket;
-import me.lucko.luckperms.standalone.app.utils.HeartbeatHttpServer;
-import me.lucko.luckperms.standalone.app.utils.TerminalInterface;
-import net.luckperms.api.LuckPerms;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+package me.lucko.luckperms.standalone;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
+import me.lucko.luckperms.library.LuckPermsLibrary;
+import me.lucko.luckperms.standalone.utils.DockerCommandSocket;
+import me.lucko.luckperms.standalone.utils.HeartbeatHttpServer;
+import me.lucko.luckperms.standalone.utils.TerminalInterface;
 
 /**
  * The LuckPerms standalone application.
@@ -46,13 +46,8 @@ public class LuckPermsApplication implements AutoCloseable {
     /** A logger instance */
     public static final Logger LOGGER = LogManager.getLogger(LuckPermsApplication.class);
 
-    /** A callback to shutdown the application via the loader bootstrap. */
-    private final ShutdownCallback shutdownCallback;
-
-    /** The instance of the LuckPerms API available within the app */
-    private LuckPerms luckPermsApi;
-    /** A command executor interface to run LuckPerms commands */
-    private CommandExecutor commandExecutor;
+    /** All of the LuckPerms stuff */
+    private LuckPermsLibrary library;
 
     /** If the application is running */
     private final AtomicBoolean running = new AtomicBoolean(true);
@@ -62,27 +57,27 @@ public class LuckPermsApplication implements AutoCloseable {
     /** The heartbeat http server */
     private HeartbeatHttpServer heartbeatHttpServer;
 
-    public LuckPermsApplication(ShutdownCallback shutdownCallback) {
-        this.shutdownCallback = shutdownCallback;
-    }
-
     /**
      * Start the app
      */
-    public void start(String[] args) {
-        TerminalInterface terminal = new TerminalInterface(this, this.commandExecutor);
+    public LuckPermsApplication(String[] args) {
+    	library = new LuckPermsLibrary(true, null, new Log4jPluginLogger(LOGGER), StandaloneLibraryManager::new);
+    	library.start();
+
+        TerminalInterface terminal = new TerminalInterface(this);
 
         List<String> arguments = Arrays.asList(args);
         if (arguments.contains("--docker")) {
             this.dockerCommandSocket = DockerCommandSocket.createAndStart("/opt/luckperms/luckperms.sock", terminal);
-            this.heartbeatHttpServer = HeartbeatHttpServer.createAndStart(3001, () -> this.luckPermsApi.runHealthCheck());
+            this.heartbeatHttpServer = HeartbeatHttpServer.createAndStart(3001, () -> library.getLuckPerms().runHealthCheck());
         }
 
         terminal.start(); // blocking
     }
 
     public void requestShutdown() {
-        this.shutdownCallback.shutdown();
+        close();
+        LogManager.shutdown(true);
     }
 
     @Override
@@ -104,32 +99,16 @@ public class LuckPermsApplication implements AutoCloseable {
                 LOGGER.warn(e);
             }
         }
+
+        library.close();
     }
 
     public AtomicBoolean runningState() {
         return this.running;
     }
 
-    // called before start()
-    public void setApi(LuckPerms luckPermsApi) {
-        this.luckPermsApi = luckPermsApi;
-    }
-
-    // called before start()
-    public void setCommandExecutor(CommandExecutor commandExecutor) {
-        this.commandExecutor = commandExecutor;
-    }
-
-    public LuckPerms getApi() {
-        return this.luckPermsApi;
-    }
-
-    public CommandExecutor getCommandExecutor() {
-        return this.commandExecutor;
-    }
-
-    public String getVersion() {
-        return "@version@";
+    public LuckPermsLibrary getLibrary() {
+        return library;
     }
 
 }

@@ -1,13 +1,14 @@
 plugins {
     alias(libs.plugins.blossom)
+    id("java-library")
 }
 
 sourceCompatibility = 17
 targetCompatibility = 17
 
 dependencies {
-    implementation project(':common')
-    implementation project(':common:loader-utils')
+    api project(':common')
+    api project(':common:loader-utils')
 
     implementation 'org.yaml:snakeyaml:1.33'
 

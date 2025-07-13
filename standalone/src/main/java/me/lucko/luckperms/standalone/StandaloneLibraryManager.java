@@ -23,15 +23,45 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.standalone.app.integration;
+package me.lucko.luckperms.standalone;
 
-/**
- * Shutdown callback for the whole standalone app.
- *
- * (in practice this is always implemented by the StandaloneLoader class)
- */
-public interface ShutdownCallback {
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
-    void shutdown();
+import me.lucko.luckperms.library.LuckPermsLibraryManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
+
+public class StandaloneLibraryManager implements LuckPermsLibraryManager {
+
+	@Override
+	public String getServerBrand() {
+		return "standalone";
+	}
+
+	@Override
+	public String getServerVersion() {
+		return "n/a";
+	}
+
+	@Override
+	public Path getDataDirectory() {
+		return Paths.get("data").toAbsolutePath();
+	}
+
+	@Override
+	public void onConsoleMessage(Component message) {
+		LuckPermsApplication.LOGGER.info(ANSIComponentSerializer.ansi().serialize(message));
+	}
+
+	@Override
+	public void performConsoleCommand(String command) {}
+
+	@Override
+	public void onPlayerMessage(UUID player, Component message) {}
+
+	@Override
+	public void performPlayerCommand(UUID player, String command) {}
 
 }

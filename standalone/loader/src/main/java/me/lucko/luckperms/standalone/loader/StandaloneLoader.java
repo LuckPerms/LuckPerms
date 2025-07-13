@@ -25,58 +25,37 @@
 
 package me.lucko.luckperms.standalone.loader;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
-import me.lucko.luckperms.common.loader.LoaderBootstrap;
-import me.lucko.luckperms.standalone.app.LuckPermsApplication;
-import me.lucko.luckperms.standalone.app.integration.ShutdownCallback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
+import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 
 /**
  * Loader bootstrap for LuckPerms running as a "standalone" app.
  *
- * There are three main modules:
+ * There are two main modules:
  * 1. the loader (this)
- *      - performs jar-in-jar loading for the plugin
- *      - starts the application
- * 2. the plugin (LPStandaloneBootstrap, LPStandalonePlugin, etc)
- *      - implements the standard classes required to create an abstract LuckPerms "plugin")
- * 3. the application
- *      - allows the user to interact with the plugin through a basic terminal layer
+ *      - performs jar-in-jar loading
+ * 2. the application
+ *      - allows the user to interact through a basic terminal layer
  */
-public class StandaloneLoader implements ShutdownCallback {
+public class StandaloneLoader {
     public static final Logger LOGGER = LogManager.getLogger(StandaloneLoader.class);
 
     private static final String JAR_NAME = "luckperms-standalone.jarinjar";
-    private static final String BOOTSTRAP_PLUGIN_CLASS = "me.lucko.luckperms.standalone.LPStandaloneBootstrap";
-    private static final String BOOTSTRAP_DEPENDENCY_PRELOADER_CLASS = "me.lucko.luckperms.standalone.StandaloneDependencyPreloader";
-
-    private LuckPermsApplication app;
-    private JarInJarClassLoader loader;
-    private LoaderBootstrap plugin;
+    private static final String APPLICATION_CLASS = "me.lucko.luckperms.standalone.LuckPermsApplication";
+    private static final String DEPENDENCY_PRELOADER_CLASS = "me.lucko.luckperms.standalone.StandaloneDependencyPreloader";
 
     // Entrypoint
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Exception in thread " + t.getName(), e));
 
-        StandaloneLoader loader = new StandaloneLoader();
-        loader.start(args);
-    }
-
-    public void start(String[] args) {
-        // construct an application, but don't "start" it yet
-        this.app = new LuckPermsApplication(this);
-
-        // create a jar-in-jar classloader for the standalone plugin, then enable it
-        // the application is passes to the plugin constructor, to allow it to pass hooks back
-        this.loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
+        ClassLoader loader = new JarInJarClassLoader(StandaloneLoader.class.getClassLoader(), JAR_NAME);
 
         // special case for dependency preload command
         if (args.length == 1 && args[0].equals("preloadDependencies")) {
             try {
-                Class<?> clazz = this.loader.loadClass(BOOTSTRAP_DEPENDENCY_PRELOADER_CLASS);
+            	Class<?> clazz = loader.loadClass(DEPENDENCY_PRELOADER_CLASS);
                 clazz.getMethod("main").invoke(null);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -84,26 +63,12 @@ public class StandaloneLoader implements ShutdownCallback {
             return;
         }
 
-        this.plugin = this.loader.instantiatePlugin(BOOTSTRAP_PLUGIN_CLASS, LuckPermsApplication.class, this.app);
-        this.plugin.onLoad();
-        this.plugin.onEnable();
-
         // start the application
-        this.app.start(args);
-    }
-
-    @Override
-    public void shutdown() {
-        // shutdown in reverse order
-        this.app.close();
-        this.plugin.onDisable();
         try {
-            this.loader.close();
-        } catch (IOException e) {
-            LOGGER.error(e);
-        }
-
-        LogManager.shutdown(true);
+	        loader.loadClass(APPLICATION_CLASS).getConstructor(String[].class).newInstance(new Object[] {args});
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
     }
 
 }

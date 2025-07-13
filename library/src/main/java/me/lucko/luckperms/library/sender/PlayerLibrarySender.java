@@ -28,6 +28,7 @@ package me.lucko.luckperms.library.sender;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import me.lucko.luckperms.library.LuckPermsLibraryManager;
 import net.kyori.adventure.text.Component;
@@ -35,12 +36,12 @@ import net.luckperms.api.util.Tristate;
 
 public class PlayerLibrarySender implements LibrarySender {
 
-    private final LuckPermsLibraryManager manager;
+    private final Supplier<LuckPermsLibraryManager> manager;
     private final UUID uuid;
     private final String username;
     private final Function<String, Tristate> getPermissionValue;
 
-    public PlayerLibrarySender(LuckPermsLibraryManager manager, UUID uuid, String username, Function<String, Tristate> getPermissionValue) {
+    public PlayerLibrarySender(Supplier<LuckPermsLibraryManager> manager, UUID uuid, String username, Function<String, Tristate> getPermissionValue) {
         this.manager = manager;
         this.uuid = uuid;
         this.username = username;
@@ -59,7 +60,7 @@ public class PlayerLibrarySender implements LibrarySender {
 
     @Override
     public void sendMessage(Component component) {
-        manager.onPlayerMessage(uuid, component);
+        manager.get().onPlayerMessage(uuid, component);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class PlayerLibrarySender implements LibrarySender {
 
     @Override
     public void performCommand(String command) {
-        manager.performPlayerCommand(uuid, command);
+        manager.get().performPlayerCommand(uuid, command);
     }
 
     @Override
@@ -84,12 +85,12 @@ public class PlayerLibrarySender implements LibrarySender {
 
     @Override
     public Locale getLocale() {
-        return manager.getPlayerLocale(uuid);
+        return manager.get().getPlayerLocale(uuid);
     }
 
     @Override
     public boolean shouldSplitNewlines() {
-        return manager.shouldPlayerSplitNewlines(uuid);
+        return manager.get().shouldPlayerSplitNewlines(uuid);
     }
 
 }

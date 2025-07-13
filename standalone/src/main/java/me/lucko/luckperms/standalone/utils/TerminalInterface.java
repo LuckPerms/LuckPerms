@@ -23,28 +23,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.standalone.app.utils;
+package me.lucko.luckperms.standalone.utils;
 
-import me.lucko.luckperms.standalone.app.LuckPermsApplication;
-import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
-import net.minecrell.terminalconsole.SimpleTerminalConsole;
+import java.util.List;
+
 import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.ParsedLine;
 
-import java.util.List;
+import me.lucko.luckperms.standalone.LuckPermsApplication;
+import net.minecrell.terminalconsole.SimpleTerminalConsole;
 
 /**
  * The terminal/console-style interface presented to the user.
  */
 public class TerminalInterface extends SimpleTerminalConsole {
     private final LuckPermsApplication application;
-    private final CommandExecutor commandExecutor;
 
-    public TerminalInterface(LuckPermsApplication application, CommandExecutor commandExecutor) {
+    public TerminalInterface(LuckPermsApplication application) {
         this.application = application;
-        this.commandExecutor = commandExecutor;
     }
 
     @Override
@@ -74,13 +72,13 @@ public class TerminalInterface extends SimpleTerminalConsole {
             return;
         }
 
-        this.commandExecutor.execute(command);
+        application.getLibrary().execFromConsole(command);
     }
 
     private void completeCommand(LineReader reader, ParsedLine line, List<Candidate> candidates) {
         String cmdLine = stripSlashLp(line.line());
 
-        for (String suggestion : this.commandExecutor.tabComplete(cmdLine)) {
+        for (String suggestion : application.getLibrary().tabCompleteFromConsole(cmdLine)) {
             candidates.add(new Candidate(suggestion));
         }
     }

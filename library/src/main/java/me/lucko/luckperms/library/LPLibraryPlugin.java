@@ -28,6 +28,8 @@ package me.lucko.luckperms.library;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
@@ -54,7 +56,9 @@ import net.luckperms.api.query.QueryOptions;
 
 public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
 
-    private final LuckPermsLibraryManager manager;
+    private final boolean loadDefaultDependencies;
+    private final Consumer<Set<Dependency>> modifyDependencies;
+    private final Supplier<LuckPermsLibraryManager> manager;
     private final LuckPermsLibrary library;
     private final LPLibraryBootstrap bootstrap;
 
@@ -66,7 +70,10 @@ public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
     private StandardTrackManager trackManager;
     private LibraryContextManager contextManager;
 
-    public LPLibraryPlugin(LuckPermsLibraryManager manager, LuckPermsLibrary library, LPLibraryBootstrap bootstrap) {
+    public LPLibraryPlugin(boolean loadDefaultDependencies, Consumer<Set<Dependency>> modifyDependencies,
+            Supplier<LuckPermsLibraryManager> manager, LuckPermsLibrary library, LPLibraryBootstrap bootstrap) {
+        this.loadDefaultDependencies = loadDefaultDependencies;
+        this.modifyDependencies = modifyDependencies;
         this.manager = manager;
         this.library = library;
         this.bootstrap = bootstrap;
@@ -85,7 +92,7 @@ public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
     @Override
     protected Set<Dependency> getGlobalDependencies() {
         Set<Dependency> dependencies;
-        if (manager.shouldLoadDefaultDependencies()) {
+        if (loadDefaultDependencies) {
             dependencies = super.getGlobalDependencies();
             dependencies.remove(Dependency.ADVENTURE);
             dependencies.add(Dependency.CONFIGURATE_CORE);
@@ -94,13 +101,14 @@ public class LPLibraryPlugin extends AbstractLuckPermsPlugin {
         } else {
             dependencies = EnumSet.noneOf(Dependency.class);
         }
-        manager.modifyDependencies(dependencies);
+        if (modifyDependencies != null)
+            modifyDependencies.accept(dependencies);
         return dependencies;
     }
 
     @Override
     protected ConfigurationAdapter provideConfigurationAdapter() {
-        return new LibraryConfigAdapter(this, () -> manager.createConfigLoader(this::resolveConfig));
+        return new LibraryConfigAdapter(this, () -> manager.get().createConfigLoader(this::resolveConfig));
     }
 
     @Override

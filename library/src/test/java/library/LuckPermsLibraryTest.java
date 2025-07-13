@@ -44,7 +44,7 @@ public class LuckPermsLibraryTest implements LuckPermsLibraryManager, PluginLogg
     private final LuckPermsLibrary luckPerms;
 
     public LuckPermsLibraryTest() {
-        luckPerms = new LuckPermsLibrary(this);
+        luckPerms = new LuckPermsLibrary(this, this);
         luckPerms.start();
 
         luckPerms.execFromConsole("user 140e3c62-f31a-4aea-8e69-3ad34c464e64 permission set luckperms.* true").join();
@@ -53,11 +53,6 @@ public class LuckPermsLibraryTest implements LuckPermsLibraryManager, PluginLogg
         luckPerms.playerDisconnected(UUID.fromString("140e3c62-f31a-4aea-8e69-3ad34c464e64"));
 
         luckPerms.close();
-    }
-
-    @Override
-    public PluginLogger getLogger() {
-        return this;
     }
 
     @Override

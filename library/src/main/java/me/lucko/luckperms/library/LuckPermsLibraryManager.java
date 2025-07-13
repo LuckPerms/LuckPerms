@@ -29,12 +29,12 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import net.kyori.adventure.text.Component;
@@ -42,19 +42,11 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
+/**
+ * <strong>Warning:</strong> This class CANNOT be loaded before the default dependencies are, so do not instantiate
+ * this until then (see {@link LuckPermsLibrary#LuckPermsLibrary(boolean, Consumer, PluginLogger, Supplier)})
+ */
 public interface LuckPermsLibraryManager {
-    /**
-     * @return If the default dependencies are excluded in gradle (transitive = false), then this should be true
-     */
-    public default boolean shouldLoadDefaultDependencies() {
-        return false;
-    }
-
-    public default void modifyDependencies(Set<Dependency> dependencies) {
-    }
-
-    public PluginLogger getLogger();
-
     public String getServerBrand();
 
     public String getServerVersion();

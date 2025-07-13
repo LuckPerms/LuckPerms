@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.standalone.app.utils;
+package me.lucko.luckperms.standalone.utils;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sun.net.httpserver.HttpExchange;

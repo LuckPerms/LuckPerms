@@ -29,9 +29,13 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
@@ -42,10 +46,10 @@ import net.luckperms.api.platform.Platform;
 
 public class LPLibraryBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
 
-    private final LuckPermsLibraryManager manager;
+    private final PluginLogger logger;
+    private final Supplier<LuckPermsLibraryManager> manager;
     private final LuckPermsLibrary library;
 
-    private final PluginLogger logger;
     private final LibrarySchedulerAdapter schedulerAdapter;
     private final ClassPathAppender classPathAppender;
     private final LPLibraryPlugin plugin;
@@ -54,14 +58,15 @@ public class LPLibraryBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
     private final CountDownLatch loadLatch = new CountDownLatch(1);
     private final CountDownLatch enableLatch = new CountDownLatch(1);
 
-    public LPLibraryBootstrap(LuckPermsLibraryManager manager, LuckPermsLibrary library) {
+    public LPLibraryBootstrap(boolean loadDefaultDependencies, Consumer<Set<Dependency>> modifyDependencies,
+            PluginLogger logger, Supplier<LuckPermsLibraryManager> manager, LuckPermsLibrary library) {
+        this.logger = logger;
         this.manager = manager;
         this.library = library;
 
-        this.logger = manager.getLogger();
         this.schedulerAdapter = new LibrarySchedulerAdapter(this);
         this.classPathAppender = new URLClassLoaderClassPathAppender();
-        this.plugin = new LPLibraryPlugin(manager, library, this);
+        this.plugin = new LPLibraryPlugin(loadDefaultDependencies, modifyDependencies, manager, library, this);
     }
 
     public LPLibraryPlugin getPlugin() {
@@ -142,17 +147,17 @@ public class LPLibraryBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
 
     @Override
     public String getServerBrand() {
-        return manager.getServerBrand();
+        return manager.get().getServerBrand();
     }
 
     @Override
     public String getServerVersion() {
-        return manager.getServerVersion();
+        return manager.get().getServerVersion();
     }
 
     @Override
     public Path getDataDirectory() {
-        return manager.getDataDirectory().toAbsolutePath();
+        return manager.get().getDataDirectory().toAbsolutePath();
     }
 
     @Override
@@ -162,12 +167,12 @@ public class LPLibraryBootstrap implements LuckPermsBootstrap, LoaderBootstrap {
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        return library.lookupUniqueId(username).or(() -> manager.lookupUniqueId(username));
+        return library.lookupUniqueId(username).or(() -> manager.get().lookupUniqueId(username));
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uuid) {
-        return library.lookupUsername(uuid).or(() -> manager.lookupUsername(uuid));
+        return library.lookupUsername(uuid).or(() -> manager.get().lookupUsername(uuid));
     }
 
     @Override
