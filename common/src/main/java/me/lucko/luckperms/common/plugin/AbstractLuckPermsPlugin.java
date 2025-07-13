@@ -132,6 +132,16 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         // load some utilities early
         this.permissionRegistry = new AsyncPermissionRegistry(getBootstrap().getScheduler());
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
+
+        // load configuration
+        getLogger().info("Loading configuration...");
+        ConfigurationAdapter configFileAdapter = provideConfigurationAdapter();
+        this.configuration = new LuckPermsConfiguration(this, new MultiConfigurationAdapter(this,
+                new FileSecretConfigAdapter(this),
+                new SystemPropertyConfigAdapter(this),
+                new EnvironmentVariableConfigAdapter(this),
+                configFileAdapter
+        ));
     }
 
     public final void enable() {
@@ -143,16 +153,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // setup log dispatcher instance early
         this.logDispatcher = new LogDispatcher(this);
-
-        // load configuration
-        getLogger().info("Loading configuration...");
-        ConfigurationAdapter configFileAdapter = provideConfigurationAdapter();
-        this.configuration = new LuckPermsConfiguration(this, new MultiConfigurationAdapter(this,
-                new FileSecretConfigAdapter(this),
-                new SystemPropertyConfigAdapter(this),
-                new EnvironmentVariableConfigAdapter(this),
-                configFileAdapter
-        ));
 
         // setup a bytebin instance
         this.httpClient = new OkHttpClient.Builder()

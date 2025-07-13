@@ -119,8 +119,8 @@ public enum Dependency {
     BYTEBUDDY(
             "net{}bytebuddy",
             "byte-buddy",
-            "1.17.5",
-            "cVaMn4OWZ3IZ9lAmj79kk97UhO3NvfLa5hKcpb6B6Ns=",
+            "1.15.11",
+            "+giZiq4ee9roO94HEsUOhETXHA4MGWuyJHrejUrQ65A=",
             Relocation.of("bytebuddy", "net{}bytebuddy")
     ),
     COMMODORE(

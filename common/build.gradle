@@ -79,7 +79,7 @@ dependencies {
     api 'com.github.ben-manes.caffeine:caffeine:3.2.0'
     api 'com.squareup.okhttp3:okhttp:3.14.9'
     api 'com.squareup.okio:okio:1.17.6'
-    api 'net.bytebuddy:byte-buddy:1.17.5'
+    api 'net.bytebuddy:byte-buddy:1.15.11'
 
     api('org.spongepowered:configurate-core:3.7.3') {
         transitive = false

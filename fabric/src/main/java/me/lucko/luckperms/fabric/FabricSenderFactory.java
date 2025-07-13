@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.fabric;
 
+import com.mojang.serialization.JsonOps;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
@@ -39,6 +40,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.rcon.RconCommandOutput;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -118,6 +120,9 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
     }
 
     public static Text toNativeText(Component component) {
-        return Text.Serialization.fromJsonTree(GsonComponentSerializer.gson().serializeToTree(component), DynamicRegistryManager.EMPTY);
+        return TextCodecs.CODEC.decode(
+                DynamicRegistryManager.EMPTY.getOps(JsonOps.INSTANCE),
+                GsonComponentSerializer.gson().serializeToTree(component)
+        ).getOrThrow(IllegalArgumentException::new).getFirst();
     }
 }

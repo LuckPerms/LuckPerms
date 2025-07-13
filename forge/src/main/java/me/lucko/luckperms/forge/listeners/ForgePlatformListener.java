@@ -38,7 +38,7 @@ import net.minecraft.server.players.ServerOpList;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -51,7 +51,7 @@ public class ForgePlatformListener {
     }
 
     @SubscribeEvent
-    public void onCommand(CommandEvent event) {
+    public boolean onCommand(CommandEvent event) {
         CommandContextBuilder<CommandSourceStack> context = event.getParseResults().getContext();
 
         if (!this.plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
@@ -63,11 +63,12 @@ public class ForgePlatformListener {
                 String name = node.getNode().getName().toLowerCase(Locale.ROOT);
                 if (name.equals("op") || name.equals("deop")) {
                     Message.OP_DISABLED.send(this.plugin.getSenderFactory().wrap(context.getSource()));
-                    event.setCanceled(true);
-                    return;
+                    return true; // cancel
                 }
             }
         }
+
+        return false; // don't cancel
     }
 
     @SubscribeEvent

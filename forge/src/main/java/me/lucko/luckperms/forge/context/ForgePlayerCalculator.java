@@ -42,7 +42,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;
@@ -68,7 +68,7 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
 
     @Override
     public void calculate(@NonNull ServerPlayer target, @NonNull ContextConsumer consumer) {
-        ServerLevel level = target.serverLevel();
+        ServerLevel level = target.level();
         if (this.dimensionType) {
             consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(level.dimension().location()));
         }

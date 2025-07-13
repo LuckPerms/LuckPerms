@@ -32,7 +32,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.forge.LPForgeBootstrap;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
@@ -78,12 +77,9 @@ public class ForgePermissionHandler implements IPermissionHandler {
 
     @Override
     public <T> T getPermission(ServerPlayer player, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
-        UserCapabilityImpl capability = UserCapabilityImpl.getNullable(player);
-
-        if (capability != null) {
-            User user = capability.getUser();
-            QueryOptions queryOptions = capability.getQueryOptionsSupplier().getQueryOptions();
-
+        User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
+        if (user != null) {
+            QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
             T value = getPermissionValue(user, queryOptions, node, context);
             if (value != null) {
                 return value;

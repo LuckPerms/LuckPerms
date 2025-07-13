@@ -31,16 +31,13 @@ import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.util.Tristate;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;

@@ -34,15 +34,16 @@ import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
-import me.lucko.luckperms.forge.util.ForgeEventBusFacade;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.bus.BusGroup;
+import net.minecraftforge.eventbus.api.listener.EventListener;
+import net.minecraftforge.eventbus.api.listener.Priority;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -50,6 +51,7 @@ import net.minecraftforge.forgespi.language.IModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -88,9 +90,9 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
     private final ClassPathAppender classPathAppender;
 
     /**
-     * A facade for the forge event bus, compatible with LP's jar-in-jar packaging
+     * A list of all event listerners registered by the plugin.
      */
-    private final ForgeEventBusFacade forgeEventBus;
+    private final List<EventListener> listeners = new ArrayList<>();
 
     /**
      * The plugin instance
@@ -116,7 +118,6 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
         this.logger = new Log4jPluginLogger(LogManager.getLogger(LPForgeBootstrap.ID));
         this.schedulerAdapter = new ForgeSchedulerAdapter(this);
         this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
-        this.forgeEventBus = new ForgeEventBusFacade();
         this.plugin = new LPForgePlugin(this);
     }
 
@@ -143,7 +144,16 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
     }
 
     public void registerListeners(Object target) {
-        this.forgeEventBus.register(target);
+        Collection<EventListener> listeners = BusGroup.DEFAULT.register(MethodHandles.lookup(), target);
+        this.listeners.addAll(listeners);
+    }
+
+    public void unregisterListeners() {
+        if (this.listeners.isEmpty()) {
+            return;
+        }
+        BusGroup.DEFAULT.unregister(this.listeners);
+        this.listeners.clear();
     }
 
     // lifecycle
@@ -157,11 +167,11 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
             this.loadLatch.countDown();
         }
 
-        this.forgeEventBus.register(this);
+        registerListeners(this);
         this.plugin.registerEarlyListeners();
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    @SubscribeEvent(priority = Priority.HIGHEST)
     public void onServerAboutToStart(ServerAboutToStartEvent event) {
         this.server = event.getServer();
         try {
@@ -171,10 +181,10 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent(priority = Priority.LOWEST)
     public void onServerStopping(ServerStoppingEvent event) {
         this.plugin.disable();
-        this.forgeEventBus.unregisterAll();
+        unregisterListeners();
         this.server = null;
     }
 

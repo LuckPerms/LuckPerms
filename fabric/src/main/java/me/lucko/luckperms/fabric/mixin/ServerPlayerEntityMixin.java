@@ -35,9 +35,7 @@ import me.lucko.luckperms.fabric.model.MixinUser;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -62,9 +60,6 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
      */
     @Unique
     private QueryOptionsSupplier luckperms$queryOptions;
-
-    // Used by PlayerChangeWorldCallback hook below.
-    @Shadow public abstract ServerWorld getServerWorld();
 
     @Override
     public User luckperms$getUser() {

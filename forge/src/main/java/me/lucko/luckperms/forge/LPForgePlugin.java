@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.sender.DummyConsoleSender;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.forge.calculator.ForgeCalculatorFactory;
-import me.lucko.luckperms.forge.capabilities.UserCapabilityListener;
 import me.lucko.luckperms.forge.context.ForgeContextManager;
 import me.lucko.luckperms.forge.context.ForgePlayerCalculator;
 import me.lucko.luckperms.forge.listeners.ForgeAutoOpListener;
@@ -92,9 +91,6 @@ public class LPForgePlugin extends AbstractLuckPermsPlugin {
 
         ForgePlatformListener platformListener = new ForgePlatformListener(this);
         this.bootstrap.registerListeners(platformListener);
-
-        UserCapabilityListener userCapabilityListener = new UserCapabilityListener(this);
-        this.bootstrap.registerListeners(userCapabilityListener);
 
         ForgePermissionHandlerListener permissionHandlerListener = new ForgePermissionHandlerListener(this);
         this.bootstrap.registerListeners(permissionHandlerListener);

@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.forge.ForgeSenderFactory;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
 import me.lucko.luckperms.forge.util.AsyncConfigurationTask;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
@@ -45,8 +44,8 @@ import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.network.GatherLoginConfigurationTasksEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.Priority;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 
 import java.util.UUID;
 
@@ -117,7 +116,7 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    @SubscribeEvent(priority = Priority.HIGHEST)
     public void onPlayerLoggedIn(PlayerLoggedInEvent event) {
         ServerPlayer player = (ServerPlayer) event.getEntity();
         GameProfile profile = player.getGameProfile();
@@ -146,13 +145,10 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
             }
         }
 
-        // initialise capability
-        UserCapabilityImpl userCapability = UserCapabilityImpl.get(player);
-        userCapability.initialise(user, player, this.plugin);
         this.plugin.getContextManager().signalContextUpdate(player);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent(priority = Priority.LOWEST)
     public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         ServerPlayer player = (ServerPlayer) event.getEntity();
         handleDisconnect(player.getGameProfile().getId());

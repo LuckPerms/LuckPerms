@@ -25,19 +25,15 @@
 
 package me.lucko.luckperms.forge.context;
 
-import me.lucko.luckperms.common.context.manager.DetachedContextManager;
-import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
+import me.lucko.luckperms.common.context.manager.SimpleContextManager;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.capabilities.UserCapabilityImpl;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.level.ServerPlayer;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Objects;
 import java.util.UUID;
 
-public class ForgeContextManager extends DetachedContextManager<ServerPlayer, ServerPlayer> {
+public class ForgeContextManager extends SimpleContextManager<ServerPlayer, ServerPlayer> {
     public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
     public ForgeContextManager(LPForgePlugin plugin) {
@@ -47,16 +43,6 @@ public class ForgeContextManager extends DetachedContextManager<ServerPlayer, Se
     @Override
     public UUID getUniqueId(ServerPlayer player) {
         return player.getUUID();
-    }
-
-    @Override
-    public @Nullable QueryOptionsSupplier getQueryOptionsSupplier(ServerPlayer subject) {
-        Objects.requireNonNull(subject, "subject");
-        UserCapabilityImpl capability = UserCapabilityImpl.getNullable(subject);
-        if (capability != null) {
-            return capability.getQueryOptionsSupplier();
-        }
-        return null;
     }
 
     @Override

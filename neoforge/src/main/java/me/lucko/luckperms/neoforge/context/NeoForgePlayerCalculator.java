@@ -68,7 +68,7 @@ public class NeoForgePlayerCalculator implements ContextCalculator<ServerPlayer>
 
     @Override
     public void calculate(@NonNull ServerPlayer target, @NonNull ContextConsumer consumer) {
-        ServerLevel level = target.serverLevel();
+        ServerLevel level = target.level();
         if (this.dimensionType) {
             consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(level.dimension().location()));
         }

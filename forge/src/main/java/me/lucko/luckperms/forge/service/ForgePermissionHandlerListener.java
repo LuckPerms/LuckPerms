@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.forge.LPForgePlugin;
 import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.server.permission.events.PermissionGatherEvent;
 import net.minecraftforge.server.permission.handler.DefaultPermissionHandler;
 import net.minecraftforge.server.permission.nodes.PermissionNode;
