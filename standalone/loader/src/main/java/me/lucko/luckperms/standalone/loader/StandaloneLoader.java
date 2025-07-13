@@ -54,7 +54,7 @@ public class StandaloneLoader {
         // special case for dependency preload command
         if (args.length == 1 && args[0].equals("preloadDependencies")) {
             try {
-            	Class<?> clazz = loader.loadClass(DEPENDENCY_PRELOADER_CLASS);
+                Class<?> clazz = loader.loadClass(DEPENDENCY_PRELOADER_CLASS);
                 clazz.getMethod("main").invoke(null);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -64,10 +64,10 @@ public class StandaloneLoader {
 
         // start the application
         try {
-	        loader.loadClass(APPLICATION_CLASS).getConstructor(String[].class).newInstance(new Object[] {args});
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+            loader.loadClass(APPLICATION_CLASS).getConstructor(String[].class).newInstance(new Object[] {args});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

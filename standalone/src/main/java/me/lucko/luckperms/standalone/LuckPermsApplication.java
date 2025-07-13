@@ -61,9 +61,9 @@ public class LuckPermsApplication implements AutoCloseable {
      * Start the app
      */
     public LuckPermsApplication(String[] args) {
-    	library = new LuckPermsLibrary(
-    			LuckPermsLibraryDependencies.loadAll(), new Log4jPluginLogger(LOGGER), StandaloneLibraryManager::new);
-    	library.start();
+        library = new LuckPermsLibrary(
+                LuckPermsLibraryDependencies.loadAll(), new Log4jPluginLogger(LOGGER), StandaloneLibraryManager::new);
+        library.start();
 
         TerminalInterface terminal = new TerminalInterface(this);
 

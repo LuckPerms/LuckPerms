@@ -56,8 +56,8 @@ import java.util.concurrent.Executor;
  */
 public class DependencyManagerImpl implements DependencyManager {
 
-	/** Stops the loading of storage dependencies and marks them as loaded once resolved */
-	private final boolean storageDependenciesAlreadyLoaded;
+    /** Stops the loading of storage dependencies and marks them as loaded once resolved */
+    private final boolean storageDependenciesAlreadyLoaded;
     /** A registry containing plugin specific behaviour for dependencies. */
     private final DependencyRegistry registry;
     /** The path where library jars are cached. */
@@ -75,7 +75,7 @@ public class DependencyManagerImpl implements DependencyManager {
     private @MonotonicNonNull RelocationHandler relocationHandler = null;
 
     public DependencyManagerImpl(LuckPermsPlugin plugin) {
-    	this.storageDependenciesAlreadyLoaded = plugin.getBootstrap().isStorageDependenciesAlreadyLoaded();
+        this.storageDependenciesAlreadyLoaded = plugin.getBootstrap().isStorageDependenciesAlreadyLoaded();
         this.registry = new DependencyRegistry(plugin.getBootstrap().getType());
         this.cacheDirectory = setupCacheDirectory(plugin);
         this.classPathAppender = plugin.getBootstrap().getClassPathAppender();
@@ -83,7 +83,7 @@ public class DependencyManagerImpl implements DependencyManager {
     }
 
     public DependencyManagerImpl(Path cacheDirectory, Executor executor) { // standalone pre-loader
-    	this.storageDependenciesAlreadyLoaded = false;
+        this.storageDependenciesAlreadyLoaded = false;
         this.registry = new DependencyRegistry(Platform.Type.STANDALONE);
         this.cacheDirectory = cacheDirectory;
         this.classPathAppender = null;
@@ -137,13 +137,13 @@ public class DependencyManagerImpl implements DependencyManager {
 
     @Override
     public void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats) {
-    	Set<Dependency> dependencies = this.registry.resolveStorageDependencies(storageTypes, redis, rabbitmq, nats);
-    	if (storageDependenciesAlreadyLoaded) {
-    		for (Dependency dependency : dependencies)
-    			loaded.put(dependency, null);
-    	} else {
-    		loadDependencies(dependencies);
-    	}
+        Set<Dependency> dependencies = this.registry.resolveStorageDependencies(storageTypes, redis, rabbitmq, nats);
+        if (storageDependenciesAlreadyLoaded) {
+            for (Dependency dependency : dependencies)
+                loaded.put(dependency, null);
+        } else {
+            loadDependencies(dependencies);
+        }
     }
 
     @Override

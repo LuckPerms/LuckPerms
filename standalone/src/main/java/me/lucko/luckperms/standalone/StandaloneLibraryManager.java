@@ -35,33 +35,33 @@ import java.util.UUID;
 
 public class StandaloneLibraryManager implements LuckPermsLibraryManager {
 
-	@Override
-	public String getServerBrand() {
-		return "standalone";
-	}
+    @Override
+    public String getServerBrand() {
+        return "standalone";
+    }
 
-	@Override
-	public String getServerVersion() {
-		return "n/a";
-	}
+    @Override
+    public String getServerVersion() {
+        return "n/a";
+    }
 
-	@Override
-	public Path getDataDirectory() {
-		return Paths.get("data").toAbsolutePath();
-	}
+    @Override
+    public Path getDataDirectory() {
+        return Paths.get("data").toAbsolutePath();
+    }
 
-	@Override
-	public void onConsoleMessage(Component message) {
-		LuckPermsApplication.LOGGER.info(ANSIComponentSerializer.ansi().serialize(message));
-	}
+    @Override
+    public void onConsoleMessage(Component message) {
+        LuckPermsApplication.LOGGER.info(ANSIComponentSerializer.ansi().serialize(message));
+    }
 
-	@Override
-	public void performConsoleCommand(String command) {}
+    @Override
+    public void performConsoleCommand(String command) {}
 
-	@Override
-	public void onPlayerMessage(UUID player, Component message) {}
+    @Override
+    public void onPlayerMessage(UUID player, Component message) {}
 
-	@Override
-	public void performPlayerCommand(UUID player, String command) {}
+    @Override
+    public void performPlayerCommand(UUID player, String command) {}
 
 }

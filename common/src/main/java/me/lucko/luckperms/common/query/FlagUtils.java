@@ -68,5 +68,5 @@ final class FlagUtils {
         }
         return settings;
     }
-    
+
 }

@@ -76,7 +76,7 @@ public interface LuckPermsBootstrap {
      * @return if the storage dependencies are already loaded
      */
     default boolean isStorageDependenciesAlreadyLoaded() {
-    	return false;
+        return false;
     }
 
     /**
