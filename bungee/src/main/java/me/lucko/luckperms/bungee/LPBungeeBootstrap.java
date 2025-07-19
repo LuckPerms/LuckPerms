@@ -302,7 +302,7 @@ public class LPBungeeBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
         try {
             Class.forName("com.google.gson.internal.bind.TreeTypeAdapter");
             return false;
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             return true;
         }
     }
