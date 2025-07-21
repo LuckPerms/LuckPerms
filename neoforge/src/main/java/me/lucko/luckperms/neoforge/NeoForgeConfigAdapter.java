@@ -33,7 +33,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import java.nio.file.Path;
 
-public class NeoForgeConfigAdapter extends ConfigurateConfigAdapter {
+public class NeoForgeConfigAdapter extends ConfigurateConfigAdapter<Path> {
     public NeoForgeConfigAdapter(LuckPermsPlugin plugin, Path path) {
         super(plugin, path);
     }
