@@ -90,7 +90,7 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger {
 
         if (handleIncomingMessage(buf)) {
             // Forward to other servers
-            this.plugin.getBootstrap().getScheduler().executeAsync(() -> sendOutgoingMessage(buf));
+            this.plugin.getBootstrap().getScheduler().async(() -> sendOutgoingMessage(buf));
         }
     }
 }

@@ -73,7 +73,7 @@ public class RedisMessenger implements Messenger {
     private void init(UnifiedJedis jedis) {
         this.jedis = jedis;
         this.sub = new Subscription(this);
-        this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
+        this.plugin.getBootstrap().getScheduler().async(this.sub);
     }
 
     private static JedisClientConfig jedisConfig(String username, String password, boolean ssl) {

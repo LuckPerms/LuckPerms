@@ -10,6 +10,7 @@ load: STARTUP
 # remapping when the plugin is loaded. Note that despite what this setting might otherwise imply,
 # LP is still compatible with pre-1.13 releases.
 api-version: 1.13
+folia-supported: true
 
 # Load LuckPerms before Vault. This means that all plugins that (soft-)depend
 # on Vault depend on LuckPerms too.
