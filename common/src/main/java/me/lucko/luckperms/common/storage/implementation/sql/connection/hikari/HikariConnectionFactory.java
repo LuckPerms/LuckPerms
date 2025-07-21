@@ -105,52 +105,63 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
 
     @Override
     public void init(LuckPermsPlugin plugin) {
-        HikariConfig config;
-        try {
-            config = new HikariConfig();
-        } catch (LinkageError e) {
-            handleClassloadingError(e, plugin);
-            throw e;
-        }
+       // initialize the config object
+HikariConfig config;
+try {
+    config = new HikariConfig();
+} catch (LinkageError e) {
+    handleClassloadingError(e, plugin);
+    throw e;
+}
 
-        // set pool name so the logging output can be linked back to us
-        config.setPoolName("luckperms-hikari");
+config.setPoolName("luckperms-hikari");
 
-        // get the database info/credentials from the config file
-        String[] addressSplit = this.configuration.getAddress().split(":");
-        String address = addressSplit[0];
-        String port = addressSplit.length > 1 ? addressSplit[1] : defaultPort();
+// parse address and port from configuration (IPv4 + IPv6 compatible)
+String configAddress = this.configuration.getAddress();
+String address;
+String port;
 
-        // allow the implementation to configure the HikariConfig appropriately with these values
-        try {
-            configureDatabase(config, address, port, this.configuration.getDatabase(), this.configuration.getUsername(), this.configuration.getPassword());
-        } catch (NoSuchMethodError e) {
-            handleClassloadingError(e, plugin);
-        }
+if (configAddress.startsWith("[")) {
+    int end = configAddress.indexOf("]");
+    if (end == -1) {
+        throw new IllegalArgumentException("Invalid IPv6 address: missing closing bracket");
+    }
+    address = configAddress.substring(1, end);
+    if (configAddress.length() > end + 1 && configAddress.charAt(end + 1) == ':') {
+        port = configAddress.substring(end + 2);
+    } else {
+        port = defaultPort();
+    }
+} else {
+    String[] addressSplit = configAddress.split(":", 2);
+    address = addressSplit[0];
+    port = addressSplit.length > 1 ? addressSplit[1] : defaultPort();
+}
 
-        // get the extra connection properties from the config
-        Map<String, Object> properties = new HashMap<>(this.configuration.getProperties());
+try {
+    configureDatabase(config, address, port,
+        this.configuration.getDatabase(),
+        this.configuration.getUsername(),
+        this.configuration.getPassword());
+} catch (NoSuchMethodError e) {
+    handleClassloadingError(e, plugin);
+}
 
-        // allow the implementation to override/make changes to these properties
-        overrideProperties(properties);
+Map<String, Object> properties = new HashMap<>(this.configuration.getProperties());
+overrideProperties(properties);
+setProperties(config, properties);
 
-        // set the properties
-        setProperties(config, properties);
+// configure pool
+config.setMaximumPoolSize(this.configuration.getMaxPoolSize());
+config.setMinimumIdle(this.configuration.getMinIdleConnections());
+config.setMaxLifetime(this.configuration.getMaxLifetime());
+config.setKeepaliveTime(this.configuration.getKeepAliveTime());
+config.setConnectionTimeout(this.configuration.getConnectionTimeout());
+config.setInitializationFailTimeout(-1);
 
-        // configure the connection pool
-        config.setMaximumPoolSize(this.configuration.getMaxPoolSize());
-        config.setMinimumIdle(this.configuration.getMinIdleConnections());
-        config.setMaxLifetime(this.configuration.getMaxLifetime());
-        config.setKeepaliveTime(this.configuration.getKeepAliveTime());
-        config.setConnectionTimeout(this.configuration.getConnectionTimeout());
+this.hikari = new HikariDataSource(config);
+postInitialize();
 
-        // don't perform any initial connection validation - we subsequently call #getConnection
-        // to setup the schema anyways
-        config.setInitializationFailTimeout(-1);
-
-        this.hikari = new HikariDataSource(config);
-
-        postInitialize();
     }
 
     @Override
