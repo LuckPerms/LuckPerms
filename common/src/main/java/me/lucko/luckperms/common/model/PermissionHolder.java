@@ -431,8 +431,8 @@ public abstract class PermissionHolder {
         Difference<Node> result = getData(dataType).removeIf(Node::hasExpired);
         if (!result.isEmpty()) {
             invalidateCache();
+            this.plugin.getEventDispatcher().dispatchNodeChanges(this, dataType, result);
         }
-        this.plugin.getEventDispatcher().dispatchNodeChanges(this, dataType, result);
         return !result.isEmpty();
     }
 

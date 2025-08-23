@@ -231,11 +231,11 @@ public final class EventDispatcher {
     }
 
     public void dispatchNodeChanges(PermissionHolder target, DataType dataType, Difference<Node> changes) {
-        if (!this.eventBus.shouldPost(NodeAddEvent.class) && !this.eventBus.shouldPost(NodeRemoveEvent.class)) {
+        if (changes.isEmpty()) {
             return;
         }
 
-        if (changes.isEmpty()) {
+        if (!this.eventBus.shouldPost(NodeAddEvent.class) && !this.eventBus.shouldPost(NodeRemoveEvent.class)) {
             return;
         }
 
