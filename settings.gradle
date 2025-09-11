@@ -43,6 +43,7 @@ include (
         'standalone:loader',
         'standalone:app',
         'minestom',
-        'minestom:loader'
+        'minestom:loader',
+        'minestom:app'
 )
 

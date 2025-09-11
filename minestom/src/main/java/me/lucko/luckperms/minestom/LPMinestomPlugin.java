@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
+import me.lucko.luckperms.minestom.app.integration.MinestomPermissible;
 import me.lucko.luckperms.minestom.calculator.MinestomCalculatorFactory;
 import me.lucko.luckperms.minestom.context.MinestomContextManager;
 import me.lucko.luckperms.minestom.context.MinestomPlayerCalculator;
@@ -63,6 +64,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
+    private static final MinestomConsoleDelgated DELEGATED_CONSOLE = MinestomConsoleDelgated.of(MinecraftServer.getCommandManager().getConsoleSender());
     private final LPMinestomBootstrap bootstrap;
 
     private MinestomSenderFactory senderFactory;
@@ -210,11 +212,11 @@ public class LPMinestomPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     public Stream<Sender> getOnlineSenders() {
-        return MinecraftServer.getConnectionManager().getOnlinePlayers().stream().map(p -> getSenderFactory().wrap(p));
+        return MinecraftServer.getConnectionManager().getOnlinePlayers().stream().filter(MinestomPermissible.class::isInstance).map(MinestomPermissible.class::cast).map(getSenderFactory()::wrap);
     }
 
     @Override
     public Sender getConsoleSender() {
-        return getSenderFactory().wrap(MinecraftServer.getCommandManager().getConsoleSender());
+        return getSenderFactory().wrap(DELEGATED_CONSOLE);
     }
 }

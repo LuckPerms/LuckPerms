@@ -27,32 +27,14 @@ package me.lucko.luckperms.minestom;
 
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.event.AbstractEventBus;
-import net.minestom.server.extensions.Extension;
 
-public class MinestomEventBus extends AbstractEventBus<Extension> {
+public class MinestomEventBus extends AbstractEventBus<Object> {
     public MinestomEventBus(LPMinestomPlugin plugin, LuckPermsApiProvider apiProvider) {
         super(plugin, apiProvider);
     }
 
     @Override
-    protected Extension checkPlugin(Object plugin) throws IllegalArgumentException {
-        if (plugin instanceof Extension extension) {
-            return extension;
-        }
-
-        throw new IllegalArgumentException("Object " + plugin + " (" + plugin.getClass().getName() + ") is not a plugin.");
-    }
-
-    @Override
-    public void close() {
-//        for (Extension extension : MinecraftServer.getExtensionManager().getExtensions()) {
-//            for (Handler handler : extension.getDescription().getLogger().getHandlers()) {
-//                if (handler instanceof UnloadHookLoggerHandler) {
-//                    plugin.getLogger().removeHandler(handler);
-//                }
-//            }
-//        }
-
-        super.close();
+    protected Object checkPlugin(Object plugin) throws IllegalArgumentException {
+        return plugin;
     }
 }

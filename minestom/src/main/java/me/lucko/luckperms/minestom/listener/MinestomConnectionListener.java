@@ -31,13 +31,12 @@ import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.minestom.LPMinestomPlugin;
-import me.lucko.luckperms.minestom.options.PlayerQueryMap;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
 
 public class MinestomConnectionListener extends AbstractConnectionListener {
     private final LPMinestomPlugin plugin;
@@ -51,26 +50,10 @@ public class MinestomConnectionListener extends AbstractConnectionListener {
         GlobalEventHandler eventManager = MinecraftServer.getGlobalEventHandler();
 
         eventManager.addListener(AsyncPlayerPreLoginEvent.class, (this::asyncPreLoginHandler));
-        eventManager.addListener(PlayerLoginEvent.class, (this::loginEventHandler));
+        eventManager.addListener(AsyncPlayerConfigurationEvent.class, (this::asyncConfigHandler));
     }
 
-    private void asyncPreLoginHandler(AsyncPlayerPreLoginEvent event) {
-        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Preparing login for " + event.getPlayerUuid() + " - " + event.getUsername());
-        }
-
-        try {
-            User user = loadUser(event.getPlayerUuid(), event.getUsername());
-            recordConnection(event.getPlayerUuid());
-            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(event.getPlayerUuid(), event.getUsername(), user);
-        } catch (Exception e) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + event.getPlayerUuid() + " - " + event.getUsername(), e);
-            Component kickMsg = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
-            event.getPlayer().kick(kickMsg);
-        }
-    }
-
-    private void loginEventHandler(PlayerLoginEvent event) {
+    private void asyncConfigHandler(AsyncPlayerConfigurationEvent event) {
         final Player player = event.getPlayer();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
@@ -85,9 +68,23 @@ public class MinestomConnectionListener extends AbstractConnectionListener {
             Component kickMsg = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
             player.kick(kickMsg);
         }
-
-        PlayerQueryMap.initializePermissions(player, user);
         this.plugin.getContextManager().signalContextUpdate(player);
+    }
+
+    private void asyncPreLoginHandler(AsyncPlayerPreLoginEvent event) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            this.plugin.getLogger().info("Preparing login for " + event.getPlayerUuid() + " - " + event.getUsername());
+        }
+
+        try {
+            User user = loadUser(event.getPlayerUuid(), event.getUsername());
+            recordConnection(event.getPlayerUuid());
+            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(event.getPlayerUuid(), event.getUsername(), user);
+        } catch (Exception e) {
+            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + event.getPlayerUuid() + " - " + event.getUsername(), e);
+            Component kickMsg = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
+            event.getConnection().kick(kickMsg);
+        }
     }
 
 }

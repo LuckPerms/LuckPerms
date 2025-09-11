@@ -1,17 +1,17 @@
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    alias(libs.plugins.shadow)
 }
 
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    compileOnly 'net.onelitefeather.microtus:Minestom:1.1.1'
+    compileOnly 'net.minestom:minestom:2025.08.29-1.21.8'
 
     implementation project(':api')
     implementation project(':common:loader-utils')
+    implementation project(':minestom:app')
 }
 
 java {

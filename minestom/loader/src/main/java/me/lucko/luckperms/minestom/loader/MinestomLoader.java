@@ -27,31 +27,46 @@ package me.lucko.luckperms.minestom.loader;
 
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
-import net.minestom.server.extensions.Extension;
+import me.lucko.luckperms.minestom.app.LuckPermsApplication;
 
-public class MinestomLoaderExtension extends Extension {
+public final class MinestomLoader {
+
     private static final String JAR_NAME = "luckperms-minestom.jarinjar";
     private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.minestom.LPMinestomBootstrap";
-
+    private static final LuckPermsApplication APPLICATION = new LuckPermsApplication();
+    private static MinestomLoader instance;
     private final LoaderBootstrap plugin;
 
-    public MinestomLoaderExtension() {
+    public MinestomLoader() {
         JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
-        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, Extension.class, this);
+        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, LuckPermsApplication.class, APPLICATION);
     }
 
-    @Override
-    public void preInitialize() {
+    public MinestomLoader registerShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(this.plugin::onDisable, "luckperms-shutdown-hook"));
+        return this;
+    }
+
+    public MinestomLoader load() {
         this.plugin.onLoad();
+        return this;
     }
 
-    @Override
-    public void initialize() {
+    public void start() {
         this.plugin.onEnable();
     }
 
-    @Override
-    public void terminate() {
-        this.plugin.onDisable();
+    public static MinestomLoader get() {
+        MinestomLoader localInstance = instance;
+        if (localInstance != null) {
+            return localInstance;
+        }
+        synchronized (MinestomLoader.class) {
+            if (instance == null) {
+                instance = new MinestomLoader();
+            }
+            return instance;
+        }
     }
 }
+

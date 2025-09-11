@@ -33,13 +33,14 @@ import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.minestom.app.LuckPermsApplication;
 import net.luckperms.api.platform.Platform;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.extensions.Extension;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +49,6 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 public class LPMinestomBootstrap implements LuckPermsBootstrap, LoaderBootstrap, BootstrappedWithLoader {
-    private final Extension loader;
     private final Slf4jPluginLogger logger = new Slf4jPluginLogger(LoggerFactory.getLogger("luckperms"));
 
     // Latches for enable and load
@@ -58,23 +58,18 @@ public class LPMinestomBootstrap implements LuckPermsBootstrap, LoaderBootstrap,
     /**
      * The plugin instance
      */
+    private final LuckPermsApplication loader;
     private final LPMinestomPlugin plugin;
     private final MinestomSchedulerAdapter schedulerAdapter;
     private final ClassPathAppender classPathAppender;
 
     private Instant startupTime;
 
-    public LPMinestomBootstrap(Extension loader) {
+    public LPMinestomBootstrap(LuckPermsApplication loader) {
         this.loader = loader;
-
         this.plugin = new LPMinestomPlugin(this);
         this.schedulerAdapter = new MinestomSchedulerAdapter(this);
         this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
-    }
-
-    @Override
-    public Extension getLoader() {
-        return loader;
     }
 
     @Override
@@ -128,7 +123,7 @@ public class LPMinestomBootstrap implements LuckPermsBootstrap, LoaderBootstrap,
 
     @Override
     public String getVersion() {
-        return loader.getOrigin().getVersion();
+        return this.loader.getVersion();
     }
 
     @Override
@@ -153,17 +148,17 @@ public class LPMinestomBootstrap implements LuckPermsBootstrap, LoaderBootstrap,
 
     @Override
     public Path getDataDirectory() {
-        return loader.getDataDirectory().toAbsolutePath();
+        return Paths.get("data").toAbsolutePath();
     }
 
     @Override
     public Optional<Player> getPlayer(UUID uniqueId) {
-        return Optional.ofNullable(MinecraftServer.getConnectionManager().getPlayer(uniqueId));
+        return Optional.ofNullable(MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uniqueId));
     }
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        Player player = MinecraftServer.getConnectionManager().findPlayer(username);
+        Player player = MinecraftServer.getConnectionManager().findOnlinePlayer(username);
 
         if (player == null) return Optional.empty();
 
@@ -172,7 +167,7 @@ public class LPMinestomBootstrap implements LuckPermsBootstrap, LoaderBootstrap,
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        Player player = MinecraftServer.getConnectionManager().getPlayer(uniqueId);
+        Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uniqueId);
 
         if (player == null) return Optional.empty();
 
@@ -200,6 +195,11 @@ public class LPMinestomBootstrap implements LuckPermsBootstrap, LoaderBootstrap,
 
     @Override
     public boolean isPlayerOnline(UUID uniqueId) {
-        return MinecraftServer.getConnectionManager().getPlayer(uniqueId) != null;
+        return MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uniqueId) != null;
+    }
+
+    @Override
+    public Object getLoader() {
+        return this.loader;
     }
 }

@@ -28,6 +28,7 @@ package me.lucko.luckperms.minestom;
 import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.minestom.app.integration.MinestomPermissible;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
@@ -65,7 +66,10 @@ public class MinestomCommandExecutor extends CommandManager {
             final var params = ArgumentType.StringArray("params");
 
             params.setSuggestionCallback((sender, context, suggestion) -> {
-                Sender wrapped = this.commandExecutor.plugin.getSenderFactory().wrap(sender);
+                if (!(sender instanceof MinestomPermissible permissible)) {
+                    return;
+                }
+                Sender wrapped = this.commandExecutor.plugin.getSenderFactory().wrap(permissible);
                 String input = context.getInput();
                 String[] split = input.split(" ", 2);
                 String args = split.length > 1 ? split[1] : "";
@@ -80,8 +84,9 @@ public class MinestomCommandExecutor extends CommandManager {
 
         public void process(@NotNull CommandSender sender, @NotNull String command, @NotNull String[] args) {
             List<String> arguments = ArgumentTokenizer.EXECUTE.tokenizeInput(args);
-
-            this.commandExecutor.executeCommand(this.commandExecutor.plugin.getSenderFactory().wrap(sender), command, arguments);
+            if (sender instanceof MinestomPermissible permissible) {
+                this.commandExecutor.executeCommand(this.commandExecutor.plugin.getSenderFactory().wrap(permissible), command, arguments);
+            }
         }
     }
 }
