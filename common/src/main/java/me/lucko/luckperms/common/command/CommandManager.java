@@ -155,7 +155,7 @@ public class CommandManager {
 
     public CompletableFuture<Void> executeCommand(Sender sender, String label, List<String> args) {
         UUID uniqueId = sender.getUniqueId();
-        if (this.plugin.getConfiguration().get(ConfigKeys.COMMANDS_RATE_LIMIT) && !sender.isConsole() && !this.playerRateLimit.add(uniqueId)) {
+        if (this.plugin.getConfiguration().get(ConfigKeys.COMMANDS_RATE_LIMIT) && !sender.isConsole() && !Sender.CONSOLE_UUID.equals(uniqueId) && !this.playerRateLimit.add(uniqueId)) {
             this.plugin.getLogger().warn("Player '" + uniqueId + "' is spamming LuckPerms commands. Ignoring further inputs.");
             return CompletableFuture.completedFuture(null);
         }
