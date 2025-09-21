@@ -143,7 +143,7 @@ public class DependencyRegistry {
         try {
             Class.forName(className);
             return true;
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             return false;
         }
     }

@@ -307,7 +307,7 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
         try {
             Class.forName("com.google.gson.JsonElement");
             return false;
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             return true;
         }
     }
