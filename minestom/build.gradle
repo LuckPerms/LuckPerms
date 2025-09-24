@@ -4,11 +4,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://libraries.minecraft.net' }
-    maven { url 'https://repo.spongepowered.org/maven' }
-    mavenLocal()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 dependencies {
     implementation project(':common')
