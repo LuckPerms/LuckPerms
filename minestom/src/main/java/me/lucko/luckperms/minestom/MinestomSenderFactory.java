@@ -28,24 +28,26 @@ package me.lucko.luckperms.minestom;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.minestom.app.integration.MinestomPermissible;
+import net.kyori.adventure.permission.PermissionChecker;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import net.luckperms.api.util.Tristate;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.entity.Player;
 
 import java.util.Locale;
 import java.util.UUID;
 
-public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, MinestomPermissible> {
+public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, CommandSender> {
 
     public MinestomSenderFactory(LPMinestomPlugin plugin) {
         super(plugin);
     }
 
     @Override
-    protected UUID getUniqueId(MinestomPermissible sender) {
+    protected UUID getUniqueId(CommandSender sender) {
         if (sender instanceof Player player) {
             return player.getUuid();
         } else {
@@ -54,7 +56,7 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Mines
     }
 
     @Override
-    protected String getName(MinestomPermissible sender) {
+    protected String getName(CommandSender sender) {
         if (sender instanceof Player player) {
             return player.getUsername();
         } else {
@@ -63,7 +65,7 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Mines
     }
 
     @Override
-    protected void sendMessage(MinestomPermissible sender, Component message) {
+    protected void sendMessage(CommandSender sender, Component message) {
         Locale locale = null;
         if (sender instanceof Player player) {
             locale = player.getSettings().locale();
@@ -73,8 +75,8 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Mines
     }
 
     @Override
-    protected Tristate getPermissionValue(MinestomPermissible sender, String node) {
-        if (sender.hasPermission(node)) {
+    protected Tristate getPermissionValue(CommandSender sender, String node) {
+        if (sender.getOrDefault(PermissionChecker.POINTER, PermissionChecker.always(TriState.FALSE)).test(node)) {
             return Tristate.TRUE;
         } else {
             return Tristate.FALSE;
@@ -82,20 +84,17 @@ public class MinestomSenderFactory extends SenderFactory<LPMinestomPlugin, Mines
     }
 
     @Override
-    protected boolean hasPermission(MinestomPermissible sender, String node) {
-        return sender.hasPermission(node);
+    protected boolean hasPermission(CommandSender sender, String node) {
+        return sender.getOrDefault(PermissionChecker.POINTER, PermissionChecker.always(TriState.FALSE)).test(node);
     }
 
     @Override
-    protected void performCommand(MinestomPermissible sender, String command) {
-        if (!(sender instanceof CommandSender commandSender)) {
-            return;
-        }
-        MinecraftServer.getCommandManager().execute(commandSender, command);
+    protected void performCommand(CommandSender sender, String command) {
+        MinecraftServer.getCommandManager().execute(sender, command);
     }
 
     @Override
-    protected boolean isConsole(MinestomPermissible sender) {
-        return sender instanceof MinestomConsoleDelgated;
+    protected boolean isConsole(CommandSender sender) {
+        return sender instanceof ConsoleSender;
     }
 }
