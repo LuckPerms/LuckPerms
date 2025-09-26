@@ -49,11 +49,11 @@ import java.util.function.Consumer;
  * Base implementation of {@link NodeMap} query methods.
  */
 abstract class NodeMapBase implements NodeMap {
-   
+
     NodeMapBase() {
 
     }
-    
+
     protected abstract SortedMap<ImmutableContextSet, SortedSet<Node>> map();
 
     protected abstract SortedMap<ImmutableContextSet, SortedSet<InheritanceNode>> inheritanceMap();
@@ -160,7 +160,7 @@ abstract class NodeMapBase implements NodeMap {
             copyInheritanceNodesTo((Collection<? super InheritanceNode>) collection, filter);
             return;
         }
-        
+
         for (Map.Entry<ImmutableContextSet, SortedSet<Node>> e : map().entrySet()) {
             if (!filter.satisfies(e.getKey(), defaultSatisfyMode())) {
                 continue;
