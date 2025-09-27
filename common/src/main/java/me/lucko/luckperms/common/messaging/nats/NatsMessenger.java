@@ -37,6 +37,7 @@ import io.nats.client.Options;
 import io.nats.client.Options.Builder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.util.Throwing;
+import me.lucko.luckperms.common.util.InetParser;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
@@ -69,9 +70,9 @@ public class NatsMessenger implements Messenger {
     }
 
     public void init(String address, String username, String password, boolean ssl) {
-        String[] addressSplit = address.split(":");
-        String host = addressSplit[0];
-        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Options.DEFAULT_PORT;
+        InetParser.Address parsed = InetParser.parseAddress(address);
+        String host = parsed.address;
+        int port = parsed.port.map(Integer::parseInt).orElse(Options.DEFAULT_PORT);
 
         this.connection = createConnection(builder -> {
             builder.server("nats://" + host + ":" + port)

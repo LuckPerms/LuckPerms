@@ -37,10 +37,12 @@ import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
+import me.lucko.luckperms.common.util.InetParser;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import redis.clients.jedis.Protocol;
 
 import java.util.concurrent.TimeUnit;
 
@@ -70,9 +72,9 @@ public class RabbitMQMessenger implements Messenger {
     }
 
     public void init(String address, String virtualHost, String username, String password) {
-        String[] addressSplit = address.split(":");
-        String host = addressSplit[0];
-        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : DEFAULT_PORT;
+        InetParser.Address parsed = InetParser.parseAddress(address);
+        String host = parsed.address;
+        int port = parsed.port.map(Integer::parseInt).orElse(DEFAULT_PORT);
 
         this.connectionFactory = new ConnectionFactory();
         this.connectionFactory.setHost(host);
@@ -150,7 +152,8 @@ public class RabbitMQMessenger implements Messenger {
             String queue = this.channel.queueDeclare("", CHANNEL_PROP_DURABLE, CHANNEL_PROP_EXCLUSIVE, CHANNEL_PROP_AUTO_DELETE, null).getQueue();
             this.channel.exchangeDeclare(EXCHANGE, BuiltinExchangeType.TOPIC, CHANNEL_PROP_DURABLE, CHANNEL_PROP_AUTO_DELETE, null);
             this.channel.queueBind(queue, EXCHANGE, ROUTING_KEY);
-            this.channel.basicConsume(queue, true, this.sub, tag -> {});
+            this.channel.basicConsume(queue, true, this.sub, tag -> {
+            });
 
             if (!firstStartup) {
                 this.plugin.getLogger().info("RabbitMQ pubsub connection re-established");

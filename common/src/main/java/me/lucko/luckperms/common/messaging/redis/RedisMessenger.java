@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.messaging.redis;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.InetParser;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
@@ -86,9 +87,10 @@ public class RedisMessenger implements Messenger {
     }
 
     private static HostAndPort parseAddress(String address) {
-        String[] addressSplit = address.split(":");
-        String host = addressSplit[0];
-        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
+        InetParser.Address parsed = InetParser.parseAddress(address);
+        String host = parsed.address;
+        int port = parsed.port.map(Integer::parseInt).orElse(Protocol.DEFAULT_PORT);
+
         return new HostAndPort(host, port);
     }
 
