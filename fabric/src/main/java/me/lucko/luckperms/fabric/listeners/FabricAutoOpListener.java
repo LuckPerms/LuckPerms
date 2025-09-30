@@ -87,9 +87,9 @@ public class FabricAutoOpListener implements LuckPermsEventListener {
     private void setOp(ServerPlayerEntity player, boolean value) {
         this.plugin.getBootstrap().getServer().ifPresent(server -> {
             if (value) {
-                server.getPlayerManager().addToOperators(player.getGameProfile());
+                server.getPlayerManager().addToOperators(player.getPlayerConfigEntry());
             } else {
-                server.getPlayerManager().removeFromOperators(player.getGameProfile());
+                server.getPlayerManager().removeFromOperators(player.getPlayerConfigEntry());
             }
         });
     }
