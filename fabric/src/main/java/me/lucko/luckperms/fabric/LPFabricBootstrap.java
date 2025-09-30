@@ -45,12 +45,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -232,13 +227,13 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        return getServer().map(MinecraftServer::getUserCache).flatMap(c -> c.findByName(username)).map(GameProfile::getId);
+        return getServer().map(server -> Objects.requireNonNull(server.getPlayerManager().getPlayer(username)).getUuid());
 
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        return getServer().map(MinecraftServer::getUserCache).flatMap(c -> c.getByUuid(uniqueId)).map(GameProfile::getName);
+        return getServer().map(server -> Objects.requireNonNull(server.getPlayerManager().getPlayer(uniqueId)).getName().toString());
     }
 
     @Override
@@ -253,7 +248,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
                     List<ServerPlayerEntity> players = server.getPlayerList();
                     List<String> list = new ArrayList<>(players.size());
                     for (ServerPlayerEntity player : players) {
-                        list.add(player.getGameProfile().getName());
+                        list.add(player.getGameProfile().name());
                     }
                     return list;
                 })
@@ -267,7 +262,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
                     List<ServerPlayerEntity> players = server.getPlayerList();
                     List<UUID> list = new ArrayList<>(players.size());
                     for (ServerPlayerEntity player : players) {
-                        list.add(player.getGameProfile().getId());
+                        list.add(player.getGameProfile().id());
                     }
                     return list;
                 })
