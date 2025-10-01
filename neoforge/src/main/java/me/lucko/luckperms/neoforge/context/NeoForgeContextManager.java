@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.context.manager.SimpleContextManager;
 import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
@@ -47,7 +48,8 @@ public class NeoForgeContextManager extends SimpleContextManager<ServerPlayer, S
 
     @Override
     public void customizeQueryOptions(ServerPlayer subject, QueryOptions.Builder builder) {
-        if (subject.getServer() != null && subject.getServer().isSingleplayerOwner(subject.getGameProfile())) {
+        MinecraftServer server = subject.level().getServer();
+        if (server != null && server.isSingleplayerOwner(subject.nameAndId())) {
             builder.option(INTEGRATED_SERVER_OWNER, true);
         }
     }

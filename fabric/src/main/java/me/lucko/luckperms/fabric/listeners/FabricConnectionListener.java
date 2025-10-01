@@ -67,8 +67,8 @@ public class FabricConnectionListener extends AbstractConnectionListener {
 
         // Get their profile from the net handler - it should have been initialised by now.
         GameProfile profile = ((ServerLoginNetworkHandlerAccessor) netHandler).getGameProfile();
-        UUID uniqueId = profile.getId();
-        String username = profile.getName();
+        UUID uniqueId = profile.id();
+        String username = profile.name();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             this.plugin.getLogger().info("Processing pre-login (sync phase) for " + uniqueId + " - " + username);
@@ -110,14 +110,14 @@ public class FabricConnectionListener extends AbstractConnectionListener {
         final ServerPlayerEntity player = netHandler.player;
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Processing login for " + player.getUuid() + " - " + player.getGameProfile().getName());
+            this.plugin.getLogger().info("Processing login for " + player.getUuid() + " - " + player.getGameProfile().name());
         }
 
         final User user = this.plugin.getUserManager().getIfLoaded(player.getUuid());
 
         /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
         if (user == null) {
-            this.plugin.getLogger().warn("User " + player.getUuid() + " - " + player.getGameProfile().getName() +
+            this.plugin.getLogger().warn("User " + player.getUuid() + " - " + player.getGameProfile().id() +
                     " doesn't currently have data pre-loaded - denying login.");
             Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
             netHandler.disconnect(FabricSenderFactory.toNativeText(reason));

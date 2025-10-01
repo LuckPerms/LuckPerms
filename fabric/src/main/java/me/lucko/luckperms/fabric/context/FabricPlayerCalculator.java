@@ -78,7 +78,7 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
         }
 
         // TODO: figure out dimension type context too
-        ServerWorld world = target.getWorld();
+        ServerWorld world = target.getEntityWorld();
         if (this.world) {
             this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(getContextKey(world.getRegistryKey().getValue()), consumer);
         }

@@ -52,7 +52,7 @@ public class NeoForgeLoaderPlugin implements Supplier<ModContainer> {
     public NeoForgeLoaderPlugin(final ModContainer modContainer, final IEventBus modBus) {
         this.container = modContainer;
 
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             LOGGER.info("Skipping LuckPerms init (not supported on the client!)");
             return;
         }

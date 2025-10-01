@@ -87,9 +87,9 @@ public class NeoForgeAutoOpListener implements LuckPermsEventListener {
     private void setOp(ServerPlayer player, boolean value) {
         this.plugin.getBootstrap().getServer().ifPresent(server -> {
             if (value) {
-                server.getPlayerList().op(player.getGameProfile());
+                server.getPlayerList().op(player.nameAndId());
             } else {
-                server.getPlayerList().deop(player.getGameProfile());
+                server.getPlayerList().deop(player.nameAndId());
             }
         });
     }

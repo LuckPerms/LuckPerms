@@ -57,7 +57,7 @@ public class FabricContextManager extends DetachedContextManager<ServerPlayerEnt
 
     @Override
     public void customizeQueryOptions(ServerPlayerEntity subject, QueryOptions.Builder builder) {
-        if (subject.getServer().isHost(subject.getGameProfile())) {
+        if (subject.getEntityWorld().getServer().isHost(subject.getPlayerConfigEntry())) {
             builder.option(INTEGRATED_SERVER_OWNER, true);
         }
     }
