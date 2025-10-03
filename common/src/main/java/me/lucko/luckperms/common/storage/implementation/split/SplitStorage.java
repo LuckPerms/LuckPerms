@@ -54,7 +54,7 @@ public class SplitStorage implements StorageImplementation {
     private final LuckPermsPlugin plugin;
     private final Map<StorageType, StorageImplementation> implementations;
     private final Map<SplitStorageType, StorageType> types;
-    
+
     public SplitStorage(LuckPermsPlugin plugin, Map<StorageType, StorageImplementation> implementations, Map<SplitStorageType, StorageType> types) {
         this.plugin = plugin;
         this.implementations = ImmutableMap.copyOf(implementations);

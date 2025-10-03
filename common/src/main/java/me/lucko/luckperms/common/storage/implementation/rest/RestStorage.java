@@ -288,7 +288,7 @@ public class RestStorage implements StorageImplementation {
 
         Set<Node> added = changes.getAdded();
         Set<Node> removed = changes.getRemoved();
-        
+
         if (!removed.isEmpty()) {
             this.client.users().nodesDelete(user.getUniqueId(), removed.stream().map(RestStorage::convertNode).collect(Collectors.toList())).execute();
         }
@@ -367,7 +367,7 @@ public class RestStorage implements StorageImplementation {
         if (remoteGroup == null) {
             return Optional.empty();
         }
-        
+
         Group group = this.plugin.getGroupManager().getOrMake(name);
         group.loadNodesFromStorage(remoteGroup.nodes().stream().map(RestStorage::convertNode).collect(Collectors.toList()));
         return Optional.of(group);

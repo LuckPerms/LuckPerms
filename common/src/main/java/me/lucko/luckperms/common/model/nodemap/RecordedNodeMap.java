@@ -105,7 +105,7 @@ public class RecordedNodeMap implements NodeMap {
     }
 
     // delegate, but pass the result through #record(MutateResult)
-    
+
     @Override
     public Difference<Node> add(Node nodeWithoutInheritanceOrigin) {
         return record(this.delegate.add(nodeWithoutInheritanceOrigin));
@@ -196,5 +196,5 @@ public class RecordedNodeMap implements NodeMap {
     @Override public void copyInheritanceNodesTo(Collection<? super InheritanceNode> collection, QueryOptions filter) { this.delegate.copyInheritanceNodesTo(collection, filter); }
     @Override public Collection<Node> nodesInContext(ContextSet context) { return this.delegate.nodesInContext(context); }
     @Override public Collection<InheritanceNode> inheritanceNodesInContext(ContextSet context) { return this.delegate.inheritanceNodesInContext(context); }
-    
+
 }

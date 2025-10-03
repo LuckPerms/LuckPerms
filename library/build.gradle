@@ -1,0 +1,38 @@
+plugins {
+    alias(libs.plugins.blossom)
+    id("java-library")
+}
+
+sourceCompatibility = 17
+targetCompatibility = 17
+
+dependencies {
+    api project(':common')
+    api project(':common:loader-utils')
+
+    implementation 'org.yaml:snakeyaml:1.33'
+
+    testImplementation('net.kyori:adventure-text-serializer-ansi:4.21.0') {
+        exclude(module: 'adventure-bom')
+        exclude(module: 'adventure-api')
+        exclude(module: 'annotations')
+    }
+    testImplementation('net.kyori:ansi:1.1.1') {
+        exclude(module: 'annotations')
+    }
+}
+
+blossom {
+    replaceTokenIn('src/main/java/me/lucko/luckperms/library/LPLibraryBootstrap.java')
+    replaceToken '@version@', project.ext.fullVersion
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            groupId 'net.luckperms'
+            artifactId 'library'
+        }
+    }
+}
