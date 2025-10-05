@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -254,12 +255,12 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        return getServer().map(MinecraftServer::getProfileCache).flatMap(profileCache -> profileCache.get(username)).map(GameProfile::getId);
+        return getServer().map(s -> s.services().nameToIdCache()).flatMap(profileCache -> profileCache.get(username)).map(NameAndId::id);
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        return getServer().map(MinecraftServer::getProfileCache).flatMap(profileCache -> profileCache.get(uniqueId)).map(GameProfile::getName);
+        return getServer().map(s -> s.services().nameToIdCache()).flatMap(profileCache -> profileCache.get(uniqueId)).map(NameAndId::name);
     }
 
     @Override
@@ -272,7 +273,7 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
         return getServer().map(MinecraftServer::getPlayerList).map(PlayerList::getPlayers).map(players -> {
             List<String> list = new ArrayList<>(players.size());
             for (ServerPlayer player : players) {
-                list.add(player.getGameProfile().getName());
+                list.add(player.getGameProfile().name());
             }
             return list;
         }).orElse(Collections.emptyList());
@@ -283,7 +284,7 @@ public final class LPForgeBootstrap implements LuckPermsBootstrap, LoaderBootstr
         return getServer().map(MinecraftServer::getPlayerList).map(PlayerList::getPlayers).map(players -> {
             List<UUID> list = new ArrayList<>(players.size());
             for (ServerPlayer player : players) {
-                list.add(player.getGameProfile().getId());
+                list.add(player.getGameProfile().id());
             }
             return list;
         }).orElse(Collections.emptyList());

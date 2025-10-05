@@ -93,7 +93,7 @@ public class ForgeCommandListUpdater implements LuckPermsEventListener {
     private void sendUpdate(UUID uniqueId) {
         this.plugin.getBootstrap().getScheduler().sync().execute(() -> {
             this.plugin.getBootstrap().getPlayer(uniqueId).ifPresent(player -> {
-                MinecraftServer server = player.getServer();
+                MinecraftServer server = player.level().getServer();
                 if (server != null) {
                     server.getPlayerList().sendPlayerPermissionLevel(player);
                 }

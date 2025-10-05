@@ -47,7 +47,7 @@ public class ForgeContextManager extends SimpleContextManager<ServerPlayer, Serv
 
     @Override
     public void customizeQueryOptions(ServerPlayer subject, QueryOptions.Builder builder) {
-        if (subject.getServer() != null && subject.getServer().isSingleplayerOwner(subject.getGameProfile())) {
+        if (subject.level().getServer() != null && subject.level().getServer().isSingleplayerOwner(subject.nameAndId())) {
             builder.option(INTEGRATED_SERVER_OWNER, true);
         }
     }
