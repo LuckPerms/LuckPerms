@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.storage.StorageMetadata;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
+import me.lucko.luckperms.common.util.InetParser;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -65,12 +66,12 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
      *
      * <p>Each driver does this slightly differently...</p>
      *
-     * @param config the hikari config
-     * @param address the database address
-     * @param port the database port
+     * @param config       the hikari config
+     * @param address      the database address
+     * @param port         the database port
      * @param databaseName the database name
-     * @param username the database username
-     * @param password the database password
+     * @param username     the database username
+     * @param password     the database password
      */
     protected abstract void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password);
 
@@ -87,7 +88,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
     /**
      * Sets the given connection properties onto the config.
      *
-     * @param config the hikari config
+     * @param config     the hikari config
      * @param properties the properties
      */
     protected void setProperties(HikariConfig config, Map<String, Object> properties) {
@@ -117,9 +118,9 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         config.setPoolName("luckperms-hikari");
 
         // get the database info/credentials from the config file
-        String[] addressSplit = this.configuration.getAddress().split(":");
-        String address = addressSplit[0];
-        String port = addressSplit.length > 1 ? addressSplit[1] : defaultPort();
+        InetParser.Address parsed = InetParser.parseAddress(this.configuration.getAddress());
+        String address = parsed.address;
+        String port = parsed.port.orElse(defaultPort());
 
         // allow the implementation to configure the HikariConfig appropriately with these values
         try {

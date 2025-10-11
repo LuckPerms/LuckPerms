@@ -60,6 +60,7 @@ import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
 import me.lucko.luckperms.common.util.Iterators;
+import me.lucko.luckperms.common.util.InetParser;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.ContextSet;
@@ -129,9 +130,10 @@ public class MongoStorage implements StorageImplementation {
                 );
             }
 
-            String[] addressSplit = this.configuration.getAddress().split(":");
-            String host = addressSplit[0];
-            int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 27017;
+            InetParser.Address parsed = InetParser.parseAddress(this.configuration.getAddress());
+            String host = parsed.address;
+            Integer port = parsed.port.map(Integer::parseInt).orElse(27017);
+
             ServerAddress address = new ServerAddress(host, port);
 
             if (credential == null) {
