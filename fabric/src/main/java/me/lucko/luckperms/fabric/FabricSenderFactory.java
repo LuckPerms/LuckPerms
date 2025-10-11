@@ -108,7 +108,7 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     @Override
     protected void performCommand(ServerCommandSource sender, String command) {
-        sender.getServer().getCommandManager().executeWithPrefix(sender, command);
+        sender.getServer().getCommandManager().parseAndExecute(sender, command);
     }
 
     @Override
