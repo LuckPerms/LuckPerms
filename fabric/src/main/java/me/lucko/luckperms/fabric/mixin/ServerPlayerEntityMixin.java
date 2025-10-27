@@ -43,9 +43,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Mixin into {@link ServerPlayerEntity} to store LP caches and implement {@link MixinUser}.
- *
- * <p>This mixin is also temporarily used to implement our internal PlayerChangeWorldCallback,
- * until a similar event is added to Fabric itself.</p>
  */
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin implements MixinUser {
