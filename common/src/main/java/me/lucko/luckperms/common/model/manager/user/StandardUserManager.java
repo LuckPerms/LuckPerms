@@ -35,7 +35,7 @@ public class StandardUserManager extends AbstractUserManager<User> {
     private final LuckPermsPlugin plugin;
 
     public StandardUserManager(LuckPermsPlugin plugin) {
-        super(plugin, UserHousekeeper.timeoutSettings(1, TimeUnit.MINUTES));
+        super(plugin, UserHousekeeper.timeoutSettings(2, TimeUnit.MINUTES));
         this.plugin = plugin;
     }
 
