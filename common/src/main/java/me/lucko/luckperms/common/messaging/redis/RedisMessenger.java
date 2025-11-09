@@ -86,10 +86,10 @@ public class RedisMessenger implements Messenger {
     }
 
     private static HostAndPort parseAddress(String address) {
-        com.google.common.net.HostAndPort hostAndPort = com.google.common.net.HostAndPort.fromString(address)
+        me.lucko.luckperms.common.util.HostAndPort hostAndPort = new me.lucko.luckperms.common.util.HostAndPort(address)
                 .requireBracketsForIPv6()
                 .withDefaultPort(Protocol.DEFAULT_PORT);
-        String host = hostAndPort.getHostText();
+        String host = hostAndPort.getHost();
         int port = hostAndPort.getPort();
         return new HostAndPort(host, port);
     }

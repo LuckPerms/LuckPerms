@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.net.HostAndPort;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -34,6 +33,7 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.storage.StorageMetadata;
 import me.lucko.luckperms.common.storage.implementation.sql.connection.ConnectionFactory;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
+import me.lucko.luckperms.common.util.HostAndPort;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -118,11 +118,11 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         config.setPoolName("luckperms-hikari");
 
         // get the database info/credentials from the config file
-        HostAndPort hostAndPort = HostAndPort.fromString(this.configuration.getAddress())
+        HostAndPort hostAndPort = new HostAndPort(this.configuration.getAddress())
                 .requireBracketsForIPv6()
                 .withDefaultPort(defaultPort());
 
-        String address = hostAndPort.getHostText();
+        String address = hostAndPort.getHost();
         int port = hostAndPort.getPort();
 
         // allow the implementation to configure the HikariConfig appropriately with these values

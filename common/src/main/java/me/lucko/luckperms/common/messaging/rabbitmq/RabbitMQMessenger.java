@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.messaging.rabbitmq;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.google.common.net.HostAndPort;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -38,6 +37,7 @@ import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
+import me.lucko.luckperms.common.util.HostAndPort;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
@@ -71,11 +71,11 @@ public class RabbitMQMessenger implements Messenger {
     }
 
     public void init(String address, String virtualHost, String username, String password) {
-        HostAndPort hostAndPort = HostAndPort.fromString(address)
+        HostAndPort hostAndPort = new HostAndPort(address)
                 .requireBracketsForIPv6()
                 .withDefaultPort(DEFAULT_PORT);
 
-        String host = hostAndPort.getHostText();
+        String host = hostAndPort.getHost();
         int port = hostAndPort.getPort();
 
         this.connectionFactory = new ConnectionFactory();

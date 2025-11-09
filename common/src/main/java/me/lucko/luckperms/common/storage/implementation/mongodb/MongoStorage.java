@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.storage.implementation.mongodb;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.net.HostAndPort;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
@@ -60,6 +59,7 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
+import me.lucko.luckperms.common.util.HostAndPort;
 import me.lucko.luckperms.common.util.Iterators;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.context.Context;
@@ -130,11 +130,11 @@ public class MongoStorage implements StorageImplementation {
                 );
             }
 
-            HostAndPort hostAndPort = HostAndPort.fromString(this.configuration.getAddress())
+            HostAndPort hostAndPort = new HostAndPort(this.configuration.getAddress())
                     .requireBracketsForIPv6()
                     .withDefaultPort(27017);
 
-            String host = hostAndPort.getHostText();
+            String host = hostAndPort.getHost();
             int port = hostAndPort.getPort();
             ServerAddress address = new ServerAddress(host, port);
 

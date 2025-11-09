@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.messaging.nats;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.google.common.net.HostAndPort;
 import io.nats.client.Connection;
 import io.nats.client.Dispatcher;
 import io.nats.client.Message;
@@ -37,6 +36,7 @@ import io.nats.client.Nats;
 import io.nats.client.Options;
 import io.nats.client.Options.Builder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.util.HostAndPort;
 import me.lucko.luckperms.common.util.Throwing;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
@@ -70,10 +70,10 @@ public class NatsMessenger implements Messenger {
     }
 
     public void init(String address, String username, String password, boolean ssl) {
-        HostAndPort hostAndPort = HostAndPort.fromString(address)
+        HostAndPort hostAndPort = new HostAndPort(address)
                 .requireBracketsForIPv6()
                 .withDefaultPort(Options.DEFAULT_PORT);
-        String host = hostAndPort.getHostText();
+        String host = hostAndPort.getHost();
         int port = hostAndPort.getPort();
 
         this.connection = createConnection(builder -> {
