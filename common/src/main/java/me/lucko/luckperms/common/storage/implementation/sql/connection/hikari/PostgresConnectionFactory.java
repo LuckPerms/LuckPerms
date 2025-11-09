@@ -41,8 +41,8 @@ public class PostgresConnectionFactory extends DriverBasedHikariConnectionFactor
     }
 
     @Override
-    protected String defaultPort() {
-        return "5432";
+    protected int defaultPort() {
+        return 5432;
     }
 
     @Override

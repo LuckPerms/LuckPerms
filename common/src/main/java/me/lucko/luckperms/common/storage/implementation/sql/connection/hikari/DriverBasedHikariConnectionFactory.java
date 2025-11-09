@@ -46,7 +46,7 @@ public abstract class DriverBasedHikariConnectionFactory extends HikariConnectio
     protected abstract String driverJdbcIdentifier();
 
     @Override
-    protected void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password) {
+    protected void configureDatabase(HikariConfig config, String address, int port, String databaseName, String username, String password) {
         config.setDriverClassName(driverClassName());
         config.setJdbcUrl(String.format("jdbc:%s://%s:%s/%s", driverJdbcIdentifier(), address, port, databaseName));
         config.setUsername(username);

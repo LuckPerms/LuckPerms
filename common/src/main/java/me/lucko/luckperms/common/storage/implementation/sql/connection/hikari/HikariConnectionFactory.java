@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.storage.implementation.sql.connection.hikari;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.net.HostAndPort;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -58,7 +59,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
      *
      * @return the default port
      */
-    protected abstract String defaultPort();
+    protected abstract int defaultPort();
 
     /**
      * Configures the {@link HikariConfig} with the relevant database properties.
@@ -72,7 +73,7 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
      * @param username the database username
      * @param password the database password
      */
-    protected abstract void configureDatabase(HikariConfig config, String address, String port, String databaseName, String username, String password);
+    protected abstract void configureDatabase(HikariConfig config, String address, int port, String databaseName, String username, String password);
 
     /**
      * Allows the connection factory instance to override certain properties before they are set.
@@ -117,9 +118,12 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         config.setPoolName("luckperms-hikari");
 
         // get the database info/credentials from the config file
-        String[] addressSplit = this.configuration.getAddress().split(":");
-        String address = addressSplit[0];
-        String port = addressSplit.length > 1 ? addressSplit[1] : defaultPort();
+        HostAndPort hostAndPort = HostAndPort.fromString(this.configuration.getAddress())
+                .requireBracketsForIPv6()
+                .withDefaultPort(defaultPort());
+
+        String address = hostAndPort.getHostText();
+        int port = hostAndPort.getPort();
 
         // allow the implementation to configure the HikariConfig appropriately with these values
         try {

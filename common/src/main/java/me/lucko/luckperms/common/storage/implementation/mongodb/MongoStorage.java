@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.storage.implementation.mongodb;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.net.HostAndPort;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
@@ -129,9 +130,12 @@ public class MongoStorage implements StorageImplementation {
                 );
             }
 
-            String[] addressSplit = this.configuration.getAddress().split(":");
-            String host = addressSplit[0];
-            int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 27017;
+            HostAndPort hostAndPort = HostAndPort.fromString(this.configuration.getAddress())
+                    .requireBracketsForIPv6()
+                    .withDefaultPort(27017);
+
+            String host = hostAndPort.getHostText();
+            int port = hostAndPort.getPort();
             ServerAddress address = new ServerAddress(host, port);
 
             if (credential == null) {

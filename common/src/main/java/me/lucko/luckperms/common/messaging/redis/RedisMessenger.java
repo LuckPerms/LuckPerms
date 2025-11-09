@@ -86,9 +86,11 @@ public class RedisMessenger implements Messenger {
     }
 
     private static HostAndPort parseAddress(String address) {
-        String[] addressSplit = address.split(":");
-        String host = addressSplit[0];
-        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : Protocol.DEFAULT_PORT;
+        com.google.common.net.HostAndPort hostAndPort = com.google.common.net.HostAndPort.fromString(address)
+                .requireBracketsForIPv6()
+                .withDefaultPort(Protocol.DEFAULT_PORT);
+        String host = hostAndPort.getHostText();
+        int port = hostAndPort.getPort();
         return new HostAndPort(host, port);
     }
 

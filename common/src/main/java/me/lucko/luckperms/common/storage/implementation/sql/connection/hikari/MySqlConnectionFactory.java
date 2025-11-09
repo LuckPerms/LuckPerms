@@ -41,8 +41,8 @@ public class MySqlConnectionFactory extends DriverBasedHikariConnectionFactory {
     }
 
     @Override
-    protected String defaultPort() {
-        return "3306";
+    protected int defaultPort() {
+        return 3306;
     }
 
     @Override

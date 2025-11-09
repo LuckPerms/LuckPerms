@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.messaging.rabbitmq;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.google.common.net.HostAndPort;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -70,9 +71,12 @@ public class RabbitMQMessenger implements Messenger {
     }
 
     public void init(String address, String virtualHost, String username, String password) {
-        String[] addressSplit = address.split(":");
-        String host = addressSplit[0];
-        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : DEFAULT_PORT;
+        HostAndPort hostAndPort = HostAndPort.fromString(address)
+                .requireBracketsForIPv6()
+                .withDefaultPort(DEFAULT_PORT);
+
+        String host = hostAndPort.getHostText();
+        int port = hostAndPort.getPort();
 
         this.connectionFactory = new ConnectionFactory();
         this.connectionFactory.setHost(host);
