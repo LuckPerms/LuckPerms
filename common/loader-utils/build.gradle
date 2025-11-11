@@ -1,1 +1,9 @@
-// nothing special to do here (yet)!
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            groupId 'me.lucko.luckperms'
+            artifactId 'loader-utils'
+        }
+    }
+}

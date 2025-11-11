@@ -47,7 +47,7 @@ public final class NodeCommandFactory {
                 sb.append("temp");
             }
             sb.append(' ');
-            
+
             // value
             sb.append(((InheritanceNode) node).getGroupName());
 
@@ -60,14 +60,14 @@ public final class NodeCommandFactory {
                 sb.append("temp");
             }
             sb.append(chatNode.getMetaType().toString());
-            
+
             // values
             sb.append(' ').append(chatNode.getPriority()).append(' ');
             appendEscaped(sb, chatNode.getMetaValue());
 
         } else if (node.getValue() && node instanceof MetaNode) {
             MetaNode metaNode = (MetaNode) node;
-            
+
             // command
             sb.append("meta unset");
             if (node.hasExpiry()) {
@@ -100,7 +100,7 @@ public final class NodeCommandFactory {
 
         return sb.toString();
     }
-    
+
     private static void appendEscaped(StringBuilder sb, String value) {
         if (value.indexOf(' ') != -1 || value.isEmpty()) {
             sb.append("\"").append(value).append("\"");
