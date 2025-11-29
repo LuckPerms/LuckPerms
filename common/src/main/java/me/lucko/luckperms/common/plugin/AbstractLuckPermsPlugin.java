@@ -202,7 +202,6 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // initialise storage
         this.storage = storageFactory.getInstance();
-        this.messagingService = provideMessagingFactory().getInstance();
 
         // setup the update task buffer
         this.syncTaskBuffer = new SyncTask.Buffer(this);
@@ -238,6 +237,9 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         getBootstrap().getScheduler().executeAsync(GeneratedEventClass::preGenerate);
         ApiRegistrationUtil.registerProvider(this.apiProvider);
         registerApiOnPlatform(this.apiProvider);
+
+        // register messaging service
+        this.messagingService = provideMessagingFactory().getInstance();
 
         // setup extension manager
         this.extensionManager = new SimpleExtensionManager(this);
