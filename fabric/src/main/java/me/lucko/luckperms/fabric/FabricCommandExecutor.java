@@ -33,6 +33,9 @@ import me.lucko.luckperms.common.command.BrigadierCommandExecutor;
 import me.lucko.luckperms.common.sender.Sender;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.permission.LeveledPermissionPredicate;
+import net.minecraft.command.permission.Permission;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -78,7 +81,8 @@ public class FabricCommandExecutor extends BrigadierCommandExecutor<ServerComman
     @Override
     public List<String> resolveSelectors(ServerCommandSource source, List<String> args) {
         // usage of @ selectors requires at least level 2 permission
-        ServerCommandSource atAllowedSource = source.hasPermissionLevel(2) ? source : source.withLevel(2);
+
+        ServerCommandSource atAllowedSource = ensureSourceCanUseSelectors(source);
         for (ListIterator<String> it = args.listIterator(); it.hasNext(); ) {
             String arg = it.next();
             if (arg.isEmpty() || arg.charAt(0) != '@') {
@@ -108,6 +112,13 @@ public class FabricCommandExecutor extends BrigadierCommandExecutor<ServerComman
         }
 
         return args;
+    }
+
+    private static ServerCommandSource ensureSourceCanUseSelectors(ServerCommandSource source) {
+        if (source.getPermissions().hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS))) {
+            return source;
+        }
+        return source.withAdditionalPermissions(LeveledPermissionPredicate.GAMEMASTERS);
     }
 
 }

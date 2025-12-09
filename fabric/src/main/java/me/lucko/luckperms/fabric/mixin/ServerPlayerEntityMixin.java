@@ -31,21 +31,21 @@ import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
+import me.lucko.luckperms.fabric.event.SetupPlayerPermissionsEvent;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.command.permission.PermissionPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Mixin into {@link ServerPlayerEntity} to store LP caches and implement {@link MixinUser}.
- *
- * <p>This mixin is also temporarily used to implement our internal PlayerChangeWorldCallback,
- * until a similar event is added to Fabric itself.</p>
  */
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin implements MixinUser {
@@ -154,5 +154,16 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
     private void luckperms$copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
         MixinUser oldMixin = (MixinUser) oldPlayer;
         luckperms$initializePermissions(oldMixin.luckperms$getUser());
+    }
+
+    @Inject(at = @At("RETURN"), method = "getPermissions", cancellable = true)
+    private void luckperms$getPermissions(CallbackInfoReturnable<PermissionPredicate> cir) {
+        ServerPlayerEntity entity = (ServerPlayerEntity) (Object) this;
+        PermissionPredicate predicate = cir.getReturnValue();
+
+        PermissionPredicate newPredicate = SetupPlayerPermissionsEvent.EVENT.invoker().onSetupPlayerPermissions(entity, predicate);
+        if (newPredicate != predicate) {
+            cir.setReturnValue(newPredicate);
+        }
     }
 }

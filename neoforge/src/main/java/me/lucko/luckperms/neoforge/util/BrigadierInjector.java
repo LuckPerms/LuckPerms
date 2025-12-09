@@ -36,6 +36,7 @@ import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -150,7 +151,7 @@ public final class BrigadierInjector {
                 Tristate state = user.getCachedData().getPermissionData(queryOptions).checkPermission(this.permission);
 
                 if (state != Tristate.UNDEFINED) {
-                    return state.asBoolean() && this.delegate.test(source.withPermission(4));
+                    return state.asBoolean() && this.delegate.test(source.withPermission(LevelBasedPermissionSet.OWNER));
                 }
             }
 

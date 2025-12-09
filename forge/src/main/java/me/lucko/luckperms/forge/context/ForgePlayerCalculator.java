@@ -35,7 +35,7 @@ import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,11 +48,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.Set;
 
 public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
-    /**
-     * GameType.NOT_SET(-1, "") was removed in 1.17
-     */
-    private static final int GAME_MODE_NOT_SET = -1;
-
     private final LPForgePlugin plugin;
 
     private final boolean gamemode;
@@ -70,16 +65,16 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
     public void calculate(@NonNull ServerPlayer target, @NonNull ContextConsumer consumer) {
         ServerLevel level = target.level();
         if (this.dimensionType) {
-            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(level.dimension().location()));
+            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(level.dimension().identifier()));
         }
 
-        ServerLevelData levelData = (ServerLevelData) level.getLevelData();
         if (this.world) {
+            ServerLevelData levelData = (ServerLevelData) level.getLevelData();
             this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(levelData.getLevelName(), consumer);
         }
 
-        GameType gameMode = target.gameMode.getGameModeForPlayer();
-        if (this.gamemode && gameMode.getId() != GAME_MODE_NOT_SET) {
+        if (this.gamemode) {
+            GameType gameMode = target.gameMode.getGameModeForPlayer();
             consumer.accept(DefaultContextKeys.GAMEMODE_KEY, gameMode.getName());
         }
     }
@@ -90,10 +85,6 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
 
         if (this.gamemode) {
             for (GameType gameType : GameType.values()) {
-                if (gameType.getId() == GAME_MODE_NOT_SET) {
-                    continue;
-                }
-
                 builder.add(DefaultContextKeys.GAMEMODE_KEY, gameType.getName());
             }
         }
@@ -101,8 +92,8 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
         MinecraftServer server = this.plugin.getBootstrap().getServer().orElse(null);
         if (this.dimensionType && server != null) {
             server.registryAccess().lookup(Registries.DIMENSION_TYPE).ifPresent(registry -> {
-                for (ResourceLocation resourceLocation : registry.keySet()) {
-                    builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(resourceLocation));
+                for (Identifier id : registry.keySet()) {
+                    builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(id));
                 }
             });
         }
@@ -119,7 +110,7 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
         return builder.build();
     }
 
-    private static String getContextKey(ResourceLocation key) {
+    private static String getContextKey(Identifier key) {
         if (key.getNamespace().equals("minecraft")) {
             return key.getPath();
         }
@@ -137,7 +128,7 @@ public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
 
     @SubscribeEvent
     public void onPlayerChangeGameMode(PlayerEvent.PlayerChangeGameModeEvent event) {
-        if (!this.gamemode || event.getNewGameMode().getId() == GAME_MODE_NOT_SET) {
+        if (!this.gamemode) {
             return;
         }
 

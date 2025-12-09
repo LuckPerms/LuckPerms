@@ -36,6 +36,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
@@ -73,7 +76,7 @@ public class NeoForgeCommandExecutor extends BrigadierCommandExecutor<CommandSou
     @Override
     public List<String> resolveSelectors(CommandSourceStack source, List<String> args) {
         // usage of @ selectors requires at least level 2 permission
-        CommandSourceStack atAllowedSource = source.hasPermission(2) ? source : source.withPermission(2);
+        CommandSourceStack atAllowedSource = ensureSourceCanUseSelectors(source);
         for (ListIterator<String> it = args.listIterator(); it.hasNext(); ) {
             String arg = it.next();
             if (arg.isEmpty() || arg.charAt(0) != '@') {
@@ -103,6 +106,13 @@ public class NeoForgeCommandExecutor extends BrigadierCommandExecutor<CommandSou
         }
 
         return args;
+    }
+
+    private static CommandSourceStack ensureSourceCanUseSelectors(CommandSourceStack source) {
+        if (source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
+            return source;
+        }
+        return source.withMaximumPermission(LevelBasedPermissionSet.GAMEMASTER);
     }
 
 }
