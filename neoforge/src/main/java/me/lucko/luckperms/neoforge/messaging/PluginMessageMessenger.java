@@ -33,7 +33,7 @@ import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements Messenger {
-    private static final ResourceLocation CHANNEL_ID = ResourceLocation.parse(AbstractPluginMessageMessenger.CHANNEL);
+    private static final Identifier CHANNEL_ID = Identifier.parse(AbstractPluginMessageMessenger.CHANNEL);
     private static final CustomPacketPayload.Type<MessageWrapper> PAYLOAD_TYPE = new CustomPacketPayload.Type<>(CHANNEL_ID);
 
     private final LPNeoForgePlugin plugin;

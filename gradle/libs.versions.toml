@@ -3,7 +3,7 @@ shadow = "8.3.8"
 blossom = "1.3.1"
 moddevgradle = "2.0.110"
 forgegradle = "[6.0.36,6.2)"
-loom = "1.11-SNAPSHOT"
+loom = "1.13-SNAPSHOT"
 licenser = "0.6.1"
 
 [plugins]

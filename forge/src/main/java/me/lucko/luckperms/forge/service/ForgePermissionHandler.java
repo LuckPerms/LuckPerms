@@ -36,7 +36,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.server.permission.handler.IPermissionHandler;
 import net.minecraftforge.server.permission.nodes.PermissionDynamicContext;
@@ -51,7 +51,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ForgePermissionHandler implements IPermissionHandler {
-    public static final ResourceLocation IDENTIFIER = ResourceLocation.fromNamespaceAndPath(LPForgeBootstrap.ID, "permission_handler");
+    public static final Identifier IDENTIFIER = Identifier.fromNamespaceAndPath(LPForgeBootstrap.ID, "permission_handler");
 
     private final LPForgePlugin plugin;
     private final Set<PermissionNode<?>> permissionNodes;
@@ -66,7 +66,7 @@ public class ForgePermissionHandler implements IPermissionHandler {
     }
 
     @Override
-    public ResourceLocation getIdentifier() {
+    public Identifier getIdentifier() {
         return IDENTIFIER;
     }
 
