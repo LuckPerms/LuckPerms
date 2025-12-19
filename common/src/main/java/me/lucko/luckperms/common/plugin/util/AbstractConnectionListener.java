@@ -75,7 +75,7 @@ public abstract class AbstractConnectionListener {
 
         // most likely because ip forwarding is not setup correctly
         // print a warning to the console
-        if (saveResult.includes(PlayerSaveResult.Outcome.OTHER_UNIQUE_IDS_PRESENT_FOR_USERNAME)) {
+        if (saveResult.includes(PlayerSaveResult.Outcome.OTHER_UNIQUE_IDS_PRESENT_FOR_USERNAME) && !Boolean.getBoolean("luckperms.suppress-uuid-mismatch-warning")) {
             Set<UUID> otherUuids = saveResult.getOtherUniqueIds();
 
             this.plugin.getLogger().warn("LuckPerms already has data for player '" + username + "' - but this data is stored under a different UUID.");
