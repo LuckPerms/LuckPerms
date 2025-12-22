@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CommandsIntegrationTest {
-    
+
     private static final Map<String, String> CONFIG = ImmutableMap.<String, String>builder()
             .put("log-notify", "false")
             .put("commands-rate-limit", "false")

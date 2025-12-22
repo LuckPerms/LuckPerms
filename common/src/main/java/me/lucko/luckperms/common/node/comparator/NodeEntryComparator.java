@@ -26,17 +26,18 @@
 package me.lucko.luckperms.common.node.comparator;
 
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
+import net.luckperms.api.node.Node;
 
 import java.util.Comparator;
 
 public class NodeEntryComparator<T extends Comparable<T>> implements Comparator<NodeEntry<T, ?>> {
 
-    public static <T extends Comparable<T>> Comparator<? super NodeEntry<T, ?>> normal() {
+    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> normal() {
         return new NodeEntryComparator<>();
     }
 
-    public static <T extends Comparable<T>> Comparator<? super NodeEntry<T, ?>> reverse() {
-        return NodeEntryComparator.<T>normal().reversed();
+    public static <T extends Comparable<T>, N extends Node> Comparator<? super NodeEntry<T, N>> reverse() {
+        return NodeEntryComparator.<T, N>normal().reversed();
     }
 
     @Override

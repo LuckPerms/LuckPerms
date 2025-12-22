@@ -43,7 +43,7 @@ import java.util.UUID;
 
 public class LogRecent extends ChildCommand<Void> {
     private static final int ENTRIES_PER_PAGE = 10;
-    
+
     public LogRecent() {
         super(CommandSpec.LOG_RECENT, "recent", CommandPermission.LOG_RECENT, Predicates.notInRange(0, 2));
     }
