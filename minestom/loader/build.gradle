@@ -1,0 +1,38 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'net.minestom:minestom:2025.08.29-1.21.8'
+
+    implementation project(':api')
+    implementation project(':common:loader-utils')
+    implementation project(':minestom:app')
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+processResources {
+    filesMatching("extension.json") {
+        expand 'pluginVersion': project.ext.fullVersion
+    }
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-Minestom-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':minestom').tasks.shadowJar.archiveFile
+    }
+}
+
+artifacts {
+    archives shadowJar
+}
