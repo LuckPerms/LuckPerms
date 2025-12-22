@@ -30,11 +30,10 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.fabric.context.FabricContextManager;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Mixin interface for {@link ServerPlayerEntity} implementing {@link User} related
- * caches and functions.
+ * Mixin interface for {@link ServerPlayer} implementing {@link User} related caches and functions.
  */
 public interface MixinUser {
 

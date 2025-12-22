@@ -26,63 +26,37 @@
 package me.lucko.luckperms.neoforge;
 
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
-import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.event.AbstractEventBus;
-import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
-import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.model.manager.group.StandardGroupManager;
-import me.lucko.luckperms.common.model.manager.track.StandardTrackManager;
-import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
-import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
-import me.lucko.luckperms.common.sender.DummyConsoleSender;
-import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.neoforge.calculator.NeoForgeCalculatorFactory;
+import me.lucko.luckperms.common.minecraft.MinecraftLuckPermsPlugin;
+import me.lucko.luckperms.common.minecraft.listeners.MinecraftAutoOpListener;
+import me.lucko.luckperms.common.minecraft.listeners.MinecraftCommandListUpdater;
 import me.lucko.luckperms.neoforge.context.NeoForgeContextManager;
 import me.lucko.luckperms.neoforge.context.NeoForgePlayerCalculator;
-import me.lucko.luckperms.neoforge.listeners.NeoForgeAutoOpListener;
-import me.lucko.luckperms.neoforge.listeners.NeoForgeCommandListUpdater;
 import me.lucko.luckperms.neoforge.listeners.NeoForgeConnectionListener;
 import me.lucko.luckperms.neoforge.listeners.NeoForgePlatformListener;
 import me.lucko.luckperms.neoforge.messaging.NeoForgeMessagingFactory;
 import me.lucko.luckperms.neoforge.messaging.PluginMessageMessenger;
 import me.lucko.luckperms.neoforge.service.NeoForgePermissionHandlerListener;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;
-import net.luckperms.api.query.QueryOptions;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.players.PlayerList;
 import net.neoforged.fml.ModContainer;
 
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * LuckPerms implementation for Forge.
  */
-public class LPNeoForgePlugin extends AbstractLuckPermsPlugin {
-    private final LPNeoForgeBootstrap bootstrap;
-
+public class LPNeoForgePlugin extends MinecraftLuckPermsPlugin<LPNeoForgePlugin, LPNeoForgeBootstrap> {
     private NeoForgeSenderFactory senderFactory;
     private NeoForgeConnectionListener connectionListener;
     private NeoForgeCommandExecutor commandManager;
-    private StandardUserManager userManager;
-    private StandardGroupManager groupManager;
-    private StandardTrackManager trackManager;
     private NeoForgeContextManager contextManager;
 
     public LPNeoForgePlugin(LPNeoForgeBootstrap bootstrap) {
-        this.bootstrap = bootstrap;
-    }
-
-    @Override
-    public LPNeoForgeBootstrap getBootstrap() {
-        return this.bootstrap;
+        super(bootstrap);
     }
 
     protected void registerEarlyListeners() {
@@ -138,18 +112,6 @@ public class LPNeoForgePlugin extends AbstractLuckPermsPlugin {
     }
 
     @Override
-    protected void setupManagers() {
-        this.userManager = new StandardUserManager(this);
-        this.groupManager = new StandardGroupManager(this);
-        this.trackManager = new StandardTrackManager(this);
-    }
-
-    @Override
-    protected CalculatorFactory provideCalculatorFactory() {
-        return new NeoForgeCalculatorFactory(this);
-    }
-
-    @Override
     protected void setupContextManager() {
         this.contextManager = new NeoForgeContextManager(this);
 
@@ -175,41 +137,13 @@ public class LPNeoForgePlugin extends AbstractLuckPermsPlugin {
     protected void performFinalSetup() {
         // register autoop listener
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
-            getApiProvider().getEventBus().subscribe(new NeoForgeAutoOpListener(this));
+            getApiProvider().getEventBus().subscribe(new MinecraftAutoOpListener(this));
         }
 
         // register forge command list updater
         if (getConfiguration().get(ConfigKeys.UPDATE_CLIENT_COMMAND_LIST)) {
-            getApiProvider().getEventBus().subscribe(new NeoForgeCommandListUpdater(this));
+            getApiProvider().getEventBus().subscribe(new MinecraftCommandListUpdater(this));
         }
-    }
-
-    @Override
-    public Optional<QueryOptions> getQueryOptionsForUser(User user) {
-        return this.bootstrap.getPlayer(user.getUniqueId()).map(player -> this.contextManager.getQueryOptions(player));
-    }
-
-    @Override
-    public Stream<Sender> getOnlineSenders() {
-        return Stream.concat(
-                Stream.of(getConsoleSender()),
-                this.bootstrap.getServer()
-                        .map(MinecraftServer::getPlayerList)
-                        .map(PlayerList::getPlayers)
-                        .map(players -> players.stream().map(player -> this.senderFactory.wrap(player.createCommandSourceStack()))).orElseGet(Stream::empty)
-        );
-    }
-
-    @Override
-    public Sender getConsoleSender() {
-        return this.bootstrap.getServer()
-                .map(server -> this.senderFactory.wrap(server.createCommandSourceStack()))
-                .orElseGet(() -> new DummyConsoleSender(this) {
-                    @Override
-                    public void sendMessage(Component message) {
-                        LPNeoForgePlugin.this.bootstrap.getPluginLogger().info(PlainTextComponentSerializer.plainText().serialize(TranslationManager.render(message)));
-                    }
-                });
     }
 
     public NeoForgeSenderFactory getSenderFactory() {
@@ -224,21 +158,6 @@ public class LPNeoForgePlugin extends AbstractLuckPermsPlugin {
     @Override
     public NeoForgeCommandExecutor getCommandManager() {
         return this.commandManager;
-    }
-
-    @Override
-    public StandardUserManager getUserManager() {
-        return this.userManager;
-    }
-
-    @Override
-    public StandardGroupManager getGroupManager() {
-        return this.groupManager;
-    }
-
-    @Override
-    public StandardTrackManager getTrackManager() {
-        return this.trackManager;
     }
 
     @Override

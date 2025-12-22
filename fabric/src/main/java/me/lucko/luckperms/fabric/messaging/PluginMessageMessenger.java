@@ -32,20 +32,20 @@ import me.lucko.luckperms.fabric.LPFabricPlugin;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PluginMessageMessenger extends AbstractPluginMessageMessenger implements ServerPlayNetworking.PlayPayloadHandler<PluginMessageMessenger.PluginMessagePayload> {
-    private static final Identifier CHANNEL = Identifier.of(AbstractPluginMessageMessenger.CHANNEL);
+    private static final Identifier CHANNEL = Identifier.parse(AbstractPluginMessageMessenger.CHANNEL);
 
     private final LPFabricPlugin plugin;
 
@@ -55,9 +55,9 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
     }
 
     public void init() {
-        PayloadTypeRegistry.playS2C().register(PluginMessagePayload.ID, PluginMessagePayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(PluginMessagePayload.ID, PluginMessagePayload.CODEC);
-        ServerPlayNetworking.registerGlobalReceiver(PluginMessagePayload.ID, this);
+        PayloadTypeRegistry.playS2C().register(PluginMessagePayload.TYPE, PluginMessagePayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(PluginMessagePayload.TYPE, PluginMessagePayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(PluginMessagePayload.TYPE, this);
     }
 
     @Override
@@ -74,8 +74,8 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
                 return;
             }
 
-            Collection<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
-            ServerPlayerEntity p = Iterables.getFirst(players, null);
+            Collection<ServerPlayer> players = server.getPlayerList().getPlayers();
+            ServerPlayer p = Iterables.getFirst(players, null);
             if (p == null) {
                 return;
             }
@@ -95,9 +95,9 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
         handleIncomingMessage(payload.data);
     }
 
-    public static class PluginMessagePayload implements CustomPayload {
-        public static final CustomPayload.Id<PluginMessagePayload> ID = new CustomPayload.Id<>(CHANNEL);
-        public static final PacketCodec<RegistryByteBuf, PluginMessagePayload> CODEC = PacketCodec.of(PluginMessagePayload::write, PluginMessagePayload::new).cast();
+    public static class PluginMessagePayload implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<PluginMessagePayload> TYPE = new CustomPacketPayload.Type<>(CHANNEL);
+        public static final StreamCodec<RegistryFriendlyByteBuf, PluginMessagePayload> CODEC = StreamCodec.ofMember(PluginMessagePayload::write, PluginMessagePayload::new).cast();
 
         private final byte[] data;
 
@@ -105,18 +105,18 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
             this.data = data;
         }
 
-        private PluginMessagePayload(PacketByteBuf buf) {
+        private PluginMessagePayload(FriendlyByteBuf buf) {
             this.data = new byte[buf.readableBytes()];
             buf.readBytes(this.data);
         }
 
-        private void write(PacketByteBuf buf) {
+        private void write(FriendlyByteBuf buf) {
             buf.writeBytes(this.data);
         }
 
         @Override
-        public Id<PluginMessagePayload> getId() {
-            return ID;
+        public Type<PluginMessagePayload> type() {
+            return TYPE;
         }
     }
 }

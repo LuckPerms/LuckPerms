@@ -28,10 +28,10 @@ package me.lucko.luckperms.fabric.listeners;
 import me.lucko.luckperms.fabric.event.SetupPlayerPermissionsEvent;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.command.permission.Permission;
-import net.minecraft.command.permission.PermissionPredicate;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionSet;
 
 /**
  * Listener to route permission checks made via Minecraft's native permission predicate to LuckPerms.
@@ -42,15 +42,15 @@ public class FabricPermissionsListener {
         SetupPlayerPermissionsEvent.EVENT.register(this::onSetupPlayerPermissions);
     }
 
-    private PermissionPredicate onSetupPlayerPermissions(ServerPlayerEntity entity, PermissionPredicate predicate) {
-        return new LuckPermsPermissionPredicate(entity, predicate);
+    private PermissionSet onSetupPlayerPermissions(ServerPlayer entity, PermissionSet defaults) {
+        return new LuckPermsPermissionSet(entity, defaults);
     }
 
-    private static final class LuckPermsPermissionPredicate implements PermissionPredicate {
-        private final ServerPlayerEntity player;
-        private final PermissionPredicate delegate;
+    private static final class LuckPermsPermissionSet implements PermissionSet {
+        private final ServerPlayer player;
+        private final PermissionSet delegate;
 
-        LuckPermsPermissionPredicate(ServerPlayerEntity player, PermissionPredicate delegate) {
+        LuckPermsPermissionSet(ServerPlayer player, PermissionSet delegate) {
             this.player = player;
             this.delegate = delegate;
         }

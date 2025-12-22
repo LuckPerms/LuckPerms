@@ -34,9 +34,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Implementation of {@link ContextManager} which utilises 'detached' supplier caches stored alongside the subject instances.
+ * Implementation of {@link ContextManagerBase} which utilises 'detached' supplier caches stored alongside the subject instances.
  */
-public abstract class DetachedContextManager<S, P extends S> extends ContextManager<S, P> {
+public abstract class DetachedContextManager<S, P extends S> extends ContextManagerBase<S, P> {
 
     private final LoadingCache<S, QueryOptions> fallbackContextsCache = CaffeineFactory.newBuilder()
             .expireAfterWrite(50, TimeUnit.MILLISECONDS)

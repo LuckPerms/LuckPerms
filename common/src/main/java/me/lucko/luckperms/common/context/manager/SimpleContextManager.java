@@ -32,7 +32,7 @@ import net.luckperms.api.query.QueryOptions;
 
 import java.util.concurrent.TimeUnit;
 
-public abstract class SimpleContextManager<S, P extends S> extends ContextManager<S, P> {
+public abstract class SimpleContextManager<S, P extends S> extends ContextManagerBase<S, P> {
 
     private final LoadingCache<S, QueryOptions> contextsCache = CaffeineFactory.newBuilder()
             .expireAfterWrite(50, TimeUnit.MILLISECONDS)

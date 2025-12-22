@@ -27,17 +27,17 @@ package me.lucko.luckperms.fabric.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.command.permission.PermissionPredicate;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionSet;
 
 public interface SetupPlayerPermissionsEvent {
-    Event<SetupPlayerPermissionsEvent> EVENT = EventFactory.createArrayBacked(SetupPlayerPermissionsEvent.class, listeners -> (entity, defaultPredicate) -> {
-        PermissionPredicate predicate = defaultPredicate;
+    Event<SetupPlayerPermissionsEvent> EVENT = EventFactory.createArrayBacked(SetupPlayerPermissionsEvent.class, listeners -> (entity, defaults) -> {
+        PermissionSet set = defaults;
         for (SetupPlayerPermissionsEvent listener : listeners) {
-            predicate = listener.onSetupPlayerPermissions(entity, predicate);
+            set = listener.onSetupPlayerPermissions(entity, set);
         }
-        return predicate;
+        return set;
     });
 
-    PermissionPredicate onSetupPlayerPermissions(ServerPlayerEntity entity, PermissionPredicate defaultPredicate);
+    PermissionSet onSetupPlayerPermissions(ServerPlayer entity, PermissionSet defaults);
 }

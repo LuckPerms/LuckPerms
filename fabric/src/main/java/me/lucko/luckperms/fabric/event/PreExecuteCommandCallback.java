@@ -27,7 +27,7 @@ package me.lucko.luckperms.fabric.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 
 public interface PreExecuteCommandCallback {
     Event<PreExecuteCommandCallback> EVENT = EventFactory.createArrayBacked(PreExecuteCommandCallback.class, listeners -> (source, input) -> {
@@ -39,5 +39,5 @@ public interface PreExecuteCommandCallback {
         return true;
     });
 
-    boolean onPreExecuteCommand(ServerCommandSource source, String input);
+    boolean onPreExecuteCommand(CommandSourceStack source, String input);
 }

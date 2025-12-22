@@ -6,6 +6,8 @@ plugins {
 }
 
 archivesBaseName = 'luckperms'
+sourceCompatibility = 21
+targetCompatibility = 21
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
@@ -14,7 +16,7 @@ repositories {
 dependencies {
     // https://modmuss50.me/fabric.html
     minecraft 'com.mojang:minecraft:1.21.11'
-    mappings 'net.fabricmc:yarn:1.21.11+build.1:v2'
+    mappings loom.officialMojangMappings()
     modImplementation 'net.fabricmc:fabric-loader:0.18.2'
 
     Set<String> apiModules = [
@@ -32,6 +34,7 @@ dependencies {
     include(modImplementation('me.lucko:fabric-permissions-api:0.6.1'))
 
     implementation project(':common')
+    implementation project(':common:minecraft')
 }
 
 processResources {

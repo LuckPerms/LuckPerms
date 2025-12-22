@@ -41,10 +41,10 @@ import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.fabricmc.fabric.api.util.TriState;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
@@ -68,21 +68,21 @@ public class FabricPermissionsApiListener {
         OfflineOptionRequestEvent.EVENT.register(this::onOfflineOptionRequest);
     }
 
-    private @NonNull TriState onPermissionCheck(CommandSource source, String permission) {
-        if (source instanceof ServerCommandSource) {
-            Entity entity = ((ServerCommandSource) source).getEntity();
-            if (entity instanceof ServerPlayerEntity) {
-                return playerPermissionCheck((ServerPlayerEntity) entity, permission);
+    private @NonNull TriState onPermissionCheck(SharedSuggestionProvider source, String permission) {
+        if (source instanceof CommandSourceStack) {
+            Entity entity = ((CommandSourceStack) source).getEntity();
+            if (entity instanceof ServerPlayer) {
+                return playerPermissionCheck((ServerPlayer) entity, permission);
             }
         }
         return otherPermissionCheck(source, permission);
     }
 
-    private @NonNull Optional<String> onOptionRequest(CommandSource source, String key) {
-        if (source instanceof ServerCommandSource) {
-            Entity entity = ((ServerCommandSource) source).getEntity();
-            if (entity instanceof ServerPlayerEntity) {
-                return playerGetOption((ServerPlayerEntity) entity, key);
+    private @NonNull Optional<String> onOptionRequest(SharedSuggestionProvider source, String key) {
+        if (source instanceof CommandSourceStack) {
+            Entity entity = ((CommandSourceStack) source).getEntity();
+            if (entity instanceof ServerPlayer) {
+                return playerGetOption((ServerPlayer) entity, key);
             }
         }
         return otherGetOption(source, key);
@@ -110,13 +110,13 @@ public class FabricPermissionsApiListener {
         return this.plugin.getStorage().loadUser(uuid, null);
     }
 
-    private TriState playerPermissionCheck(ServerPlayerEntity player, String permission) {
+    private TriState playerPermissionCheck(ServerPlayer player, String permission) {
         return fabricTristate(((MixinUser) player).luckperms$hasPermission(permission));
     }
 
-    private TriState otherPermissionCheck(CommandSource source, String permission) {
-        if (source instanceof ServerCommandSource) {
-            String name = ((ServerCommandSource) source).getName();
+    private TriState otherPermissionCheck(SharedSuggestionProvider source, String permission) {
+        if (source instanceof CommandSourceStack) {
+            String name = ((CommandSourceStack) source).getTextName();
             VerboseCheckTarget target = VerboseCheckTarget.internal(name);
 
             this.plugin.getVerboseHandler().offerPermissionCheckEvent(CheckOrigin.PLATFORM_API_HAS_PERMISSION, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.UNDEFINED);
@@ -126,13 +126,13 @@ public class FabricPermissionsApiListener {
         return TriState.DEFAULT;
     }
 
-    private Optional<String> playerGetOption(ServerPlayerEntity player, String key) {
+    private Optional<String> playerGetOption(ServerPlayer player, String key) {
         return Optional.ofNullable(((MixinUser) player).luckperms$getOption(key));
     }
 
-    private Optional<String> otherGetOption(CommandSource source, String key) {
-        if (source instanceof ServerCommandSource) {
-            String name = ((ServerCommandSource) source).getName();
+    private Optional<String> otherGetOption(SharedSuggestionProvider source, String key) {
+        if (source instanceof CommandSourceStack) {
+            String name = ((CommandSourceStack) source).getTextName();
             VerboseCheckTarget target = VerboseCheckTarget.internal(name);
 
             this.plugin.getVerboseHandler().offerMetaCheckEvent(CheckOrigin.PLATFORM_API, target, QueryOptionsImpl.DEFAULT_CONTEXTUAL, key, StringResult.nullResult());

@@ -25,114 +25,31 @@
 
 package me.lucko.luckperms.forge.context;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
+import me.lucko.luckperms.common.minecraft.context.MinecraftPlayerCalculator;
 import me.lucko.luckperms.forge.LPForgePlugin;
-import net.luckperms.api.context.Context;
-import net.luckperms.api.context.ContextCalculator;
-import net.luckperms.api.context.ContextConsumer;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.DefaultContextKeys;
-import net.luckperms.api.context.ImmutableContextSet;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;
 
-public class ForgePlayerCalculator implements ContextCalculator<ServerPlayer> {
-    private final LPForgePlugin plugin;
-
-    private final boolean gamemode;
-    private final boolean world;
-    private final boolean dimensionType;
-
+public class ForgePlayerCalculator extends MinecraftPlayerCalculator {
     public ForgePlayerCalculator(LPForgePlugin plugin, Set<String> disabled) {
-        this.plugin = plugin;
-        this.gamemode = !disabled.contains(DefaultContextKeys.GAMEMODE_KEY);
-        this.world = !disabled.contains(DefaultContextKeys.WORLD_KEY);
-        this.dimensionType = !disabled.contains(DefaultContextKeys.DIMENSION_TYPE_KEY);
-    }
-
-    @Override
-    public void calculate(@NonNull ServerPlayer target, @NonNull ContextConsumer consumer) {
-        ServerLevel level = target.level();
-        if (this.dimensionType) {
-            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(level.dimension().identifier()));
-        }
-
-        if (this.world) {
-            ServerLevelData levelData = (ServerLevelData) level.getLevelData();
-            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(levelData.getLevelName(), consumer);
-        }
-
-        if (this.gamemode) {
-            GameType gameMode = target.gameMode.getGameModeForPlayer();
-            consumer.accept(DefaultContextKeys.GAMEMODE_KEY, gameMode.getName());
-        }
-    }
-
-    @Override
-    public @NonNull ContextSet estimatePotentialContexts() {
-        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-
-        if (this.gamemode) {
-            for (GameType gameType : GameType.values()) {
-                builder.add(DefaultContextKeys.GAMEMODE_KEY, gameType.getName());
-            }
-        }
-
-        MinecraftServer server = this.plugin.getBootstrap().getServer().orElse(null);
-        if (this.dimensionType && server != null) {
-            server.registryAccess().lookup(Registries.DIMENSION_TYPE).ifPresent(registry -> {
-                for (Identifier id : registry.keySet()) {
-                    builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(id));
-                }
-            });
-        }
-
-        if (this.world && server != null) {
-            for (ServerLevel level : server.getAllLevels()) {
-                ServerLevelData levelData = (ServerLevelData) level.getLevelData();
-                if (Context.isValidValue(levelData.getLevelName())) {
-                    builder.add(DefaultContextKeys.WORLD_KEY, levelData.getLevelName());
-                }
-            }
-        }
-
-        return builder.build();
-    }
-
-    private static String getContextKey(Identifier key) {
-        if (key.getNamespace().equals("minecraft")) {
-            return key.getPath();
-        }
-        return key.toString();
+        super(plugin, disabled);
     }
 
     @SubscribeEvent
     public void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (!(this.world || this.dimensionType)) {
-            return;
+        if (this.world || this.dimensionType) {
+            this.plugin.getContextManager().signalContextUpdate((ServerPlayer) event.getEntity());
         }
-
-        this.plugin.getContextManager().signalContextUpdate((ServerPlayer) event.getEntity());
     }
 
     @SubscribeEvent
     public void onPlayerChangeGameMode(PlayerEvent.PlayerChangeGameModeEvent event) {
-        if (!this.gamemode) {
-            return;
+        if (this.gamemode) {
+            this.plugin.getContextManager().signalContextUpdate((ServerPlayer) event.getEntity());
         }
-
-        this.plugin.getContextManager().signalContextUpdate((ServerPlayer) event.getEntity());
     }
 
 }

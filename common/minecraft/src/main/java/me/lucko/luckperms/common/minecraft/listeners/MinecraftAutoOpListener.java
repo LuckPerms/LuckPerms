@@ -23,12 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.forge.listeners;
+package me.lucko.luckperms.common.minecraft.listeners;
 
 import me.lucko.luckperms.common.api.implementation.ApiUser;
 import me.lucko.luckperms.common.event.LuckPermsEventListener;
+import me.lucko.luckperms.common.minecraft.MinecraftLuckPermsPlugin;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.forge.LPForgePlugin;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
@@ -37,12 +37,12 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
 
-public class ForgeAutoOpListener implements LuckPermsEventListener {
+public class MinecraftAutoOpListener implements LuckPermsEventListener {
     private static final String NODE = "luckperms.autoop";
 
-    private final LPForgePlugin plugin;
+    private final MinecraftLuckPermsPlugin<?, ?> plugin;
 
-    public ForgeAutoOpListener(LPForgePlugin plugin) {
+    public MinecraftAutoOpListener(MinecraftLuckPermsPlugin<?, ?> plugin) {
         this.plugin = plugin;
     }
 

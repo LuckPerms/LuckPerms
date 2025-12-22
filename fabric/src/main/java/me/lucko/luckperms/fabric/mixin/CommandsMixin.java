@@ -23,28 +23,23 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.calculator;
+package me.lucko.luckperms.fabric.mixin;
 
-import me.lucko.luckperms.common.cacheddata.result.TristateResult;
-import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
-import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-import net.luckperms.api.util.Tristate;
+import com.mojang.brigadier.ParseResults;
+import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Permission processor which is added to the owner of an Integrated server to
- * simply return true if no other processors match.
- */
-public class ServerOwnerProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
-    private static final TristateResult TRUE_RESULT = new TristateResult.Factory(ServerOwnerProcessor.class).result(Tristate.TRUE);
-
-    public static final ServerOwnerProcessor INSTANCE = new ServerOwnerProcessor();
-
-    private ServerOwnerProcessor() {
-
-    }
-
-    @Override
-    public TristateResult hasPermission(String permission) {
-        return TRUE_RESULT;
+@Mixin(Commands.class)
+public class CommandsMixin {
+    @Inject(at = @At("HEAD"), method = "performCommand", cancellable = true)
+    private void commandExecuteCallback(ParseResults<CommandSourceStack> parseResults, String command, CallbackInfo ci) {
+        if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(parseResults.getContext().getSource(), command)) {
+            ci.cancel();
+        }
     }
 }

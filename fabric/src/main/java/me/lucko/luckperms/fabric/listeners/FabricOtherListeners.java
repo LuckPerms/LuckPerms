@@ -29,14 +29,14 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.regex.Pattern;
 
 public class FabricOtherListeners {
     private static final Pattern OP_COMMAND_PATTERN = Pattern.compile("^/?(deop|op)( .*)?$");
 
-    private LPFabricPlugin plugin;
+    private final LPFabricPlugin plugin;
 
     public FabricOtherListeners(LPFabricPlugin plugin) {
         this.plugin = plugin;
@@ -46,7 +46,7 @@ public class FabricOtherListeners {
         PreExecuteCommandCallback.EVENT.register(this::onPreExecuteCommand);
     }
 
-    private boolean onPreExecuteCommand(ServerCommandSource source, String input) {
+    private boolean onPreExecuteCommand(CommandSourceStack source, String input) {
         if (input.isEmpty()) {
             return true;
         }

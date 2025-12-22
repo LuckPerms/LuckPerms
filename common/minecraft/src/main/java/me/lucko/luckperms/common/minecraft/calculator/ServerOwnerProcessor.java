@@ -23,23 +23,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge;
+package me.lucko.luckperms.common.minecraft.calculator;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
+import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import net.luckperms.api.util.Tristate;
 
-import java.util.concurrent.Executor;
+/**
+ * Permission processor which is added to the owner of an integrated server to simply return true if no other processors match.
+ */
+public class ServerOwnerProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+    private static final TristateResult TRUE_RESULT = new TristateResult.Factory(ServerOwnerProcessor.class).result(Tristate.TRUE);
 
-public class NeoForgeSchedulerAdapter extends AbstractJavaScheduler {
-    private final Executor sync;
+    public static final ServerOwnerProcessor INSTANCE = new ServerOwnerProcessor();
 
-    public NeoForgeSchedulerAdapter(LPNeoForgeBootstrap bootstrap) {
-        super(bootstrap);
-        this.sync = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).executeBlocking(r);
+    private ServerOwnerProcessor() {
+
     }
 
     @Override
-    public Executor sync() {
-        return this.sync;
+    public TristateResult hasPermission(String permission) {
+        return TRUE_RESULT;
     }
-
 }

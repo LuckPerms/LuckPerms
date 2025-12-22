@@ -21,6 +21,7 @@ include (
         'api',
         'common',
         'common:loader-utils',
+        'common:minecraft',
         'bukkit',
         'bukkit:loader',
         'bukkit-legacy',

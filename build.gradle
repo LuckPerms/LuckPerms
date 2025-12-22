@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.licenser) apply false
+    alias(libs.plugins.loom) apply false
 }
 
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat

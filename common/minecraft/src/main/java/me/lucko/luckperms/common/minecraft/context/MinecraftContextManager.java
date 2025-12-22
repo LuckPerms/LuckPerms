@@ -23,29 +23,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge.calculator;
+package me.lucko.luckperms.common.minecraft.context;
 
-import me.lucko.luckperms.common.cacheddata.result.TristateResult;
-import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
-import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-import net.luckperms.api.util.Tristate;
+import me.lucko.luckperms.common.context.manager.ContextManager;
+import net.luckperms.api.query.OptionKey;
+import net.minecraft.server.level.ServerPlayer;
 
-/**
- * Permission processor which is added to the owner of an Integrated server to
- * simply return true if no other processors match.
- */
-public class ServerOwnerProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
-    private static final TristateResult TRUE_RESULT = new TristateResult.Factory(ServerOwnerProcessor.class).result(Tristate.TRUE);
+public interface MinecraftContextManager extends ContextManager<ServerPlayer, ServerPlayer> {
 
-    public static final ServerOwnerProcessor INSTANCE = new ServerOwnerProcessor();
-
-    private ServerOwnerProcessor() {
-
-    }
-
-    @Override
-    public TristateResult hasPermission(String permission) {
-        return TRUE_RESULT;
-    }
+    OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
 
 }

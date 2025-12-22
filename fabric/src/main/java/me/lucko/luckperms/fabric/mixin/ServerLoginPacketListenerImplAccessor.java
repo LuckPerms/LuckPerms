@@ -25,18 +25,19 @@
 
 package me.lucko.luckperms.fabric.mixin;
 
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.ServerCommandSource;
+import com.mojang.authlib.GameProfile;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 /**
- * Accessor mixin to provide access to the underlying {@link CommandOutput}
+ * Accessor mixin to provide access to the underlying {@link GameProfile} during the server
+ * login handling.
  */
-@Mixin(ServerCommandSource.class)
-public interface ServerCommandSourceAccessor {
+@Mixin(ServerLoginPacketListenerImpl.class)
+public interface ServerLoginPacketListenerImplAccessor {
 
-    @Accessor("output")
-    CommandOutput getOutput();
+    @Accessor("authenticatedProfile")
+    GameProfile getAuthenticatedProfile();
 
 }

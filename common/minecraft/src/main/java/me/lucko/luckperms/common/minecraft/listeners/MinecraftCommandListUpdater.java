@@ -23,36 +23,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.listeners;
+package me.lucko.luckperms.common.minecraft.listeners;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.lucko.luckperms.common.api.implementation.ApiGroup;
 import me.lucko.luckperms.common.cache.BufferedRequest;
 import me.lucko.luckperms.common.event.LuckPermsEventListener;
+import me.lucko.luckperms.common.minecraft.MinecraftLuckPermsPlugin;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.util.CaffeineFactory;
-import me.lucko.luckperms.fabric.LPFabricPlugin;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.context.ContextUpdateEvent;
 import net.luckperms.api.event.group.GroupDataRecalculateEvent;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Calls {@link net.minecraft.server.PlayerManager#sendCommandTree()} when a players permissions change.
- *
- * TODO: Extract base class for this and BukkitCommandListUpdater
+ * Calls {@link PlayerList#sendPlayerPermissionLevel(ServerPlayer)} when a players permissions change.
  */
-public class FabricCommandListUpdater implements LuckPermsEventListener {
-
-    private final LPFabricPlugin plugin;
+public class MinecraftCommandListUpdater implements LuckPermsEventListener {
+    private final MinecraftLuckPermsPlugin<?, ?> plugin;
     private final LoadingCache<UUID, SendBuffer> sendingBuffers = CaffeineFactory.newBuilder()
             .expireAfterAccess(10, TimeUnit.SECONDS)
             .build(SendBuffer::new);
 
-    public FabricCommandListUpdater(LPFabricPlugin plugin) {
+    public MinecraftCommandListUpdater(MinecraftLuckPermsPlugin<?, ?> plugin) {
         this.plugin = plugin;
     }
 
@@ -68,14 +68,15 @@ public class FabricCommandListUpdater implements LuckPermsEventListener {
     }
 
     private void onGroupDataRecalculate(GroupDataRecalculateEvent e) {
-        plugin.getUserManager().getAll().values().stream()
-            .filter(u -> u.resolveInheritanceTree(u.getQueryOptions())
-                .contains(ApiGroup.cast(e.getGroup())))
-            .forEach(u -> requestUpdate(u.getUniqueId()));
+        for (User user : this.plugin.getUserManager().getAll().values()) {
+            if (user.resolveInheritanceTree(user.getQueryOptions()).contains(ApiGroup.cast(e.getGroup()))) {
+                requestUpdate(user.getUniqueId());
+            }
+        }
     }
 
     private void onContextUpdate(ContextUpdateEvent e) {
-        e.getSubject(ServerPlayerEntity.class).ifPresent(p -> requestUpdate(p.getUuid()));
+        e.getSubject(ServerPlayer.class).ifPresent(p -> requestUpdate(p.getUUID()));
     }
 
     private void requestUpdate(UUID uniqueId) {
@@ -83,27 +84,24 @@ public class FabricCommandListUpdater implements LuckPermsEventListener {
             return;
         }
 
-        // Buffer the request to send a commands update.
         this.sendingBuffers.get(uniqueId).request();
     }
 
     // Called when the buffer times out.
     private void sendUpdate(UUID uniqueId) {
-        this.plugin.getBootstrap().getScheduler().sync()
-                .execute(() -> this.plugin.getBootstrap().getPlayer(uniqueId)
-                    .ifPresent(player -> this.plugin.getBootstrap().getServer()
-                        .ifPresent(server -> {
-                            server.getPlayerManager().sendCommandTree(player);
-                        })
-                    )
-                );
+        this.plugin.getBootstrap().getScheduler().sync().execute(() ->
+                this.plugin.getBootstrap().getPlayer(uniqueId).ifPresent(player -> {
+                    MinecraftServer server = player.level().getServer();
+                    server.getPlayerList().sendPlayerPermissionLevel(player);
+                })
+        );
     }
 
     private final class SendBuffer extends BufferedRequest<Void> {
         private final UUID uniqueId;
 
         SendBuffer(UUID uniqueId) {
-            super(500, TimeUnit.MILLISECONDS, FabricCommandListUpdater.this.plugin.getBootstrap().getScheduler());
+            super(500, TimeUnit.MILLISECONDS, MinecraftCommandListUpdater.this.plugin.getBootstrap().getScheduler());
             this.uniqueId = uniqueId;
         }
 
@@ -113,4 +111,5 @@ public class FabricCommandListUpdater implements LuckPermsEventListener {
             return null;
         }
     }
+
 }

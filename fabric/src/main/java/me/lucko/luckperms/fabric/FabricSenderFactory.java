@@ -25,104 +25,29 @@
 
 package me.lucko.luckperms.fabric;
 
-import com.mojang.serialization.JsonOps;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import me.lucko.luckperms.common.locale.TranslationManager;
-import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.sender.SenderFactory;
-import me.lucko.luckperms.fabric.mixin.ServerCommandSourceAccessor;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import me.lucko.luckperms.common.minecraft.MinecraftSenderFactory;
+import me.lucko.luckperms.fabric.mixin.CommandSourceStackAccessor;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.rcon.RconCommandOutput;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 
-import java.util.Locale;
-import java.util.UUID;
-
-public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCommandSource> {
-    private final LPFabricPlugin plugin;
-
+public class FabricSenderFactory extends MinecraftSenderFactory<LPFabricPlugin> {
     public FabricSenderFactory(LPFabricPlugin plugin) {
         super(plugin);
-        this.plugin = plugin;
     }
 
     @Override
-    protected LPFabricPlugin getPlugin() {
-        return this.plugin;
+    protected CommandSource getSource(CommandSourceStack sender) {
+        return ((CommandSourceStackAccessor) sender).getSource();
     }
 
     @Override
-    protected UUID getUniqueId(ServerCommandSource commandSource) {
-        if (commandSource.getEntity() != null) {
-            return commandSource.getEntity().getUuid();
-        }
-        return Sender.CONSOLE_UUID;
-    }
-
-    @Override
-    protected String getName(ServerCommandSource commandSource) {
-        String name = commandSource.getName();
-        if (commandSource.getEntity() != null && name.equals("Server")) {
-            return Sender.CONSOLE_NAME;
-        }
-        return name;
-    }
-
-    @Override
-    protected void sendMessage(ServerCommandSource sender, Component message) {
-        final Locale locale;
-        if (sender.getEntity() instanceof ServerPlayerEntity) {
-            String language = ((ServerPlayerEntity) sender.getEntity()).getClientOptions().language();
-            locale = language == null ? null : TranslationManager.parseLocale(language);
-        } else {
-            locale = null;
-        }
-        sender.sendFeedback(() -> toNativeText(TranslationManager.render(message, locale)), false);
-    }
-
-    @Override
-    protected Tristate getPermissionValue(ServerCommandSource commandSource, String node) {
-        switch (Permissions.getPermissionValue(commandSource, node)) {
-            case TRUE:
-                return Tristate.TRUE;
-            case FALSE:
-                return Tristate.FALSE;
-            case DEFAULT:
-                return Tristate.UNDEFINED;
-            default:
-                throw new AssertionError();
-        }
-    }
-
-    @Override
-    protected boolean hasPermission(ServerCommandSource commandSource, String node) {
-        return getPermissionValue(commandSource, node).asBoolean();
-    }
-
-    @Override
-    protected void performCommand(ServerCommandSource sender, String command) {
-        sender.getServer().getCommandManager().parseAndExecute(sender, command);
-    }
-
-    @Override
-    protected boolean isConsole(ServerCommandSource sender) {
-        CommandOutput output = ((ServerCommandSourceAccessor) sender).getOutput();
-        return output == sender.getServer() || // Console
-            output.getClass() == RconCommandOutput.class || // Rcon
-            (output == CommandOutput.DUMMY && sender.getName().equals("")); // Functions
-    }
-
-    public static Text toNativeText(Component component) {
-        return TextCodecs.CODEC.decode(
-                DynamicRegistryManager.EMPTY.getOps(JsonOps.INSTANCE),
-                GsonComponentSerializer.gson().serializeToTree(component)
-        ).getOrThrow(IllegalArgumentException::new).getFirst();
+    protected Tristate getPermissionValue(CommandSourceStack commandSource, String node) {
+        return switch (Permissions.getPermissionValue(commandSource, node)) {
+            case TRUE -> Tristate.TRUE;
+            case FALSE -> Tristate.FALSE;
+            case DEFAULT -> Tristate.UNDEFINED;
+        };
     }
 }

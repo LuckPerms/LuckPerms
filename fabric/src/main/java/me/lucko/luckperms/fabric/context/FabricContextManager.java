@@ -27,37 +27,35 @@ package me.lucko.luckperms.fabric.context;
 
 import me.lucko.luckperms.common.context.manager.DetachedContextManager;
 import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
+import me.lucko.luckperms.common.minecraft.context.MinecraftContextManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.fabric.model.MixinUser;
-import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public class FabricContextManager extends DetachedContextManager<ServerPlayerEntity, ServerPlayerEntity> {
-    public static final OptionKey<Boolean> INTEGRATED_SERVER_OWNER = OptionKey.of("integrated_server_owner", Boolean.class);
-
+public class FabricContextManager extends DetachedContextManager<ServerPlayer, ServerPlayer> implements MinecraftContextManager {
     public FabricContextManager(LuckPermsPlugin plugin) {
-        super(plugin, ServerPlayerEntity.class, ServerPlayerEntity.class);
+        super(plugin, ServerPlayer.class, ServerPlayer.class);
     }
 
     @Override
-    public UUID getUniqueId(ServerPlayerEntity player) {
-        return player.getUuid();
+    public UUID getUniqueId(ServerPlayer player) {
+        return player.getUUID();
     }
 
     @Override
-    public @Nullable QueryOptionsSupplier getQueryOptionsSupplier(ServerPlayerEntity subject) {
+    public @Nullable QueryOptionsSupplier getQueryOptionsSupplier(ServerPlayer subject) {
         Objects.requireNonNull(subject, "subject");
         return ((MixinUser) subject).luckperms$getQueryOptionsCache(this);
     }
 
     @Override
-    public void customizeQueryOptions(ServerPlayerEntity subject, QueryOptions.Builder builder) {
-        if (subject.getEntityWorld().getServer().isHost(subject.getPlayerConfigEntry())) {
+    public void customizeQueryOptions(ServerPlayer subject, QueryOptions.Builder builder) {
+        if (subject.level().getServer().isSingleplayerOwner(subject.nameAndId())) {
             builder.option(INTEGRATED_SERVER_OWNER, true);
         }
     }

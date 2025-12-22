@@ -23,23 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.fabric.mixin;
+package me.lucko.luckperms.common.minecraft;
 
-import com.mojang.brigadier.ParseResults;
-import me.lucko.luckperms.fabric.event.PreExecuteCommandCallback;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
 
-@Mixin(CommandManager.class)
-public class CommandManagerMixin {
-    @Inject(at = @At("HEAD"), method = "execute", cancellable = true)
-    private void commandExecuteCallback(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfo ci) {
-        if (!PreExecuteCommandCallback.EVENT.invoker().onPreExecuteCommand(parseResults.getContext().getSource(), command)) {
-            ci.cancel();
-        }
+import java.util.concurrent.Executor;
+
+public class MinecraftSchedulerAdapter extends AbstractJavaScheduler {
+    private final Executor sync;
+
+    public MinecraftSchedulerAdapter(MinecraftLuckPermsBootstrap bootstrap) {
+        super(bootstrap);
+        this.sync = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).executeBlocking(r);
+    }
+
+    @Override
+    public Executor sync() {
+        return this.sync;
     }
 }

@@ -25,103 +25,26 @@
 
 package me.lucko.luckperms.fabric.context;
 
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
-import me.lucko.luckperms.common.util.EnumNamer;
+import me.lucko.luckperms.common.minecraft.context.MinecraftPlayerCalculator;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
-import net.luckperms.api.context.Context;
-import net.luckperms.api.context.ContextCalculator;
-import net.luckperms.api.context.ContextConsumer;
-import net.luckperms.api.context.ContextSet;
-import net.luckperms.api.context.DefaultContextKeys;
-import net.luckperms.api.context.ImmutableContextSet;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.GameMode;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
-import java.util.Optional;
 import java.util.Set;
 
-public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEntity> {
-    private static final EnumNamer<GameMode> GAMEMODE_NAMER = new EnumNamer<>(
-            GameMode.class,
-            EnumNamer.LOWER_CASE_NAME
-    );
-
-    private final LPFabricPlugin plugin;
-
-    private final boolean gamemode;
-    private final boolean world;
-    //private final boolean dimensionType;
-
+public class FabricPlayerCalculator extends MinecraftPlayerCalculator {
     public FabricPlayerCalculator(LPFabricPlugin plugin, Set<String> disabled) {
-        this.plugin = plugin;
-        this.gamemode = !disabled.contains(DefaultContextKeys.GAMEMODE_KEY);
-        this.world = !disabled.contains(DefaultContextKeys.WORLD_KEY);
-        //this.dimensionType = !disabled.contains(DefaultContextKeys.DIMENSION_TYPE_KEY);
+        super(plugin, disabled);
     }
 
     public void registerListeners() {
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(this::onWorldChange);
     }
 
-    @Override
-    public void calculate(@NonNull ServerPlayerEntity target, @NonNull ContextConsumer consumer) {
-        GameMode mode = target.interactionManager.getGameMode();
-        if (this.gamemode && mode != null) {
-            consumer.accept(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
-        }
-
-        // TODO: figure out dimension type context too
-        ServerWorld world = target.getEntityWorld();
-        if (this.world) {
-            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(getContextKey(world.getRegistryKey().getValue()), consumer);
-        }
-    }
-
-    @Override
-    public @NotNull @NonNull ContextSet estimatePotentialContexts() {
-        ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
-
-        if (this.gamemode) {
-            for (GameMode mode : GameMode.values()) {
-                builder.add(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
-            }
-        }
-
-        // TODO: dimension type
-
-        Optional<MinecraftServer> server = this.plugin.getBootstrap().getServer();
-        if (this.world && server.isPresent()) {
-            Iterable<ServerWorld> worlds = server.get().getWorlds();
-            for (ServerWorld world : worlds) {
-                String worldName = getContextKey(world.getRegistryKey().getValue());
-                if (Context.isValidValue(worldName)) {
-                    builder.add(DefaultContextKeys.WORLD_KEY, worldName);
-                }
-            }
-        }
-
-        return builder.build();
-    }
-
-    private static String getContextKey(Identifier key) {
-        if (key.getNamespace().equals("minecraft")) {
-            return key.getPath();
-        }
-        return key.toString();
-    }
-
-    private void onWorldChange(ServerPlayerEntity player, ServerWorld origin, ServerWorld destination) {
-        if (this.world) {
-            this.plugin.getContextManager().invalidateCache(player);
+    private void onWorldChange(ServerPlayer player, ServerLevel origin, ServerLevel destination) {
+        if (this.world || this.dimensionType) {
             this.plugin.getContextManager().signalContextUpdate(player);
         }
     }
-
 }

@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.neoforge;
 
-import com.mojang.authlib.GameProfile;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import me.lucko.luckperms.common.minecraft.MinecraftLuckPermsBootstrap;
+import me.lucko.luckperms.common.minecraft.MinecraftSchedulerAdapter;
 import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
@@ -37,9 +38,6 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.neoforge.util.NeoForgeEventBusFacade;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.NameAndId;
-import net.minecraft.server.players.PlayerList;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -53,19 +51,14 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Supplier;
 
 /**
  * Bootstrap plugin for LuckPerms running on Forge.
  */
-public final class LPNeoForgeBootstrap implements LuckPermsBootstrap, LoaderBootstrap, BootstrappedWithLoader {
+public final class LPNeoForgeBootstrap extends MinecraftLuckPermsBootstrap implements LuckPermsBootstrap, LoaderBootstrap, BootstrappedWithLoader {
     public static final String ID = "luckperms";
 
     /**
@@ -115,7 +108,7 @@ public final class LPNeoForgeBootstrap implements LuckPermsBootstrap, LoaderBoot
     public LPNeoForgeBootstrap(Supplier<ModContainer> loader) {
         this.loader = loader;
         this.logger = new Log4jPluginLogger(LogManager.getLogger(LPNeoForgeBootstrap.ID));
-        this.schedulerAdapter = new NeoForgeSchedulerAdapter(this);
+        this.schedulerAdapter = new MinecraftSchedulerAdapter(this);
         this.classPathAppender = new JarInJarClassPathAppender(getClass().getClassLoader());
         this.forgeEventBus = new NeoForgeEventBusFacade();
         this.plugin = new LPNeoForgePlugin(this);
@@ -189,8 +182,7 @@ public final class LPNeoForgeBootstrap implements LuckPermsBootstrap, LoaderBoot
         return this.enableLatch;
     }
 
-    // MinecraftServer singleton getter
-
+    @Override
     public Optional<MinecraftServer> getServer() {
         return Optional.ofNullable(this.server);
     }
@@ -236,53 +228,6 @@ public final class LPNeoForgeBootstrap implements LuckPermsBootstrap, LoaderBoot
     @Override
     public Path getDataDirectory() {
         return FMLPaths.CONFIGDIR.get().resolve(LPNeoForgeBootstrap.ID).toAbsolutePath();
-    }
-
-    @Override
-    public Optional<ServerPlayer> getPlayer(UUID uniqueId) {
-        return getServer().map(MinecraftServer::getPlayerList).map(playerList -> playerList.getPlayer(uniqueId));
-    }
-
-    @Override
-    public Optional<UUID> lookupUniqueId(String username) {
-        return getServer().map(s -> s.services().nameToIdCache()).flatMap(profileCache -> profileCache.get(username)).map(NameAndId::id);
-    }
-
-    @Override
-    public Optional<String> lookupUsername(UUID uniqueId) {
-        return getServer().map(s -> s.services().nameToIdCache()).flatMap(profileCache -> profileCache.get(uniqueId)).map(NameAndId::name);
-    }
-
-    @Override
-    public int getPlayerCount() {
-        return getServer().map(MinecraftServer::getPlayerCount).orElse(0);
-    }
-
-    @Override
-    public Collection<String> getPlayerList() {
-        return getServer().map(MinecraftServer::getPlayerList).map(PlayerList::getPlayers).map(players -> {
-            List<String> list = new ArrayList<>(players.size());
-            for (ServerPlayer player : players) {
-                list.add(player.getGameProfile().name());
-            }
-            return list;
-        }).orElse(Collections.emptyList());
-    }
-
-    @Override
-    public Collection<UUID> getOnlinePlayers() {
-        return getServer().map(MinecraftServer::getPlayerList).map(PlayerList::getPlayers).map(players -> {
-            List<UUID> list = new ArrayList<>(players.size());
-            for (ServerPlayer player : players) {
-                list.add(player.getGameProfile().id());
-            }
-            return list;
-        }).orElse(Collections.emptyList());
-    }
-
-    @Override
-    public boolean isPlayerOnline(UUID uniqueId) {
-        return getServer().map(MinecraftServer::getPlayerList).map(playerList -> playerList.getPlayer(uniqueId)).isPresent();
     }
 
 }

@@ -25,100 +25,15 @@
 
 package me.lucko.luckperms.fabric;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.ArgumentCommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import me.lucko.luckperms.common.command.BrigadierCommandExecutor;
-import me.lucko.luckperms.common.sender.Sender;
+import me.lucko.luckperms.common.minecraft.command.MinecraftCommandExecutor;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.permission.LeveledPermissionPredicate;
-import net.minecraft.command.permission.Permission;
-import net.minecraft.command.permission.PermissionLevel;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 
-import java.util.List;
-import java.util.ListIterator;
-
-import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
-
-public class FabricCommandExecutor extends BrigadierCommandExecutor<ServerCommandSource> {
-
-    private final LPFabricPlugin plugin;
-
+public class FabricCommandExecutor extends MinecraftCommandExecutor {
     public FabricCommandExecutor(LPFabricPlugin plugin) {
         super(plugin);
-        this.plugin = plugin;
     }
 
     public void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            for (String alias : COMMAND_ALIASES) {
-                LiteralCommandNode<ServerCommandSource> cmd = literal(alias)
-                        .executes(this)
-                        .build();
-
-                ArgumentCommandNode<ServerCommandSource, String> args = argument("args", greedyString())
-                        .suggests(this)
-                        .executes(this)
-                        .build();
-
-                cmd.addChild(args);
-                dispatcher.getRoot().addChild(cmd);
-            }
-        });
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));
     }
-
-    @Override
-    public Sender getSender(ServerCommandSource source) {
-        return this.plugin.getSenderFactory().wrap(source);
-    }
-
-    @Override
-    public List<String> resolveSelectors(ServerCommandSource source, List<String> args) {
-        // usage of @ selectors requires at least level 2 permission
-
-        ServerCommandSource atAllowedSource = ensureSourceCanUseSelectors(source);
-        for (ListIterator<String> it = args.listIterator(); it.hasNext(); ) {
-            String arg = it.next();
-            if (arg.isEmpty() || arg.charAt(0) != '@') {
-                continue;
-            }
-
-            List<ServerPlayerEntity> matchedPlayers;
-            try {
-                matchedPlayers = EntityArgumentType.entities().parse(new StringReader(arg)).getPlayers(atAllowedSource);
-            } catch (CommandSyntaxException e) {
-                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + source + " executing " + args, e);
-                continue;
-            }
-
-            if (matchedPlayers.isEmpty()) {
-                continue;
-            }
-
-            if (matchedPlayers.size() > 1) {
-                this.plugin.getLogger().warn("Error parsing selector '" + arg + "' for " + source + " executing " + args +
-                        ": ambiguous result (more than one player matched) - " + matchedPlayers);
-                continue;
-            }
-
-            ServerPlayerEntity player = matchedPlayers.get(0);
-            it.set(player.getUuidAsString());
-        }
-
-        return args;
-    }
-
-    private static ServerCommandSource ensureSourceCanUseSelectors(ServerCommandSource source) {
-        if (source.getPermissions().hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS))) {
-            return source;
-        }
-        return source.withAdditionalPermissions(LeveledPermissionPredicate.GAMEMASTERS);
-    }
-
 }

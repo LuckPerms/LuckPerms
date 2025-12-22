@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.forge.calculator;
+package me.lucko.luckperms.common.minecraft.calculator;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
@@ -34,17 +34,17 @@ import me.lucko.luckperms.common.calculator.processor.RegexProcessor;
 import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.forge.LPForgePlugin;
-import me.lucko.luckperms.forge.context.ForgeContextManager;
+import me.lucko.luckperms.common.minecraft.context.MinecraftContextManager;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ForgeCalculatorFactory implements CalculatorFactory {
-    private final LPForgePlugin plugin;
+public class MinecraftCalculatorFactory implements CalculatorFactory {
+    private final LuckPermsPlugin plugin;
 
-    public ForgeCalculatorFactory(LPForgePlugin plugin) {
+    public MinecraftCalculatorFactory(LuckPermsPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -66,12 +66,11 @@ public class ForgeCalculatorFactory implements CalculatorFactory {
             processors.add(new SpongeWildcardProcessor());
         }
 
-        boolean integratedOwner = queryOptions.option(ForgeContextManager.INTEGRATED_SERVER_OWNER).orElse(false);
+        boolean integratedOwner = queryOptions.option(MinecraftContextManager.INTEGRATED_SERVER_OWNER).orElse(false);
         if (integratedOwner && this.plugin.getConfiguration().get(ConfigKeys.INTEGRATED_SERVER_OWNER_BYPASSES_CHECKS)) {
             processors.add(ServerOwnerProcessor.INSTANCE);
         }
 
         return new PermissionCalculator(this.plugin, metadata, processors);
     }
-
 }

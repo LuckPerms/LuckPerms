@@ -20,6 +20,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}"
     annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.12'
     implementation project(':common')
+    implementation project(':common:minecraft')
     compileOnly project(':common:loader-utils')
 }
 

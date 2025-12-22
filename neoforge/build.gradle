@@ -25,6 +25,7 @@ neoForge {
 
 dependencies {
     add('shade', project(':common'))
+    add('shade', project(':common:minecraft'))
     compileOnly project(':common:loader-utils')
 }
 

@@ -25,58 +25,26 @@
 
 package me.lucko.luckperms.neoforge;
 
-import com.mojang.brigadier.ParseResults;
-import com.mojang.serialization.JsonOps;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
-import me.lucko.luckperms.common.locale.TranslationManager;
+import me.lucko.luckperms.common.minecraft.MinecraftSenderFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
-import me.lucko.luckperms.common.sender.Sender;
-import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.rcon.RconConsoleSource;
-import net.minecraft.world.entity.player.Player;
 
-import java.util.Locale;
-import java.util.UUID;
-
-public class NeoForgeSenderFactory extends SenderFactory<LPNeoForgePlugin, CommandSourceStack> {
+public class NeoForgeSenderFactory extends MinecraftSenderFactory<LPNeoForgePlugin> {
     public NeoForgeSenderFactory(LPNeoForgePlugin plugin) {
         super(plugin);
     }
 
     @Override
-    protected UUID getUniqueId(CommandSourceStack commandSource) {
-        if (commandSource.getEntity() instanceof Player) {
-            return commandSource.getEntity().getUUID();
-        }
-        return Sender.CONSOLE_UUID;
-    }
-
-    @Override
-    protected String getName(CommandSourceStack commandSource) {
-        if (commandSource.getEntity() instanceof Player) {
-            return commandSource.getTextName();
-        }
-        return Sender.CONSOLE_NAME;
-    }
-
-    @Override
-    protected void sendMessage(CommandSourceStack sender, Component message) {
-        Locale locale = sender.getEntity() instanceof ServerPlayer player
-                ? TranslationManager.parseLocale(player.getLanguage())
-                : null;
-        sender.sendSuccess(() -> toNativeText(TranslationManager.render(message, locale)), false);
+    protected CommandSource getSource(CommandSourceStack sender) {
+        return sender.source;
     }
 
     @Override
@@ -96,31 +64,4 @@ public class NeoForgeSenderFactory extends SenderFactory<LPNeoForgePlugin, Comma
         getPlugin().getPermissionRegistry().offer(node);
         return Tristate.UNDEFINED;
     }
-
-    @Override
-    protected boolean hasPermission(CommandSourceStack commandSource, String node) {
-        return getPermissionValue(commandSource, node).asBoolean();
-    }
-
-    @Override
-    protected void performCommand(CommandSourceStack sender, String command) {
-        ParseResults<CommandSourceStack> results = sender.getServer().getCommands().getDispatcher().parse(command, sender);
-        sender.getServer().getCommands().performCommand(results, command);
-    }
-
-    @Override
-    protected boolean isConsole(CommandSourceStack sender) {
-        CommandSource output = sender.source;
-        return output == sender.getServer() || // Console
-                output.getClass() == RconConsoleSource.class || // Rcon
-                (output == CommandSource.NULL && sender.getTextName().equals("")); // Functions
-    }
-
-    public static net.minecraft.network.chat.Component toNativeText(Component component) {
-        return ComponentSerialization.CODEC.decode(
-                RegistryAccess.EMPTY.createSerializationContext(JsonOps.INSTANCE),
-                GsonComponentSerializer.gson().serializeToTree(component)
-        ).getOrThrow(IllegalArgumentException::new).getFirst();
-    }
-
 }
