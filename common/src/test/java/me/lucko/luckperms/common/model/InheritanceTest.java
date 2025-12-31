@@ -42,6 +42,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
+import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
@@ -97,9 +98,12 @@ public class InheritanceTest {
             "DEPTH_FIRST_PRE_ORDER,  false, 'owner -> admin -> mod -> helper -> member -> vip+ -> vip'",
             "BREADTH_FIRST,          false, 'owner -> vip+ -> admin -> vip -> mod -> member -> helper'",
             "DEPTH_FIRST_POST_ORDER, false, 'member -> helper -> mod -> admin -> owner -> vip -> vip+'",
+            "REVERSED_DFS_POST,      false, 'vip+ -> vip -> owner -> admin -> mod -> helper -> member'",
             "DEPTH_FIRST_PRE_ORDER,  true,  'owner -> admin -> mod -> helper -> vip+ -> vip -> member'",
             "BREADTH_FIRST,          true,  'owner -> admin -> mod -> helper -> vip+ -> vip -> member'",
-            "DEPTH_FIRST_POST_ORDER, true,  'owner -> admin -> mod -> helper -> vip+ -> vip -> member'"
+            "DEPTH_FIRST_POST_ORDER, true,  'owner -> admin -> mod -> helper -> vip+ -> vip -> member'",
+            "REVERSED_DFS_POST,      true,  'owner -> admin -> mod -> helper -> vip+ -> vip -> member'",
+            "KHAN,                   true,  'owner -> admin -> mod -> helper -> vip+ -> vip -> member'"
     })
     public void testInheritanceTree(TraversalAlgorithm traversalAlgorithm, boolean postTraversalSort, String expected) {
         when(this.configuration.get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM)).thenReturn(traversalAlgorithm);
@@ -124,6 +128,42 @@ public class InheritanceTest {
 
         List<String> expectedList = Arrays.stream(expected.split(" -> ")).collect(Collectors.toList());
         assertEquals(expectedList, groups);
+    }
+
+    @Test
+    public void testKhanAlgorithm() {
+        when(this.configuration.get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM)).thenReturn(TraversalAlgorithm.KHAN);
+        when(this.configuration.get(ConfigKeys.POST_TRAVERSAL_INHERITANCE_SORT)).thenReturn(false);
+
+        Group c = this.groupManager.getOrMake("c");
+        Group b = createGroup("b", 1, c);
+        Group a = createGroup("a", 2, b);
+
+        PermissionHolder testHolder = this.groupManager.getOrMake("test");
+        testHolder.normalData().add(Inheritance.builder().group(a.getName()).build());
+
+        List<String> groups = testHolder.resolveInheritanceTree(QueryOptionsImpl.DEFAULT_CONTEXTUAL)
+                .stream().map(Group::getName).collect(Collectors.toList());
+
+        assertEquals(List.of("a", "b", "c"), groups);
+    }
+
+    @Test
+    public void testReversedDfsPostAlgorithm() {
+        when(this.configuration.get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM)).thenReturn(TraversalAlgorithm.REVERSED_DFS_POST);
+        when(this.configuration.get(ConfigKeys.POST_TRAVERSAL_INHERITANCE_SORT)).thenReturn(false);
+
+        Group c = this.groupManager.getOrMake("c");
+        Group b = createGroup("b", 1, c);
+        Group a = createGroup("a", 2, b);
+
+        PermissionHolder testHolder = this.groupManager.getOrMake("test");
+        testHolder.normalData().add(Inheritance.builder().group(a.getName()).build());
+
+        List<String> groups = testHolder.resolveInheritanceTree(QueryOptionsImpl.DEFAULT_CONTEXTUAL)
+                .stream().map(Group::getName).collect(Collectors.toList());
+
+        assertEquals(List.of("a", "b", "c"), groups);
     }
 
     private Group createGroup(String name, int weight, Group parent) {

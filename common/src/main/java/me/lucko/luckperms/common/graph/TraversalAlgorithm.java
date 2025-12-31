@@ -44,9 +44,14 @@ package me.lucko.luckperms.common.graph;
 import com.google.common.collect.AbstractIterator;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
@@ -105,6 +110,92 @@ public enum TraversalAlgorithm {
             Objects.requireNonNull(graph, "graph");
             Objects.requireNonNull(startNode, "startNode");
             return () -> new DepthFirstIterator<>(graph, startNode, DepthFirstIterator.Order.POST_ORDER);
+        }
+    },
+
+    /**
+     * Traverses in topological order, using a reversed depth-first-post-order traversal.
+     *
+     * <p>This algorithm is useful for visiting nodes in an order that respects dependencies,
+     * such that dependencies are visited before their dependents.</p>
+     *
+     * <p>A post-order traversal of a DAG, when reversed, produces a topological sort.</p>
+     */
+    REVERSED_DFS_POST {
+        @Override
+        public <N> Iterable<N> traverse(Graph<N> graph, N startNode) {
+            Objects.requireNonNull(graph, "graph");
+            Objects.requireNonNull(startNode, "startNode");
+            return () -> {
+                Deque<N> stack = new ArrayDeque<>();
+                DEPTH_FIRST_POST_ORDER.traverse(graph, startNode).forEach(stack::push);
+                return stack.iterator();
+            };
+        }
+    },
+
+    /**
+     * Traverses in topological order, using Khan's algorithm.
+     *
+     * <p>This algorithm is useful for visiting nodes in an order that respects dependencies,
+     * such that dependencies are visited before their dependents.</p>
+     *
+     * <p>See <a href="https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm">Wikipedia</a> for more info.</p>
+     */
+    KHAN {
+        @Override
+        public <N> Iterable<N> traverse(Graph<N> graph, N startNode) {
+            Objects.requireNonNull(graph, "graph");
+            Objects.requireNonNull(startNode, "startNode");
+
+            // 1. Find all nodes in the graph by traversing from the start node.
+            Set<N> nodes = new HashSet<>();
+            Queue<N> nodesToVisit = new ArrayDeque<>();
+            nodesToVisit.add(startNode);
+            nodes.add(startNode);
+            while (!nodesToVisit.isEmpty()) {
+                N node = nodesToVisit.poll();
+                for (N successor : graph.successors(node)) {
+                    if (nodes.add(successor)) {
+                        nodesToVisit.add(successor);
+                    }
+                }
+            }
+
+            // 2. Calculate in-degrees for all nodes.
+            Map<N, Integer> inDegree = new HashMap<>();
+            for (N node : nodes) {
+                inDegree.put(node, 0);
+            }
+            for (N node : nodes) {
+                for (N successor : graph.successors(node)) {
+                    inDegree.merge(successor, 1, Integer::sum);
+                }
+            }
+
+            // 3. Find all nodes with an in-degree of 0.
+            Queue<N> queue = new ArrayDeque<>();
+            for (N node : nodes) {
+                if (inDegree.get(node) == 0) {
+                    queue.add(node);
+                }
+            }
+
+            // 4. Perform the topological sort.
+            List<N> sorted = new ArrayList<>();
+            while (!queue.isEmpty()) {
+                N node = queue.poll();
+                sorted.add(node);
+
+                for (N successor : graph.successors(node)) {
+                    inDegree.merge(successor, -1, Integer::sum);
+                    if (inDegree.get(successor) == 0) {
+                        queue.add(successor);
+                    }
+                }
+            }
+
+            return sorted;
         }
     };
 
