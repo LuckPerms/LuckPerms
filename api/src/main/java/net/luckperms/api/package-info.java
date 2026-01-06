@@ -23,7 +23,5 @@
  *  SOFTWARE.
  */
 
-/**
- * Main package for the {@link net.luckperms.api.LuckPerms} API interface.
- */
-package net.luckperms.api;
+/** Main package for the {@link net.luckperms.api.LuckPerms} API interface.
+ */package net.luckperms.api;
