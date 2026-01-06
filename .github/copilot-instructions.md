@@ -46,3 +46,30 @@
 - **License & headers:** [LICENSE.txt](LICENSE.txt), [HEADER.txt](HEADER.txt)
 
 Wenn etwas unklar ist oder du ein größeres API-Änderungsset planst, frage bitte: Welche Module müssen verändert werden, und welche Kompatibilitätsgarantien sollen erhalten bleiben?
+ 
+**Quickstart für Änderungen (konkret)**
+- **Inspect startup:** Schau in `bukkit/src/main/java` und `standalone/src/main/java` nach Einstiegspunkten (Plugin-/App-Initialisierung). Prüfe auch `loader/`-Submodule für Bootstrap-Logik.
+- **Änderungsfluss:** Implementiere Kernlogik in `common/` (oder `api/` wenn öffentlich), füge platform-spezifische Bindings in `bukkit/`, `bungee/`, `fabric/` etc. hinzu.
+- **Build & smoke-test:** Führe `./gradlew :<module>:build` und starte die passende runtime (z. B. Test-Server oder `standalone`), um Klassenloading/DI-Probleme zu catchen.
+
+**Debug & häufige Tasks**
+- **Schnellsuche nach Loader-Code:** Grep nach `loader`-Packages oder Klassen mit Namen `Bootstrap`, `Loader`, `PlatformBootstrap`.
+- **Shading/Relocation prüfen:** Wenn ein ClassNotFound/AmbiguousError auftritt, öffne das Modul-`build.gradle` und suche nach `shadowJar`, `relocate` oder Loom-Relocations.
+- **IDE-Run:** Module können meist direkt aus der IDE gebaut/gestartet werden; setze die Klassenpfade so, dass `api/` und `common/` referenziert werden.
+
+**Testing-Pattern**
+- **Unit tests:** Leben in `common/src/test` und in den jeweiligen Modul-`src/test` Ordnern; benutze `./gradlew :<module>:test`.
+- **Integration:** Für plattformspezifische Integrationstests starte die Plattform (z. B. Minecraft test environment) oder nutze Mocks in `common`.
+
+**PR-Template (Beispiel)**
+- **Title:** Kurzbeschreibung (Module): `Fix/Feature: Kurze Beschreibung (bukkit, common)`
+- **Body:** 1) Was wurde geändert? 2) Welche Module betrifft es? 3) Build-/Test-Schritte (z. B. `./gradlew :bukkit:build && :common:test`). 4) API-Änderungen? Falls ja, Migrationstext.
+
+**Schnelle grep-/IDE-Snippets**
+- Suche nach Stellen, die Permissions oder Speicher betreffen: `grep -R "permission" -n common bukkit`.
+- Suche nach Serialisierung/Storage: `grep -R "StorageProvider" -n` oder `grep -R "Dao" -n`.
+
+**Kurzregeln für Agenten**
+- Mache keine nicht-rückwärtskompatiblen Änderungen in `api/` ohne Autorisierung.
+- Wenn du neue Abhängigkeiten hinzufügst, aktualisiere `gradle/libs.versions.toml` und `gradle.properties` konsistent.
+- Bewahre `HEADER.txt`-Kopfzeile beim Ändern von Java-Dateien.
