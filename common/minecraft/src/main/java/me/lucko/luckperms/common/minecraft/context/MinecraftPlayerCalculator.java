@@ -40,7 +40,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;
@@ -68,12 +68,11 @@ public class MinecraftPlayerCalculator implements ContextCalculator<ServerPlayer
 
         ServerLevel level = target.level();
         if (this.dimensionType) {
-            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(level.dimension().identifier()));
+            consumer.accept(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(level.dimensionTypeRegistration().unwrapKey().orElse(BuiltinDimensionTypes.OVERWORLD).identifier()));
         }
 
         if (this.world) {
-            ServerLevelData levelData = (ServerLevelData) level.getLevelData();
-            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(levelData.getLevelName(), consumer);
+            this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(getContextKey(level.dimension().identifier()), consumer);
         }
     }
 
@@ -98,9 +97,8 @@ public class MinecraftPlayerCalculator implements ContextCalculator<ServerPlayer
 
         if (this.world && server != null) {
             for (ServerLevel level : server.getAllLevels()) {
-                ServerLevelData levelData = (ServerLevelData) level.getLevelData();
-                if (Context.isValidValue(levelData.getLevelName())) {
-                    builder.add(DefaultContextKeys.WORLD_KEY, levelData.getLevelName());
+                if (Context.isValidValue(level.dimension().identifier().toString())) {
+                    builder.add(DefaultContextKeys.WORLD_KEY, level.dimension().identifier().toString());
                 }
             }
         }
