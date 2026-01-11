@@ -1,0 +1,19 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+    implementation project(':common')
+    compileOnly project(':common:loader-utils')
+    compileOnly project(':minestom:app')
+
+    compileOnly 'net.minestom:minestom:2025.08.29-1.21.8'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
