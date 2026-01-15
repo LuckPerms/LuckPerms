@@ -23,44 +23,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.hytale.calculator;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
+import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import net.luckperms.api.util.Tristate;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+/**
+ * Permission processor which is added to the owner of an integrated server to simply return true if no other processors match.
+ */
+public class ServerOwnerProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+    private static final TristateResult TRUE_RESULT = new TristateResult.Factory(ServerOwnerProcessor.class).result(Tristate.TRUE);
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
+    public static final ServerOwnerProcessor INSTANCE = new ServerOwnerProcessor();
 
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
+    private ServerOwnerProcessor() {
 
-    public JarInJarClassLoader getClassLoader() {
-        return this.classLoader;
     }
 
     @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public TristateResult hasPermission(String permission) {
+        return TRUE_RESULT;
     }
 }

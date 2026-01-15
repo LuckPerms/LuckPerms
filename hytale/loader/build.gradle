@@ -1,0 +1,32 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
+dependencies {
+    implementation project(':api')
+    implementation project(':common:loader-utils')
+
+    compileOnly 'com.hypixel.hytale:Server:2026.01.24-6e2d4fc36'
+}
+
+repositories {
+    maven { url 'https://maven.hytale.com/release/' }
+}
+
+processResources {
+    filesMatching('manifest.json') {
+        expand 'pluginVersion': project.ext.fullVersion
+    }
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-Hytale-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':hytale').tasks.shadowJar.archiveFile
+    }
+}
+
+artifacts {
+    archives shadowJar
+}

@@ -148,7 +148,8 @@ public class TreeView {
                 .add("uploader", new JObject()
                         .add("name", sender.getNameWithLocation())
                         .add("uuid", sender.getUniqueId().toString())
-                );
+                )
+                .add("platform", sender.getPlugin().getBootstrap().getType().getFriendlyName());
 
         JObject checks;
         if (user != null && checker != null) {

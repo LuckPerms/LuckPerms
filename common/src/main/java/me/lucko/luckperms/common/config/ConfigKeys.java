@@ -335,6 +335,16 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> APPLY_SPONGE_DEFAULT_SUBJECTS = notReloadable(booleanKey("apply-sponge-default-subjects", true));
 
     /**
+     * If Hytale virtual groups should be applied
+     */
+    public static final ConfigKey<Boolean> APPLY_HYTALE_VIRTUAL_GROUPS = notReloadable(booleanKey("apply-hytale-virtual-groups", true));
+
+    /**
+     * If LuckPerms should delegate permission checks to the Hytale permissions provider for users/groups not managed by LuckPerms
+     */
+    public static final ConfigKey<Boolean> DELEGATE_TO_HYTALE_PERMISSIONS_PROVIDER = notReloadable(booleanKey("delegate-to-hytale-permissions-provider", true));
+
+    /**
      * The algorithm LuckPerms should use when traversing the "inheritance tree"
      */
     public static final ConfigKey<TraversalAlgorithm> INHERITANCE_TRAVERSAL_ALGORITHM = key(c -> {
@@ -744,6 +754,16 @@ public final class ConfigKeys {
      * The password in use by the rabbitmq server, or an empty string if there is no password
      */
     public static final ConfigKey<String> RABBITMQ_PASSWORD = notReloadable(stringKey("rabbitmq.password", "guest"));
+
+    /**
+     * If the chat formatter is enabled
+     */
+    public static final ConfigKey<Boolean> CHAT_FORMATTER_ENABLED = booleanKey("chat-formatter.enabled", true);
+
+    /**
+     * The chat formatter format string
+     */
+    public static final ConfigKey<String> CHAT_FORMATTER_MESSAGE_FORMAT = stringKey("chat-formatter.message-format", "<prefix><username><suffix>: <message>");
 
     /**
      * If the editor key should be generated lazily (only when needed)

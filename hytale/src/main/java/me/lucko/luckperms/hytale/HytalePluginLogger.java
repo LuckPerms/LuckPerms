@@ -23,44 +23,40 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.hytale;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import com.hypixel.hytale.logger.HytaleLogger;
+import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+public class HytalePluginLogger implements PluginLogger {
+    private final HytaleLogger logger;
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
-
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
-
-    public JarInJarClassLoader getClassLoader() {
-        return this.classLoader;
+    public HytalePluginLogger(HytaleLogger logger) {
+        this.logger = logger;
     }
 
     @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+    public void info(String s) {
+        this.logger.atInfo().log(s);
     }
 
     @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void warn(String s) {
+        this.logger.atWarning().log(s);
+    }
+
+    @Override
+    public void warn(String s, Throwable t) {
+        this.logger.atWarning().withCause(t).log(s);
+    }
+
+    @Override
+    public void severe(String s) {
+        this.logger.atSevere().log(s);
+    }
+
+    @Override
+    public void severe(String s, Throwable t) {
+        this.logger.atSevere().withCause(t).log(s);
     }
 }

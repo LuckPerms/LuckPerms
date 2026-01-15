@@ -1,0 +1,14 @@
+{
+  "Group": "LuckPerms",
+  "Name": "LuckPerms",
+  "Version": "${pluginVersion}",
+  "Description": "A permissions plugin",
+  "Authors": [{"Name": "Luck"}],
+  "Website": "https://luckperms.net",
+  "ServerVersion": "*",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "Main": "me.lucko.luckperms.hytale.loader.HytaleLoaderPlugin",
+  "IncludesAssetPack": false
+}

@@ -23,44 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.hytale;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+import java.util.concurrent.Executor;
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
+public class HytaleSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
 
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
-
-    public JarInJarClassLoader getClassLoader() {
-        return this.classLoader;
+    public HytaleSchedulerAdapter(LPHytaleBootstrap bootstrap) {
+        super(bootstrap);
     }
 
     @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+    public Executor sync() {
+        return this.async();
     }
 
-    @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

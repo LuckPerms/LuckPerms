@@ -23,44 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.hytale.service;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import com.google.common.collect.ImmutableSet;
+import net.luckperms.api.query.OptionKey;
+import net.luckperms.api.query.QueryOptions;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+import java.util.Set;
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
+/**
+ * A {@link QueryOptions} option key for virtual groups.
+ *
+ * @param groups the groups
+ */
+public record VirtualGroups(Set<String> groups) {
 
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
+    public static final VirtualGroups EMPTY = new VirtualGroups(ImmutableSet.of());
+    public static final OptionKey<VirtualGroups> KEY = OptionKey.of("virtual_groups", VirtualGroups.class);
 
-    public JarInJarClassLoader getClassLoader() {
-        return this.classLoader;
-    }
-
-    @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
