@@ -35,6 +35,8 @@ include (
         'forge:loader',
         'nukkit',
         'nukkit:loader',
+        'hytale',
+        'hytale:loader',
         'sponge',
         'sponge:loader',
         'sponge:sponge-service',

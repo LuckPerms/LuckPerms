@@ -262,7 +262,8 @@ public class VerboseListener {
                         .add("uuid", this.notifiedSender.getUniqueId().toString())
                 )
                 .add("filter", this.filter.toString())
-                .add("truncated", truncated);
+                .add("truncated", truncated)
+                .add("platform", this.notifiedSender.getPlugin().getBootstrap().getType().getFriendlyName());
 
         JArray data = new JArray();
         for (VerboseEvent event : this.results) {

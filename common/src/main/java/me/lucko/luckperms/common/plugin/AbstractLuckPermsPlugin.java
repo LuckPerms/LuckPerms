@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiRegistrationUtil;
 import me.lucko.luckperms.common.api.LuckPermsApiProvider;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
+import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
@@ -131,6 +132,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
 
         // load some utilities early
         this.permissionRegistry = new AsyncPermissionRegistry(getBootstrap().getScheduler());
+        for (CommandPermission permission : CommandPermission.values()) {
+            this.permissionRegistry.insert(permission.getPermission());
+        }
+
         this.verboseHandler = new VerboseHandler(getBootstrap().getScheduler());
 
         // load configuration

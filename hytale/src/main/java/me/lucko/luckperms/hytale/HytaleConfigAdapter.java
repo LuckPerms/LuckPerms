@@ -23,44 +23,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.hytale;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurateConfigAdapter;
+import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Path;
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
-
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
-
-    public JarInJarClassLoader getClassLoader() {
-        return this.classLoader;
+public class HytaleConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
+    public HytaleConfigAdapter(LuckPermsPlugin plugin, Path path) {
+        super(plugin, path);
     }
 
     @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    protected ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path) {
+        return YAMLConfigurationLoader.builder().setPath(path).build();
     }
 }
