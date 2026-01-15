@@ -25,24 +25,18 @@
 
 package me.lucko.luckperms.common.calculator;
 
-import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-import net.luckperms.api.node.Node;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Calculates and caches permissions
  */
-public class PermissionCalculator implements Function<String, TristateResult> {
+public class PermissionCalculator extends PermissionLookupCache {
 
     /** The plugin instance */
     private final LuckPermsPlugin plugin;
@@ -50,73 +44,24 @@ public class PermissionCalculator implements Function<String, TristateResult> {
     /** Info about the nature of this calculator. */
     private final CacheMetadata metadata;
 
-    /** The processors which back this calculator */
-    private final PermissionProcessor[] processors;
-
-    /** Loading cache for permission checks */
-    private final LoadingMap<String, TristateResult> lookupCache = LoadingMap.of(this);
-
     public PermissionCalculator(LuckPermsPlugin plugin, CacheMetadata metadata, Collection<PermissionProcessor> processors) {
+        super(processors);
         this.plugin = plugin;
         this.metadata = metadata;
-        this.processors = processors.toArray(new PermissionProcessor[0]);
     }
 
-    /**
-     * Performs a permission check against this calculator.
-     *
-     * <p>The result is calculated using the calculators backing 'processors'.</p>
-     *
-     * @param permission the permission to check
-     * @param origin marks where this check originated from
-     * @return the result
-     */
+    @Override
     public TristateResult checkPermission(String permission, CheckOrigin origin) {
-        // get the result
-        TristateResult result = this.lookupCache.get(permission);
-
-        // log this permission lookup to the verbose handler
+        TristateResult result = super.checkPermission(permission, origin);
         this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), permission, result);
-
-        // return the result
         return result;
     }
 
     @Override
-    public TristateResult apply(@NonNull String permission) {
-        // convert the permission to lowercase, as all values in the backing map are also lowercase.
-        // this allows fast case insensitive lookups
-        permission = permission.toLowerCase(Locale.ROOT);
-
+    protected void observePermission(String permission) {
         // offer the permission to the permission vault
         // we only need to do this once per permission, so it doesn't matter
         // that this call is behind the cache.
         this.plugin.getPermissionRegistry().offer(permission);
-
-        TristateResult result = TristateResult.UNDEFINED;
-        for (PermissionProcessor processor : this.processors) {
-            result = processor.hasPermission(result, permission);
-        }
-        return result;
-    }
-
-    /**
-     * Defines the source permissions map which should be used when calculating
-     * a result.
-     *
-     * @param sourceMap the source map
-     */
-    public synchronized void setSourcePermissions(Map<String, Node> sourceMap) {
-        for (PermissionProcessor processor : this.processors) {
-            processor.setSource(sourceMap);
-            processor.refresh();
-        }
-    }
-
-    public void invalidateCache() {
-        for (PermissionProcessor processor : this.processors) {
-            processor.invalidate();
-        }
-        this.lookupCache.clear();
     }
 }

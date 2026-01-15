@@ -1,0 +1,32 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
+dependencies {
+    implementation project(':api')
+    implementation project(':common:loader-utils')
+
+    compileOnly 'com.hypixel.hytale:HytaleServer:2026.01.13-dcad8778f-SNAPSHOT'
+}
+
+repositories {
+    maven { url 'https://nexus.lucko.me/repository/maven-hytale/' }
+}
+
+processResources {
+    filesMatching('manifest.json') {
+        expand 'pluginVersion': project.ext.fullVersion
+    }
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-Hytale-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':hytale').tasks.shadowJar.archiveFile
+    }
+}
+
+artifacts {
+    archives shadowJar
+}

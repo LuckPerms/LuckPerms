@@ -23,44 +23,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.hytale;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import com.hypixel.hytale.server.core.plugin.PluginBase;
+import me.lucko.luckperms.common.api.LuckPermsApiProvider;
+import me.lucko.luckperms.common.event.AbstractEventBus;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+public class HytaleEventBus extends AbstractEventBus<PluginBase> {
+    public HytaleEventBus(LPHytalePlugin plugin, LuckPermsApiProvider apiProvider) {
+        super(plugin, apiProvider);
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
-
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
-
-    public JarInJarClassLoader getClassLoader() {
-        return this.classLoader;
+        // register listener
+        // TODO
     }
 
     @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+    protected PluginBase checkPlugin(Object plugin) throws IllegalArgumentException {
+        if (plugin instanceof PluginBase) {
+            return (PluginBase) plugin;
         }
+
+        throw new IllegalArgumentException("Object " + plugin + " (" + plugin.getClass().getName() + ") is not a plugin.");
     }
 
-    @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    //public void onPluginDisable(PluginDisableEvent e) {
+    //    Plugin plugin = e.getPlugin();
+    //    unregisterHandlers(plugin);
+    //}
+
 }

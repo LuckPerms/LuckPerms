@@ -152,7 +152,7 @@ public class WebEditorRequest {
 
     private static JObject createJsonPayload(Map<PermissionHolder, List<Node>> holders, Map<Track, List<String>> tracks, Sender sender, String cmdLabel, ImmutableContextSet potentialContexts, LuckPermsPlugin plugin) {
         return new JObject()
-                .add("metadata", formMetadata(sender, cmdLabel, plugin.getBootstrap().getVersion()))
+                .add("metadata", formMetadata(sender, cmdLabel, plugin.getBootstrap().getVersion(), plugin.getBootstrap().getType().getFriendlyName()))
                 .add("permissionHolders", new JArray().consume(arr ->
                         holders.forEach((holder, data) ->
                                 arr.add(formPermissionHolder(holder, data))
@@ -167,7 +167,7 @@ public class WebEditorRequest {
                 .add("potentialContexts", ContextSetJsonSerializer.serialize(potentialContexts));
     }
 
-    private static JObject formMetadata(Sender sender, String cmdLabel, String pluginVersion) {
+    private static JObject formMetadata(Sender sender, String cmdLabel, String pluginVersion, String platform) {
         return new JObject()
                 .add("commandAlias", cmdLabel)
                 .add("uploader", new JObject()
@@ -175,7 +175,8 @@ public class WebEditorRequest {
                         .add("uuid", sender.getUniqueId().toString())
                 )
                 .add("time", System.currentTimeMillis())
-                .add("pluginVersion", pluginVersion);
+                .add("pluginVersion", pluginVersion)
+                .add("platform", platform);
     }
 
     private static JObject formPermissionHolder(PermissionHolder holder, List<Node> data) {
