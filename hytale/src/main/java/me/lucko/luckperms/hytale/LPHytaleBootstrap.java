@@ -30,6 +30,11 @@ import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.PluginClassLoader;
 import com.hypixel.hytale.server.core.plugin.PluginManager;
+import com.hypixel.hytale.server.core.auth.ProfileServiceClient;
+import com.hypixel.hytale.server.core.auth.ProfileServiceClient.PublicGameProfile;
+import com.hypixel.hytale.server.core.auth.ServerAuthManager;
+import com.hypixel.hytale.server.core.plugin.JavaPlugin;
+import com.hypixel.hytale.server.core.plugin.PluginClassLoader;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
@@ -219,12 +224,26 @@ public class LPHytaleBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
 
     @Override
     public Optional<UUID> lookupUniqueId(String username) {
-        return Optional.empty(); // TODO ?
+        ServerAuthManager authManager = ServerAuthManager.getInstance();
+        String sessionToken = authManager.getSessionToken();
+        if (sessionToken == null) {
+            return Optional.empty();
+        }
+
+        PublicGameProfile profile = authManager.getProfileServiceClient().getProfileByUsername(username, sessionToken);
+        return Optional.ofNullable(profile).map(PublicGameProfile::getUuid);
     }
 
     @Override
     public Optional<String> lookupUsername(UUID uniqueId) {
-        return Optional.empty(); // TODO ?
+        ServerAuthManager authManager = ServerAuthManager.getInstance();
+        String sessionToken = authManager.getSessionToken();
+        if (sessionToken == null) {
+            return Optional.empty();
+        }
+
+        PublicGameProfile profile = authManager.getProfileServiceClient().getProfileByUuid(uniqueId, sessionToken);
+        return Optional.ofNullable(profile).map(PublicGameProfile::getUsername);
     }
 
     @Override
