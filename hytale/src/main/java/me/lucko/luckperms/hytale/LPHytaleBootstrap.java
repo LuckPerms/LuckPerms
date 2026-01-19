@@ -26,8 +26,10 @@
 package me.lucko.luckperms.hytale;
 
 import com.hypixel.hytale.common.util.java.ManifestUtil;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.PluginClassLoader;
+import com.hypixel.hytale.server.core.plugin.PluginManager;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
@@ -51,6 +53,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Bootstrap plugin for LuckPerms running on Hytale.
@@ -152,7 +155,17 @@ public class LPHytaleBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
 
     @Override
     public void onDisable() {
-        this.plugin.disable();
+        try {
+            PluginManager pluginManager = HytaleServer.get().getPluginManager();
+            Field lockField = PluginManager.class.getDeclaredField("lock");
+            lockField.setAccessible(true);
+            ReentrantReadWriteLock lock = (ReentrantReadWriteLock) lockField.get(pluginManager);
+            lock.writeLock().unlock();
+            this.plugin.disable();
+            lock.writeLock().lock();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
