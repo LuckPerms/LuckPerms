@@ -39,7 +39,6 @@ import org.jspecify.annotations.NonNull;
 import java.util.AbstractSet;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -74,17 +73,91 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
     @Override
     public Set<String> getUserPermissions(@NonNull UUID userUniqueId) {
         User user = this.plugin.getUserManager().getIfLoaded(userUniqueId);
-        if (user == null) {
-            return this.delegateToHytaleProvider
-                    ? this.hytaleProvider.getUserPermissions(userUniqueId)
-                    : Set.of();
+        if (user != null) {
+            return new LuckPermsPermissionsSet(user);
+        } else if (this.delegateToHytaleProvider) {
+            return this.hytaleProvider.getUserPermissions(userUniqueId);
+        } else {
+            return Set.of();
         }
-        return new LuckPermsPermissionsSet(user);
+    }
+
+    @Override
+    public void addUserToGroup(@NonNull UUID userUniqueId, @NonNull String groupName) {
+        this.playerVirtualGroupsMap.addPlayerToGroup(userUniqueId, groupName);
+        if (this.delegateToHytaleProvider) {
+            this.hytaleProvider.addUserToGroup(userUniqueId, groupName);
+        }
+    }
+
+    @Override
+    public void removeUserFromGroup(@NonNull UUID userUniqueId, @NonNull String groupName) {
+        this.playerVirtualGroupsMap.removePlayerFromGroup(userUniqueId, groupName);
+        if (this.delegateToHytaleProvider) {
+            this.hytaleProvider.removeUserFromGroup(userUniqueId, groupName);
+        }
+    }
+
+    @Override
+    public Set<String> getGroupsForUser(@NonNull UUID userUniqueId) {
+        Set<String> virtualGroups = this.playerVirtualGroupsMap.getPlayerGroups(userUniqueId);
+
+        User user = this.plugin.getUserManager().getIfLoaded(userUniqueId);
+        if (user != null) {
+            Set<String> groups = new HashSet<>(virtualGroups);
+            for (InheritanceNode node : user.getOwnInheritanceNodes(user.getQueryOptions())) {
+                groups.add(node.getGroupName());
+            }
+            return groups;
+
+        } else if (this.delegateToHytaleProvider) {
+            Set<String> groups = new HashSet<>(virtualGroups);
+            groups.addAll(this.hytaleProvider.getGroupsForUser(userUniqueId));
+            return groups;
+
+        } else {
+            return virtualGroups;
+        }
+    }
+
+    @Override
+    public void addUserPermissions(@NonNull UUID userUniqueId, @NonNull Set<String> permissions) {
+        if (this.delegateToHytaleProvider) {
+            this.hytaleProvider.addUserPermissions(userUniqueId, permissions);
+        }
+    }
+
+    @Override
+    public void removeUserPermissions(@NonNull UUID userUniqueId, @NonNull Set<String> permissions) {
+        if (this.delegateToHytaleProvider) {
+            this.hytaleProvider.removeUserPermissions(userUniqueId, permissions);
+        }
+    }
+
+    @Override
+    public void addGroupPermissions(@NonNull String groupName, @NonNull Set<String> permissions) {
+        if (this.delegateToHytaleProvider) {
+            this.hytaleProvider.addGroupPermissions(groupName, permissions);
+        }
+    }
+
+    @Override
+    public void removeGroupPermissions(@NonNull String groupName, @NonNull Set<String> permissions) {
+        if (this.delegateToHytaleProvider) {
+            this.hytaleProvider.removeGroupPermissions(groupName, permissions);
+        }
+    }
+
+    @Override
+    public Set<String> getGroupPermissions(@NonNull String groupName) {
+        return this.delegateToHytaleProvider
+                ? this.hytaleProvider.getGroupPermissions(groupName)
+                : Set.of();
     }
 
     /**
-     * A dodgy way to trick {@link PermissionsModule#hasPermission(Set, String)} into always returning according
-     * to LuckPerms data.
+     * A permissions set that tricks {@link PermissionsModule#hasPermission(Set, String)} into always
+     * returning according to LuckPerms data.
      */
     private static final class LuckPermsPermissionsSet extends AbstractSet<String> {
         private static final String WILDCARD_PERMISSION = "*";
@@ -125,65 +198,5 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
         public int size() {
             throw new UnsupportedOperationException();
         }
-    }
-
-    @Override
-    public void addUserToGroup(@NonNull UUID userUniqueId, @NonNull String groupName) {
-        this.playerVirtualGroupsMap.addPlayerToGroup(userUniqueId, groupName);
-    }
-
-    @Override
-    public void removeUserFromGroup(@NonNull UUID userUniqueId, @NonNull String groupName) {
-        this.playerVirtualGroupsMap.removePlayerFromGroup(userUniqueId, groupName);
-    }
-
-    @Override
-    public Set<String> getGroupsForUser(@NonNull UUID userUniqueId) {
-        Set<String> virtualGroups = this.playerVirtualGroupsMap.getPlayerGroups(userUniqueId);
-
-        User user = this.plugin.getUserManager().getIfLoaded(userUniqueId);
-        if (user == null) {
-            return virtualGroups;
-        }
-
-        List<InheritanceNode> inheritanceNodes = user.getOwnInheritanceNodes(user.getQueryOptions());
-        Set<String> groups = new HashSet<>(virtualGroups);
-        for (InheritanceNode node : inheritanceNodes) {
-            groups.add(node.getGroupName());
-        }
-        return groups;
-    }
-
-    @Override
-    public void addUserPermissions(@NonNull UUID userUniqueId, @NonNull Set<String> permissions) {
-        if (this.delegateToHytaleProvider) {
-            this.hytaleProvider.addUserPermissions(userUniqueId, permissions);
-        }
-    }
-
-    @Override
-    public void removeUserPermissions(@NonNull UUID userUniqueId, @NonNull Set<String> permissions) {
-        if (this.delegateToHytaleProvider) {
-            this.hytaleProvider.removeUserPermissions(userUniqueId, permissions);
-        }
-    }
-
-    @Override
-    public void addGroupPermissions(@NonNull String groupName, @NonNull Set<String> permissions) {
-        if (this.delegateToHytaleProvider) {
-            this.hytaleProvider.addGroupPermissions(groupName, permissions);
-        }
-    }
-
-    @Override
-    public void removeGroupPermissions(@NonNull String groupName, @NonNull Set<String> permissions) {
-        if (this.delegateToHytaleProvider) {
-            this.hytaleProvider.removeGroupPermissions(groupName, permissions);
-        }
-    }
-
-    @Override
-    public Set<String> getGroupPermissions(@NonNull String groupName) {
-        return this.delegateToHytaleProvider ? this.hytaleProvider.getGroupPermissions(groupName) : Set.of();
     }
 }
