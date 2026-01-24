@@ -23,44 +23,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.hytale.calculator;
 
-import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import me.lucko.luckperms.common.calculator.PermissionLookupCache;
+import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
+import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+/**
+ * Permission Processor for Hytale "virtual groups".
+ */
+public class HytaleVirtualGroupProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
+    public static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(HytaleVirtualGroupProcessor.class);
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
+    private final PermissionLookupCache lookup;
 
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
-
-    public JarInJarClassLoader getClassLoader() {
-        return this.classLoader;
-    }
-
-    @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+    public HytaleVirtualGroupProcessor(PermissionLookupCache lookup) {
+        this.lookup = lookup;
     }
 
     @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public TristateResult hasPermission(String permission) {
+        return RESULT_FACTORY.result(this.lookup.checkPermission(permission, CheckOrigin.INTERNAL).result());
     }
+
 }

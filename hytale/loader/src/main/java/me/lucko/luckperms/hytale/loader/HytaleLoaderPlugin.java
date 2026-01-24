@@ -23,44 +23,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.plugin.classpath;
+package me.lucko.luckperms.hytale.loader;
 
+import com.hypixel.hytale.server.core.plugin.JavaPlugin;
+import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
+import me.lucko.luckperms.common.loader.LoaderBootstrap;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
+public class HytaleLoaderPlugin extends JavaPlugin {
+    private static final String JAR_NAME = "luckperms-hytale.jarinjar";
+    private static final String BOOTSTRAP_CLASS = "me.lucko.luckperms.hytale.LPHytaleBootstrap";
 
-public class JarInJarClassPathAppender implements ClassPathAppender {
-    private final JarInJarClassLoader classLoader;
+    private final LoaderBootstrap plugin;
 
-    public JarInJarClassPathAppender(ClassLoader classLoader) {
-        if (!(classLoader instanceof JarInJarClassLoader)) {
-            throw new IllegalArgumentException("Loader is not a JarInJarClassLoader: " + classLoader.getClass().getName());
-        }
-        this.classLoader = (JarInJarClassLoader) classLoader;
-    }
-
-    public JarInJarClassLoader getClassLoader() {
-        return this.classLoader;
+    public HytaleLoaderPlugin(@NonNullDecl JavaPluginInit init) {
+        super(init);
+        JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
+        this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, JavaPlugin.class, this);
     }
 
     @Override
-    public void addJarToClasspath(Path file) {
-        try {
-            this.classLoader.addJarToClasspath(file.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+    protected void setup() {
+        this.plugin.onLoad();
     }
 
     @Override
-    public void close() {
-        this.classLoader.deleteJarResource();
-        try {
-            this.classLoader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    protected void start() {
+        this.plugin.onEnable();
     }
+
+    @Override
+    protected void shutdown() {
+        this.plugin.onDisable();
+    }
+
 }
