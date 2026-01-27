@@ -33,7 +33,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import java.nio.file.Path;
 
-public class FabricConfigAdapter extends ConfigurateConfigAdapter {
+public class FabricConfigAdapter extends ConfigurateConfigAdapter<Path> {
     public FabricConfigAdapter(LuckPermsPlugin plugin, Path path) {
         super(plugin, path);
     }

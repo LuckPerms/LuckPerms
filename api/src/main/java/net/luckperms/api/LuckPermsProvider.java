@@ -26,8 +26,7 @@
 package net.luckperms.api;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-
-import static org.jetbrains.annotations.ApiStatus.Internal;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
  * Provides static access to the {@link LuckPerms} API.

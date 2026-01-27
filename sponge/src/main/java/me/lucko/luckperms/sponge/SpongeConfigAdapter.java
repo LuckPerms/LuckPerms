@@ -34,7 +34,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import java.nio.file.Path;
 
-public class SpongeConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
+public class SpongeConfigAdapter extends ConfigurateConfigAdapter<Path> implements ConfigurationAdapter {
     public SpongeConfigAdapter(LuckPermsPlugin plugin, Path path) {
         super(plugin, path);
     }

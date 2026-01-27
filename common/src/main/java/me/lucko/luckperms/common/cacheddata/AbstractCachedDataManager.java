@@ -148,7 +148,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
      * @param queryOptions the query options
      */
     protected abstract void resolveMeta(MetaAccumulator accumulator, QueryOptions queryOptions);
-    
+
     private PermissionCache calculatePermissions(QueryOptions queryOptions) {
         Objects.requireNonNull(queryOptions, "queryOptions");
         CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
@@ -156,7 +156,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
         ConcurrentHashMap<String, Node> sourcePermissions = resolvePermissions(ConcurrentHashMap::new, queryOptions);
         return new PermissionCache(queryOptions, metadata, getCalculatorFactory(), sourcePermissions);
     }
-    
+
     private MonitoredMetaCache calculateMeta(QueryOptions queryOptions) {
         Objects.requireNonNull(queryOptions, "queryOptions");
         CacheMetadata metadata = getMetadataForQueryOptions(queryOptions);
@@ -254,7 +254,7 @@ public abstract class AbstractCachedDataManager implements CachedDataManager {
             this.cache.clear();
         }
     }
-    
+
     private MetaAccumulator newAccumulator(QueryOptions queryOptions) {
         return new MetaAccumulator(
                 queryOptions.option(MetaStackDefinition.PREFIX_STACK_KEY).orElseGet(() -> getDefaultMetaStackDefinition(ChatMetaType.PREFIX)),

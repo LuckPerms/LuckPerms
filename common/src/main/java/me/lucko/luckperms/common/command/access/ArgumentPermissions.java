@@ -104,10 +104,10 @@ public final class ArgumentPermissions {
         if (!plugin.getConfiguration().get(ConfigKeys.USE_ARGUMENT_BASED_COMMAND_PERMISSIONS)) {
             return false;
         }
-        
+
         if (target instanceof User) {
             User targetUser = (User) target;
-            
+
             if (targetUser.getUniqueId().equals(sender.getUniqueId())) {
                 // the sender is trying to edit themselves
                 Tristate state = sender.getPermissionValue(base.getPermission() + ".modify.self");
@@ -307,5 +307,5 @@ public final class ArgumentPermissions {
         TristateResult result = permissionData.checkPermission(Inheritance.key(targetGroupName), CheckOrigin.INTERNAL);
         return result.result() != Tristate.TRUE || result.processorClass() != DirectProcessor.class;
     }
-    
+
 }

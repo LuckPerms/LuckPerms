@@ -34,7 +34,7 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.nio.file.Path;
 
-public class VelocityConfigAdapter extends ConfigurateConfigAdapter implements ConfigurationAdapter {
+public class VelocityConfigAdapter extends ConfigurateConfigAdapter<Path> implements ConfigurationAdapter {
     public VelocityConfigAdapter(LuckPermsPlugin plugin, Path path) {
         super(plugin, path);
     }

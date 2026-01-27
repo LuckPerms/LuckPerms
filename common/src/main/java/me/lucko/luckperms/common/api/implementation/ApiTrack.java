@@ -47,7 +47,7 @@ public class ApiTrack implements net.luckperms.api.track.Track {
     }
 
     private final Track handle;
-    
+
     public ApiTrack(Track handle) {
         this.handle = handle;
     }

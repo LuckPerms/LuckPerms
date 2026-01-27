@@ -31,28 +31,27 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class ConfigurateConfigAdapter implements ConfigurationAdapter {
+public abstract class ConfigurateConfigAdapter<T> implements ConfigurationAdapter {
     private final LuckPermsPlugin plugin;
-    private final Path path;
+    private final T data;
     private ConfigurationNode root;
 
-    public ConfigurateConfigAdapter(LuckPermsPlugin plugin, Path path) {
+    public ConfigurateConfigAdapter(LuckPermsPlugin plugin, T data) {
         this.plugin = plugin;
-        this.path = path;
+        this.data = data;
         reload();
     }
 
-    protected abstract ConfigurationLoader<? extends ConfigurationNode> createLoader(Path path);
+    protected abstract ConfigurationLoader<? extends ConfigurationNode> createLoader(T data);
 
     @Override
     public void reload() {
-        ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(this.path);
+        ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(this.data);
         try {
             this.root = loader.load();
         } catch (IOException e) {

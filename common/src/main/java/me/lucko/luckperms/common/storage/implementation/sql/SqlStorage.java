@@ -134,7 +134,7 @@ public class SqlStorage implements StorageImplementation {
     private static final String ACTION_COUNT = "SELECT COUNT(*) FROM '{prefix}actions'";
 
     private final LuckPermsPlugin plugin;
-    
+
     private final ConnectionFactory connectionFactory;
     private final StatementProcessor statementProcessor;
 

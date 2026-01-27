@@ -72,8 +72,8 @@ dependencies {
         exclude(module: 'guava')
     }
 
-    api 'com.google.code.gson:gson:2.7'
-    api 'com.google.guava:guava:19.0'
+    api 'com.google.code.gson:gson:2.13.1'
+    api 'com.google.guava:guava:33.4.8-jre'
 
     api 'com.github.ben-manes.caffeine:caffeine:3.2.0'
     api 'com.squareup.okhttp3:okhttp:3.14.9'
@@ -103,4 +103,14 @@ dependencies {
     compileOnly 'org.postgresql:postgresql:42.7.6'
     compileOnly 'org.yaml:snakeyaml:1.33'
     compileOnly 'net.luckperms:rest-api-java-client:0.1'
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            groupId 'me.lucko.luckperms'
+            artifactId 'common'
+        }
+    }
 }

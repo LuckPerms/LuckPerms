@@ -50,35 +50,35 @@ public class DurationParserTest {
                 Arguments.of("2 y", years.multipliedBy(2)),
                 Arguments.of("3 year", years.multipliedBy(3)),
                 Arguments.of("4 years", years.multipliedBy(4)),
-        
+
                 Arguments.of("2mo", months.multipliedBy(2)),
                 Arguments.of("3month", months.multipliedBy(3)),
                 Arguments.of("4months", months.multipliedBy(4)),
                 Arguments.of("2 mo", months.multipliedBy(2)),
                 Arguments.of("3 month", months.multipliedBy(3)),
                 Arguments.of("4 months", months.multipliedBy(4)),
-        
+
                 Arguments.of("2w", Duration.ofDays(7 * 2)),
                 Arguments.of("3week", Duration.ofDays(7 * 3)),
                 Arguments.of("4weeks", Duration.ofDays(7 * 4)),
                 Arguments.of("2 w", Duration.ofDays(7 * 2)),
                 Arguments.of("3 week", Duration.ofDays(7 * 3)),
                 Arguments.of("4 weeks", Duration.ofDays(7 * 4)),
-        
+
                 Arguments.of("2d", Duration.ofDays(2)),
                 Arguments.of("3day", Duration.ofDays(3)),
                 Arguments.of("4days", Duration.ofDays(4)),
                 Arguments.of("2 d", Duration.ofDays(2)),
                 Arguments.of("3 day", Duration.ofDays(3)),
                 Arguments.of("4 days", Duration.ofDays(4)),
-        
+
                 Arguments.of("2h", Duration.ofHours(2)),
                 Arguments.of("3hour", Duration.ofHours(3)),
                 Arguments.of("4hours", Duration.ofHours(4)),
                 Arguments.of("2 h", Duration.ofHours(2)),
                 Arguments.of("3 hour", Duration.ofHours(3)),
                 Arguments.of("4 hours", Duration.ofHours(4)),
-        
+
                 Arguments.of("2m", Duration.ofMinutes(2)),
                 Arguments.of("3min", Duration.ofMinutes(3)),
                 Arguments.of("4mins", Duration.ofMinutes(4)),
@@ -89,7 +89,7 @@ public class DurationParserTest {
                 Arguments.of("4 mins", Duration.ofMinutes(4)),
                 Arguments.of("5 minute", Duration.ofMinutes(5)),
                 Arguments.of("6 minutes", Duration.ofMinutes(6)),
-        
+
                 Arguments.of("2s", Duration.ofSeconds(2)),
                 Arguments.of("3sec", Duration.ofSeconds(3)),
                 Arguments.of("4secs", Duration.ofSeconds(4)),
@@ -102,7 +102,7 @@ public class DurationParserTest {
                 Arguments.of("6 seconds", Duration.ofSeconds(6))
         );
     }
-    
+
     @ParameterizedTest
     @MethodSource
     public void testSimple(String input, Duration expected) {

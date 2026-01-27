@@ -71,6 +71,15 @@ public interface LuckPermsBootstrap {
     ClassPathAppender getClassPathAppender();
 
     /**
+     * Stops the loading of storage dependencies and marks them as loaded once resolved
+     * 
+     * @return if the storage dependencies are already loaded
+     */
+    default boolean isStorageDependenciesAlreadyLoaded() {
+        return false;
+    }
+
+    /**
      * Returns a countdown latch which {@link CountDownLatch#countDown() counts down}
      * after the plugin has loaded.
      *
