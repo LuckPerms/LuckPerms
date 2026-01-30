@@ -36,6 +36,9 @@ import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter;
 import me.lucko.luckperms.common.dependencies.Dependency;
+import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.dependencies.DependencyManagerImpl;
+import me.lucko.luckperms.common.dependencies.DependencyRepository;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.messaging.MessagingFactory;
 import me.lucko.luckperms.common.model.User;
@@ -57,6 +60,8 @@ import me.lucko.luckperms.hytale.service.PlayerVirtualGroupsMap;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 
+import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -90,6 +95,26 @@ public class LPHytalePlugin extends AbstractLuckPermsPlugin {
 
     public JavaPlugin getLoader() {
         return this.bootstrap.getLoader();
+    }
+
+    @Override
+    protected DependencyManager createDependencyManager() {
+        boolean loadDepsFromJar = false;
+
+        JavaPlugin loader = this.bootstrap.getLoader();
+        try {
+            Field loadDepsFromJarField = loader.getClass().getField("LOAD_DEPS_FROM_JAR");
+            loadDepsFromJar = loadDepsFromJarField.getBoolean(loader);
+        } catch (Exception e) {
+            // ignore
+        }
+
+        if (loadDepsFromJar) {
+            getLogger().info("Will load dependencies from local jar (jar-in-jar)");
+            return new DependencyManagerImpl(this, List.of(DependencyRepository.JAR_IN_JAR));
+        }
+
+        return super.createDependencyManager();
     }
 
     @Override

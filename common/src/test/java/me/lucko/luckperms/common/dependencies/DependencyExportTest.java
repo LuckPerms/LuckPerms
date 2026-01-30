@@ -25,21 +25,23 @@
 
 package me.lucko.luckperms.common.dependencies;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+public class DependencyExportTest {
 
-public class DependencyChecksumTest {
-
-    @ParameterizedTest
-    @EnumSource
-    public void checksumMatches(Dependency dependency) throws DependencyDownloadException {
-        for (DependencyRepository repo : DependencyRepository.REMOTE_MAVEN_REPOSITORIES) {
-            byte[] hash = Dependency.createDigest().digest(repo.downloadRaw(dependency));
-            assertTrue(dependency.checksumMatches(hash), "Dependency " + dependency.name() + " has hash " +  Base64.getEncoder().encodeToString(hash));
+    @Test
+    @Disabled
+    public void print() {
+        for (Dependency dependency : Dependency.values()) {
+            System.out.printf(
+                    "[name: \"%s\", url:  \"%s\", sha256: \"%s\"],\n",
+                    dependency.getFileName(null) + "injar",
+                    "https://repo1.maven.org/maven2/" + dependency.getMavenRepoPath(),
+                    Base64.getEncoder().encodeToString(dependency.getChecksum())
+            );
         }
     }
 

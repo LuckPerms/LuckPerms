@@ -37,6 +37,7 @@ include (
         'nukkit:loader',
         'hytale',
         'hytale:loader',
+        'hytale:loader-with-deps',
         'sponge',
         'sponge:loader',
         'sponge:sponge-service',

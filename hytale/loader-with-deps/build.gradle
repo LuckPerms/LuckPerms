@@ -1,0 +1,146 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
+tasks.configureEach {
+    enabled = false
+}
+
+dependencies {
+    implementation project(':api')
+    implementation project(':common:loader-utils')
+
+    compileOnly 'com.hypixel.hytale:Server:2026.01.24-6e2d4fc36'
+}
+
+repositories {
+    maven { url 'https://maven.hytale.com/release/' }
+}
+
+processResources {
+    filesMatching('manifest.json') {
+        expand 'pluginVersion': project.ext.fullVersion
+    }
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-Hytale-${project.ext.fullVersion}-with-deps.jar"
+
+    from {
+        project(':hytale').tasks.shadowJar.archiveFile
+    }
+}
+
+artifacts {
+    archives shadowJar
+}
+
+// CurseForge does not allow mods that download dependencies from external sources at runtime.
+// Therefore, we create this special "loader-with-deps" jar which bundles all dependencies into
+// the mod jar itself. This way, no runtime downloading is necessary.
+
+// The dependencies list below is auto-generated via `DependencyExportTest` in the common test source set.
+def deps = [
+        [name: "asm-9.8.jarinjar", url:  "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.8/asm-9.8.jar", sha256: "h26raoPa7K1cpn65/KuwY8l7WuuM8fynqYns3hdSIFE="],
+        [name: "asm-commons-9.8.jarinjar", url:  "https://repo1.maven.org/maven2/org/ow2/asm/asm-commons/9.8/asm-commons-9.8.jar", sha256: "MwGhwctMWfzFKSZI2sHXxa7UwPBn376IhzuM3+d0BPQ="],
+        [name: "jar-relocator-1.7.jarinjar", url:  "https://repo1.maven.org/maven2/me/lucko/jar-relocator/1.7/jar-relocator-1.7.jar", sha256: "b30RhOF6kHiHl+O5suNLh/+eAr1iOFEFLXhwkHHDu4I="],
+        [name: "adventure-4.21.1.jarinjar", url:  "https://repo1.maven.org/maven2/me/lucko/adventure-api/4.21.1/adventure-api-4.21.1.jar", sha256: "kQJlZ0gUxdTRRkskT43qiy2kpt9s654LvB0nqoCP6YE="],
+        [name: "event-3.0.0.jarinjar", url:  "https://repo1.maven.org/maven2/net/kyori/event-api/3.0.0/event-api-3.0.0.jar", sha256: "yjvdTdAyktl3iFEQFLHC3qYwwt7/DbCd7Zc8Q4SlIag="],
+        [name: "caffeine-3.2.0.jarinjar", url:  "https://repo1.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/3.2.0/caffeine-3.2.0.jar", sha256: "7EEd/fDAPyUhhkjOiYYWMLcWgOWFippyeOusjlXKs9c="],
+        [name: "okio-1.17.6.jarinjar", url:  "https://repo1.maven.org/maven2/com/squareup/okio/okio/1.17.6/okio-1.17.6.jar", sha256: "joiwVVI8yAYT37hE1Zh0DhCtpi9L2YMEzdFAxYVMw7Y="],
+        [name: "okhttp-3.14.9.jarinjar", url:  "https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/3.14.9/okhttp-3.14.9.jar", sha256: "JXD6tVUVy/iB16TO70n8UVSQvAJwV+Zmd2ooMkZa7KA="],
+        [name: "bytebuddy-1.15.11.jarinjar", url:  "https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.jar", sha256: "+giZiq4ee9roO94HEsUOhETXHA4MGWuyJHrejUrQ65A="],
+        [name: "commodore-2.2.jarinjar", url:  "https://repo1.maven.org/maven2/me/lucko/commodore/2.2/commodore-2.2.jar", sha256: "hmZ3A/Sf8LvrT95buTlFNwdEBZ36X9Ks8SKOS1b7f28="],
+        [name: "commodore-file-1.0.jarinjar", url:  "https://repo1.maven.org/maven2/me/lucko/commodore-file/1.0/commodore-file-1.0.jar", sha256: "V9++dyp9RbzD4DLO2R9upF8Z8v5SWasyX8ocqYRAMow="],
+        [name: "mariadb-driver-3.5.2.jarinjar", url:  "https://repo1.maven.org/maven2/org/mariadb/jdbc/mariadb-java-client/3.5.2/mariadb-java-client-3.5.2.jar", sha256: "8vPDwaO9rKad0dThzYrtB1JC/HKuQUY924LjZ7OI9q0="],
+        [name: "mysql-driver-9.3.0.jarinjar", url:  "https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.3.0/mysql-connector-j-9.3.0.jar", sha256: "bI5mkrUhN22JvFYYwWzer4xhhUMp9PolZ37Qh3bFu3Y="],
+        [name: "postgresql-driver-42.7.6.jarinjar", url:  "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.6/postgresql-42.7.6.jar", sha256: "8qHMA1LdXlxvZdut/ye+4Awy5DLGrQMNB0R/ilmDxCo="],
+        [name: "h2-driver-legacy-1.4.199.jarinjar", url:  "https://repo1.maven.org/maven2/com/h2database/h2/1.4.199/h2-1.4.199.jar", sha256: "MSWhZ0O8a0z7thq7p4MgPx+2gjCqD9yXiY95b5ml1C4="],
+        [name: "h2-driver-2.1.214.jarinjar", url:  "https://repo1.maven.org/maven2/com/h2database/h2/2.1.214/h2-2.1.214.jar", sha256: "1iPNwPYdIYz1SajQnxw5H/kQlhFrIuJHVHX85PvnK9A="],
+        [name: "sqlite-driver-3.49.1.0.jarinjar", url:  "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.49.1.0/sqlite-jdbc-3.49.1.0.jar", sha256: "XIYJ0so0HeuMb3F3iXS1ukmVx9MtfHyJ2TkqPnLDkpE="],
+        [name: "hikari-6.3.0.jarinjar", url:  "https://repo1.maven.org/maven2/com/zaxxer/HikariCP/6.3.0/HikariCP-6.3.0.jar", sha256: "B8Y0QFmvMKE1FEIJx8i9ZmuIIxJEIuyFmGTSCdSrfKE="],
+        [name: "slf4j-simple-1.7.36.jarinjar", url:  "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar", sha256: "Lzm+2UPWJN+o9BAtBXEoOhCHC2qjbxl6ilBvFHAQwQ8="],
+        [name: "slf4j-api-1.7.36.jarinjar", url:  "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar", sha256: "0+9XXj5JeWeNwBvx3M5RAhSTtNEft/G+itmCh3wWocA="],
+        [name: "mongodb-driver-core-5.5.0.jarinjar", url:  "https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-core/5.5.0/mongodb-driver-core-5.5.0.jar", sha256: "69tQuKep52lbYvX2YM+J6GGlYkNySXkMBDuk6BqtsJE="],
+        [name: "mongodb-driver-legacy-5.5.0.jarinjar", url:  "https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-legacy/5.5.0/mongodb-driver-legacy-5.5.0.jar", sha256: "yo/0wEdLw0/Md1xqgEd/iqiKV+t0AqAcdnS1TNAaygM="],
+        [name: "mongodb-driver-sync-5.5.0.jarinjar", url:  "https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-sync/5.5.0/mongodb-driver-sync-5.5.0.jar", sha256: "nFECiREXgMc5Ikamvmnzaxumhz75NKG+ajIhAW/ioPI="],
+        [name: "mongodb-driver-bson-5.5.0.jarinjar", url:  "https://repo1.maven.org/maven2/org/mongodb/bson/5.5.0/bson-5.5.0.jar", sha256: "hQx5w0v/DuQvASpnGXkLuWxkhXhewDTTAmrifPWbBJQ="],
+        [name: "jedis-5.2.0.jarinjar", url:  "https://repo1.maven.org/maven2/redis/clients/jedis/5.2.0/jedis-5.2.0.jar", sha256: "3U+9osED8xmrSVrbK8GQYTmEB0bP1MZrJ3ENGvmDgtQ="],
+        [name: "nats-2.21.1.jarinjar", url:  "https://repo1.maven.org/maven2/io/nats/jnats/2.21.1/jnats-2.21.1.jar", sha256: "QHUHUCnCCy/oRSwoqhy0245SrvD4lwCfc+ZVmemHXLg="],
+        [name: "rabbitmq-5.25.0.jarinjar", url:  "https://repo1.maven.org/maven2/com/rabbitmq/amqp-client/5.25.0/amqp-client-5.25.0.jar", sha256: "WqlvAFCEE56xB32UtV3GQo7KfafizFPqtEp3M5H4qo8="],
+        [name: "commons-pool-2-2.12.1.jarinjar", url:  "https://repo1.maven.org/maven2/org/apache/commons/commons-pool2/2.12.1/commons-pool2-2.12.1.jar", sha256: "UnPIvIwNyiIRF1wNJ++9cijvrplomqwAGo4e+Ohy6e8="],
+        [name: "configurate-core-3.7.3.jarinjar", url:  "https://repo1.maven.org/maven2/org/spongepowered/configurate-core/3.7.3/configurate-core-3.7.3.jar", sha256: "06R3WDViB84WtSkHTudV8TSPxF1eQyCyfab8L7Pvo2M="],
+        [name: "configurate-gson-3.7.3.jarinjar", url:  "https://repo1.maven.org/maven2/org/spongepowered/configurate-gson/3.7.3/configurate-gson-3.7.3.jar", sha256: "QM+bGrgrzfwT9nvIvTHtR2TUEpun+RwlXIO/a9BU0Mc="],
+        [name: "configurate-yaml-3.7.3.jarinjar", url:  "https://repo1.maven.org/maven2/org/spongepowered/configurate-yaml/3.7.3/configurate-yaml-3.7.3.jar", sha256: "a04vRkLhigIqiG/gdVvK7c1YiBQJ7k1q/kBNsS9OVDs="],
+        [name: "snakeyaml-1.33.jarinjar", url:  "https://repo1.maven.org/maven2/org/yaml/snakeyaml/1.33/snakeyaml-1.33.jar", sha256: "Ef9Fl4jwoteB9WpKhtfmkgLOus0Cc9UmnErp8C8/2PA="],
+        [name: "configurate-hocon-3.7.3.jarinjar", url:  "https://repo1.maven.org/maven2/org/spongepowered/configurate-hocon/3.7.3/configurate-hocon-3.7.3.jar", sha256: "e/UDpbIrWdJNB6yMFXtrOnnNn3nptmSv/J8n46uQPNs="],
+        [name: "hocon-config-1.4.1.jarinjar", url:  "https://repo1.maven.org/maven2/com/typesafe/config/1.4.1/config-1.4.1.jar", sha256: "TAqn4iPHXIhAxB/Bg9TNMRgUCh7lA+PgjOZu0nlMlI8="],
+        [name: "configurate-toml-3.7.jarinjar", url:  "https://repo1.maven.org/maven2/me/lucko/configurate/configurate-toml/3.7/configurate-toml-3.7.jar", sha256: "EmyLOfsiR74QGhkktqhexMN8tC3kg1cM1UhM5MCmxuE="],
+        [name: "toml4j-0.7.2.jarinjar", url:  "https://repo1.maven.org/maven2/com/moandjiezana/toml/toml4j/0.7.2/toml4j-0.7.2.jar", sha256: "9UdeY+fonl22IiNImux6Vr0wNUN3IHehfCy1TBnKOiA="],
+]
+
+// Task to download the jar-in-jar dependencies and place them in the build resources directory.
+tasks.register('downloadJarInJarDeps') {
+    def outputDir = layout.buildDirectory.dir("resources/main/luckperms/deps")
+    outputs.dir(outputDir)
+
+    inputs.property(
+            "files",
+            deps.collect { "${it.name}:${it.url}:${it.sha256}" }
+    )
+
+    doLast {
+        def targetDir = outputDir.get().asFile
+        targetDir.mkdirs()
+
+        deps.each { f ->
+            def target = new File(targetDir, f.name)
+
+            boolean needsDownload = true
+
+            if (target.exists()) {
+                def actual = sha256Base64(target)
+                if (actual == f.sha256) {
+                    logger.lifecycle("${f.name} checksum OK")
+                    needsDownload = false
+                } else {
+                    logger.warn("${f.name} checksum mismatch, re-downloading")
+                }
+            }
+
+            if (needsDownload) {
+                logger.lifecycle("Downloading ${f.name}")
+                f.url.toURL().withInputStream { i ->
+                    target.withOutputStream { it << i }
+                }
+
+                def actual = sha256Base64(target)
+                if (actual != f.sha256) {
+                    throw new GradleException(
+                            "Checksum verification failed for ${f.name}\n" +
+                                    "Expected: ${f.sha256}\n" +
+                                    "Actual:   ${actual}"
+                    )
+                }
+            }
+        }
+    }
+}
+
+import java.security.MessageDigest
+
+static String sha256Base64(File file) {
+    MessageDigest md = MessageDigest.getInstance("SHA-256")
+    file.withInputStream { is ->
+        byte[] buffer = new byte[8192]
+        int read
+        while ((read = is.read(buffer)) != -1) {
+            md.update(buffer, 0, read)
+        }
+    }
+    return Base64.encoder.encodeToString(md.digest())
+}
+
+tasks.named("processResources") {
+    dependsOn("downloadJarInJarDeps")
+}

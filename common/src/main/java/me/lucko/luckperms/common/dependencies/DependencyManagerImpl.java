@@ -42,6 +42,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,8 @@ public class DependencyManagerImpl implements DependencyManager {
     private final ClassPathAppender classPathAppender;
     /** The executor to use when loading dependencies */
     private final Executor loadingExecutor;
+    /** A collection of repositories to attempt to download dependencies from. */
+    private final Collection<DependencyRepository> repositories;
 
     /** A map of dependencies which have already been loaded. */
     private final EnumMap<Dependency, Path> loaded = new EnumMap<>(Dependency.class);
@@ -72,11 +75,12 @@ public class DependencyManagerImpl implements DependencyManager {
     /** Cached relocation handler instance. */
     private @MonotonicNonNull RelocationHandler relocationHandler = null;
 
-    public DependencyManagerImpl(LuckPermsPlugin plugin) {
+    public DependencyManagerImpl(LuckPermsPlugin plugin, Collection<DependencyRepository> repositories) {
         this.registry = new DependencyRegistry(plugin.getBootstrap().getType());
         this.cacheDirectory = setupCacheDirectory(plugin);
         this.classPathAppender = plugin.getBootstrap().getClassPathAppender();
         this.loadingExecutor = plugin.getBootstrap().getScheduler().async();
+        this.repositories = repositories;
     }
 
     public DependencyManagerImpl(Path cacheDirectory, Executor executor) { // standalone pre-loader
@@ -84,6 +88,7 @@ public class DependencyManagerImpl implements DependencyManager {
         this.cacheDirectory = cacheDirectory;
         this.classPathAppender = null;
         this.loadingExecutor = executor;
+        this.repositories = DependencyRepository.REMOTE_MAVEN_REPOSITORIES;
     }
 
     private synchronized RelocationHandler getRelocationHandler() {
@@ -184,7 +189,7 @@ public class DependencyManagerImpl implements DependencyManager {
         DependencyDownloadException lastError = null;
 
         // attempt to download the dependency from each repo in order.
-        for (DependencyRepository repo : DependencyRepository.values()) {
+        for (DependencyRepository repo : this.repositories) {
             try {
                 repo.download(dependency, file);
                 return file;

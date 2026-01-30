@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.context.calculator.ConfigurationContextCalculat
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.dependencies.DependencyManagerImpl;
+import me.lucko.luckperms.common.dependencies.DependencyRepository;
 import me.lucko.luckperms.common.event.AbstractEventBus;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.event.gen.GeneratedEventClass;
@@ -338,7 +339,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     // hooks called during load
 
     protected DependencyManager createDependencyManager() {
-        return new DependencyManagerImpl(this);
+        return new DependencyManagerImpl(this, DependencyRepository.REMOTE_MAVEN_REPOSITORIES);
     }
 
     protected Set<Dependency> getGlobalDependencies() {

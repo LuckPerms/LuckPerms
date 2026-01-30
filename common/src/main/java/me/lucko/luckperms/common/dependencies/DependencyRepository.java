@@ -34,6 +34,8 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,7 +44,8 @@ import java.util.concurrent.TimeUnit;
 public enum DependencyRepository {
 
     /**
-     * Maven Central mirror repository.
+     * A {@link DependencyRepository} that downloads from the
+     * LuckPerms Maven Central mirror repository.
      *
      * <p>This is used to reduce the load on repo.maven.org.</p>
      *
@@ -53,10 +56,14 @@ public enum DependencyRepository {
      * <p>LuckPerms will fallback to the real-thing if the mirror ever goes offline.
      * Retrieved content is validated with a checksum, so there is no risk to integrity.</p>
      */
-    MAVEN_CENTRAL_MIRROR("https://libraries.luckperms.net/") {
+    MAVEN_CENTRAL_MIRROR {
+        private static final String URL = "https://libraries.luckperms.net/";
+
         @Override
-        protected URLConnection openConnection(Dependency dependency) throws IOException {
-            URLConnection connection = super.openConnection(dependency);
+        protected InputStream openStream(Dependency dependency) throws IOException {
+            URL dependencyUrl = new URL(URL + dependency.getMavenRepoPath());
+
+            URLConnection connection = dependencyUrl.openConnection();
             connection.setRequestProperty("User-Agent", "luckperms");
 
             // Set a connect/read timeout, so if the mirror goes offline we can fallback
@@ -64,32 +71,46 @@ public enum DependencyRepository {
             connection.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(5));
             connection.setReadTimeout((int) TimeUnit.SECONDS.toMillis(10));
 
-            return connection;
+            return connection.getInputStream();
         }
     },
 
     /**
-     * Maven Central.
+     * A {@link DependencyRepository} that downloads from the official Maven Central mirror repository.
      */
-    MAVEN_CENTRAL("https://repo1.maven.org/maven2/");
+    MAVEN_CENTRAL {
+        private static final String URL = "https://repo1.maven.org/maven2/";
 
-    private final String url;
-
-    DependencyRepository(String url) {
-        this.url = url;
-    }
+        @Override
+        protected InputStream openStream(Dependency dependency) throws IOException {
+            URL dependencyUrl = new URL(URL + dependency.getMavenRepoPath());
+            return dependencyUrl.openStream();
+        }
+    },
 
     /**
-     * Opens a connection to the given {@code dependency}.
+     * A {@link DependencyRepository} that searches for dependencies bundled inside the jar (jar-in-jar).
+     */
+    JAR_IN_JAR {
+        private static final String PATH = "luckperms/deps/";
+
+        @Override
+        protected synchronized InputStream openStream(Dependency dependency) throws IOException {
+            String path = PATH + dependency.getFileName(null) + "injar"; // extension becomes .jarinjar
+            return getClass().getClassLoader().getResourceAsStream(path);
+        }
+    };
+
+    public static final Collection<DependencyRepository> REMOTE_MAVEN_REPOSITORIES = List.of(MAVEN_CENTRAL_MIRROR, MAVEN_CENTRAL);
+
+    /**
+     * Opens an InputStream to the given {@code dependency}.
      *
      * @param dependency the dependency to download
-     * @return the connection
-     * @throws IOException if unable to open a connection
+     * @return the input stream
+     * @throws IOException if unable to open an input stream
      */
-    protected URLConnection openConnection(Dependency dependency) throws IOException {
-        URL dependencyUrl = new URL(this.url + dependency.getMavenRepoPath());
-        return dependencyUrl.openConnection();
-    }
+    protected abstract InputStream openStream(Dependency dependency) throws IOException;
 
     /**
      * Downloads the raw bytes of the {@code dependency}.
@@ -100,8 +121,11 @@ public enum DependencyRepository {
      */
     public byte[] downloadRaw(Dependency dependency) throws DependencyDownloadException {
         try {
-            URLConnection connection = openConnection(dependency);
-            try (InputStream in = connection.getInputStream()) {
+            try (InputStream in = openStream(dependency)) {
+                if (in == null) {
+                    throw new DependencyDownloadException("Repository " + this.name() + " returned null stream for dependency " + dependency);
+                }
+
                 byte[] bytes = ByteStreams.toByteArray(in);
                 if (bytes.length == 0) {
                     throw new DependencyDownloadException("Empty stream");
