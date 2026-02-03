@@ -209,7 +209,9 @@ public class DependencyManagerImpl implements DependencyManager {
             return normalFile;
         }
 
-        Path remappedFile = this.cacheDirectory.resolve(dependency.getFileName(DependencyRegistry.isGsonRelocated() ? "remapped-legacy" : "remapped"));
+        // subtly different file name if we're relocating gson - allows users to switch jars seamlessly
+        String remappedFileName = dependency.getFileName(DependencyRegistry.isGsonRelocated() ? "remap" : "remapped");
+        Path remappedFile = this.cacheDirectory.resolve(remappedFileName);
 
         // if the remapped source exists already, just use that.
         if (Files.exists(remappedFile)) {

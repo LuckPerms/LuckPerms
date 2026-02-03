@@ -561,6 +561,12 @@ apply-regex: true
 # - If set to true, LuckPerms will detect and expand shorthand node patterns.
 apply-shorthand: true
 
+# If the owner of an integrated server should bypass permission checks.
+#
+# - This setting only applies when LuckPerms is active on a single-player world.
+# - The owner of an integrated server is the player whose client instance is running the server.
+integrated-server-owner-bypasses-checks: true
+
 # If the plugin should apply Hytale "virtual groups". These act a bit like default permissions for
 # built-in commands.
 #
