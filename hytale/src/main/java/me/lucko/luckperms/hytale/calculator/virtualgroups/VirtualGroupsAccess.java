@@ -27,8 +27,11 @@ package me.lucko.luckperms.hytale.calculator.virtualgroups;
 
 import com.google.common.collect.ImmutableMap;
 import com.hypixel.hytale.server.core.permissions.PermissionsModule;
+import me.lucko.luckperms.common.model.InheritanceOrigin;
+import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
+import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
 import java.lang.reflect.Field;
@@ -58,7 +61,7 @@ public class VirtualGroupsAccess {
         Map<String, Set<String>> virtualGroups = getVirtualGroups();
         return virtualGroups.entrySet().stream().collect(ImmutableCollectors.toMap(
                 e -> e.getKey().toLowerCase(Locale.ROOT),
-                e -> transformSet(e.getValue())
+                e -> transformSet(e.getValue(), e.getKey())
         ));
     }
 
@@ -83,8 +86,13 @@ public class VirtualGroupsAccess {
      * @param permissions the input
      * @return the transformed map
      */
-    private static ImmutableMap<String, Node> transformSet(Set<String> permissions) {
+    private static ImmutableMap<String, Node> transformSet(Set<String> permissions, String originGroup) {
         ImmutableMap.Builder<String, Node> builder = ImmutableMap.builder();
+
+        InheritanceOrigin origin = new InheritanceOrigin(
+                new PermissionHolderIdentifier("virtual_group", originGroup),
+                DataType.TRANSIENT
+        );
 
         for (String permission : permissions) {
             boolean value = true;
@@ -93,10 +101,12 @@ public class VirtualGroupsAccess {
                 permission = permission.substring(1);
             }
 
-            builder.put(
-                    permission.toLowerCase(Locale.ROOT),
-                    NodeBuilders.determineMostApplicable(permission).value(value).build()
-            );
+            Node node = NodeBuilders.determineMostApplicable(permission)
+                    .value(value)
+                    .withMetadata(InheritanceOrigin.KEY, origin)
+                    .build();
+
+            builder.put(permission.toLowerCase(Locale.ROOT), node);
         }
 
         return builder.build();
