@@ -26,35 +26,36 @@
 package me.lucko.luckperms.common.calculator.processor;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.node.types.RegexPermission;
 import net.luckperms.api.node.Node;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class RegexProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {
+public class RegexProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(RegexProcessor.class);
 
-    private List<Map.Entry<Pattern, TristateResult>> regexPermissions = Collections.emptyList();
+    private final List<RegexEntry> regexPermissions;
+
+    public RegexProcessor(Map<String, Node> sourceMap) {
+        this.regexPermissions = process(sourceMap);
+    }
 
     @Override
     public TristateResult hasPermission(String permission) {
-        for (Map.Entry<Pattern, TristateResult> e : this.regexPermissions) {
-            if (e.getKey().matcher(permission).matches()) {
-                return e.getValue();
+        for (RegexEntry e : this.regexPermissions) {
+            if (e.pattern().matcher(permission).matches()) {
+                return e.result();
             }
         }
         return TristateResult.UNDEFINED;
     }
 
-    @Override
-    public void refresh() {
-        ImmutableList.Builder<Map.Entry<Pattern, TristateResult>> builder = ImmutableList.builder();
-        for (Map.Entry<String, Node> e : this.sourceMap.entrySet()) {
+    private static List<RegexEntry> process(Map<String, Node> sourceMap) {
+        ImmutableList.Builder<RegexEntry> builder = ImmutableList.builder();
+        for (Map.Entry<String, Node> e : sourceMap.entrySet()) {
             RegexPermission.Builder regexPerm = RegexPermission.parse(e.getKey());
             if (regexPerm == null) {
                 continue;
@@ -66,8 +67,26 @@ public class RegexProcessor extends AbstractSourceBasedProcessor implements Perm
             }
 
             TristateResult value = RESULT_FACTORY.result(e.getValue());
-            builder.add(Maps.immutableEntry(pattern, value));
+            builder.add(new RegexEntry(pattern, value));
         }
-        this.regexPermissions = builder.build();
+        return builder.build();
+    }
+
+    private static final class RegexEntry {
+        private final Pattern pattern;
+        private final TristateResult result;
+
+        RegexEntry(Pattern pattern, TristateResult result) {
+            this.pattern = pattern;
+            this.result = result;
+        }
+
+        public Pattern pattern() {
+            return this.pattern;
+        }
+
+        public TristateResult result() {
+            return this.result;
+        }
     }
 }

@@ -29,8 +29,16 @@ import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.node.AbstractNode;
 import net.luckperms.api.node.Node;
 
-public class SpongeWildcardProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {
+import java.util.Map;
+
+public class SpongeWildcardProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(SpongeWildcardProcessor.class);
+
+    private final Map<String, Node> sourceMap;
+
+    public SpongeWildcardProcessor(Map<String, Node> sourceMap) {
+        this.sourceMap = sourceMap;
+    }
 
     @Override
     public TristateResult hasPermission(String permission) {

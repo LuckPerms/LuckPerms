@@ -31,26 +31,22 @@ import me.lucko.luckperms.common.node.AbstractNode;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
 
-import java.util.Collections;
 import java.util.Map;
 
-public class WildcardProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {
+public class WildcardProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(WildcardProcessor.class);
 
     public static final String WILDCARD_SUFFIX = ".*";
     private static final String ROOT_WILDCARD = "*";
     private static final String ROOT_WILDCARD_WITH_QUOTES = "'*'";
 
-    public static boolean isRootWildcard(String permission) {
-        return ROOT_WILDCARD.equals(permission) || ROOT_WILDCARD_WITH_QUOTES.equals(permission);
-    }
+    private final Map<String, TristateResult> wildcardPermissions;
+    private final TristateResult rootWildcardState;
 
-    public static boolean isWildcardPermission(String permission) {
-        return isRootWildcard(permission) || permission.endsWith(WILDCARD_SUFFIX) && permission.length() > 2;
+    public WildcardProcessor(Map<String, Node> sourceMap) {
+        this.wildcardPermissions = processWildcardPermissions(sourceMap);
+        this.rootWildcardState = rootWildcardState(sourceMap);
     }
-
-    private Map<String, TristateResult> wildcardPermissions = Collections.emptyMap();
-    private TristateResult rootWildcardState = TristateResult.UNDEFINED;
 
     @Override
     public TristateResult hasPermission(String permission) {
@@ -74,10 +70,17 @@ public class WildcardProcessor extends AbstractSourceBasedProcessor implements P
         return this.rootWildcardState;
     }
 
-    @Override
-    public void refresh() {
+    public static boolean isRootWildcard(String permission) {
+        return ROOT_WILDCARD.equals(permission) || ROOT_WILDCARD_WITH_QUOTES.equals(permission);
+    }
+
+    public static boolean isWildcardPermission(String permission) {
+        return isRootWildcard(permission) || permission.endsWith(WILDCARD_SUFFIX) && permission.length() > 2;
+    }
+
+    private static Map<String, TristateResult> processWildcardPermissions(Map<String, Node> sourceMap) {
         ImmutableMap.Builder<String, TristateResult> builder = ImmutableMap.builder();
-        for (Map.Entry<String, Node> e : this.sourceMap.entrySet()) {
+        for (Map.Entry<String, Node> e : sourceMap.entrySet()) {
             String key = e.getKey();
             if (!key.endsWith(WILDCARD_SUFFIX) || key.length() <= 2) {
                 continue;
@@ -87,12 +90,14 @@ public class WildcardProcessor extends AbstractSourceBasedProcessor implements P
             TristateResult value = RESULT_FACTORY.result(e.getValue());
             builder.put(key, value);
         }
-        this.wildcardPermissions = builder.build();
+        return builder.build();
+    }
 
-        Node rootWildcard = this.sourceMap.get(ROOT_WILDCARD);
+    private static TristateResult rootWildcardState(Map<String, Node> sourceMap) {
+        Node rootWildcard = sourceMap.get(ROOT_WILDCARD);
         if (rootWildcard == null) {
-            rootWildcard = this.sourceMap.get(ROOT_WILDCARD_WITH_QUOTES);
+            rootWildcard = sourceMap.get(ROOT_WILDCARD_WITH_QUOTES);
         }
-        this.rootWildcardState = rootWildcard == null ? TristateResult.UNDEFINED : RESULT_FACTORY.result(rootWildcard);
+        return rootWildcard == null ? TristateResult.UNDEFINED : RESULT_FACTORY.result(rootWildcard);
     }
 }

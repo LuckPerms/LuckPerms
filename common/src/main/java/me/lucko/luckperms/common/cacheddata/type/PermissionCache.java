@@ -74,9 +74,7 @@ public class PermissionCache extends UsageTracked implements CachedPermissionDat
         this.queryOptions = queryOptions;
         this.permissions = sourcePermissions;
         this.permissionsView = Collections.unmodifiableMap(Maps.transformValues(this.permissions, Node::getValue));
-
-        this.calculator = calculatorFactory.build(queryOptions, metadata);
-        this.calculator.setSourcePermissions(this.permissions);
+        this.calculator = calculatorFactory.build(queryOptions, this.permissions, metadata);
     }
 
     @Override

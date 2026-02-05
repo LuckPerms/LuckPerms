@@ -28,6 +28,7 @@ package me.lucko.luckperms.velocity.calculator;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
+import me.lucko.luckperms.common.calculator.PermissionCalculatorMonitored;
 import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.RegexProcessor;
@@ -35,10 +36,12 @@ import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.velocity.LPVelocityPlugin;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class VelocityCalculatorFactory implements CalculatorFactory {
     private final LPVelocityPlugin plugin;
@@ -48,23 +51,23 @@ public class VelocityCalculatorFactory implements CalculatorFactory {
     }
 
     @Override
-    public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
+    public PermissionCalculator build(QueryOptions queryOptions, Map<String, Node> sourceMap, CacheMetadata metadata) {
         List<PermissionProcessor> processors = new ArrayList<>(4);
 
-        processors.add(new DirectProcessor());
+        processors.add(new DirectProcessor(sourceMap));
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
-            processors.add(new RegexProcessor());
+            processors.add(new RegexProcessor(sourceMap));
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
-            processors.add(new WildcardProcessor());
+            processors.add(new WildcardProcessor(sourceMap));
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS_SPONGE)) {
-            processors.add(new SpongeWildcardProcessor());
+            processors.add(new SpongeWildcardProcessor(sourceMap));
         }
 
-        return new PermissionCalculator(this.plugin, metadata, processors);
+        return new PermissionCalculatorMonitored(this.plugin, metadata, processors);
     }
 }

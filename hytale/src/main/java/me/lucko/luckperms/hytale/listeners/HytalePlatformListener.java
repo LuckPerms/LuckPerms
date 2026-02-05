@@ -46,7 +46,7 @@ public class HytalePlatformListener {
 
     public void onBoot(BootEvent e) {
         insertCommandPermissionsIntoRegistry();
-        this.plugin.getVirtualGroupsLookupProvider().refresh();
+        this.plugin.getVirtualGroupsMap().refresh();
     }
 
     public void insertCommandPermissionsIntoRegistry() {

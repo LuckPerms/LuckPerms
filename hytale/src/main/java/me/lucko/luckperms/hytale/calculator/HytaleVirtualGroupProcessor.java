@@ -25,11 +25,20 @@
 
 package me.lucko.luckperms.hytale.calculator;
 
+import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
-import me.lucko.luckperms.common.calculator.PermissionLookupCache;
+import me.lucko.luckperms.common.calculator.PermissionCalculator;
 import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
+import me.lucko.luckperms.hytale.LPHytalePlugin;
+import me.lucko.luckperms.hytale.calculator.virtualgroups.VirtualGroupsMap;
+import net.luckperms.api.node.Node;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Permission Processor for Hytale "virtual groups".
@@ -37,15 +46,32 @@ import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 public class HytaleVirtualGroupProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     public static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(HytaleVirtualGroupProcessor.class);
 
-    private final PermissionLookupCache lookup;
+    private final PermissionCalculator calculator;
 
-    public HytaleVirtualGroupProcessor(PermissionLookupCache lookup) {
-        this.lookup = lookup;
+    public HytaleVirtualGroupProcessor(LPHytalePlugin plugin, ImmutableSet<String> virtualGroups, Map<String, Node> sourceMap) {
+        VirtualGroupsMap virtualGroupsMap = plugin.getVirtualGroupsMap();
+
+        Set<String> groups = virtualGroups;
+        for (String group : virtualGroupsMap.getAllVirtualGroups()) {
+            if (groups.contains(group)) {
+                continue;
+            }
+
+            Node node = sourceMap.get(Inheritance.key(group));
+            if (node != null && node.getValue()) {
+                if (groups instanceof ImmutableSet) {
+                    groups = new HashSet<>(groups);
+                }
+                groups.add(group);
+            }
+        }
+
+        this.calculator = virtualGroupsMap.getCalculator(ImmutableSet.copyOf(groups));
     }
 
     @Override
     public TristateResult hasPermission(String permission) {
-        return RESULT_FACTORY.result(this.lookup.checkPermission(permission, CheckOrigin.INTERNAL).result());
+        return RESULT_FACTORY.result(this.calculator.checkPermission(permission, CheckOrigin.INTERNAL).result());
     }
 
 }

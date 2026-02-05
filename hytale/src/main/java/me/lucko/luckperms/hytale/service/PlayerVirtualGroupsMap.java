@@ -27,8 +27,8 @@ package me.lucko.luckperms.hytale.service;
 
 import com.google.common.collect.ImmutableSet;
 
+import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,7 +38,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PlayerVirtualGroupsMap {
     private final Map<UUID, ImmutableSet<String>> uuidToGroups = new ConcurrentHashMap<>();
 
-    public void addPlayerToGroup(UUID uuid, String group) {
+    public void addPlayerToGroup(UUID uuid, String group0) {
+        String group = group0.toLowerCase(Locale.ROOT);
+
         this.uuidToGroups.compute(uuid, (key, existing)-> {
             if (existing == null) {
                 return ImmutableSet.of(group);
@@ -55,7 +57,9 @@ public class PlayerVirtualGroupsMap {
         });
     }
 
-    public void removePlayerFromGroup(UUID uuid, String group) {
+    public void removePlayerFromGroup(UUID uuid, String group0) {
+        String group = group0.toLowerCase(Locale.ROOT);
+
         this.uuidToGroups.computeIfPresent(uuid, (key, existing) -> {
             if (!existing.contains(group)) {
                 return existing;
@@ -75,7 +79,7 @@ public class PlayerVirtualGroupsMap {
         });
     }
 
-    public Set<String> getPlayerGroups(UUID uuid) {
+    public ImmutableSet<String> getPlayerGroups(UUID uuid) {
         return this.uuidToGroups.getOrDefault(uuid, ImmutableSet.of());
     }
 

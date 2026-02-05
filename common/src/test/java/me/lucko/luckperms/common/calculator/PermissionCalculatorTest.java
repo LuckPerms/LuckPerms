@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class PermissionLookupCacheTest {
+public class PermissionCalculatorTest {
 
     private static final Map<String, Node> EXAMPLE_PERMISSIONS = ImmutableMap.<String, Boolean>builder()
             // direct
@@ -86,10 +86,11 @@ public class PermissionLookupCacheTest {
             "test.node2, FALSE"
     })
     public void testDirect(String node, Tristate expected) {
-        PermissionLookupCache lookupCache = new PermissionLookupCache(ImmutableList.of(new DirectProcessor()));
-        lookupCache.setSourcePermissions(EXAMPLE_PERMISSIONS);
+        PermissionCalculator calculator = new PermissionCalculatorBase(ImmutableList.of(
+                new DirectProcessor(EXAMPLE_PERMISSIONS)
+        ));
 
-        TristateResult result = lookupCache.checkPermission(node, CheckOrigin.INTERNAL);
+        TristateResult result = calculator.checkPermission(node, CheckOrigin.INTERNAL);
         assertEquals(expected, result.result());
         assertNull(result.overriddenResult());
 
@@ -118,10 +119,12 @@ public class PermissionLookupCacheTest {
             "*, false, direct",
     })
     public void testWildcard(String node, boolean expected, String type) {
-        PermissionLookupCache lookupCache = new PermissionLookupCache(ImmutableList.of(new DirectProcessor(), new WildcardProcessor()));
-        lookupCache.setSourcePermissions(EXAMPLE_PERMISSIONS);
+        PermissionCalculator calculator = new PermissionCalculatorBase(ImmutableList.of(
+                new DirectProcessor(EXAMPLE_PERMISSIONS),
+                new WildcardProcessor(EXAMPLE_PERMISSIONS)
+        ));
 
-        TristateResult result = lookupCache.checkPermission(node, CheckOrigin.INTERNAL);
+        TristateResult result = calculator.checkPermission(node, CheckOrigin.INTERNAL);
         assertEquals(Tristate.of(expected), result.result());
         assertNull(result.overriddenResult());
         assertNotNull(result.node());
@@ -143,10 +146,12 @@ public class PermissionLookupCacheTest {
             "one.two.test, true, wildcard",
     })
     public void testSpongeWildcard(String node, boolean expected, String type) {
-        PermissionLookupCache lookupCache = new PermissionLookupCache(ImmutableList.of(new DirectProcessor(), new SpongeWildcardProcessor()));
-        lookupCache.setSourcePermissions(EXAMPLE_PERMISSIONS);
+        PermissionCalculator calculator = new PermissionCalculatorBase(ImmutableList.of(
+                new DirectProcessor(EXAMPLE_PERMISSIONS),
+                new SpongeWildcardProcessor(EXAMPLE_PERMISSIONS)
+        ));
 
-        TristateResult result = lookupCache.checkPermission(node, CheckOrigin.INTERNAL);
+        TristateResult result = calculator.checkPermission(node, CheckOrigin.INTERNAL);
         assertEquals(Tristate.of(expected), result.result());
         assertNull(result.overriddenResult());
         assertNotNull(result.node());
@@ -172,10 +177,12 @@ public class PermissionLookupCacheTest {
             "regexps4, FALSE",
     })
     public void testRegex(String node, Tristate expected) {
-        PermissionLookupCache lookupCache = new PermissionLookupCache(ImmutableList.of(new DirectProcessor(), new RegexProcessor()));
-        lookupCache.setSourcePermissions(EXAMPLE_PERMISSIONS);
+        PermissionCalculator calculator = new PermissionCalculatorBase(ImmutableList.of(
+                new DirectProcessor(EXAMPLE_PERMISSIONS),
+                new RegexProcessor(EXAMPLE_PERMISSIONS)
+        ));
 
-        TristateResult result = lookupCache.checkPermission(node, CheckOrigin.INTERNAL);
+        TristateResult result = calculator.checkPermission(node, CheckOrigin.INTERNAL);
         assertEquals(expected, result.result());
         assertNull(result.overriddenResult());
 
@@ -201,10 +208,13 @@ public class PermissionLookupCacheTest {
             }
         };
 
-        PermissionLookupCache lookupCache = new PermissionLookupCache(ImmutableList.of(new DirectProcessor(), new WildcardProcessor(), overrideProcessor));
-        lookupCache.setSourcePermissions(EXAMPLE_PERMISSIONS);
+        PermissionCalculator calculator = new PermissionCalculatorBase(ImmutableList.of(
+                new DirectProcessor(EXAMPLE_PERMISSIONS),
+                new WildcardProcessor(EXAMPLE_PERMISSIONS),
+                overrideProcessor
+        ));
 
-        TristateResult result = lookupCache.checkPermission("overridetest.test", CheckOrigin.INTERNAL);
+        TristateResult result = calculator.checkPermission("overridetest.test", CheckOrigin.INTERNAL);
         assertEquals(Tristate.FALSE, result.result());
         assertSame(AbstractOverrideWildcardProcessor.class, result.processorClass());
 

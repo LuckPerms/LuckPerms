@@ -26,9 +26,18 @@
 package me.lucko.luckperms.common.calculator.processor;
 
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
+import net.luckperms.api.node.Node;
 
-public class DirectProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {
+import java.util.Map;
+
+public class DirectProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(DirectProcessor.class);
+
+    private final Map<String, Node> sourceMap;
+
+    public DirectProcessor(Map<String, Node> sourceMap) {
+        this.sourceMap = sourceMap;
+    }
 
     @Override
     public TristateResult hasPermission(String permission) {

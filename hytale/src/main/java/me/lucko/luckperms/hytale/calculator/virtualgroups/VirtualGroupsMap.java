@@ -26,8 +26,10 @@
 package me.lucko.luckperms.hytale.calculator.virtualgroups;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.cache.LoadingMap;
-import me.lucko.luckperms.common.calculator.PermissionLookupCache;
+import me.lucko.luckperms.common.calculator.PermissionCalculator;
+import me.lucko.luckperms.common.calculator.PermissionCalculatorBase;
 import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
@@ -39,12 +41,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class VirtualGroupsLookupProvider {
-    private final Map<Set<String>, PermissionLookupCache> caches;
-    private Map<String, Map<String, Node>> virtualGroupToNodesMap;
+public class VirtualGroupsMap {
+    private final Map<ImmutableSet<String>, PermissionCalculator> caches;
+    private ImmutableMap<String, ImmutableMap<String, Node>> virtualGroupToNodesMap;
 
-    public VirtualGroupsLookupProvider() {
-        this.caches = LoadingMap.of(this::buildCache);
+    public VirtualGroupsMap() {
+        this.caches = LoadingMap.of(this::buildCalculator);
         refresh();
     }
 
@@ -53,23 +55,29 @@ public class VirtualGroupsLookupProvider {
         this.caches.clear();
     }
 
-    public PermissionLookupCache getLookup(Set<String> virtualGroups) {
+    public ImmutableSet<String> getAllVirtualGroups() {
+        return this.virtualGroupToNodesMap.keySet();
+    }
+
+    public PermissionCalculator getCalculator(ImmutableSet<String> virtualGroups) {
         return this.caches.get(virtualGroups);
     }
 
-    private PermissionLookupCache buildCache(Set<String> virtualGroups) {
+    private PermissionCalculator buildCalculator(Set<String> virtualGroups) {
         Map<String, Node> sourceMap = new ConcurrentHashMap<>();
         for (String virtualGroup : virtualGroups) {
             sourceMap.putAll(this.virtualGroupToNodesMap.getOrDefault(virtualGroup, ImmutableMap.of()));
         }
 
-        List<PermissionProcessor> processors = new ArrayList<>(2);
-        processors.add(new DirectProcessor());
-        processors.add(new WildcardProcessor());
+        if (sourceMap.isEmpty()) {
+            return PermissionCalculator.EMPTY;
+        }
 
-        PermissionLookupCache lookupCache = new PermissionLookupCache(processors);
-        lookupCache.setSourcePermissions(sourceMap);
-        return lookupCache;
+        List<PermissionProcessor> processors = new ArrayList<>(2);
+        processors.add(new DirectProcessor(sourceMap));
+        processors.add(new WildcardProcessor(sourceMap));
+
+        return new PermissionCalculatorBase(processors);
     }
 
 }

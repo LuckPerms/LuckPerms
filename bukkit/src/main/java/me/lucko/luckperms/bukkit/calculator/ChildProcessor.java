@@ -26,12 +26,13 @@
 package me.lucko.luckperms.bukkit.calculator;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.bukkit.inject.server.LuckPermsPermissionMap;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
-import me.lucko.luckperms.common.calculator.processor.AbstractSourceBasedProcessor;
+import me.lucko.luckperms.common.calculator.processor.AbstractPermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,15 +40,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Permission Processor for Bukkits "child" permission system.
  */
-public class ChildProcessor extends AbstractSourceBasedProcessor implements PermissionProcessor {
+public class ChildProcessor extends AbstractPermissionProcessor implements PermissionProcessor {
     private static final TristateResult.Factory RESULT_FACTORY = new TristateResult.Factory(ChildProcessor.class);
 
     private final LPBukkitPlugin plugin;
-    private final AtomicBoolean needsRefresh = new AtomicBoolean(false);
-    private Map<String, TristateResult> childPermissions = Collections.emptyMap();
+    private final Map<String, Node> sourceMap;
 
-    public ChildProcessor(LPBukkitPlugin plugin) {
+    private final AtomicBoolean needsRefresh = new AtomicBoolean(false);
+    private Map<String, TristateResult> childPermissions;
+
+    public ChildProcessor(LPBukkitPlugin plugin, Map<String, Node> sourceMap) {
         this.plugin = plugin;
+        this.sourceMap = sourceMap;
+        refresh();
+    }
+
+    private void refresh() {
+        this.childPermissions = processChildPermissions(this.sourceMap, this.plugin.getPermissionMap());
     }
 
     @Override
@@ -59,20 +68,18 @@ public class ChildProcessor extends AbstractSourceBasedProcessor implements Perm
     }
 
     @Override
-    public void refresh() {
+    public void invalidate() {
+        this.needsRefresh.set(true);
+    }
+
+    private static Map<String, TristateResult> processChildPermissions(Map<String, Node> sourceMap, LuckPermsPermissionMap permissionMap) {
         Map<String, TristateResult> childPermissions = new HashMap<>();
-        this.sourceMap.forEach((key, node) -> {
-            Map<String, Boolean> children = this.plugin.getPermissionMap().getChildPermissions(key, node.getValue());
+        sourceMap.forEach((key, node) -> {
+            Map<String, Boolean> children = permissionMap.getChildPermissions(key, node.getValue());
             children.forEach((childKey, childValue) -> {
                 childPermissions.put(childKey, RESULT_FACTORY.resultWithOverride(node, Tristate.of(childValue)));
             });
         });
-        this.childPermissions = childPermissions;
-        this.needsRefresh.set(false);
-    }
-
-    @Override
-    public void invalidate() {
-        this.needsRefresh.set(true);
+        return childPermissions;
     }
 }

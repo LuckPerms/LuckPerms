@@ -28,6 +28,7 @@ package me.lucko.luckperms.sponge.calculator;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
+import me.lucko.luckperms.common.calculator.PermissionCalculatorMonitored;
 import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.RegexProcessor;
@@ -36,10 +37,12 @@ import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SpongeCalculatorFactory implements CalculatorFactory {
     private final LPSpongePlugin plugin;
@@ -49,21 +52,21 @@ public class SpongeCalculatorFactory implements CalculatorFactory {
     }
 
     @Override
-    public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
+    public PermissionCalculator build(QueryOptions queryOptions, Map<String, Node> sourceMap, CacheMetadata metadata) {
         List<PermissionProcessor> processors = new ArrayList<>(6);
 
-        processors.add(new DirectProcessor());
+        processors.add(new DirectProcessor(sourceMap));
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
-            processors.add(new RegexProcessor());
+            processors.add(new RegexProcessor(sourceMap));
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
-            processors.add(new WildcardProcessor());
+            processors.add(new WildcardProcessor(sourceMap));
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS_SPONGE)) {
-            processors.add(new SpongeWildcardProcessor());
+            processors.add(new SpongeWildcardProcessor(sourceMap));
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_DEFAULT_SUBJECTS)) {
@@ -76,6 +79,6 @@ public class SpongeCalculatorFactory implements CalculatorFactory {
             processors.add(new RootDefaultsProcessor(this.plugin.getService(), queryOptions, overrideWildcards));
         }
 
-        return new PermissionCalculator(this.plugin, metadata, processors);
+        return new PermissionCalculatorMonitored(this.plugin, metadata, processors);
     }
 }

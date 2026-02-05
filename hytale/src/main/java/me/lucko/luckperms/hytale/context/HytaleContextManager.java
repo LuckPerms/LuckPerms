@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.hytale.context;
 
+import com.google.common.collect.ImmutableSet;
 import com.hypixel.hytale.server.core.Constants;
 import com.hypixel.hytale.server.core.modules.singleplayer.SingleplayerModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -35,7 +36,6 @@ import me.lucko.luckperms.hytale.service.VirtualGroups;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 
-import java.util.Set;
 import java.util.UUID;
 
 public class HytaleContextManager extends SimpleContextManager<PlayerRef, PlayerRef> {
@@ -59,7 +59,7 @@ public class HytaleContextManager extends SimpleContextManager<PlayerRef, Player
             builder.option(INTEGRATED_SERVER_OWNER, true);
         }
 
-        Set<String> groups = this.playerVirtualGroupsMap.getPlayerGroups(subject.getUuid());
+        ImmutableSet<String> groups = this.playerVirtualGroupsMap.getPlayerGroups(subject.getUuid());
         builder.option(VirtualGroups.KEY, new VirtualGroups(groups));
     }
 }

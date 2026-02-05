@@ -29,14 +29,12 @@ import com.google.common.collect.ImmutableSet;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 
-import java.util.Set;
-
 /**
  * A {@link QueryOptions} option key for virtual groups.
  *
  * @param groups the groups
  */
-public record VirtualGroups(Set<String> groups) {
+public record VirtualGroups(ImmutableSet<String> groups) {
 
     public static final VirtualGroups EMPTY = new VirtualGroups(ImmutableSet.of());
     public static final OptionKey<VirtualGroups> KEY = OptionKey.of("virtual_groups", VirtualGroups.class);

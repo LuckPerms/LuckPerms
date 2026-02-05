@@ -28,13 +28,13 @@ package me.lucko.luckperms.hytale.calculator.virtualgroups;
 import com.google.common.collect.ImmutableMap;
 import com.hypixel.hytale.server.core.permissions.PermissionsModule;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.util.ImmutableCollectors;
 import net.luckperms.api.node.Node;
 
 import java.lang.reflect.Field;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class VirtualGroupsAccess {
 
@@ -54,10 +54,10 @@ public class VirtualGroupsAccess {
      *
      * @return the exported mapping
      */
-    public static Map<String, Map<String, Node>> export() {
+    public static ImmutableMap<String, ImmutableMap<String, Node>> export() {
         Map<String, Set<String>> virtualGroups = getVirtualGroups();
-        return virtualGroups.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
+        return virtualGroups.entrySet().stream().collect(ImmutableCollectors.toMap(
+                e -> e.getKey().toLowerCase(Locale.ROOT),
                 e -> transformSet(e.getValue())
         ));
     }
@@ -83,7 +83,7 @@ public class VirtualGroupsAccess {
      * @param permissions the input
      * @return the transformed map
      */
-    private static Map<String, Node> transformSet(Set<String> permissions) {
+    private static ImmutableMap<String, Node> transformSet(Set<String> permissions) {
         ImmutableMap.Builder<String, Node> builder = ImmutableMap.builder();
 
         for (String permission : permissions) {

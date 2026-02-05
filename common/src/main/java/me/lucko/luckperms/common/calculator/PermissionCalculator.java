@@ -25,43 +25,34 @@
 
 package me.lucko.luckperms.common.calculator;
 
-import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
-import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 
-import java.util.Collection;
+public interface PermissionCalculator {
 
-/**
- * Calculates and caches permissions
- */
-public class PermissionCalculator extends PermissionLookupCache {
+    /**
+     * A calculator which always returns undefined.
+     */
+    PermissionCalculator EMPTY = new PermissionCalculator() {
+        @Override
+        public TristateResult checkPermission(String permission, CheckOrigin origin) {
+            return TristateResult.UNDEFINED;
+        }
 
-    /** The plugin instance */
-    private final LuckPermsPlugin plugin;
+        @Override
+        public void invalidateCache() {
 
-    /** Info about the nature of this calculator. */
-    private final CacheMetadata metadata;
+        }
+    };
 
-    public PermissionCalculator(LuckPermsPlugin plugin, CacheMetadata metadata, Collection<PermissionProcessor> processors) {
-        super(processors);
-        this.plugin = plugin;
-        this.metadata = metadata;
-    }
+    /**
+     * Performs a permission check against this calculator.
+     *
+     * @param permission the permission to check
+     * @param origin marks where this check originated from
+     * @return the result
+     */
+    TristateResult checkPermission(String permission, CheckOrigin origin);
 
-    @Override
-    public TristateResult checkPermission(String permission, CheckOrigin origin) {
-        TristateResult result = super.checkPermission(permission, origin);
-        this.plugin.getVerboseHandler().offerPermissionCheckEvent(origin, this.metadata.getVerboseCheckInfo(), this.metadata.getQueryOptions(), permission, result);
-        return result;
-    }
-
-    @Override
-    protected void observePermission(String permission) {
-        // offer the permission to the permission vault
-        // we only need to do this once per permission, so it doesn't matter
-        // that this call is behind the cache.
-        this.plugin.getPermissionRegistry().offer(permission);
-    }
+    void invalidateCache();
 }

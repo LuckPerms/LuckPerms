@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.cacheddata.metastack.StandardStackElements;
 import me.lucko.luckperms.common.cacheddata.type.MetaAccumulator;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
+import me.lucko.luckperms.common.calculator.PermissionCalculatorMonitored;
 import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
@@ -100,17 +101,17 @@ public class CalculatedSubjectCachedDataManager extends AbstractCachedDataManage
     }
 
     @Override
-    public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
+    public PermissionCalculator build(QueryOptions queryOptions, Map<String, Node> sourceMap, CacheMetadata metadata) {
         List<PermissionProcessor> processors = new ArrayList<>(5);
-        processors.add(new DirectProcessor());
-        processors.add(new SpongeWildcardProcessor());
-        processors.add(new WildcardProcessor());
+        processors.add(new DirectProcessor(sourceMap));
+        processors.add(new SpongeWildcardProcessor(sourceMap));
+        processors.add(new WildcardProcessor(sourceMap));
 
         if (!this.subject.getParentCollection().isDefaultsCollection()) {
             processors.add(new FixedTypeDefaultsProcessor(this.subject.getService(), queryOptions, this.subject.getDefaults(), true));
             processors.add(new RootDefaultsProcessor(this.subject.getService(), queryOptions, true));
         }
 
-        return new PermissionCalculator(getPlugin(), metadata, processors);
+        return new PermissionCalculatorMonitored(getPlugin(), metadata, processors);
     }
 }

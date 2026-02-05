@@ -25,9 +25,11 @@
 
 package me.lucko.luckperms.hytale.calculator;
 
+import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
 import me.lucko.luckperms.common.calculator.CalculatorFactory;
 import me.lucko.luckperms.common.calculator.PermissionCalculator;
+import me.lucko.luckperms.common.calculator.PermissionCalculatorMonitored;
 import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
 import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.calculator.processor.RegexProcessor;
@@ -35,40 +37,38 @@ import me.lucko.luckperms.common.calculator.processor.SpongeWildcardProcessor;
 import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.hytale.LPHytalePlugin;
-import me.lucko.luckperms.hytale.calculator.virtualgroups.VirtualGroupsLookupProvider;
 import me.lucko.luckperms.hytale.context.HytaleContextManager;
 import me.lucko.luckperms.hytale.service.VirtualGroups;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class HytaleCalculatorFactory implements CalculatorFactory {
     private final LPHytalePlugin plugin;
-    private final VirtualGroupsLookupProvider virtualGroupsLookupProvider;
 
-    public HytaleCalculatorFactory(LPHytalePlugin plugin, VirtualGroupsLookupProvider virtualGroupsLookupProvider) {
+    public HytaleCalculatorFactory(LPHytalePlugin plugin) {
         this.plugin = plugin;
-        this.virtualGroupsLookupProvider = virtualGroupsLookupProvider;
     }
 
     @Override
-    public PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata) {
+    public PermissionCalculator build(QueryOptions queryOptions, Map<String, Node> sourceMap, CacheMetadata metadata) {
         List<PermissionProcessor> processors = new ArrayList<>(6);
 
-        processors.add(new DirectProcessor());
+        processors.add(new DirectProcessor(sourceMap));
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
-            processors.add(new RegexProcessor());
+            processors.add(new RegexProcessor(sourceMap));
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
-            processors.add(new WildcardProcessor());
+            processors.add(new WildcardProcessor(sourceMap));
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS_SPONGE)) {
-            processors.add(new SpongeWildcardProcessor());
+            processors.add(new SpongeWildcardProcessor(sourceMap));
         }
 
         boolean integratedOwner = queryOptions.option(HytaleContextManager.INTEGRATED_SERVER_OWNER).orElse(false);
@@ -77,12 +77,10 @@ public class HytaleCalculatorFactory implements CalculatorFactory {
         }
 
         if (this.plugin.getConfiguration().get(ConfigKeys.APPLY_HYTALE_VIRTUAL_GROUPS)) {
-            Set<String> virtualGroups = queryOptions.option(VirtualGroups.KEY).orElse(VirtualGroups.EMPTY).groups();
-            if (!virtualGroups.isEmpty()) {
-                processors.add(new HytaleVirtualGroupProcessor(this.virtualGroupsLookupProvider.getLookup(virtualGroups)));
-            }
+            ImmutableSet<String> virtualGroups = queryOptions.option(VirtualGroups.KEY).orElse(VirtualGroups.EMPTY).groups();
+            processors.add(new HytaleVirtualGroupProcessor(this.plugin, virtualGroups, sourceMap));
         }
 
-        return new PermissionCalculator(this.plugin, metadata, processors);
+        return new PermissionCalculatorMonitored(this.plugin, metadata, processors);
     }
 }

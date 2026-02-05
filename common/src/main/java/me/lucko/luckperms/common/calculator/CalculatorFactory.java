@@ -26,20 +26,24 @@
 package me.lucko.luckperms.common.calculator;
 
 import me.lucko.luckperms.common.cacheddata.CacheMetadata;
+import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 
+import java.util.Map;
+
 /**
- * Creates a calculator instance given a set of contexts
+ * Creates {@link PermissionCalculator} instances
  */
 public interface CalculatorFactory {
 
     /**
-     * Builds a PermissionCalculator for the user in the given context
+     * Builds a PermissionCalculator with the given source permissions and query options.
      *
-     * @param queryOptions the query options to build the calculator for
-     * @param metadata the calculator metadata
+     * @param queryOptions the query options
+     * @param sourceMap    the source permissions map
+     * @param metadata     the calculator metadata
      * @return a permission calculator instance
      */
-    PermissionCalculator build(QueryOptions queryOptions, CacheMetadata metadata);
+    PermissionCalculator build(QueryOptions queryOptions, Map<String, Node> sourceMap, CacheMetadata metadata);
 
 }
