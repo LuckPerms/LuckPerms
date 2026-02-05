@@ -31,6 +31,8 @@ import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
+import java.util.List;
+
 public class HytaleLoaderPlugin extends JavaPlugin {
     // marker field to indicate to the plugin that dependencies should be loaded from the jar
     // read using reflection in LPHytalePlugin#createDependencyManager
@@ -44,6 +46,7 @@ public class HytaleLoaderPlugin extends JavaPlugin {
     public HytaleLoaderPlugin(@NonNullDecl JavaPluginInit init) {
         super(init);
         JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
+        loader.setPriorityPackagePrefixes(List.of("org.slf4j"));
         this.plugin = loader.instantiatePlugin(BOOTSTRAP_CLASS, JavaPlugin.class, this);
     }
 

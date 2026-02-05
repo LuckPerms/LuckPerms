@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 /**
  * Classloader that can load a jar from within another jar file.
@@ -51,6 +52,11 @@ public class JarInJarClassLoader extends URLClassLoader {
     }
 
     /**
+     * A list of package prefixes to attempt to load from the URLs first, before delegating to the parent classloader.
+     */
+    private List<String> priorityPackagePrefixes = null;
+
+    /**
      * Creates a new jar-in-jar class loader.
      *
      * @param loaderClassLoader the loader plugin's classloader (setup and created by the platform)
@@ -63,6 +69,10 @@ public class JarInJarClassLoader extends URLClassLoader {
 
     public void addJarToClasspath(URL url) {
         addURL(url);
+    }
+
+    public void setPriorityPackagePrefixes(List<String> priorityPackagePrefixes) {
+        this.priorityPackagePrefixes = priorityPackagePrefixes;
     }
 
     public void deleteJarResource() {
@@ -149,6 +159,43 @@ public class JarInJarClassLoader extends URLClassLoader {
             return path.toUri().toURL();
         } catch (MalformedURLException e) {
             throw new LoadingException("Unable to get URL from path", e);
+        }
+    }
+
+    private boolean shouldLoadFromUrlsFirst(String name) {
+        if (this.priorityPackagePrefixes == null) {
+            return false;
+        }
+
+        for (String prefix : this.priorityPackagePrefixes) {
+            if (name.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        if (!shouldLoadFromUrlsFirst(name)) {
+            return super.loadClass(name, resolve);
+        }
+
+        synchronized (getClassLoadingLock(name)) {
+            Class<?> clazz = findLoadedClass(name);
+            if (clazz != null) {
+                return clazz;
+            }
+
+            try {
+                clazz = findClass(name);
+            } catch (ClassNotFoundException e) {
+                clazz = super.loadClass(name, false);
+            }
+            if (resolve) {
+                resolveClass(clazz);
+            }
+            return clazz;
         }
     }
 

@@ -134,6 +134,15 @@ public class DependencyRegistry {
         }
     }
 
+    private boolean slf4jPresent() {
+        if (this.platformType == Platform.Type.HYTALE) {
+            // always load SLf4J on hytale, as it's not provided by the platform, and we don't want to
+            // accidentally use a version shaded in a different plugin
+            return false;
+        }
+        return classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory");
+    }
+
     @SuppressWarnings("ConstantConditions")
     public static boolean isGsonRelocated() {
         return JsonElement.class.getName().startsWith("me.lucko");
@@ -146,10 +155,6 @@ public class DependencyRegistry {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    private static boolean slf4jPresent() {
-        return classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory");
     }
 
 }
