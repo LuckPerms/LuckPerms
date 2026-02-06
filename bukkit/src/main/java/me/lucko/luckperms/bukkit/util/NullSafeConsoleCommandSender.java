@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.bukkit.util;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
@@ -35,9 +36,12 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * The {@link Server#getConsoleSender()} method returns null during onEnable
@@ -109,12 +113,16 @@ public class NullSafeConsoleCommandSender implements ConsoleCommandSender {
 
     // just throw UnsupportedOperationException - we never use any of these methods
     @Override public @NonNull Spigot spigot() { throw new UnsupportedOperationException(); }
+    @Override public void sendMessage(@Nullable UUID uuid, @NotNull String s) { throw new UnsupportedOperationException(); }
+    @Override public void sendMessage(@Nullable UUID uuid, @NotNull String... strings) { throw new UnsupportedOperationException(); }
+    @Override public @NotNull Component name() { throw new UnsupportedOperationException(); }
     @Override public boolean isConversing() { throw new UnsupportedOperationException(); }
     @Override public void acceptConversationInput(@NonNull String s) { throw new UnsupportedOperationException(); }
     @Override public boolean beginConversation(@NonNull Conversation conversation) { throw new UnsupportedOperationException(); }
     @Override public void abandonConversation(@NonNull Conversation conversation) { throw new UnsupportedOperationException(); }
     @Override public void abandonConversation(@NonNull Conversation conversation, @NonNull ConversationAbandonedEvent conversationAbandonedEvent) { throw new UnsupportedOperationException(); }
     @Override public void sendRawMessage(@NonNull String s) { throw new UnsupportedOperationException(); }
+    @Override public void sendRawMessage(@Nullable UUID uuid, @NotNull String s) { throw new UnsupportedOperationException(); }
     @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String s, boolean b) { throw new UnsupportedOperationException(); }
     @Override public @NonNull PermissionAttachment addAttachment(@NonNull Plugin plugin) { throw new UnsupportedOperationException(); }
     @Override public PermissionAttachment addAttachment(@NonNull Plugin plugin, @NonNull String s, boolean b, int i) { throw new UnsupportedOperationException(); }

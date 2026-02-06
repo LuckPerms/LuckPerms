@@ -23,24 +23,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.hytale;
+package me.lucko.luckperms.bukkit;
 
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.server.core.command.system.CommandSender;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.receiver.IMessageReceiver;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import me.lucko.luckperms.common.plugin.scheduler.JavaSchedulerAdapter;
+import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.sender.AbstractSender;
 import me.lucko.luckperms.common.sender.Sender;
+import org.bukkit.Server;
+import org.bukkit.command.BlockCommandSender;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.ProxiedCommandSender;
+import org.bukkit.command.RemoteConsoleCommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.plugin.java.JavaPlugin;
 
-public class HytaleSchedulerAdapter extends JavaSchedulerAdapter implements SchedulerAdapter {
+public class FoliaSchedulerAdapter extends BukkitSchedulerAdapter implements SchedulerAdapter {
+    private final JavaPlugin loader;
+    private final Server server;
 
-    public HytaleSchedulerAdapter(LPHytaleBootstrap bootstrap) {
+    public FoliaSchedulerAdapter(LPBukkitBootstrap bootstrap) {
         super(bootstrap);
+        this.loader = bootstrap.getLoader();
+        this.server = bootstrap.getServer();
+    }
+
+    @Override
+    public void executeSync(Runnable task) {
+        this.server.getGlobalRegionScheduler().execute(this.loader, task);
     }
 
     @Override
@@ -48,32 +58,29 @@ public class HytaleSchedulerAdapter extends JavaSchedulerAdapter implements Sche
         executeSync(unwrapSender(ctx), task);
     }
 
-    public void executeSync(IMessageReceiver ctx, Runnable task) {
-        if (ctx instanceof PlayerRef playerRef) {
-            Ref<EntityStore> ref = playerRef.getReference();
-            if (ref != null) {
-                World world = ref.getStore().getExternalData().getWorld();
-                world.execute(task);
-                return;
-            }
-        } else if (ctx instanceof Player player) {
-            World world = player.getWorld();
-            if (world != null) {
-                world.execute(task);
-                return;
-            }
+    @Override
+    public void executeSync(CommandSender ctx, Runnable task) {
+        if (ctx instanceof Entity) {
+            ((Entity) ctx).getScheduler().execute(this.loader, task, null, 0);
+        } else if (ctx instanceof BlockCommandSender) {
+            RegionScheduler scheduler = this.server.getRegionScheduler();
+            scheduler.execute(this.loader, ((BlockCommandSender) ctx).getBlock().getLocation(), task);
+        } else if (ctx instanceof ConsoleCommandSender || ctx instanceof RemoteConsoleCommandSender) {
+            this.server.getGlobalRegionScheduler().execute(this.loader, task);
+        } else if (ctx instanceof ProxiedCommandSender) {
+            executeSync(((ProxiedCommandSender) ctx).getCallee(), task);
+        } else {
+            throw new IllegalArgumentException("Unknown command sender type: " + ctx.getClass().getName());
         }
-
-        // fallback
-        executeAsync(task);
     }
 
     @SuppressWarnings("unchecked")
-    private static IMessageReceiver unwrapSender(Sender sender) {
+    private static CommandSender unwrapSender(Sender sender) {
         if (sender instanceof AbstractSender) {
             return ((AbstractSender<CommandSender>) sender).getSender();
         } else {
             throw new IllegalArgumentException("unknown sender type: " + sender.getClass());
         }
     }
+
 }
