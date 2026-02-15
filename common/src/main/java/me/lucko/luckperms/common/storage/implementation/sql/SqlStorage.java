@@ -947,7 +947,7 @@ public class SqlStorage implements StorageImplementation {
                     UUID uuid = UUID.fromString(rs.getString("uuid"));
                     Node node = readNode(rs);
                     if (node != null) {
-                        map.get(uuid).add(readNode(rs));
+                        map.get(uuid).add(node);
                     }
                 }
             }
@@ -1062,7 +1062,7 @@ public class SqlStorage implements StorageImplementation {
                     if (list != null) {
                         Node node = readNode(rs);
                         if (node != null) {
-                            list.add(readNode(rs));
+                            list.add(node);
                         }
                     }
                 }
