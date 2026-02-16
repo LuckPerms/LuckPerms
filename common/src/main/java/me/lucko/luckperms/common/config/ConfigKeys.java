@@ -758,7 +758,7 @@ public final class ConfigKeys {
     /**
      * If the chat formatter is enabled
      */
-    public static final ConfigKey<Boolean> CHAT_FORMATTER_ENABLED = booleanKey("chat-formatter.enabled", true);
+    public static final ConfigKey<Boolean> CHAT_FORMATTER_ENABLED = notReloadable(booleanKey("chat-formatter.enabled", true));
 
     /**
      * The chat formatter format string

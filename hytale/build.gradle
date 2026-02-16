@@ -13,10 +13,13 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.7'
 
     compileOnly 'com.hypixel.hytale:Server:2026.01.24-6e2d4fc36'
+
+    compileOnly 'at.helpch:placeholderapi-hytale:1.0.6'
 }
 
 repositories {
     maven { url 'https://maven.hytale.com/release/' }
+    maven { url 'https://repo.helpch.at/releases/' }
 }
 
 shadowJar {

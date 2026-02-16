@@ -50,11 +50,11 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.hytale.calculator.HytaleCalculatorFactory;
 import me.lucko.luckperms.hytale.calculator.virtualgroups.VirtualGroupsMap;
-import me.lucko.luckperms.hytale.chat.LuckPermsChatFormatter;
 import me.lucko.luckperms.hytale.context.HytaleContextManager;
 import me.lucko.luckperms.hytale.context.HytalePlayerCalculator;
 import me.lucko.luckperms.hytale.listeners.HytaleConnectionListener;
 import me.lucko.luckperms.hytale.listeners.HytalePlatformListener;
+import me.lucko.luckperms.hytale.listeners.HytaleChatListener;
 import me.lucko.luckperms.hytale.service.LuckPermsPermissionProvider;
 import me.lucko.luckperms.hytale.service.PlayerVirtualGroupsMap;
 import net.luckperms.api.LuckPerms;
@@ -83,6 +83,7 @@ public class LPHytalePlugin extends AbstractLuckPermsPlugin {
     private PlayerVirtualGroupsMap playerVirtualGroupsMap;
     private VirtualGroupsMap virtualGroupsMap;
     private LuckPermsPermissionProvider permissionProvider;
+    private HytaleChatListener chatListener;
 
     public LPHytalePlugin(LPHytaleBootstrap bootstrap) {
         this.bootstrap = bootstrap;
@@ -205,8 +206,8 @@ public class LPHytalePlugin extends AbstractLuckPermsPlugin {
 
         // chat
         if (getConfiguration().get(ConfigKeys.CHAT_FORMATTER_ENABLED)) {
-            LuckPermsChatFormatter chatFormatter = new LuckPermsChatFormatter(this);
-            chatFormatter.register(this.bootstrap.getLoader().getEventRegistry());
+            this.chatListener = new HytaleChatListener(this);
+            this.chatListener.register(this.bootstrap.getLoader().getEventRegistry());
         }
 
         // general
@@ -236,7 +237,9 @@ public class LPHytalePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void performFinalSetup() {
-
+        if (this.chatListener != null) {
+            getApiProvider().getEventBus().subscribe(this.chatListener);
+        }
     }
 
     @Override

@@ -7,7 +7,9 @@
   "Website": "https://luckperms.net",
   "ServerVersion": "*",
   "Dependencies": {},
-  "OptionalDependencies": {},
+  "OptionalDependencies": {
+    "HelpChat:PlaceholderAPI": ">= 1.0.2"
+  },
   "DisabledByDefault": false,
   "Main": "me.lucko.luckperms.hytale.loader.HytaleLoaderPlugin",
   "IncludesAssetPack": false

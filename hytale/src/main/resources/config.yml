@@ -62,13 +62,26 @@ use-server-uuid-cache: false
 # When enabled, LuckPerms formats the chat using the format defined below.
 # The following placeholders are supported:
 #
-# - <prefix>: The players prefix meta value
-# - <username>: The players username
-# - <suffix>: The players suffix meta value
-# - <message>: The actual chat message sent by the player
+# - Chat Message:
+#   => <username>       The players username
+#   => <message>        The actual chat message sent by the player
 #
-# The format string, as well as the prefix and suffix values support formatting using MiniMessage:
-#   https://docs.papermc.io/adventure/minimessage/
+# - LuckPerms:
+#   => <prefix>         The players prefix meta value
+#   => <suffix>         The players suffix meta value
+#   => <meta:META_KEY>  The players meta value for the given key
+#
+# - PlaceholderAPI:
+#   => %placeholder%    Any PlaceholderAPI placeholder. Relational placeholders are not supported.
+#
+# - MiniMessage:
+#   => <color>          Named colors
+#   => <#00ff00>        Hex colors
+#   => <bold>           Bold text
+#   => <italic>         Italic text
+#   ... many more. See for more info: https://docs.papermc.io/adventure/minimessage/format/
+#
+# MiniMessage formatting is also resolved in LuckPerms and PlaceholderAPI values.
 #
 chat-formatter:
 
@@ -76,6 +89,9 @@ chat-formatter:
   enabled: true
 
   # The format to use.
+  #
+  # - See above for the supported placeholders.
+  # - Can be reloaded using the '/lp reloadconfig' command.
   message-format: "<prefix><username><suffix>: <message>"
 
 
