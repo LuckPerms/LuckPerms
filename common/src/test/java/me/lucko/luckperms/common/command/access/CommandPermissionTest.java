@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.command.access;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

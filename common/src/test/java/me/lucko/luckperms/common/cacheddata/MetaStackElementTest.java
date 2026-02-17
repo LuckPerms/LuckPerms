@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.cacheddata;
 
+import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.cacheddata.metastack.StandardStackElements;
 import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.model.InheritanceOrigin;
@@ -39,7 +40,6 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

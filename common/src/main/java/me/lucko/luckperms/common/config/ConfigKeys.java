@@ -756,14 +756,9 @@ public final class ConfigKeys {
     public static final ConfigKey<String> RABBITMQ_PASSWORD = notReloadable(stringKey("rabbitmq.password", "guest"));
 
     /**
-     * If the chat formatter is enabled
+     * If the chat formatter is enabled - deprecated
      */
-    public static final ConfigKey<Boolean> CHAT_FORMATTER_ENABLED = booleanKey("chat-formatter.enabled", true);
-
-    /**
-     * The chat formatter format string
-     */
-    public static final ConfigKey<String> CHAT_FORMATTER_MESSAGE_FORMAT = stringKey("chat-formatter.message-format", "<prefix><username><suffix>: <message>");
+    public static final ConfigKey<Boolean> CHAT_FORMATTER_ENABLED = booleanKey("chat-formatter.enabled", false);
 
     /**
      * If the editor key should be generated lazily (only when needed)

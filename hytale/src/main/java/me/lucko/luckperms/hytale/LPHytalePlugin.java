@@ -50,7 +50,6 @@ import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.hytale.calculator.HytaleCalculatorFactory;
 import me.lucko.luckperms.hytale.calculator.virtualgroups.VirtualGroupsMap;
-import me.lucko.luckperms.hytale.chat.LuckPermsChatFormatter;
 import me.lucko.luckperms.hytale.context.HytaleContextManager;
 import me.lucko.luckperms.hytale.context.HytalePlayerCalculator;
 import me.lucko.luckperms.hytale.listeners.HytaleConnectionListener;
@@ -203,10 +202,11 @@ public class LPHytalePlugin extends AbstractLuckPermsPlugin {
             }
         }
 
-        // chat
         if (getConfiguration().get(ConfigKeys.CHAT_FORMATTER_ENABLED)) {
-            LuckPermsChatFormatter chatFormatter = new LuckPermsChatFormatter(this);
-            chatFormatter.register(this.bootstrap.getLoader().getEventRegistry());
+            getLogger().warn("The built-in LuckPerms chat formatter has been removed. Please delete the 'CHAT SETTINGS' section " +
+                    "from your LuckPerms config.yml. We recommend that users migrate to " +
+                    "mini-chat-formatter (https://github.com/lucko/mini-chat-formatter) or a suitable alternative." +
+                    "Please see the LuckPerms wiki for more information: https://luckperms.net/wiki/Hytale#chat-formatting");
         }
 
         // general

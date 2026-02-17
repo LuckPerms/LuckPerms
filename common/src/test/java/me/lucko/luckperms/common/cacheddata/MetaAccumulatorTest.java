@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.cacheddata;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import me.lucko.luckperms.common.cacheddata.metastack.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.cacheddata.metastack.StandardStackElements;
@@ -44,8 +46,6 @@ import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 
 import java.util.SortedMap;
 

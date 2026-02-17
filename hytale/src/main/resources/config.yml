@@ -48,41 +48,6 @@ use-server-uuid-cache: false
 
 # +----------------------------------------------------------------------------------------------+ #
 # |                                                                                              | #
-# |                                         CHAT SETTINGS                                        | #
-# |                                                                                              | #
-# |            Controls how LuckPerms should format messages from players in the chat.           | #
-# |                                                                                              | #
-# +----------------------------------------------------------------------------------------------+ #
-
-# Configuration for the built-in LuckPerms chat formatter.
-#
-# Note: This functionality is only intended for simple chat formatting needs. For more advanced
-# chat formatting, we recommend using a dedicated chat plugin that integrates with LuckPerms.
-#
-# When enabled, LuckPerms formats the chat using the format defined below.
-# The following placeholders are supported:
-#
-# - <prefix>: The players prefix meta value
-# - <username>: The players username
-# - <suffix>: The players suffix meta value
-# - <message>: The actual chat message sent by the player
-#
-# The format string, as well as the prefix and suffix values support formatting using MiniMessage:
-#   https://docs.papermc.io/adventure/minimessage/
-#
-chat-formatter:
-
-  # If LuckPerms should handle chat formatting.
-  enabled: true
-
-  # The format to use.
-  message-format: "<prefix><username><suffix>: <message>"
-
-
-
-
-# +----------------------------------------------------------------------------------------------+ #
-# |                                                                                              | #
 # |                                       STORAGE SETTINGS                                       | #
 # |                                                                                              | #
 # |                Controls which storage method LuckPerms will use to store data.               | #

@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.cacheddata;
 
+import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.cacheddata.metastack.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.cacheddata.metastack.StandardStackElements;
 import me.lucko.luckperms.common.cacheddata.result.StringResult;
@@ -34,7 +35,6 @@ import net.luckperms.api.metastacking.DuplicateRemovalFunction;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.types.PrefixNode;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
