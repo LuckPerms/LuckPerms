@@ -89,12 +89,13 @@ public class MinecraftCommandListUpdater implements LuckPermsEventListener {
 
     // Called when the buffer times out.
     private void sendUpdate(UUID uniqueId) {
-        this.plugin.getBootstrap().getScheduler().sync().execute(() ->
-                this.plugin.getBootstrap().getPlayer(uniqueId).ifPresent(player -> {
-                    MinecraftServer server = player.level().getServer();
-                    server.getPlayerList().sendPlayerPermissionLevel(player);
-                })
-        );
+        this.plugin.getBootstrap().getScheduler().executeSync(() -> {
+            ServerPlayer player = this.plugin.getBootstrap().getPlayer(uniqueId).orElse(null);
+            if (player != null) {
+                MinecraftServer server = player.level().getServer();
+                server.getPlayerList().sendPlayerPermissionLevel(player);
+            }
+        });
     }
 
     private final class SendBuffer extends BufferedRequest<Void> {
