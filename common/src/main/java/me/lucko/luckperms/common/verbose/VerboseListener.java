@@ -73,11 +73,15 @@ public class VerboseListener {
             .withZone(ZoneId.systemDefault());
 
     // how much data should we store before stopping.
-    private static final int DATA_TRUNCATION = 10000;
+    private static final int DATA_TRUNCATION = 10_000;
     // how many lines should we include in each stack trace send as a chat message
     private static final int STACK_TRUNCATION_CHAT = 15;
     // how many lines should we include in each stack trace in the web output
     private static final int STACK_TRUNCATION_WEB = 40;
+    // rate limit for notifications: 50 notifications per second for players, 100 for console
+    private static final int NOTIFICATION_RATE_LIMIT_MAX_EVENTS_PLAYER = 50;
+    private static final int NOTIFICATION_RATE_LIMIT_MAX_EVENTS_CONSOLE = 100;
+    private static final long NOTIFICATION_RATE_LIMIT_WINDOW_MS = 1000;
 
     private static final StackTracePrinter FILTERING_PRINTER = StackTracePrinter.builder()
             .ignoreClassStartingWith("me.lucko.luckperms.")
@@ -116,6 +120,10 @@ public class VerboseListener {
     private final AtomicInteger matchedCounter = new AtomicInteger(0);
     // the events which passed the filter, up to a max size of #DATA_TRUNCATION
     private final List<VerboseEvent> results = new ArrayList<>(DATA_TRUNCATION / 10);
+    // a list of timestamps when a notification message was sent, used for rate limiting
+    private final List<Long> notificationTimestamps = new ArrayList<>();
+    // track if we've already warned about rate limiting in the current window
+    private boolean notificationRateLimitWarningShown = false;
 
     public VerboseListener(Sender notifiedSender, VerboseFilter filter, boolean notify) {
         this.notifiedSender = notifiedSender;
@@ -152,6 +160,10 @@ public class VerboseListener {
     }
 
     private void sendNotification(VerboseEvent event) {
+        if (!checkNotificationRateLimit()) {
+            return;
+        }
+
         // form a text component from the check trace
         Component component;
         if (event instanceof PermissionCheckEvent) {
@@ -225,6 +237,36 @@ public class VerboseListener {
         // send the message
         HoverEvent<Component> hoverEvent = HoverEvent.showText(Component.join(JoinConfiguration.newlines(), hover));
         this.notifiedSender.sendMessage(component.hoverEvent(hoverEvent));
+    }
+
+    /**
+     * Check if we should send a notification based on rate limiting.
+     *
+     * @return true if the notification should be sent, false if rate limited
+     */
+    private boolean checkNotificationRateLimit() {
+        long now = System.currentTimeMillis();
+        int maxEvents = this.notifiedSender.isConsole() ? NOTIFICATION_RATE_LIMIT_MAX_EVENTS_CONSOLE : NOTIFICATION_RATE_LIMIT_MAX_EVENTS_PLAYER;
+
+        // remove timestamps outside the current window
+        this.notificationTimestamps.removeIf(timestamp -> (now - timestamp) > NOTIFICATION_RATE_LIMIT_WINDOW_MS);
+
+        if (this.notificationTimestamps.size() >= maxEvents) {
+            if (!this.notificationRateLimitWarningShown) {
+                Message.VERBOSE_NOTIFICATION_RATE_LIMITED.send(this.notifiedSender);
+                this.notificationRateLimitWarningShown = true;
+            }
+            return false;
+        }
+
+        this.notificationTimestamps.add(now);
+
+        // reset the warning flag if we're back under the limit
+        if (this.notificationTimestamps.size() < maxEvents) {
+            this.notificationRateLimitWarningShown = false;
+        }
+
+        return true;
     }
 
     private static boolean shouldFilterStackTrace(VerboseEvent event) {

@@ -454,6 +454,22 @@ public interface Message {
             .append(text(processor, DARK_GREEN))
             .build();
 
+    Args0 VERBOSE_NOTIFICATION_RATE_LIMITED = () -> prefixed(text()
+            // "&3VB &3&l> &cNotification rate limit exceeded. Some events are not being shown. Use &7/lp verbose upload &cto see the full output."
+            .append(translatable("luckperms.logs.verbose-prefix", DARK_AQUA))
+            .append(space())
+            .append(text('>', DARK_AQUA, BOLD))
+            .append(space())
+            .append(translatable()
+                    .key("luckperms.logs.verbose.rate-limit-exceeded")
+                    .color(RED)
+                    .args(text("/lp verbose upload", GRAY)
+                            .clickEvent(ClickEvent.runCommand("/lp verbose upload"))
+                    )
+                    .append(FULL_STOP)
+            )
+    );
+
     Args1<String> EXPORT_LOG = msg -> prefixed(text()
             // "&3EXPORT &3&l> &f{}"
             .append(translatable("luckperms.logs.export-prefix", DARK_AQUA))
