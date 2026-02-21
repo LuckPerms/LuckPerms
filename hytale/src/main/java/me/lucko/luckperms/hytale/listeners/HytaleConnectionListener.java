@@ -27,6 +27,7 @@ package me.lucko.luckperms.hytale.listeners;
 
 import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.event.EventRegistry;
+import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerSetupConnectEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -57,6 +58,7 @@ public class HytaleConnectionListener extends AbstractConnectionListener {
     public void register(EventRegistry registry) {
         registry.register(EventPriority.EARLY, PlayerSetupConnectEvent.class, this::onPlayerPreLogin);
         registry.register(EventPriority.LAST, PlayerSetupConnectEvent.class, this::onPlayerPreLoginMonitor);
+        registry.register(EventPriority.NORMAL, PlayerConnectEvent.class, this::onPlayerPostLogin);
         registry.register(EventPriority.LAST, PlayerDisconnectEvent.class, this::onPlayerQuit);
     }
 
@@ -116,6 +118,35 @@ public class HytaleConnectionListener extends AbstractConnectionListener {
                 e.setCancelled(true);
             }
         }
+    }
+
+    private void onPlayerPostLogin(PlayerConnectEvent e) {
+        /* Called when the player starts logging into the server.
+           At this point, the users data should be present and loaded. */
+
+        PlayerRef player = e.getPlayerRef();
+
+        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            this.plugin.getLogger().info("Processing post-login for " + player.getUuid() + " - " + player.getUsername());
+        }
+
+        final User user = this.plugin.getUserManager().getIfLoaded(player.getUuid());
+        if (user != null) {
+            return;
+        }
+
+        if (!getUniqueConnections().contains(player.getUuid())) {
+            this.plugin.getLogger().warn("User " + player.getUuid() + " - " + player.getUsername() +
+                    " doesn't have data pre-loaded, they have never been processed during pre-login in this session." +
+                    " - denying login.");
+        } else {
+            this.plugin.getLogger().warn("User " + player.getUuid() + " - " + player.getUsername() +
+                    " doesn't currently have data pre-loaded, but they have been processed before in this session." +
+                    " - denying login.");
+        }
+
+        Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLanguage());
+        player.getPacketHandler().disconnect(PlainTextComponentSerializer.plainText().serialize(reason));
     }
 
     private void onPlayerQuit(PlayerDisconnectEvent e) {

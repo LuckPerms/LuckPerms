@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class LuckPermsPermissionProvider implements PermissionProvider {
     private static final String PERMISSION_PROVIDER_NAME = "LuckPerms";
@@ -53,6 +54,8 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
     private final PlayerVirtualGroupsMap playerVirtualGroupsMap;
     /** Whether to delegate operations on groups/users not managed by LuckPerms to the built-in Hytale provider */
     private final boolean delegateToHytaleProvider;
+    /** A set of UUIDs of users who have been delegated to the Hytale provider */
+    private final Set<UUID> delegatedUsers = ConcurrentHashMap.newKeySet();
 
     public LuckPermsPermissionProvider(LPHytalePlugin plugin, HytalePermissionsProvider hytaleProvider, PlayerVirtualGroupsMap playerVirtualGroupsMap) {
         this.plugin = plugin;
@@ -76,6 +79,9 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
         if (user != null) {
             return new LuckPermsPermissionsSet(user);
         } else if (this.delegateToHytaleProvider) {
+            if (this.delegatedUsers.add(userUniqueId)) {
+                this.plugin.getLogger().warn("LuckPerms does not have permissions data loaded for user '" + userUniqueId + "', so their checks will be delegated to the Hytale provider.");
+            }
             return this.hytaleProvider.getUserPermissions(userUniqueId);
         } else {
             return Set.of();
@@ -111,6 +117,10 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
             return groups;
 
         } else if (this.delegateToHytaleProvider) {
+            if (this.delegatedUsers.add(userUniqueId)) {
+                this.plugin.getLogger().warn("LuckPerms does not have permissions data loaded for user '" + userUniqueId + "', so their checks will be delegated to the Hytale provider.");
+            }
+
             Set<String> groups = new HashSet<>(virtualGroups);
             groups.addAll(this.hytaleProvider.getGroupsForUser(userUniqueId));
             return groups;

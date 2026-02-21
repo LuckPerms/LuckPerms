@@ -43,6 +43,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.luckperms.api.util.Tristate;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -124,9 +125,11 @@ public class HytaleSenderFactory extends SenderFactory<LPHytalePlugin, IMessageR
 
         if (sender instanceof CommandSender commandSender) {
             CommandManager.get().handleCommand(commandSender, command).join();
+            return;
         }
         if (sender instanceof PlayerRef playerRef) {
             CommandManager.get().handleCommand(playerRef, command).join();
+            return;
         }
 
         throw new AssertionError();
@@ -138,36 +141,41 @@ public class HytaleSenderFactory extends SenderFactory<LPHytalePlugin, IMessageR
     }
 
     public static Message toHytaleMessage(Component component) {
-        if (!(component instanceof TextComponent text)) {
+        Message message;
+        if (component instanceof TextComponent text) {
+            message = Message.raw(text.content());
+        } else {
             throw new UnsupportedOperationException("Unsupported component type: " + component.getClass());
         }
 
-        Message message = Message.raw(text.content());
-
-        TextColor color = text.color();
+        TextColor color = component.color();
         if (color != null) {
             message.color(color.asHexString());
         }
 
-        TextDecoration.State bold = text.decoration(TextDecoration.BOLD);
+        TextDecoration.State bold = component.decoration(TextDecoration.BOLD);
         if (bold != TextDecoration.State.NOT_SET) {
             message.bold(bold == TextDecoration.State.TRUE);
         }
 
-        TextDecoration.State italic = text.decoration(TextDecoration.ITALIC);
+        TextDecoration.State italic = component.decoration(TextDecoration.ITALIC);
         if (italic != TextDecoration.State.NOT_SET) {
             message.italic(italic == TextDecoration.State.TRUE);
         }
 
-        ClickEvent clickEvent = text.clickEvent();
+        ClickEvent clickEvent = component.clickEvent();
         if (clickEvent != null && clickEvent.action() == ClickEvent.Action.OPEN_URL) {
             message.link(clickEvent.value());
         }
 
-        message.insertAll(text.children().stream()
+        List<Message> children = component.children().stream()
                 .map(HytaleSenderFactory::toHytaleMessage)
-                .toList()
-        );
+                .toList();
+
+        if (!children.isEmpty()) {
+            message.insertAll(children);
+        }
+
         return message;
     }
 }
