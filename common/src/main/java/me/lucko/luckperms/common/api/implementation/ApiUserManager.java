@@ -112,6 +112,25 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     }
 
     @Override
+    public @NonNull CompletableFuture<Void> modifyUserWithPush(@NonNull UUID uniqueId, @NonNull Consumer<? super net.luckperms.api.model.user.User> action) {
+        Objects.requireNonNull(uniqueId, "uniqueId");
+        Objects.requireNonNull(action, "action");
+
+        return this.plugin.getStorage().loadUser(uniqueId, null)
+            .thenApplyAsync(user -> {
+                action.accept(user.getApiProxy());
+                return user;
+            }, this.plugin.getBootstrap().getScheduler().async())
+            .thenCompose(user -> {
+                this.plugin.getUserManager().giveDefaultIfNeeded(user);
+                return this.plugin.getStorage().saveUser(user)
+                    .thenApply(ignored -> user);
+            }).thenAcceptAsync(user -> this.plugin.getMessagingService().ifPresent(
+                messagingService -> messagingService.pushUserUpdate(user)
+            ));
+    }
+
+    @Override
     public @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uniqueId, @NonNull String username) {
         Objects.requireNonNull(uniqueId, "uuid");
         Objects.requireNonNull(username, "username");
