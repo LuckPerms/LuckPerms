@@ -86,12 +86,11 @@ public class WebEditorIntegrationTest {
         assertTrue(this.bytesocks.isRunning());
 
         String bytebinUrl = "http://" + this.bytebin.getHost() + ":" + this.bytebin.getFirstMappedPort() + "/";
-        String bytesocksHost = this.bytesocks.getHost() + ":" + this.bytesocks.getFirstMappedPort();
+        String bytesocksUrl = "http://" + this.bytesocks.getHost() + ":" + this.bytesocks.getFirstMappedPort() + "/";
 
         Map<String, String> config = ImmutableMap.<String, String>builder()
                 .put("bytebin-url", bytebinUrl)
-                .put("bytesocks-host", bytesocksHost)
-                .put("bytesocks-use-tls", "false")
+                .put("bytesocks-url", bytesocksUrl)
                 .build();
 
         TestPluginProvider.use(tempDir, config, (app, bootstrap, plugin) -> {
@@ -141,7 +140,7 @@ public class WebEditorIntegrationTest {
 
             httpClient.newWebSocket(
                     new Request.Builder()
-                            .url("ws://" + bytesocksHost + "/" +  bytesocksKey)
+                            .url(bytesocksUrl +  bytesocksKey)
                             .build(),
                     new WebSocketListener() {
                         @Override

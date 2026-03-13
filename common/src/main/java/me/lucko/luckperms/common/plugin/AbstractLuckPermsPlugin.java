@@ -172,8 +172,7 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
         );
         this.bytesocks = new BytesocksClient(
                 this.httpClient,
-                getConfiguration().get(ConfigKeys.BYTESOCKS_HOST),
-                getConfiguration().get(ConfigKeys.BYTESOCKS_USE_TLS),
+                getConfiguration().get(ConfigKeys.BYTESOCKS_URL),
                 "luckperms/editor"
         );
         this.webEditorStore = new WebEditorStore(this);

@@ -46,14 +46,21 @@ public class BytesocksClient extends AbstractHttpClient {
     /**
      * Creates a new bytesocks instance
      *
-     * @param host the bytesocks host
+     * @param url the bytesocks url
      * @param userAgent the client user agent string
      */
-    public BytesocksClient(OkHttpClient okHttpClient, String host, boolean tls, String userAgent) {
+    public BytesocksClient(OkHttpClient okHttpClient, String url, String userAgent) {
         super(okHttpClient);
 
-        this.httpUrl = (tls ? "https://" : "http://") + host + "/";
-        this.wsUrl = (tls ? "wss://" : "ws://") + host + "/";
+        this.httpUrl = url;
+        if (this.httpUrl.startsWith("http://")) {
+            this.wsUrl = "ws://" + this.httpUrl.substring(7);
+        } else if (this.httpUrl.startsWith("https://")) {
+            this.wsUrl = "wss://" + this.httpUrl.substring(8);
+        } else {
+            throw new IllegalArgumentException("Invalid URL: " + url);
+        }
+
         this.userAgent = userAgent;
     }
 
