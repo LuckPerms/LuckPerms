@@ -69,7 +69,7 @@ public class NatsMessenger implements Messenger {
         this.connection.publish(CHANNEL, output.toByteArray());
     }
 
-    public void init(String address, String username, String password, boolean ssl) {
+    public void init(String address, String username, String password, String token, boolean ssl) {
         HostAndPort hostAndPort = new HostAndPort(address)
                 .requireBracketsForIPv6()
                 .withDefaultPort(Options.DEFAULT_PORT);
@@ -84,6 +84,10 @@ public class NatsMessenger implements Messenger {
 
             if (username != null && password != null) {
                 builder.userInfo(username, password);
+            }
+
+            if (token != null) {
+                builder.token(token.toCharArray());
             }
 
             if (ssl) {
