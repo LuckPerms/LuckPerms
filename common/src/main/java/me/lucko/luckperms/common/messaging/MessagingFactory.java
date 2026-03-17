@@ -170,15 +170,19 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             String address = configuration.get(ConfigKeys.NATS_ADDRESS);
             String username = configuration.get(ConfigKeys.NATS_USERNAME);
             String password = configuration.get(ConfigKeys.NATS_PASSWORD);
+            String token = configuration.get(ConfigKeys.NATS_TOKEN);
             if (password.isEmpty()) {
                 password = null;
             }
             if (username.isEmpty()) {
                 username = null;
             }
+            if (token.isEmpty()) {
+                token = null;
+            }
             boolean ssl = configuration.get(ConfigKeys.NATS_SSL);
 
-            natsMessenger.init(address, username, password, ssl);
+            natsMessenger.init(address, username, password, token, ssl);
             return natsMessenger;
         }
     }
