@@ -1,6 +1,7 @@
 plugins {
     id("java-library")
     id("jacoco")
+    alias(libs.plugins.blossom)
 }
 
 test {
@@ -13,6 +14,16 @@ test {
 
 jacocoTestReport {
     dependsOn test
+}
+
+sourceSets {
+    main {
+        blossom {
+            javaSources {
+                property 'version', project.ext.fullVersion
+            }
+        }
+    }
 }
 
 dependencies {

@@ -5,9 +5,13 @@ plugins {
     alias(libs.plugins.loom)
 }
 
-archivesBaseName = 'luckperms'
-sourceCompatibility = 21
-targetCompatibility = 21
+base {
+    archivesName = 'luckperms'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
@@ -17,7 +21,7 @@ dependencies {
     // https://modmuss50.me/fabric.html
     minecraft 'com.mojang:minecraft:1.21.11'
     mappings loom.officialMojangMappings()
-    modImplementation 'net.fabricmc:fabric-loader:0.18.2'
+    modImplementation 'net.fabricmc:fabric-loader:0.18.4'
 
     Set<String> apiModules = [
             'fabric-api-base',
@@ -76,7 +80,7 @@ shadowJar {
     relocate 'org.yaml.snakeyaml', 'me.lucko.luckperms.lib.yaml'
 }
 
-task remappedShadowJar(type: RemapJarTask) {
+tasks.register('remappedShadowJar', RemapJarTask) {
     dependsOn tasks.shadowJar
     input = tasks.shadowJar.archiveFile
     addNestedDependencies = true

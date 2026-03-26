@@ -1,5 +1,4 @@
 plugins {
-    alias(libs.plugins.blossom)
     alias(libs.plugins.shadow)
 }
 
@@ -12,11 +11,6 @@ dependencies {
 
     compileOnly 'com.velocitypowered:velocity-api:3.1.1'
     annotationProcessor 'com.velocitypowered:velocity-api:3.1.1'
-}
-
-blossom {
-    replaceTokenIn('src/main/java/me/lucko/luckperms/velocity/LPVelocityBootstrap.java')
-    replaceToken '@version@', project.ext.fullVersion
 }
 
 shadowJar {

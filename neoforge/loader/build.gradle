@@ -9,22 +9,20 @@ plugins {
     id("java-library")
 }
 
-sourceCompatibility = 21
-targetCompatibility = 21
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
 
 neoForge {
     version = project.neoForgeVersion
-
     validateAccessTransformers = true
 
     runs {
         client {
             client()
-            //mods.set(new HashSet()) // Work around classpath issues by using the production jar for dev runs
         }
         server {
             server()
-            //mods.set(new HashSet()) // Work around classpath issues by using the production jar for dev runs
         }
     }
 }
@@ -39,14 +37,14 @@ tasks.withType(RunGameTask).configureEach {
     }
 }
 
-Configuration shade = configurations.create('shade')
-configurations.implementation {
-    extendsFrom configurations.shade
+configurations {
+    shade
+    implementation.extendsFrom shade
 }
 
 dependencies {
-    add('shade', project(':api'))
-    add('shade', project(':common:loader-utils'))
+    shade project(':api')
+    shade project(':common:loader-utils')
 }
 
 build {
@@ -75,7 +73,7 @@ processResources {
 
 shadowJar {
     archiveFileName = "LuckPerms-NeoForge-${project.ext.fullVersion}.jar"
-    configurations = [shade]
+    configurations = [project.configurations.shade]
 
     from {
         project(':neoforge').tasks.shadowJar.archiveFile

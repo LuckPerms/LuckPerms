@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.util.BuildInfo;
 import me.lucko.luckperms.neoforge.util.NeoForgeEventBusFacade;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
@@ -191,7 +192,7 @@ public final class LPNeoForgeBootstrap extends MinecraftLuckPermsBootstrap imple
 
     @Override
     public String getVersion() {
-        return "@version@";
+        return BuildInfo.VERSION;
     }
 
     @Override

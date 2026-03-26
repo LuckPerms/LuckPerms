@@ -2,8 +2,9 @@ plugins {
     alias(libs.plugins.loom)
 }
 
-sourceCompatibility = 21
-targetCompatibility = 21
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }

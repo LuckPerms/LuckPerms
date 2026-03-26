@@ -2,8 +2,9 @@ plugins {
     alias(libs.plugins.shadow)
 }
 
-sourceCompatibility = 21
-targetCompatibility = 21
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
 
 dependencies {
     implementation project(':common')

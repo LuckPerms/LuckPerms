@@ -128,8 +128,4 @@ public class LuckPermsApplication implements AutoCloseable {
         return this.commandExecutor;
     }
 
-    public String getVersion() {
-        return "@version@";
-    }
-
 }

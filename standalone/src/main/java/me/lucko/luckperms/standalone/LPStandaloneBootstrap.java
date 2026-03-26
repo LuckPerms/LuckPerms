@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
+import me.lucko.luckperms.common.util.BuildInfo;
 import me.lucko.luckperms.standalone.app.LuckPermsApplication;
 import net.luckperms.api.platform.Platform;
 
@@ -145,7 +146,7 @@ public class LPStandaloneBootstrap implements LuckPermsBootstrap, LoaderBootstra
 
     @Override
     public String getVersion() {
-        return this.loader.getVersion();
+        return BuildInfo.VERSION;
     }
 
     @Override

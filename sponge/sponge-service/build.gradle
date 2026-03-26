@@ -2,8 +2,9 @@ repositories {
     maven { url 'https://repo.spongepowered.org/repository/maven-public/' }
 }
 
-sourceCompatibility = 21
-targetCompatibility = 21
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
 
 dependencies {
     implementation project(':common')

@@ -46,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
@@ -168,8 +169,8 @@ public class FileActionLogger {
     public LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws IOException {
         List<LoggedAction> filtered = loadLog(filters)
                 .sorted(Comparator.comparing(LoggedAction::getTimestamp))
-                .collect(Collectors.toList())
-                .reversed();
+                .collect(Collectors.toList());
+        Collections.reverse(filtered);
 
         int size = filtered.size();
         List<LoggedAction> paginated = page != null ? page.paginate(filtered) : filtered;

@@ -6,21 +6,17 @@ plugins {
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-defaultTasks 'licenseFormat', 'build'
-
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
-    apply plugin: 'org.cadixdev.licenser'
+    apply plugin: 'dev.yumi.gradle.licenser'
 
     group = 'me.lucko.luckperms'
     version = '5.5-SNAPSHOT'
 
-    sourceCompatibility = 11
-    targetCompatibility = 11
-
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
+        options.release = 11
     }
 
     tasks.withType(Test).configureEach {
@@ -38,18 +34,11 @@ subprojects {
     }
 
     def determinePatchVersion = {
-        // get the name of the last tag
-        def tagInfo = new ByteArrayOutputStream()
-        exec {
+        def tagInfo = providers.exec {
             commandLine 'git', 'describe', '--tags'
-            standardOutput = tagInfo
-        }
-        tagInfo = tagInfo.toString()
+        }.standardOutput.asText.get().trim()
 
-        if (!tagInfo.contains('-')) {
-            return 0
-        }
-        return tagInfo.split("-")[1]
+        return tagInfo.contains('-') ? tagInfo.split('-')[1] : 0
     }
 
     project.ext.majorVersion = '5'
@@ -59,9 +48,8 @@ subprojects {
     project.ext.fullVersion = project.ext.apiVersion + '.' + project.ext.patchVersion
 
     license {
-        header = rootProject.file('HEADER.txt')
-        include '**/*.java'
-        newLine = true
+        rule(rootProject.file("HEADER.txt"))
+        exclude '*.xml'
     }
 
     repositories {

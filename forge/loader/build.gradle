@@ -4,15 +4,22 @@ plugins {
     id("java-library")
 }
 
-sourceCompatibility = 21
-targetCompatibility = 21
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
 
 minecraft {
     mappings channel: 'official', version: minecraftVersion
 }
 
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+}
+
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}"
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}")
     implementation project(':api')
     implementation project(':common:loader-utils')
 }

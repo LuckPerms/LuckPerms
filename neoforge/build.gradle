@@ -1,37 +1,31 @@
 plugins {
-    alias(libs.plugins.blossom)
     alias(libs.plugins.shadow)
     alias(libs.plugins.moddevgradle)
 }
 
-sourceCompatibility = 21
-targetCompatibility = 21
-
-Configuration shade = configurations.create('shade')
-configurations.implementation {
-    extendsFrom configurations.shade
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
 }
 
-blossom {
-    replaceTokenIn 'src/main/java/me/lucko/luckperms/neoforge/LPNeoForgeBootstrap.java'
-    replaceToken '@version@', project.ext.fullVersion
+configurations {
+    shade
+    implementation.extendsFrom shade
 }
 
 neoForge {
     version = project.neoForgeVersion
-
     validateAccessTransformers = true
 }
 
 dependencies {
-    add('shade', project(':common'))
-    add('shade', project(':common:minecraft'))
+    shade project(':common')
+    shade project(':common:minecraft')
     compileOnly project(':common:loader-utils')
 }
 
 shadowJar {
     archiveFileName = "luckperms-neoforge.jarinjar"
-    configurations = [shade]
+    configurations = [project.configurations.shade]
 
     dependencies {
         include(dependency('me.lucko.luckperms:.*'))

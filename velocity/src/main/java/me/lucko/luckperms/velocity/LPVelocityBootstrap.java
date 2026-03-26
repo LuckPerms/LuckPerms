@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.logging.Slf4jPluginLogger;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.util.BuildInfo;
 import net.luckperms.api.platform.Platform;
 import org.slf4j.Logger;
 
@@ -57,7 +58,7 @@ import java.util.concurrent.CountDownLatch;
 @Plugin(
         id = "luckperms",
         name = "LuckPerms",
-        version = "@version@",
+        version = BuildInfo.VERSION,
         authors = "Luck",
         description = "A permissions plugin",
         url = "https://luckperms.net"
@@ -168,7 +169,7 @@ public class LPVelocityBootstrap implements LuckPermsBootstrap {
 
     @Override
     public String getVersion() {
-        return "@version@";
+        return BuildInfo.VERSION;
     }
 
     @Override

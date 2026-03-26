@@ -1,24 +1,25 @@
 plugins {
-    alias(libs.plugins.blossom)
     alias(libs.plugins.shadow)
     alias(libs.plugins.forgegradle)
 }
 
-sourceCompatibility = 21
-targetCompatibility = 21
-
-blossom {
-    replaceTokenIn 'src/main/java/me/lucko/luckperms/forge/LPForgeBootstrap.java'
-    replaceToken '@version@', project.ext.fullVersion
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
 }
 
 minecraft {
     mappings channel: 'official', version: minecraftVersion
 }
 
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+}
+
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}"
-    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.12'
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}")
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.1'
     implementation project(':common')
     implementation project(':common:minecraft')
     compileOnly project(':common:loader-utils')

@@ -4,8 +4,9 @@ plugins {
     id("jacoco-report-aggregation")
 }
 
-sourceCompatibility = 17
-targetCompatibility = 17
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+}
 
 test {
     useJUnitPlatform {

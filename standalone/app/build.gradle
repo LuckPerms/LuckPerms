@@ -1,10 +1,10 @@
 plugins {
-    alias(libs.plugins.blossom)
     id("java-library")
 }
 
-sourceCompatibility = 17
-targetCompatibility = 17
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+}
 
 dependencies {
     implementation project(':api')
@@ -48,9 +48,4 @@ dependencies {
     api('net.kyori:ansi:1.1.1') {
         exclude(module: 'annotations')
     }
-}
-
-blossom {
-    replaceTokenIn('src/main/java/me/lucko/luckperms/standalone/app/LuckPermsApplication.java')
-    replaceToken '@version@', project.ext.fullVersion
 }
