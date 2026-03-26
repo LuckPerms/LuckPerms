@@ -222,7 +222,7 @@ public final class LPForgeBootstrap extends MinecraftLuckPermsBootstrap implemen
 
     @Override
     public String getServerBrand() {
-        return ModList.get().getModContainerById("forge")
+        return ModList.getModContainerById("forge")
                 .map(ModContainer::getModInfo)
                 .map(IModInfo::getDisplayName)
                 .orElse("null");
@@ -230,7 +230,7 @@ public final class LPForgeBootstrap extends MinecraftLuckPermsBootstrap implemen
 
     @Override
     public String getServerVersion() {
-        String forgeVersion = ModList.get().getModContainerById("forge")
+        String forgeVersion = ModList.getModContainerById("forge")
                 .map(ModContainer::getModInfo)
                 .map(IModInfo::getVersion)
                 .map(ArtifactVersion::toString)

@@ -4,11 +4,7 @@ plugins {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.release = 21
-}
-
-minecraft {
-    mappings channel: 'official', version: minecraftVersion
+    options.release = 25
 }
 
 repositories {

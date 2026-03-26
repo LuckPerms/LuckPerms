@@ -27,7 +27,7 @@ package me.lucko.luckperms.fabric.context;
 
 import me.lucko.luckperms.common.minecraft.context.MinecraftPlayerCalculator;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -39,7 +39,7 @@ public class FabricPlayerCalculator extends MinecraftPlayerCalculator {
     }
 
     public void registerListeners() {
-        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(this::onWorldChange);
+        ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(this::onWorldChange);
     }
 
     private void onWorldChange(ServerPlayer player, ServerLevel origin, ServerLevel destination) {

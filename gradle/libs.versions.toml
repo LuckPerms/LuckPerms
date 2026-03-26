@@ -1,7 +1,7 @@
 [versions]
 shadow = "8.3.8"
 blossom = "2.2.0"
-moddevgradle = "2.0.140"
+moddevgradle = "2.0.141"
 forgegradle = "[7.0.13,8.0)"
 loom = "1.15-SNAPSHOT"
 licenser = "2.2.2"
@@ -11,5 +11,5 @@ blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 moddevgradle = { id = "net.neoforged.moddev", version.ref = "moddevgradle" }
 forgegradle = { id = "net.minecraftforge.gradle", version.ref = "forgegradle" }
-loom = { id = "net.fabricmc.fabric-loom-remap", version.ref = "loom" }
+loom = { id = "net.fabricmc.fabric-loom", version.ref = "loom" }
 licenser = { id = "dev.yumi.gradle.licenser", version.ref = "licenser" }

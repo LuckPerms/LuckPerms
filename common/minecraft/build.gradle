@@ -3,7 +3,7 @@ plugins {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.release = 21
+    options.release = 25
 }
 
 repositories {
@@ -12,12 +12,6 @@ repositories {
 
 dependencies {
     // https://modmuss50.me/fabric.html
-    minecraft 'com.mojang:minecraft:1.21.11'
-    mappings loom.officialMojangMappings()
-
+    minecraft 'com.mojang:minecraft:26.1'
     implementation project(':common')
-}
-
-remapJar {
-    targetNamespace = 'named'
 }

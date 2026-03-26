@@ -38,7 +38,7 @@ public class ForgeEventBus extends AbstractEventBus<ModContainer> {
 
     @Override
     protected ModContainer checkPlugin(Object mod) throws IllegalArgumentException {
-        ModContainer modContainer = ModList.get().getModContainerByObject(mod).orElse(null);
+        ModContainer modContainer = ModList.getModContainerByObject(mod).orElse(null);
         if (modContainer != null) {
             return modContainer;
         }

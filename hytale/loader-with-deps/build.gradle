@@ -19,7 +19,10 @@ repositories {
 
 processResources {
     filesMatching('manifest.json') {
-        expand 'pluginVersion': project.ext.fullVersion
+        expand (
+                'pluginVersion': project.ext.fullVersion,
+                'hytaleVersion': hytaleVersion
+        )
     }
 }
 

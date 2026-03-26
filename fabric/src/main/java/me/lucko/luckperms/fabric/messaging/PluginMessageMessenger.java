@@ -55,8 +55,8 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
     }
 
     public void init() {
-        PayloadTypeRegistry.playS2C().register(PluginMessagePayload.TYPE, PluginMessagePayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(PluginMessagePayload.TYPE, PluginMessagePayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(PluginMessagePayload.TYPE, PluginMessagePayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(PluginMessagePayload.TYPE, PluginMessagePayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(PluginMessagePayload.TYPE, this);
     }
 
