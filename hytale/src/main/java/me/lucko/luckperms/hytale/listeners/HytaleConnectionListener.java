@@ -36,9 +36,9 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
+import me.lucko.luckperms.hytale.HytaleSenderFactory;
 import me.lucko.luckperms.hytale.LPHytalePlugin;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -99,7 +99,7 @@ public class HytaleConnectionListener extends AbstractConnectionListener {
 
             Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
             e.setCancelled(true);
-            e.setReason(PlainTextComponentSerializer.plainText().serialize(reason));
+            e.setReason(HytaleSenderFactory.toHytaleMessage(reason));
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(e.getUuid(), e.getUsername(), null);
         }
     }
@@ -146,7 +146,7 @@ public class HytaleConnectionListener extends AbstractConnectionListener {
         }
 
         Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build(), player.getLanguage());
-        player.getPacketHandler().disconnect(PlainTextComponentSerializer.plainText().serialize(reason));
+        player.getPacketHandler().disconnect(HytaleSenderFactory.toHytaleMessage(reason));
     }
 
     private void onPlayerQuit(PlayerDisconnectEvent e) {
