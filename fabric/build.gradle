@@ -61,6 +61,11 @@ shadowJar {
     archiveFileName = "LuckPerms-Fabric-${project.ext.fullVersion}.jar"
     configurations = [project.configurations.shade]
 
+    dependencies {
+        include(dependency('net.luckperms:.*'))
+        include(dependency('me.lucko.luckperms:.*'))
+    }
+
     relocate 'net.kyori.adventure', 'me.lucko.luckperms.lib.adventure'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
