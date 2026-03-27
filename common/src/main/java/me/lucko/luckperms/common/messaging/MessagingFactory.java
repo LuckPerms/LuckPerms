@@ -211,7 +211,21 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             }
             boolean ssl = config.get(ConfigKeys.REDIS_SSL);
 
-            if (!addresses.isEmpty()) {
+            boolean sentinelEnabled = config.get(ConfigKeys.REDIS_SENTINEL_ENABLED);
+            if (sentinelEnabled) {
+                // redis sentinel
+                String masterName = config.get(ConfigKeys.REDIS_SENTINEL_MASTER);
+                List<String> sentinelAddresses = config.get(ConfigKeys.REDIS_SENTINEL_ADDRESSES);
+                String sentinelUsername = config.get(ConfigKeys.REDIS_SENTINEL_USERNAME);
+                String sentinelPassword = config.get(ConfigKeys.REDIS_SENTINEL_PASSWORD);
+                if (sentinelUsername.isEmpty()) {
+                    sentinelUsername = null;
+                }
+                if (sentinelPassword.isEmpty()) {
+                    sentinelPassword = null;
+                }
+                redis.init(masterName, sentinelAddresses, username, password, ssl, sentinelUsername, sentinelPassword);
+            } else if (!addresses.isEmpty()) {
                 // redis cluster
                 addresses = new ArrayList<>(addresses);
                 if (address != null) {
