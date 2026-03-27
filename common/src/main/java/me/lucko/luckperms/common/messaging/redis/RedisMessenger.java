@@ -72,11 +72,11 @@ public class RedisMessenger implements Messenger {
         this.init(new JedisPooled(parseAddress(address), jedisConfig(username, password, ssl)));
     }
 
-    public void init(String masterName, List<String> sentinelAddresses, String username, String password, boolean ssl) {
+    public void init(String masterName, List<String> sentinelAddresses, String username, String password, boolean ssl, String sentinelUsername, String sentinelPassword) {
         Set<HostAndPort> sentinels = sentinelAddresses.stream()
                 .map(addr -> parseAddress(addr, SENTINEL_DEFAULT_PORT))
                 .collect(Collectors.toSet());
-        this.init(new JedisSentineled(masterName, jedisConfig(username, password, ssl), sentinels, jedisConfig(null, null, ssl)));
+        this.init(new JedisSentineled(masterName, jedisConfig(username, password, ssl), sentinels, jedisConfig(sentinelUsername, sentinelPassword, ssl)));
     }
 
     private void init(UnifiedJedis jedis) {

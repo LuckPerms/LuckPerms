@@ -721,6 +721,16 @@ public final class ConfigKeys {
     public static final ConfigKey<List<String>> REDIS_SENTINEL_ADDRESSES = notReloadable(stringListKey("redis.sentinel.addresses", ImmutableList.of()));
 
     /**
+     * The username to connect to the redis sentinel nodes with, or an empty string if it should use default
+     */
+    public static final ConfigKey<String> REDIS_SENTINEL_USERNAME = notReloadable(stringKey("redis.sentinel.username", ""));
+
+    /**
+     * The password in use by the redis sentinel nodes, or an empty string if there is no password
+     */
+    public static final ConfigKey<String> REDIS_SENTINEL_PASSWORD = notReloadable(stringKey("redis.sentinel.password", ""));
+
+    /**
      * If nats messaging is enabled
      */
     public static final ConfigKey<Boolean> NATS_ENABLED = notReloadable(booleanKey("nats.enabled", false));
