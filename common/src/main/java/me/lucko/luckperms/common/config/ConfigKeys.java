@@ -706,6 +706,21 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> REDIS_SSL = notReloadable(booleanKey("redis.ssl", false));
 
     /**
+     * If redis sentinel is enabled
+     */
+    public static final ConfigKey<Boolean> REDIS_SENTINEL_ENABLED = notReloadable(booleanKey("redis.sentinel.enabled", false));
+
+    /**
+     * The name of the redis sentinel master
+     */
+    public static final ConfigKey<String> REDIS_SENTINEL_MASTER = notReloadable(stringKey("redis.sentinel.master", "mymaster"));
+
+    /**
+     * The addresses of the redis sentinel nodes
+     */
+    public static final ConfigKey<List<String>> REDIS_SENTINEL_ADDRESSES = notReloadable(stringListKey("redis.sentinel.addresses", ImmutableList.of()));
+
+    /**
      * If nats messaging is enabled
      */
     public static final ConfigKey<Boolean> NATS_ENABLED = notReloadable(booleanKey("nats.enabled", false));
