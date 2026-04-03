@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
 import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import me.lucko.luckperms.hytale.LPHytalePlugin;
-import me.lucko.luckperms.hytale.calculator.virtualgroups.VirtualGroupsMap;
+import me.lucko.luckperms.hytale.util.VirtualGroupsCache;
 import net.luckperms.api.node.Node;
 
 import java.util.HashSet;
@@ -49,10 +49,10 @@ public class HytaleVirtualGroupProcessor extends AbstractPermissionProcessor imp
     private final PermissionCalculator calculator;
 
     public HytaleVirtualGroupProcessor(LPHytalePlugin plugin, ImmutableSet<String> virtualGroups, Map<String, Node> sourceMap) {
-        VirtualGroupsMap virtualGroupsMap = plugin.getVirtualGroupsMap();
-
         Set<String> groups = virtualGroups;
-        for (String group : virtualGroupsMap.getAllVirtualGroups()) {
+
+        VirtualGroupsCache virtualGroupsCache = plugin.getVirtualGroupsCache();
+        for (String group : virtualGroupsCache.getAllVirtualGroups()) {
             if (groups.contains(group)) {
                 continue;
             }
@@ -66,12 +66,12 @@ public class HytaleVirtualGroupProcessor extends AbstractPermissionProcessor imp
             }
         }
 
-        this.calculator = virtualGroupsMap.getCalculator(ImmutableSet.copyOf(groups));
+        this.calculator = virtualGroupsCache.getCalculator(ImmutableSet.copyOf(groups));
     }
 
     @Override
     public TristateResult hasPermission(String permission) {
-        return RESULT_FACTORY.result(this.calculator.checkPermission(permission, CheckOrigin.INTERNAL).result());
+        return RESULT_FACTORY.result(this.calculator.checkPermission(permission, CheckOrigin.INTERNAL));
     }
 
 }

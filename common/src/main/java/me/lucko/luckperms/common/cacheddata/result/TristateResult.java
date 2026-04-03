@@ -127,5 +127,9 @@ public final class TristateResult extends AbstractResult<Tristate, Node, Tristat
             }
             return new TristateResult(result, node, this.processorClass);
         }
+
+        public TristateResult result(TristateResult result) {
+            return new TristateResult(result.result(), result.node(), this.processorClass);
+        }
     }
 }

@@ -23,10 +23,17 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.hytale.calculator.virtualgroups;
+package me.lucko.luckperms.hytale.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.hypixel.hytale.server.core.permissions.PermissionsModule;
+import me.lucko.luckperms.common.cache.LoadingMap;
+import me.lucko.luckperms.common.calculator.PermissionCalculator;
+import me.lucko.luckperms.common.calculator.PermissionCalculatorBase;
+import me.lucko.luckperms.common.calculator.processor.DirectProcessor;
+import me.lucko.luckperms.common.calculator.processor.PermissionProcessor;
+import me.lucko.luckperms.common.calculator.processor.WildcardProcessor;
 import me.lucko.luckperms.common.model.InheritanceOrigin;
 import me.lucko.luckperms.common.model.PermissionHolderIdentifier;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
@@ -34,50 +41,69 @@ import me.lucko.luckperms.common.util.ImmutableCollectors;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class VirtualGroupsAccess {
-
-    /** Reflective access to PermissionsModule.virtualGroups field */
-    private static final Field VIRTUAL_GROUPS_FIELD;
-    static {
-        try {
-            VIRTUAL_GROUPS_FIELD = PermissionsModule.class.getDeclaredField("virtualGroups");
-            VIRTUAL_GROUPS_FIELD.setAccessible(true);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-    }
+public class VirtualGroupsCache {
 
     /**
-     * Exports the virtual groups mapping from Hytale's PermissionsModule into a map of maps of {@link Node}.
-     *
-     * @return the exported mapping
+     * A loading map (cache) of virtual group names to a {@link PermissionCalculator}
+     * that can resolve the collective permissions of the groups.
      */
-    public static ImmutableMap<String, ImmutableMap<String, Node>> export() {
-        Map<String, Set<String>> virtualGroups = getVirtualGroups();
-        return virtualGroups.entrySet().stream().collect(ImmutableCollectors.toMap(
+    private final Map<ImmutableSet<String>, PermissionCalculator> caches;
+
+    /**
+     * A set of known virtual group names
+     */
+    private ImmutableSet<String> knownVirtualGroups;
+
+    /**
+     * A lookup of virtual group name (lowercase) to the permissions it grants, as nodes.
+     */
+    private ImmutableMap<String, ImmutableMap<String, Node>> virtualGroupToNodesLookup;
+
+    public VirtualGroupsCache() {
+        this.caches = LoadingMap.of(this::buildCalculator);
+        refresh();
+    }
+
+    public void refresh() {
+        Map<String, Set<String>> virtualGroups = PermissionsModule.get().getVirtualGroups();
+        this.knownVirtualGroups = ImmutableSet.copyOf(virtualGroups.keySet());
+        this.virtualGroupToNodesLookup = virtualGroups.entrySet().stream().collect(ImmutableCollectors.toMap(
                 e -> e.getKey().toLowerCase(Locale.ROOT),
-                e -> transformSet(e.getValue(), e.getKey())
+                e -> hytalePermissionStringsToNodes(e.getValue(), e.getKey())
         ));
+        this.caches.clear();
     }
 
-    /**
-     * Reads the virtual groups map from the PermissionsModule.
-     *
-     * @return the virtual groups map
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Map<String, Set<String>> getVirtualGroups() {
-        PermissionsModule permissionsModule = PermissionsModule.get();
-        try {
-            return (Map) VIRTUAL_GROUPS_FIELD.get(permissionsModule);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+    public ImmutableSet<String> getAllVirtualGroups() {
+        return this.knownVirtualGroups;
+    }
+
+    public PermissionCalculator getCalculator(ImmutableSet<String> virtualGroups) {
+        return this.caches.get(virtualGroups);
+    }
+
+    private PermissionCalculator buildCalculator(Set<String> virtualGroups) {
+        Map<String, Node> sourceMap = new ConcurrentHashMap<>();
+        for (String virtualGroup : virtualGroups) {
+            sourceMap.putAll(this.virtualGroupToNodesLookup.getOrDefault(virtualGroup.toLowerCase(Locale.ROOT), ImmutableMap.of()));
         }
+
+        if (sourceMap.isEmpty()) {
+            return PermissionCalculator.EMPTY;
+        }
+
+        List<PermissionProcessor> processors = new ArrayList<>(2);
+        processors.add(new DirectProcessor(sourceMap));
+        processors.add(new WildcardProcessor(sourceMap));
+
+        return new PermissionCalculatorBase(processors);
     }
 
     /**
@@ -86,7 +112,7 @@ public class VirtualGroupsAccess {
      * @param permissions the input
      * @return the transformed map
      */
-    private static ImmutableMap<String, Node> transformSet(Set<String> permissions, String originGroup) {
+    private static ImmutableMap<String, Node> hytalePermissionStringsToNodes(Set<String> permissions, String originGroup) {
         ImmutableMap.Builder<String, Node> builder = ImmutableMap.builder();
 
         InheritanceOrigin origin = new InheritanceOrigin(
@@ -111,4 +137,5 @@ public class VirtualGroupsAccess {
 
         return builder.build();
     }
+
 }
