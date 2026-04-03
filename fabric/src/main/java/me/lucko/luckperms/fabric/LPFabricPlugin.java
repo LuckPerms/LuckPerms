@@ -38,7 +38,8 @@ import me.lucko.luckperms.fabric.context.FabricContextManager;
 import me.lucko.luckperms.fabric.context.FabricPlayerCalculator;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.FabricOtherListeners;
-import me.lucko.luckperms.fabric.listeners.FabricPermissionsApiListener;
+import me.lucko.luckperms.fabric.listeners.FabricPermissionsApiV0Listener;
+import me.lucko.luckperms.fabric.listeners.FabricPermissionsApiV1Listener;
 import me.lucko.luckperms.fabric.listeners.FabricPermissionsListener;
 import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -64,7 +65,8 @@ public class LPFabricPlugin extends MinecraftLuckPermsPlugin<LPFabricPlugin, LPF
         this.connectionListener = new FabricConnectionListener(this);
         this.connectionListener.registerListeners();
 
-        new FabricPermissionsApiListener(this).registerListeners();
+        new FabricPermissionsApiV0Listener(this).registerListeners();
+        new FabricPermissionsApiV1Listener(this).registerListeners();
         new FabricPermissionsListener().registerListeners();
 
         // Command registration also need to occur early, and will persist across game states as well.

@@ -15,6 +15,7 @@ tasks.withType(JavaCompile).configureEach {
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
+    mavenLocal()
 }
 
 configurations {
@@ -41,6 +42,8 @@ dependencies {
     apiModules.forEach {
         implementation(fabricApi.module(it, '0.144.0+26.1'))
     }
+
+    implementation 'net.fabricmc.fabric-api:fabric-permission-api-v1:1.0.0+local'
 
     jarInJar 'me.lucko:fabric-permissions-api:0.7.0'
 
