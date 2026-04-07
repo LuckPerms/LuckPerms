@@ -28,9 +28,12 @@ package me.lucko.luckperms.common.commands.group;
 import com.google.common.collect.Maps;
 import me.lucko.luckperms.common.cache.LoadingMap;
 import me.lucko.luckperms.common.command.abstraction.ChildCommand;
+import me.lucko.luckperms.common.command.abstraction.CommandException;
 import me.lucko.luckperms.common.command.access.ArgumentPermissions;
 import me.lucko.luckperms.common.command.access.CommandPermission;
 import me.lucko.luckperms.common.command.spec.CommandSpec;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompleter;
+import me.lucko.luckperms.common.command.tabcomplete.TabCompletions;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
@@ -46,6 +49,7 @@ import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.util.Iterators;
 import me.lucko.luckperms.common.util.Predicates;
+import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.types.InheritanceNode;
 
 import java.util.ArrayList;
@@ -57,11 +61,11 @@ import java.util.stream.Collectors;
 
 public class GroupListMembers extends ChildCommand<Group> {
     public GroupListMembers() {
-        super(CommandSpec.GROUP_LISTMEMBERS, "listmembers", CommandPermission.GROUP_LIST_MEMBERS, Predicates.notInRange(0, 1));
+        super(CommandSpec.GROUP_LISTMEMBERS, "listmembers", CommandPermission.GROUP_LIST_MEMBERS, Predicates.notInRange(0, 2));
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Group target, ArgumentList args, String label) throws CommandException {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), target)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return;
@@ -70,11 +74,13 @@ public class GroupListMembers extends ChildCommand<Group> {
         InheritanceNode node = Inheritance.builder(target.getName()).build();
         ConstraintNodeMatcher<InheritanceNode> matcher = StandardNodeMatchers.key(node);
         int page = args.getIntOrDefault(0, 1);
+        ImmutableContextSet context = args.getContextOrEmpty(1);
 
         Message.SEARCH_SEARCHING_MEMBERS.send(sender, target.getName());
 
         List<NodeEntry<UUID, InheritanceNode>> matchedUsers = plugin.getStorage().searchUserNodes(matcher).join().stream()
                 .filter(n -> n.getNode().getValue())
+                .filter(n -> context.isEmpty() || n.getNode().getContexts().isSatisfiedBy(context))
                 .collect(Collectors.toList());
 
         // special handling for default group
@@ -92,6 +98,7 @@ public class GroupListMembers extends ChildCommand<Group> {
 
         List<NodeEntry<String, InheritanceNode>> matchedGroups = plugin.getStorage().searchGroupNodes(matcher).join().stream()
                 .filter(n -> n.getNode().getValue())
+                .filter(n -> context.isEmpty() || n.getNode().getContexts().isSatisfiedBy(context))
                 .collect(Collectors.toList());
 
         int users = matchedUsers.size();
@@ -133,5 +140,12 @@ public class GroupListMembers extends ChildCommand<Group> {
         for (Map.Entry<String, NodeEntry<T, InheritanceNode>> ent : mappedContent) {
             Message.SEARCH_INHERITS_NODE_ENTRY.send(sender, ent.getValue().getNode(), ent.getKey(), holderType, label, sender.getPlugin());
         }
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
+        return TabCompleter.create()
+                .from(1, TabCompletions.contexts(plugin))
+                .complete(args);
     }
 }
