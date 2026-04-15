@@ -59,7 +59,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
     public void init() throws SQLException {
         try (Connection c = getConnection()) {
             // init table
-            String createStatement = "CREATE TABLE IF NOT EXISTS `" + getTableName() + "` (`id` INT AUTO_INCREMENT NOT NULL, `time` TIMESTAMP NOT NULL, `msg` TEXT NOT NULL, PRIMARY KEY (`id`)) DEFAULT CHARSET = utf8mb4";
+            String createStatement = "CREATE TABLE IF NOT EXISTS `" + getTableName() + "` (`id` INT AUTO_INCREMENT NOT NULL, `time` TIMESTAMP NOT NULL, `msg` TEXT NOT NULL, PRIMARY KEY (`id`), KEY (`time`)) DEFAULT CHARSET = utf8mb4";
             try (Statement s = c.createStatement()) {
                 try {
                     s.execute(createStatement);
@@ -69,6 +69,18 @@ public abstract class AbstractSqlMessenger implements Messenger {
                         s.execute(createStatement.replace("utf8mb4", "utf8"));
                     } else {
                         throw e;
+                    }
+                }
+            }
+
+            // add index for time column if it doesn't already exist
+            try (PreparedStatement ps = c.prepareStatement("SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = 'time' LIMIT 1")) {
+                ps.setString(1, getTableName());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        try (Statement s = c.createStatement()) {
+                            s.execute("CREATE INDEX `time` ON `" + getTableName() + "` (`time`)");
+                        }
                     }
                 }
             }
