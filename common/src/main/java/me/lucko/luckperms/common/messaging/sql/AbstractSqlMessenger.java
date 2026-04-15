@@ -124,7 +124,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
         }
 
         try (Connection c = getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM `" + getTableName() + "` WHERE `id` > ? AND (NOW() - `time` < 30)")) {
+            try (PreparedStatement ps = c.prepareStatement("SELECT `id`, `msg` FROM `" + getTableName() + "` WHERE `id` > ? AND `time` > (NOW() - INTERVAL 30 SECOND)")) {
                 ps.setLong(1, this.lastId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -151,7 +151,7 @@ public abstract class AbstractSqlMessenger implements Messenger {
         }
 
         try (Connection c = getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement("DELETE FROM `" + getTableName() + "` WHERE (NOW() - `time` > 60)")) {
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM `" + getTableName() + "` WHERE `time` < (NOW() - INTERVAL 60 SECOND)")) {
                 ps.execute();
             }
         } catch (SQLException e) {
