@@ -9,7 +9,7 @@ tasks.withType(JavaCompile).configureEach {
 dependencies {
     implementation project(':common')
 
-    compileOnly('org.spongepowered:spongeapi:12.0.0') {
+    compileOnly('org.spongepowered:spongeapi:15.0.0-SNAPSHOT') {
         exclude(module: 'configurate-core')
         exclude(module: 'configurate-hocon')
         exclude(module: 'configurate-gson')

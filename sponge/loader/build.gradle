@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.spongepowered:spongeapi:12.0.0'
+    compileOnly 'org.spongepowered:spongeapi:15.0.0-SNAPSHOT'
 
     implementation project(':api')
     implementation project(':common:loader-utils')
