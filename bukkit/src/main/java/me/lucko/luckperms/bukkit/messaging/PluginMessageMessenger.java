@@ -27,6 +27,8 @@ package me.lucko.luckperms.bukkit.messaging;
 
 import com.google.common.collect.Iterables;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.bukkit.util.FoliaSchedulerHelper;
+import me.lucko.luckperms.bukkit.util.FoliaUtil;
 import me.lucko.luckperms.common.messaging.pluginmsg.AbstractPluginMessageMessenger;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
@@ -61,19 +63,32 @@ public class PluginMessageMessenger extends AbstractPluginMessageMessenger imple
 
     @Override
     protected void sendOutgoingMessage(byte[] buf) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                Collection<? extends Player> players = PluginMessageMessenger.this.plugin.getBootstrap().getServer().getOnlinePlayers();
+        if (FoliaUtil.isFolia()) {
+            FoliaSchedulerHelper.runOnGlobalRegionAtFixedRate(this.plugin.getLoader(), () -> {
+                Collection<? extends Player> players = this.plugin.getBootstrap().getServer().getOnlinePlayers();
                 Player p = Iterables.getFirst(players, null);
                 if (p == null) {
-                    return;
+                    return false;
                 }
 
-                p.sendPluginMessage(PluginMessageMessenger.this.plugin.getLoader(), CHANNEL, buf);
-                cancel();
-            }
-        }.runTaskTimer(this.plugin.getLoader(), 1L, 100L);
+                p.sendPluginMessage(this.plugin.getLoader(), CHANNEL, buf);
+                return true;
+            }, 1L, 100L);
+        } else {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Collection<? extends Player> players = PluginMessageMessenger.this.plugin.getBootstrap().getServer().getOnlinePlayers();
+                    Player p = Iterables.getFirst(players, null);
+                    if (p == null) {
+                        return;
+                    }
+
+                    p.sendPluginMessage(PluginMessageMessenger.this.plugin.getLoader(), CHANNEL, buf);
+                    cancel();
+                }
+            }.runTaskTimer(this.plugin.getLoader(), 1L, 100L);
+        }
     }
 
     @Override

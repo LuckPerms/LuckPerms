@@ -28,6 +28,8 @@ package me.lucko.luckperms.bukkit.inject.permissible;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.bukkit.util.FoliaSchedulerHelper;
+import me.lucko.luckperms.bukkit.util.FoliaUtil;
 import me.lucko.luckperms.bukkit.calculator.OpProcessor;
 import me.lucko.luckperms.bukkit.calculator.PermissionMapProcessor;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
@@ -244,9 +246,13 @@ public class LuckPermsPermissible extends PermissibleBase {
         }
 
         LuckPermsPermissionAttachment attachment = addAttachment(plugin);
-        if (getPlugin().getBootstrap().getServer().getScheduler().scheduleSyncDelayedTask(plugin, attachment::remove, ticks) == -1) {
-            attachment.remove();
-            throw new RuntimeException("Could not add PermissionAttachment to " + this.player + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
+        if (FoliaUtil.isFolia()) {
+            FoliaSchedulerHelper.runOnGlobalRegionDelayed(plugin, attachment::remove, ticks);
+        } else {
+            if (getPlugin().getBootstrap().getServer().getScheduler().scheduleSyncDelayedTask(plugin, attachment::remove, ticks) == -1) {
+                attachment.remove();
+                throw new RuntimeException("Could not add PermissionAttachment to " + this.player + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
+            }
         }
         return attachment;
     }

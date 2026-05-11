@@ -23,30 +23,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit;
+package me.lucko.luckperms.bukkit.util;
 
-import me.lucko.luckperms.bukkit.util.FoliaSchedulerHelper;
-import me.lucko.luckperms.bukkit.util.FoliaUtil;
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+public final class FoliaUtil {
+    private static final boolean FOLIA;
 
-import java.util.concurrent.Executor;
-
-public class BukkitSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
-    private final Executor sync;
-
-    public BukkitSchedulerAdapter(LPBukkitBootstrap bootstrap) {
-        super(bootstrap);
-        if (FoliaUtil.isFolia()) {
-            this.sync = r -> FoliaSchedulerHelper.executeOnGlobalRegion(bootstrap.getLoader(), r);
-        } else {
-            this.sync = r -> bootstrap.getServer().getScheduler().scheduleSyncDelayedTask(bootstrap.getLoader(), r);
+    static {
+        boolean folia;
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            folia = true;
+        } catch (ClassNotFoundException e) {
+            folia = false;
         }
+        FOLIA = folia;
     }
 
-    @Override
-    public Executor sync() {
-        return this.sync;
+    private FoliaUtil() {
     }
 
+    public static boolean isFolia() {
+        return FOLIA;
+    }
 }

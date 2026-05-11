@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.bukkit;
 
+import me.lucko.luckperms.bukkit.util.FoliaSchedulerHelper;
+import me.lucko.luckperms.bukkit.util.FoliaUtil;
 import me.lucko.luckperms.bukkit.util.NullSafeConsoleCommandSender;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
 import me.lucko.luckperms.common.plugin.bootstrap.BootstrappedWithLoader;
@@ -175,7 +177,11 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
             this.plugin.enable();
 
             // schedule a task to update the 'serverStarting' flag
-            getServer().getScheduler().runTask(this.loader, () -> this.serverStarting = false);
+            if (FoliaUtil.isFolia()) {
+                FoliaSchedulerHelper.executeOnGlobalRegion(this.loader, () -> this.serverStarting = false);
+            } else {
+                getServer().getScheduler().runTask(this.loader, () -> this.serverStarting = false);
+            }
         } finally {
             this.enableLatch.countDown();
         }

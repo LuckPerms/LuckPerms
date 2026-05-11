@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.bukkit;
 
+import me.lucko.luckperms.bukkit.util.FoliaSchedulerHelper;
+import me.lucko.luckperms.bukkit.util.FoliaUtil;
 import me.lucko.luckperms.bukkit.brigadier.LuckPermsBrigadier;
 import me.lucko.luckperms.bukkit.calculator.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.context.BukkitContextManager;
@@ -206,7 +208,11 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
             // schedule another injection after all plugins have loaded
             // the entire pluginmanager instance is replaced by some plugins :(
-            this.bootstrap.getServer().getScheduler().runTaskLaterAsynchronously(this.bootstrap.getLoader(), injector, 1);
+            if (FoliaUtil.isFolia()) {
+                FoliaSchedulerHelper.executeAsync(this.bootstrap.getLoader(), injector);
+            } else {
+                this.bootstrap.getServer().getScheduler().runTaskLaterAsynchronously(this.bootstrap.getLoader(), injector, 1);
+            }
         }
 
         /*
@@ -268,11 +274,16 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
         // remove all operators on startup if they're disabled
         if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
-            this.bootstrap.getServer().getScheduler().runTaskAsynchronously(this.bootstrap.getLoader(), () -> {
+            Runnable removeOps = () -> {
                 for (OfflinePlayer player : this.bootstrap.getServer().getOperators()) {
                     player.setOp(false);
                 }
-            });
+            };
+            if (FoliaUtil.isFolia()) {
+                FoliaSchedulerHelper.executeAsync(this.bootstrap.getLoader(), removeOps);
+            } else {
+                this.bootstrap.getServer().getScheduler().runTaskAsynchronously(this.bootstrap.getLoader(), removeOps);
+            }
         }
 
         // register autoop listener

@@ -26,6 +26,8 @@
 package me.lucko.luckperms.bukkit.listeners;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.bukkit.util.FoliaSchedulerHelper;
+import me.lucko.luckperms.bukkit.util.FoliaUtil;
 import me.lucko.luckperms.bukkit.inject.permissible.LuckPermsPermissible;
 import me.lucko.luckperms.bukkit.inject.permissible.PermissibleInjector;
 import me.lucko.luckperms.bukkit.util.PlayerLocaleUtil;
@@ -240,7 +242,7 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
 
         // perform unhooking from bukkit objects 1 tick later.
         // this allows plugins listening after us on MONITOR to still have intact permissions data
-        this.plugin.getBootstrap().getServer().getScheduler().runTaskLater(this.plugin.getLoader(), () -> {
+        Runnable unhookTask = () -> {
             // Remove the custom permissible
             try {
                 PermissibleInjector.uninject(player, true);
@@ -253,7 +255,12 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             if (this.plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) {
                 player.setOp(false);
             }
-        }, 1L);
+        };
+        if (FoliaUtil.isFolia()) {
+            FoliaSchedulerHelper.runOnGlobalRegionDelayed(this.plugin.getLoader(), unhookTask, 1L);
+        } else {
+            this.plugin.getBootstrap().getServer().getScheduler().runTaskLater(this.plugin.getLoader(), unhookTask, 1L);
+        }
     }
 
 }
