@@ -132,7 +132,8 @@ public enum CommandSpec {
 
     GROUP_INFO,
     GROUP_LISTMEMBERS(
-            arg("page", false)
+            arg("page", false),
+            arg("context...", false)
     ),
     GROUP_SETWEIGHT(
             arg("weight", true)

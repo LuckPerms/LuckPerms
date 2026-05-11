@@ -543,7 +543,9 @@ luckperms {
 
       editor;
       listmembers {
-        page brigadier:integer;
+        page brigadier:integer {
+          context brigadier:string greedy_phrase;
+        }
       }
       setweight {
         weight brigadier:integer;
