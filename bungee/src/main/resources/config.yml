@@ -266,6 +266,16 @@ redis:
   address: localhost
   username: ''
   password: ''
+  # Settings for Redis Sentinel.
+  # Sentinel provides high availability for Redis by monitoring master/replica instances.
+  # Port 26379 is used by default for sentinel nodes.
+  sentinel:
+    enabled: false
+    master: mymaster
+    addresses:
+      - localhost:26379
+    username: ''
+    password: ''
 
 # Settings for Nats.
 # Port 4222 is used by default; set address to "host:port" if differs
