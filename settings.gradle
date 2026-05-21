@@ -22,6 +22,7 @@ include (
         'common',
         'common:loader-utils',
         'common:minecraft',
+        'common:placeholders',
         'bukkit',
         'bukkit:loader',
         'bukkit-legacy',
