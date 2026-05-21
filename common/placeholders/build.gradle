@@ -1,0 +1,45 @@
+plugins {
+    id("java-library")
+    id("jacoco")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jacocoTestReport {
+    dependsOn test
+}
+
+dependencies {
+    api project(':api')
+
+    compileOnly 'org.checkerframework:checker-qual:3.49.3'
+    compileOnly 'org.jetbrains:annotations:26.0.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.2'
+    testImplementation 'org.mockito:mockito-core:5.18.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.18.0'
+}
+
+publishing {
+    //repositories {
+    //    maven {
+    //        url = 'https://nexus.lucko.me/repository/maven-snapshots/'
+    //        credentials {
+    //            username = luckoNexusUsername
+    //            password = luckoNexusPassword
+    //        }
+    //    }
+    //}
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'common-placeholders'
+            version = "${project.ext.fullVersion}-SNAPSHOT"
+        }
+    }
+}
