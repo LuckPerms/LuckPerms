@@ -41,7 +41,9 @@ import me.lucko.luckperms.fabric.listeners.FabricOtherListeners;
 import me.lucko.luckperms.fabric.listeners.FabricPermissionsApiListener;
 import me.lucko.luckperms.fabric.listeners.FabricPermissionsListener;
 import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
+import me.lucko.luckperms.fabric.placeholder.FabricPlaceholderApiIntegration;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.luckperms.api.LuckPerms;
 import net.minecraft.server.players.ServerOpList;
@@ -155,6 +157,15 @@ public class LPFabricPlugin extends MinecraftLuckPermsPlugin<LPFabricPlugin, LPF
         // register fabric command list updater
         if (getConfiguration().get(ConfigKeys.UPDATE_CLIENT_COMMAND_LIST)) {
             getApiProvider().getEventBus().subscribe(new MinecraftCommandListUpdater(this));
+        }
+
+        // hook with placeholder api, if present
+        if (FabricLoader.getInstance().isModLoaded("placeholder-api")) {
+            try {
+                new FabricPlaceholderApiIntegration(this).register();
+            } catch (LinkageError e) {
+                // ignore
+            }
         }
     }
 
