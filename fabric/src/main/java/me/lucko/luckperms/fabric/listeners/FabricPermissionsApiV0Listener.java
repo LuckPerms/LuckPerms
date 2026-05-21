@@ -54,10 +54,10 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Listener to route permission checks made via fabric-permissions-api to LuckPerms.
  */
-public class FabricPermissionsApiListener {
+public class FabricPermissionsApiV0Listener {
     private final LPFabricPlugin plugin;
 
-    public FabricPermissionsApiListener(LPFabricPlugin plugin) {
+    public FabricPermissionsApiV0Listener(LPFabricPlugin plugin) {
         this.plugin = plugin;
     }
 
