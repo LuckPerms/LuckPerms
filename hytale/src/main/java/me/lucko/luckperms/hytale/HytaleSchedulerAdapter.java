@@ -25,20 +25,55 @@
 
 package me.lucko.luckperms.hytale;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.server.core.command.system.CommandSender;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.receiver.IMessageReceiver;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import me.lucko.luckperms.common.plugin.scheduler.JavaSchedulerAdapter;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
+import me.lucko.luckperms.common.sender.AbstractSender;
+import me.lucko.luckperms.common.sender.Sender;
 
-import java.util.concurrent.Executor;
-
-public class HytaleSchedulerAdapter extends AbstractJavaScheduler implements SchedulerAdapter {
+public class HytaleSchedulerAdapter extends JavaSchedulerAdapter implements SchedulerAdapter {
 
     public HytaleSchedulerAdapter(LPHytaleBootstrap bootstrap) {
         super(bootstrap);
     }
 
     @Override
-    public Executor sync() {
-        return this.async();
+    public void executeSync(Sender ctx, Runnable task) {
+        executeSync(unwrapSender(ctx), task);
     }
 
+    public void executeSync(IMessageReceiver ctx, Runnable task) {
+        if (ctx instanceof PlayerRef playerRef) {
+            Ref<EntityStore> ref = playerRef.getReference();
+            if (ref != null) {
+                World world = ref.getStore().getExternalData().getWorld();
+                world.execute(task);
+                return;
+            }
+        } else if (ctx instanceof Player player) {
+            World world = player.getWorld();
+            if (world != null) {
+                world.execute(task);
+                return;
+            }
+        }
+
+        // fallback
+        executeAsync(task);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static IMessageReceiver unwrapSender(Sender sender) {
+        if (sender instanceof AbstractSender) {
+            return ((AbstractSender<IMessageReceiver>) sender).getSender();
+        } else {
+            throw new IllegalArgumentException("unknown sender type: " + sender.getClass());
+        }
+    }
 }

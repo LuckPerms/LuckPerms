@@ -25,20 +25,25 @@
 
 package me.lucko.luckperms.common.minecraft;
 
-import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import me.lucko.luckperms.common.plugin.scheduler.JavaSchedulerAdapter;
+import me.lucko.luckperms.common.sender.Sender;
 
 import java.util.concurrent.Executor;
 
-public class MinecraftSchedulerAdapter extends AbstractJavaScheduler {
-    private final Executor sync;
+public class MinecraftSchedulerAdapter extends JavaSchedulerAdapter {
+    private final Executor syncExecutor;
 
     public MinecraftSchedulerAdapter(MinecraftLuckPermsBootstrap bootstrap) {
         super(bootstrap);
-        this.sync = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).executeBlocking(r);
+        this.syncExecutor = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).executeBlocking(r);
+    }
+
+    public void executeSync(Runnable task) {
+        this.syncExecutor.execute(task);
     }
 
     @Override
-    public Executor sync() {
-        return this.sync;
+    public void executeSync(Sender ctx, Runnable task) {
+        this.syncExecutor.execute(task);
     }
 }

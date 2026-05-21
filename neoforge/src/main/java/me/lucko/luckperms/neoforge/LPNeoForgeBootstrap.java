@@ -75,7 +75,7 @@ public final class LPNeoForgeBootstrap extends MinecraftLuckPermsBootstrap imple
     /**
      * A scheduler adapter for the platform
      */
-    private final SchedulerAdapter schedulerAdapter;
+    private final MinecraftSchedulerAdapter schedulerAdapter;
 
     /**
      * The plugin class path appender
@@ -128,7 +128,7 @@ public final class LPNeoForgeBootstrap extends MinecraftLuckPermsBootstrap imple
     }
 
     @Override
-    public SchedulerAdapter getScheduler() {
+    public MinecraftSchedulerAdapter getScheduler() {
         return this.schedulerAdapter;
     }
 

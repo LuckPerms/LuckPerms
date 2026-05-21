@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 /**
  * Abstract implementation of {@link SchedulerAdapter} using a {@link ScheduledExecutorService}.
  */
-public abstract class AbstractJavaScheduler implements SchedulerAdapter {
+public class JavaSchedulerAdapter implements SchedulerAdapter {
     private static final int PARALLELISM = 16;
 
     private final LuckPermsBootstrap bootstrap;
@@ -52,7 +52,7 @@ public abstract class AbstractJavaScheduler implements SchedulerAdapter {
     private final ScheduledThreadPoolExecutor scheduler;
     private final ForkJoinPool worker;
 
-    public AbstractJavaScheduler(LuckPermsBootstrap bootstrap) {
+    public JavaSchedulerAdapter(LuckPermsBootstrap bootstrap) {
         this.bootstrap = bootstrap;
 
         this.scheduler = new ScheduledThreadPoolExecutor(1, r -> {
@@ -133,7 +133,7 @@ public abstract class AbstractJavaScheduler implements SchedulerAdapter {
     private final class ExceptionHandler implements UncaughtExceptionHandler {
         @Override
         public void uncaughtException(Thread t, Throwable e) {
-            AbstractJavaScheduler.this.bootstrap.getPluginLogger().warn("Thread " + t.getName() + " threw an uncaught exception", e);
+            JavaSchedulerAdapter.this.bootstrap.getPluginLogger().warn("Thread " + t.getName() + " threw an uncaught exception", e);
         }
     }
 }
