@@ -38,6 +38,7 @@ import net.fabricmc.fabric.api.permission.v1.PermissionContext;
 import net.fabricmc.fabric.api.permission.v1.PermissionEvents;
 import net.fabricmc.fabric.api.permission.v1.PermissionNode;
 import net.fabricmc.fabric.impl.permission.PermissionContextKey;
+import net.luckperms.api.util.Tristate;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
@@ -108,12 +109,14 @@ public class FabricPermissionsApiV1Listener {
     private static Boolean permissionCheck(PermissionContext ctx, String permission) {
         Entity entity = ctx.get(PermissionContextKey.ENTITY);
         if (entity instanceof MixinUser user) {
-            return user.luckperms$hasPermission(permission).asBoolean();
+            Tristate result = user.luckperms$hasPermission(permission);
+            return tristateToNullableBoolean(result);
         }
 
         User user = ctx.get(USER_KEY);
         if (user != null) {
-            return user.getCachedData().getPermissionData().checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result().asBoolean();
+            Tristate result = user.getCachedData().getPermissionData().checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
+            return tristateToNullableBoolean(result);
         }
 
         return null;
@@ -131,6 +134,10 @@ public class FabricPermissionsApiV1Listener {
         }
 
         return null;
+    }
+
+    private static Boolean tristateToNullableBoolean(Tristate value) {
+        return value == Tristate.UNDEFINED ? null : value.asBoolean();
     }
 
 }
