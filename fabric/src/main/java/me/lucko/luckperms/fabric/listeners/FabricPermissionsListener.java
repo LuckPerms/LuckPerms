@@ -30,8 +30,11 @@ import me.lucko.luckperms.fabric.model.MixinUser;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.server.permissions.PermissionSet;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Listener to route permission checks made via Minecraft's native permission predicate to LuckPerms.
@@ -43,20 +46,22 @@ public class FabricPermissionsListener {
     }
 
     private PermissionSet onSetupPlayerPermissions(ServerPlayer entity, PermissionSet defaults) {
-        return new LuckPermsPermissionSet(entity, defaults);
+        return defaults instanceof LevelBasedPermissionSet levelBasedDefaults
+            ? new LuckPermsLevelBasedPermissionSet<>(entity, levelBasedDefaults)
+            : new LuckPermsPermissionSet<>(entity, defaults);
     }
 
-    private static final class LuckPermsPermissionSet implements PermissionSet {
-        private final ServerPlayer player;
-        private final PermissionSet delegate;
+    private static class LuckPermsPermissionSet<D extends PermissionSet> implements PermissionSet {
+        protected final ServerPlayer player;
+        protected final D delegate;
 
-        LuckPermsPermissionSet(ServerPlayer player, PermissionSet delegate) {
+        LuckPermsPermissionSet(ServerPlayer player, D delegate) {
             this.player = player;
             this.delegate = delegate;
         }
 
         @Override
-        public boolean hasPermission(Permission permission) {
+        public boolean hasPermission(@NonNull Permission permission) {
             if (permission instanceof Permission.Atom) {
                 Identifier permissionId = ((Permission.Atom) permission).id();
                 String permissionString = permissionId.getNamespace() + '.' + permissionId.getPath();
@@ -68,6 +73,17 @@ public class FabricPermissionsListener {
             }
 
             return this.delegate.hasPermission(permission);
+        }
+    }
+
+    private static class LuckPermsLevelBasedPermissionSet<D extends LevelBasedPermissionSet> extends LuckPermsPermissionSet<D> implements LevelBasedPermissionSet {
+        LuckPermsLevelBasedPermissionSet(ServerPlayer player, D delegate) {
+            super(player, delegate);
+        }
+
+        @Override
+        public @NonNull PermissionLevel level() {
+            return this.delegate.level();
         }
     }
 }
