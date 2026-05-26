@@ -266,7 +266,7 @@ public class LPHytaleBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
 
     @Override
     public Collection<String> getPlayerList() {
-        List<PlayerRef> players = Universe.get().getPlayers();
+        Collection<PlayerRef> players = Universe.get().getPlayers();
         List<String> list = new ArrayList<>(players.size());
         for (PlayerRef player : players) {
             list.add(player.getUsername());
@@ -276,7 +276,7 @@ public class LPHytaleBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
 
     @Override
     public Collection<UUID> getOnlinePlayers() {
-        List<PlayerRef> players = Universe.get().getPlayers();
+        Collection<PlayerRef> players = Universe.get().getPlayers();
         List<UUID> list = new ArrayList<>(players.size());
         for (PlayerRef player : players) {
             list.add(player.getUuid());

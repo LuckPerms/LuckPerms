@@ -35,6 +35,7 @@ import me.lucko.luckperms.hytale.LPHytalePlugin;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.util.Tristate;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.AbstractSet;
 import java.util.HashSet;
@@ -105,6 +106,14 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
     }
 
     @Override
+    public void setUserGroup(@NonNull UUID userUniqueId, @NonNull String groupName) {
+        this.playerVirtualGroupsMap.addPlayerToGroupAndRemoveAllOthers(userUniqueId, groupName);
+        if (this.delegateToHytaleProvider) {
+            this.hytaleProvider.setUserGroup(userUniqueId, groupName);
+        }
+    }
+
+    @Override
     public Set<String> getGroupsForUser(@NonNull UUID userUniqueId) {
         Set<String> virtualGroups = this.playerVirtualGroupsMap.getPlayerGroups(userUniqueId);
 
@@ -165,6 +174,27 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
                 : Set.of();
     }
 
+    @Override
+    public @Nullable String getGroupParent(@NonNull String groupName) {
+        return this.delegateToHytaleProvider
+                ? this.hytaleProvider.getGroupParent(groupName)
+                : null;
+    }
+
+    @Override
+    public @NonNull Set<String> getAllRegisteredGroups() {
+        return this.delegateToHytaleProvider
+                ? this.hytaleProvider.getAllRegisteredGroups()
+                : Set.of();
+    }
+
+    @Override
+    public @NonNull Set<String> getEffectiveGroupPermissions(@NonNull String groupName) {
+        return this.delegateToHytaleProvider
+                ? this.hytaleProvider.getEffectiveGroupPermissions(groupName)
+                : Set.of();
+    }
+
     /**
      * A permissions set that tricks {@link PermissionsModule#hasPermission(Set, String)} into always
      * returning according to LuckPerms data.
@@ -197,6 +227,11 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
 
             Tristate result = this.user.getCachedData().getPermissionData().checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
             return inverted != result.asBoolean();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
         }
 
         @Override

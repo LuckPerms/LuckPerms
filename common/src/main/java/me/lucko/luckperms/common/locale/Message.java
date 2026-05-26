@@ -127,13 +127,17 @@ public interface Message {
                 .append(text("v" + bootstrap.getVersion(), AQUA))
                 .build();
 
-        Component infoLine2 = text()
+        String platformName = bootstrap.getType().getFriendlyName();
+        String serverBrand = bootstrap.getServerBrand();
+
+        TextComponent.Builder infoLine2 = text()
                 .color(DARK_GRAY)
                 .append(text("Running on "))
-                .append(text(bootstrap.getType().getFriendlyName()))
-                .append(text(" - "))
-                .append(text(bootstrap.getServerBrand()))
-                .build();
+                .append(text(platformName));
+
+        if (!platformName.equals(serverBrand)) {
+            infoLine2.append(text(" - ")).append(text(serverBrand));
+        }
 
         // "        __    "
         // "  |    |__)   "

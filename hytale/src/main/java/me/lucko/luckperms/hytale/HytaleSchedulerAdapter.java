@@ -27,8 +27,6 @@ package me.lucko.luckperms.hytale;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.receiver.IMessageReceiver;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -48,17 +46,11 @@ public class HytaleSchedulerAdapter extends JavaSchedulerAdapter implements Sche
         executeSync(unwrapSender(ctx), task);
     }
 
-    public void executeSync(IMessageReceiver ctx, Runnable task) {
+    public void executeSync(CommandSender ctx, Runnable task) {
         if (ctx instanceof PlayerRef playerRef) {
             Ref<EntityStore> ref = playerRef.getReference();
             if (ref != null) {
                 World world = ref.getStore().getExternalData().getWorld();
-                world.execute(task);
-                return;
-            }
-        } else if (ctx instanceof Player player) {
-            World world = player.getWorld();
-            if (world != null) {
                 world.execute(task);
                 return;
             }
@@ -69,9 +61,9 @@ public class HytaleSchedulerAdapter extends JavaSchedulerAdapter implements Sche
     }
 
     @SuppressWarnings("unchecked")
-    private static IMessageReceiver unwrapSender(Sender sender) {
+    private static CommandSender unwrapSender(Sender sender) {
         if (sender instanceof AbstractSender) {
-            return ((AbstractSender<IMessageReceiver>) sender).getSender();
+            return ((AbstractSender<CommandSender>) sender).getSender();
         } else {
             throw new IllegalArgumentException("unknown sender type: " + sender.getClass());
         }

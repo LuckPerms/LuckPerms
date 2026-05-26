@@ -49,7 +49,7 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.hytale.calculator.HytaleCalculatorFactory;
-import me.lucko.luckperms.hytale.calculator.virtualgroups.VirtualGroupsMap;
+import me.lucko.luckperms.hytale.util.VirtualGroupsCache;
 import me.lucko.luckperms.hytale.context.HytaleContextManager;
 import me.lucko.luckperms.hytale.context.HytalePlayerCalculator;
 import me.lucko.luckperms.hytale.listeners.HytaleConnectionListener;
@@ -80,7 +80,7 @@ public class LPHytalePlugin extends AbstractLuckPermsPlugin {
     private HytaleContextManager contextManager;
 
     private PlayerVirtualGroupsMap playerVirtualGroupsMap;
-    private VirtualGroupsMap virtualGroupsMap;
+    private VirtualGroupsCache virtualGroupsCache;
     private LuckPermsPermissionProvider permissionProvider;
 
     public LPHytalePlugin(LPHytaleBootstrap bootstrap) {
@@ -162,7 +162,7 @@ public class LPHytalePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected CalculatorFactory provideCalculatorFactory() {
-        this.virtualGroupsMap = new VirtualGroupsMap();
+        this.virtualGroupsCache = new VirtualGroupsCache();
         return new HytaleCalculatorFactory(this);
     }
 
@@ -261,8 +261,8 @@ public class LPHytalePlugin extends AbstractLuckPermsPlugin {
         return this.senderFactory;
     }
 
-    public VirtualGroupsMap getVirtualGroupsMap() {
-        return this.virtualGroupsMap;
+    public VirtualGroupsCache getVirtualGroupsCache() {
+        return this.virtualGroupsCache;
     }
 
     @Override

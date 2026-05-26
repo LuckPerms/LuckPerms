@@ -26,8 +26,8 @@
 package me.lucko.luckperms.hytale.service;
 
 import com.google.common.collect.ImmutableSet;
+import com.hypixel.hytale.server.core.permissions.provider.HytalePermissionsProvider;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,11 +36,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * A thread-safe map of player UUIDs to their virtual groups.
  */
 public class PlayerVirtualGroupsMap {
+
+    /** The default set of groups a player has, if not otherwise defined */
+    private static final ImmutableSet<String> DEFAULT_GROUPS = ImmutableSet.copyOf(HytalePermissionsProvider.DEFAULT_GROUP_LIST);
+
     private final Map<UUID, ImmutableSet<String>> uuidToGroups = new ConcurrentHashMap<>();
 
-    public void addPlayerToGroup(UUID uuid, String group0) {
-        String group = group0.toLowerCase(Locale.ROOT);
-
+    public void addPlayerToGroup(UUID uuid, String group) {
         this.uuidToGroups.compute(uuid, (key, existing)-> {
             if (existing == null) {
                 return ImmutableSet.of(group);
@@ -57,9 +59,7 @@ public class PlayerVirtualGroupsMap {
         });
     }
 
-    public void removePlayerFromGroup(UUID uuid, String group0) {
-        String group = group0.toLowerCase(Locale.ROOT);
-
+    public void removePlayerFromGroup(UUID uuid, String group) {
         this.uuidToGroups.computeIfPresent(uuid, (key, existing) -> {
             if (!existing.contains(group)) {
                 return existing;
@@ -79,8 +79,18 @@ public class PlayerVirtualGroupsMap {
         });
     }
 
+    public void addPlayerToGroupAndRemoveAllOthers(UUID uuid, String group) {
+        this.uuidToGroups.compute(uuid, (key, existing)-> {
+            if (existing != null && existing.size() == 1 && existing.contains(group)) {
+                return existing;
+            } else {
+                return ImmutableSet.of(group);
+            }
+        });
+    }
+
     public ImmutableSet<String> getPlayerGroups(UUID uuid) {
-        return this.uuidToGroups.getOrDefault(uuid, ImmutableSet.of());
+        return this.uuidToGroups.getOrDefault(uuid, DEFAULT_GROUPS);
     }
 
 }

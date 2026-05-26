@@ -29,9 +29,6 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandManager;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.console.ConsoleSender;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.permissions.PermissionsModule;
-import com.hypixel.hytale.server.core.receiver.IMessageReceiver;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
@@ -47,52 +44,32 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-public class HytaleSenderFactory extends SenderFactory<LPHytalePlugin, IMessageReceiver> {
+public class HytaleSenderFactory extends SenderFactory<LPHytalePlugin, CommandSender> {
 
     public HytaleSenderFactory(LPHytalePlugin plugin) {
         super(plugin);
     }
 
-    // Enforce that sender is either a `PlayerRef` or `CommandSender`
-    private void checkType(IMessageReceiver sender) {
-        if (sender instanceof PlayerRef || sender instanceof CommandSender) {
-            return;
-        }
-        throw new IllegalArgumentException("Unsupported sender type: " + sender.getClass().getName());
-    }
-
     @Override
-    protected String getName(IMessageReceiver sender) {
-        checkType(sender);
-        if (sender instanceof Player player) {
-            return player.getDisplayName();
-        } else if (sender instanceof PlayerRef playerRef) {
+    protected String getName(CommandSender sender) {
+        if (sender instanceof PlayerRef playerRef) {
             return playerRef.getUsername();
         }
         return Sender.CONSOLE_NAME;
     }
 
     @Override
-    protected UUID getUniqueId(IMessageReceiver sender) {
-        checkType(sender);
-        if (sender instanceof Player player) {
-            //noinspection removal
-            return player.getPlayerRef().getUuid();
-        } else if (sender instanceof PlayerRef playerRef) {
+    protected UUID getUniqueId(CommandSender sender) {
+        if (sender instanceof PlayerRef playerRef) {
             return playerRef.getUuid();
         }
         return Sender.CONSOLE_UUID;
     }
 
     @Override
-    protected void sendMessage(IMessageReceiver sender, Component message) {
-        checkType(sender);
-
+    protected void sendMessage(CommandSender sender, Component message) {
         Locale locale = null;
-        if (sender instanceof Player player) {
-            //noinspection removal
-            locale = TranslationManager.parseLocale(player.getPlayerRef().getLanguage());
-        } else if (sender instanceof PlayerRef playerRef) {
+        if (sender instanceof PlayerRef playerRef) {
             locale = TranslationManager.parseLocale(playerRef.getLanguage());
         }
 
@@ -101,42 +78,22 @@ public class HytaleSenderFactory extends SenderFactory<LPHytalePlugin, IMessageR
     }
 
     @Override
-    protected Tristate getPermissionValue(IMessageReceiver sender, String node) {
+    protected Tristate getPermissionValue(CommandSender sender, String node) {
         return Tristate.of(hasPermission(sender, node));
     }
 
     @Override
-    protected boolean hasPermission(IMessageReceiver sender, String node) {
-        checkType(sender);
-
-        if (sender instanceof CommandSender commandSender) {
-            return commandSender.hasPermission(node);
-        }
-        if (sender instanceof PlayerRef playerRef) {
-            return PermissionsModule.get().hasPermission(playerRef.getUuid(), node);
-        }
-
-        throw new AssertionError();
+    protected boolean hasPermission(CommandSender sender, String node) {
+        return sender.hasPermission(node);
     }
 
     @Override
-    protected void performCommand(IMessageReceiver sender, String command) {
-        checkType(sender);
-
-        if (sender instanceof CommandSender commandSender) {
-            CommandManager.get().handleCommand(commandSender, command).join();
-            return;
-        }
-        if (sender instanceof PlayerRef playerRef) {
-            CommandManager.get().handleCommand(playerRef, command).join();
-            return;
-        }
-
-        throw new AssertionError();
+    protected void performCommand(CommandSender sender, String command) {
+        CommandManager.get().handleCommand(sender, command).join();
     }
 
     @Override
-    protected boolean isConsole(IMessageReceiver sender) {
+    protected boolean isConsole(CommandSender sender) {
         return sender instanceof ConsoleSender;
     }
 
