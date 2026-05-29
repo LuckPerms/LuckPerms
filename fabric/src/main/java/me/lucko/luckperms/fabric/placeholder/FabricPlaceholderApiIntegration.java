@@ -25,17 +25,16 @@
 
 package me.lucko.luckperms.fabric.placeholder;
 
+import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.ServerPlaceholderContext;
-import me.lucko.luckperms.common.minecraft.MinecraftSenderFactory;
+import eu.pb4.placeholders.api.parsers.NodeParser;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.placeholders.Placeholder;
 import me.lucko.luckperms.common.placeholders.PlaceholderContext;
 import me.lucko.luckperms.common.placeholders.PlaceholderRegistry;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -56,6 +55,8 @@ public class FabricPlaceholderApiIntegration {
             );
         }
     }
+
+    private static final NodeParser NODE_PARSER = NodeParser.builder().legacyAll().simplifiedTextFormat().quickText().build();
 
     private record Handler(LPFabricPlugin plugin, Placeholder placeholder) implements eu.pb4.placeholders.api.Placeholder.Handler<ServerPlaceholderContext, String> {
         @Override
@@ -85,8 +86,7 @@ public class FabricPlaceholderApiIntegration {
             if (input == null) {
                 return null;
             }
-            TextComponent component = LegacyComponentSerializer.legacySection().deserialize(input);
-            return MinecraftSenderFactory.toNativeText(component);
+            return NODE_PARSER.parseComponent(input, ParserContext.of());
         }
 
         private static PlaceholderResult toResult(Component component) {

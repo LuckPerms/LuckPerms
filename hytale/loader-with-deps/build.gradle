@@ -3,7 +3,7 @@ plugins {
 }
 
 tasks.configureEach {
-    enabled = false
+    //enabled = false
 }
 
 dependencies {
