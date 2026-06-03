@@ -31,11 +31,8 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.luckperms.common.graph.Graph;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.minecraft.MinecraftLuckPermsPlugin;
-import me.lucko.luckperms.common.model.User;
-import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 
 import java.lang.reflect.Field;
@@ -140,19 +137,10 @@ public final class BrigadierInjector {
 
         @Override
         public boolean test(CommandSourceStack source) {
-            if (source.getEntity() instanceof ServerPlayer player) {
+            Tristate state = this.plugin.getSenderFactory().wrap(source).getPermissionValue(this.permission);
 
-                User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
-                if (user == null) {
-                    return false;
-                }
-
-                QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
-                Tristate state = user.getCachedData().getPermissionData(queryOptions).checkPermission(this.permission);
-
-                if (state != Tristate.UNDEFINED) {
-                    return state.asBoolean() && this.delegate.test(source.withPermission(LevelBasedPermissionSet.OWNER));
-                }
+            if (state != Tristate.UNDEFINED) {
+                return state.asBoolean() && this.delegate.test(source.withPermission(LevelBasedPermissionSet.OWNER));
             }
 
             return this.delegate.test(source);

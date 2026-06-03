@@ -25,17 +25,18 @@
 
 package me.lucko.luckperms.neoforge;
 
+import com.mojang.authlib.GameProfile;
 import me.lucko.luckperms.common.cacheddata.result.TristateResult;
 import me.lucko.luckperms.common.minecraft.MinecraftSenderFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
-import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.level.ServerPlayer;
+
+import java.util.Optional;
 
 public class NeoForgeSenderFactory extends MinecraftSenderFactory<LPNeoForgePlugin> {
     public NeoForgeSenderFactory(LPNeoForgePlugin plugin) {
@@ -49,14 +50,14 @@ public class NeoForgeSenderFactory extends MinecraftSenderFactory<LPNeoForgePlug
 
     @Override
     protected Tristate getPermissionValue(CommandSourceStack commandSource, String node) {
-        if (commandSource.getEntity() instanceof ServerPlayer player) {
-            User user = getPlugin().getUserManager().getIfLoaded(player.getUUID());
+        Optional<GameProfile> sourceProfile = commandSource.getSourceProfile();
+        if (sourceProfile.isPresent()) {
+            User user = getPlugin().getUserManager().getIfLoaded(sourceProfile.get().id());
             if (user == null) {
                 return Tristate.UNDEFINED;
             }
 
-            QueryOptions queryOptions = getPlugin().getContextManager().getQueryOptions(player);
-            return user.getCachedData().getPermissionData(queryOptions).checkPermission(node, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
+            return user.getCachedData().getPermissionData().checkPermission(node, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
         }
 
         VerboseCheckTarget target = VerboseCheckTarget.internal(commandSource.getTextName());
