@@ -35,7 +35,11 @@ public class MinecraftSchedulerAdapter extends JavaSchedulerAdapter {
 
     public MinecraftSchedulerAdapter(MinecraftLuckPermsBootstrap bootstrap) {
         super(bootstrap);
-        this.syncExecutor = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).executeBlocking(r);
+        this.syncExecutor = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).execute(r);
+    }
+
+    public Executor sync() {
+        return this.syncExecutor;
     }
 
     public void executeSync(Runnable task) {

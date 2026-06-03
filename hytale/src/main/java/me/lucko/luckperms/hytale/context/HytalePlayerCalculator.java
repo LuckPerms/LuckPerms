@@ -159,6 +159,7 @@ public class HytalePlayerCalculator implements ContextCalculator<PlayerRef> {
 
     private void onGameModeEvent(PlayerRef playerRef, ChangeGameModeEvent e) {
         this.playerGameModes.put(playerRef.getUuid(), e.getGameMode());
+        this.plugin.getContextManager().signalContextUpdate(playerRef);
     }
 
     private final class ChangeGameModeSystem extends EntityEventSystem<EntityStore, ChangeGameModeEvent> {

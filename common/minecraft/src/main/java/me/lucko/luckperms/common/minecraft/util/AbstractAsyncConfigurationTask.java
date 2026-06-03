@@ -23,25 +23,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.neoforge.util;
+package me.lucko.luckperms.common.minecraft.util;
 
-import me.lucko.luckperms.common.minecraft.util.AbstractAsyncConfigurationTask;
-import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
+import me.lucko.luckperms.common.minecraft.MinecraftLuckPermsPlugin;
+import net.minecraft.server.network.ConfigurationTask;
 
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
-public class AsyncConfigurationTask extends AbstractAsyncConfigurationTask {
-    private final ServerConfigurationPacketListener listener;
+public abstract class AbstractAsyncConfigurationTask implements ConfigurationTask {
+    private final MinecraftLuckPermsPlugin<?, ?> plugin;
+    private final Type type;
+    private final Runnable task;
 
-    public AsyncConfigurationTask(LPNeoForgePlugin plugin, Type type, Runnable task, ServerConfigurationPacketListener listener) {
-        super(plugin, type, task);
-        this.listener = listener;
+    public AbstractAsyncConfigurationTask(MinecraftLuckPermsPlugin<?, ?> plugin, Type type, Runnable task) {
+        this.plugin = plugin;
+        this.type = type;
+        this.task = task;
+    }
+
+    protected CompletableFuture<Void> start(Runnable completeCallback) {
+        CompletableFuture<Void> future = CompletableFuture.runAsync(this.task, this.plugin.getBootstrap().getScheduler().async());
+        future.whenCompleteAsync((o, e) -> {
+            if (e != null) {
+                this.plugin.getLogger().warn("Configuration task threw an exception", e);
+            }
+            completeCallback.run();
+        }, this.plugin.getBootstrap().getScheduler().sync());
+        return future;
     }
 
     @Override
-    public void start(Consumer<Packet<?>> send) {
-        start(() -> this.listener.finishCurrentTask(type()));
+    public Type type() {
+        return this.type;
     }
 }
