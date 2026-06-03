@@ -29,6 +29,7 @@ import me.lucko.luckperms.neoforge.LPNeoForgePlugin;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.minecraft.server.network.ConfigurationTask;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -54,7 +55,7 @@ public class AsyncConfigurationTask implements ConfigurationTask {
                 this.plugin.getLogger().warn("Configuration task threw an exception", e);
             }
             this.listener.finishCurrentTask(this.type);
-        });
+        }, ServerLifecycleHooks.getCurrentServer());
     }
 
     @Override
