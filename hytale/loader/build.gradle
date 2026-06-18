@@ -10,7 +10,7 @@ dependencies {
 }
 
 repositories {
-    maven { url "https://maven.hytale.com/${hytaleRepo}/" }
+    maven { url 'https://nexus.lucko.me/repository/maven-hytale/' }
 }
 
 processResources {
