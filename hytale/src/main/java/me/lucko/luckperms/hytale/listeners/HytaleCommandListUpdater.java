@@ -23,46 +23,41 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.minecraft.listeners;
+package me.lucko.luckperms.hytale.listeners;
 
-import me.lucko.luckperms.common.event.listeners.AbstractAutoOpListener;
-import me.lucko.luckperms.common.minecraft.MinecraftLuckPermsPlugin;
-import net.minecraft.server.level.ServerPlayer;
+import com.hypixel.hytale.server.core.io.PacketHandler;
+import com.hypixel.hytale.server.core.io.handlers.game.GamePacketHandler;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+import me.lucko.luckperms.common.event.listeners.AbstractCommandListUpdater;
+import me.lucko.luckperms.hytale.LPHytalePlugin;
 
 import java.util.UUID;
 
-public class MinecraftAutoOpListener extends AbstractAutoOpListener<MinecraftLuckPermsPlugin<?, ?>, ServerPlayer> {
-    public MinecraftAutoOpListener(MinecraftLuckPermsPlugin<?, ?> plugin) {
-        super(plugin, plugin.getContextManager(), ServerPlayer.class);
+public class HytaleCommandListUpdater extends AbstractCommandListUpdater<LPHytalePlugin, PlayerRef> {
+    public HytaleCommandListUpdater(LPHytalePlugin plugin) {
+        super(plugin, PlayerRef.class);
     }
 
     @Override
     protected boolean isServerAvailable() {
-        return this.plugin.getBootstrap().getServer().isPresent();
+        return true;
     }
 
     @Override
-    protected UUID getUniqueId(ServerPlayer player) {
-        return player.getUUID();
+    protected UUID getUniqueId(PlayerRef player) {
+        return player.getUuid();
     }
 
     @Override
-    protected void setOp(ServerPlayer player, boolean value, boolean callerIsSync) {
-        if (callerIsSync) {
-            setOp(player, value);
-        } else {
-            this.plugin.getBootstrap().getScheduler().executeSync(() -> setOp(player, value));
-        }
-    }
-
-    private void setOp(ServerPlayer player, boolean value) {
-        this.plugin.getBootstrap().getServer().ifPresent(server -> {
-            if (value) {
-                server.getPlayerList().op(player.nameAndId());
-            } else {
-                server.getPlayerList().deop(player.nameAndId());
+    protected void sendCommandListUpdate(UUID uniqueId) {
+        PlayerRef playerRef = Universe.get().getPlayer(uniqueId);
+        if (playerRef != null) {
+            PacketHandler handler = playerRef.getPacketHandler();
+            if (handler instanceof GamePacketHandler gameHandler) {
+                gameHandler.sendCommandTree();
             }
-        });
+        }
     }
 
 }

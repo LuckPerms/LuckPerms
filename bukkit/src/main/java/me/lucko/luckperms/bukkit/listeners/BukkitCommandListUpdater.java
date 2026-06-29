@@ -25,24 +25,17 @@
 
 package me.lucko.luckperms.bukkit.listeners;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.lucko.luckperms.bukkit.LPBukkitBootstrap;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.cache.BufferedRequest;
-import me.lucko.luckperms.common.event.LuckPermsEventListener;
-import me.lucko.luckperms.common.util.CaffeineFactory;
-import net.luckperms.api.event.EventBus;
-import net.luckperms.api.event.context.ContextUpdateEvent;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
+import me.lucko.luckperms.common.event.listeners.AbstractCommandListUpdater;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Calls {@link Player#updateCommands()} when a players permissions change.
  */
-public class BukkitCommandListUpdater implements LuckPermsEventListener {
+public class BukkitCommandListUpdater extends AbstractCommandListUpdater<LPBukkitPlugin, Player> {
 
     public static boolean isSupported() {
         try {
@@ -53,44 +46,22 @@ public class BukkitCommandListUpdater implements LuckPermsEventListener {
         }
     }
 
-    private final LPBukkitPlugin plugin;
-    private final LoadingCache<UUID, SendBuffer> sendingBuffers = CaffeineFactory.newBuilder()
-            .expireAfterAccess(10, TimeUnit.SECONDS)
-            .build(SendBuffer::new);
-
     public BukkitCommandListUpdater(LPBukkitPlugin plugin) {
-        this.plugin = plugin;
+        super(plugin, Player.class);
     }
 
     @Override
-    public void bind(EventBus bus) {
-        bus.subscribe(UserDataRecalculateEvent.class, this::onUserDataRecalculate);
-        bus.subscribe(ContextUpdateEvent.class, this::onContextUpdate);
+    protected boolean isServerAvailable() {
+        return !this.plugin.getBootstrap().isServerStopping();
     }
 
-    private void onUserDataRecalculate(UserDataRecalculateEvent e) {
-        requestUpdate(e.getUser().getUniqueId());
+    @Override
+    protected UUID getUniqueId(Player player) {
+        return player.getUniqueId();
     }
 
-    private void onContextUpdate(ContextUpdateEvent e) {
-        e.getSubject(Player.class).ifPresent(p -> requestUpdate(p.getUniqueId()));
-    }
-
-    private void requestUpdate(UUID uniqueId) {
-        if (this.plugin.getBootstrap().isServerStopping()) {
-            return;
-        }
-
-        if (!this.plugin.getBootstrap().isPlayerOnline(uniqueId)) {
-            return;
-        }
-
-        // Buffer the request to send a commands update.
-        this.sendingBuffers.get(uniqueId).request();
-    }
-
-    // Called when the buffer times out.
-    private void sendUpdate(UUID uniqueId) {
+    @Override
+    protected void sendCommandListUpdate(UUID uniqueId) {
         LPBukkitBootstrap bootstrap = this.plugin.getBootstrap();
         if (bootstrap.isServerStopping()) {
             return;
@@ -99,21 +70,6 @@ public class BukkitCommandListUpdater implements LuckPermsEventListener {
         Player player = bootstrap.getPlayer(uniqueId).orElse(null);
         if (player != null) {
             bootstrap.getScheduler().executeSync(player, player::updateCommands);
-        }
-    }
-
-    private final class SendBuffer extends BufferedRequest<Void> {
-        private final UUID uniqueId;
-
-        SendBuffer(UUID uniqueId) {
-            super(500, TimeUnit.MILLISECONDS, BukkitCommandListUpdater.this.plugin.getBootstrap().getScheduler());
-            this.uniqueId = uniqueId;
-        }
-
-        @Override
-        protected Void perform() {
-            sendUpdate(this.uniqueId);
-            return null;
         }
     }
 }

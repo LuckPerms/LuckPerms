@@ -26,65 +26,32 @@
 package me.lucko.luckperms.bukkit.listeners;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.api.implementation.ApiUser;
-import me.lucko.luckperms.common.event.LuckPermsEventListener;
-import me.lucko.luckperms.common.model.User;
-import net.luckperms.api.event.EventBus;
-import net.luckperms.api.event.context.ContextUpdateEvent;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
-import net.luckperms.api.query.QueryOptions;
+import me.lucko.luckperms.common.event.listeners.AbstractAutoOpListener;
 import org.bukkit.entity.Player;
 
-import java.util.Map;
+import java.util.UUID;
 
-/**
- * Implements the LuckPerms auto op feature.
- */
-public class BukkitAutoOpListener implements LuckPermsEventListener {
-    private static final String NODE = "luckperms.autoop";
-
-    private final LPBukkitPlugin plugin;
-
+public class BukkitAutoOpListener extends AbstractAutoOpListener<LPBukkitPlugin, Player> {
     public BukkitAutoOpListener(LPBukkitPlugin plugin) {
-        this.plugin = plugin;
+        super(plugin, plugin.getContextManager(), Player.class);
     }
 
     @Override
-    public void bind(EventBus bus) {
-        bus.subscribe(UserDataRecalculateEvent.class, this::onUserDataRecalculate);
-        bus.subscribe(ContextUpdateEvent.class, this::onContextUpdate);
+    protected boolean isServerAvailable() {
+        return !this.plugin.getBootstrap().isServerStopping();
     }
 
-    private void onUserDataRecalculate(UserDataRecalculateEvent e) {
-        User user = ApiUser.cast(e.getUser());
-        this.plugin.getBootstrap().getPlayer(user.getUniqueId()).ifPresent(p -> refreshAutoOp(p, false));
+    @Override
+    protected UUID getUniqueId(Player player) {
+        return player.getUniqueId();
     }
 
-    private void onContextUpdate(ContextUpdateEvent e) {
-        e.getSubject(Player.class).ifPresent(p -> refreshAutoOp(p, true));
-    }
-
-    private void refreshAutoOp(Player player, boolean callerIsSync) {
-        if (!callerIsSync && this.plugin.getBootstrap().isServerStopping()) {
-            return;
-        }
-
-        User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
-
-        boolean value;
-        if (user != null) {
-            QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
-            Map<String, Boolean> permData = user.getCachedData().getPermissionData(queryOptions).getPermissionMap();
-            value = permData.getOrDefault(NODE, false);
-        } else {
-            value = false;
-        }
-
+    @Override
+    protected void setOp(Player player, boolean value, boolean callerIsSync) {
         if (callerIsSync) {
             player.setOp(value);
         } else {
             this.plugin.getBootstrap().getScheduler().executeSync(player, () -> player.setOp(value));
         }
     }
-
 }

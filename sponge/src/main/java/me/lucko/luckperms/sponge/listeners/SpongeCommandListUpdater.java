@@ -25,60 +25,34 @@
 
 package me.lucko.luckperms.sponge.listeners;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import me.lucko.luckperms.common.cache.BufferedRequest;
-import me.lucko.luckperms.common.event.LuckPermsEventListener;
-import me.lucko.luckperms.common.util.CaffeineFactory;
+import me.lucko.luckperms.common.event.listeners.AbstractCommandListUpdater;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
-import net.luckperms.api.event.EventBus;
-import net.luckperms.api.event.context.ContextUpdateEvent;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Calls {@link CommandManager#updateCommandTreeForPlayer(ServerPlayer)}
  * when a players permissions change.
  */
-public class SpongeCommandListUpdater implements LuckPermsEventListener {
-
-    private final LPSpongePlugin plugin;
-    private final LoadingCache<UUID, SendBuffer> sendingBuffers = CaffeineFactory.newBuilder()
-            .expireAfterAccess(10, TimeUnit.SECONDS)
-            .build(SendBuffer::new);
-
+public class SpongeCommandListUpdater extends AbstractCommandListUpdater<LPSpongePlugin, ServerPlayer> {
     public SpongeCommandListUpdater(LPSpongePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin, ServerPlayer.class);
     }
 
     @Override
-    public void bind(EventBus bus) {
-        bus.subscribe(UserDataRecalculateEvent.class, this::onUserDataRecalculate);
-        bus.subscribe(ContextUpdateEvent.class, this::onContextUpdate);
+    protected boolean isServerAvailable() {
+        return true;
     }
 
-    private void onUserDataRecalculate(UserDataRecalculateEvent e) {
-        requestUpdate(e.getUser().getUniqueId());
+    @Override
+    protected UUID getUniqueId(ServerPlayer player) {
+        return player.uniqueId();
     }
 
-    private void onContextUpdate(ContextUpdateEvent e) {
-        e.getSubject(ServerPlayer.class).ifPresent(p -> requestUpdate(p.uniqueId()));
-    }
-
-    private void requestUpdate(UUID uniqueId) {
-        if (!this.plugin.getBootstrap().isPlayerOnline(uniqueId)) {
-            return;
-        }
-
-        // Buffer the request to send a commands update.
-        this.sendingBuffers.get(uniqueId).request();
-    }
-
-    // Called when the buffer times out.
-    private void sendUpdate(UUID uniqueId) {
+    @Override
+    protected void sendCommandListUpdate(UUID uniqueId) {
         this.plugin.getBootstrap().getScheduler().executeSync(() -> {
             ServerPlayer player = this.plugin.getBootstrap().getPlayer(uniqueId).orElse(null);
             if (player != null) {
@@ -88,18 +62,4 @@ public class SpongeCommandListUpdater implements LuckPermsEventListener {
         });
     }
 
-    private final class SendBuffer extends BufferedRequest<Void> {
-        private final UUID uniqueId;
-
-        SendBuffer(UUID uniqueId) {
-            super(500, TimeUnit.MILLISECONDS, SpongeCommandListUpdater.this.plugin.getBootstrap().getScheduler());
-            this.uniqueId = uniqueId;
-        }
-
-        @Override
-        protected Void perform() {
-            sendUpdate(this.uniqueId);
-            return null;
-        }
-    }
 }

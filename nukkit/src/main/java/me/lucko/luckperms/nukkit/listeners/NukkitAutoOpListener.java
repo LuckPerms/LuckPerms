@@ -26,56 +26,28 @@
 package me.lucko.luckperms.nukkit.listeners;
 
 import cn.nukkit.Player;
-import me.lucko.luckperms.common.api.implementation.ApiUser;
-import me.lucko.luckperms.common.event.LuckPermsEventListener;
-import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.event.listeners.AbstractAutoOpListener;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-import net.luckperms.api.event.EventBus;
-import net.luckperms.api.event.context.ContextUpdateEvent;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
-import net.luckperms.api.query.QueryOptions;
 
-import java.util.Map;
+import java.util.UUID;
 
-/**
- * Implements the LuckPerms auto op feature.
- */
-public class NukkitAutoOpListener implements LuckPermsEventListener {
-    private static final String NODE = "luckperms.autoop";
-
-    private final LPNukkitPlugin plugin;
-
+public class NukkitAutoOpListener extends AbstractAutoOpListener<LPNukkitPlugin, Player> {
     public NukkitAutoOpListener(LPNukkitPlugin plugin) {
-        this.plugin = plugin;
+        super(plugin, plugin.getContextManager(), Player.class);
     }
 
     @Override
-    public void bind(EventBus bus) {
-        bus.subscribe(UserDataRecalculateEvent.class, this::onUserDataRecalculate);
-        bus.subscribe(ContextUpdateEvent.class, this::onContextUpdate);
+    protected boolean isServerAvailable() {
+        return true;
     }
 
-    private void onUserDataRecalculate(UserDataRecalculateEvent e) {
-        User user = ApiUser.cast(e.getUser());
-        this.plugin.getBootstrap().getPlayer(user.getUniqueId()).ifPresent(this::refreshAutoOp);
+    @Override
+    protected UUID getUniqueId(Player player) {
+        return player.getUniqueId();
     }
 
-    private void onContextUpdate(ContextUpdateEvent e) {
-        e.getSubject(Player.class).ifPresent(this::refreshAutoOp);
-    }
-
-    private void refreshAutoOp(Player player) {
-        User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
-        boolean value;
-
-        if (user != null) {
-            QueryOptions queryOptions = this.plugin.getContextManager().getQueryOptions(player);
-            Map<String, Boolean> permData = user.getCachedData().getPermissionData(queryOptions).getPermissionMap();
-            value = permData.getOrDefault(NODE, false);
-        } else {
-            value = false;
-        }
-
+    @Override
+    protected void setOp(Player player, boolean value, boolean callerIsSync) {
         player.setOp(value);
     }
 

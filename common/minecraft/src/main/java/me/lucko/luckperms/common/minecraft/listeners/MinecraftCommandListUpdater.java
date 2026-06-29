@@ -25,70 +25,34 @@
 
 package me.lucko.luckperms.common.minecraft.listeners;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import me.lucko.luckperms.common.api.implementation.ApiGroup;
-import me.lucko.luckperms.common.cache.BufferedRequest;
-import me.lucko.luckperms.common.event.LuckPermsEventListener;
+import me.lucko.luckperms.common.event.listeners.AbstractCommandListUpdater;
 import me.lucko.luckperms.common.minecraft.MinecraftLuckPermsPlugin;
-import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.util.CaffeineFactory;
-import net.luckperms.api.event.EventBus;
-import net.luckperms.api.event.context.ContextUpdateEvent;
-import net.luckperms.api.event.group.GroupDataRecalculateEvent;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Calls {@link PlayerList#sendPlayerPermissionLevel(ServerPlayer)} when a players permissions change.
  */
-public class MinecraftCommandListUpdater implements LuckPermsEventListener {
-    private final MinecraftLuckPermsPlugin<?, ?> plugin;
-    private final LoadingCache<UUID, SendBuffer> sendingBuffers = CaffeineFactory.newBuilder()
-            .expireAfterAccess(10, TimeUnit.SECONDS)
-            .build(SendBuffer::new);
-
+public class MinecraftCommandListUpdater extends AbstractCommandListUpdater<MinecraftLuckPermsPlugin<?, ?>, ServerPlayer> {
     public MinecraftCommandListUpdater(MinecraftLuckPermsPlugin<?, ?> plugin) {
-        this.plugin = plugin;
+        super(plugin, ServerPlayer.class);
     }
 
     @Override
-    public void bind(EventBus bus) {
-        bus.subscribe(UserDataRecalculateEvent.class, this::onUserDataRecalculate);
-        bus.subscribe(GroupDataRecalculateEvent.class, this::onGroupDataRecalculate);
-        bus.subscribe(ContextUpdateEvent.class, this::onContextUpdate);
+    protected boolean isServerAvailable() {
+        return this.plugin.getBootstrap().getServer().isPresent();
     }
 
-    private void onUserDataRecalculate(UserDataRecalculateEvent e) {
-        requestUpdate(e.getUser().getUniqueId());
+    @Override
+    protected UUID getUniqueId(ServerPlayer player) {
+        return player.getUUID();
     }
 
-    private void onGroupDataRecalculate(GroupDataRecalculateEvent e) {
-        for (User user : this.plugin.getUserManager().getAll().values()) {
-            if (user.resolveInheritanceTree(user.getQueryOptions()).contains(ApiGroup.cast(e.getGroup()))) {
-                requestUpdate(user.getUniqueId());
-            }
-        }
-    }
-
-    private void onContextUpdate(ContextUpdateEvent e) {
-        e.getSubject(ServerPlayer.class).ifPresent(p -> requestUpdate(p.getUUID()));
-    }
-
-    private void requestUpdate(UUID uniqueId) {
-        if (!this.plugin.getBootstrap().isPlayerOnline(uniqueId)) {
-            return;
-        }
-
-        this.sendingBuffers.get(uniqueId).request();
-    }
-
-    // Called when the buffer times out.
-    private void sendUpdate(UUID uniqueId) {
+    @Override
+    protected void sendCommandListUpdate(UUID uniqueId) {
         this.plugin.getBootstrap().getScheduler().executeSync(() -> {
             ServerPlayer player = this.plugin.getBootstrap().getPlayer(uniqueId).orElse(null);
             if (player != null) {
@@ -96,21 +60,6 @@ public class MinecraftCommandListUpdater implements LuckPermsEventListener {
                 server.getPlayerList().sendPlayerPermissionLevel(player);
             }
         });
-    }
-
-    private final class SendBuffer extends BufferedRequest<Void> {
-        private final UUID uniqueId;
-
-        SendBuffer(UUID uniqueId) {
-            super(500, TimeUnit.MILLISECONDS, MinecraftCommandListUpdater.this.plugin.getBootstrap().getScheduler());
-            this.uniqueId = uniqueId;
-        }
-
-        @Override
-        protected Void perform() {
-            sendUpdate(this.uniqueId);
-            return null;
-        }
     }
 
 }

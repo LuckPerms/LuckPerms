@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.hytale.calculator.HytaleCalculatorFactory;
+import me.lucko.luckperms.hytale.listeners.HytaleCommandListUpdater;
 import me.lucko.luckperms.hytale.util.VirtualGroupsCache;
 import me.lucko.luckperms.hytale.context.HytaleContextManager;
 import me.lucko.luckperms.hytale.context.HytalePlayerCalculator;
@@ -236,7 +237,9 @@ public class LPHytalePlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void performFinalSetup() {
-
+        if (getConfiguration().get(ConfigKeys.UPDATE_CLIENT_COMMAND_LIST)) {
+            getApiProvider().getEventBus().subscribe(new HytaleCommandListUpdater(this));
+        }
     }
 
     @Override
