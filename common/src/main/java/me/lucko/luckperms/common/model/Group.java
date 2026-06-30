@@ -175,7 +175,7 @@ public class Group extends PermissionHolder {
     public class DisplayNameCache extends Cache<Optional<String>> {
         @Override
         protected @NonNull Optional<String> supply() {
-            return calculateDisplayName(getPlugin().getContextManager().getStaticQueryOptions());
+            return calculateDisplayName(getQueryOptions());
         }
     }
 }
