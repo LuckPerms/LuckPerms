@@ -1,0 +1,33 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
+repositories {
+    maven { url 'https://repo.waterdog.dev/main/' }
+    maven { url 'https://repo.opencollab.dev/main/' }
+}
+
+dependencies {
+    compileOnly 'dev.waterdog.waterdogpe:waterdog:2.0.4-SNAPSHOT'
+
+    implementation project(':api')
+    implementation project(':common:loader-utils')
+}
+
+processResources {
+    filesMatching('plugin.yml') {
+        expand 'pluginVersion': project.ext.fullVersion
+    }
+}
+
+shadowJar {
+    archiveFileName = "LuckPerms-Waterdog-${project.ext.fullVersion}.jar"
+
+    from {
+        project(':waterdog').tasks.shadowJar.archiveFile
+    }
+}
+
+artifacts {
+    archives shadowJar
+}

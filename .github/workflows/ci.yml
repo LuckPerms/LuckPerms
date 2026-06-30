@@ -53,6 +53,7 @@ jobs:
             bungee/loader/build/libs/LuckPerms-Bungee-*.jar
             sponge/loader/build/libs/LuckPerms-Sponge-*.jar
             nukkit/loader/build/libs/LuckPerms-Nukkit-*.jar
+            waterdog/loader/build/libs/LuckPerms-Waterdog-*.jar
             velocity/build/libs/LuckPerms-Velocity-*.jar
             fabric/build/libs/LuckPerms-Fabric-*.jar
             forge/loader/build/libs/LuckPerms-Forge-*.jar
