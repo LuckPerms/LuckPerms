@@ -36,6 +36,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.Sorts;
 import me.lucko.luckperms.common.actionlog.LogPage;
@@ -146,6 +147,7 @@ public class MongoStorage implements StorageImplementation {
         }
         
         this.database = this.mongoClient.getDatabase(this.configuration.getDatabase());
+        ensureIndexes();
     }
 
     @Override
@@ -713,6 +715,12 @@ public class MongoStorage implements StorageImplementation {
                     .description(d.getString("action"))
                     .build();
         }
+    }
+
+    private void ensureIndexes() {
+        this.database.getCollection(this.prefix + "uuid").createIndex(Indexes.ascending("name"));
+        this.database.getCollection(this.prefix + "users").createIndex(Indexes.ascending("permissions.key"));
+        this.database.getCollection(this.prefix + "groups").createIndex(Indexes.ascending("permissions.key"));
     }
 
 }
