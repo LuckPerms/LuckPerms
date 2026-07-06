@@ -55,7 +55,7 @@ public class WaterdogPermissionCheckListener {
         eventManager.subscribe(TristateCheckEvent.class, this::onOtherTristateCheck, EventPriority.HIGHEST);
     }
 
-    public void onPlayerPermissionCheck(PlayerPermissionCheckEvent e) {
+    private void onPlayerPermissionCheck(PlayerPermissionCheckEvent e) {
         Objects.requireNonNull(e.getPermission(), "permission");
         Objects.requireNonNull(e.getPlayer(), "player");
 
@@ -79,7 +79,7 @@ public class WaterdogPermissionCheckListener {
         e.setHasPermission(result.asBoolean());
     }
 
-    public void onPlayerTristateCheck(TristateCheckEvent e) {
+    private void onPlayerTristateCheck(TristateCheckEvent e) {
         if (!(e.getSender() instanceof ProxiedPlayer)) {
             return;
         }
@@ -107,7 +107,7 @@ public class WaterdogPermissionCheckListener {
         e.setResult(result);
     }
 
-    public void onOtherTristateCheck(TristateCheckEvent e) {
+    private void onOtherTristateCheck(TristateCheckEvent e) {
         if (e.getSender() instanceof ProxiedPlayer) {
             return;
         }
