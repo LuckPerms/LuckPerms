@@ -72,13 +72,14 @@ public class NodeMapMutable extends NodeMapBase {
      *
      * We use our own "multimap"-like implementation here because guava's is not thread safe.
      *
-     * The map fields aren't final because they are replaced when large updates (e.g. clear)
-     * are performed. We do this so there's no risk that the read methods will see an inconsistent
-     * state in the middle of an update from the DB. (see below comment about locking - we don't
-     * lock for reads!)
+     * The map fields aren't final because they are replaced when large updates (e.g. clear,
+     * setContent) are performed. We do this so there's no risk that the read methods will see an
+     * inconsistent state in the middle of an update from the DB. (see below comment about locking -
+     * we don't lock for reads!) A replacement must be fully populated before being assigned (see
+     * setContent), and the fields are volatile so it is safely published to the lock-free readers.
      */
-    private SortedMap<ImmutableContextSet, SortedSet<Node>> map = createMap();
-    private SortedMap<ImmutableContextSet, SortedSet<InheritanceNode>> inheritanceMap = createMap();
+    private volatile SortedMap<ImmutableContextSet, SortedSet<Node>> map = createMap();
+    private volatile SortedMap<ImmutableContextSet, SortedSet<InheritanceNode>> inheritanceMap = createMap();
 
     /**
      * This lock is used whilst performing mutations, but *not* reads.
@@ -356,27 +357,29 @@ public class NodeMapMutable extends NodeMapBase {
 
     @Override
     public Difference<Node> setContent(Iterable<? extends Node> set) {
-        Difference<Node> result = new Difference<>();
-
-        this.lock.lock();
-        try {
-            result.mergeFrom(clear());
-            result.mergeFrom(addAll(set));
-        } finally {
-            this.lock.unlock();
-        }
-
-        return result;
+        return setContent(next -> next.addAll(set));
     }
 
     @Override
     public Difference<Node> setContent(Stream<? extends Node> stream) {
+        return setContent(next -> next.addAll(stream));
+    }
+
+    // Builds the new content in a detached map and swaps it in only once fully populated, so a
+    // lock-free reader (e.g. a storage save reading asList()) never observes a partial map.
+    // Clearing and refilling this.map in place would briefly expose an empty/partly-filled map.
+    private Difference<Node> setContent(Function<NodeMapMutable, Difference<Node>> populate) {
         Difference<Node> result = new Difference<>();
 
         this.lock.lock();
         try {
-            result.mergeFrom(clear());
-            result.mergeFrom(addAll(stream));
+            NodeMapMutable next = new NodeMapMutable(this.holder, this.inheritanceOrigin.getDataType());
+            for (SortedSet<Node> nodes : this.map.values()) {
+                result.recordChanges(ChangeType.REMOVE, nodes);
+            }
+            result.mergeFrom(populate.apply(next));
+            this.map = next.map;
+            this.inheritanceMap = next.inheritanceMap;
         } finally {
             this.lock.unlock();
         }
