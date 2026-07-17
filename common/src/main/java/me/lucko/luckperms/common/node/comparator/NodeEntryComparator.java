@@ -31,17 +31,17 @@ import java.util.Comparator;
 
 public class NodeEntryComparator<T extends Comparable<T>> implements Comparator<NodeEntry<T, ?>> {
 
-    public static <T extends Comparable<T>> Comparator<? super NodeEntry<T, ?>> normal() {
+    public static <T extends Comparable<T>> Comparator<? super NodeEntry<T, ?>> ascending() {
         return new NodeEntryComparator<>();
     }
 
-    public static <T extends Comparable<T>> Comparator<? super NodeEntry<T, ?>> reverse() {
-        return NodeEntryComparator.<T>normal().reversed();
+    public static <T extends Comparable<T>> Comparator<? super NodeEntry<T, ?>> descending() {
+        return NodeEntryComparator.<T>ascending().reversed();
     }
 
     @Override
     public int compare(NodeEntry<T, ?> o1, NodeEntry<T, ?> o2) {
-        int i = NodeWithContextComparator.normal().compare(o1.getNode(), o2.getNode());
+        int i = NodeWithContextComparator.ascending().compare(o1.getNode(), o2.getNode());
         if (i != 0) {
             return i;
         }

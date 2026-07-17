@@ -54,6 +54,11 @@ public class ContextSetComparatorTest {
             .add("foo", "foo")
             .add("foo", "bar")
             .build();
+    private static final ImmutableContextSet MISC_2 = new ImmutableContextSetImpl.BuilderImpl()
+            .add("foo", "foo")
+            .add("foo", "bar")
+            .add("bar", "foo")
+            .build();
     private static final ImmutableContextSet SERVER_AND_MISC = new ImmutableContextSetImpl.BuilderImpl()
             .add("server", "foo")
             .add("foo", "foo")
@@ -77,46 +82,46 @@ public class ContextSetComparatorTest {
             .build();
 
     private static Stream<ImmutableContextSet> all() {
-        return Stream.of(EMPTY, JUST_SERVER, JUST_WORLD, SERVER_AND_WORLD, MISC, SERVER_AND_MISC, WORLD_AND_MISC, SERVER_AND_WORLD_AND_MISC_1, SERVER_AND_WORLD_AND_MISC_2);
+        return Stream.of(EMPTY, JUST_SERVER, JUST_WORLD, SERVER_AND_WORLD, MISC, MISC_2, SERVER_AND_MISC, WORLD_AND_MISC, SERVER_AND_WORLD_AND_MISC_1, SERVER_AND_WORLD_AND_MISC_2);
     }
 
-    private static final Comparator<ImmutableContextSet> INSTANCE = ContextSetComparator.normal();
+    private static final Comparator<ImmutableContextSet> ASCENDING = ContextSetComparator.ascending();
 
     @ParameterizedTest
     @MethodSource("all")
     @SuppressWarnings("EqualsWithItself")
     public void testEquals(ImmutableContextSet set) {
-        assertEquals(0, INSTANCE.compare(set, set));
+        assertEquals(0, ASCENDING.compare(set, set));
     }
 
     @Test
     public void testEmpty() {
-        assertTrue(INSTANCE.compare(JUST_SERVER, EMPTY) > 0);
-        assertTrue(INSTANCE.compare(EMPTY, JUST_SERVER) < 0);
+        assertTrue(ASCENDING.compare(JUST_SERVER, EMPTY) > 0);
+        assertTrue(ASCENDING.compare(EMPTY, JUST_SERVER) < 0);
     }
 
     @Test
     public void testServerPresence() {
-        assertTrue(INSTANCE.compare(JUST_SERVER, MISC) > 0);
-        assertTrue(INSTANCE.compare(JUST_SERVER, WORLD_AND_MISC) > 0);
+        assertTrue(ASCENDING.compare(JUST_SERVER, MISC) > 0);
+        assertTrue(ASCENDING.compare(JUST_SERVER, WORLD_AND_MISC) > 0);
     }
 
     @Test
     public void testWorldPresence() {
-        assertTrue(INSTANCE.compare(JUST_WORLD, MISC) > 0);
+        assertTrue(ASCENDING.compare(JUST_WORLD, MISC) > 0);
     }
 
     @Test
     public void testOverallSize() {
-        assertTrue(INSTANCE.compare(SERVER_AND_MISC, JUST_SERVER) > 0);
-        assertTrue(INSTANCE.compare(WORLD_AND_MISC, JUST_WORLD) > 0);
+        assertTrue(ASCENDING.compare(SERVER_AND_MISC, JUST_SERVER) > 0);
+        assertTrue(ASCENDING.compare(WORLD_AND_MISC, JUST_WORLD) > 0);
     }
 
     @ParameterizedTest
     @MethodSource("all")
     public void testOverallSizeAll(ImmutableContextSet other) {
         if (other == SERVER_AND_WORLD_AND_MISC_2) return;
-        assertTrue(INSTANCE.compare(SERVER_AND_WORLD_AND_MISC_2, other) > 0);
+        assertTrue(ASCENDING.compare(SERVER_AND_WORLD_AND_MISC_2, other) > 0);
     }
 
     private static Stream<Arguments> testTransitivity() {
@@ -141,11 +146,29 @@ public class ContextSetComparatorTest {
         list.add(a);
         list.add(b);
         list.add(c);
-        list.sort(INSTANCE);
+        list.sort(ASCENDING);
 
         List<ImmutableContextSet> reversed = new ArrayList<>(list);
-        reversed.sort(INSTANCE.reversed());
+        reversed.sort(ASCENDING.reversed());
 
+        assertEquals(Lists.reverse(list), reversed);
+    }
+
+    @Test
+    public void testPriorityOrdering() {
+        List<ImmutableContextSet> list = new ArrayList<>();
+        list.add(EMPTY);
+        list.add(JUST_SERVER);
+        list.add(JUST_WORLD);
+        list.add(MISC);
+        list.add(MISC_2);
+        list.sort(ContextSetComparator.ascending());
+
+        assertEquals(List.of(EMPTY, MISC, MISC_2, JUST_WORLD, JUST_SERVER), list);
+
+        // list sorted with the descending comparator should be exactly the reverse of the ascending list
+        List<ImmutableContextSet> reversed = new ArrayList<>(list);
+        reversed.sort(ContextSetComparator.descending());
         assertEquals(Lists.reverse(list), reversed);
     }
 

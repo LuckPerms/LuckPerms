@@ -31,15 +31,15 @@ import net.luckperms.api.node.types.PermissionNode;
 import java.util.Comparator;
 
 public class NodeComparator implements Comparator<Node> {
-    private static final Comparator<? super Node> INSTANCE = new NodeComparator();
-    private static final Comparator<? super Node> REVERSE = INSTANCE.reversed();
+    private static final Comparator<? super Node> ASCENDING = new NodeComparator();
+    private static final Comparator<? super Node> DESCENDING = ASCENDING.reversed();
 
-    public static Comparator<? super Node> normal() {
-        return INSTANCE;
+    public static Comparator<? super Node> ascending() {
+        return ASCENDING;
     }
 
-    public static Comparator<? super Node> reverse() {
-        return REVERSE;
+    public static Comparator<? super Node> descending() {
+        return DESCENDING;
     }
 
     @SuppressWarnings({"ConstantConditions", "OptionalGetWithoutIsPresent"})
@@ -49,13 +49,13 @@ public class NodeComparator implements Comparator<Node> {
             return 0;
         }
 
-        // compare whether nodes are temporary
+        // compare whether nodes are temporary - temporary has priority
         int result = Boolean.compare(o1.hasExpiry(), o2.hasExpiry());
         if (result != 0) {
             return result;
         }
 
-        // compare whether nodes are wildcard nodes
+        // compare whether nodes are wildcard nodes - non-wildcard has priority
         result = Boolean.compare(
                 o1 instanceof PermissionNode && ((PermissionNode) o1).isWildcard(),
                 o2 instanceof PermissionNode && ((PermissionNode) o2).isWildcard()
@@ -66,8 +66,9 @@ public class NodeComparator implements Comparator<Node> {
 
         // compare expiry times if both nodes are temporary
         // due to the comparison earlier, either both nodes are temporary or neither are.
+        // sooner expiry has priority
         if (o1.hasExpiry()) {
-            result = o1.getExpiry().compareTo(o2.getExpiry());
+            result = -o1.getExpiry().compareTo(o2.getExpiry());
             if (result != 0) {
                 return result;
             }

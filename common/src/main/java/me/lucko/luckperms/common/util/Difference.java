@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.util;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Records a log of the changes that occur as a result
@@ -125,10 +126,20 @@ public class Difference<T> {
      * @param type the type of change
      * @param values the changed values
      */
-    public void recordChanges(ChangeType type, Iterable<T> values) {
+    public void recordChanges(ChangeType type, Iterable<? extends T> values) {
         for (T value : values) {
             recordChange(new Change<>(type, value));
         }
+    }
+
+    /**
+     * Records some changes.
+     *
+     * @param type the type of change
+     * @param values the changed values
+     */
+    public void recordChanges(ChangeType type, Stream<? extends T> values) {
+        values.forEach(value -> recordChange(new Change<>(type, value)));
     }
 
     /**

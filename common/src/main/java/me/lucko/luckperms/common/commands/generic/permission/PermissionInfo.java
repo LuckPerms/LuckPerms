@@ -115,6 +115,6 @@ public class PermissionInfo extends GenericChildCommand {
         }
 
         // fallback to priority
-        return NodeWithContextComparator.reverse().compare(o1, o2);
+        return NodeWithContextComparator.descending().compare(o1, o2);
     };
 }

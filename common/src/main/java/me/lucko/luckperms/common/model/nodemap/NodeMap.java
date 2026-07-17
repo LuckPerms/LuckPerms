@@ -70,7 +70,7 @@ public interface NodeMap {
     }
 
     default SortedSet<Node> asSortedSet() {
-        SortedSet<Node> set = new TreeSet<>(NodeWithContextComparator.reverse());
+        SortedSet<Node> set = new TreeSet<>(NodeWithContextComparator.descending());
         copyTo(set);
         return set;
     }
@@ -96,7 +96,7 @@ public interface NodeMap {
     }
 
     default SortedSet<InheritanceNode> inheritanceAsSortedSet() {
-        SortedSet<InheritanceNode> set = new TreeSet<>(NodeWithContextComparator.reverse());
+        SortedSet<InheritanceNode> set = new TreeSet<>(NodeWithContextComparator.descending());
         copyInheritanceNodesTo(set);
         return set;
     }

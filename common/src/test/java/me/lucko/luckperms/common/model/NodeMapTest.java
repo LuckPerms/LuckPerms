@@ -52,13 +52,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -178,52 +181,104 @@ public class NodeMapTest {
 
         assertEquals(4, map.size());
 
-        map.remove(makeNode("test1").toBuilder().withContext("hello", "world").build());
-        map.remove(makeNode("test3"));
-        map.remove(makeNode("test4"));
-        map.remove(makeNode("test4").toBuilder().withContext("hello", "world").withContext("aaa", "bbb").build());
-        map.remove(makeNode("test5"));
+        for (Node node : List.of(
+                makeNode("test1").toBuilder().withContext("hello", "world").build(),
+                makeNode("test3"),
+                makeNode("test4"),
+                makeNode("test4").toBuilder().withContext("hello", "world").withContext("aaa", "bbb").build(),
+                makeNode("test5")
+        )) {
+            Difference<Node> diff = map.remove(node);
+            assertEquals(Set.of(), diff.getChanges());
+        }
 
         assertEquals(4, map.size());
 
-        map.remove(makeNode("test1"));
-        map.remove(makeNode("test2").toBuilder().value(true).build());
-        map.remove(makeNode("test3").toBuilder().expiry(2, TimeUnit.HOURS).build());
-        map.remove(makeNode("test4").toBuilder().withContext("hello", "world").build());
+        for (Node node : List.of(
+                makeNode("test1"),
+                makeNode("test2").toBuilder().value(true).build(),
+                makeNode("test3").toBuilder().expiry(2, TimeUnit.HOURS).build(),
+                makeNode("test4").toBuilder().withContext("hello", "world").build()
+        )) {
+            Difference<Node> diff = map.remove(node);
+            assertEquals(0, diff.getAdded().size());
+            assertEquals(1, diff.getRemoved().size());
+        }
 
         assertEquals(0, map.size());
     }
 
     @Test
     public void testRemoveExact() {
+        Instant expiry = Instant.now().plusSeconds(60);
+
         NodeMapMutable map = new NodeMapMutable(this.mockHolder, DataType.NORMAL);
         map.add(makeNode("test1"));
         map.add(makeNode("test2").toBuilder().value(false).build());
-        map.add(makeNode("test3").toBuilder().expiry(1, TimeUnit.HOURS).build());
+        map.add(makeNode("test3").toBuilder().expiry(expiry).build());
         map.add(makeNode("test4").toBuilder().withContext("hello", "world").build());
 
         assertEquals(4, map.size());
 
-        map.removeExact(makeNode("test1").toBuilder().withContext("hello", "world").build());
-        map.removeExact(makeNode("test3"));
-        map.removeExact(makeNode("test4"));
-        map.removeExact(makeNode("test4").toBuilder().withContext("hello", "world").withContext("aaa", "bbb").build());
-        map.removeExact(makeNode("test5"));
+        for (Node node : List.of(
+                makeNode("test1").toBuilder().withContext("hello", "world").build(),
+                makeNode("test3"),
+                makeNode("test4"),
+                makeNode("test4").toBuilder().withContext("hello", "world").withContext("aaa", "bbb").build(),
+                makeNode("test5"),
+                makeNode("test2").toBuilder().value(true).build(),
+                makeNode("test3").toBuilder().expiry(2, TimeUnit.HOURS).build(),
+                makeNode("test4").toBuilder().withContext("hello", "world").withContext("aaa", "bbb").build()
+        )) {
+            Difference<Node> diff = map.removeExact(node);
+            assertEquals(Set.of(), diff.getChanges());
+        }
 
         assertEquals(4, map.size());
 
-        map.removeExact(makeNode("test2").toBuilder().value(true).build());
-        map.removeExact(makeNode("test3").toBuilder().expiry(2, TimeUnit.HOURS).build());
-        map.removeExact(makeNode("test4").toBuilder().withContext("hello", "world").withContext("aaa", "bbb").build());
-
-        assertEquals(4, map.size());
-
-        map.removeExact(makeNode("test1"));
-        map.removeExact(makeNode("test2").toBuilder().value(false).build());
-        map.removeExact(makeNode("test3").toBuilder().expiry(1, TimeUnit.HOURS).build());
-        map.removeExact(makeNode("test4").toBuilder().withContext("hello", "world").build());
+        for (Node node : List.of(
+                makeNode("test1"),
+                makeNode("test2").toBuilder().value(false).build(),
+                makeNode("test3").toBuilder().expiry(expiry).build(),
+                makeNode("test4").toBuilder().withContext("hello", "world").build()
+        )) {
+            Difference<Node> diff = map.removeExact(node);
+            assertEquals(0, diff.getAdded().size());
+            assertEquals(1, diff.getRemoved().size());
+        }
 
         assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testClear() {
+        NodeMapMutable map = new NodeMapMutable(this.mockHolder, DataType.NORMAL);
+        map.add(makeNode("a"));
+        map.add(makeNode("b"));
+        map.add(makeNode("c"));
+
+        assertEquals(3, map.size());
+
+        Difference<Node> diff = map.clear();
+        assertEquals(3, diff.getRemoved().size());
+        assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testSetContent() {
+        Node a = makeNode("a");
+        Node b = makeNode("b");
+        Node c = makeNode("c");
+
+        NodeMapMutable map = new NodeMapMutable(this.mockHolder, DataType.NORMAL);
+        map.add(a);
+        map.add(b);
+
+        Difference<Node> diff = map.setContent(List.of(b, c));
+        assertEquals(Set.of(c), diff.getAdded());
+        assertEquals(Set.of(a), diff.getRemoved());
+
+        assertEquals(Set.of(b, c), map.asSet());
     }
 
     @ParameterizedTest(name = "s={0} w={1} is={2} iw={3}")
@@ -277,6 +332,130 @@ public class NodeMapTest {
         assertEquals(expectedInheritance, inheritanceOutput.size());
     }
 
+    @Test
+    public void testRemoveIf() {
+        NodeMapMutable map = new NodeMapMutable(this.mockHolder, DataType.NORMAL);
+        Node test1 = makeNode("test1");
+        Node test2 = makeNode("test2").toBuilder().value(false).build();
+        Node group1 = makeNode("group.test1");
+        Node group2 = makeNode("group.test2").toBuilder().value(false).build();
+
+        map.add(test1);
+        map.add(test2);
+        map.add(group1);
+        map.add(group2);
+        assertEquals(4, map.size());
+
+        Difference<Node> diff = map.removeIf(node -> !node.getValue());
+        assertEquals(Set.of(test2, group2), diff.getRemoved());
+        assertEquals(Set.of(), diff.getAdded());
+        assertEquals(2, map.size());
+        assertEquals(Set.of(test1, group1), map.asSet());
+        assertEquals(List.of(group1), map.inheritanceAsList());
+    }
+
+    @Test
+    public void testRemoveIfWithContext() {
+        NodeMapMutable map = new NodeMapMutable(this.mockHolder, DataType.NORMAL);
+        Node inContext = makeNode("test1").toBuilder().withContext("server", "test").build();
+        Node globalNode = makeNode("test2");
+        Node otherInContext = makeNode("test3").toBuilder().withContext("server", "test").build();
+
+        map.add(inContext);
+        map.add(globalNode);
+        map.add(otherInContext);
+        assertEquals(3, map.size());
+
+        Difference<Node> diff = map.removeIf(inContext.getContexts(), node -> node.getKey().equals("test1"));
+        assertEquals(Set.of(inContext), diff.getRemoved());
+        assertEquals(2, map.size());
+        assertEquals(Set.of(globalNode, otherInContext), map.asSet());
+
+        // no-op if the context set isn't present in the map
+        Difference<Node> diff2 = map.removeIf(ImmutableContextSetImpl.of("world", "test"), node -> true);
+        assertTrue(diff2.isEmpty());
+        assertEquals(2, map.size());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "test1, test2, false",
+            "test1, test1, true"
+    })
+    public void testRemoveThenAdd(String removeKey, String addKey, boolean sameNode) {
+        NodeMapMutable map = new NodeMapMutable(this.mockHolder, DataType.NORMAL);
+        Node toRemove = makeNode(removeKey);
+        Node toAdd = makeNode(addKey);
+        map.add(toRemove);
+
+        Difference<Node> diff = map.removeThenAdd(toRemove, toAdd);
+
+        if (sameNode) {
+            // removeThenAdd is a no-op if the two nodes are equal
+            assertTrue(diff.isEmpty());
+            assertEquals(1, map.size());
+            assertEquals(Set.of(toRemove), map.asSet());
+        } else {
+            assertEquals(Set.of(toAdd), diff.getAdded());
+            assertEquals(Set.of(toRemove), diff.getRemoved());
+            assertEquals(Set.of(toAdd), map.asSet());
+        }
+    }
+
+    @Test
+    public void testClearContext() {
+        NodeMapMutable map = new NodeMapMutable(this.mockHolder, DataType.NORMAL);
+        Node global = makeNode("test1");
+        Node scoped = makeNode("test2").toBuilder().withContext("server", "test").build();
+
+        map.add(global);
+        map.add(scoped);
+        assertEquals(2, map.size());
+
+        Difference<Node> diff = map.clear(scoped.getContexts());
+        assertEquals(Set.of(scoped), diff.getRemoved());
+        assertEquals(Set.of(global), map.asSet());
+
+        // clearing a context that's no longer present is a no-op
+        Difference<Node> diff2 = map.clear(scoped.getContexts());
+        assertTrue(diff2.isEmpty());
+        assertEquals(1, map.size());
+    }
+
+    @Test
+    public void testApplyChanges() {
+        NodeMapMutable map = new NodeMapMutable(this.mockHolder, DataType.NORMAL);
+        Node existing = makeNode("test1");
+        Node incoming = makeNode("test2");
+        map.add(existing);
+
+        Difference<Node> changes = new Difference<>();
+        changes.recordChange(Difference.ChangeType.REMOVE, existing);
+        changes.recordChange(Difference.ChangeType.ADD, incoming);
+
+        Difference<Node> result = map.applyChanges(changes);
+        assertEquals(Set.of(incoming), result.getAdded());
+        assertEquals(Set.of(existing), result.getRemoved());
+        assertEquals(Set.of(incoming), map.asSet());
+    }
+
+    @Test
+    public void testNodesInContext() {
+        NodeMapMutable map = new NodeMapMutable(this.mockHolder, DataType.NORMAL);
+        Node global = makeNode("test1");
+        Node scoped = makeNode("group.test2").toBuilder().withContext("server", "test").build();
+
+        map.add(global);
+        map.add(scoped);
+
+        assertEquals(Set.of(global), Set.copyOf(map.nodesInContext(ImmutableContextSetImpl.EMPTY)));
+        assertEquals(Set.of(scoped), Set.copyOf(map.nodesInContext(scoped.getContexts())));
+        assertEquals(Set.of(scoped), Set.copyOf(map.inheritanceNodesInContext(scoped.getContexts())));
+
+        // context not present in the map
+        assertEquals(Set.of(), map.nodesInContext(ImmutableContextSetImpl.of("world", "test")));
+    }
+
     @ParameterizedTest
     @CsvSource({
             "'', 2, 1",
@@ -323,6 +502,5 @@ public class NodeMapTest {
         map.copyInheritanceNodesTo(inheritanceOutput, options);
         assertEquals(expectedInheritance, inheritanceOutput.size());
     }
-
 
 }

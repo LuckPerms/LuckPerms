@@ -57,12 +57,12 @@ public class NodeMapMutable extends NodeMapBase {
 
     // Used in calls to Map#computeIfAbsent to make them behave like a LoadingMap/Cache
     // The key (ImmutableContextSet) isn't actually used - these are more like suppliers than functions
-    private static final Function<ImmutableContextSet, SortedSet<Node>> VALUE_SET_SUPPLIER = k -> new ConcurrentSkipListSet<>(NodeComparator.reverse());
-    private static final Function<ImmutableContextSet, SortedSet<InheritanceNode>> INHERITANCE_VALUE_SET_SUPPLIER = k -> new ConcurrentSkipListSet<>(NodeComparator.reverse());
+    private static final Function<ImmutableContextSet, SortedSet<Node>> VALUE_SET_SUPPLIER = k -> new ConcurrentSkipListSet<>(NodeComparator.descending());
+    private static final Function<ImmutableContextSet, SortedSet<InheritanceNode>> INHERITANCE_VALUE_SET_SUPPLIER = k -> new ConcurrentSkipListSet<>(NodeComparator.descending());
 
     // Creates the Map instances used by this.map and this.inheritanceMap
     private static <N extends Node> SortedMap<ImmutableContextSet, SortedSet<N>> createMap() {
-        return new ConcurrentSkipListMap<>(ContextSetComparator.reverse());
+        return new ConcurrentSkipListMap<>(ContextSetComparator.descending());
     }
 
     /*

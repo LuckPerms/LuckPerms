@@ -142,7 +142,7 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     public Map<String, Node> resolvePermissions(QueryOptions filter) {
         // get relevant entries
-        SortedMap<ImmutableContextSet, Map<String, Node>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        SortedMap<ImmutableContextSet, Map<String, Node>> sorted = new TreeMap<>(ContextSetComparator.descending());
         for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> entry : this.permissions.entrySet()) {
             if (!filter.satisfies(entry.getKey(), defaultSatisfyMode())) {
                 continue;
@@ -231,7 +231,7 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     public Set<LPSubjectReference> resolveParents(QueryOptions filter) {
         // get relevant entries
-        SortedMap<ImmutableContextSet, Set<LPSubjectReference>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        SortedMap<ImmutableContextSet, Set<LPSubjectReference>> sorted = new TreeMap<>(ContextSetComparator.descending());
         for (Map.Entry<ImmutableContextSet, Set<LPSubjectReference>> entry : this.parents.entrySet()) {
             if (!filter.satisfies(entry.getKey(), defaultSatisfyMode())) {
                 continue;
@@ -307,7 +307,7 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     public Map<String, MetaNode> resolveOptions(QueryOptions filter) {
         // get relevant entries
-        SortedMap<ImmutableContextSet, Map<String, MetaNode>> sorted = new TreeMap<>(ContextSetComparator.reverse());
+        SortedMap<ImmutableContextSet, Map<String, MetaNode>> sorted = new TreeMap<>(ContextSetComparator.descending());
         for (Map.Entry<ImmutableContextSet, Map<String, String>> entry : this.options.entrySet()) {
             if (!filter.satisfies(entry.getKey(), defaultSatisfyMode())) {
                 continue;

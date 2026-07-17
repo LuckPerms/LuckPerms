@@ -258,7 +258,7 @@ public abstract class PermissionHolder {
     }
 
     public SortedSet<Node> getOwnNodesSorted(QueryOptions queryOptions) {
-        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.reverse());
+        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.descending());
         for (DataType dataType : queryOrder(queryOptions)) {
             getData(dataType).copyTo(nodes, queryOptions);
         }
@@ -301,7 +301,7 @@ public abstract class PermissionHolder {
             return getOwnNodesSorted(queryOptions);
         }
 
-        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.reverse());
+        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.descending());
         InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
         for (PermissionHolder holder : graph.traverse(this)) {
             for (DataType dataType : holder.queryOrder(queryOptions)) {
