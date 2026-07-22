@@ -49,6 +49,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.model.user.User, UserManager<?>> implements net.luckperms.api.model.user.UserManager {
     public ApiUserManager(LuckPermsPlugin plugin, UserManager<?> handle) {
@@ -74,6 +75,18 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
 
         return this.plugin.getStorage().loadUser(uniqueId, username)
                 .thenApply(this::proxyAndRegisterUsage);
+    }
+
+    @Override
+    public @NonNull CompletableFuture<Map<UUID, net.luckperms.api.model.user.User>> loadUsers(@NonNull Set<@NonNull UUID> uniqueIds) {
+        Objects.requireNonNull(uniqueIds, "uuid set");
+
+        if (uniqueIds.isEmpty()) {
+            return CompletableFuture.completedFuture(Map.of());
+        }
+
+        return this.plugin.getStorage().loadUsers(uniqueIds)
+                .thenApply(map -> map.entrySet().stream().collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> this.proxyAndRegisterUsage(entry.getValue()))));
     }
 
     @Override

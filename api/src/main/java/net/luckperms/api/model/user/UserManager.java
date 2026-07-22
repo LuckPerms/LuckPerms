@@ -82,6 +82,15 @@ public interface UserManager {
     }
 
     /**
+     * Loads multiple users from the plugin's storage provider into memory.
+     *
+     * @param uniqueIds the uuids of the users to load
+     * @return a future for an unmodifiable map of loaded users
+     * @throws NullPointerException if the uuid set is null
+     */
+    @NonNull CompletableFuture<@Unmodifiable Map<UUID, User>> loadUsers(@NonNull Set<@NonNull UUID> uniqueIds);
+
+    /**
      * Uses the LuckPerms cache to find a uuid for the given username.
      *
      * <p>This lookup is case insensitive.</p>
