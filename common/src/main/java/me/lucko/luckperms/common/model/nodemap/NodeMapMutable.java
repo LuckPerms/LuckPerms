@@ -71,21 +71,19 @@ public class NodeMapMutable extends NodeMapBase {
      * The node values are ordered according to the priority rules defined in NodeComparator.
      *
      * We use our own "multimap"-like implementation here because guava's is not thread safe.
-     *
-     * The map fields aren't final because they are replaced when large updates (e.g. clear)
-     * are performed. We do this so there's no risk that the read methods will see an inconsistent
-     * state in the middle of an update from the DB. (see below comment about locking - we don't
-     * lock for reads!)
      */
-    private SortedMap<ImmutableContextSet, SortedSet<Node>> map = createMap();
-    private SortedMap<ImmutableContextSet, SortedSet<InheritanceNode>> inheritanceMap = createMap();
+    private final SortedMap<ImmutableContextSet, SortedSet<Node>> map = createMap();
+    private final SortedMap<ImmutableContextSet, SortedSet<InheritanceNode>> inheritanceMap = createMap();
 
     /**
-     * This lock is used whilst performing mutations, but *not* reads.
+     * This lock is used whilst performing writes, but *not* reads.
      *
      * The maps themselves are thread safe, so for querying, we just allow
      * the read methods to do whatever they want without any locking.
-     * However, we want mutations to be atomic, so we use the lock to ensure that happens.
+     *
+     * Readers can see partially inconsistent data, but this is fine - the data is only ever used for
+     * querying, and the worst case scenario is that a query returns a node that has just been removed,
+     * or doesn't return a node that has just been added.
      */
     private final Lock lock = new ReentrantLock();
 
@@ -324,10 +322,8 @@ public class NodeMapMutable extends NodeMapBase {
                 result.recordChanges(ChangeType.REMOVE, nodes);
             }
 
-            // replace the map - this means any client reading async won't be affected
-            // by any race conditions between this call to clear and any subsequent call to setContent
-            this.map = createMap();
-            this.inheritanceMap = createMap();
+            this.map.clear();
+            this.inheritanceMap.clear();
         } finally {
             this.lock.unlock();
         }
@@ -356,32 +352,18 @@ public class NodeMapMutable extends NodeMapBase {
 
     @Override
     public Difference<Node> setContent(Iterable<? extends Node> set) {
-        Difference<Node> result = new Difference<>();
+        Difference<Node> diff = new Difference<>();
+        diff.recordChanges(ChangeType.ADD, set);
 
         this.lock.lock();
         try {
-            result.mergeFrom(clear());
-            result.mergeFrom(addAll(set));
+            for (SortedSet<Node> nodes : this.map.values()) {
+                diff.recordChanges(ChangeType.REMOVE, nodes);
+            }
+            return applyChanges(diff);
         } finally {
             this.lock.unlock();
         }
-
-        return result;
-    }
-
-    @Override
-    public Difference<Node> setContent(Stream<? extends Node> stream) {
-        Difference<Node> result = new Difference<>();
-
-        this.lock.lock();
-        try {
-            result.mergeFrom(clear());
-            result.mergeFrom(addAll(stream));
-        } finally {
-            this.lock.unlock();
-        }
-
-        return result;
     }
 
     @Override

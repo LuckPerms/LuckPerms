@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.util;
 
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -98,18 +97,6 @@ public class Difference<T> {
         this.changes.clear();
     }
 
-    private void recordChange(Change<T> change) {
-        // This method is the magic of this class.
-        // When tracking, we want to ignore changes that cancel each other out, and only
-        // keep track of the net difference.
-        // e.g. adding then removing the same value = zero net change, so ignore it.
-
-        if (this.changes.remove(change.inverse())) {
-            return;
-        }
-        this.changes.add(change);
-    }
-
     /**
      * Records a change.
      *
@@ -117,7 +104,14 @@ public class Difference<T> {
      * @param value the changed value
      */
     public void recordChange(ChangeType type, T value) {
-        recordChange(new Change<>(type, value));
+        // This method is the magic of this class.
+        // When tracking, we want to ignore changes that cancel each other out, and only
+        // keep track of the net difference.
+        // e.g. adding then removing the same value = zero net change, so ignore it.
+        if (this.changes.remove(new Change<>(type.inverse(), value))) {
+            return;
+        }
+        this.changes.add(new Change<>(type, value));
     }
 
     /**
@@ -128,18 +122,8 @@ public class Difference<T> {
      */
     public void recordChanges(ChangeType type, Iterable<? extends T> values) {
         for (T value : values) {
-            recordChange(new Change<>(type, value));
+            recordChange(type, value);
         }
-    }
-
-    /**
-     * Records some changes.
-     *
-     * @param type the type of change
-     * @param values the changed values
-     */
-    public void recordChanges(ChangeType type, Stream<? extends T> values) {
-        values.forEach(value -> recordChange(new Change<>(type, value)));
     }
 
     /**
@@ -150,7 +134,7 @@ public class Difference<T> {
      */
     public Difference<T> mergeFrom(Difference<T> other) {
         for (Change<T> change : other.changes) {
-            recordChange(change);
+            recordChange(change.type(), change.value());
         }
         return this;
     }
@@ -168,10 +152,12 @@ public class Difference<T> {
     public static final class Change<T> {
         private final ChangeType type;
         private final T value;
+        private final int hashCode;
 
         public Change(ChangeType type, T value) {
             this.type = type;
             this.value = value;
+            this.hashCode = 31 * type.hashCode() + value.hashCode();
         }
 
         public ChangeType type() {
@@ -180,10 +166,6 @@ public class Difference<T> {
 
         public T value() {
             return this.value;
-        }
-
-        public Change<T> inverse() {
-            return new Change<>(this.type.inverse(), this.value);
         }
 
         @Override
@@ -196,7 +178,7 @@ public class Difference<T> {
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.type, this.value);
+            return this.hashCode;
         }
 
         @Override
