@@ -38,6 +38,8 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.Sorts;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.Updates;
 import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.actionlog.filter.ActionFilterMongoBuilder;
@@ -59,6 +61,7 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
+import me.lucko.luckperms.common.util.Difference;
 import me.lucko.luckperms.common.util.HostAndPort;
 import me.lucko.luckperms.common.util.Iterators;
 import net.luckperms.api.actionlog.Action;
@@ -266,7 +269,7 @@ public class MongoStorage implements StorageImplementation {
 
                 boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
                 if (updatedUsername | user.auditTemporaryNodes()) {
-                    c.replaceOne(Filters.eq("_id", user.getUniqueId()), userToDoc(user));
+                    saveUser(user);
                 }
             } else {
                 if (this.plugin.getUserManager().isNonDefaultUser(user)) {
@@ -292,11 +295,40 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public void saveUser(User user) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-        user.normalData().discardChanges();
-        if (!this.plugin.getUserManager().isNonDefaultUser(user)) {
+
+        Difference<Node> changes = user.normalData().exportChanges(results -> {
+            if (this.plugin.getUserManager().isNonDefaultUser(user)) {
+                return true;
+            }
+
+            // if the only change is adding the default node, we don't need to export
+            if (results.getChanges().size() == 1) {
+                Difference.Change<Node> onlyChange = results.getChanges().iterator().next();
+                return !(onlyChange.type() == Difference.ChangeType.ADD && this.plugin.getUserManager().isDefaultNode(onlyChange.value()));
+            }
+
+            return true;
+        });
+
+        // if the user only has the default group, delete their data
+        boolean isDefaultUser = !this.plugin.getUserManager().isNonDefaultUser(user);
+        if (changes != null && isDefaultUser) {
+            user.normalData().addDefaultNodeToChangeSet();
+            changes = null;
+        }
+
+        if (changes == null) {
             c.deleteOne(Filters.eq("_id", user.getUniqueId()));
-        } else {
-            c.replaceOne(Filters.eq("_id", user.getUniqueId()), userToDoc(user), new ReplaceOptions().upsert(true));
+            return;
+        }
+
+        List<Bson> updates = nodeChangesToUpdates(changes);
+        updates.add(Updates.combine(
+                Updates.set("name", user.getUsername().orElse("null")),
+                Updates.set("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME))
+        ));
+        for (Bson update : updates) {
+            c.updateOne(Filters.eq("_id", user.getUniqueId()), update, new UpdateOptions().upsert(true));
         }
     }
 
@@ -342,11 +374,11 @@ public class MongoStorage implements StorageImplementation {
         Group group = this.plugin.getGroupManager().getOrMake(name);
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
         try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", group.getName())).iterator()) {
-            if (cursor.hasNext()) {
+            if (!cursor.hasNext()) {
+                c.insertOne(new Document("_id", group.getName()));
+            } else {
                 Document d = cursor.next();
                 group.loadNodesFromStorage(nodesFromDoc(d));
-            } else {
-                c.insertOne(groupToDoc(group));
             }
         }
         return group;
@@ -388,8 +420,12 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public void saveGroup(Group group) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-        group.normalData().discardChanges();
-        c.replaceOne(Filters.eq("_id", group.getName()), groupToDoc(group), new ReplaceOptions().upsert(true));
+        Difference<Node> changes = group.normalData().exportChanges(results -> true);
+
+        List<Bson> updates = nodeChangesToUpdates(changes);
+        for (Bson update : updates) {
+            c.updateOne(Filters.eq("_id", group.getName()), update, new UpdateOptions().upsert(true));
+        }
     }
 
     @Override
@@ -553,17 +589,6 @@ public class MongoStorage implements StorageImplementation {
         }
     }
 
-    private static Document userToDoc(User user) {
-        List<Document> nodes = user.normalData().asList().stream()
-                .map(MongoStorage::nodeToDoc)
-                .collect(Collectors.toList());
-
-        return new Document("_id", user.getUniqueId())
-                .append("name", user.getUsername().orElse("null"))
-                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME))
-                .append("permissions", nodes);
-    }
-
     private static List<Node> nodesFromDoc(Document document) {
         List<Node> nodes = new ArrayList<>();
         if (document.containsKey("permissions") && document.get("permissions") instanceof List) {
@@ -579,16 +604,27 @@ public class MongoStorage implements StorageImplementation {
         return nodes;
     }
 
-    private static Document groupToDoc(Group group) {
-        List<Document> nodes = group.normalData().asList().stream()
-                .map(MongoStorage::nodeToDoc)
-                .collect(Collectors.toList());
-
-        return new Document("_id", group.getName()).append("permissions", nodes);
-    }
-
     private static Document trackToDoc(Track track) {
         return new Document("_id", track.getName()).append("groups", track.getGroups());
+    }
+
+    private static List<Bson> nodeChangesToUpdates(Difference<Node> changes) {
+        List<Bson> updates = new ArrayList<>();
+
+        Set<Node> removed = changes.getRemoved();
+        Set<Node> added = changes.getAdded();
+
+        if (!removed.isEmpty()) {
+            List<Document> docs = removed.stream().map(MongoStorage::nodeToDoc).collect(Collectors.toList());
+            updates.add(Updates.pullAll("permissions", docs));
+        }
+
+        if (!added.isEmpty()) {
+            List<Document> docs = added.stream().map(MongoStorage::nodeToDoc).collect(Collectors.toList());
+            updates.add(Updates.pushEach("permissions", docs));
+        }
+
+        return updates;
     }
 
     @VisibleForTesting
