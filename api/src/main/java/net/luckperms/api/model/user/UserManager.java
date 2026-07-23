@@ -87,6 +87,7 @@ public interface UserManager {
      * @param uniqueIds the uuids of the users to load
      * @return a future for an unmodifiable map of loaded users
      * @throws NullPointerException if the uuid set is null
+     * @since 5.6
      */
     @NonNull CompletableFuture<@Unmodifiable Map<UUID, User>> loadUsers(@NonNull Set<@NonNull UUID> uniqueIds);
 

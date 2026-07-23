@@ -49,7 +49,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.model.user.User, UserManager<?>> implements net.luckperms.api.model.user.UserManager {
     public ApiUserManager(LuckPermsPlugin plugin, UserManager<?> handle) {
@@ -70,7 +69,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
 
     @Override
     public @NonNull CompletableFuture<net.luckperms.api.model.user.User> loadUser(@NonNull UUID uniqueId, @Nullable String username) {
-        Objects.requireNonNull(uniqueId, "uuid");
+        Objects.requireNonNull(uniqueId, "uniqueId");
         ApiUtils.checkUsername(username, this.plugin);
 
         return this.plugin.getStorage().loadUser(uniqueId, username)
@@ -79,14 +78,19 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
 
     @Override
     public @NonNull CompletableFuture<Map<UUID, net.luckperms.api.model.user.User>> loadUsers(@NonNull Set<@NonNull UUID> uniqueIds) {
-        Objects.requireNonNull(uniqueIds, "uuid set");
+        Objects.requireNonNull(uniqueIds, "uniqueIds");
 
         if (uniqueIds.isEmpty()) {
             return CompletableFuture.completedFuture(Map.of());
         }
 
         return this.plugin.getStorage().loadUsers(uniqueIds)
-                .thenApply(map -> map.entrySet().stream().collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> this.proxyAndRegisterUsage(entry.getValue()))));
+                .thenApply(map -> map.entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                Map.Entry::getKey,
+                                entry -> this.proxyAndRegisterUsage(entry.getValue())
+                        ))
+                );
     }
 
     @Override
@@ -97,7 +101,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
 
     @Override
     public @NonNull CompletableFuture<String> lookupUsername(@NonNull UUID uniqueId) {
-        Objects.requireNonNull(uniqueId, "uuid");
+        Objects.requireNonNull(uniqueId, "uniqueId");
         return this.plugin.getStorage().getPlayerName(uniqueId);
     }
 
@@ -126,7 +130,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
 
     @Override
     public @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uniqueId, @NonNull String username) {
-        Objects.requireNonNull(uniqueId, "uuid");
+        Objects.requireNonNull(uniqueId, "uniqueId");
         Objects.requireNonNull(username, "username");
         return this.plugin.getStorage().savePlayerData(uniqueId, username);
     }
@@ -166,13 +170,13 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
 
     @Override
     public net.luckperms.api.model.user.User getUser(@NonNull UUID uniqueId) {
-        Objects.requireNonNull(uniqueId, "uuid");
+        Objects.requireNonNull(uniqueId, "uniqueId");
         return proxyAndRegisterUsage(this.handle.getIfLoaded(uniqueId));
     }
 
     @Override
     public net.luckperms.api.model.user.User getUser(@NonNull String username) {
-        Objects.requireNonNull(username, "name");
+        Objects.requireNonNull(username, "username");
         return proxyAndRegisterUsage(this.handle.getByUsername(username));
     }
 
@@ -185,7 +189,7 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
 
     @Override
     public boolean isLoaded(@NonNull UUID uniqueId) {
-        Objects.requireNonNull(uniqueId, "uuid");
+        Objects.requireNonNull(uniqueId, "uniqueId");
         return this.handle.isLoaded(uniqueId);
     }
 

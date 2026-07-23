@@ -62,7 +62,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -397,6 +400,44 @@ public abstract class AbstractStorageTest {
 
         user = this.storage.loadUser(exampleUniqueId, exampleUsername);
         assertEquals(editedNodes, user.normalData().asSet());
+    }
+
+    @Test
+    public void testBulkLoadUsers() throws Exception {
+        StandardUserManager userManager = new StandardUserManager(this.plugin);
+
+        //noinspection unchecked,rawtypes
+        when(this.plugin.getUserManager()).thenReturn((UserManager) userManager);
+
+        Map<UUID, String> users = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            UUID uuid = UUID.randomUUID();
+            String username = "User" + i;
+            users.put(uuid, username);
+
+            this.storage.savePlayerData(uuid, username);
+
+            User user = this.storage.loadUser(uuid, username);
+            user.setNode(DataType.NORMAL, Permission.builder()
+                    .permission("test.1")
+                    .withContext("server", "test")
+                    .build(), true);
+            this.storage.saveUser(user);
+        }
+
+        userManager.retainAll(List.of());
+
+        Set<UUID> usersToLoad = new HashSet<>(users.keySet());
+        usersToLoad.add(UUID.randomUUID()); // add a user that doesn't exist
+
+        Map<UUID, User> loadedUsers = this.storage.loadUsers(usersToLoad);
+        assertEquals(usersToLoad.size(), loadedUsers.size());
+
+        UUID uuid = users.keySet().iterator().next();
+        User user = loadedUsers.get(uuid);
+        assertNotNull(user);
+
+        assertEquals(2, user.normalData().asList().size());
     }
 
 }

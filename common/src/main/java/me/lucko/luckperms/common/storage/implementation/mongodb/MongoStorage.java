@@ -254,44 +254,58 @@ public class MongoStorage implements StorageImplementation {
 
     @Override
     public User loadUser(UUID uniqueId, String username) {
-        User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-        try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", user.getUniqueId())).iterator()) {
-            if (cursor.hasNext()) {
-                // User exists, let's load.
-                Document d = cursor.next();
-                String name = d.getString("name");
 
-                user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
-                user.setUsername(name, true);
-
-                user.loadNodesFromStorage(nodesFromDoc(d));
-                this.plugin.getUserManager().giveDefaultIfNeeded(user);
-
-
-                boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
-                if (updatedUsername | user.auditTemporaryNodes()) {
-                    saveUser(user);
-                }
-            } else {
-                if (this.plugin.getUserManager().isNonDefaultUser(user)) {
-                    user.loadNodesFromStorage(Collections.emptyList());
-                    user.getPrimaryGroup().setStoredValue(null);
-                    this.plugin.getUserManager().giveDefaultIfNeeded(user);
-                }
-            }
+        Document document;
+        try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", uniqueId)).iterator()) {
+            document = cursor.hasNext() ? cursor.next() : null;
         }
-        return user;
+
+        return createUser(uniqueId, username, document);
     }
 
     @Override
-    public Map<UUID, User> loadUsers(Set<UUID> uniqueIds) throws Exception {
-        // make this a bulk search?
-        Map<UUID, User> map = new HashMap<>();
-        for (UUID uniqueId : uniqueIds) {
-            map.put(uniqueId, loadUser(uniqueId, null));
+    public Map<UUID, User> loadUsers(Set<UUID> uniqueIds) {
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
+
+        Map<UUID, Document> documents = new HashMap<>();
+        try (MongoCursor<Document> cursor = c.find(Filters.in("_id", uniqueIds)).iterator()) {
+            while (cursor.hasNext()) {
+                Document document = cursor.next();
+                documents.put(getDocumentId(document), document);
+            }
         }
-        return map;
+
+        Map<UUID, User> users = new HashMap<>();
+        for (UUID uniqueId : uniqueIds) {
+            users.put(uniqueId, createUser(uniqueId, null, documents.get(uniqueId)));
+        }
+        return users;
+    }
+
+    private User createUser(UUID uniqueId, String username, @Nullable Document document) {
+        User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
+        if (document != null) {
+            String name = document.getString("name");
+
+            user.getPrimaryGroup().setStoredValue(document.getString("primaryGroup"));
+            user.setUsername(name, true);
+
+            user.loadNodesFromStorage(nodesFromDoc(document));
+            this.plugin.getUserManager().giveDefaultIfNeeded(user);
+
+            boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
+            if (updatedUsername | user.auditTemporaryNodes()) {
+                saveUser(user);
+            }
+        } else {
+            if (this.plugin.getUserManager().isNonDefaultUser(user)) {
+                user.loadNodesFromStorage(Collections.emptyList());
+                user.getPrimaryGroup().setStoredValue(null);
+                this.plugin.getUserManager().giveDefaultIfNeeded(user);
+            }
+        }
+        return user;
     }
 
     @Override
