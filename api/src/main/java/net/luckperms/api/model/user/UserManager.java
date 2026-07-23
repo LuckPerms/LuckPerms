@@ -137,6 +137,20 @@ public interface UserManager {
     }
 
     /**
+     * Loads a user from the plugin's storage provider, applies the given {@code action},
+     * then saves the user's data back to storage and pushes the changes via MessagingService if present.
+     *
+     * <p>This method effectively calls {@link #loadUser(UUID)}, followed by the {@code action},
+     * later {@link #saveUser(User)}, and finally {@link net.luckperms.api.messaging.MessagingService#pushUserUpdate(User)} and returns an encapsulation of the whole process as a
+     * {@link CompletableFuture}. </p>
+     *
+     * @param uniqueId the uuid of the user
+     * @param action the action to apply to the user
+     * @return a future to encapsulate the operation
+     */
+    @NonNull CompletableFuture<Void> modifyUserWithPush(@NonNull UUID uniqueId, @NonNull Consumer<? super User> action);
+
+    /**
      * Saves data about a player to the uuid caching system.
      *
      * @param uniqueId     the users mojang unique id
