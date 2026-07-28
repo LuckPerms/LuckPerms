@@ -175,13 +175,13 @@ public enum CommandSpec {
     PERMISSION_SETTEMP(
             arg("node", true),
             arg("value", "true|false", false),
-            arg("duration", true),
+            arg("duration", "[+|-]duration", true),
             arg("temporary modifier", false),
             arg("context...", false)
     ),
     PERMISSION_UNSETTEMP(
             arg("node", true),
-            arg("duration", false),
+            arg("duration", "[+|-]duration", false),
             arg("context...", false)
     ),
     PERMISSION_CHECK(

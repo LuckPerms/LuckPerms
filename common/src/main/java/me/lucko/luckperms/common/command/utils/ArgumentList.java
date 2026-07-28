@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.context.MutableContextSetImpl;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.DurationParser;
+import me.lucko.luckperms.common.util.SignedDuration;
 import net.luckperms.api.context.Context;
 import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.ImmutableContextSet;
@@ -142,6 +143,53 @@ public class ArgumentList extends ForwardingList<String> {
         }
 
         return parseDuration(get(index)).orElse(defaultValue);
+    }
+
+    public SignedDuration getSignedDuration(int index) throws ArgumentException {
+        String arg = get(index);
+        return parseSignedDuration(arg).orElseThrow(() -> new ArgumentException.InvalidDate(arg));
+    }
+
+    public SignedDuration getSignedDurationOrDefault(int index, SignedDuration defaultValue) throws ArgumentException {
+        if (indexOutOfBounds(index)) {
+            return defaultValue;
+        }
+
+        return parseSignedDuration(get(index)).orElse(defaultValue);
+    }
+
+    private static Optional<SignedDuration> parseSignedDuration(String input) throws ArgumentException {
+        SignedDuration.Sign sign = SignedDuration.Sign.ABSOLUTE;
+
+        if (!input.isEmpty()) {
+            char first = input.charAt(0);
+            if (first == '+') {
+                sign = SignedDuration.Sign.ADD;
+            } else if (first == '-') {
+                sign = SignedDuration.Sign.SUBTRACT;
+            }
+        }
+
+        if (sign == SignedDuration.Sign.ABSOLUTE) {
+            return parseDuration(input).map(duration -> SignedDuration.of(SignedDuration.Sign.ABSOLUTE, duration));
+        }
+
+        // a leading sign means the argument was unambiguously meant as a duration, so failing
+        // to parse it is an error - never something to hand on to the context parser instead
+        String magnitude = input.substring(1);
+        if (magnitude.isEmpty()) {
+            // DurationParser reads an empty string as a zero duration, which would make a
+            // bare '+' or '-' a temporary operation that expires immediately
+            throw new ArgumentException.InvalidDate(input);
+        }
+
+        // a sign is only meaningful when applied to a relative duration, so (unlike the
+        // unsigned case) don't fall back to interpreting the argument as a unix timestamp
+        try {
+            return Optional.of(SignedDuration.of(sign, DurationParser.parseDuration(magnitude)));
+        } catch (IllegalArgumentException e) {
+            throw new ArgumentException.InvalidDate(input);
+        }
     }
 
     private static Optional<Duration> parseDuration(String input) throws ArgumentException.PastDate {
