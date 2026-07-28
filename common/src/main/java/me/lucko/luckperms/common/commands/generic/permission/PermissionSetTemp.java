@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.node.factory.NodeBuilders;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+import me.lucko.luckperms.common.util.SignedDuration;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
@@ -51,6 +52,7 @@ import net.luckperms.api.node.types.InheritanceNode;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 public class PermissionSetTemp extends GenericChildCommand {
     public PermissionSetTemp() {
@@ -66,12 +68,19 @@ public class PermissionSetTemp extends GenericChildCommand {
 
         String node = args.get(0);
         boolean value = args.getBooleanOrInsert(1, true);
-        Duration duration = args.getDuration(2);
-        TemporaryNodeMergeStrategy modifier = args.getTemporaryModifierAndRemove(3).orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
+        SignedDuration duration = args.getSignedDuration(2);
+        Optional<TemporaryNodeMergeStrategy> explicitModifier = args.getTemporaryModifierAndRemove(3);
         MutableContextSet context = args.getContextOrDefault(3, plugin);
 
         if (node.isEmpty()) {
             Message.INVALID_PERMISSION_EMPTY.send(sender);
+            return;
+        }
+
+        // '+1h' and '-1h' already say how the duration should be applied, so a written
+        // out modifier alongside them would be either redundant or contradictory
+        if (duration.isSigned() && explicitModifier.isPresent()) {
+            Message.DURATION_MODIFIER_CONFLICT.send(sender);
             return;
         }
 
@@ -82,7 +91,7 @@ public class PermissionSetTemp extends GenericChildCommand {
             return;
         }
 
-        Node builtNode = NodeBuilders.determineMostApplicable(node).value(value).withContext(context).expiry(duration).build();
+        Node builtNode = NodeBuilders.determineMostApplicable(node).value(value).withContext(context).expiry(duration.duration()).build();
 
         if (builtNode instanceof InheritanceNode) {
             if (ArgumentPermissions.checkGroup(plugin, sender, ((InheritanceNode) builtNode).getGroupName(), context)) {
@@ -91,20 +100,56 @@ public class PermissionSetTemp extends GenericChildCommand {
             }
         }
 
+        if (duration.sign() == SignedDuration.Sign.SUBTRACT) {
+            subtract(plugin, sender, target, node, value, builtNode, duration.duration(), context);
+            return;
+        }
+
+        TemporaryNodeMergeStrategy modifier = duration.sign() == SignedDuration.Sign.ADD
+                ? TemporaryNodeMergeStrategy.ADD_NEW_DURATION_TO_EXISTING
+                : explicitModifier.orElseGet(() -> plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR));
+
         DataMutateResult.WithMergedNode result = target.setNode(DataType.NORMAL, builtNode, modifier);
 
         if (result.getResult().wasSuccessful()) {
-            duration = result.getMergedNode().getExpiryDuration();
-            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, target, duration, context);
+            Duration newDuration = result.getMergedNode().getExpiryDuration();
+            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, value, target, newDuration, context);
 
             LoggedAction.build().source(sender).target(target)
-                    .description("permission", "settemp", node, value, duration, context)
+                    .description("permission", "settemp", node, value, newDuration, context)
                     .build().submit(plugin, sender);
 
             StorageAssistant.save(target, sender, plugin);
         } else {
             Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, target, node, context);
         }
+    }
+
+    /**
+     * Takes the given duration away from the expiry of an existing temporary node,
+     * removing it entirely if that would take it into the past.
+     */
+    private static void subtract(LuckPermsPlugin plugin, Sender sender, PermissionHolder target, String node, boolean value, Node builtNode, Duration duration, MutableContextSet context) {
+        DataMutateResult.WithMergedNode result = target.unsetNode(DataType.NORMAL, builtNode, duration);
+
+        if (!result.getResult().wasSuccessful()) {
+            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, target, node, context);
+            return;
+        }
+
+        Node mergedNode = result.getMergedNode();
+        //noinspection ConstantConditions
+        if (mergedNode != null) {
+            Message.UNSET_TEMP_PERMISSION_SUBTRACT_SUCCESS.send(sender, mergedNode.getKey(), mergedNode.getValue(), target, mergedNode.getExpiryDuration(), context, duration);
+        } else {
+            Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, target, context);
+        }
+
+        LoggedAction.build().source(sender).target(target)
+                .description("permission", "settemp", node, value, "-" + duration, context)
+                .build().submit(plugin, sender);
+
+        StorageAssistant.save(target, sender, plugin);
     }
 
     @Override

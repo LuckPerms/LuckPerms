@@ -259,6 +259,198 @@ public class CommandsIntegrationTest {
     }
 
     @Test
+    public void testTemporaryPermissionDurationModifiers(@TempDir Path tempDir) {
+        TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
+            CommandExecutor executor = app.getCommandExecutor();
+
+            new CommandTester(executor)
+                    .whenRunCommand("creategroup test")
+                    .clearMessageBuffer()
+
+                    .givenHasPermissions("luckperms.group.permission.settemp")
+                    .whenRunCommand("group test permission settemp abc true 1h")
+                    .thenExpect("[LP] Set abc to true for test for a duration of 1 hour in context global.")
+
+                    // '+' accumulates onto the existing duration
+                    .givenHasPermissions("luckperms.group.permission.settemp")
+                    .whenRunCommand("group test permission settemp abc true +30m")
+                    .thenExpect("[LP] Set abc to true for test for a duration of 1 hour 30 minutes in context global.")
+
+                    // '-' takes time back off it
+                    .givenHasPermissions("luckperms.group.permission.settemp")
+                    .whenRunCommand("group test permission settemp abc true -45m")
+                    .thenExpect("[LP] Set abc to true for test for a duration of 45 minutes in context global, 45 minutes less than before.")
+
+                    // a sign already says how to apply the duration, so a written modifier as well is a mistake
+                    .givenHasPermissions("luckperms.group.permission.settemp")
+                    .whenRunCommand("group test permission settemp abc true +1h replace")
+                    .thenExpect("[LP] A duration prefixed with + or - already says how it should be applied, so a temporary modifier cannot be given as well")
+
+                    // against an already temporary permission, an unsigned duration still subtracts
+                    .givenHasPermissions("luckperms.group.permission.unsettemp")
+                    .whenRunCommand("group test permission unsettemp abc 10m")
+                    .thenExpect("[LP] Set abc to true for test for a duration of 35 minutes in context global, 10 minutes less than before.")
+
+                    .givenHasPermissions("luckperms.group.permission.unsettemp")
+                    .whenRunCommand("group test permission unsettemp abc -5m")
+                    .thenExpect("[LP] Set abc to true for test for a duration of 30 minutes in context global, 5 minutes less than before.")
+
+                    .givenHasPermissions("luckperms.group.permission.unsettemp")
+                    .whenRunCommand("group test permission unsettemp abc")
+                    .thenExpect("[LP] Unset temporary permission abc for test in context global.")
+
+                    // taking a permanent permission away for a while
+                    .givenHasPermissions("luckperms.group.permission.set")
+                    .whenRunCommand("group test permission set xyz true")
+                    .thenExpect("[LP] Set xyz to true for test in context global.")
+
+                    .givenHasPermissions("luckperms.group.permission.unsettemp")
+                    .whenRunCommand("group test permission unsettemp xyz 1h")
+                    .thenExpect("[LP] Took xyz away from test for 1 hour in context global, after which it will apply again.")
+
+                    // the permanent node is left alone - the temporary negation just outranks it
+                    .givenHasPermissions("luckperms.group.permission.info")
+                    .whenRunCommand("group test permission info")
+                    .thenExpect("""
+                            [LP] test's Permissions:  (page 1 of 1 - 2 entries)
+                            > xyz
+                            -    expires in 1 hour
+                            > xyz
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.group.permission.check")
+                    .whenRunCommand("group test permission check xyz")
+                    .thenExpect("""
+                            [LP] Permission information for xyz:
+                            [LP] - test has xyz set to false in context global.
+                            [LP] - test has xyz set to true in context global.
+                            [LP] - test does not inherit xyz.
+                            [LP]
+                            [LP] Permission check for xyz:
+                            [LP]     Result: false
+                            [LP]     Processor: common.DirectProcessor
+                            [LP]     Cause: test has xyz set to false in context global
+                            [LP]     Context: None
+                            """
+                    )
+
+                    // '+' extends an existing removal
+                    .givenHasPermissions("luckperms.group.permission.unsettemp")
+                    .whenRunCommand("group test permission unsettemp xyz +30m")
+                    .thenExpect("[LP] Took xyz away from test for 1 hour 30 minutes in context global, after which it will apply again.")
+
+                    // an unsigned duration now shortens it, since the removal itself is a temporary node
+                    .givenHasPermissions("luckperms.group.permission.unsettemp")
+                    .whenRunCommand("group test permission unsettemp xyz 30m")
+                    .thenExpect("[LP] Set xyz to false for test for a duration of 1 hour in context global, 30 minutes less than before.")
+
+                    // dropping the removal early puts the permanent permission straight back
+                    .givenHasPermissions("luckperms.group.permission.unsettemp")
+                    .whenRunCommand("group test permission unsettemp xyz")
+                    .thenExpect("[LP] Unset temporary permission xyz for test in context global.")
+
+                    .givenHasPermissions("luckperms.group.permission.unsettemp")
+                    .whenRunCommand("group test permission unsettemp xyz +10m")
+                    .thenExpect("[LP] test does not have xyz taken away temporarily in context global, so there is nothing to extend.")
+
+                    .givenHasPermissions("luckperms.group.permission.info")
+                    .whenRunCommand("group test permission info")
+                    .thenExpect("""
+                            [LP] test's Permissions:  (page 1 of 1 - 1 entries)
+                            > xyz
+                            """
+                    );
+        });
+    }
+
+    @Test
+    public void testTemporaryPermissionRemovalOfInheritedPermission(@TempDir Path tempDir) {
+        TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
+            CommandExecutor executor = app.getCommandExecutor();
+
+            plugin.getStorage().savePlayerData(UUID.fromString("c1d60c50-70b5-4722-8057-87767557e50d"), "Luck").join();
+
+            new CommandTester(executor)
+                    .whenRunCommand("creategroup vip")
+                    .clearMessageBuffer()
+
+                    .givenHasPermissions("luckperms.group.permission.set")
+                    .whenRunCommand("group vip permission set fly.enabled true")
+                    .thenExpect("[LP] Set fly.enabled to true for vip in context global.")
+
+                    .givenHasPermissions("luckperms.user.parent.add")
+                    .whenRunCommand("user Luck parent add vip")
+                    .thenExpect("[LP] luck now inherits permissions from vip in context global.")
+
+                    // the permission is only inherited - the user holds nothing of their own
+                    .givenHasPermissions("luckperms.user.permission.check")
+                    .whenRunCommand("user Luck permission check fly.enabled")
+                    .thenExpect("""
+                            [LP] Permission information for fly.enabled:
+                            [LP] - luck does not have fly.enabled set.
+                            [LP] - luck inherits fly.enabled set to true from vip in context global.
+                            [LP]
+                            [LP] Permission check for fly.enabled:
+                            [LP]     Result: true
+                            [LP]     Processor: common.DirectProcessor
+                            [LP]     Cause: vip has fly.enabled set to true in context global
+                            [LP]     Context: None
+                            """
+                    )
+
+                    // taking it away puts a temporary negation on the user, leaving the group alone
+                    .givenHasPermissions("luckperms.user.permission.unsettemp")
+                    .whenRunCommand("user Luck permission unsettemp fly.enabled 1h")
+                    .thenExpect("[LP] Took fly.enabled away from luck for 1 hour in context global, after which it will apply again.")
+
+                    .givenHasPermissions("luckperms.user.permission.check")
+                    .whenRunCommand("user Luck permission check fly.enabled")
+                    .thenExpect("""
+                            [LP] Permission information for fly.enabled:
+                            [LP] - luck has fly.enabled set to false in context global.
+                            [LP] - luck inherits fly.enabled set to true from vip in context global.
+                            [LP]
+                            [LP] Permission check for fly.enabled:
+                            [LP]     Result: false
+                            [LP]     Processor: common.DirectProcessor
+                            [LP]     Cause: c1d60c50-70b5-4722-8057-87767557e50d has fly.enabled set to false in context global
+                            [LP]     Context: None
+                            """
+                    )
+
+                    // the group still grants it to everyone else
+                    .givenHasPermissions("luckperms.group.permission.info")
+                    .whenRunCommand("group vip permission info")
+                    .thenExpect("""
+                            [LP] vip's Permissions:  (page 1 of 1 - 1 entries)
+                            > fly.enabled
+                            """
+                    )
+
+                    // dropping the negation restores the inherited permission
+                    .givenHasPermissions("luckperms.user.permission.unsettemp")
+                    .whenRunCommand("user Luck permission unsettemp fly.enabled")
+                    .thenExpect("[LP] Unset temporary permission fly.enabled for luck in context global.")
+
+                    .givenHasPermissions("luckperms.user.permission.check")
+                    .whenRunCommand("user Luck permission check fly.enabled")
+                    .thenExpect("""
+                            [LP] Permission information for fly.enabled:
+                            [LP] - luck does not have fly.enabled set.
+                            [LP] - luck inherits fly.enabled set to true from vip in context global.
+                            [LP]
+                            [LP] Permission check for fly.enabled:
+                            [LP]     Result: true
+                            [LP]     Processor: common.DirectProcessor
+                            [LP]     Cause: vip has fly.enabled set to true in context global
+                            [LP]     Context: None
+                            """
+                    );
+        });
+    }
+
+    @Test
     public void testGroupParentCommands(@TempDir Path tempDir) {
         TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
             CommandExecutor executor = app.getCommandExecutor();

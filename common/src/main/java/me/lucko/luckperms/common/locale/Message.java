@@ -2259,6 +2259,37 @@ public interface Message {
             .append(FULL_STOP)
     );
 
+    Args4<String, PermissionHolder, Duration, ContextSet> UNSET_TEMP_PERMISSION_REVOKE_SUCCESS = (permission, holder, duration, context) -> prefixed(translatable()
+            // "&aTook &b{}&a away from &b{}&a for &b{}&a in context {}&a, after which it will apply again."
+            .key("luckperms.command.generic.permission.revoke-temp")
+            .color(GREEN)
+            .args(
+                    text(permission, AQUA),
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text().color(AQUA).append(DurationFormatter.LONG.format(duration)),
+                    formatContextSet(context)
+            )
+            .append(FULL_STOP)
+    );
+
+    Args3<PermissionHolder, String, ContextSet> NO_TEMP_PERMISSION_REVOCATION = (holder, permission, context) -> prefixed(translatable()
+            // "&b{}&a does not have &b{}&a taken away temporarily in context {}&a, so there is nothing to extend."
+            .key("luckperms.command.generic.permission.no-temp-revocation")
+            .color(GREEN)
+            .args(
+                    text().color(AQUA).append(holder.getFormattedDisplayName()),
+                    text(permission, AQUA),
+                    formatContextSet(context)
+            )
+            .append(FULL_STOP)
+    );
+
+    Args0 DURATION_MODIFIER_CONFLICT = () -> prefixed(translatable()
+            // "&cA duration prefixed with &4+&c or &4-&c already says how it should be applied, so a temporary modifier cannot be given as well."
+            .key("luckperms.command.generic.permission.duration-modifier-conflict")
+            .color(RED)
+    );
+
     Args3<PermissionHolder, String, ContextSet> DOES_NOT_HAVE_TEMP_PERMISSION = (holder, permission, context) -> prefixed(translatable()
             // "&b{}&a does not have &b{}&a set temporarily in context {}&a."
             .key("luckperms.command.generic.permission.doesnt-have-temp")

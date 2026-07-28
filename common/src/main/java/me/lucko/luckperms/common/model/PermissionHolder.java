@@ -57,6 +57,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -483,8 +484,11 @@ public abstract class PermissionHolder {
                 Node newNode = null;
                 switch (mergeStrategy) {
                     case ADD_NEW_DURATION_TO_EXISTING: {
-                        // Create a new Node with the same properties, but add the expiry dates together
-                        Instant newExpiry = otherMatch.getExpiry().plus(Duration.between(Instant.now(), node.getExpiry()));
+                        // Create a new Node with the same properties, but add the expiry dates together.
+                        // 'now' is truncated to match the way the node's expiry was originally derived from
+                        // the requested duration, so that adding e.g. 30m really does add 30m.
+                        Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+                        Instant newExpiry = otherMatch.getExpiry().plus(Duration.between(now, node.getExpiry()));
                         newNode = node.toBuilder().expiry(newExpiry).build();
                         break;
                     }
@@ -536,7 +540,9 @@ public abstract class PermissionHolder {
                 Instant newExpiry = otherMatch.getExpiry().minus(duration);
 
                 if (newExpiry.isAfter(Instant.now())) {
-                    Node newNode = node.toBuilder().expiry(newExpiry).build();
+                    // rebuild from the node that was matched, not from the one passed in - the match
+                    // ignores value, so building from the latter would overwrite the existing value
+                    Node newNode = otherMatch.toBuilder().expiry(newExpiry).build();
 
                     // Remove the old Node & add the new one.
                     Difference<Node> changes = data.removeThenAdd(otherMatch, newNode);
