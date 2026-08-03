@@ -73,12 +73,21 @@ public enum Dependency {
             "Kk8IkEMVa9ITBfC3yocpcXQiZ9CwN9VxeWjKUD8I0n0=",
             Relocation.of("adventure", "net{}kyori{}adventure")
     ),
+    // upstream, not the me.lucko fork - the fork is still based on 4.4.0, which lacks the
+    // ComponentSerialization codec path in MinecraftComponentSerializer. Without it, every
+    // CraftBukkit facet is unsupported on Minecraft 1.21.9+ and messages degrade to legacy
+    // strings, silently dropping click/hover events.
     ADVENTURE_PLATFORM_BUKKIT(
-            "me{}lucko",
-            "adventure-platform-bukkit",
-            "4.21.1",
-            "NffwBnfT/Mc6VpsmTcaXPvckv9T4vPJD83adt0C8vao=",
-            Relocation.of("adventure", "net{}kyori{}adventure")
+        "net{}kyori",
+        "adventure-platform-bukkit",
+        "4.4.1",
+        "zcs6Zqu/njk2FNtd6yf4QRF8W1t+9SdToshG/UbJzfE=",
+        Relocation.of("adventure", "net{}kyori{}adventure"),
+        // the me.lucko adventure-api fork republishes net.kyori.option under
+        // net.kyori.adventure.util.option, so it is covered by the relocation above.
+        // upstream artifacts still reference the original package, and must be pointed
+        // at the same destination - otherwise method descriptors don't match at runtime.
+        Relocation.of("adventure.util.option", "net{}kyori{}option")
     ),
     ADVENTURE_PLATFORM_BUNGEECORD(
             "me{}lucko",

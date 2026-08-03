@@ -15,7 +15,7 @@ dependencies {
     compileOnly project(':common:loader-utils')
 
     compileOnly 'dev.folia:folia-api:26.1.2.build.8-stable'
-    compileOnly('net.kyori:adventure-platform-bukkit:4.4.0') {
+    compileOnly('net.kyori:adventure-platform-bukkit:4.4.1') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
         exclude(module: 'adventure-nbt')
