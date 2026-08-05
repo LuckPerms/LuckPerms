@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.util.BuildInfo;
 import net.luckperms.api.platform.Platform;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.eventbus.api.listener.EventListener;
@@ -180,6 +181,17 @@ public final class LPForgeBootstrap extends MinecraftLuckPermsBootstrap implemen
 
     @SubscribeEvent(priority = Priority.LOWEST)
     public void onServerStopping(ServerStoppingEvent event) {
+        this.plugin.disable();
+        unregisterListeners();
+        this.server = null;
+    }
+
+    @SubscribeEvent(priority = Priority.LOWEST)
+    public void onServerStopped(ServerStoppedEvent event) {
+        if (this.server == null) {
+            return;
+        }
+
         this.plugin.disable();
         unregisterListeners();
         this.server = null;

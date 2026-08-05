@@ -45,6 +45,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforgespi.language.IModInfo;
 import org.apache.logging.log4j.LogManager;
@@ -168,6 +169,17 @@ public final class LPNeoForgeBootstrap extends MinecraftLuckPermsBootstrap imple
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onServerStopping(ServerStoppingEvent event) {
+        this.plugin.disable();
+        this.forgeEventBus.unregisterAll();
+        this.server = null;
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onServerStopped(ServerStoppedEvent event) {
+        if (this.server == null) {
+            return;
+        }
+
         this.plugin.disable();
         this.forgeEventBus.unregisterAll();
         this.server = null;
