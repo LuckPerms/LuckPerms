@@ -88,11 +88,21 @@ public class MinecraftPlayerCalculator implements ContextCalculator<ServerPlayer
 
         MinecraftServer server = this.plugin.getBootstrap().getServer().orElse(null);
         if (this.dimensionType && server != null) {
-            server.registryAccess().lookup(Registries.DIMENSION_TYPE).ifPresent(registry -> {
-                for (Identifier id : registry.keySet()) {
-                    builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(id));
-                }
-            });
+            try {
+                server.registryAccess().lookup(Registries.DIMENSION_TYPE).ifPresent(registry -> {
+                    for (Identifier id : registry.keySet()) {
+                        builder.add(DefaultContextKeys.DIMENSION_TYPE_KEY, getContextKey(id));
+                    }
+                });
+            } catch (ClassCastException e) {
+                // Some mod loaders (observed on NeoForge 1.21.1) can return a registry
+                // implementation from #lookup(...) that isn't safely castable to Registry<T>
+                // at this call site, e.g. a MappedRegistry$1 wrapper produced by their mixins.
+                // Rather than letting this crash the whole potential-context calculation
+                // (which is used by things like the web editor), skip the dimension-type
+                // contexts for this estimate.
+                // See: https://github.com/LuckPerms/LuckPerms/issues/4211
+            }
         }
 
         if (this.world && server != null) {
