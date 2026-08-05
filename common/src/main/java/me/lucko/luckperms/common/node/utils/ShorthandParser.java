@@ -29,6 +29,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterators;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -43,13 +44,21 @@ public enum ShorthandParser {
      */
     NUMERIC_RANGE {
         @Override
-        public Iterator<String> extract(String input) throws NumberFormatException {
+        public Iterator<String> extract(String input) throws ShorthandParseException {
             int index = input.indexOf(RANGE_SEPARATOR);
             if (index == -1 || index == 0 || index == input.length() - 1) {
                 return null;
             }
 
-            return new RangeIterator(Integer.parseInt(input.substring(0, index)), Integer.parseInt(input.substring(index + 1))) {
+            int a, b;
+            try {
+                a = Integer.parseInt(input.substring(0, index));
+                b = Integer.parseInt(input.substring(index + 1));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+
+            return new RangeIterator(a, b, false) {
                 @Override
                 protected String toString(int i) {
                     return Integer.toString(i);
@@ -63,12 +72,12 @@ public enum ShorthandParser {
      */
     CHARACTER_RANGE {
         @Override
-        public Iterator<String> extract(String input) {
+        public Iterator<String> extract(String input) throws ShorthandParseException {
             if (input.length() != 3 || input.charAt(1) != RANGE_SEPARATOR) {
                 return null;
             }
 
-            return new RangeIterator(input.charAt(0), input.charAt(2)) {
+            return new RangeIterator(input.charAt(0), input.charAt(2), true) {
                 @Override
                 protected String toString(int i) {
                     return Character.toString((char) i);
@@ -97,9 +106,9 @@ public enum ShorthandParser {
      *
      * @param input the input shorthand
      * @return an iterator of the resultant strings, or optionally null if the input was invalid
-     * @throws IllegalArgumentException if the input was invalid
+     * @throws ShorthandParseException if the range is too large or the input is invalid
      */
-    abstract Iterator<String> extract(String input) throws IllegalArgumentException;
+    abstract Iterator<String> extract(String input) throws ShorthandParseException;
 
     /** Character used to open a group */
     private static final char OPEN_GROUP = '{';
@@ -119,13 +128,46 @@ public enum ShorthandParser {
     /** The parsers */
     private static final ShorthandParser[] PARSERS = values();
 
+    /** The max number of results to return */
+    private static final int MAX_RESULTS = 1000;
+
+    /**
+     * Parses and expands the shorthand format.
+     *
+     * @param s the string to expand
+     * @return the expanded result, or an empty set if the input was invalid
+     */
+    public static Set<String> expandShorthandSafely(String s) {
+        try {
+            return expandShorthand(s);
+        } catch (ShorthandParseException e) {
+            return Collections.emptySet();
+        }
+    }
+
+    /**
+     * Check if the string can be expanded safely.
+     *
+     * @param s the string to expand
+     * @return the error, if any
+     */
+    public static ShorthandParseException checkParse(String s) {
+        try {
+            expandShorthand(s);
+            return null;
+        } catch (ShorthandParseException e) {
+            return e;
+        }
+    }
+
     /**
      * Parses and expands the shorthand format.
      *
      * @param s the string to expand
      * @return the expanded result
+     * @throws ShorthandParseException if the range is too large or the input is invalid
      */
-    public static Set<String> expandShorthand(String s) {
+    public static Set<String> expandShorthand(String s) throws ShorthandParseException {
         Set<String> results = new HashSet<>();
         results.add(s);
 
@@ -140,6 +182,10 @@ public enum ShorthandParser {
                     workSet.addAll(expanded);
                 } else {
                     workSet.add(string);
+                }
+
+                if (workSet.size() > MAX_RESULTS) {
+                    throw new ShorthandParseException("Results exceeded limit of " + MAX_RESULTS + " when parsing '" + string + "'");
                 }
             }
 
@@ -162,7 +208,7 @@ public enum ShorthandParser {
         return results;
     }
 
-    private static Set<String> matchGroup(String input) {
+    private static Set<String> matchGroup(String input) throws ShorthandParseException {
         int openingIndex = indexOfEither(input, OPEN_GROUP, OPEN_GROUP_2);
         if (openingIndex == -1) {
             return null;
@@ -215,11 +261,14 @@ public enum ShorthandParser {
         private final int max;
         private int next;
 
-        RangeIterator(int a, int b) {
+        RangeIterator(int a, int b, boolean characters) throws ShorthandParseException {
             this.max = Math.max(a, b);
             this.next = Math.min(a, b);
             if ((this.max - this.next) > MAX_RANGE) {
-                throw new IllegalArgumentException("Range too large");
+                throw new ShorthandParseException(characters
+                        ? "Range between " + (char) a + " and " + (char) b + " exceeds limit of " + MAX_RANGE
+                        : "Range between " + a + " and " + b + " exceeds limit of " + MAX_RANGE
+                );
             }
         }
 

@@ -38,6 +38,8 @@ import me.lucko.luckperms.common.command.utils.StorageAssistant;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.factory.NodeBuilders;
+import me.lucko.luckperms.common.node.utils.ShorthandParseException;
+import me.lucko.luckperms.common.node.utils.ShorthandParser;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
@@ -46,6 +48,7 @@ import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.node.types.PermissionNode;
 
 import java.util.List;
 
@@ -83,6 +86,13 @@ public class PermissionSet extends GenericChildCommand {
             if (ArgumentPermissions.checkGroup(plugin, sender, ((InheritanceNode) builtNode).getGroupName(), context)) {
                 Message.COMMAND_NO_PERMISSION.send(sender);
                 return;
+            }
+        }
+
+        if (builtNode instanceof PermissionNode) {
+            ShorthandParseException shorthandError = ShorthandParser.checkParse(builtNode.getKey());
+            if (shorthandError != null) {
+                Message.SHORTHAND_PARSE_ERROR.send(sender, builtNode.getKey(), shorthandError.getMessage());
             }
         }
 

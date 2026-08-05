@@ -2283,6 +2283,16 @@ public interface Message {
     Args0 INVALID_META_KEY_EMPTY = () -> INVALID_INPUT_EMPTY.build("meta-key");
     Args0 INVALID_DISPLAY_NAME_EMPTY = () -> INVALID_INPUT_EMPTY.build("display-name");
 
+    Args2<String, String> SHORTHAND_PARSE_ERROR = (key, error) -> prefixed(translatable()
+            // "&cWarning: Permission &f{}&c could not be parsed as shorthand: &4{}&c"
+            .key("luckperms.command.misc.shorthand-parse-error")
+            .color(RED)
+            .args(
+                    text(key, WHITE),
+                    text(error, DARK_RED)
+            )
+    );
+
     Args3<PermissionHolder, Group, ContextSet> SET_INHERIT_SUCCESS = (holder, parent, context) -> prefixed(translatable()
             // "&b{}&a now inherits permissions from &b{}&a in context {}&a."
             .key("luckperms.command.generic.parent.add")
