@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.bukkit;
 
+import me.lucko.luckperms.bukkit.util.PaperAdventureBridge;
+import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -35,14 +37,21 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.RemoteConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Locale;
 import java.util.UUID;
 
-public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSender> {
-    private final BukkitAudiences audiences;
+public abstract class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSender> {
+
+    public static BukkitSenderFactory create(LPBukkitPlugin plugin) {
+        PaperAdventureBridge bridge = PaperAdventureBridge.INSTANCE;
+        return bridge != null
+                ? new PaperBridgeBukkitSenderFactory(plugin, bridge)
+                : new AdventurePlatformBukkitSenderFactory(plugin);
+
+    }
 
     public BukkitSenderFactory(LPBukkitPlugin plugin) {
         super(plugin);
-        this.audiences = BukkitAudiences.create(plugin.getLoader());
     }
 
     @Override
@@ -65,11 +74,13 @@ public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSe
     protected void sendMessage(CommandSender sender, Component message) {
         // we can safely send async for players and the console - otherwise, send it sync
         if (sender instanceof Player || sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender) {
-            this.audiences.sender(sender).sendMessage(message);
+            sendMessage0(sender, message);
         } else {
-            getPlugin().getBootstrap().getScheduler().executeSync(sender, () -> this.audiences.sender(sender).sendMessage(message));
+            getPlugin().getBootstrap().getScheduler().executeSync(sender, () -> sendMessage0(sender, message));
         }
     }
+
+    protected abstract void sendMessage0(CommandSender sender, Component message);
 
     @Override
     protected Tristate getPermissionValue(CommandSender sender, String node) {
@@ -97,9 +108,48 @@ public class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, CommandSe
         return sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender;
     }
 
-    @Override
-    public void close() {
-        super.close();
-        this.audiences.close();
+    /**
+     * Sender factory that uses native Paper adventure support to send messages.
+     */
+    private static class PaperBridgeBukkitSenderFactory extends BukkitSenderFactory {
+        private final PaperAdventureBridge bridge;
+
+        public PaperBridgeBukkitSenderFactory(LPBukkitPlugin plugin, PaperAdventureBridge bridge) {
+            super(plugin);
+            this.bridge = bridge;
+        }
+
+        @Override
+        protected void sendMessage0(CommandSender sender, Component message) {
+            Locale locale = null;
+            if (sender instanceof Player) {
+                locale = ((Player) sender).locale();
+            }
+            Component rendered = TranslationManager.render(message, locale);
+            this.bridge.sendMessage(sender, rendered);
+        }
+    }
+
+    /**
+     * Sender factory that uses the adventure-platform library to send messages.
+     */
+    private static class AdventurePlatformBukkitSenderFactory extends BukkitSenderFactory {
+        private final BukkitAudiences audiences;
+
+        public AdventurePlatformBukkitSenderFactory(LPBukkitPlugin plugin) {
+            super(plugin);
+            this.audiences = BukkitAudiences.create(plugin.getLoader());
+        }
+
+        @Override
+        protected void sendMessage0(CommandSender sender, Component message) {
+            this.audiences.sender(sender).sendMessage(message);
+        }
+
+        @Override
+        public void close() {
+            super.close();
+            this.audiences.close();
+        }
     }
 }
