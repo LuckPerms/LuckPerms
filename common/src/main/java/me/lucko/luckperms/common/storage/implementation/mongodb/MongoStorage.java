@@ -31,6 +31,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCredential;
+import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -150,7 +151,12 @@ public class MongoStorage implements StorageImplementation {
         }
         
         this.database = this.mongoClient.getDatabase(this.configuration.getDatabase());
-        ensureIndexes();
+
+        try {
+            ensureIndexes();
+        } catch (MongoException e) {
+            // ignore
+        }
     }
 
     @Override
