@@ -59,10 +59,14 @@ public class LogGroupHistory extends ChildCommand<Void> {
             return;
         }
 
-        PageParameters pageParams = new PageParameters(ENTRIES_PER_PAGE, args.getIntOrDefault(1, 1));
-        LogPage log = plugin.getStorage().getLogPage(ActionFilters.group(group), pageParams).join();
+        int page = args.getIntOrDefault(1, 1);
+        if (page < 1) {
+            Message.LOG_INVALID_PAGE_RANGE.send(sender, 1);
+            return;
+        }
 
-        int page = pageParams.pageNumber();
+        PageParameters pageParams = new PageParameters(ENTRIES_PER_PAGE, page);
+        LogPage log = plugin.getStorage().getLogPage(ActionFilters.group(group), pageParams).join();
         int maxPage = pageParams.getMaxPage(log.getTotalEntries());
 
         if (log.getTotalEntries() == 0) {
@@ -70,7 +74,7 @@ public class LogGroupHistory extends ChildCommand<Void> {
             return;
         }
 
-        if (page < 1 || page > maxPage) {
+        if (page > maxPage) {
             Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
             return;
         }
