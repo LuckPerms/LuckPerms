@@ -55,7 +55,7 @@ public final class PaperAdventureBridge {
         Class<?> componentClass = Class.forName(adventurePkg + "text.Component");
         Class<?> serializerClass = Class.forName(adventurePkg + "text.serializer.gson.GsonComponentSerializer");
 
-        if (CommandSender.class.isAssignableFrom(audienceClass)) {
+        if (!audienceClass.isAssignableFrom(CommandSender.class)) {
             throw new IllegalStateException("CommandSender does not implement Audience");
         }
 
