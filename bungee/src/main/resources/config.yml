@@ -465,7 +465,7 @@ inheritance-traversal-algorithm: depth-first-pre-order
 # the inheritance tree.
 #
 # Effectively when this setting is 'true': the tree is flattened, and rules applied afterwards,
-# and when this setting is 'false':, the rules are just applied during each step of the traversal.
+# and when this setting is 'false': the rules are just applied during each step of the traversal.
 post-traversal-inheritance-sort: false
 
 # Defines the mode used to determine whether a set of contexts are satisfied.

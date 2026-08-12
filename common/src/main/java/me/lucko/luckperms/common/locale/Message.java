@@ -4034,7 +4034,7 @@ public interface Message {
     );
 
     Args0 EXPORT_FILE_FAILURE = () -> prefixed(translatable()
-            // "&cAn unexpected error occured whilst writing to the file."
+            // "&cAn unexpected error occurred whilst writing to the file."
             .key("luckperms.command.export.file-unexpected-error-writing")
             .color(RED)
             .append(FULL_STOP)
@@ -4083,7 +4083,7 @@ public interface Message {
     );
 
     Args0 IMPORT_FILE_READ_FAILURE = () -> prefixed(text()
-            // "&cAn unexpected error occured whilst reading from the import file. (is it the correct format?)"
+            // "&cAn unexpected error occurred whilst reading from the import file. (is it the correct format?)"
             .color(RED)
             .append(translatable("luckperms.command.import.file.unexpected-error-reading"))
             .append(FULL_STOP)
