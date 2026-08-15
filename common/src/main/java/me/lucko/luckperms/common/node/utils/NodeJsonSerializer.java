@@ -82,7 +82,7 @@ public class NodeJsonSerializer {
     }
 
     public static JsonArray serializeNodes(Collection<Node> nodes) {
-        JsonArray arr = new JsonArray(nodes.size());
+        JsonArray arr = new JsonArray();
         for (Node node : nodes) {
             arr.add(serializeNode(node, false));
         }
