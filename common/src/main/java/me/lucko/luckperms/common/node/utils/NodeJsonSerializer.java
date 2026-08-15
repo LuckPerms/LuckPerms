@@ -36,7 +36,7 @@ import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -82,7 +82,7 @@ public class NodeJsonSerializer {
     }
 
     public static JsonArray serializeNodes(Collection<Node> nodes) {
-        JsonArray arr = new JsonArray();
+        JsonArray arr = new JsonArray(nodes.size());
         for (Node node : nodes) {
             arr.add(serializeNode(node, false));
         }
@@ -115,7 +115,7 @@ public class NodeJsonSerializer {
     }
 
     public static Set<Node> deserializeNodes(JsonArray arr) {
-        Set<Node> nodes = new HashSet<>();
+        Set<Node> nodes = new LinkedHashSet<>(arr.size());
         for (JsonElement ent : arr) {
             Node node = deserializeNode(ent);
             if (node != null) {

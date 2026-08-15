@@ -29,7 +29,10 @@ import com.google.common.collect.Lists;
 import me.lucko.luckperms.common.context.ContextSetComparatorTest;
 import me.lucko.luckperms.common.node.comparator.NodeComparator;
 import me.lucko.luckperms.common.node.comparator.NodeWithContextComparator;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.node.types.Permission;
+import me.lucko.luckperms.common.node.types.Prefix;
+import me.lucko.luckperms.common.node.types.Suffix;
 import net.luckperms.api.node.Node;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -85,6 +88,18 @@ public class NodeComparatorTest {
             descendingSorted.sort(NodeComparator.descending());
 
             assertEquals(Lists.reverse(ascendingSorted), descendingSorted);
+        }
+
+        @Test
+        public void testNonPermissionNodeTypesTakePriority() {
+            Node permissionNode = Permission.builder().permission("a").build();
+            Node prefixNode = Prefix.builder("test", 100).build();
+            Node suffixNode = Suffix.builder("test", 100).build();
+            Node inheritNode = Inheritance.builder("test").build();
+
+            List<Node> list = new ArrayList<>(List.of(permissionNode, prefixNode, suffixNode, inheritNode));
+            list.sort(NodeComparator.descending());
+            assertEquals(List.of(inheritNode, prefixNode, suffixNode, permissionNode), list);
         }
 
         @Test

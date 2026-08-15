@@ -52,7 +52,8 @@ public interface NodeType<T extends Node> {
     NodeType<PermissionNode> PERMISSION = new SimpleNodeType<>(
             "PERMISSION",
             n -> n instanceof PermissionNode,
-            n -> (PermissionNode) n
+            n -> (PermissionNode) n,
+            7
     );
 
     /**
@@ -61,7 +62,8 @@ public interface NodeType<T extends Node> {
     NodeType<RegexPermissionNode> REGEX_PERMISSION = new SimpleNodeType<>(
             "REGEX_PERMISSION",
             n -> n instanceof RegexPermissionNode,
-            n -> (RegexPermissionNode) n
+            n -> (RegexPermissionNode) n,
+            6
     );
 
     /**
@@ -70,7 +72,8 @@ public interface NodeType<T extends Node> {
     NodeType<InheritanceNode> INHERITANCE = new SimpleNodeType<>(
             "INHERITANCE",
             n -> n instanceof InheritanceNode,
-            n -> (InheritanceNode) n
+            n -> (InheritanceNode) n,
+            0
     );
 
     /**
@@ -79,7 +82,8 @@ public interface NodeType<T extends Node> {
     NodeType<PrefixNode> PREFIX = new SimpleNodeType<>(
             "PREFIX",
             n -> n instanceof PrefixNode,
-            n -> (PrefixNode) n
+            n -> (PrefixNode) n,
+            1
     );
 
     /**
@@ -88,7 +92,8 @@ public interface NodeType<T extends Node> {
     NodeType<SuffixNode> SUFFIX = new SimpleNodeType<>(
             "SUFFIX",
             n -> n instanceof SuffixNode,
-            n -> (SuffixNode) n
+            n -> (SuffixNode) n,
+            2
     );
 
     /**
@@ -97,7 +102,8 @@ public interface NodeType<T extends Node> {
     NodeType<MetaNode> META = new SimpleNodeType<>(
             "META",
             n -> n instanceof MetaNode,
-            n -> (MetaNode) n
+            n -> (MetaNode) n,
+            3
     );
 
     /**
@@ -106,7 +112,8 @@ public interface NodeType<T extends Node> {
     NodeType<WeightNode> WEIGHT = new SimpleNodeType<>(
             "WEIGHT",
             n -> n instanceof WeightNode,
-            n -> (WeightNode) n
+            n -> (WeightNode) n,
+            4
     );
 
     /**
@@ -115,7 +122,8 @@ public interface NodeType<T extends Node> {
     NodeType<DisplayNameNode> DISPLAY_NAME = new SimpleNodeType<>(
             "DISPLAY_NAME",
             n -> n instanceof DisplayNameNode,
-            n -> (DisplayNameNode) n
+            n -> (DisplayNameNode) n,
+            5
     );
 
     /**
@@ -127,7 +135,8 @@ public interface NodeType<T extends Node> {
     NodeType<ChatMetaNode<?, ?>> CHAT_META = new SimpleNodeType<>(
             "CHAT_META",
             n -> n instanceof ChatMetaNode<?, ?>,
-            n -> (ChatMetaNode<?, ?>) n
+            n -> (ChatMetaNode<?, ?>) n,
+            -1
     );
 
     /**
@@ -139,7 +148,8 @@ public interface NodeType<T extends Node> {
     NodeType<Node> META_OR_CHAT_META = new SimpleNodeType<>(
             "META_OR_CHAT_META",
             n -> META.matches(n) || CHAT_META.matches(n),
-            Function.identity()
+            Function.identity(),
+            -1
     );
 
     /**

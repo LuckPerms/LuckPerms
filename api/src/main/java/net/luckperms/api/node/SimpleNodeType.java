@@ -32,15 +32,17 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-final class SimpleNodeType<T extends Node> implements NodeType<T> {
+final class SimpleNodeType<T extends Node> implements NodeType<T>, Comparable<SimpleNodeType<?>> {
     private final String name;
     private final Predicate<Node> matches;
     private final Function<Node, T> cast;
+    private final int sortOrder;
 
-    SimpleNodeType(String name, Predicate<Node> matches, Function<Node, T> cast) {
+    SimpleNodeType(String name, Predicate<Node> matches, Function<Node, T> cast, int sortOrder) {
         this.name = name;
         this.matches = matches;
         this.cast = cast;
+        this.sortOrder = sortOrder;
     }
 
     @Override
@@ -65,5 +67,10 @@ final class SimpleNodeType<T extends Node> implements NodeType<T> {
     @Override
     public String toString() {
         return name();
+    }
+
+    @Override
+    public int compareTo(@NotNull SimpleNodeType<?> o) {
+        return Integer.compare(this.sortOrder, o.sortOrder);
     }
 }

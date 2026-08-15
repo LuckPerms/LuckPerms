@@ -52,8 +52,12 @@ import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.types.InheritanceOriginMetadata;
 import net.luckperms.api.node.types.ChatMetaNode;
+import net.luckperms.api.node.types.DisplayNameNode;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.node.types.SuffixNode;
+import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.util.Tristate;
 
 import java.text.DecimalFormat;
@@ -76,9 +80,11 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_PURPLE;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
@@ -94,7 +100,7 @@ import static net.kyori.adventure.text.format.TextDecoration.BOLD;
  */
 public interface Message {
 
-    static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd '@' HH:mm:ss")
+    DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd '@' HH:mm:ss")
             .withZone(ZoneId.systemDefault());
 
     TextComponent OPEN_BRACKET = Component.text('(');
@@ -1112,7 +1118,7 @@ public interface Message {
     Args1<Node> APPLY_EDIT_NODE = node -> text()
             // "&f{} {} {} {}"
             .color(WHITE)
-            .append(text(node.getKey()))
+            .append(formatNodeKeyWithType(node))
             .append(space())
             .append(text()
                     .color(GRAY)
@@ -4229,6 +4235,60 @@ public interface Message {
         } else {
             return MiniMessage.miniMessage().deserialize(value).hoverEvent(hover);
         }
+    }
+
+    static Component formatNodeKeyWithType(Node node) {
+        Component type, key;
+
+        if (node instanceof InheritanceNode) {
+            type = translatable("luckperms.command.misc.node.inheritance", BLUE);
+            key = text(((InheritanceNode) node).getGroupName());
+        } else if (node instanceof PrefixNode || node instanceof SuffixNode) {
+            type = node instanceof PrefixNode
+                    ? translatable("luckperms.command.misc.node.prefix", GREEN)
+                    : translatable("luckperms.command.misc.node.suffix", YELLOW);
+            key = text()
+                    .append(text()
+                            .color(WHITE)
+                            .append(text('\''))
+                            .append(formatColoredValue(((ChatMetaNode<?, ?>) node).getMetaValue()))
+                            .append(text('\''))
+                    )
+                    .append(space())
+                    .append(text()
+                            .color(GRAY)
+                            .append(OPEN_BRACKET)
+                            .append(translatable("luckperms.command.misc.priority-label", text(((ChatMetaNode<?, ?>) node).getPriority())))
+                            .append(CLOSE_BRACKET)
+                    )
+                    .build();
+        } else if (node instanceof MetaNode) {
+            type = translatable("luckperms.command.misc.node.meta", RED);
+            key = text()
+                    .append(text(((MetaNode) node).getMetaKey()))
+                    .append(text(" = ", GRAY))
+                    .append(text(((MetaNode) node).getMetaValue()))
+                    .build();
+        } else if (node instanceof WeightNode) {
+            type = translatable("luckperms.command.misc.node.weight", AQUA);
+            key = text(((WeightNode) node).getWeight());
+        } else if (node instanceof DisplayNameNode) {
+            type = translatable("luckperms.command.misc.node.displayname", DARK_PURPLE);
+            key = text(((DisplayNameNode) node).getDisplayName());
+        } else {
+            type = translatable("luckperms.command.misc.node.permission", GRAY);
+            key = text(node.getKey());
+        }
+
+        return text()
+                .append(text()
+                        .color(DARK_GRAY)
+                        .append(text("["))
+                        .append(type)
+                        .append(text("]:")))
+                .append(space())
+                .append(key)
+                .build();
     }
 
     static Component formatContextBracketed(String key, String value) {
