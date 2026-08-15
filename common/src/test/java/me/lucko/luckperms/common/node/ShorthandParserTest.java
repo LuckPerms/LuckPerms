@@ -45,6 +45,7 @@ public class ShorthandParserTest {
                 // numeric range
                 Arguments.of("{2-4}", new String[]{"2", "3", "4"}),
                 Arguments.of("{4-2}", new String[]{"2", "3", "4"}),
+                Arguments.of("{2147483647-2147483647}", new String[]{"2147483647"}),
 
                 // character range
                 Arguments.of("{a-d}", new String[]{"a", "b", "c", "d"}),
@@ -81,6 +82,7 @@ public class ShorthandParserTest {
             "{!-က}",
             "{က-!}",
             "{1-100}{1-100}{1-100}",
+            "{5--2147483647}"
     })
     public void testTooManyElements(String shorthand) {
         assertThrows(ShorthandParseException.class, () -> ShorthandParser.expandShorthand(shorthand));

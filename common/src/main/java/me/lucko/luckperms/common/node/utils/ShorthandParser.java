@@ -32,6 +32,7 @@ import com.google.common.collect.Iterators;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -259,7 +260,7 @@ public enum ShorthandParser {
         private static final int MAX_RANGE = 250;
 
         private final int max;
-        private int next;
+        private long next;
 
         RangeIterator(int a, int b, boolean characters) throws ShorthandParseException {
             this.max = Math.max(a, b);
@@ -281,7 +282,10 @@ public enum ShorthandParser {
 
         @Override
         public final String next() {
-            return toString(this.next++);
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return toString((int) this.next++);
         }
     }
 
