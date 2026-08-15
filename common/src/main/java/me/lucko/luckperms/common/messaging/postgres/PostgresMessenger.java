@@ -150,7 +150,7 @@ public class PostgresMessenger implements Messenger {
                 }
 
             } catch (PSQLException e) {
-                if (!(e.getCause() instanceof SocketException && e.getCause().getMessage().equals("Socket closed"))) {
+                if (!(e.getCause() instanceof SocketException && "Socket closed".equals(e.getCause().getMessage()))) {
                     e.printStackTrace();
                 }
             } catch (Exception e) {
