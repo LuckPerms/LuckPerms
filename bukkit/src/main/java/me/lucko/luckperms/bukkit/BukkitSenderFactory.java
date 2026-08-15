@@ -26,6 +26,7 @@
 package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.bukkit.util.PaperAdventureBridge;
+import me.lucko.luckperms.bukkit.util.PlayerLocaleUtil;
 import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
@@ -123,7 +124,7 @@ public abstract class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, 
         protected void sendMessage0(CommandSender sender, Component message) {
             Locale locale = null;
             if (sender instanceof Player) {
-                locale = ((Player) sender).locale();
+                locale = PlayerLocaleUtil.getLocale((Player) sender);
             }
             Component rendered = TranslationManager.render(message, locale);
             this.bridge.sendMessage(sender, rendered);
