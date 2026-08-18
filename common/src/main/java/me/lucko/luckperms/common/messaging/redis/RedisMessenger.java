@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.messaging.redis;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
@@ -42,6 +43,7 @@ import redis.clients.jedis.UnifiedJedis;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -53,14 +55,17 @@ public class RedisMessenger implements Messenger {
 
     private final LuckPermsPlugin plugin;
     private final IncomingMessageConsumer consumer;
+    private final long keepaliveInterval;
 
     private /* final */ UnifiedJedis jedis;
     private /* final */ Subscription sub;
+    private SchedulerTask keepaliveTask;
     private boolean closing = false;
 
-    public RedisMessenger(LuckPermsPlugin plugin, IncomingMessageConsumer consumer) {
+    public RedisMessenger(LuckPermsPlugin plugin, IncomingMessageConsumer consumer, long keepaliveInterval) {
         this.plugin = plugin;
         this.consumer = consumer;
+        this.keepaliveInterval = keepaliveInterval;
     }
 
     public void init(List<String> addresses, String username, String password, boolean ssl) {
@@ -83,6 +88,10 @@ public class RedisMessenger implements Messenger {
         this.jedis = jedis;
         this.sub = new Subscription(this);
         this.plugin.getBootstrap().getScheduler().executeAsync(this.sub);
+
+        if (this.keepaliveInterval > 0) {
+            this.keepaliveTask = this.plugin.getBootstrap().getScheduler().asyncRepeating(this.sub::sendKeepalive, this.keepaliveInterval, TimeUnit.MILLISECONDS);
+        }
     }
 
     private static JedisClientConfig jedisConfig(String username, String password, boolean ssl) {
@@ -115,6 +124,10 @@ public class RedisMessenger implements Messenger {
     @Override
     public void close() {
         this.closing = true;
+        if (this.keepaliveTask != null) {
+            this.keepaliveTask.cancel();
+            this.keepaliveTask = null;
+        }
         this.sub.unsubscribe();
         this.jedis.close();
     }
@@ -166,6 +179,18 @@ public class RedisMessenger implements Messenger {
                 return;
             }
             this.messenger.consumer.consumeIncomingMessageAsString(msg);
+        }
+
+        private void sendKeepalive() {
+            if (this.messenger.closing || !isSubscribed()) {
+                return;
+            }
+
+            try {
+                ping();
+            } catch (Exception e) {
+                this.messenger.plugin.getLogger().warn("Error whilst pinging the redis pubsub connection", e);
+            }
         }
 
         private boolean isRedisAlive() {
