@@ -257,6 +257,9 @@ redis:
   address: localhost
   username: ''
   password: ''
+  # How often (in milliseconds) a ping should be sent on the pub/sub connection to keep it alive.
+  # This prevents idle connections from being closed by firewalls or proxies. Set to 0 to disable.
+  keepalive-interval: 60000
   # Settings for Redis Sentinel.
   # Sentinel provides high availability for Redis by monitoring master/replica instances.
   # Port 26379 is used by default for sentinel nodes.
