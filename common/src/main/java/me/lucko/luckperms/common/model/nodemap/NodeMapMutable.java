@@ -372,11 +372,11 @@ public class NodeMapMutable extends NodeMapBase {
 
         this.lock.lock();
         try {
-            for (Node n : changes.getAdded()) {
-                result.mergeFrom(add(n));
-            }
             for (Node n : changes.getRemoved()) {
                 result.mergeFrom(removeExact(n));
+            }
+            for (Node n : changes.getAdded()) {
+                result.mergeFrom(add(n));
             }
         } finally {
             this.lock.unlock();
