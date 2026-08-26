@@ -195,6 +195,13 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
                 : Set.of();
     }
 
+    @Override
+    public @NonNull Set<UUID> getUsersWithPermission(@NonNull String permission) {
+        return this.delegateToHytaleProvider
+                ? this.hytaleProvider.getUsersWithPermission(permission)
+                : Set.of();
+    }
+
     /**
      * A permissions set that tricks {@link PermissionsModule#hasPermission(Set, String)} into always
      * returning according to LuckPerms data.

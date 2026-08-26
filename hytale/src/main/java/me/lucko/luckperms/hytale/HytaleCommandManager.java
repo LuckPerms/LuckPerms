@@ -92,11 +92,6 @@ public class HytaleCommandManager extends CommandManager {
         }
 
         @Override
-        protected boolean canGeneratePermission() {
-            return false;
-        }
-
-        @Override
         public boolean hasPermission(@NonNull CommandSender sender) {
             return HytaleCommandManager.this.hasPermissionForAny(sender);
         }
