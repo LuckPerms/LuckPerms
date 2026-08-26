@@ -64,7 +64,7 @@ public class FabricPermissionsListener {
         public boolean hasPermission(@NonNull Permission permission) {
             if (permission instanceof Permission.Atom) {
                 Identifier permissionId = ((Permission.Atom) permission).id();
-                String permissionString = permissionId.getNamespace() + '.' + permissionId.getPath();
+                String permissionString = permissionId.getNamespace() + '.' + permissionId.getPath().replace('/', '.');
 
                 Tristate result = ((MixinUser) this.player).luckperms$hasPermission(permissionString);
                 if (result != Tristate.UNDEFINED) {
