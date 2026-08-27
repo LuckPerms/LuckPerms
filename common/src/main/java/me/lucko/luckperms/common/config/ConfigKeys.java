@@ -706,6 +706,11 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> REDIS_SSL = notReloadable(booleanKey("redis.ssl", false));
 
     /**
+     * How often, in milliseconds, a ping should be sent on the redis pub/sub connection to keep it alive
+     */
+    public static final ConfigKey<Integer> REDIS_KEEPALIVE_INTERVAL = notReloadable(key(c -> c.getInteger("redis.keepalive-interval", 60000)));
+
+    /**
      * If redis sentinel is enabled
      */
     public static final ConfigKey<Boolean> REDIS_SENTINEL_ENABLED = notReloadable(booleanKey("redis.sentinel.enabled", false));
