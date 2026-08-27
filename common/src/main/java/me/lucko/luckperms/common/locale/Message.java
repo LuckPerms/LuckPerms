@@ -4283,9 +4283,9 @@ public interface Message {
         return text()
                 .append(text()
                         .color(DARK_GRAY)
-                        .append(text("["))
+                        .append(OPEN_BRACKET)
                         .append(type)
-                        .append(text("]:")))
+                        .append(CLOSE_BRACKET))
                 .append(space())
                 .append(key)
                 .build();

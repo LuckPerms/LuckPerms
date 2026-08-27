@@ -27,17 +27,26 @@ package me.lucko.luckperms.common.model;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+import me.lucko.luckperms.common.context.ImmutableContextSetImpl;
 import me.lucko.luckperms.common.event.EventDispatcher;
 import me.lucko.luckperms.common.graph.TraversalAlgorithm;
 import me.lucko.luckperms.common.inheritance.InheritanceGraphFactory;
 import me.lucko.luckperms.common.model.manager.group.GroupManager;
 import me.lucko.luckperms.common.model.manager.group.StandardGroupManager;
 import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.node.types.Permission;
 import me.lucko.luckperms.common.node.types.Weight;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsBuilderImpl;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import net.luckperms.api.context.ContextSatisfyMode;
+import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.node.Node;
+import net.luckperms.api.node.types.PermissionNode;
+import net.luckperms.api.query.QueryMode;
+import net.luckperms.api.query.QueryOptions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -126,10 +135,46 @@ public class InheritanceTest {
         assertEquals(expectedList, groups);
     }
 
+    @Test
+    public void testResolveInheritedNodes() {
+        when(this.configuration.get(ConfigKeys.INHERITANCE_TRAVERSAL_ALGORITHM)).thenReturn(TraversalAlgorithm.DEPTH_FIRST_PRE_ORDER);
+        when(this.configuration.get(ConfigKeys.POST_TRAVERSAL_INHERITANCE_SORT)).thenReturn(false);
+
+        Group member = this.groupManager.getOrMake("member");
+        Group vip = createGroup("vip", 5, member);
+        Group vipPlus = createGroup("vip+", 10, vip);
+
+        Node testTrue = Permission.builder().permission("test").build();
+        Node testFalse = Permission.builder().permission("test").value(false).build();
+        PermissionNode testTrueWithContext = Permission.builder().permission("test").withContext("server", "test").build();
+
+        member.setNode(DataType.NORMAL, testFalse, false);
+        vip.setNode(DataType.NORMAL, testTrueWithContext, false);
+        vipPlus.setNode(DataType.NORMAL, testTrue, false);
+
+        PermissionHolder testHolder = this.groupManager.getOrMake("test");
+        testHolder.setNode(DataType.NORMAL, Inheritance.builder().group(vipPlus.getName()).build(), false);
+
+        assertEquals(
+                List.of(testTrue, testFalse),
+                testHolder.resolveInheritedNodes(QueryOptionsImpl.DEFAULT_CONTEXTUAL).stream()
+                        .filter(node -> node.getKey().equals("test"))
+                        .collect(Collectors.toList())
+        );
+
+        QueryOptions queryOptions = new QueryOptionsBuilderImpl(QueryMode.CONTEXTUAL).context(ImmutableContextSetImpl.of("server", "test")).build();
+        assertEquals(
+                List.of(testTrue, testTrueWithContext, testFalse),
+                testHolder.resolveInheritedNodes(queryOptions).stream()
+                        .filter(node -> node.getKey().equals("test"))
+                        .collect(Collectors.toList())
+        );
+    }
+
     private Group createGroup(String name, int weight, Group parent) {
         Group group = this.groupManager.getOrMake(name);
-        group.normalData().add(Inheritance.builder().group(parent.getName()).build());
-        group.normalData().add(Weight.builder().weight(weight).build());
+        group.setNode(DataType.NORMAL, Inheritance.builder().group(parent.getName()).build(), false);
+        group.setNode(DataType.NORMAL, Weight.builder().weight(weight).build(), false);
         return group;
     }
 
