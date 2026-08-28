@@ -36,6 +36,8 @@ include (
         'forge:loader',
         'nukkit',
         'nukkit:loader',
+        'waterdog',
+        'waterdog:loader',
         'hytale',
         'hytale:loader',
         'hytale:loader-with-deps',
