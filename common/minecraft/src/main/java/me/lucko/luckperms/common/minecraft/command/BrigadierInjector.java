@@ -137,7 +137,13 @@ public final class BrigadierInjector {
 
         @Override
         public boolean test(CommandSourceStack source) {
-            Tristate state = this.plugin.getSenderFactory().wrap(source).getPermissionValue(this.permission);
+            var senderFactory = this.plugin.getSenderFactory();
+            if (senderFactory == null) {
+                // This can happen during, uh, datapack loading period.
+                // If that happens, we have no choice but rely on the fallback.
+                return this.delegate.test(source);
+            }
+            Tristate state = senderFactory.wrap(source).getPermissionValue(this.permission);
 
             if (state != Tristate.UNDEFINED) {
                 return state.asBoolean() && this.delegate.test(source.withPermission(LevelBasedPermissionSet.OWNER));
