@@ -42,6 +42,7 @@ import me.lucko.luckperms.bukkit.listeners.BukkitAutoOpListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitCommandListUpdater;
 import me.lucko.luckperms.bukkit.listeners.BukkitConnectionListener;
 import me.lucko.luckperms.bukkit.listeners.BukkitPlatformListener;
+import me.lucko.luckperms.bukkit.listeners.PaperConnectionListener;
 import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
 import me.lucko.luckperms.bukkit.util.PluginManagerUtil;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
@@ -135,6 +136,10 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
         this.connectionListener = new BukkitConnectionListener(this);
         this.bootstrap.getServer().getPluginManager().registerEvents(this.connectionListener, this.bootstrap.getLoader());
         this.bootstrap.getServer().getPluginManager().registerEvents(new BukkitPlatformListener(this), this.bootstrap.getLoader());
+        if (isConfigurationTrackingSupported()) {
+            PaperConnectionListener paperConnectionListener = new PaperConnectionListener(this.bootstrap.getConfiguringPlayers());
+            this.bootstrap.getServer().getPluginManager().registerEvents(paperConnectionListener, this.bootstrap.getLoader());
+        }
     }
 
     @Override
@@ -358,6 +363,10 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     private static boolean isAsyncTabCompleteSupported() {
         return classExists("com.destroystokyo.paper.event.server.AsyncTabCompleteEvent");
+    }
+
+    private static boolean isConfigurationTrackingSupported() {
+        return classExists("io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent");
     }
 
     @Override

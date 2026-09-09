@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.JavaPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
+import me.lucko.luckperms.common.util.ExpiringSet;
 import net.luckperms.api.platform.Platform;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -48,8 +49,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -94,6 +97,16 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
     private final CountDownLatch enableLatch = new CountDownLatch(1);
     private boolean serverStarting = true;
     private boolean serverStopping = false;
+
+    /**
+     * UUIDs of players currently in the configuration phase (Paper 1.20.2+).
+     *
+     * <p>{@link Server#getPlayer(UUID)} returns null for these players until the
+     * configuration phase ends, so they are tracked separately to keep the user
+     * housekeeper from unloading their data while they are stuck configuring
+     * (e.g. downloading a resource pack).</p>
+     */
+    private final Set<UUID> configuringPlayers = ExpiringSet.newExpiringSet(15, TimeUnit.MINUTES);
 
     // if the plugin has been loaded on an incompatible version
     private boolean incompatibleVersion = false;
@@ -288,8 +301,15 @@ public class LPBukkitBootstrap implements LuckPermsBootstrap, LoaderBootstrap, B
 
     @Override
     public boolean isPlayerOnline(UUID uniqueId) {
+        if (this.configuringPlayers.contains(uniqueId)) {
+            return true;
+        }
         Player player = getServer().getPlayer(uniqueId);
         return player != null && player.isOnline();
+    }
+
+    public Set<UUID> getConfiguringPlayers() {
+        return this.configuringPlayers;
     }
 
     @Override
