@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.util;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Records a log of the changes that occur as a result

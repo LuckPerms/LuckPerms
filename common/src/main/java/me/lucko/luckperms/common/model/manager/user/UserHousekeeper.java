@@ -47,11 +47,15 @@ public class UserHousekeeper implements Runnable {
     // contains the uuids of users who have recently been retrieved from the API
     private final Set<UUID> recentlyUsedApi;
 
+    // contains the uuids of users who are currently logging in
+    private final Set<UUID> loggingIn;
+
     public UserHousekeeper(LuckPermsPlugin plugin, UserManager<?> userManager, TimeoutSettings timeoutSettings) {
         this.plugin = plugin;
         this.userManager = userManager;
         this.recentlyUsed = ExpiringSet.newExpiringSet(timeoutSettings.duration, timeoutSettings.unit);
         this.recentlyUsedApi = ExpiringSet.newExpiringSet(5, TimeUnit.MINUTES);
+        this.loggingIn = ExpiringSet.newExpiringSet(10, TimeUnit.MINUTES);
     }
 
     // called when a player attempts a connection or logs out
@@ -63,8 +67,16 @@ public class UserHousekeeper implements Runnable {
         this.recentlyUsedApi.add(uuid);
     }
 
-    public void clearApiUsage(UUID uuid) {
+    public void registerLoggingIn(UUID uuid) {
+        this.loggingIn.add(uuid);
+    }
+
+    public void unregisterApiUsage(UUID uuid) {
         this.recentlyUsedApi.remove(uuid);
+    }
+
+    public void unregisterLoggingIn(UUID uuid) {
+        this.loggingIn.remove(uuid);
     }
 
     @Override
@@ -76,7 +88,7 @@ public class UserHousekeeper implements Runnable {
 
     public void cleanup(UUID uuid) {
         // unload users which aren't online and who haven't been online (or tried to login) recently
-        if (this.recentlyUsed.contains(uuid) || this.recentlyUsedApi.contains(uuid) || this.plugin.getBootstrap().isPlayerOnline(uuid)) {
+        if (this.recentlyUsed.contains(uuid) || this.recentlyUsedApi.contains(uuid) || this.loggingIn.contains(uuid) || this.plugin.getBootstrap().isPlayerOnline(uuid)) {
             return;
         }
 

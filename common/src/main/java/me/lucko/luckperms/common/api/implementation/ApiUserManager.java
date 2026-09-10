@@ -196,6 +196,6 @@ public class ApiUserManager extends ApiAbstractManager<User, net.luckperms.api.m
     @Override
     public void cleanupUser(net.luckperms.api.model.user.@NonNull User user) {
         Objects.requireNonNull(user, "user");
-        this.handle.getHouseKeeper().clearApiUsage(ApiUser.cast(user).getUniqueId());
+        this.handle.getHouseKeeper().unregisterApiUsage(ApiUser.cast(user).getUniqueId());
     }
 }
