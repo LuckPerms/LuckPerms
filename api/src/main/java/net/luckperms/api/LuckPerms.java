@@ -48,7 +48,6 @@ import net.luckperms.api.platform.PluginMetadata;
 import net.luckperms.api.query.QueryOptionsRegistry;
 import net.luckperms.api.track.Track;
 import net.luckperms.api.track.TrackManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.util.Optional;
@@ -84,7 +83,7 @@ public interface LuckPerms {
      *
      * @return the server name
      */
-    @NonNull String getServerName();
+    String getServerName();
 
     /**
      * Gets the {@link UserManager}, responsible for managing
@@ -95,7 +94,7 @@ public interface LuckPerms {
      *
      * @return the user manager
      */
-    @NonNull UserManager getUserManager();
+    UserManager getUserManager();
 
     /**
      * Gets the {@link GroupManager}, responsible for managing
@@ -106,7 +105,7 @@ public interface LuckPerms {
      *
      * @return the group manager
      */
-    @NonNull GroupManager getGroupManager();
+    GroupManager getGroupManager();
 
     /**
      * Gets the {@link TrackManager}, responsible for managing
@@ -117,7 +116,7 @@ public interface LuckPerms {
      *
      * @return the track manager
      */
-    @NonNull TrackManager getTrackManager();
+    TrackManager getTrackManager();
 
     /**
      * Gets the {@link PlayerAdapter} instance, a utility class for adapting platform Player
@@ -144,7 +143,7 @@ public interface LuckPerms {
      * @throws IllegalArgumentException if the player class is not correct
      * @since 5.1
      */
-    <T> @NonNull PlayerAdapter<T> getPlayerAdapter(@NonNull Class<T> playerClass);
+    <T> PlayerAdapter<T> getPlayerAdapter(Class<T> playerClass);
 
     /**
      * Gets the {@link Platform}, which represents the server platform the
@@ -152,7 +151,7 @@ public interface LuckPerms {
      *
      * @return the platform
      */
-    @NonNull Platform getPlatform();
+    Platform getPlatform();
 
     /**
      * Gets the {@link PluginMetadata}, responsible for providing metadata about
@@ -160,7 +159,7 @@ public interface LuckPerms {
      *
      * @return the plugin metadata
      */
-    @NonNull PluginMetadata getPluginMetadata();
+    PluginMetadata getPluginMetadata();
 
     /**
      * Gets the {@link EventBus}, used for subscribing to internal LuckPerms
@@ -168,7 +167,7 @@ public interface LuckPerms {
      *
      * @return the event bus
      */
-    @NonNull EventBus getEventBus();
+    EventBus getEventBus();
 
     /**
      * Gets the {@link MessagingService}, used to dispatch updates throughout a
@@ -179,7 +178,7 @@ public interface LuckPerms {
      *
      * @return the messaging service instance, if present.
      */
-    @NonNull Optional<MessagingService> getMessagingService();
+    Optional<MessagingService> getMessagingService();
 
     /**
      * Gets the {@link ActionLogger}, responsible for saving and broadcasting
@@ -187,7 +186,7 @@ public interface LuckPerms {
      *
      * @return the action logger
      */
-    @NonNull ActionLogger getActionLogger();
+    ActionLogger getActionLogger();
 
     /**
      * Gets the {@link ContextManager}, responsible for managing
@@ -195,7 +194,7 @@ public interface LuckPerms {
      *
      * @return the context manager
      */
-    @NonNull ContextManager getContextManager();
+    ContextManager getContextManager();
 
     /**
      * Gets the {@link MetaStackFactory}.
@@ -206,7 +205,7 @@ public interface LuckPerms {
      *
      * @return the meta stack factory
      */
-    @NonNull MetaStackFactory getMetaStackFactory();
+    MetaStackFactory getMetaStackFactory();
 
     /**
      * Schedules the execution of an update task, and returns an encapsulation
@@ -219,7 +218,7 @@ public interface LuckPerms {
      *
      * @return a future
      */
-    @NonNull CompletableFuture<Void> runUpdateTask();
+    CompletableFuture<Void> runUpdateTask();
 
     /**
      * Executes a health check.
@@ -230,7 +229,7 @@ public interface LuckPerms {
      * @return the health status
      * @since 5.5
      */
-    @NonNull Health runHealthCheck();
+    Health runHealthCheck();
 
     /**
      * Registers a {@link MessengerProvider} for use by the platform.
@@ -240,7 +239,7 @@ public interface LuckPerms {
      *
      * @param messengerProvider the messenger provider.
      */
-    void registerMessengerProvider(@NonNull MessengerProvider messengerProvider);
+    void registerMessengerProvider(MessengerProvider messengerProvider);
 
     /**
      * Gets the {@link NodeBuilderRegistry}.
@@ -248,7 +247,7 @@ public interface LuckPerms {
      * @return the node builder registry
      */
     @Internal
-    @NonNull NodeBuilderRegistry getNodeBuilderRegistry();
+    NodeBuilderRegistry getNodeBuilderRegistry();
 
     /**
      * Gets the {@link QueryOptionsRegistry}.
@@ -257,7 +256,7 @@ public interface LuckPerms {
      * @since 5.1
      */
     @Internal
-    @NonNull QueryOptionsRegistry getQueryOptionsRegistry();
+    QueryOptionsRegistry getQueryOptionsRegistry();
 
     /**
      * Gets the {@link NodeMatcherFactory}.
@@ -266,7 +265,7 @@ public interface LuckPerms {
      * @since 5.1
      */
     @Internal
-    @NonNull NodeMatcherFactory getNodeMatcherFactory();
+    NodeMatcherFactory getNodeMatcherFactory();
 
     /**
      * Gets the {@link ActionFilterFactory}.
@@ -275,7 +274,6 @@ public interface LuckPerms {
      * @since 5.5
      */
     @Internal
-    @NonNull
     ActionFilterFactory getActionFilterFactory();
 
 }

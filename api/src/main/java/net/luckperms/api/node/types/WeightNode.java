@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A sub-type of {@link Node} used to mark the weight of the node's holder.
@@ -38,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface WeightNode extends ScopedNode<WeightNode, WeightNode.Builder> {
 
     @Override
-    default @NonNull NodeType<WeightNode> getType() {
+    default NodeType<WeightNode> getType() {
         return NodeType.WEIGHT;
     }
 
@@ -54,7 +53,7 @@ public interface WeightNode extends ScopedNode<WeightNode, WeightNode.Builder> {
      *
      * @return the builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forWeight();
     }
 
@@ -64,7 +63,7 @@ public interface WeightNode extends ScopedNode<WeightNode, WeightNode.Builder> {
      * @param weight the weight to set
      * @return the builder
      */
-    static @NonNull Builder builder(int weight) {
+    static Builder builder(int weight) {
         return builder().weight(weight);
     }
 
@@ -79,7 +78,7 @@ public interface WeightNode extends ScopedNode<WeightNode, WeightNode.Builder> {
          * @param weight the weight
          * @return the builder
          */
-        @NonNull Builder weight(int weight);
+        Builder weight(int weight);
 
     }
 

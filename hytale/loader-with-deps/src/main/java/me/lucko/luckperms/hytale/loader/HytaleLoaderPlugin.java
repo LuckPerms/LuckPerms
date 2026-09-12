@@ -29,7 +29,6 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import me.lucko.luckperms.common.loader.JarInJarClassLoader;
 import me.lucko.luckperms.common.loader.LoaderBootstrap;
-import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class HytaleLoaderPlugin extends JavaPlugin {
 
     private final LoaderBootstrap plugin;
 
-    public HytaleLoaderPlugin(@NonNullDecl JavaPluginInit init) {
+    public HytaleLoaderPlugin(JavaPluginInit init) {
         super(init);
         JarInJarClassLoader loader = new JarInJarClassLoader(getClass().getClassLoader(), JAR_NAME);
         loader.setPriorityPackagePrefixes(List.of("org.slf4j"));

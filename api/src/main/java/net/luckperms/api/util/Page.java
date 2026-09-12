@@ -25,7 +25,6 @@
 
 package net.luckperms.api.util;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 
@@ -41,7 +40,7 @@ public interface Page<T> {
      *
      * @return the entries
      */
-    @NonNull List<T> entries();
+    List<T> entries();
 
     /**
      * Gets the total/overall number of entries (not just the number of entries on this page).

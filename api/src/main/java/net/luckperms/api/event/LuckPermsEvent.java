@@ -26,7 +26,6 @@
 package net.luckperms.api.event;
 
 import net.luckperms.api.LuckPerms;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A superinterface for all LuckPerms events.
@@ -38,13 +37,13 @@ public interface LuckPermsEvent {
      *
      * @return the api instance
      */
-    @NonNull LuckPerms getLuckPerms();
+    LuckPerms getLuckPerms();
 
     /**
      * Gets the type of the event.
      *
      * @return the type of the event
      */
-    @NonNull Class<? extends LuckPermsEvent> getEventType();
+    Class<? extends LuckPermsEvent> getEventType();
 
 }

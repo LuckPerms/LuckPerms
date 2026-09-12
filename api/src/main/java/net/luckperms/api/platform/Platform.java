@@ -25,7 +25,6 @@
 
 package net.luckperms.api.platform;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.time.Instant;
@@ -43,28 +42,28 @@ public interface Platform {
      *
      * @return the type of platform LuckPerms is running on
      */
-    Platform.@NonNull Type getType();
+    Platform.Type getType();
 
     /**
      * Gets the unique players which have connected to the server since it started.
      *
      * @return the unique connections
      */
-    @NonNull @Unmodifiable Set<UUID> getUniqueConnections();
+    @Unmodifiable Set<UUID> getUniqueConnections();
 
     /**
      * Gets a {@link Collection} of all known permission strings.
      *
      * @return a collection of the known permissions
      */
-    @NonNull @Unmodifiable Collection<String> getKnownPermissions();
+    @Unmodifiable Collection<String> getKnownPermissions();
 
     /**
      * Gets the time when the plugin first started.
      *
      * @return the enable time
      */
-    @NonNull Instant getStartTime();
+    Instant getStartTime();
 
     /**
      * Represents a type of platform which LuckPerms can run on.
@@ -92,7 +91,7 @@ public interface Platform {
          *
          * @return a readable name
          */
-        public @NonNull String getFriendlyName() {
+        public String getFriendlyName() {
             return this.friendlyName;
         }
     }

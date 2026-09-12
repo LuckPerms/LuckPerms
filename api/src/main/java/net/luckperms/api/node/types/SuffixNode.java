@@ -28,7 +28,6 @@ package net.luckperms.api.node.types;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A sub-type of {@link Node} used to store suffix assignments.
@@ -36,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface SuffixNode extends ChatMetaNode<SuffixNode, SuffixNode.Builder> {
 
     @Override
-    default @NonNull NodeType<SuffixNode> getType() {
+    default NodeType<SuffixNode> getType() {
         return NodeType.SUFFIX;
     }
 
@@ -45,7 +44,7 @@ public interface SuffixNode extends ChatMetaNode<SuffixNode, SuffixNode.Builder>
      *
      * @return the builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forSuffix();
     }
 
@@ -56,7 +55,7 @@ public interface SuffixNode extends ChatMetaNode<SuffixNode, SuffixNode.Builder>
      * @param priority the priority to set
      * @return the builder
      */
-    static @NonNull Builder builder(@NonNull String suffix, int priority) {
+    static Builder builder(String suffix, int priority) {
         return builder().suffix(suffix).priority(priority);
     }
 
@@ -71,7 +70,7 @@ public interface SuffixNode extends ChatMetaNode<SuffixNode, SuffixNode.Builder>
          * @param suffix the suffix
          * @return the builder
          */
-        @NonNull Builder suffix(@NonNull String suffix);
+        Builder suffix(String suffix);
 
     }
 

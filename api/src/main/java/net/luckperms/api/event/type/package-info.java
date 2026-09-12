@@ -26,4 +26,5 @@
 /**
  * Event abstract types.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.type;

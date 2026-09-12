@@ -27,8 +27,7 @@ package net.luckperms.api.event.sync;
 
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -47,7 +46,7 @@ public interface PostNetworkSyncEvent extends LuckPermsEvent {
      * @return the id of the sync request
      */
     @Param(0)
-    @NonNull UUID getSyncId();
+    UUID getSyncId();
 
     /**
      * Gets the sync type.
@@ -55,7 +54,7 @@ public interface PostNetworkSyncEvent extends LuckPermsEvent {
      * @return the sync type
      */
     @Param(1)
-    @NonNull SyncType getType();
+    SyncType getType();
 
     /**
      * Gets if a sync occurred.

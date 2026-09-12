@@ -25,7 +25,6 @@
 
 package net.luckperms.api.metastacking;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.HashSet;
 import java.util.List;
@@ -46,14 +45,14 @@ public interface DuplicateRemovalFunction {
      * @param list the entries
      * @param <T> the type of entries
      */
-    <T> void processDuplicates(@NonNull List<T> list);
+    <T> void processDuplicates(List<T> list);
 
     /**
      * A {@link DuplicateRemovalFunction} that does not remove duplicates.
      */
     DuplicateRemovalFunction RETAIN_ALL = new DuplicateRemovalFunction() {
         @Override
-        public <T> void processDuplicates(@NonNull List<T> list) {
+        public <T> void processDuplicates(List<T> list) {
 
         }
 
@@ -69,7 +68,7 @@ public interface DuplicateRemovalFunction {
     DuplicateRemovalFunction FIRST_ONLY = new DuplicateRemovalFunction() {
         @SuppressWarnings("Java8CollectionRemoveIf")
         @Override
-        public <T> void processDuplicates(@NonNull List<T> list) {
+        public <T> void processDuplicates(List<T> list) {
             Set<T> seen = new HashSet<>(list.size());
             for (ListIterator<T> it = list.listIterator(); it.hasNext(); ) {
                 T next = it.next();
@@ -90,7 +89,7 @@ public interface DuplicateRemovalFunction {
      */
     DuplicateRemovalFunction LAST_ONLY = new DuplicateRemovalFunction() {
         @Override
-        public <T> void processDuplicates(@NonNull List<T> list) {
+        public <T> void processDuplicates(List<T> list) {
             Set<T> seen = new HashSet<>(list.size());
             for (ListIterator<T> it = list.listIterator(list.size()); it.hasPrevious(); ) {
                 T next = it.previous();

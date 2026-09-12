@@ -29,7 +29,6 @@ import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.type.Cancellable;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a log is about to be published to the storage file/table
@@ -42,6 +41,6 @@ public interface LogPublishEvent extends LuckPermsEvent, Cancellable {
      * @return the log entry to be published
      */
     @Param(0)
-    @NonNull Action getEntry();
+    Action getEntry();
 
 }

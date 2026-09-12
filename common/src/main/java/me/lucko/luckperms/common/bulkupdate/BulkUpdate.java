@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.bulkupdate.action.BulkUpdateAction;
 import me.lucko.luckperms.common.filter.FilterList;
 import me.lucko.luckperms.common.model.HolderType;
 import net.luckperms.api.node.Node;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Objects;

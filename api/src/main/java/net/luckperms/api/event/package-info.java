@@ -26,4 +26,5 @@
 /**
  * Main events package.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event;

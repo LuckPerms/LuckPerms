@@ -55,7 +55,7 @@ import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Objects;

@@ -25,7 +25,6 @@
 
 package net.luckperms.api;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import static org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -47,7 +46,7 @@ public final class LuckPermsProvider {
      * @return an instance of the LuckPerms API
      * @throws IllegalStateException if the API is not loaded yet
      */
-    public static @NonNull LuckPerms get() {
+    public static LuckPerms get() {
         LuckPerms instance = LuckPermsProvider.instance;
         if (instance == null) {
             throw new NotLoadedException();

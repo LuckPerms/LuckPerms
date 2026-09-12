@@ -31,7 +31,7 @@ import cn.nukkit.plugin.PluginManager;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;

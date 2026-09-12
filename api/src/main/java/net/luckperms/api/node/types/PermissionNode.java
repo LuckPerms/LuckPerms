@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.OptionalInt;
 
@@ -40,7 +39,7 @@ import java.util.OptionalInt;
 public interface PermissionNode extends ScopedNode<PermissionNode, PermissionNode.Builder> {
 
     @Override
-    default @NonNull NodeType<PermissionNode> getType() {
+    default NodeType<PermissionNode> getType() {
         return NodeType.PERMISSION;
     }
 
@@ -52,7 +51,7 @@ public interface PermissionNode extends ScopedNode<PermissionNode, PermissionNod
      *
      * @return the actual permission node
      */
-    @NonNull String getPermission();
+    String getPermission();
 
     /**
      * Gets if this node is a wildcard permission.
@@ -72,14 +71,14 @@ public interface PermissionNode extends ScopedNode<PermissionNode, PermissionNod
      *
      * @return the wildcard level
      */
-    @NonNull OptionalInt getWildcardLevel();
+    OptionalInt getWildcardLevel();
 
     /**
      * Creates a {@link PermissionNode} builder.
      *
      * @return the builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forPermission();
     }
 
@@ -90,7 +89,7 @@ public interface PermissionNode extends ScopedNode<PermissionNode, PermissionNod
      * @return the builder
      * @throws IllegalArgumentException if {@code permission} is empty
      */
-    static @NonNull Builder builder(@NonNull String permission) {
+    static Builder builder(String permission) {
         return builder().permission(permission);
     }
 
@@ -106,7 +105,7 @@ public interface PermissionNode extends ScopedNode<PermissionNode, PermissionNod
          * @return the builder
          * @throws IllegalArgumentException if {@code permission} is empty
          */
-        @NonNull Builder permission(@NonNull String permission);
+        Builder permission(String permission);
 
     }
 

@@ -29,7 +29,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
@@ -50,7 +49,7 @@ public interface NodeMatcherFactory {
      * @param key the key
      * @return the matcher
      */
-    @NonNull NodeMatcher<Node> key(@NonNull String key);
+    NodeMatcher<Node> key(String key);
 
     /**
      * Gets a {@link NodeMatcher} which matches nodes with the same {@link Node#getKey() key}.
@@ -63,7 +62,7 @@ public interface NodeMatcherFactory {
      * @param <T> the node type
      * @return the matcher
      */
-    <T extends Node> @NonNull NodeMatcher<T> key(@NonNull T node);
+    <T extends Node> NodeMatcher<T> key(T node);
 
     /**
      * Gets a {@link NodeMatcher} which matches nodes with a {@link Node#getKey() key} starting
@@ -74,7 +73,7 @@ public interface NodeMatcherFactory {
      * @param startingWith the string to match
      * @return the matcher
      */
-    @NonNull NodeMatcher<Node> keyStartsWith(@NonNull String startingWith);
+    NodeMatcher<Node> keyStartsWith(String startingWith);
 
     /**
      * Gets a {@link NodeMatcher} which matches nodes which are
@@ -88,7 +87,7 @@ public interface NodeMatcherFactory {
      * @param <T> the node type
      * @return the matcher
      */
-    <T extends Node> @NonNull NodeMatcher<T> equals(@NonNull T other, @NonNull NodeEqualityPredicate equalityPredicate);
+    <T extends Node> NodeMatcher<T> equals(T other, NodeEqualityPredicate equalityPredicate);
 
     /**
      * Gets a {@link NodeMatcher} which matches {@link MetaNode}s with the same
@@ -101,7 +100,7 @@ public interface NodeMatcherFactory {
      * @param metaKey the meta key
      * @return the matcher
      */
-    @NonNull NodeMatcher<MetaNode> metaKey(@NonNull String metaKey);
+    NodeMatcher<MetaNode> metaKey(String metaKey);
 
     /**
      * Gets a {@link NodeMatcher} which matches {@link Node}s with the same
@@ -116,6 +115,6 @@ public interface NodeMatcherFactory {
      * @param <T> the node type
      * @return the matcher
      */
-    <T extends Node> @NonNull NodeMatcher<T> type(@NonNull NodeType<? extends T> type);
+    <T extends Node> NodeMatcher<T> type(NodeType<? extends T> type);
 
 }

@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.messaging.MessagingService} functionality.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.messaging;

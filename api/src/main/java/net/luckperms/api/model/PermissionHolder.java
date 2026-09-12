@@ -35,7 +35,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
@@ -81,14 +80,14 @@ public interface PermissionHolder {
          *
          * @return the identifier for this object. Either a uuid string or name.
          */
-        @NonNull String getName();
+        String getName();
 
         /**
          * Gets the type of the {@link PermissionHolder}.
          *
          * @return the type
          */
-        @NonNull String getType();
+        String getType();
     }
 
     /**
@@ -96,7 +95,7 @@ public interface PermissionHolder {
      *
      * @return the identifier
      */
-    @NonNull Identifier getIdentifier();
+    Identifier getIdentifier();
 
     /**
      * Gets a friendly name for this holder, to be displayed in command output, etc.
@@ -112,7 +111,7 @@ public interface PermissionHolder {
      *
      * @return a friendly identifier for this holder
      */
-    @NonNull String getFriendlyName();
+    String getFriendlyName();
 
     /**
      * Gets the most appropriate query options available at the time for the
@@ -130,14 +129,14 @@ public interface PermissionHolder {
      * @return query options
      * @since 5.1
      */
-    @NonNull QueryOptions getQueryOptions();
+    QueryOptions getQueryOptions();
 
     /**
      * Gets the holders {@link CachedDataManager} cache.
      *
      * @return the holders cached data.
      */
-    @NonNull CachedDataManager getCachedData();
+    CachedDataManager getCachedData();
 
     /**
      * Gets the {@link NodeMap} of a particular type.
@@ -145,14 +144,14 @@ public interface PermissionHolder {
      * @param dataType the data type
      * @return the data
      */
-    @NonNull NodeMap getData(@NonNull DataType dataType);
+    NodeMap getData(DataType dataType);
 
     /**
      * Gets the holders {@link DataType#NORMAL} data.
      *
      * @return the normal data
      */
-    @NonNull NodeMap data();
+    NodeMap data();
 
     /**
      * Gets the holders {@link DataType#TRANSIENT} data.
@@ -170,7 +169,7 @@ public interface PermissionHolder {
      *
      * @return the transient data
      */
-    @NonNull NodeMap transientData();
+    NodeMap transientData();
 
     /**
      * Gets a flattened view of the holders own {@link Node}s.
@@ -186,7 +185,7 @@ public interface PermissionHolder {
      *
      * @return a collection of the holders own nodes.
      */
-    default @NonNull @Unmodifiable Collection<Node> getNodes() {
+    default @Unmodifiable Collection<Node> getNodes() {
         /* This default method is overridden in the implementation, and is just here
            to demonstrate what this method does in the API sources. */
         List<Node> nodes = new ArrayList<>();
@@ -204,7 +203,7 @@ public interface PermissionHolder {
      * @see #getNodes()
      * @since 5.1
      */
-    default <T extends Node> @NonNull @Unmodifiable Collection<T> getNodes(@NonNull NodeType<T> type) {
+    default <T extends Node> @Unmodifiable Collection<T> getNodes(NodeType<T> type) {
         /* This default method is overridden in the implementation, and is just here
            to demonstrate what this method does in the API sources. */
         return getNodes().stream()
@@ -223,7 +222,7 @@ public interface PermissionHolder {
      *
      * @return a sorted set of the holders own distinct nodes
      */
-    @NonNull @Unmodifiable SortedSet<Node> getDistinctNodes();
+    @Unmodifiable SortedSet<Node> getDistinctNodes();
 
     /**
      * Gets a resolved view of the holders own and inherited {@link Node}s.
@@ -240,7 +239,7 @@ public interface PermissionHolder {
      * @param queryOptions the query options
      * @return a list of the holders inherited nodes
      */
-    @NonNull @Unmodifiable Collection<Node> resolveInheritedNodes(@NonNull QueryOptions queryOptions);
+    @Unmodifiable Collection<Node> resolveInheritedNodes(QueryOptions queryOptions);
 
     /**
      * Gets a resolved view of the holders own and inherited {@link Node}s of a given {@code type}.
@@ -252,7 +251,7 @@ public interface PermissionHolder {
      * @see #resolveInheritedNodes(QueryOptions)
      * @since 5.1
      */
-    default <T extends Node> @NonNull @Unmodifiable Collection<T> resolveInheritedNodes(@NonNull NodeType<T> type, @NonNull QueryOptions queryOptions) {
+    default <T extends Node> @Unmodifiable Collection<T> resolveInheritedNodes(NodeType<T> type, QueryOptions queryOptions) {
         /* This default method is overridden in the implementation, and is just here
            to demonstrate what this method does in the API sources. */
         return resolveInheritedNodes(queryOptions).stream()
@@ -275,7 +274,7 @@ public interface PermissionHolder {
      * @param queryOptions the query options
      * @return a sorted set of the holders distinct inherited nodes
      */
-    @NonNull @Unmodifiable SortedSet<Node> resolveDistinctInheritedNodes(@NonNull QueryOptions queryOptions);
+    @Unmodifiable SortedSet<Node> resolveDistinctInheritedNodes(QueryOptions queryOptions);
 
     /**
      * Gets a collection of the {@link Group}s this holder inherits nodes from.
@@ -296,7 +295,7 @@ public interface PermissionHolder {
      * @return a collection of the groups the holder inherits from
      * @since 5.1
      */
-    @NonNull @Unmodifiable Collection<Group> getInheritedGroups(@NonNull QueryOptions queryOptions);
+    @Unmodifiable Collection<Group> getInheritedGroups(QueryOptions queryOptions);
 
     /**
      * Removes any temporary permissions that have expired.

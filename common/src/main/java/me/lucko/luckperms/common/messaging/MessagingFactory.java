@@ -41,7 +41,7 @@ import me.lucko.luckperms.common.storage.implementation.sql.connection.hikari.Po
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;

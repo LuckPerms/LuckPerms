@@ -31,7 +31,7 @@ import com.google.common.io.ByteStreams;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Abstract implementation of {@link Messenger} using Minecraft's

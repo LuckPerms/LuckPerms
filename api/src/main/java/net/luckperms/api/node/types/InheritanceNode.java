@@ -31,7 +31,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A sub-type of {@link Node} used to mark that the holder of the node should inherit
@@ -40,7 +39,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface InheritanceNode extends ScopedNode<InheritanceNode, InheritanceNode.Builder> {
 
     @Override
-    default @NonNull NodeType<InheritanceNode> getType() {
+    default NodeType<InheritanceNode> getType() {
         return NodeType.INHERITANCE;
     }
 
@@ -51,14 +50,14 @@ public interface InheritanceNode extends ScopedNode<InheritanceNode, Inheritance
      *
      * @return the name of the group
      */
-    @NonNull String getGroupName();
+    String getGroupName();
 
     /**
      * Creates a {@link InheritanceNode} builder.
      *
      * @return the builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forInheritance();
     }
 
@@ -69,7 +68,7 @@ public interface InheritanceNode extends ScopedNode<InheritanceNode, Inheritance
      * @return the builder
      * @throws IllegalArgumentException if {@code group} is not a valid group name
      */
-    static @NonNull Builder builder(@NonNull String group) {
+    static Builder builder(String group) {
         return builder().group(group);
     }
 
@@ -79,7 +78,7 @@ public interface InheritanceNode extends ScopedNode<InheritanceNode, Inheritance
      * @param group the group name
      * @return the builder
      */
-    static @NonNull Builder builder(@NonNull Group group) {
+    static Builder builder(Group group) {
         return builder().group(group);
     }
 
@@ -98,7 +97,7 @@ public interface InheritanceNode extends ScopedNode<InheritanceNode, Inheritance
          * @return the builder
          * @throws IllegalArgumentException if {@code group} is not a valid group name
          */
-        @NonNull Builder group(@NonNull String group);
+        Builder group(String group);
 
         /**
          * Sets the group to inherit.
@@ -109,7 +108,7 @@ public interface InheritanceNode extends ScopedNode<InheritanceNode, Inheritance
          * @param group the group
          * @return the builder
          */
-        @NonNull Builder group(@NonNull Group group);
+        Builder group(Group group);
 
     }
 

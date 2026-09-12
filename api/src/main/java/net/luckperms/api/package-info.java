@@ -26,4 +26,5 @@
 /**
  * Main package for the {@link net.luckperms.api.LuckPerms} API interface.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api;

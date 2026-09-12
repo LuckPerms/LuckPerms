@@ -26,7 +26,6 @@
 package net.luckperms.api.query;
 
 import net.luckperms.api.node.metadata.NodeMetadataKey;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.util.Objects;
@@ -54,7 +53,7 @@ public interface OptionKey<T> {
      * @param <T> the type parameter
      * @return the key
      */
-    static <T> @NonNull OptionKey<T> of(@NonNull String name, @NonNull Class<T> type) {
+    static <T> OptionKey<T> of(String name, Class<T> type) {
         Objects.requireNonNull(name, "name");
         Objects.requireNonNull(type, "type");
         return new SimpleOptionKey<>(name, type);
@@ -65,13 +64,13 @@ public interface OptionKey<T> {
      *
      * @return the key name
      */
-    @NonNull String name();
+    String name();
 
     /**
      * Gets the type of the key
      *
      * @return the type
      */
-    @NonNull Class<T> type();
+    Class<T> type();
 
 }

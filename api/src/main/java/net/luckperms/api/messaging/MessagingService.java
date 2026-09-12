@@ -28,7 +28,6 @@ package net.luckperms.api.messaging;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.event.messaging.CustomMessageReceiveEvent;
 import net.luckperms.api.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A means to send messages to other servers using the platforms networking
@@ -40,7 +39,7 @@ public interface MessagingService {
      *
      * @return the name of this messaging service
      */
-    @NonNull String getName();
+    String getName();
 
     /**
      * Uses the messaging service to inform other servers about a general
@@ -70,7 +69,7 @@ public interface MessagingService {
      *
      * @param user the user to push the update for
      */
-    void pushUserUpdate(@NonNull User user);
+    void pushUserUpdate(User user);
 
     /**
      * Uses the messaging service to send a message with a custom payload.
@@ -110,6 +109,6 @@ public interface MessagingService {
      * @param payload the message payload
      * @since 5.5
      */
-    void sendCustomMessage(@NonNull String channelId, @NonNull String payload);
+    void sendCustomMessage(String channelId, String payload);
 
 }

@@ -29,9 +29,8 @@ import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.context.ContextSatisfyMode;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +48,7 @@ public interface QueryOptions {
      * @param mode the query mode
      * @return a new builder
      */
-    static @NonNull Builder builder(@NonNull QueryMode mode) {
+    static Builder builder(QueryMode mode) {
         return LuckPermsProvider.get().getContextManager().queryOptionsBuilder(mode);
     }
 
@@ -61,7 +60,7 @@ public interface QueryOptions {
      * @param flags the query flags
      * @return the query options
      */
-    static @NonNull QueryOptions contextual(@NonNull ContextSet context, @NonNull Set<Flag> flags) {
+    static QueryOptions contextual(ContextSet context, Set<Flag> flags) {
         return builder(QueryMode.CONTEXTUAL).context(context).flags(flags).build();
     }
 
@@ -72,7 +71,7 @@ public interface QueryOptions {
      * @param context the contexts to query in
      * @return the query options
      */
-    static @NonNull QueryOptions contextual(@NonNull ContextSet context) {
+    static QueryOptions contextual(ContextSet context) {
         return builder(QueryMode.CONTEXTUAL).context(context).build();
     }
 
@@ -83,7 +82,7 @@ public interface QueryOptions {
      * @param flags the query flags
      * @return the query options
      */
-    static @NonNull QueryOptions nonContextual(@NonNull Set<Flag> flags) {
+    static QueryOptions nonContextual(Set<Flag> flags) {
         return builder(QueryMode.NON_CONTEXTUAL).flags(flags).build();
     }
 
@@ -95,7 +94,7 @@ public interface QueryOptions {
      *
      * @return the default non contextual query options
      */
-    static @NonNull QueryOptions nonContextual() {
+    static QueryOptions nonContextual() {
         return LuckPermsProvider.get().getQueryOptionsRegistry().defaultNonContextualOptions();
     }
 
@@ -108,7 +107,7 @@ public interface QueryOptions {
      *
      * @return the default contextual query options
      */
-    static @NonNull QueryOptions defaultContextualOptions() {
+    static QueryOptions defaultContextualOptions() {
         return LuckPermsProvider.get().getQueryOptionsRegistry().defaultContextualOptions();
     }
 
@@ -117,7 +116,7 @@ public interface QueryOptions {
      *
      * @return the query mode
      */
-    @NonNull QueryMode mode();
+    QueryMode mode();
 
     /**
      * Gets the {@link ContextSet context}, if the options are
@@ -128,7 +127,7 @@ public interface QueryOptions {
      *
      * @return the context
      */
-    @NonNull ImmutableContextSet context();
+    ImmutableContextSet context();
 
     /**
      * Gets if the given {@link Flag} is set.
@@ -136,14 +135,14 @@ public interface QueryOptions {
      * @param flag the flag
      * @return if the flag is set
      */
-    boolean flag(@NonNull Flag flag);
+    boolean flag(Flag flag);
 
     /**
      * Gets the {@link Flag}s which are set.
      *
      * @return the flags
      */
-    @NonNull Set<Flag> flags();
+    Set<Flag> flags();
 
     /**
      * Gets the value assigned to the given {@link OptionKey}.
@@ -155,14 +154,14 @@ public interface QueryOptions {
      * @param <O> the option type
      * @return the value assigned to the key
      */
-    <O> @NonNull Optional<O> option(@NonNull OptionKey<O> key);
+    <O> Optional<O> option(OptionKey<O> key);
 
     /**
      * Gets the options which are set.
      *
      * @return the options
      */
-    @NonNull Map<OptionKey<?>, Object> options();
+    Map<OptionKey<?>, Object> options();
 
     /**
      * Gets whether this {@link QueryOptions} satisfies the given required
@@ -174,7 +173,7 @@ public interface QueryOptions {
      * @param contextSet the contexts
      * @return the result
      */
-    default boolean satisfies(@NonNull ContextSet contextSet) {
+    default boolean satisfies(ContextSet contextSet) {
         return satisfies(contextSet, ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY);
     }
 
@@ -190,14 +189,14 @@ public interface QueryOptions {
      * @return the result
      * @since 5.2
      */
-    boolean satisfies(@NonNull ContextSet contextSet, @NonNull ContextSatisfyMode defaultContextSatisfyMode);
+    boolean satisfies(ContextSet contextSet, ContextSatisfyMode defaultContextSatisfyMode);
 
     /**
      * Converts this {@link QueryOptions} to a mutable builder.
      *
      * @return a builder, with the same properties already set
      */
-    @NonNull Builder toBuilder();
+    Builder toBuilder();
 
     /**
      * Builder for {@link QueryOptions}.
@@ -211,7 +210,7 @@ public interface QueryOptions {
          * @param mode the mode to set
          * @return this builder
          */
-        @NonNull Builder mode(@NonNull QueryMode mode);
+        Builder mode(QueryMode mode);
 
         /**
          * Sets the context.
@@ -225,7 +224,7 @@ public interface QueryOptions {
          * @param context the context to set
          * @return this builder
          */
-        @NonNull Builder context(@NonNull ContextSet context);
+        Builder context(ContextSet context);
 
         /**
          * Sets the value of the given flag.
@@ -236,7 +235,7 @@ public interface QueryOptions {
          * @param value the value to set
          * @return this builder
          */
-        @NonNull Builder flag(@NonNull Flag flag, boolean value);
+        Builder flag(Flag flag, boolean value);
 
         /**
          * Sets the flags.
@@ -249,7 +248,7 @@ public interface QueryOptions {
          * @param flags the flags
          * @return this builder
          */
-        @NonNull Builder flags(@NonNull Set<Flag> flags);
+        Builder flags(Set<Flag> flags);
 
         /**
          * Sets the value of the given option.
@@ -262,7 +261,7 @@ public interface QueryOptions {
          * @param <O> the option type
          * @return this builder
          */
-        <O> @NonNull Builder option(@NonNull OptionKey<O> key, @Nullable O value);
+        <O> Builder option(OptionKey<O> key, @Nullable O value);
 
         /**
          * Builds a {@link QueryOptions} instance from the properties defined to
@@ -270,7 +269,7 @@ public interface QueryOptions {
          *
          * @return a {@link QueryOptions} instance.
          */
-        @NonNull QueryOptions build();
+        QueryOptions build();
 
     }
 

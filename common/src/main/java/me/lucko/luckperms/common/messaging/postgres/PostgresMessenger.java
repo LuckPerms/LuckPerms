@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.storage.implementation.sql.SqlStorage;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.postgresql.PGConnection;
 import org.postgresql.PGNotification;
 import org.postgresql.util.PSQLException;

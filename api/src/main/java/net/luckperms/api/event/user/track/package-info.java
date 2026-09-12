@@ -27,4 +27,5 @@
  * Events relating to a {@link net.luckperms.api.model.user.User}s movement on a
  * {@link net.luckperms.api.track.Track}.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.user.track;

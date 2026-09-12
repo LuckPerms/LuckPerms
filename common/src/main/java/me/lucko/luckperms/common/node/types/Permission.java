@@ -33,7 +33,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.PermissionNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 import java.util.Objects;

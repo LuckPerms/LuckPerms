@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.webeditor.store;
 
 import me.lucko.luckperms.common.webeditor.WebEditorRequest;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

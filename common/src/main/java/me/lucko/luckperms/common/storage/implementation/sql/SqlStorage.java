@@ -58,7 +58,7 @@ import net.luckperms.api.context.DefaultContextKeys;
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;

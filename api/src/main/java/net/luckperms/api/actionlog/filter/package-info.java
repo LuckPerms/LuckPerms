@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.actionlog.Action} filters.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.actionlog.filter;

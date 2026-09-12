@@ -26,7 +26,6 @@
 package net.luckperms.api.event.track.mutate;
 
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a group is removed from a track
@@ -39,6 +38,6 @@ public interface TrackRemoveGroupEvent extends TrackMutateEvent {
      * @return the group that was removed
      */
     @Param(3)
-    @NonNull String getGroup();
+    String getGroup();
 
 }

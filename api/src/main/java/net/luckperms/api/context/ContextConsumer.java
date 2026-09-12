@@ -25,7 +25,6 @@
 
 package net.luckperms.api.context;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Functional interface that accepts context key value pairs.
@@ -39,14 +38,14 @@ public interface ContextConsumer {
      * @param key the key
      * @param value the value
      */
-    void accept(@NonNull String key, @NonNull String value);
+    void accept(String key, String value);
 
     /**
      * Accepts a context pair.
      *
      * @param context the context
      */
-    default void accept(@NonNull Context context) {
+    default void accept(Context context) {
         accept(context.getKey(), context.getValue());
     }
 
@@ -55,7 +54,7 @@ public interface ContextConsumer {
      *
      * @param contextSet the context set
      */
-    default void accept(@NonNull ContextSet contextSet) {
+    default void accept(ContextSet contextSet) {
         for (Context entry : contextSet) {
             accept(entry);
         }

@@ -28,7 +28,6 @@ package net.luckperms.api.event.user;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a user is loaded into memory from the storage.
@@ -41,6 +40,6 @@ public interface UserLoadEvent extends LuckPermsEvent {
      * @return the user that was loaded
      */
     @Param(0)
-    @NonNull User getUser();
+    User getUser();
 
 }

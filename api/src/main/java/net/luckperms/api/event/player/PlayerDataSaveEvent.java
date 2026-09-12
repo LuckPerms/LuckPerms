@@ -29,7 +29,6 @@ import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.model.user.UserManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;
 
@@ -46,7 +45,7 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      * @return the uuid
      */
     @Param(0)
-    @NonNull UUID getUniqueId();
+    UUID getUniqueId();
 
     /**
      * Gets the username that was saved.
@@ -54,7 +53,7 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      * @return the username
      */
     @Param(1)
-    @NonNull String getUsername();
+    String getUsername();
 
     /**
      * Gets the result of the operation.
@@ -62,6 +61,6 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
      * @return the result
      */
     @Param(2)
-    @NonNull PlayerSaveResult getResult();
+    PlayerSaveResult getResult();
 
 }

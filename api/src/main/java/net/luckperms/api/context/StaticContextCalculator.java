@@ -25,7 +25,6 @@
 
 package net.luckperms.api.context;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -66,10 +65,10 @@ public interface StaticContextCalculator extends ContextCalculator<Object> {
      *
      * @param consumer the {@link ContextConsumer} to submit contexts to
      */
-    void calculate(@NonNull ContextConsumer consumer);
+    void calculate(ContextConsumer consumer);
 
     @Override
-    default void calculate(@NonNull Object target, @NonNull ContextConsumer consumer) {
+    default void calculate(Object target, ContextConsumer consumer) {
         calculate(consumer);
     }
 }

@@ -25,7 +25,6 @@
 
 package net.luckperms.api.node;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Dummy implementation of {@link NodeEqualityPredicate}, used for the given constant
@@ -43,7 +42,7 @@ final class DummyNodeEqualityPredicate implements NodeEqualityPredicate {
     }
 
     @Override
-    public boolean areEqual(@NonNull Node o1, @NonNull Node o2) {
+    public boolean areEqual(Node o1, Node o2) {
         return o1.equals(o2, this);
     }
 

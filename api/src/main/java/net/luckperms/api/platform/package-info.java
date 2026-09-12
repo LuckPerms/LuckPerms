@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.platform.Platform} specific information and utilities.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.platform;

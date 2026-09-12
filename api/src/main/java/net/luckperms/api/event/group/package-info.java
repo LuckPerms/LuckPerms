@@ -26,4 +26,5 @@
 /**
  * Events relating to {@link net.luckperms.api.model.group.Group}s.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.group;

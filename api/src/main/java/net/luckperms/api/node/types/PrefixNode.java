@@ -28,7 +28,6 @@ package net.luckperms.api.node.types;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A sub-type of {@link Node} used to store prefix assignments.
@@ -36,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface PrefixNode extends ChatMetaNode<PrefixNode, PrefixNode.Builder> {
 
     @Override
-    default @NonNull NodeType<PrefixNode> getType() {
+    default NodeType<PrefixNode> getType() {
         return NodeType.PREFIX;
     }
 
@@ -45,7 +44,7 @@ public interface PrefixNode extends ChatMetaNode<PrefixNode, PrefixNode.Builder>
      *
      * @return the builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forPrefix();
     }
 
@@ -56,7 +55,7 @@ public interface PrefixNode extends ChatMetaNode<PrefixNode, PrefixNode.Builder>
      * @param priority the priority to set
      * @return the builder
      */
-    static @NonNull Builder builder(@NonNull String prefix, int priority) {
+    static Builder builder(String prefix, int priority) {
         return builder().prefix(prefix).priority(priority);
     }
 
@@ -71,7 +70,7 @@ public interface PrefixNode extends ChatMetaNode<PrefixNode, PrefixNode.Builder>
          * @param prefix the prefix
          * @return the builder
          */
-        @NonNull Builder prefix(@NonNull String prefix);
+        Builder prefix(String prefix);
 
     }
 

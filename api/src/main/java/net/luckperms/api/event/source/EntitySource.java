@@ -26,7 +26,6 @@
 package net.luckperms.api.event.source;
 
 import net.luckperms.api.platform.PlatformEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an {@link PlatformEntity} which was the {@link Source} of something.
@@ -38,6 +37,6 @@ public interface EntitySource extends Source {
      *
      * @return the entity
      */
-    @NonNull PlatformEntity getEntity();
+    PlatformEntity getEntity();
 
 }

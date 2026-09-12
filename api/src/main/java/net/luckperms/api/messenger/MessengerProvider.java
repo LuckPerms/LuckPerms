@@ -26,7 +26,6 @@
 package net.luckperms.api.messenger;
 
 import net.luckperms.api.LuckPerms;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.OverrideOnly;
 
 /**
@@ -45,7 +44,7 @@ public interface MessengerProvider {
      *
      * @return the provider name
      */
-    @NonNull String getName();
+    String getName();
 
     /**
      * Creates and returns a new {@link Messenger} instance, which passes
@@ -58,6 +57,6 @@ public interface MessengerProvider {
      *                                incoming messages to
      * @return a new messenger agent instance
      */
-    @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer);
+    Messenger obtain(IncomingMessageConsumer incomingMessageConsumer);
 
 }

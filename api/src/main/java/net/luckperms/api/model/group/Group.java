@@ -27,8 +27,7 @@ package net.luckperms.api.model.group;
 
 import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.OptionalInt;
 
@@ -42,7 +41,7 @@ public interface Group extends PermissionHolder {
      *
      * @return the name of the group
      */
-    @NonNull String getName();
+    String getName();
 
     /**
      * Gets the groups "display name", if it has one that differs from it's actual name.
@@ -65,13 +64,13 @@ public interface Group extends PermissionHolder {
      * @param queryOptions the query options to lookup in
      * @return the display name
      */
-    @Nullable String getDisplayName(@NonNull QueryOptions queryOptions);
+    @Nullable String getDisplayName(QueryOptions queryOptions);
 
     /**
      * Gets the weight of this group, if present.
      *
      * @return the group weight
      */
-    @NonNull OptionalInt getWeight();
+    OptionalInt getWeight();
 
 }

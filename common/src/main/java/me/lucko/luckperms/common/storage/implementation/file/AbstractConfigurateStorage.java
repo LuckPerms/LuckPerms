@@ -61,7 +61,7 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.MetaNode;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.Types;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;

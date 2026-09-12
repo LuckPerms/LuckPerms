@@ -37,7 +37,7 @@ import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collections;
 import java.util.Map;

@@ -33,7 +33,7 @@ import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
 import me.lucko.luckperms.sponge.service.model.LPSubjectUser;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.context.Context;

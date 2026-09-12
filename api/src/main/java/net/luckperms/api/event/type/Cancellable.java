@@ -26,7 +26,6 @@
 package net.luckperms.api.event.type;
 
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -41,7 +40,7 @@ public interface Cancellable {
      * @return the cancellation
      */
     @Param(-1)
-    @NonNull AtomicBoolean cancellationState();
+    AtomicBoolean cancellationState();
 
     /**
      * Returns true if the event is currently cancelled.

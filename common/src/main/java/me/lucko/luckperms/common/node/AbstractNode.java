@@ -35,8 +35,8 @@ import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.ScopedNode;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
 import net.luckperms.api.node.types.PermissionNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;

@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.query.QueryOptions} functionality.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.query;

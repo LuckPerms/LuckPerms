@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A sub-type of {@link Node} used to store meta assignments.
@@ -38,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface MetaNode extends ScopedNode<MetaNode, MetaNode.Builder> {
 
     @Override
-    default @NonNull NodeType<MetaNode> getType() {
+    default NodeType<MetaNode> getType() {
         return NodeType.META;
     }
 
@@ -47,21 +46,21 @@ public interface MetaNode extends ScopedNode<MetaNode, MetaNode.Builder> {
      *
      * @return the meta key
      */
-    @NonNull String getMetaKey();
+    String getMetaKey();
 
     /**
      * Gets the meta value.
      *
      * @return the meta value
      */
-    @NonNull String getMetaValue();
+    String getMetaValue();
 
     /**
      * Creates a {@link MetaNode} builder.
      *
      * @return the builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forMeta();
     }
 
@@ -73,7 +72,7 @@ public interface MetaNode extends ScopedNode<MetaNode, MetaNode.Builder> {
      * @return the builder
      * @throws IllegalArgumentException if {@code key} is empty
      */
-    static @NonNull Builder builder(@NonNull String key, @NonNull String value) {
+    static Builder builder(String key, String value) {
         return builder().key(key).value(value);
     }
 
@@ -89,7 +88,7 @@ public interface MetaNode extends ScopedNode<MetaNode, MetaNode.Builder> {
          * @return the builder
          * @throws IllegalArgumentException if {@code key} is empty
          */
-        @NonNull Builder key(@NonNull String key);
+        Builder key(String key);
 
         /**
          * Sets the meta value.
@@ -97,7 +96,7 @@ public interface MetaNode extends ScopedNode<MetaNode, MetaNode.Builder> {
          * @param value the meta value
          * @return the builder
          */
-        @NonNull Builder value(@NonNull String value);
+        Builder value(String value);
 
     }
 

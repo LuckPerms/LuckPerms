@@ -25,7 +25,6 @@
 
 package net.luckperms.api.context;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
@@ -43,7 +42,7 @@ public interface ContextSetFactory {
      * @return a immutable context set builder
      * @see ImmutableContextSet#builder()
      */
-    ImmutableContextSet.@NonNull Builder immutableBuilder();
+    ImmutableContextSet.Builder immutableBuilder();
 
     /**
      * Prefer using {@link ImmutableContextSet#of(String, String)}.
@@ -53,7 +52,7 @@ public interface ContextSetFactory {
      * @return an immutable context set
      * @see ImmutableContextSet#of(String, String)
      */
-    @NonNull ImmutableContextSet immutableOf(@NonNull String key, @NonNull String value);
+    ImmutableContextSet immutableOf(String key, String value);
 
     /**
      * Prefer using {@link ImmutableContextSet#empty()}.
@@ -61,7 +60,7 @@ public interface ContextSetFactory {
      * @return an empty immutable context set
      * @see ImmutableContextSet#empty()
      */
-    @NonNull ImmutableContextSet immutableEmpty();
+    ImmutableContextSet immutableEmpty();
 
     /**
      * Prefer using {@link MutableContextSet#create()}.
@@ -69,6 +68,6 @@ public interface ContextSetFactory {
      * @return a new mutable context set
      * @see MutableContextSet#create()
      */
-    @NonNull MutableContextSet mutable();
+    MutableContextSet mutable();
 
 }

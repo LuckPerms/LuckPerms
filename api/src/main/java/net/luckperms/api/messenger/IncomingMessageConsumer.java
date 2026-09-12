@@ -27,7 +27,6 @@ package net.luckperms.api.messenger;
 
 import net.luckperms.api.messenger.message.Message;
 import net.luckperms.api.messenger.message.OutgoingMessage;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 /**
@@ -51,7 +50,7 @@ public interface IncomingMessageConsumer {
      * @param message the message
      * @return true if the message was accepted by the plugin
      */
-    boolean consumeIncomingMessage(@NonNull Message message);
+    boolean consumeIncomingMessage(Message message);
 
     /**
      * Consumes a message in an encoded string format.
@@ -72,6 +71,6 @@ public interface IncomingMessageConsumer {
      * @param encodedString the encoded string
      * @return true if the message was accepted by the plugin
      */
-    boolean consumeIncomingMessageAsString(@NonNull String encodedString);
+    boolean consumeIncomingMessageAsString(String encodedString);
 
 }

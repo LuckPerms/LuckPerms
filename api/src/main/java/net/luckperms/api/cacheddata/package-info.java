@@ -27,4 +27,5 @@
  * Caches permission checks and meta lookups for {@link net.luckperms.api.model.user.User}s and
  * {@link net.luckperms.api.model.group.Group}s.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.cacheddata;

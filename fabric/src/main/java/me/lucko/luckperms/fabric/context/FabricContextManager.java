@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.luckperms.api.query.QueryOptions;
 import net.minecraft.server.level.ServerPlayer;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;

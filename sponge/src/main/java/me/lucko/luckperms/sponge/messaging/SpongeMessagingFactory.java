@@ -32,7 +32,7 @@ import me.lucko.luckperms.sponge.LPSpongePlugin;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public class SpongeMessagingFactory extends MessagingFactory<LPSpongePlugin> {
     public SpongeMessagingFactory(LPSpongePlugin plugin) {

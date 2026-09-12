@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.messenger.Messenger} message abstract types.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.messenger.message;

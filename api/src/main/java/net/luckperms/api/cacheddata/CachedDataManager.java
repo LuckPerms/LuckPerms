@@ -30,7 +30,6 @@ import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -48,14 +47,14 @@ public interface CachedDataManager {
      *
      * @return the permission data manager
      */
-    @NonNull Container<CachedPermissionData> permissionData();
+    Container<CachedPermissionData> permissionData();
 
     /**
      * Gets the manager for {@link CachedMetaData}.
      *
      * @return the meta data manager
      */
-    @NonNull Container<CachedMetaData> metaData();
+    Container<CachedMetaData> metaData();
 
     /**
      * Gets PermissionData from the cache, using the given query options.
@@ -63,7 +62,7 @@ public interface CachedDataManager {
      * @param queryOptions the query options
      * @return a permission data instance
      */
-    @NonNull CachedPermissionData getPermissionData(@NonNull QueryOptions queryOptions);
+    CachedPermissionData getPermissionData(QueryOptions queryOptions);
 
     /**
      * Gets MetaData from the cache, using the given query options.
@@ -71,7 +70,7 @@ public interface CachedDataManager {
      * @param queryOptions the query options
      * @return a meta data instance
      */
-    @NonNull CachedMetaData getMetaData(@NonNull QueryOptions queryOptions);
+    CachedMetaData getMetaData(QueryOptions queryOptions);
 
     /**
      * Gets PermissionData from the cache, using the most appropriate query options
@@ -88,7 +87,7 @@ public interface CachedDataManager {
      * @return a permission data instance
      * @since 5.1
      */
-    @NonNull CachedPermissionData getPermissionData();
+    CachedPermissionData getPermissionData();
 
     /**
      * Gets MetaData from the cache, using the most appropriate query options
@@ -106,7 +105,7 @@ public interface CachedDataManager {
      * @since 5.1
      * @see PermissionHolder#getQueryOptions()
      */
-    @NonNull CachedMetaData getMetaData();
+    CachedMetaData getMetaData();
 
     /**
      * Invalidates all cached {@link CachedPermissionData} and {@link CachedMetaData}
@@ -136,7 +135,7 @@ public interface CachedDataManager {
          * @return a data instance
          * @throws NullPointerException if contexts is null
          */
-        @NonNull T get(@NonNull QueryOptions queryOptions);
+        T get(QueryOptions queryOptions);
 
         /**
          * Calculates {@link T data}, bypassing the cache.
@@ -153,7 +152,7 @@ public interface CachedDataManager {
          * @return a data instance
          * @throws NullPointerException if contexts is null
          */
-        @NonNull T calculate(@NonNull QueryOptions queryOptions);
+        T calculate(QueryOptions queryOptions);
 
         /**
          * (Re)calculates data for a given context.
@@ -171,7 +170,7 @@ public interface CachedDataManager {
          * @param queryOptions the query options
          * @throws NullPointerException if contexts is null
          */
-        void recalculate(@NonNull QueryOptions queryOptions);
+        void recalculate(QueryOptions queryOptions);
 
         /**
          * (Re)loads permission data for a given context.
@@ -197,7 +196,7 @@ public interface CachedDataManager {
          * @return a future
          * @throws NullPointerException if contexts is null
          */
-        @NonNull CompletableFuture<? extends T> reload(@NonNull QueryOptions queryOptions);
+        CompletableFuture<? extends T> reload(QueryOptions queryOptions);
 
         /**
          * Recalculates data for all known contexts.
@@ -229,14 +228,14 @@ public interface CachedDataManager {
          *
          * @return a future
          */
-        @NonNull CompletableFuture<Void> reload();
+        CompletableFuture<Void> reload();
 
         /**
          * Invalidates any cached data instances mapped to the given context.
          *
          * @param queryOptions the queryOptions to invalidate for
          */
-        void invalidate(@NonNull QueryOptions queryOptions);
+        void invalidate(QueryOptions queryOptions);
 
         /**
          * Invalidates all cached data instances.

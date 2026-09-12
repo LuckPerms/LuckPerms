@@ -25,7 +25,6 @@
 
 package net.luckperms.api.context;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Iterator;
@@ -91,7 +90,7 @@ public interface ContextSet extends Iterable<Context> {
      *
      * @return an immutable representation of this set
      */
-    @NonNull ImmutableContextSet immutableCopy();
+    ImmutableContextSet immutableCopy();
 
     /**
      * Creates a mutable copy of this {@link ContextSet}.
@@ -101,7 +100,7 @@ public interface ContextSet extends Iterable<Context> {
      *
      * @return a mutable ContextSet
      */
-    @NonNull MutableContextSet mutableCopy();
+    MutableContextSet mutableCopy();
 
     /**
      * Returns a {@link Set} of {@link Context}s representing the current
@@ -112,7 +111,7 @@ public interface ContextSet extends Iterable<Context> {
      *
      * @return an immutable set
      */
-    @NonNull @Unmodifiable Set<Context> toSet();
+    @Unmodifiable Set<Context> toSet();
 
     /**
      * Returns a {@link Map} representing the current state of this
@@ -123,7 +122,7 @@ public interface ContextSet extends Iterable<Context> {
      *
      * @return a map
      */
-    @NonNull @Unmodifiable Map<String, Set<String>> toMap();
+    @Unmodifiable Map<String, Set<String>> toMap();
 
     /**
      * Returns a {@link Map} <b>loosely</b> representing the current state of
@@ -139,7 +138,7 @@ public interface ContextSet extends Iterable<Context> {
      * @deprecated Deprecated because the returned map may not contain all data in the ContextSet
      */
     @Deprecated
-    @NonNull @Unmodifiable Map<String, String> toFlattenedMap();
+    @Unmodifiable Map<String, String> toFlattenedMap();
 
     /**
      * Returns an {@link Iterator} over each of the context pairs in this set.
@@ -152,7 +151,7 @@ public interface ContextSet extends Iterable<Context> {
      * @return an iterator
      */
     @Override
-    @NonNull @Unmodifiable Iterator<Context> iterator();
+    @Unmodifiable Iterator<Context> iterator();
 
     /**
      * Returns if the {@link ContextSet} contains at least one value for the
@@ -162,7 +161,7 @@ public interface ContextSet extends Iterable<Context> {
      * @return true if the set contains a value for the key
      * @throws NullPointerException if the key is null
      */
-    boolean containsKey(@NonNull String key);
+    boolean containsKey(String key);
 
     /**
      * Returns a {@link Set} of the values mapped to the given key.
@@ -174,7 +173,7 @@ public interface ContextSet extends Iterable<Context> {
      * @return a set of values
      * @throws NullPointerException if the key is null
      */
-    @NonNull @Unmodifiable Set<String> getValues(@NonNull String key);
+    @Unmodifiable Set<String> getValues(String key);
 
     /**
      * Returns any value from this {@link ContextSet} matching the key, if present.
@@ -185,7 +184,7 @@ public interface ContextSet extends Iterable<Context> {
      * @param key the key to find values for
      * @return an optional containing any match
      */
-    default @NonNull Optional<String> getAnyValue(@NonNull String key) {
+    default Optional<String> getAnyValue(String key) {
         return getValues(key).stream().findAny();
     }
 
@@ -197,7 +196,7 @@ public interface ContextSet extends Iterable<Context> {
      * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
      */
-    boolean contains(@NonNull String key, @NonNull String value);
+    boolean contains(String key, String value);
 
     /**
      * Returns if the {@link ContextSet} contains a given context pairing.
@@ -206,7 +205,7 @@ public interface ContextSet extends Iterable<Context> {
      * @return true if the set contains the context pair
      * @throws NullPointerException if the key or value is null
      */
-    default boolean contains(@NonNull Context entry) {
+    default boolean contains(Context entry) {
         Objects.requireNonNull(entry, "entry");
         return contains(entry.getKey(), entry.getValue());
     }
@@ -219,7 +218,7 @@ public interface ContextSet extends Iterable<Context> {
      * @return true if the set contains any of the pairs
      * @since 5.2
      */
-    default boolean containsAny(@NonNull String key, @NonNull Iterable<String> values) {
+    default boolean containsAny(String key, Iterable<String> values) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(values, "values");
 
@@ -239,7 +238,7 @@ public interface ContextSet extends Iterable<Context> {
      * @param other the other set
      * @return true if this context set is satisfied by the other
      */
-    default boolean isSatisfiedBy(@NonNull ContextSet other) {
+    default boolean isSatisfiedBy(ContextSet other) {
         return isSatisfiedBy(other, ContextSatisfyMode.AT_LEAST_ONE_VALUE_PER_KEY);
     }
 
@@ -252,7 +251,7 @@ public interface ContextSet extends Iterable<Context> {
      * @return true if this context set is satisfied by the other
      * @since 5.2
      */
-    boolean isSatisfiedBy(@NonNull ContextSet other, @NonNull ContextSatisfyMode mode);
+    boolean isSatisfiedBy(ContextSet other, ContextSatisfyMode mode);
 
     /**
      * Returns if the {@link ContextSet} is empty.

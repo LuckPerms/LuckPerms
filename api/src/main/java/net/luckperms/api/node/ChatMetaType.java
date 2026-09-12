@@ -28,7 +28,6 @@ package net.luckperms.api.node;
 import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Locale;
 
@@ -42,12 +41,12 @@ public enum ChatMetaType {
      */
     PREFIX(NodeType.PREFIX) {
         @Override
-        public ChatMetaNode.@NonNull Builder<?, ?> builder() {
+        public ChatMetaNode.Builder<?, ?> builder() {
             return PrefixNode.builder();
         }
 
         @Override
-        public ChatMetaNode.@NonNull Builder<?, ?> builder(@NonNull String prefix, int priority) {
+        public ChatMetaNode.Builder<?, ?> builder(String prefix, int priority) {
             return PrefixNode.builder(prefix, priority);
         }
     },
@@ -57,12 +56,12 @@ public enum ChatMetaType {
      */
     SUFFIX(NodeType.SUFFIX) {
         @Override
-        public ChatMetaNode.@NonNull Builder<?, ?> builder() {
+        public ChatMetaNode.Builder<?, ?> builder() {
             return SuffixNode.builder();
         }
 
         @Override
-        public ChatMetaNode.@NonNull Builder<?, ?> builder(@NonNull String suffix, int priority) {
+        public ChatMetaNode.Builder<?, ?> builder(String suffix, int priority) {
             return SuffixNode.builder(suffix, priority);
         }
     };
@@ -80,7 +79,7 @@ public enum ChatMetaType {
      *
      * @return the node type
      */
-    public @NonNull NodeType<? extends ChatMetaNode<?, ?>> nodeType() {
+    public NodeType<? extends ChatMetaNode<?, ?>> nodeType() {
         return this.nodeType;
     }
 
@@ -89,7 +88,7 @@ public enum ChatMetaType {
      *
      * @return a builder
      */
-    public abstract ChatMetaNode.@NonNull Builder<?, ?> builder();
+    public abstract ChatMetaNode.Builder<?, ?> builder();
 
     /**
      * Creates a {@link ChatMetaNode.Builder} for the {@link ChatMetaType}.
@@ -98,7 +97,7 @@ public enum ChatMetaType {
      * @param priority the priority to set
      * @return a builder
      */
-    public abstract ChatMetaNode.@NonNull Builder<?, ?> builder(@NonNull String value, int priority);
+    public abstract ChatMetaNode.Builder<?, ?> builder(String value, int priority);
 
     @Override
     public String toString() {

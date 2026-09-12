@@ -26,7 +26,6 @@
 package net.luckperms.api.messenger.message.type;
 
 import net.luckperms.api.messenger.message.Message;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;
 
@@ -42,6 +41,6 @@ public interface UserUpdateMessage extends Message {
      *
      * @return the user
      */
-    @NonNull UUID getUserUniqueId();
+    UUID getUserUniqueId();
 
 }

@@ -27,7 +27,6 @@ package net.luckperms.api.messenger;
 
 import net.luckperms.api.messenger.message.Message;
 import net.luckperms.api.messenger.message.OutgoingMessage;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.OverrideOnly;
 
 /**
@@ -51,7 +50,7 @@ public interface Messenger extends AutoCloseable {
      *
      * @param outgoingMessage the outgoing message
      */
-    void sendOutgoingMessage(@NonNull OutgoingMessage outgoingMessage);
+    void sendOutgoingMessage(OutgoingMessage outgoingMessage);
 
     /**
      * Performs the necessary action to gracefully shutdown the messenger.

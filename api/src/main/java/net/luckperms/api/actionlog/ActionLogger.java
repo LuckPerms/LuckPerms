@@ -27,7 +27,6 @@ package net.luckperms.api.actionlog;
 
 import net.luckperms.api.actionlog.filter.ActionFilter;
 import net.luckperms.api.util.Page;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +41,7 @@ public interface ActionLogger {
      *
      * @return a new builder
      */
-    Action.@NonNull Builder actionBuilder();
+    Action.Builder actionBuilder();
 
     /**
      * Gets a {@link ActionLog} instance from the plugin storage.
@@ -52,7 +51,7 @@ public interface ActionLogger {
      * are more efficient (they don't load the full action log into memory) and allow for pagination.
      */
     @Deprecated
-    @NonNull CompletableFuture<ActionLog> getLog();
+    CompletableFuture<ActionLog> getLog();
 
     /**
      * Gets all actions from the action log matching the given {@code filter}.
@@ -66,7 +65,7 @@ public interface ActionLogger {
      * @return the actions
      * @since 5.5
      */
-    @NonNull CompletableFuture<List<Action>> queryActions(@NonNull ActionFilter filter);
+    CompletableFuture<List<Action>> queryActions(ActionFilter filter);
 
     /**
      * Gets a page of actions from the action log matching the given {@code filter}.
@@ -79,7 +78,7 @@ public interface ActionLogger {
      * @return the page of actions
      * @since 5.5
      */
-    @NonNull CompletableFuture<Page<Action>> queryActions(@NonNull ActionFilter filter, int pageSize, int pageNumber);
+    CompletableFuture<Page<Action>> queryActions(ActionFilter filter, int pageSize, int pageNumber);
 
     /**
      * Submits a logged action to LuckPerms.
@@ -98,7 +97,7 @@ public interface ActionLogger {
      * @param entry the entry to submit
      * @return a future which will complete when the action is submitted
      */
-    @NonNull CompletableFuture<Void> submit(@NonNull Action entry);
+    CompletableFuture<Void> submit(Action entry);
 
     /**
      * Submits a logged action to LuckPerms and persists it in the storage backend.
@@ -108,7 +107,7 @@ public interface ActionLogger {
      * @param entry the entry to submit
      * @return a future which will complete when the action is submitted
      */
-    @NonNull CompletableFuture<Void> submitToStorage(@NonNull Action entry);
+    CompletableFuture<Void> submitToStorage(Action entry);
 
     /**
      * Submits a logged action to LuckPerms and broadcasts it to administrators.
@@ -121,6 +120,6 @@ public interface ActionLogger {
      * @param entry the entry to submit
      * @return a future which will complete when the action is broadcasted
      */
-    @NonNull CompletableFuture<Void> broadcastAction(@NonNull Action entry);
+    CompletableFuture<Void> broadcastAction(Action entry);
 
 }

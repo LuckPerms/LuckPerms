@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -41,7 +40,7 @@ import java.util.regex.Pattern;
 public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, RegexPermissionNode.Builder> {
 
     @Override
-    default @NonNull NodeType<RegexPermissionNode> getType() {
+    default NodeType<RegexPermissionNode> getType() {
         return NodeType.REGEX_PERMISSION;
     }
 
@@ -50,7 +49,7 @@ public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, Reg
      *
      * @return the pattern string
      */
-    @NonNull String getPatternString();
+    String getPatternString();
 
     /**
      * Gets the pattern for the regex node.
@@ -59,14 +58,14 @@ public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, Reg
      *
      * @return the pattern
      */
-    @NonNull Optional<Pattern> getPattern();
+    Optional<Pattern> getPattern();
 
     /**
      * Creates a {@link RegexPermissionNode} builder.
      *
      * @return the builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forRegexPermission();
     }
 
@@ -77,7 +76,7 @@ public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, Reg
      * @return the builder
      * @throws IllegalArgumentException if {@code pattern} is empty
      */
-    static @NonNull Builder builder(@NonNull String pattern) {
+    static Builder builder(String pattern) {
         return builder().pattern(pattern);
     }
 
@@ -87,7 +86,7 @@ public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, Reg
      * @param pattern the pattern to set
      * @return the builder
      */
-    static @NonNull Builder builder(@NonNull Pattern pattern) {
+    static Builder builder(Pattern pattern) {
         return builder().pattern(pattern);
     }
 
@@ -103,7 +102,7 @@ public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, Reg
          * @return the builder
          * @throws IllegalArgumentException if {@code pattern} is empty
          */
-        @NonNull Builder pattern(@NonNull String pattern);
+        Builder pattern(String pattern);
 
         /**
          * Sets the pattern.
@@ -111,7 +110,7 @@ public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, Reg
          * @param pattern the pattern
          * @return the builder
          */
-        @NonNull Builder pattern(@NonNull Pattern pattern);
+        Builder pattern(Pattern pattern);
 
     }
 

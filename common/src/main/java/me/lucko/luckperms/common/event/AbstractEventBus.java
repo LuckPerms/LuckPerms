@@ -32,7 +32,7 @@ import net.kyori.event.SimpleEventBus;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.EventSubscription;
 import net.luckperms.api.event.LuckPermsEvent;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 import java.util.Set;

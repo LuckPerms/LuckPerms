@@ -26,7 +26,6 @@
 package net.luckperms.api.messenger.message;
 
 import net.luckperms.api.messenger.IncomingMessageConsumer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an outgoing {@link Message}.
@@ -53,6 +52,6 @@ public interface OutgoingMessage extends Message {
      *
      * @return an encoded string form of the message
      */
-    @NonNull String asEncodedString();
+    String asEncodedString();
 
 }

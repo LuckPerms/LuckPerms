@@ -26,7 +26,6 @@
 package net.luckperms.api.context;
 
 import net.luckperms.api.LuckPermsProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 
@@ -40,7 +39,7 @@ public interface MutableContextSet extends ContextSet {
      *
      * @return a new MutableContextSet
      */
-    static @NonNull MutableContextSet create() {
+    static MutableContextSet create() {
         return LuckPermsProvider.get().getContextManager().getContextSetFactory().mutable();
     }
 
@@ -52,7 +51,7 @@ public interface MutableContextSet extends ContextSet {
      * @return a new MutableContextSet containing one context pair
      * @throws NullPointerException if key or value is null
      */
-    static @NonNull MutableContextSet of(@NonNull String key, @NonNull String value) {
+    static MutableContextSet of(String key, String value) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(value, "value");
         MutableContextSet set = create();
@@ -67,7 +66,7 @@ public interface MutableContextSet extends ContextSet {
      * @param value the value to add
      * @throws NullPointerException if the key or value is null
      */
-    void add(@NonNull String key, @NonNull String value);
+    void add(String key, String value);
 
     /**
      * Adds a context to this set.
@@ -75,7 +74,7 @@ public interface MutableContextSet extends ContextSet {
      * @param entry the entry to add
      * @throws NullPointerException if the entry is null
      */
-    default void add(@NonNull Context entry) {
+    default void add(Context entry) {
         Objects.requireNonNull(entry, "entry");
         add(entry.getKey(), entry.getValue());
     }
@@ -86,7 +85,7 @@ public interface MutableContextSet extends ContextSet {
      * @param iterable an iterable of key value context pairs
      * @throws NullPointerException if iterable is null
      */
-    default void addAll(@NonNull Iterable<Context> iterable) {
+    default void addAll(Iterable<Context> iterable) {
         for (Context e : Objects.requireNonNull(iterable, "iterable")) {
             add(e);
         }
@@ -98,7 +97,7 @@ public interface MutableContextSet extends ContextSet {
      * @param contextSet the set to add from
      * @throws NullPointerException if the contextSet is null
      */
-    void addAll(@NonNull ContextSet contextSet);
+    void addAll(ContextSet contextSet);
 
     /**
      * Removes a context from this set.
@@ -107,7 +106,7 @@ public interface MutableContextSet extends ContextSet {
      * @param value the value to remove
      * @throws NullPointerException if the key or value is null
      */
-    void remove(@NonNull String key, @NonNull String value);
+    void remove(String key, String value);
 
     /**
      * Removes all contexts from this set with the given key.
@@ -115,7 +114,7 @@ public interface MutableContextSet extends ContextSet {
      * @param key the key to remove
      * @throws NullPointerException if the key is null
      */
-    void removeAll(@NonNull String key);
+    void removeAll(String key);
 
     /**
      * Removes all contexts from the set.

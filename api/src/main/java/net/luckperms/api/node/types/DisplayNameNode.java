@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A sub-type of {@link Node} used to mark the display name of the node's holder.
@@ -38,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface DisplayNameNode extends ScopedNode<DisplayNameNode, DisplayNameNode.Builder> {
 
     @Override
-    default @NonNull NodeType<DisplayNameNode> getType() {
+    default NodeType<DisplayNameNode> getType() {
         return NodeType.DISPLAY_NAME;
     }
 
@@ -47,14 +46,14 @@ public interface DisplayNameNode extends ScopedNode<DisplayNameNode, DisplayName
      *
      * @return the display name
      */
-    @NonNull String getDisplayName();
+    String getDisplayName();
 
     /**
      * Creates a {@link DisplayNameNode} builder.
      *
      * @return the builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forDisplayName();
     }
 
@@ -65,7 +64,7 @@ public interface DisplayNameNode extends ScopedNode<DisplayNameNode, DisplayName
      * @return the builder
      * @throws IllegalArgumentException if {@code displayName} is empty
      */
-    static @NonNull Builder builder(@NonNull String displayName) {
+    static Builder builder(String displayName) {
         return builder().displayName(displayName);
     }
 
@@ -81,7 +80,7 @@ public interface DisplayNameNode extends ScopedNode<DisplayNameNode, DisplayName
          * @return the builder
          * @throws IllegalArgumentException if {@code displayName} is empty
          */
-        @NonNull Builder displayName(@NonNull String displayName);
+        Builder displayName(String displayName);
 
     }
 

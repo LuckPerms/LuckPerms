@@ -35,7 +35,6 @@ import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.util.Tristate;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
@@ -65,7 +64,7 @@ public interface NodeMap {
      *
      * @return a map of nodes
      */
-    @NonNull @Unmodifiable Map<ImmutableContextSet, Collection<Node>> toMap();
+    @Unmodifiable Map<ImmutableContextSet, Collection<Node>> toMap();
 
     /**
      * Gets a flattened view of {@link Node}s contained within this instance.
@@ -75,7 +74,7 @@ public interface NodeMap {
      *
      * @return a flattened collection of nodes
      */
-    @NonNull @Unmodifiable Collection<Node> toCollection();
+    @Unmodifiable Collection<Node> toCollection();
 
     /**
      * Gets if this instance contains a given {@link Node}.
@@ -89,7 +88,7 @@ public interface NodeMap {
      * @return a Tristate relating to the assigned state of the node
      * @throws NullPointerException if the node is null
      */
-    @NonNull Tristate contains(@NonNull Node node, @NonNull NodeEqualityPredicate equalityPredicate);
+    Tristate contains(Node node, NodeEqualityPredicate equalityPredicate);
 
     /**
      * Adds a node.
@@ -97,7 +96,7 @@ public interface NodeMap {
      * @param node the node to be add
      * @return the result of the operation
      */
-    @NonNull DataMutateResult add(@NonNull Node node);
+    DataMutateResult add(Node node);
 
     /**
      * Adds a node.
@@ -106,7 +105,7 @@ public interface NodeMap {
      * @param temporaryNodeMergeStrategy the strategy used to merge temporary permission entries
      * @return the result of the operation
      */
-    DataMutateResult.@NonNull WithMergedNode add(@NonNull Node node, @NonNull TemporaryNodeMergeStrategy temporaryNodeMergeStrategy);
+    DataMutateResult.WithMergedNode add(Node node, TemporaryNodeMergeStrategy temporaryNodeMergeStrategy);
 
     /**
      * Removes a node.
@@ -114,7 +113,7 @@ public interface NodeMap {
      * @param node the node to remove
      * @return the result of the operation
      */
-    @NonNull DataMutateResult remove(@NonNull Node node);
+    DataMutateResult remove(Node node);
 
     /**
      * Clears all nodes.
@@ -126,14 +125,14 @@ public interface NodeMap {
      *
      * @param test the predicate to test for nodes which should be removed
      */
-    void clear(@NonNull Predicate<? super Node> test);
+    void clear(Predicate<? super Node> test);
 
     /**
      * Clears all nodes in a specific context.
      *
      * @param contextSet the contexts to filter by
      */
-    void clear(@NonNull ContextSet contextSet);
+    void clear(ContextSet contextSet);
 
     /**
      * Clears all nodes in a specific context which pass the predicate.
@@ -141,6 +140,6 @@ public interface NodeMap {
      * @param contextSet the contexts to filter by
      * @param test the predicate to test for nodes which should be removed
      */
-    void clear(@NonNull ContextSet contextSet, @NonNull Predicate<? super Node> test);
+    void clear(ContextSet contextSet, Predicate<? super Node> test);
 
 }

@@ -52,8 +52,8 @@ import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;

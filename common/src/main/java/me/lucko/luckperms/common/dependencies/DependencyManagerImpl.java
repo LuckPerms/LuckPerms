@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.util.MoreFiles;
 import net.luckperms.api.platform.Platform;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -73,7 +72,7 @@ public class DependencyManagerImpl implements DependencyManager {
     /** A map of isolated classloaders which have been created. */
     private final Map<ImmutableSet<Dependency>, IsolatedClassLoader> loaders = new HashMap<>();
     /** Cached relocation handler instance. */
-    private @MonotonicNonNull RelocationHandler relocationHandler = null;
+    private RelocationHandler relocationHandler = null;
 
     public DependencyManagerImpl(LuckPermsPlugin plugin, Collection<DependencyRepository> repositories) {
         this.registry = new DependencyRegistry(plugin.getBootstrap().getType());

@@ -26,4 +26,5 @@
 /**
  * Events relating to the {@link net.luckperms.api.messaging.MessagingService}.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.messaging;

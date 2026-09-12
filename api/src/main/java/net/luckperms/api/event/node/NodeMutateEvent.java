@@ -32,7 +32,6 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Set;
@@ -48,7 +47,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      * @return the event target
      */
     @Param(0)
-    @NonNull PermissionHolder getTarget();
+    PermissionHolder getTarget();
 
     /**
      * Gets the data type that was mutated.
@@ -56,14 +55,14 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      * @return the data type
      */
     @Param(1)
-    @NonNull DataType getDataType();
+    DataType getDataType();
 
     /**
      * Gets an immutable copy of the holders data before the change
      *
      * @return the data before the change
      */
-    @NonNull @Unmodifiable Set<Node> getDataBefore();
+    @Unmodifiable Set<Node> getDataBefore();
 
     /**
      * Gets an immutable copy of the holders data after the change
@@ -71,7 +70,7 @@ public interface NodeMutateEvent extends LuckPermsEvent {
      * @return the data after the change
      */
     @Param(2)
-    @NonNull @Unmodifiable Set<Node> getDataAfter();
+    @Unmodifiable Set<Node> getDataAfter();
 
     /**
      * Gets whether the target of this event is a {@link User}

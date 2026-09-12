@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryOptions;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;

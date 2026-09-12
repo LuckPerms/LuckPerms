@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.actionlog.ActionLog} related functionality.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.actionlog;

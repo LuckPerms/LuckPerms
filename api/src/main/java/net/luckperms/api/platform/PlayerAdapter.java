@@ -33,7 +33,6 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;
 
@@ -68,7 +67,7 @@ public interface PlayerAdapter<T> {
      * @return the user
      * @see UserManager#getUser(UUID)
      */
-    @NonNull User getUser(@NonNull T player);
+    User getUser(T player);
 
     /**
      * Gets current {@link ImmutableContextSet active context} for the {@code player}.
@@ -77,7 +76,7 @@ public interface PlayerAdapter<T> {
      * @return the active context for the player
      * @see ContextManager#getContext(Object)
      */
-    @NonNull ImmutableContextSet getContext(@NonNull T player);
+    ImmutableContextSet getContext(T player);
 
     /**
      * Gets current {@link QueryOptions active query options} for the {@code player}.
@@ -86,7 +85,7 @@ public interface PlayerAdapter<T> {
      * @return the active query options for the player
      * @see ContextManager#getQueryOptions(Object)
      */
-    @NonNull QueryOptions getQueryOptions(@NonNull T player);
+    QueryOptions getQueryOptions(T player);
 
     /**
      * Gets the current {@link CachedPermissionData} for the {@code player},
@@ -96,7 +95,7 @@ public interface PlayerAdapter<T> {
      * @return the cached permission data for the player
      * @see CachedDataManager#getPermissionData()
      */
-    default @NonNull CachedPermissionData getPermissionData(@NonNull T player) {
+    default CachedPermissionData getPermissionData(T player) {
         return getUser(player).getCachedData().getPermissionData(getQueryOptions(player));
     }
 
@@ -108,7 +107,7 @@ public interface PlayerAdapter<T> {
      * @return the cached meta data for the player
      * @see CachedDataManager#getMetaData()
      */
-    default @NonNull CachedMetaData getMetaData(@NonNull T player) {
+    default CachedMetaData getMetaData(T player) {
         return getUser(player).getCachedData().getMetaData(getQueryOptions(player));
     }
 

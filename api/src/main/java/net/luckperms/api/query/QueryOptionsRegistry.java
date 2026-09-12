@@ -25,7 +25,6 @@
 
 package net.luckperms.api.query;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
@@ -45,7 +44,7 @@ public interface QueryOptionsRegistry {
      * @return the default contextual query options
      * @see QueryOptions#defaultContextualOptions()
      */
-    @NonNull QueryOptions defaultContextualOptions();
+    QueryOptions defaultContextualOptions();
 
     /**
      * Gets the default {@link QueryMode#NON_CONTEXTUAL non contextual}
@@ -56,6 +55,6 @@ public interface QueryOptionsRegistry {
      * @return the default non contextual query options
      * @see QueryOptions#nonContextual()
      */
-    @NonNull QueryOptions defaultNonContextualOptions();
+    QueryOptions defaultNonContextualOptions();
 
 }

@@ -25,7 +25,6 @@
 
 package net.luckperms.api.event;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Set;
@@ -50,7 +49,7 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an event handler instance representing this subscription
      */
-    <T extends LuckPermsEvent> @NonNull EventSubscription<T> subscribe(@NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
+    <T extends LuckPermsEvent> EventSubscription<T> subscribe(Class<T> eventClass, Consumer<? super T> handler);
 
     /**
      * Registers a new subscription to the given event.
@@ -70,7 +69,7 @@ public interface EventBus {
      * @param handler    the event handler
      * @return an event handler instance representing this subscription
      */
-    <T extends LuckPermsEvent> @NonNull EventSubscription<T> subscribe(Object plugin, @NonNull Class<T> eventClass, @NonNull Consumer<? super T> handler);
+    <T extends LuckPermsEvent> EventSubscription<T> subscribe(Object plugin, Class<T> eventClass, Consumer<? super T> handler);
 
     /**
      * Gets a set of all registered handlers for a given event.
@@ -79,6 +78,6 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an immutable set of event handlers
      */
-    <T extends LuckPermsEvent> @NonNull @Unmodifiable Set<EventSubscription<T>> getSubscriptions(@NonNull Class<T> eventClass);
+    <T extends LuckPermsEvent> @Unmodifiable Set<EventSubscription<T>> getSubscriptions(Class<T> eventClass);
 
 }

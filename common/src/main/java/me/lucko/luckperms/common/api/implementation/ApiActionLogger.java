@@ -37,7 +37,7 @@ import net.luckperms.api.actionlog.ActionLog;
 import net.luckperms.api.actionlog.ActionLogger;
 import net.luckperms.api.actionlog.filter.ActionFilter;
 import net.luckperms.api.util.Page;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Objects;

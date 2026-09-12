@@ -25,7 +25,6 @@
 
 package net.luckperms.api.node;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Predicate;
 
@@ -59,7 +58,7 @@ public interface NodeEqualityPredicate {
      * @param o2 the second node
      * @return true if equal
      */
-    boolean areEqual(@NonNull Node o1, @NonNull Node o2);
+    boolean areEqual(Node o1, Node o2);
 
     /**
      * Returns a {@link Predicate}, returning true if the tested node is equal

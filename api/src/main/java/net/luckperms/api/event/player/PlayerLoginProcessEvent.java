@@ -29,8 +29,7 @@ import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.util.Result;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -58,7 +57,7 @@ public interface PlayerLoginProcessEvent extends LuckPermsEvent, Result {
      * @return the uuid of the connection which was processed
      */
     @Param(0)
-    @NonNull UUID getUniqueId();
+    UUID getUniqueId();
 
     /**
      * Gets the username of the connection which was processed
@@ -66,7 +65,7 @@ public interface PlayerLoginProcessEvent extends LuckPermsEvent, Result {
      * @return the username of the connection which was processed
      */
     @Param(1)
-    @NonNull String getUsername();
+    String getUsername();
 
     /**
      * Gets if the login was processed successfully.

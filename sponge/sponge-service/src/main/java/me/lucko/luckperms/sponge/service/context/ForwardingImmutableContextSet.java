@@ -26,7 +26,7 @@
 package me.lucko.luckperms.sponge.service.context;
 
 import net.luckperms.api.context.ImmutableContextSet;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.api.service.context.Context;
 
 import java.util.Iterator;

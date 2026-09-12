@@ -29,7 +29,6 @@ import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.node.Node;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;
 
@@ -44,7 +43,7 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      * @return the name of the deleted group
      */
     @Param(0)
-    @NonNull String getGroupName();
+    String getGroupName();
 
     /**
      * Gets an immutable copy of the groups existing data
@@ -52,7 +51,7 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      * @return a copy of the groups existing data
      */
     @Param(1)
-    @NonNull Set<Node> getExistingData();
+    Set<Node> getExistingData();
 
     /**
      * Gets the cause of the deletion
@@ -60,6 +59,6 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      * @return the cause of the deletion
      */
     @Param(2)
-    @NonNull DeletionCause getCause();
+    DeletionCause getCause();
 
 }

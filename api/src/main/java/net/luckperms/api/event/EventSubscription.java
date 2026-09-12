@@ -25,7 +25,6 @@
 
 package net.luckperms.api.event;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Consumer;
 
@@ -41,7 +40,7 @@ public interface EventSubscription<T extends LuckPermsEvent> extends AutoCloseab
      *
      * @return the event class
      */
-    @NonNull Class<T> getEventClass();
+    Class<T> getEventClass();
 
     /**
      * Returns true if this handler is active
@@ -61,5 +60,5 @@ public interface EventSubscription<T extends LuckPermsEvent> extends AutoCloseab
      *
      * @return the event consumer
      */
-    @NonNull Consumer<? super T> getHandler();
+    Consumer<? super T> getHandler();
 }

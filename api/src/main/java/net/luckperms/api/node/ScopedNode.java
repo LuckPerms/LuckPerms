@@ -25,7 +25,6 @@
 
 package net.luckperms.api.node;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A {@link Node}, with its own type and the type of its associated builder
@@ -37,9 +36,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface ScopedNode<N extends ScopedNode<N, B>, B extends NodeBuilder<N, B>> extends Node {
 
     @Override
-    @NonNull NodeType<N> getType();
+    NodeType<N> getType();
 
     @Override
-    @NonNull B toBuilder();
+    B toBuilder();
 
 }

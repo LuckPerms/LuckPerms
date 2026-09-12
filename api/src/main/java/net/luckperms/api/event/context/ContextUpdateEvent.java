@@ -28,7 +28,6 @@ package net.luckperms.api.event.context;
 import net.luckperms.api.context.ContextManager;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 
@@ -58,7 +57,7 @@ public interface ContextUpdateEvent extends LuckPermsEvent {
      * @return the subject
      */
     @Param(0)
-    @NonNull Object getSubject();
+    Object getSubject();
 
     /**
      * Gets the subject whose contexts were updated, casted to a given type.
@@ -67,7 +66,7 @@ public interface ContextUpdateEvent extends LuckPermsEvent {
      * @param <T> the subject type
      * @return the casted subject
      */
-    default <T> @NonNull Optional<T> getSubject(@NonNull Class<T> subjectClass) {
+    default <T> Optional<T> getSubject(Class<T> subjectClass) {
         Object subject = getSubject();
         return subjectClass.isInstance(subject) ? Optional.of(subjectClass.cast(subject)) : Optional.empty();
     }

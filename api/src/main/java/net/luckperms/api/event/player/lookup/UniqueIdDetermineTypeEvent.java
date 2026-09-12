@@ -28,7 +28,6 @@ package net.luckperms.api.event.player.lookup;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.type.ResultEvent;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -77,14 +76,14 @@ public interface UniqueIdDetermineTypeEvent extends LuckPermsEvent, ResultEvent<
      * @return the unique id
      */
     @Param(0)
-    @NonNull UUID getUniqueId();
+    UUID getUniqueId();
 
     /**
      * Gets the current result unique id type.
      *
      * @return the type
      */
-    default @NonNull String getType() {
+    default String getType() {
         return result().get();
     }
 
@@ -93,7 +92,7 @@ public interface UniqueIdDetermineTypeEvent extends LuckPermsEvent, ResultEvent<
      *
      * @param type the type
      */
-    default void setType(@NonNull String type) {
+    default void setType(String type) {
         Objects.requireNonNull(type, "type");
         result().set(type);
     }

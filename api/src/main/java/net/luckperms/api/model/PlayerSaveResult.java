@@ -26,9 +26,8 @@
 package net.luckperms.api.model;
 
 import net.luckperms.api.model.user.UserManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Set;
@@ -47,7 +46,7 @@ public interface PlayerSaveResult {
      *
      * @return the status
      */
-    @NonNull @Unmodifiable Set<Outcome> getOutcomes();
+    @Unmodifiable Set<Outcome> getOutcomes();
 
     /**
      * Gets if the result includes a certain outcome.
@@ -55,7 +54,7 @@ public interface PlayerSaveResult {
      * @param outcome the outcome to check for
      * @return if the result includes the outcome
      */
-    default boolean includes(@NonNull Outcome outcome) {
+    default boolean includes(Outcome outcome) {
         Objects.requireNonNull(outcome, "outcome");
         return getOutcomes().contains(outcome);
     }

@@ -32,8 +32,8 @@ import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.OptionKey;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.HashMap;

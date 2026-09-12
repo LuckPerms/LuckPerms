@@ -28,8 +28,7 @@ package net.luckperms.api.event.player.lookup;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.type.ResultEvent;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -46,7 +45,7 @@ public interface UniqueIdLookupEvent extends LuckPermsEvent, ResultEvent<UUID> {
      * @return the username
      */
     @Param(0)
-    @NonNull String getUsername();
+    String getUsername();
 
     /**
      * Sets the result unique id.

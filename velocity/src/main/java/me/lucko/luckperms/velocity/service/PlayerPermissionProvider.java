@@ -35,7 +35,7 @@ import com.velocitypowered.api.proxy.Player;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.verbose.event.CheckOrigin;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public class PlayerPermissionProvider implements PermissionProvider, PermissionFunction {
     private final Player player;

@@ -30,9 +30,8 @@ import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -63,7 +62,7 @@ public interface CachedMetaData extends CachedData {
      * @return a result containing the value
      * @since 5.4
      */
-    @NonNull Result<String, MetaNode> queryMetaValue(@NonNull String key);
+    Result<String, MetaNode> queryMetaValue(String key);
 
     /**
      * Gets a value for the given meta key.
@@ -73,7 +72,7 @@ public interface CachedMetaData extends CachedData {
      * @param key the key
      * @return the value
      */
-    default @Nullable String getMetaValue(@NonNull String key) {
+    default @Nullable String getMetaValue(String key) {
         return queryMetaValue(key).result();
     }
 
@@ -97,7 +96,7 @@ public interface CachedMetaData extends CachedData {
      * @return the meta value
      * @since 5.3
      */
-    default <T> @NonNull Optional<T> getMetaValue(@NonNull String key, @NonNull Function<String, ? extends T> valueTransformer) {
+    default <T> Optional<T> getMetaValue(String key, Function<String, ? extends T> valueTransformer) {
         return Optional.ofNullable(getMetaValue(key)).map(value -> {
             try {
                 return valueTransformer.apply(value);
@@ -123,7 +122,7 @@ public interface CachedMetaData extends CachedData {
      * @return a result containing the prefix
      * @since 5.4
      */
-    @NonNull Result<String, PrefixNode> queryPrefix();
+    Result<String, PrefixNode> queryPrefix();
 
     /**
      * Gets the prefix.
@@ -158,7 +157,7 @@ public interface CachedMetaData extends CachedData {
      * @return a result containing the suffix
      * @since 5.4
      */
-    @NonNull Result<String, SuffixNode> querySuffix();
+    Result<String, SuffixNode> querySuffix();
 
     /**
      * Gets the suffix.
@@ -187,7 +186,7 @@ public interface CachedMetaData extends CachedData {
      * @return a result containing the weight
      * @since 5.5
      */
-    @NonNull Result<Integer, WeightNode> queryWeight();
+    Result<Integer, WeightNode> queryWeight();
 
     /**
      * Gets the weight.
@@ -208,7 +207,7 @@ public interface CachedMetaData extends CachedData {
      *
      * @return a map of meta
      */
-    @NonNull @Unmodifiable Map<String, List<String>> getMeta();
+    @Unmodifiable Map<String, List<String>> getMeta();
 
     /**
      * Gets a sorted map of all accumulated {@link PrefixNode prefixes}.
@@ -217,7 +216,7 @@ public interface CachedMetaData extends CachedData {
      *
      * @return a sorted map of prefixes
      */
-    @NonNull @Unmodifiable SortedMap<Integer, String> getPrefixes();
+    @Unmodifiable SortedMap<Integer, String> getPrefixes();
 
     /**
      * Gets a sorted map of all accumulated {@link SuffixNode suffixes}.
@@ -226,7 +225,7 @@ public interface CachedMetaData extends CachedData {
      *
      * @return a sorted map of suffixes
      */
-    @NonNull @Unmodifiable SortedMap<Integer, String> getSuffixes();
+    @Unmodifiable SortedMap<Integer, String> getSuffixes();
 
     /**
      * Gets the name of the holders primary group.
@@ -243,13 +242,13 @@ public interface CachedMetaData extends CachedData {
      *
      * @return the definition used for the prefix stack
      */
-    @NonNull MetaStackDefinition getPrefixStackDefinition();
+    MetaStackDefinition getPrefixStackDefinition();
 
     /**
      * Gets the definition used for the suffix stack.
      *
      * @return the definition used for the suffix stack
      */
-    @NonNull MetaStackDefinition getSuffixStackDefinition();
+    MetaStackDefinition getSuffixStackDefinition();
 
 }

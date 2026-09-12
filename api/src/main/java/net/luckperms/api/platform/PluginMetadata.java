@@ -25,7 +25,6 @@
 
 package net.luckperms.api.platform;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Provides information about the LuckPerms plugin.
@@ -37,13 +36,13 @@ public interface PluginMetadata {
      *
      * @return the version of the plugin running on the platform
      */
-    @NonNull String getVersion();
+    String getVersion();
 
     /**
      * Gets the API version
      *
      * @return the version of the API running on the platform
      */
-    @NonNull String getApiVersion();
+    String getApiVersion();
 
 }

@@ -25,8 +25,6 @@
 
 package net.luckperms.api.node;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -46,18 +44,18 @@ final class SimpleNodeType<T extends Node> implements NodeType<T>, Comparable<Si
     }
 
     @Override
-    public @NotNull String name() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public boolean matches(@NonNull Node node) {
+    public boolean matches(Node node) {
         Objects.requireNonNull(node, "node");
         return this.matches.test(node);
     }
 
     @Override
-    public @NotNull T cast(@NonNull Node node) {
+    public T cast(Node node) {
         if (!matches(node)) {
             throw new IllegalArgumentException("Node " + node.getClass() + " does not match " + this.name);
         }
@@ -70,7 +68,7 @@ final class SimpleNodeType<T extends Node> implements NodeType<T>, Comparable<Si
     }
 
     @Override
-    public int compareTo(@NotNull SimpleNodeType<?> o) {
+    public int compareTo(SimpleNodeType<?> o) {
         return Integer.compare(this.sortOrder, o.sortOrder);
     }
 }

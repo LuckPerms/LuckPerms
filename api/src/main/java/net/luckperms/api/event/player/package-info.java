@@ -26,4 +26,5 @@
 /**
  * Events relating to a player.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.player;

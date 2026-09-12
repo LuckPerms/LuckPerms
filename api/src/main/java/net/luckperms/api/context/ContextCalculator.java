@@ -25,7 +25,6 @@
 
 package net.luckperms.api.context;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -70,7 +69,7 @@ public interface ContextCalculator<T> {
      * @param <T> the contextual type
      * @return the resultant calculator
      */
-    static <T> @NonNull ContextCalculator<T> forSingleContext(@NonNull String key, @NonNull Function<T, String> valueFunction) {
+    static <T> ContextCalculator<T> forSingleContext(String key, Function<T, String> valueFunction) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(valueFunction, "valueFunction");
         return (target, consumer) -> {
@@ -92,7 +91,7 @@ public interface ContextCalculator<T> {
      * @param target the target contextual subject for this operation
      * @param consumer the {@link ContextConsumer} to submit contexts to
      */
-    void calculate(@NonNull T target, @NonNull ContextConsumer consumer);
+    void calculate(T target, ContextConsumer consumer);
 
     /**
      * Gets a {@link ContextSet}, containing some/all of the contexts this
@@ -103,7 +102,7 @@ public interface ContextCalculator<T> {
      *
      * @return a set of potential contexts
      */
-    default @NonNull ContextSet estimatePotentialContexts() {
+    default ContextSet estimatePotentialContexts() {
         return ImmutableContextSet.empty();
     }
 

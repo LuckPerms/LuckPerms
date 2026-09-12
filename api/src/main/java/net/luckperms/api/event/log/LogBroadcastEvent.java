@@ -29,7 +29,6 @@ import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.type.Cancellable;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a log entry is about to be sent to notifiable players on the platform
@@ -42,7 +41,7 @@ public interface LogBroadcastEvent extends LuckPermsEvent, Cancellable {
      * @return the log entry to be broadcasted
      */
     @Param(0)
-    @NonNull Action getEntry();
+    Action getEntry();
 
     /**
      * Gets where the log entry originated from.
@@ -50,7 +49,7 @@ public interface LogBroadcastEvent extends LuckPermsEvent, Cancellable {
      * @return the origin of the log
      */
     @Param(1)
-    @NonNull Origin getOrigin();
+    Origin getOrigin();
 
     /**
      * Represents where a log entry is from

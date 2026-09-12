@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.filter.Comparison;
 import me.lucko.luckperms.common.filter.Constraint;
 import me.lucko.luckperms.common.filter.PageParameters;
 import org.bson.conversions.Bson;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
