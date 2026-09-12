@@ -57,7 +57,7 @@ public interface ActionLog {
     /**
      * Gets the entries in the log performed by the given actor.
      *
-     * @param actor the uuid of the actor to filter by
+     * @param actor the UUID of the actor to filter by
      * @return the content for the given actor
      */
     @Unmodifiable SortedSet<Action> getContent(UUID actor);
@@ -65,8 +65,8 @@ public interface ActionLog {
     /**
      * Gets the log content for a given user
      *
-     * @param uniqueId the uuid to filter by
-     * @return all content in this log where the user = uuid
+     * @param uniqueId the UUID to filter by
+     * @return all content in this log where the user = UUID
      */
     @Unmodifiable SortedSet<Action> getUserHistory(UUID uniqueId);
 

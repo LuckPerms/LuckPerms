@@ -60,11 +60,11 @@ public interface ContextUpdateEvent extends LuckPermsEvent {
     Object getSubject();
 
     /**
-     * Gets the subject whose contexts were updated, casted to a given type.
+     * Gets the subject whose contexts were updated, cast to a given type.
      *
      * @param subjectClass the type to cast to
      * @param <T> the subject type
-     * @return the casted subject
+     * @return the cast subject
      */
     default <T> Optional<T> getSubject(Class<T> subjectClass) {
         Object subject = getSubject();

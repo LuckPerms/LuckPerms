@@ -117,7 +117,7 @@ public interface CachedMetaData extends CachedData {
      * 
      * <p>This method will always return a {@link Result}, but the
      * {@link Result#result() inner result} {@link String} will be null if
-     * a the resultant prefix stack contained no elements.</p>
+     * the resultant prefix stack contained no elements.</p>
      *
      * @return a result containing the prefix
      * @since 5.4
@@ -152,7 +152,7 @@ public interface CachedMetaData extends CachedData {
      *
      * <p>This method will always return a {@link Result}, but the
      * {@link Result#result() inner result} {@link String} will be null if
-     * a the resultant suffix stack contained no elements.</p>
+     * the resultant suffix stack contained no elements.</p>
      *
      * @return a result containing the suffix
      * @since 5.4

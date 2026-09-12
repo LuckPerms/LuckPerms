@@ -25,7 +25,6 @@
 
 package net.luckperms.api.util;
 
-
 import java.util.List;
 
 /**

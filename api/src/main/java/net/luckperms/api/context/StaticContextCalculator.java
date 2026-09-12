@@ -25,6 +25,7 @@
 
 package net.luckperms.api.context;
 
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -45,7 +46,7 @@ public interface StaticContextCalculator extends ContextCalculator<Object> {
      *                      if the value returned is null.
      * @return the resultant calculator
      */
-    static StaticContextCalculator forSingleContext(String key, Supplier<String> valueFunction) {
+    static StaticContextCalculator forSingleContext(String key, Supplier<@Nullable String> valueFunction) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(valueFunction, "valueFunction");
         return consumer -> {

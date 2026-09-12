@@ -78,7 +78,7 @@ public interface PermissionHolder {
          * <p>The {@link User#getUniqueId()}, {@link User#getUsername()} and {@link Group#getName()} methods
          * define a "tighter" specification for obtaining object identifiers.</p>
          *
-         * @return the identifier for this object. Either a uuid string or name.
+         * @return the identifier for this object. Either a UUID string or name.
          */
         String getName();
 
@@ -119,7 +119,7 @@ public interface PermissionHolder {
      *
      * <p>For {@link User}s, the most appropriate query options will be their
      * {@link ContextManager#getQueryOptions(User) current active query options} if the
-     * corresponding player is online, and otherwise, will fallback to
+     * corresponding player is online, and otherwise, will fall back to
      * {@link ContextManager#getStaticQueryOptions() the current static query options}
      * if they are offline.</p>
      *

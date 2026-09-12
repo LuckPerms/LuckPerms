@@ -25,7 +25,6 @@
 
 package net.luckperms.api.metastacking;
 
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;

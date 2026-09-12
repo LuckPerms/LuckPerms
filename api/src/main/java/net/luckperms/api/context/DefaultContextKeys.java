@@ -34,17 +34,17 @@ public final class DefaultContextKeys {
     }
 
     /**
-     * The context key used to denote the name of the subjects server.
+     * The context key used to denote the name of the subject's server.
      */
     public static final String SERVER_KEY = "server";
 
     /**
-     * The context key used to denote the name of the subjects world.
+     * The context key used to denote the name of the subject's world.
      */
     public static final String WORLD_KEY = "world";
 
     /**
-     * The context key used to denote the dimension type of the subjects world.
+     * The context key used to denote the dimension type of the subject's world.
      *
      * <p>Possible values: overworld, the_nether, the_end</p>
      *
@@ -53,7 +53,7 @@ public final class DefaultContextKeys {
     public static final String DIMENSION_TYPE_KEY = "dimension-type";
 
     /**
-     * The context key used to denote the subjects gamemode.
+     * The context key used to denote the subject's gamemode.
      *
      * <p>Possible values: survival, creative, adventure, spectator</p>
      *

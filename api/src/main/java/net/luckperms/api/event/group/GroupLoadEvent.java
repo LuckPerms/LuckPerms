@@ -32,7 +32,7 @@ import net.luckperms.api.model.group.Group;
 /**
  * Called when a group is loaded into memory from the storage.
  *
- * Note that this event is not the same as {@link GroupCreateEvent}
+ * <p>Note that this event is not the same as {@link GroupCreateEvent}.</p>
  */
 public interface GroupLoadEvent extends LuckPermsEvent {
 

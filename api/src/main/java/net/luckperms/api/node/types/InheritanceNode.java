@@ -33,7 +33,7 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
 
 /**
- * A sub-type of {@link Node} used to mark that the holder of the node should inherit
+ * A subtype of {@link Node} used to mark that the holder of the node should inherit
  * from another group.
  */
 public interface InheritanceNode extends ScopedNode<InheritanceNode, InheritanceNode.Builder> {

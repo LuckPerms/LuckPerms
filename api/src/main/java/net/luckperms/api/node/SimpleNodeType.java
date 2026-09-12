@@ -25,7 +25,6 @@
 
 package net.luckperms.api.node;
 
-
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;

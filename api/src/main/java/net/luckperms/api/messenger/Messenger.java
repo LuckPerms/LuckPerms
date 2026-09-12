@@ -53,7 +53,7 @@ public interface Messenger extends AutoCloseable {
     void sendOutgoingMessage(OutgoingMessage outgoingMessage);
 
     /**
-     * Performs the necessary action to gracefully shutdown the messenger.
+     * Performs the necessary action to gracefully shut down the messenger.
      */
     @Override
     default void close() {

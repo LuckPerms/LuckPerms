@@ -37,7 +37,7 @@ import java.util.UUID;
  *
  * @since 5.3
  */
-public interface UsernameLookupEvent extends LuckPermsEvent, ResultEvent<String> {
+public interface UsernameLookupEvent extends LuckPermsEvent, ResultEvent<@Nullable String> {
 
     /**
      * Gets the {@link UUID unique id} being looked up.

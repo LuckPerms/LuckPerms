@@ -39,7 +39,7 @@ public interface ContextSetFactory {
     /**
      * Prefer using {@link ImmutableContextSet#builder()}.
      *
-     * @return a immutable context set builder
+     * @return an immutable context set builder
      * @see ImmutableContextSet#builder()
      */
     ImmutableContextSet.Builder immutableBuilder();

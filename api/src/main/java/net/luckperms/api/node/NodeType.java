@@ -173,7 +173,7 @@ public interface NodeType<T extends Node> {
      * not {@link #matches(Node) match} the type.</p>
      *
      * @param node the node to cast
-     * @return the casted node
+     * @return the cast node
      * @throws IllegalArgumentException if the node to cast does not match the type
      */
     T cast(Node node);
@@ -186,7 +186,7 @@ public interface NodeType<T extends Node> {
      * does not {@link #matches(Node) match} the type.</p>
      *
      * @param node the node to cast
-     * @return an optional, possibly containing a casted node
+     * @return an optional, possibly containing a cast node
      */
     default Optional<T> tryCast(Node node) {
         Objects.requireNonNull(node, "node");

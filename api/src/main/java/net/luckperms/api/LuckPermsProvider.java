@@ -25,6 +25,7 @@
 
 package net.luckperms.api;
 
+import org.jspecify.annotations.Nullable;
 
 import static org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -35,7 +36,7 @@ import static org.jetbrains.annotations.ApiStatus.Internal;
  * instance, however, this provider can be used if this is not viable.</p>
  */
 public final class LuckPermsProvider {
-    private static LuckPerms instance = null;
+    private static @Nullable LuckPerms instance = null;
 
     /**
      * Gets an instance of the {@link LuckPerms} API,

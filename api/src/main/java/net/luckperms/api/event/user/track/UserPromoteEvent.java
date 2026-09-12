@@ -25,7 +25,6 @@
 
 package net.luckperms.api.event.user.track;
 
-
 /**
  * Called when a user is promoted up a track.
  *

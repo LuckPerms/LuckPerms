@@ -30,7 +30,7 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 
 /**
- * A sub-type of {@link Node} used to store prefix assignments.
+ * A subtype of {@link Node} used to store prefix assignments.
  */
 public interface PrefixNode extends ChatMetaNode<PrefixNode, PrefixNode.Builder> {
 

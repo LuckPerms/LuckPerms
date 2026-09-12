@@ -32,7 +32,7 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
 
 /**
- * A sub-type of {@link Node} used to mark the display name of the node's holder.
+ * A subtype of {@link Node} used to mark the display name of the node's holder.
  */
 public interface DisplayNameNode extends ScopedNode<DisplayNameNode, DisplayNameNode.Builder> {
 

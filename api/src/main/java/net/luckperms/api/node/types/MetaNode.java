@@ -32,7 +32,7 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.ScopedNode;
 
 /**
- * A sub-type of {@link Node} used to store meta assignments.
+ * A subtype of {@link Node} used to store meta assignments.
  */
 public interface MetaNode extends ScopedNode<MetaNode, MetaNode.Builder> {
 

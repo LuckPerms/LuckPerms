@@ -25,7 +25,6 @@
 
 package net.luckperms.api.node;
 
-
 /**
  * A {@link Node}, with its own type and the type of its associated builder
  * defined as a type parameter.

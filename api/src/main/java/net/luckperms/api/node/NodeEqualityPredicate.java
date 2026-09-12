@@ -25,7 +25,6 @@
 
 package net.luckperms.api.node;
 
-
 import java.util.function.Predicate;
 
 /**
@@ -141,7 +140,7 @@ public interface NodeEqualityPredicate {
     NodeEqualityPredicate IGNORE_EXPIRY_TIME_AND_VALUE = new DummyNodeEqualityPredicate("IGNORE_EXPIRY_TIME_AND_VALUE");
 
     /**
-     * All attributes must match, except for {@link Node#getValue() value} and the if the node
+     * All attributes must match, except for {@link Node#getValue() value} and if the node
      * {@link Node#hasExpiry() has an expiry}, which are ignored.
      *
      * <p>Effectively only considers the key and the context.</p>

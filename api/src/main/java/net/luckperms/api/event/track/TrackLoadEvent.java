@@ -32,7 +32,7 @@ import net.luckperms.api.track.Track;
 /**
  * Called when a track is loaded into memory from the storage.
  *
- * Note that this event is not the same as {@link TrackCreateEvent}
+ * <p>Note that this event is not the same as {@link TrackCreateEvent}.</p>
  */
 public interface TrackLoadEvent extends LuckPermsEvent {
 

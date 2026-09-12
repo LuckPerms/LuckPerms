@@ -64,7 +64,7 @@ import java.util.Set;
  * the '{@code :}' character. (e.g. "{@code worldguard:region}" for WorldGuard
  * regions)</p>
  *
- * <p>Contexts can be combined with each other to form so called
+ * <p>Contexts can be combined with each other to form so-called
  * "context sets" - simply a collection of context pairs.</p>
  *
  * <p>Two default ContextSet implementations are provided.

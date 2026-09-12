@@ -42,7 +42,7 @@ public interface PlayerDataSaveEvent extends LuckPermsEvent {
     /**
      * Gets the unique ID that was saved.
      *
-     * @return the uuid
+     * @return the UUID
      */
     @Param(0)
     UUID getUniqueId();

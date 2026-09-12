@@ -52,7 +52,7 @@ public interface QueryOptionsRegistry {
      *
      * <p>Prefer using the {@link QueryOptions#nonContextual()} accessor.</p>
      *
-     * @return the default non contextual query options
+     * @return the default non-contextual query options
      * @see QueryOptions#nonContextual()
      */
     QueryOptions defaultNonContextualOptions();

@@ -33,21 +33,21 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Called when the platform needs to determine the type of a player's {@link UUID unique id}.
+ * Called when the platform needs to determine a player's {@link UUID unique id} type.
  *
  * @since 5.3
  */
 public interface UniqueIdDetermineTypeEvent extends LuckPermsEvent, ResultEvent<String> {
 
     /**
-     * The players UUID has been obtained by authenticating with the Mojang session servers.
+     * The player's UUID has been obtained by authenticating with the Mojang session servers.
      *
      * <p>Usually indicated by the UUID being {@link UUID#version() version} 4.</p>
      */
     String TYPE_AUTHENTICATED = "authenticated";
 
     /**
-     * The players UUID has not been obtained through authentication, and instead is likely based
+     * The player's UUID has not been obtained through authentication, and instead is likely based
      * on the username they connected with.
      *
      * <p>Usually indicated by the UUID being {@link UUID#version() version} 3.</p>
@@ -55,7 +55,7 @@ public interface UniqueIdDetermineTypeEvent extends LuckPermsEvent, ResultEvent<
     String TYPE_UNAUTHENTICATED = "unauthenticated";
 
     /**
-     * The players UUID most likely belongs to a NPC (non-player character).
+     * The player's UUID most likely belongs to a NPC (non-player character).
      *
      * <p>Usually indicated by the UUID being {@link UUID#version() version} 2.</p>
      *

@@ -25,7 +25,6 @@
 
 package net.luckperms.api.node;
 
-
 /**
  * Dummy implementation of {@link NodeEqualityPredicate}, used for the given constant
  * implementations.

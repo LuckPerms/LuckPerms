@@ -54,7 +54,7 @@ public interface PlayerLoginProcessEvent extends LuckPermsEvent, Result {
     /**
      * Gets the UUID of the connection which was processed
      *
-     * @return the uuid of the connection which was processed
+     * @return the UUID of the connection which was processed
      */
     @Param(0)
     UUID getUniqueId();

@@ -24,7 +24,7 @@
  */
 
 /**
- * Events relating to the {@link net.luckperms.api.actionlog.ActionLog}.
+ * Events relating to the {@link net.luckperms.api.actionlog.ActionLogger}.
  */
 @org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.log;

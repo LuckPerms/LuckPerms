@@ -30,7 +30,7 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeType;
 
 /**
- * A sub-type of {@link Node} used to store suffix assignments.
+ * A subtype of {@link Node} used to store suffix assignments.
  */
 public interface SuffixNode extends ChatMetaNode<SuffixNode, SuffixNode.Builder> {
 

@@ -89,7 +89,7 @@ public interface LuckPerms {
      * Gets the {@link UserManager}, responsible for managing
      * {@link User} instances.
      *
-     * <p>This manager can be used to retrieve instances of {@link User} by uuid
+     * <p>This manager can be used to retrieve instances of {@link User} by UUID
      * or name, or query all loaded users.</p>
      *
      * @return the user manager

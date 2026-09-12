@@ -25,6 +25,7 @@
 
 package net.luckperms.api.util;
 
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents three different states of a setting.
@@ -74,7 +75,7 @@ public enum Tristate {
      * @return {@link #UNDEFINED}, {@link #TRUE} or {@link #FALSE}, if the value
      *         is <code>null</code>, <code>true</code> or <code>false</code>, respectively.
      */
-    public static Tristate of(Boolean val) {
+    public static Tristate of(@Nullable Boolean val) {
         return val == null ? UNDEFINED : val ? TRUE : FALSE;
     }
 

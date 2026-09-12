@@ -25,7 +25,6 @@
 
 package net.luckperms.api.context;
 
-
 /**
  * Functional interface that accepts context key value pairs.
  */

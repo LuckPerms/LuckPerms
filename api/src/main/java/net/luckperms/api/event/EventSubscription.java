@@ -25,7 +25,6 @@
 
 package net.luckperms.api.event;
 
-
 import java.util.function.Consumer;
 
 /**

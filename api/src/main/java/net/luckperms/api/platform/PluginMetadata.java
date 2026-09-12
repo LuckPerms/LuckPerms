@@ -25,7 +25,6 @@
 
 package net.luckperms.api.platform;
 
-
 /**
  * Provides information about the LuckPerms plugin.
  */

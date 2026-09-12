@@ -30,7 +30,7 @@ import net.luckperms.api.messenger.message.Message;
 import java.util.UUID;
 
 /**
- * Represents an "user update" message.
+ * Represents a "user update" message.
  *
  * <p>Used to notify other servers of a change to a specific user.</p>
  */

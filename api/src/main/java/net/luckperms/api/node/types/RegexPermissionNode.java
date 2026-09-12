@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * A sub-type of {@link Node} used to store regex permissions.
+ * A subtype of {@link Node} used to store regex permissions.
  */
 public interface RegexPermissionNode extends ScopedNode<RegexPermissionNode, RegexPermissionNode.Builder> {
 

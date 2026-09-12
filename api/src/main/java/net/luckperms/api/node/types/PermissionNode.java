@@ -34,7 +34,7 @@ import net.luckperms.api.node.ScopedNode;
 import java.util.OptionalInt;
 
 /**
- * A sub-type of {@link Node} representing basic permissions.
+ * A subtype of {@link Node} representing basic permissions.
  */
 public interface PermissionNode extends ScopedNode<PermissionNode, PermissionNode.Builder> {
 

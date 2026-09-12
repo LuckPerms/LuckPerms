@@ -37,7 +37,7 @@ import java.util.UUID;
  *
  * @since 5.3
  */
-public interface UniqueIdLookupEvent extends LuckPermsEvent, ResultEvent<UUID> {
+public interface UniqueIdLookupEvent extends LuckPermsEvent, ResultEvent<@Nullable UUID> {
 
     /**
      * Gets the username being looked up.

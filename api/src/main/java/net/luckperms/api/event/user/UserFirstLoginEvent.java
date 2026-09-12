@@ -46,7 +46,7 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
     /**
      * Gets the UUID of the user
      *
-     * @return the uuid of the user
+     * @return the UUID of the user
      */
     @Param(0)
     UUID getUniqueId();

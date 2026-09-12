@@ -49,7 +49,7 @@ public interface Track {
     /**
      * Gets a list of the groups on this track
      *
-     * <p>Index 0 is the first/lowest group in (or start of) the track.</p>
+     * <p>The group at index 0 is the first/lowest/starting group in the track.</p>
      *
      * <p>The returned collection is immutable, and cannot be modified.</p>
      *

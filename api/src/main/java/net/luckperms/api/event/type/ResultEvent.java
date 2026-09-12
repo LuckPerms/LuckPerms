@@ -26,6 +26,7 @@
 package net.luckperms.api.event.type;
 
 import net.luckperms.api.event.util.Param;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <T> the type of the result
  * @since 5.3
  */
-public interface ResultEvent<T> {
+public interface ResultEvent<T extends @Nullable Object> {
 
     /**
      * Gets an {@link AtomicReference} containing the result.

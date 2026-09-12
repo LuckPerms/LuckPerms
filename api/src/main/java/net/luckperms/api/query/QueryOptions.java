@@ -92,7 +92,7 @@ public interface QueryOptions {
      *
      * <p>This instance has the default set of flags.</p>
      *
-     * @return the default non contextual query options
+     * @return the default non-contextual query options
      */
     static QueryOptions nonContextual() {
         return LuckPermsProvider.get().getQueryOptionsRegistry().defaultNonContextualOptions();

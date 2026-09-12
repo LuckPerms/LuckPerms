@@ -42,9 +42,9 @@ public interface PlatformEntity {
     /**
      * Gets the unique id of the entity, if it has one.
      *
-     * <p>For players, this returns their uuid assigned by the server.</p>
+     * <p>For players, this returns their UUID assigned by the server.</p>
      *
-     * @return the uuid of the object, if available
+     * @return the UUID of the object, if available
      */
     @Nullable UUID getUniqueId();
 

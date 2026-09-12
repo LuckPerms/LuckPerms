@@ -104,7 +104,7 @@ public interface PlayerAdapter<T> {
      * using their {@link #getQueryOptions(Object) active query options}.
      *
      * @param player the player
-     * @return the cached meta data for the player
+     * @return the cached metadata for the player
      * @see CachedDataManager#getMetaData()
      */
     default CachedMetaData getMetaData(T player) {

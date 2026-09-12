@@ -78,7 +78,7 @@ public interface CachedDataManager {
      *
      * <p>For {@link User}s, the most appropriate query options will be their
      * {@link ContextManager#getQueryOptions(User) current active query options} if the
-     * corresponding player is online, and otherwise, will fallback to
+     * corresponding player is online, and otherwise, will fall back to
      * {@link ContextManager#getStaticQueryOptions() the current static query options}.</p>
      *
      * <p>For {@link Group}s, the most appropriate query options will always be
@@ -95,7 +95,7 @@ public interface CachedDataManager {
      *
      * <p>For {@link User}s, the most appropriate query options will be their
      * {@link ContextManager#getQueryOptions(User) current active query options} if the
-     * corresponding player is online, and otherwise, will fallback to
+     * corresponding player is online, and otherwise, will fall back to
      * {@link ContextManager#getStaticQueryOptions() the current static query options}.</p>
      *
      * <p>For {@link Group}s, the most appropriate query options will always be

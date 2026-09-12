@@ -25,6 +25,7 @@
 
 package net.luckperms.api.node.metadata;
 
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -54,7 +55,7 @@ final class SimpleNodeMetadataKey<T> implements NodeMetadataKey<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SimpleNodeMetadataKey<?> that = (SimpleNodeMetadataKey<?>) o;

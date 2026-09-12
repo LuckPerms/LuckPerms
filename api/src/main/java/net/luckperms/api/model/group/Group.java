@@ -44,11 +44,11 @@ public interface Group extends PermissionHolder {
     String getName();
 
     /**
-     * Gets the groups "display name", if it has one that differs from it's actual name.
+     * Gets the groups "display name", if it has one that differs from its actual name.
      *
      * <p>The lookup is made using the current servers active context.</p>
      *
-     * <p>Will return <code>null</code> if the groups display name is equal to it's
+     * <p>Will return <code>null</code> if the groups display name is equal to its
      * {@link #getName() actual name}.</p>
      *
      * @return the display name
@@ -56,9 +56,9 @@ public interface Group extends PermissionHolder {
     @Nullable String getDisplayName();
 
     /**
-     * Gets the groups "display name", if it has one that differs from it's actual name.
+     * Gets the groups "display name", if it has one that differs from its actual name.
      *
-     * <p>Will return <code>null</code> if the groups display name is equal to it's
+     * <p>Will return <code>null</code> if the groups display name is equal to its
      * {@link #getName() actual name}.</p>
      *
      * @param queryOptions the query options to lookup in

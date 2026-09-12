@@ -25,6 +25,7 @@
 
 package net.luckperms.api.context;
 
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -37,8 +38,8 @@ import java.util.function.Function;
  * <ul>
  *     <li>Context lookups should be <i>fast</i>: lookup methods are likely to
  *     be invoked frequently, and should therefore be fast to execute. If
- *     determining the current contexts involves a particularly time consuming
- *     lookup (database queries, network requests, etc), then such results
+ *     determining the current contexts involves a particularly time-consuming
+ *     lookup (database queries, network requests, etc.), then such results
  *     should be cached ahead of time.</li>
  *
  *     <li>Context lookups should be <i>thread-safe</i>: lookups will sometimes
@@ -69,7 +70,7 @@ public interface ContextCalculator<T> {
      * @param <T> the contextual type
      * @return the resultant calculator
      */
-    static <T> ContextCalculator<T> forSingleContext(String key, Function<T, String> valueFunction) {
+    static <T> ContextCalculator<T> forSingleContext(String key, Function<T, @Nullable String> valueFunction) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(valueFunction, "valueFunction");
         return (target, consumer) -> {

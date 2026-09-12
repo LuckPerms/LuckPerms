@@ -45,7 +45,7 @@ public interface MessagingService {
      * Uses the messaging service to inform other servers about a general
      * change.
      *
-     * <p>The standard response by other servers will be to execute a overall
+     * <p>The standard response by other servers will be to execute an overall
      * sync of all live data, equivalent to calling
      * {@link LuckPerms#runUpdateTask()}.</p>
      *
@@ -76,7 +76,7 @@ public interface MessagingService {
      *
      * <p>The intended use case of this functionality is to allow plugins/mods
      * to send <b>lightweight</b> and <b>permissions-related</b> custom messages
-     * between instances, piggy-backing on top of the messenger abstraction
+     * between instances, piggybacking on top of the messenger abstraction
      * already built into LuckPerms.</p>
      *
      * <p>It is <b>not</b> intended as a full message broker replacement/abstraction.

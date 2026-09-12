@@ -93,7 +93,7 @@ public interface NodeMap {
     /**
      * Adds a node.
      *
-     * @param node the node to be add
+     * @param node the node to be added
      * @return the result of the operation
      */
     DataMutateResult add(Node node);
