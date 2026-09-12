@@ -1,3 +1,5 @@
+apply plugin: 'java-library'
+
 group = 'net.luckperms'
 project.version = '5.5'
 
@@ -12,7 +14,7 @@ jar {
 }
 
 dependencies {
-    compileOnly 'org.checkerframework:checker-qual:3.49.3'
+    compileOnlyApi 'org.checkerframework:checker-qual:3.49.3'
     compileOnly 'org.jetbrains:annotations:26.0.2'
 }
 
