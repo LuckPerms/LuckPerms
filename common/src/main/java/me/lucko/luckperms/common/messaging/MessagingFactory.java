@@ -196,9 +196,10 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
 
         @Override
         public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
-            RedisMessenger redis = new RedisMessenger(getPlugin(), incomingMessageConsumer);
-
             LuckPermsConfiguration config = getPlugin().getConfiguration();
+
+            RedisMessenger redis = new RedisMessenger(getPlugin(), incomingMessageConsumer, config.get(ConfigKeys.REDIS_KEEPALIVE_INTERVAL));
+
             String address = config.get(ConfigKeys.REDIS_ADDRESS);
             List<String> addresses = config.get(ConfigKeys.REDIS_ADDRESSES);
             String username = config.get(ConfigKeys.REDIS_USERNAME);

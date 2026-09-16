@@ -268,6 +268,9 @@ redis:
   address: localhost
   username: ''
   password: ''
+  # How often (in milliseconds) a ping should be sent on the pub/sub connection to keep it alive.
+  # This prevents idle connections from being closed by firewalls or proxies. Set to 0 to disable.
+  keepalive-interval: 60000
 
 # Settings for Nats.
 # Port 4222 is used by default; set address to "host:port" if differs
