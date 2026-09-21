@@ -91,7 +91,7 @@ public class ApiGroupManager extends ApiAbstractManager<Group, net.luckperms.api
 
     @Override
     public @NonNull CompletableFuture<Void> modifyGroup(@NonNull String name, @NonNull Consumer<? super net.luckperms.api.model.group.Group> action) {
-        Objects.requireNonNull(name, "name");
+        name = ApiUtils.checkName(Objects.requireNonNull(name, "name"));
         Objects.requireNonNull(action, "action");
 
         return this.plugin.getStorage().createAndLoadGroup(name, CreationCause.API)
