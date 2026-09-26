@@ -53,14 +53,14 @@ public class LogPage {
     }
 
     public List<Entry<LoggedAction>> getNumberedContent() {
-        int startIndex = this.params != null
-                ? this.params.pageSize() * (this.params.pageNumber() - 1)
+        long startIndex = this.params != null
+                ? (long) this.params.pageSize() * (this.params.pageNumber() - 1)
                 : 0;
 
         List<Entry<LoggedAction>> numberedContent = new ArrayList<>();
         for (int i = 0; i < this.content.size(); i++) {
-            int index = startIndex + i + 1;
-            numberedContent.add(new Entry<>(index, this.content.get(i)));
+            long index = startIndex + i + 1;
+            numberedContent.add(new Entry<>((int) Math.min(index, Integer.MAX_VALUE), this.content.get(i)));
         }
         return numberedContent;
     }
