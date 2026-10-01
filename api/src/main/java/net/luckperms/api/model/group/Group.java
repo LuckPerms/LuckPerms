@@ -69,6 +69,10 @@ public interface Group extends PermissionHolder {
     /**
      * Gets the weight of this group, if present.
      *
+     * <p>A group with no weight set is treated as having a weight of
+     * <code>0</code> wherever LuckPerms orders groups by weight, for example
+     * when resolving inheritance or picking a user's primary group.</p>
+     *
      * @return the group weight
      */
     OptionalInt getWeight();
