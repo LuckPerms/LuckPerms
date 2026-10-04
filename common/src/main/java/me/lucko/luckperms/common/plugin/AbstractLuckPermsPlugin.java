@@ -151,6 +151,10 @@ public abstract class AbstractLuckPermsPlugin implements LuckPermsPlugin {
     }
 
     public final void enable() {
+        // start ticking the utilities loaded early only now, async class loading during the platform load phase isn't safe (e.g. BungeeCord)
+        this.permissionRegistry.start();
+        this.verboseHandler.start();
+
         // load the sender factory instance
         setupSenderFactory();
 
