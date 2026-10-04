@@ -25,10 +25,17 @@
 
 package me.lucko.luckperms.common.filter;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PageParametersTest {
 
@@ -45,6 +52,27 @@ public class PageParametersTest {
     public void testMaxPage(int pageSize, int total, int expectedMaxPage) {
         int maxPage = new PageParameters(pageSize, 1).getMaxPage(total);
         assertEquals(expectedMaxPage, maxPage);
+    }
+
+    @Test
+    public void testMaxPageOverflow() {
+        int maxPage = new PageParameters(10, 1).getMaxPage(Integer.MAX_VALUE);
+        assertTrue(maxPage > 0);
+        assertEquals(214748365, maxPage);
+    }
+
+    @Test
+    public void testPaginateOverflow() {
+        PageParameters params = new PageParameters(10, Integer.MAX_VALUE);
+        List<String> list = Arrays.asList("a", "b", "c");
+        assertEquals(Collections.emptyList(), params.paginate(list));
+    }
+
+    @Test
+    public void testPaginateStreamOverflow() {
+        PageParameters params = new PageParameters(10, Integer.MAX_VALUE);
+        Stream<String> stream = Stream.of("a", "b", "c");
+        assertEquals(0, params.paginate(stream).count());
     }
 
 }
