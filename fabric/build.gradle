@@ -44,7 +44,7 @@ dependencies {
     ]
 
     apiModules.forEach {
-        implementation(fabricApi.module(it, '0.160.6+26.3'))
+        implementation(fabricApi.module(it, '0.161.0+26.3'))
     }
 
     jarInJar 'me.lucko:fabric-permissions-api:0.7.0'
