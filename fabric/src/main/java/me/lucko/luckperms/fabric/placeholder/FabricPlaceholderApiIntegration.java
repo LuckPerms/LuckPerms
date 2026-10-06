@@ -62,6 +62,10 @@ public class FabricPlaceholderApiIntegration {
         @Override
         public PlaceholderResult onPlaceholderRequest(ServerPlaceholderContext context, String argument) {
             ServerPlayer player = context.serverPlayer();
+            if (player == null) {
+                return PlaceholderResult.invalid("No player!");
+            }
+
             User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
             if (user == null) {
                 return PlaceholderResult.invalid("Unable to find corresponding user for UUID: " + player.getUUID());
@@ -71,12 +75,16 @@ public class FabricPlaceholderApiIntegration {
             PlaceholderContext ctx = new PlaceholderContext(this.plugin.getApiProvider(), user.getApiProxy(), queryOptions);
 
             String result;
-            if (this.placeholder instanceof Placeholder.Basic basic) {
-                result = basic.resolve(ctx);
-            } else if (this.placeholder instanceof Placeholder.UsingArgument usingArg) {
-                result = usingArg.resolve(ctx.withArgument(argument == null ? "" : argument));
-            } else {
-                throw new IllegalStateException("Unknown placeholder type: " + this.placeholder.getClass());
+            try {
+                if (this.placeholder instanceof Placeholder.Basic basic) {
+                    result = basic.resolve(ctx);
+                } else if (this.placeholder instanceof Placeholder.UsingArgument usingArg) {
+                    result = usingArg.resolve(ctx.withArgument(argument == null ? "" : argument));
+                } else {
+                    throw new IllegalStateException("Unknown placeholder type: " + this.placeholder.getClass());
+                }
+            } catch (IllegalArgumentException e) {
+                return PlaceholderResult.invalid(e.getMessage());
             }
 
             return toResult(parseText(result));
