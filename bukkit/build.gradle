@@ -10,11 +10,22 @@ java {
     disableAutoTargetJvm()
 }
 
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
     implementation project(':common')
     compileOnly project(':common:loader-utils')
+    testRuntimeOnly project(':common:loader-utils')
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.mockito:mockito-core:5.18.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.18.0'
 
     compileOnly 'dev.folia:folia-api:26.1.2.build.8-stable'
+    testRuntimeOnly 'dev.folia:folia-api:26.1.2.build.8-stable'
     compileOnly('net.kyori:adventure-platform-bukkit:4.4.0') {
         exclude(module: 'adventure-bom')
         exclude(module: 'adventure-api')
