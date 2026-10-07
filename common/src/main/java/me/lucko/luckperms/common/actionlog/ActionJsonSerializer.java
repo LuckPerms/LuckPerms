@@ -80,10 +80,12 @@ public final class ActionJsonSerializer {
         if (data.has("target")) {
             JsonObject target = data.get("target").getAsJsonObject();
             builder.targetType(LoggedAction.parseType(target.get("type").getAsString()));
-            if (target.has("uniqueId")) {
-                builder.target(UUID.fromString(target.get("uniqueId").getAsString()));
+            // some 5.0 builds wrote the uniqueId and name of the target next to the target object (#1843)
+            JsonObject targetData = target.has("name") ? target : data;
+            if (targetData.has("uniqueId")) {
+                builder.target(UUID.fromString(targetData.get("uniqueId").getAsString()));
             }
-            builder.targetName(target.get("name").getAsString());
+            builder.targetName(targetData.get("name").getAsString());
         } else {
             builder.targetType(LoggedAction.parseType(data.get("type").getAsString()));
             if (data.has("acted")) {
