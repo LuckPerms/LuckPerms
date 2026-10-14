@@ -28,7 +28,6 @@ package net.luckperms.api.context;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.util.Optional;
@@ -61,7 +60,7 @@ public interface ContextManager {
      * @param subject the subject
      * @return the applicable context for the subject
      */
-    @NonNull ImmutableContextSet getContext(@NonNull Object subject);
+    ImmutableContextSet getContext(Object subject);
 
     /**
      * Queries the ContextManager for current context values for the given User.
@@ -76,7 +75,7 @@ public interface ContextManager {
      * @param user the user
      * @return the applicable context for the subject
      */
-    @NonNull Optional<ImmutableContextSet> getContext(@NonNull User user);
+    Optional<ImmutableContextSet> getContext(User user);
 
     /**
      * Gets the contexts from the static calculators in this manager.
@@ -86,7 +85,7 @@ public interface ContextManager {
      *
      * @return the current active static contexts
      */
-    @NonNull ImmutableContextSet getStaticContext();
+    ImmutableContextSet getStaticContext();
 
     /**
      * Creates a new {@link QueryOptions.Builder}.
@@ -94,7 +93,7 @@ public interface ContextManager {
      * @param mode the mode
      * @return a new query options builder
      */
-    QueryOptions.@NonNull Builder queryOptionsBuilder(@NonNull QueryMode mode);
+    QueryOptions.Builder queryOptionsBuilder(QueryMode mode);
 
     /**
      * Obtains current {@link QueryOptions} for the subject.
@@ -102,7 +101,7 @@ public interface ContextManager {
      * @param subject the subject
      * @return the query options for the subject
      */
-    @NonNull QueryOptions getQueryOptions(@NonNull Object subject);
+    QueryOptions getQueryOptions(Object subject);
 
     /**
      * Obtains current {@link QueryOptions} for the given User.
@@ -116,28 +115,28 @@ public interface ContextManager {
      * @param user the user
      * @return the query options for the subject
      */
-    @NonNull Optional<QueryOptions> getQueryOptions(@NonNull User user);
+    Optional<QueryOptions> getQueryOptions(User user);
 
     /**
      * Gets the static query options, using the registered static context calculators.
      *
      * @return the current static query options
      */
-    @NonNull QueryOptions getStaticQueryOptions();
+    QueryOptions getStaticQueryOptions();
 
     /**
      * Registers a context calculator with the manager.
      *
      * @param calculator the calculator
      */
-    void registerCalculator(@NonNull ContextCalculator<?> calculator);
+    void registerCalculator(ContextCalculator<?> calculator);
 
     /**
      * Unregisters a context calculator with the manager.
      *
      * @param calculator the calculator
      */
-    void unregisterCalculator(@NonNull ContextCalculator<?> calculator);
+    void unregisterCalculator(ContextCalculator<?> calculator);
 
     /**
      * Signal to the {@link ContextManager} that a {@code subject}s
@@ -149,7 +148,7 @@ public interface ContextManager {
      * @param subject the subject
      * @since 5.2
      */
-    void signalContextUpdate(@NonNull Object subject);
+    void signalContextUpdate(Object subject);
 
     /**
      * Gets the {@link ContextSetFactory}, responsible for creating
@@ -158,7 +157,7 @@ public interface ContextManager {
      * @return the context set factory
      */
     @Internal
-    @NonNull ContextSetFactory getContextSetFactory();
+    ContextSetFactory getContextSetFactory();
 
     /**
      * Invalidates the lookup cache for a given subject
@@ -167,7 +166,7 @@ public interface ContextManager {
      * @deprecated Use {@link #signalContextUpdate(Object)} instead
      */
     @Deprecated
-    default void invalidateCache(@NonNull Object subject) {
+    default void invalidateCache(Object subject) {
         signalContextUpdate(subject);
     }
 

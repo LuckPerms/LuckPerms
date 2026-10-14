@@ -26,9 +26,8 @@
 package net.luckperms.api.actionlog;
 
 import net.luckperms.api.LuckPermsProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -47,7 +46,7 @@ public interface Action extends Comparable<Action> {
      *
      * @return a new builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getActionLogger().actionBuilder();
     }
 
@@ -56,21 +55,21 @@ public interface Action extends Comparable<Action> {
      *
      * @return the timestamp
      */
-    @NonNull Instant getTimestamp();
+    Instant getTimestamp();
 
     /**
      * Gets the source of the action.
      *
      * @return the source
      */
-    @NonNull Source getSource();
+    Source getSource();
 
     /**
      * Gets the target of the action.
      *
      * @return the target
      */
-    @NonNull Target getTarget();
+    Target getTarget();
 
     /**
      * Returns a string describing the action which took place.
@@ -80,7 +79,7 @@ public interface Action extends Comparable<Action> {
      *
      * @return the action
      */
-    @NonNull String getDescription();
+    String getDescription();
 
     /**
      * Represents the source of an action.
@@ -93,14 +92,14 @@ public interface Action extends Comparable<Action> {
          *
          * @return the source unique id
          */
-        @NonNull UUID getUniqueId();
+        UUID getUniqueId();
 
         /**
          * Gets the source name.
          *
          * @return the source name
          */
-        @NonNull String getName();
+        String getName();
 
     }
 
@@ -115,21 +114,21 @@ public interface Action extends Comparable<Action> {
          *
          * @return the target unique id
          */
-        @NonNull Optional<UUID> getUniqueId();
+        Optional<UUID> getUniqueId();
 
         /**
          * Gets the target name.
          *
          * @return the target name
          */
-        @NonNull String getName();
+        String getName();
 
         /**
          * Gets the target type.
          *
          * @return the target type
          */
-        @NonNull Type getType();
+        Type getType();
 
         /**
          * Represents the type of {@link Target}.
@@ -151,7 +150,7 @@ public interface Action extends Comparable<Action> {
          * @return the builder
          * @see Action#getTimestamp()
          */
-        @NonNull Builder timestamp(@NonNull Instant timestamp);
+        Builder timestamp(Instant timestamp);
 
         /**
          * Sets the actor of the entry.
@@ -159,7 +158,7 @@ public interface Action extends Comparable<Action> {
          * @param actor the actor
          * @return the builder
          */
-        @NonNull Builder source(@NonNull UUID actor);
+        Builder source(UUID actor);
 
         /**
          * Sets the actor name of the entry.
@@ -167,7 +166,7 @@ public interface Action extends Comparable<Action> {
          * @param actorName the actor name
          * @return the builder
          */
-        @NonNull Builder sourceName(@NonNull String actorName);
+        Builder sourceName(String actorName);
 
         /**
          * Sets the type of the entry.
@@ -175,7 +174,7 @@ public interface Action extends Comparable<Action> {
          * @param type the type
          * @return the builder
          */
-        @NonNull Builder targetType(Target.@NonNull Type type);
+        Builder targetType(Target.Type type);
 
         /**
          * Sets the acted object for the entry.
@@ -183,7 +182,7 @@ public interface Action extends Comparable<Action> {
          * @param acted the acted object
          * @return the builder
          */
-        @NonNull Builder target(@Nullable UUID acted);
+        Builder target(@Nullable UUID acted);
 
         /**
          * Sets the acted name for the entry.
@@ -191,7 +190,7 @@ public interface Action extends Comparable<Action> {
          * @param actedName the acted name
          * @return the builder
          */
-        @NonNull Builder targetName(@NonNull String actedName);
+        Builder targetName(String actedName);
 
         /**
          * Sets the action of the entry.
@@ -199,14 +198,14 @@ public interface Action extends Comparable<Action> {
          * @param action the action
          * @return the builder
          */
-        @NonNull Builder description(@NonNull String action);
+        Builder description(String action);
 
         /**
          * Creates a {@link Action} instance from the builder.
          *
          * @return a new log entry instance
          */
-        @NonNull Action build();
+        Action build();
 
     }
 

@@ -27,7 +27,6 @@ package net.luckperms.api.track;
 
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.util.Result;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 
@@ -41,7 +40,7 @@ public interface DemotionResult extends Result {
      *
      * @return the status
      */
-    @NonNull Status getStatus();
+    Status getStatus();
 
     @Override
     default boolean wasSuccessful() {
@@ -59,7 +58,7 @@ public interface DemotionResult extends Result {
      *
      * @return the group the user was demoted from.
      */
-    @NonNull Optional<String> getGroupFrom();
+    Optional<String> getGroupFrom();
 
     /**
      * Gets the name of the group the user was demoted from, if applicable.
@@ -69,7 +68,7 @@ public interface DemotionResult extends Result {
      *
      * @return the group the user was demoted to.
      */
-    @NonNull Optional<String> getGroupTo();
+    Optional<String> getGroupTo();
 
     /**
      * The result status

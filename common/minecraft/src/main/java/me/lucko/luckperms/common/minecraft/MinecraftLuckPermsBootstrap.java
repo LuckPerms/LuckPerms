@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.minecraft;
 
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;

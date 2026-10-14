@@ -31,13 +31,17 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCredential;
+import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.Sorts;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.Updates;
 import me.lucko.luckperms.common.actionlog.LogPage;
 import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.actionlog.filter.ActionFilterMongoBuilder;
@@ -59,6 +63,7 @@ import me.lucko.luckperms.common.storage.implementation.StorageImplementation;
 import me.lucko.luckperms.common.storage.misc.NodeEntry;
 import me.lucko.luckperms.common.storage.misc.PlayerSaveResultImpl;
 import me.lucko.luckperms.common.storage.misc.StorageCredentials;
+import me.lucko.luckperms.common.util.Difference;
 import me.lucko.luckperms.common.util.HostAndPort;
 import me.lucko.luckperms.common.util.Iterators;
 import net.luckperms.api.actionlog.Action;
@@ -72,7 +77,7 @@ import net.luckperms.api.node.NodeBuilder;
 import org.bson.Document;
 import org.bson.UuidRepresentation;
 import org.bson.conversions.Bson;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -119,7 +124,12 @@ public class MongoStorage implements StorageImplementation {
                 .uuidRepresentation(UuidRepresentation.JAVA_LEGACY);
 
         if (!Strings.isNullOrEmpty(this.connectionUri)) {
-            this.mongoClient = new MongoClient(new MongoClientURI(this.connectionUri, options));
+            MongoClientURI uri = new MongoClientURI(this.connectionUri, options);
+            this.mongoClient = new MongoClient(uri);
+
+            String databaseName = uri.getDatabase() != null ? uri.getDatabase() : this.configuration.getDatabase();
+            this.database = this.mongoClient.getDatabase(databaseName);
+
         } else {
             MongoCredential credential = null;
             if (!Strings.isNullOrEmpty(this.configuration.getUsername())) {
@@ -143,9 +153,15 @@ public class MongoStorage implements StorageImplementation {
             } else {
                 this.mongoClient = new MongoClient(address, credential, options.build());
             }
+
+            this.database = this.mongoClient.getDatabase(this.configuration.getDatabase());
         }
-        
-        this.database = this.mongoClient.getDatabase(this.configuration.getDatabase());
+
+        try {
+            ensureIndexes();
+        } catch (MongoException e) {
+            // ignore
+        }
     }
 
     @Override
@@ -249,54 +265,97 @@ public class MongoStorage implements StorageImplementation {
 
     @Override
     public User loadUser(UUID uniqueId, String username) {
-        User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-        try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", user.getUniqueId())).iterator()) {
-            if (cursor.hasNext()) {
-                // User exists, let's load.
-                Document d = cursor.next();
-                String name = d.getString("name");
 
-                user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
-                user.setUsername(name, true);
+        Document document;
+        try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", uniqueId)).iterator()) {
+            document = cursor.hasNext() ? cursor.next() : null;
+        }
 
-                user.loadNodesFromStorage(nodesFromDoc(d));
+        return createUser(uniqueId, username, document);
+    }
+
+    @Override
+    public Map<UUID, User> loadUsers(Set<UUID> uniqueIds) {
+        MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
+
+        Map<UUID, Document> documents = new HashMap<>();
+        try (MongoCursor<Document> cursor = c.find(Filters.in("_id", uniqueIds)).iterator()) {
+            while (cursor.hasNext()) {
+                Document document = cursor.next();
+                documents.put(getDocumentId(document), document);
+            }
+        }
+
+        Map<UUID, User> users = new HashMap<>();
+        for (UUID uniqueId : uniqueIds) {
+            users.put(uniqueId, createUser(uniqueId, null, documents.get(uniqueId)));
+        }
+        return users;
+    }
+
+    private User createUser(UUID uniqueId, String username, @Nullable Document document) {
+        User user = this.plugin.getUserManager().getOrMake(uniqueId, username);
+        if (document != null) {
+            String name = document.getString("name");
+
+            user.getPrimaryGroup().setStoredValue(document.getString("primaryGroup"));
+            user.setUsername(name, true);
+
+            user.loadNodesFromStorage(nodesFromDoc(document));
+            this.plugin.getUserManager().giveDefaultIfNeeded(user);
+
+            boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
+            if (updatedUsername | user.auditTemporaryNodes()) {
+                saveUser(user);
+            }
+        } else {
+            if (this.plugin.getUserManager().isNonDefaultUser(user)) {
+                user.loadNodesFromStorage(Collections.emptyList());
+                user.getPrimaryGroup().setStoredValue(null);
                 this.plugin.getUserManager().giveDefaultIfNeeded(user);
-
-
-                boolean updatedUsername = user.getUsername().isPresent() && (name == null || !user.getUsername().get().equalsIgnoreCase(name));
-                if (updatedUsername | user.auditTemporaryNodes()) {
-                    c.replaceOne(Filters.eq("_id", user.getUniqueId()), userToDoc(user));
-                }
-            } else {
-                if (this.plugin.getUserManager().isNonDefaultUser(user)) {
-                    user.loadNodesFromStorage(Collections.emptyList());
-                    user.getPrimaryGroup().setStoredValue(null);
-                    this.plugin.getUserManager().giveDefaultIfNeeded(user);
-                }
             }
         }
         return user;
     }
 
     @Override
-    public Map<UUID, User> loadUsers(Set<UUID> uniqueIds) throws Exception {
-        // make this a bulk search?
-        Map<UUID, User> map = new HashMap<>();
-        for (UUID uniqueId : uniqueIds) {
-            map.put(uniqueId, loadUser(uniqueId, null));
-        }
-        return map;
-    }
-
-    @Override
     public void saveUser(User user) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "users");
-        user.normalData().discardChanges();
-        if (!this.plugin.getUserManager().isNonDefaultUser(user)) {
+
+        Difference<Node> changes = user.normalData().exportChanges(results -> {
+            if (this.plugin.getUserManager().isNonDefaultUser(user)) {
+                return true;
+            }
+
+            // if the only change is adding the default node, we don't need to export
+            if (results.getChanges().size() == 1) {
+                Difference.Change<Node> onlyChange = results.getChanges().iterator().next();
+                return !(onlyChange.type() == Difference.ChangeType.ADD && this.plugin.getUserManager().isDefaultNode(onlyChange.value()));
+            }
+
+            return true;
+        });
+
+        // if the user only has the default group, delete their data
+        boolean isDefaultUser = !this.plugin.getUserManager().isNonDefaultUser(user);
+        if (changes != null && isDefaultUser) {
+            user.normalData().addDefaultNodeToChangeSet();
+            changes = null;
+        }
+
+        if (changes == null) {
             c.deleteOne(Filters.eq("_id", user.getUniqueId()));
-        } else {
-            c.replaceOne(Filters.eq("_id", user.getUniqueId()), userToDoc(user), new ReplaceOptions().upsert(true));
+            return;
+        }
+
+        List<Bson> updates = nodeChangesToUpdates(changes);
+        updates.add(Updates.combine(
+                Updates.set("name", user.getUsername().orElse("null")),
+                Updates.set("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME))
+        ));
+        for (Bson update : updates) {
+            c.updateOne(Filters.eq("_id", user.getUniqueId()), update, new UpdateOptions().upsert(true));
         }
     }
 
@@ -342,11 +401,11 @@ public class MongoStorage implements StorageImplementation {
         Group group = this.plugin.getGroupManager().getOrMake(name);
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
         try (MongoCursor<Document> cursor = c.find(Filters.eq("_id", group.getName())).iterator()) {
-            if (cursor.hasNext()) {
+            if (!cursor.hasNext()) {
+                c.insertOne(new Document("_id", group.getName()));
+            } else {
                 Document d = cursor.next();
                 group.loadNodesFromStorage(nodesFromDoc(d));
-            } else {
-                c.insertOne(groupToDoc(group));
             }
         }
         return group;
@@ -388,8 +447,12 @@ public class MongoStorage implements StorageImplementation {
     @Override
     public void saveGroup(Group group) {
         MongoCollection<Document> c = this.database.getCollection(this.prefix + "groups");
-        group.normalData().discardChanges();
-        c.replaceOne(Filters.eq("_id", group.getName()), groupToDoc(group), new ReplaceOptions().upsert(true));
+        Difference<Node> changes = group.normalData().exportChanges(results -> true);
+
+        List<Bson> updates = nodeChangesToUpdates(changes);
+        for (Bson update : updates) {
+            c.updateOne(Filters.eq("_id", group.getName()), update, new UpdateOptions().upsert(true));
+        }
     }
 
     @Override
@@ -553,17 +616,6 @@ public class MongoStorage implements StorageImplementation {
         }
     }
 
-    private static Document userToDoc(User user) {
-        List<Document> nodes = user.normalData().asList().stream()
-                .map(MongoStorage::nodeToDoc)
-                .collect(Collectors.toList());
-
-        return new Document("_id", user.getUniqueId())
-                .append("name", user.getUsername().orElse("null"))
-                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse(GroupManager.DEFAULT_GROUP_NAME))
-                .append("permissions", nodes);
-    }
-
     private static List<Node> nodesFromDoc(Document document) {
         List<Node> nodes = new ArrayList<>();
         if (document.containsKey("permissions") && document.get("permissions") instanceof List) {
@@ -579,16 +631,27 @@ public class MongoStorage implements StorageImplementation {
         return nodes;
     }
 
-    private static Document groupToDoc(Group group) {
-        List<Document> nodes = group.normalData().asList().stream()
-                .map(MongoStorage::nodeToDoc)
-                .collect(Collectors.toList());
-
-        return new Document("_id", group.getName()).append("permissions", nodes);
-    }
-
     private static Document trackToDoc(Track track) {
         return new Document("_id", track.getName()).append("groups", track.getGroups());
+    }
+
+    private static List<Bson> nodeChangesToUpdates(Difference<Node> changes) {
+        List<Bson> updates = new ArrayList<>();
+
+        Set<Node> removed = changes.getRemoved();
+        Set<Node> added = changes.getAdded();
+
+        if (!removed.isEmpty()) {
+            List<Document> docs = removed.stream().map(MongoStorage::nodeToDoc).collect(Collectors.toList());
+            updates.add(Updates.pullAll("permissions", docs));
+        }
+
+        if (!added.isEmpty()) {
+            List<Document> docs = added.stream().map(MongoStorage::nodeToDoc).collect(Collectors.toList());
+            updates.add(Updates.pushEach("permissions", docs));
+        }
+
+        return updates;
     }
 
     @VisibleForTesting
@@ -713,6 +776,12 @@ public class MongoStorage implements StorageImplementation {
                     .description(d.getString("action"))
                     .build();
         }
+    }
+
+    private void ensureIndexes() {
+        this.database.getCollection(this.prefix + "uuid").createIndex(Indexes.ascending("name"));
+        this.database.getCollection(this.prefix + "users").createIndex(Indexes.ascending("permissions.key"));
+        this.database.getCollection(this.prefix + "groups").createIndex(Indexes.ascending("permissions.key"));
     }
 
 }

@@ -34,16 +34,15 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 public class ContextSetComparator implements Comparator<ImmutableContextSet> {
+    private static final Comparator<ImmutableContextSet> ASCENDING = new ContextSetComparator();
+    private static final Comparator<ImmutableContextSet> DESCENDING = ASCENDING.reversed();
 
-    private static final Comparator<ImmutableContextSet> INSTANCE = new ContextSetComparator();
-    private static final Comparator<ImmutableContextSet> REVERSE = INSTANCE.reversed();
-
-    public static Comparator<ImmutableContextSet> normal() {
-        return INSTANCE;
+    public static Comparator<ImmutableContextSet> ascending() {
+        return ASCENDING;
     }
 
-    public static Comparator<ImmutableContextSet> reverse() {
-        return REVERSE;
+    public static Comparator<ImmutableContextSet> descending() {
+        return DESCENDING;
     }
 
     @Override

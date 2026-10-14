@@ -26,4 +26,5 @@
 /**
  * Miscellaneous utilities and classes that don't fit into any package.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.util;

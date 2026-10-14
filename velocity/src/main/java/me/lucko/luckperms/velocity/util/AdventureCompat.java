@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.velocity.util;
 
+import com.google.gson.JsonElement;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.ResultedEvent.ComponentResult;
 import net.kyori.adventure.text.Component;
@@ -54,7 +55,7 @@ public final class AdventureCompat {
             Class<?> componentClass = Class.forName(adventurePkg + "text.Component");
             Class<?> serializerClass = Class.forName(adventurePkg + "text.serializer.gson.GsonComponentSerializer");
 
-            PLATFORM_SERIALIZER_DESERIALIZE = serializerClass.getMethod("deserialize", Object.class);
+            PLATFORM_SERIALIZER_DESERIALIZE = serializerClass.getMethod("deserializeFromTree", JsonElement.class);
             PLATFORM_SEND_MESSAGE = audienceClass.getMethod("sendMessage", componentClass);
             PLATFORM_COMPONENT_RESULT_DENIED = ComponentResult.class.getMethod("denied", componentClass);
             PLATFORM_SERIALIZER_INSTANCE = serializerClass.getMethod("gson").invoke(null);
@@ -64,7 +65,7 @@ public final class AdventureCompat {
     }
 
     public static Object toPlatformComponent(Component component) {
-        String json = GsonComponentSerializer.gson().serialize(component);
+        JsonElement json = GsonComponentSerializer.gson().serializeToTree(component);
         try {
             return PLATFORM_SERIALIZER_DESERIALIZE.invoke(PLATFORM_SERIALIZER_INSTANCE, json);
         } catch (ReflectiveOperationException e) {

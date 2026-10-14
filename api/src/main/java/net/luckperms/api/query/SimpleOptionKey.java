@@ -25,7 +25,7 @@
 
 package net.luckperms.api.query;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -42,12 +42,12 @@ final class SimpleOptionKey<T> implements OptionKey<T> {
     }
 
     @Override
-    public @NonNull String name() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public @NonNull Class<T> type() {
+    public Class<T> type() {
         return this.type;
     }
 
@@ -57,7 +57,7 @@ final class SimpleOptionKey<T> implements OptionKey<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SimpleOptionKey<?> that = (SimpleOptionKey<?>) o;

@@ -32,7 +32,6 @@ import java.util.Comparator;
 public class ContextComparator implements Comparator<Context> {
 
     public static final ContextComparator INSTANCE = new ContextComparator(false);
-
     public static final ContextComparator ONLY_KEY = new ContextComparator(true);
 
     private final boolean onlyKeys;

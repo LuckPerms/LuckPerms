@@ -163,6 +163,8 @@ public class BukkitConnectionListener extends AbstractConnectionListener impleme
             this.plugin.getLogger().info("Processing login for " + player.getUniqueId() + " - " + player.getName());
         }
 
+        handleLoggedIn(player.getUniqueId());
+
         final User user = this.plugin.getUserManager().getIfLoaded(player.getUniqueId());
 
         /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */

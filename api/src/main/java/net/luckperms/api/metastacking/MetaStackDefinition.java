@@ -26,7 +26,6 @@
 package net.luckperms.api.metastacking;
 
 import net.luckperms.api.query.OptionKey;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
@@ -57,7 +56,7 @@ public interface MetaStackDefinition {
      *
      * @return the elements in this stack
      */
-    @NonNull @Unmodifiable List<MetaStackElement> getElements();
+    @Unmodifiable List<MetaStackElement> getElements();
 
     /**
      * Gets the duplicate removal function, applied to the entries before
@@ -65,27 +64,27 @@ public interface MetaStackDefinition {
      *
      * @return the duplicate removal function
      */
-    @NonNull DuplicateRemovalFunction getDuplicateRemovalFunction();
+    DuplicateRemovalFunction getDuplicateRemovalFunction();
 
     /**
      * Gets the spacer string added before any stack elements
      *
      * @return the start spacer
      */
-    @NonNull String getStartSpacer();
+    String getStartSpacer();
 
     /**
      * Gets the spacer added between stack elements
      *
      * @return the middle spacer
      */
-    @NonNull String getMiddleSpacer();
+    String getMiddleSpacer();
 
     /**
      * Gets the spacer added after any stack elements
      *
      * @return the end spacer
      */
-    @NonNull String getEndSpacer();
+    String getEndSpacer();
 
 }

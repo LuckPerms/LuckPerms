@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.util.gson.GsonProvider;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.extension.Extension;
 import net.luckperms.api.extension.ExtensionManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;

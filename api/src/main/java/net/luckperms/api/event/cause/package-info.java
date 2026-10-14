@@ -26,4 +26,5 @@
 /**
  * Event causes.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.cause;

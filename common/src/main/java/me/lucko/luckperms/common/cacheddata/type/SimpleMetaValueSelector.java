@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.cacheddata.type;
 import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.query.meta.MetaValueSelector;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Locale;

@@ -30,8 +30,8 @@ import me.lucko.luckperms.common.actionlog.ActionJsonSerializer;
 import me.lucko.luckperms.common.messaging.LuckPermsMessagingService;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.messenger.message.type.ActionLogMessage;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 

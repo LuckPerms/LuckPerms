@@ -44,7 +44,6 @@ dependencies {
     testImplementation 'net.luckperms:rest-api-java-client:0.1'
 
     api project(':api')
-    api 'org.checkerframework:checker-qual:3.12.0'
 
     compileOnly project(':common:loader-utils')
 

@@ -281,7 +281,7 @@ public class SubjectDataContainer {
 
     private static <T> List<Map.Entry<ImmutableContextSet, T>> sortContextMap(Map<ImmutableContextSet, T> map) {
         List<Map.Entry<ImmutableContextSet, T>> entries = new ArrayList<>(map.entrySet());
-        entries.sort((o1, o2) -> ContextSetComparator.reverse().compare(o1.getKey(), o2.getKey()));
+        entries.sort((o1, o2) -> ContextSetComparator.descending().compare(o1.getKey(), o2.getKey()));
         return entries;
     }
 

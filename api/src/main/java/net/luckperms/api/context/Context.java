@@ -25,8 +25,7 @@
 
 package net.luckperms.api.context;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents an individual context pair.
@@ -89,13 +88,13 @@ public interface Context {
      *
      * @return the key
      */
-    @NonNull String getKey();
+    String getKey();
 
     /**
      * Gets the context value
      *
      * @return the value
      */
-    @NonNull String getValue();
+    String getValue();
 
 }

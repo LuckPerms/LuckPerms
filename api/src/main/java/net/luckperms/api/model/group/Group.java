@@ -27,8 +27,7 @@ package net.luckperms.api.model.group;
 
 import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.OptionalInt;
 
@@ -42,14 +41,14 @@ public interface Group extends PermissionHolder {
      *
      * @return the name of the group
      */
-    @NonNull String getName();
+    String getName();
 
     /**
-     * Gets the groups "display name", if it has one that differs from it's actual name.
+     * Gets the groups "display name", if it has one that differs from its actual name.
      *
      * <p>The lookup is made using the current servers active context.</p>
      *
-     * <p>Will return <code>null</code> if the groups display name is equal to it's
+     * <p>Will return <code>null</code> if the groups display name is equal to its
      * {@link #getName() actual name}.</p>
      *
      * @return the display name
@@ -57,21 +56,25 @@ public interface Group extends PermissionHolder {
     @Nullable String getDisplayName();
 
     /**
-     * Gets the groups "display name", if it has one that differs from it's actual name.
+     * Gets the groups "display name", if it has one that differs from its actual name.
      *
-     * <p>Will return <code>null</code> if the groups display name is equal to it's
+     * <p>Will return <code>null</code> if the groups display name is equal to its
      * {@link #getName() actual name}.</p>
      *
      * @param queryOptions the query options to lookup in
      * @return the display name
      */
-    @Nullable String getDisplayName(@NonNull QueryOptions queryOptions);
+    @Nullable String getDisplayName(QueryOptions queryOptions);
 
     /**
      * Gets the weight of this group, if present.
      *
+     * <p>A group with no weight set is treated as having a weight of
+     * <code>0</code> wherever LuckPerms orders groups by weight, for example
+     * when resolving inheritance or picking a user's primary group.</p>
+     *
      * @return the group weight
      */
-    @NonNull OptionalInt getWeight();
+    OptionalInt getWeight();
 
 }

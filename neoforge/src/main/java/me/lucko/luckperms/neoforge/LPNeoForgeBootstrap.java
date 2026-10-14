@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
 import me.lucko.luckperms.common.plugin.classpath.JarInJarClassPathAppender;
 import me.lucko.luckperms.common.plugin.logging.Log4jPluginLogger;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
-import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter;
 import me.lucko.luckperms.common.util.BuildInfo;
 import me.lucko.luckperms.neoforge.util.NeoForgeEventBusFacade;
 import net.luckperms.api.platform.Platform;
@@ -45,6 +44,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforgespi.language.IModInfo;
 import org.apache.logging.log4j.LogManager;
@@ -168,6 +168,17 @@ public final class LPNeoForgeBootstrap extends MinecraftLuckPermsBootstrap imple
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onServerStopping(ServerStoppingEvent event) {
+        this.plugin.disable();
+        this.forgeEventBus.unregisterAll();
+        this.server = null;
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onServerStopped(ServerStoppedEvent event) {
+        if (this.server == null) {
+            return;
+        }
+
         this.plugin.disable();
         this.forgeEventBus.unregisterAll();
         this.server = null;

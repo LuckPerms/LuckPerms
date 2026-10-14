@@ -29,7 +29,6 @@ import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.track.Track;
 import net.luckperms.api.util.Result;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents the result of a data mutation call on a LuckPerms object.
@@ -79,7 +78,7 @@ public enum DataMutateResult implements Result {
          *
          * @return the result
          */
-        @NonNull DataMutateResult getResult();
+        DataMutateResult getResult();
 
         /**
          * Gets the node that resulted from any {@link TemporaryNodeMergeStrategy}
@@ -90,7 +89,7 @@ public enum DataMutateResult implements Result {
          *
          * @return the resultant node
          */
-        @NonNull Node getMergedNode();
+        Node getMergedNode();
 
     }
 }

@@ -28,7 +28,6 @@ package net.luckperms.api.query.meta;
 import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.types.MetaNode;
 import net.luckperms.api.query.OptionKey;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 
@@ -54,6 +53,6 @@ public interface MetaValueSelector {
      * @param values the values, in the order in which they were accumulated.
      * @return the selected value
      */
-    @NonNull Result<String, MetaNode> selectValue(@NonNull String key, @NonNull List<? extends Result<String, MetaNode>> values);
+    Result<String, MetaNode> selectValue(String key, List<? extends Result<String, MetaNode>> values);
 
 }

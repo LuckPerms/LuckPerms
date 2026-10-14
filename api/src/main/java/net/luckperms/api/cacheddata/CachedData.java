@@ -26,7 +26,6 @@
 package net.luckperms.api.cacheddata;
 
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Holds cached lookup data for a given set of query options.
@@ -42,6 +41,6 @@ public interface CachedData {
      *
      * @return the query options this container is caching
      */
-    @NonNull QueryOptions getQueryOptions();
+    QueryOptions getQueryOptions();
 
 }

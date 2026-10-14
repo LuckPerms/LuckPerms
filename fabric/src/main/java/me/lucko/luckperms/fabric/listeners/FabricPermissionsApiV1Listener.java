@@ -70,7 +70,7 @@ public class FabricPermissionsApiV1Listener {
 
         if (codec == Codec.BOOL) {
             // permission check
-            String permissionString = node.key().getNamespace() + '.' + node.key().getPath();
+            String permissionString = node.key().getNamespace() + '.' + node.key().getPath().replace('/', '.');
             Boolean permissionValue = permissionCheck(ctx, permissionString);
             return node.cast(permissionValue);
         }

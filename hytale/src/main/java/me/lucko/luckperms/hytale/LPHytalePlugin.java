@@ -49,14 +49,14 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.hytale.calculator.HytaleCalculatorFactory;
-import me.lucko.luckperms.hytale.listeners.HytaleCommandListUpdater;
-import me.lucko.luckperms.hytale.util.VirtualGroupsCache;
 import me.lucko.luckperms.hytale.context.HytaleContextManager;
 import me.lucko.luckperms.hytale.context.HytalePlayerCalculator;
+import me.lucko.luckperms.hytale.listeners.HytaleCommandListUpdater;
 import me.lucko.luckperms.hytale.listeners.HytaleConnectionListener;
 import me.lucko.luckperms.hytale.listeners.HytalePlatformListener;
 import me.lucko.luckperms.hytale.service.LuckPermsPermissionProvider;
 import me.lucko.luckperms.hytale.service.PlayerVirtualGroupsMap;
+import me.lucko.luckperms.hytale.util.VirtualGroupsCache;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
 

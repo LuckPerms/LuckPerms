@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.actionlog.LoggedAction;
 import me.lucko.luckperms.common.util.ImmutableCollectors;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.actionlog.ActionLog;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Objects;

@@ -27,7 +27,6 @@ package net.luckperms.api.event.user;
 
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;
 
@@ -47,10 +46,10 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
     /**
      * Gets the UUID of the user
      *
-     * @return the uuid of the user
+     * @return the UUID of the user
      */
     @Param(0)
-    @NonNull UUID getUniqueId();
+    UUID getUniqueId();
 
     /**
      * Gets the username of the user
@@ -58,6 +57,6 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
      * @return the username of the user
      */
     @Param(1)
-    @NonNull String getUsername();
+    String getUsername();
 
 }

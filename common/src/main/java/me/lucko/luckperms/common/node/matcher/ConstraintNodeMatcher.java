@@ -30,8 +30,8 @@ import me.lucko.luckperms.common.filter.Constraint;
 import me.lucko.luckperms.common.filter.ConstraintFactory;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.matcher.NodeMatcher;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Abstract implementation of {@link NodeMatcher} backed by a {@link Constraint}.

@@ -32,7 +32,7 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.matcher.NodeMatcher;
 import net.luckperms.api.node.matcher.NodeMatcherFactory;
 import net.luckperms.api.node.types.MetaNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 

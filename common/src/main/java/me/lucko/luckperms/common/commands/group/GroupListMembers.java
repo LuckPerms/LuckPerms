@@ -118,7 +118,7 @@ public class GroupListMembers extends ChildCommand<Group> {
 
     private static <T extends Comparable<T>> void sendResult(Sender sender, List<NodeEntry<T, InheritanceNode>> results, Function<T, String> lookupFunction, Message.Args3<Integer, Integer, Integer> headerMessage, HolderType holderType, String label, int page) {
         results = new ArrayList<>(results);
-        results.sort(NodeEntryComparator.normal());
+        results.sort(NodeEntryComparator.ascending());
 
         int pageIndex = page - 1;
         List<List<NodeEntry<T, InheritanceNode>>> pages = Iterators.divideIterable(results, 15);

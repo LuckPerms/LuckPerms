@@ -1,7 +1,7 @@
 [versions]
 shadow = "8.3.8"
 blossom = "2.2.0"
-moddevgradle = "2.0.141"
+moddevgradle = "2.0.147"
 forgegradle = "[7.0.13,8.0)"
 loom = "1.15-SNAPSHOT"
 licenser = "2.2.2"

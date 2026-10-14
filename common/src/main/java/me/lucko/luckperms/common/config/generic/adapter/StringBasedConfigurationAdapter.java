@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.config.generic.adapter;
 
 import com.google.common.base.Splitter;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;

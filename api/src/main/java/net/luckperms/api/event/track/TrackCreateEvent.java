@@ -29,7 +29,6 @@ import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.track.Track;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a track is created
@@ -42,7 +41,7 @@ public interface TrackCreateEvent extends LuckPermsEvent {
      * @return the new track
      */
     @Param(0)
-    @NonNull Track getTrack();
+    Track getTrack();
 
     /**
      * Gets the cause of the creation
@@ -50,6 +49,6 @@ public interface TrackCreateEvent extends LuckPermsEvent {
      * @return the cause of the creation
      */
     @Param(1)
-    @NonNull CreationCause getCause();
+    CreationCause getCause();
 
 }

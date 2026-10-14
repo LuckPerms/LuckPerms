@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.service.reference;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectReference;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.lang.ref.WeakReference;

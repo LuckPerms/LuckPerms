@@ -25,9 +25,8 @@
 
 package net.luckperms.api.track;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -60,7 +59,7 @@ public interface TrackManager {
      * @return the resultant track
      * @throws NullPointerException if the name is null
      */
-    @NonNull CompletableFuture<Track> createAndLoadTrack(@NonNull String name);
+    CompletableFuture<Track> createAndLoadTrack(String name);
 
     /**
      * Loads a track from the plugin's storage provider into memory.
@@ -72,7 +71,7 @@ public interface TrackManager {
      * @return the resultant track
      * @throws NullPointerException if the name is null
      */
-    @NonNull CompletableFuture<Optional<Track>> loadTrack(@NonNull String name);
+    CompletableFuture<Optional<Track>> loadTrack(String name);
 
     /**
      * Saves a track's data back to the plugin's storage provider.
@@ -84,7 +83,7 @@ public interface TrackManager {
      * @throws NullPointerException  if track is null
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      */
-    @NonNull CompletableFuture<Void> saveTrack(@NonNull Track track);
+    CompletableFuture<Void> saveTrack(Track track);
 
     /**
      * Permanently deletes a track from the plugin's storage provider.
@@ -94,7 +93,7 @@ public interface TrackManager {
      * @throws NullPointerException  if track is null
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      */
-    @NonNull CompletableFuture<Void> deleteTrack(@NonNull Track track);
+    CompletableFuture<Void> deleteTrack(Track track);
 
     /**
      * Loads (or creates) a track from the plugin's storage provider, applies the given {@code action},
@@ -109,7 +108,7 @@ public interface TrackManager {
      * @return a future to encapsulate the operation
      * @since 5.5
      */
-    default @NonNull CompletableFuture<Void> modifyTrack(@NonNull String name, @NonNull Consumer<? super Track> action) {
+    default CompletableFuture<Void> modifyTrack(String name, Consumer<? super Track> action) {
         /* This default method is overridden in the implementation, and is just here
            to demonstrate what this method does in the API sources. */
         return createAndLoadTrack(name)
@@ -122,7 +121,7 @@ public interface TrackManager {
      *
      * @return a future to encapsulate the operation.
      */
-    @NonNull CompletableFuture<Void> loadAllTracks();
+    CompletableFuture<Void> loadAllTracks();
 
     /**
      * Gets a loaded track.
@@ -131,14 +130,14 @@ public interface TrackManager {
      * @return a {@link Track} object, if one matching the name exists, or null if not
      * @throws NullPointerException if the name is null
      */
-    @Nullable Track getTrack(@NonNull String name);
+    @Nullable Track getTrack(String name);
 
     /**
      * Gets a set of all loaded tracks.
      *
      * @return a {@link Set} of {@link Track} objects
      */
-    @NonNull @Unmodifiable Set<Track> getLoadedTracks();
+    @Unmodifiable Set<Track> getLoadedTracks();
 
     /**
      * Check if a track is loaded in memory
@@ -147,6 +146,6 @@ public interface TrackManager {
      * @return true if the track is loaded
      * @throws NullPointerException if the name is null
      */
-    boolean isLoaded(@NonNull String name);
+    boolean isLoaded(String name);
 
 }

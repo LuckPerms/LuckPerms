@@ -110,7 +110,7 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
 
     @Override
     protected void setupSenderFactory() {
-        this.senderFactory = new BukkitSenderFactory(this);
+        this.senderFactory = BukkitSenderFactory.create(this);
     }
 
     @Override

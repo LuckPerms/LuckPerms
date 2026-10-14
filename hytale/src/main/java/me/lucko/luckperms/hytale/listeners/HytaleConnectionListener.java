@@ -130,6 +130,8 @@ public class HytaleConnectionListener extends AbstractConnectionListener {
             this.plugin.getLogger().info("Processing post-login for " + player.getUuid() + " - " + player.getUsername());
         }
 
+        handleLoggedIn(player.getUuid());
+
         final User user = this.plugin.getUserManager().getIfLoaded(player.getUuid());
         if (user != null) {
             return;

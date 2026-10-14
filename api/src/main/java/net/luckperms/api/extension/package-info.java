@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.extension.Extension}s functionality.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.extension;

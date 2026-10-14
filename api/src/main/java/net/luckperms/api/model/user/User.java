@@ -27,8 +27,7 @@ package net.luckperms.api.model.user;
 
 import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.model.data.DataMutateResult;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -42,7 +41,7 @@ public interface User extends PermissionHolder {
      *
      * @return the users Mojang assigned unique id
      */
-    @NonNull UUID getUniqueId();
+    UUID getUniqueId();
 
     /**
      * Gets the users username
@@ -62,7 +61,7 @@ public interface User extends PermissionHolder {
      *
      * @return the users primary group
      */
-    @NonNull String getPrimaryGroup();
+    String getPrimaryGroup();
 
     /**
      * Sets a users primary group.
@@ -75,6 +74,6 @@ public interface User extends PermissionHolder {
      * @throws IllegalStateException if the user is not a member of that group
      * @throws NullPointerException  if the group is null
      */
-    @NonNull DataMutateResult setPrimaryGroup(@NonNull String group);
+    DataMutateResult setPrimaryGroup(String group);
 
 }

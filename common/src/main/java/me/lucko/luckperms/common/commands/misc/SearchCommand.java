@@ -98,7 +98,7 @@ public class SearchCommand extends SingleCommand {
 
     private static <T extends Comparable<T>> void sendResult(Sender sender, List<NodeEntry<T, Node>> results, Function<T, String> lookupFunction, Message.Args3<Integer, Integer, Integer> headerMessage, HolderType holderType, String label, int page, Comparison comparison) {
         results = new ArrayList<>(results);
-        results.sort(NodeEntryComparator.normal());
+        results.sort(NodeEntryComparator.ascending());
 
         int pageIndex = page - 1;
         List<List<NodeEntry<T, Node>>> pages = Iterators.divideIterable(results, 15);

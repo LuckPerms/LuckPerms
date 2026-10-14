@@ -26,7 +26,6 @@
 package net.luckperms.api.messenger.message.type;
 
 import net.luckperms.api.messenger.message.Message;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a "custom payload" message.
@@ -44,13 +43,13 @@ public interface CustomMessage extends Message {
      *
      * @return the namespace
      */
-    @NonNull String getChannelId();
+    String getChannelId();
 
     /**
      * Gets the payload.
      *
      * @return the payload
      */
-    @NonNull String getPayload();
+    String getPayload();
 
 }

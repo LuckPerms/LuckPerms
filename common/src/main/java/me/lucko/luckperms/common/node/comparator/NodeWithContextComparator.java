@@ -32,18 +32,18 @@ import net.luckperms.api.node.Node;
 import java.util.Comparator;
 
 /**
- * Compares permission nodes based upon their supposed "priority".
+ * Compares permission nodes based upon their "priority".
  */
 public class NodeWithContextComparator implements Comparator<Node> {
-    private static final Comparator<? super Node> INSTANCE = new NodeWithContextComparator(ContextSetComparator.normal(), NodeComparator.normal());
-    private static final Comparator<? super Node> REVERSE = new NodeWithContextComparator(ContextSetComparator.reverse(), NodeComparator.reverse());
+    private static final Comparator<? super Node> ASCENDING = new NodeWithContextComparator(ContextSetComparator.ascending(), NodeComparator.ascending());
+    private static final Comparator<? super Node> DESCENDING = new NodeWithContextComparator(ContextSetComparator.descending(), NodeComparator.descending());
 
-    public static Comparator<? super Node> normal() {
-        return INSTANCE;
+    public static Comparator<? super Node> ascending() {
+        return ASCENDING;
     }
 
-    public static Comparator<? super Node> reverse() {
-        return REVERSE;
+    public static Comparator<? super Node> descending() {
+        return DESCENDING;
     }
 
     private final Comparator<? super ImmutableContextSet> contextSetComparator;

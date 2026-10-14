@@ -26,7 +26,6 @@
 package net.luckperms.api.context;
 
 import net.luckperms.api.LuckPermsProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 
@@ -40,7 +39,7 @@ public interface ImmutableContextSet extends ContextSet {
      *
      * @return a new ImmutableContextSet builder
      */
-    static @NonNull Builder builder() {
+    static Builder builder() {
         return LuckPermsProvider.get().getContextManager().getContextSetFactory().immutableBuilder();
     }
 
@@ -49,7 +48,7 @@ public interface ImmutableContextSet extends ContextSet {
      *
      * @return an empty ImmutableContextSet
      */
-    static @NonNull ImmutableContextSet empty() {
+    static ImmutableContextSet empty() {
         return LuckPermsProvider.get().getContextManager().getContextSetFactory().immutableEmpty();
     }
 
@@ -61,7 +60,7 @@ public interface ImmutableContextSet extends ContextSet {
      * @return a new ImmutableContextSet containing one context pair
      * @throws NullPointerException if key or value is null
      */
-    static @NonNull ImmutableContextSet of(@NonNull String key, @NonNull String value) {
+    static ImmutableContextSet of(String key, String value) {
         return LuckPermsProvider.get().getContextManager().getContextSetFactory().immutableOf(key, value);
     }
 
@@ -70,7 +69,7 @@ public interface ImmutableContextSet extends ContextSet {
      */
     @Override
     @Deprecated
-    @NonNull ImmutableContextSet immutableCopy();
+    ImmutableContextSet immutableCopy();
 
     /**
      * A builder for {@link ImmutableContextSet}.
@@ -86,7 +85,7 @@ public interface ImmutableContextSet extends ContextSet {
          * @throws NullPointerException if the key or value is null
          * @see MutableContextSet#add(String, String)
          */
-        @NonNull Builder add(@NonNull String key, @NonNull String value);
+        Builder add(String key, String value);
 
         /**
          * Adds a context to the set.
@@ -96,7 +95,7 @@ public interface ImmutableContextSet extends ContextSet {
          * @throws NullPointerException if the entry is null
          * @see MutableContextSet#add(Context)
          */
-        default @NonNull Builder add(@NonNull Context entry) {
+        default Builder add(Context entry) {
             Objects.requireNonNull(entry, "entry");
             add(entry.getKey(), entry.getValue());
             return this;
@@ -110,7 +109,7 @@ public interface ImmutableContextSet extends ContextSet {
          * @throws NullPointerException if iterable is null
          * @see MutableContextSet#addAll(Iterable)
          */
-        default @NonNull Builder addAll(@NonNull Iterable<Context> iterable) {
+        default Builder addAll(Iterable<Context> iterable) {
             for (Context e : Objects.requireNonNull(iterable, "iterable")) {
                 add(e);
             }
@@ -125,7 +124,7 @@ public interface ImmutableContextSet extends ContextSet {
          * @throws NullPointerException if the contextSet is null
          * @see MutableContextSet#addAll(ContextSet)
          */
-        @NonNull Builder addAll(@NonNull ContextSet contextSet);
+        Builder addAll(ContextSet contextSet);
 
         /**
          * Creates a {@link ImmutableContextSet} from the values previously
@@ -133,6 +132,6 @@ public interface ImmutableContextSet extends ContextSet {
          *
          * @return an {@link ImmutableContextSet} from the builder
          */
-        @NonNull ImmutableContextSet build();
+        ImmutableContextSet build();
     }
 }

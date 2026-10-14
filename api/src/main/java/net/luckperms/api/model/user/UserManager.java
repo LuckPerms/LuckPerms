@@ -29,9 +29,8 @@ import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.matcher.NodeMatcher;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,7 +45,7 @@ import java.util.function.Consumer;
  * Represents the object responsible for managing {@link User} instances.
  *
  * <p>Note that User instances are automatically loaded for online players.
- * It's likely that offline players will not have an instance pre-loaded.</p>
+ * It's likely that offline players will not have an instance preloaded.</p>
  *
  * <p>All blocking methods return {@link CompletableFuture}s, which will be
  * populated with the result once the data has been loaded/saved asynchronously.
@@ -63,45 +62,55 @@ public interface UserManager {
     /**
      * Loads a user from the plugin's storage provider into memory.
      *
-     * @param uniqueId the uuid of the user
+     * @param uniqueId the UUID of the user
      * @param username the username, if known
      * @return the resultant user
-     * @throws NullPointerException if the uuid is null
+     * @throws NullPointerException if the UUID is null
      */
-    @NonNull CompletableFuture<User> loadUser(@NonNull UUID uniqueId, @Nullable String username);
+    CompletableFuture<User> loadUser(UUID uniqueId, @Nullable String username);
 
     /**
      * Loads a user from the plugin's storage provider into memory.
      *
-     * @param uniqueId the uuid of the user
+     * @param uniqueId the UUID of the user
      * @return the resultant user
-     * @throws NullPointerException if the uuid is null
+     * @throws NullPointerException if the UUID is null
      */
-    default @NonNull CompletableFuture<User> loadUser(@NonNull UUID uniqueId) {
+    default CompletableFuture<User> loadUser(UUID uniqueId) {
         return loadUser(uniqueId, null);
     }
 
     /**
-     * Uses the LuckPerms cache to find a uuid for the given username.
+     * Loads multiple users from the plugin's storage provider into memory.
      *
-     * <p>This lookup is case insensitive.</p>
+     * @param uniqueIds the UUIDs of the users to load
+     * @return a future for an unmodifiable map of loaded users
+     * @throws NullPointerException if the UUID set is null
+     * @since 5.6
+     */
+    CompletableFuture<@Unmodifiable Map<UUID, User>> loadUsers(Set<UUID> uniqueIds);
+
+    /**
+     * Uses the LuckPerms cache to find a UUID for the given username.
+     *
+     * <p>This lookup is case-insensitive.</p>
      *
      * @param username the username
-     * @return a uuid, could be null
+     * @return a UUID, could be null
      * @throws NullPointerException     if either parameters are null
      * @throws IllegalArgumentException if the username is invalid
      */
-    @NonNull CompletableFuture<UUID> lookupUniqueId(@NonNull String username);
+    CompletableFuture<UUID> lookupUniqueId(String username);
 
     /**
-     * Uses the LuckPerms cache to find a username for the given uuid.
+     * Uses the LuckPerms cache to find a username for the given UUID.
      *
-     * @param uniqueId the uuid
+     * @param uniqueId the UUID
      * @return a username, could be null
      * @throws NullPointerException     if either parameters are null
      * @throws IllegalArgumentException if the username is invalid
      */
-    @NonNull CompletableFuture<String> lookupUsername(@NonNull UUID uniqueId);
+    CompletableFuture<String> lookupUsername(UUID uniqueId);
 
     /**
      * Saves a user's data back to the plugin's storage provider.
@@ -113,7 +122,7 @@ public interface UserManager {
      * @throws NullPointerException  if user is null
      * @throws IllegalStateException if the user instance was not obtained from LuckPerms.
      */
-    @NonNull CompletableFuture<Void> saveUser(@NonNull User user);
+    CompletableFuture<Void> saveUser(User user);
 
     /**
      * Loads a user from the plugin's storage provider, applies the given {@code action},
@@ -123,12 +132,12 @@ public interface UserManager {
      * then {@link #saveUser(User)}, and returns an encapsulation of the whole process as a
      * {@link CompletableFuture}. </p>
      *
-     * @param uniqueId the uuid of the user
+     * @param uniqueId the UUID of the user
      * @param action the action to apply to the user
      * @return a future to encapsulate the operation
      * @since 5.1
      */
-    default @NonNull CompletableFuture<Void> modifyUser(@NonNull UUID uniqueId, @NonNull Consumer<? super User> action) {
+    default CompletableFuture<Void> modifyUser(UUID uniqueId, Consumer<? super User> action) {
         /* This default method is overridden in the implementation, and is just here
            to demonstrate what this method does in the API sources. */
         return loadUser(uniqueId)
@@ -137,7 +146,7 @@ public interface UserManager {
     }
 
     /**
-     * Saves data about a player to the uuid caching system.
+     * Saves data about a player to the UUID caching system.
      *
      * @param uniqueId     the users mojang unique id
      * @param username the users username
@@ -145,10 +154,10 @@ public interface UserManager {
      * @throws NullPointerException     if either parameters are null
      * @throws IllegalArgumentException if the username is invalid
      */
-    @NonNull CompletableFuture<PlayerSaveResult> savePlayerData(@NonNull UUID uniqueId, @NonNull String username);
+    CompletableFuture<PlayerSaveResult> savePlayerData(UUID uniqueId, String username);
 
     /**
-     * Deletes any data about a given player from the uuid caching system.
+     * Deletes any data about a given player from the UUID caching system.
      *
      * <p>Note that this method does not affect any saved user/permissions data.</p>
      *
@@ -156,16 +165,16 @@ public interface UserManager {
      * @return a future encapsulating the result of the operation
      * @since 5.2
      */
-    @NonNull CompletableFuture<Void> deletePlayerData(@NonNull UUID uniqueId);
+    CompletableFuture<Void> deletePlayerData(UUID uniqueId);
 
     /**
      * Gets a set all "unique" user UUIDs.
      *
      * <p>"Unique" meaning the user isn't just a member of the "default" group.</p>
      *
-     * @return a set of uuids
+     * @return a set of UUIDs
      */
-    @NonNull CompletableFuture<@Unmodifiable Set<UUID>> getUniqueUsers();
+    CompletableFuture<@Unmodifiable Set<UUID>> getUniqueUsers();
 
     /**
      * Searches the {@link User#data() normal node maps} of all known {@link User}s for {@link Node}
@@ -175,7 +184,7 @@ public interface UserManager {
      * @return the entries which matched
      * @since 5.1
      */
-    <T extends Node> @NonNull CompletableFuture<@Unmodifiable Map<UUID, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher);
+    <T extends Node> CompletableFuture<@Unmodifiable Map<UUID, Collection<T>>> searchAll(NodeMatcher<? extends T> matcher);
 
     /**
      * Searches for a list of users with a given permission.
@@ -186,41 +195,41 @@ public interface UserManager {
      * @deprecated Use {@link #searchAll(NodeMatcher)} instead
      */
     @Deprecated
-    @NonNull CompletableFuture<@Unmodifiable List<HeldNode<UUID>>> getWithPermission(@NonNull String permission);
+    CompletableFuture<@Unmodifiable List<HeldNode<UUID>>> getWithPermission(String permission);
 
     /**
      * Gets a loaded user.
      *
-     * @param uniqueId the uuid of the user to get
-     * @return a {@link User} object, if one matching the uuid is loaded, or null if not
-     * @throws NullPointerException if the uuid is null
+     * @param uniqueId the UUID of the user to get
+     * @return a {@link User} object, if one matching the UUID is loaded, or null if not
+     * @throws NullPointerException if the UUID is null
      */
-    @Nullable User getUser(@NonNull UUID uniqueId);
+    @Nullable User getUser(UUID uniqueId);
 
     /**
      * Gets a loaded user.
      *
      * @param username the username of the user to get
-     * @return a {@link User} object, if one matching the uuid is loaded, or null if not
+     * @return a {@link User} object, if one matching the UUID is loaded, or null if not
      * @throws NullPointerException if the name is null
      */
-    @Nullable User getUser(@NonNull String username);
+    @Nullable User getUser(String username);
 
     /**
      * Gets a set of all loaded users.
      *
      * @return a {@link Set} of {@link User} objects
      */
-    @NonNull @Unmodifiable Set<User> getLoadedUsers();
+    @Unmodifiable Set<User> getLoadedUsers();
 
     /**
      * Check if a user is loaded in memory
      *
-     * @param uniqueId the uuid to check for
+     * @param uniqueId the UUID to check for
      * @return true if the user is loaded
-     * @throws NullPointerException if the uuid is null
+     * @throws NullPointerException if the UUID is null
      */
-    boolean isLoaded(@NonNull UUID uniqueId);
+    boolean isLoaded(UUID uniqueId);
 
     /**
      * Unload a user from the internal storage, if they're not currently online.
@@ -228,6 +237,6 @@ public interface UserManager {
      * @param user the user to unload
      * @throws NullPointerException if the user is null
      */
-    void cleanupUser(@NonNull User user);
+    void cleanupUser(User user);
 
 }

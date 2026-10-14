@@ -28,7 +28,6 @@ package net.luckperms.api.event.track;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 
@@ -43,7 +42,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      * @return the name of the deleted track
      */
     @Param(0)
-    @NonNull String getTrackName();
+    String getTrackName();
 
     /**
      * Gets an immutable copy of the tracks existing data
@@ -51,7 +50,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      * @return a copy of the tracks existing data
      */
     @Param(1)
-    @NonNull List<String> getExistingData();
+    List<String> getExistingData();
 
     /**
      * Gets the cause of the deletion
@@ -59,6 +58,6 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      * @return the cause of the deletion
      */
     @Param(2)
-    @NonNull DeletionCause getCause();
+    DeletionCause getCause();
 
 }

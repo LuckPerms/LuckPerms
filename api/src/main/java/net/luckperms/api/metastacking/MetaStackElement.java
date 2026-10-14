@@ -27,8 +27,7 @@ package net.luckperms.api.metastacking;
 
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.types.ChatMetaNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents an element within a {@link MetaStackDefinition}.
@@ -45,6 +44,6 @@ public interface MetaStackElement {
      * @param current the current value being used. If this returns true, the current value will be replaced by this entry
      * @return true if the node should be accumulated into this element, replacing the current value
      */
-    boolean shouldAccumulate(@NonNull ChatMetaType type, @NonNull ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current);
+    boolean shouldAccumulate(ChatMetaType type, ChatMetaNode<?, ?> node, @Nullable ChatMetaNode<?, ?> current);
 
 }

@@ -118,7 +118,7 @@ public class MetaInfo extends GenericChildCommand {
             if (result != 0) {
                 return result;
             }
-            return NodeWithContextComparator.normal().compare(o1.getValue(), o2.getValue());
+            return NodeWithContextComparator.ascending().compare(o1.getValue(), o2.getValue());
         }
     }
 }

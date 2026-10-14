@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.filter.Comparison;
 import me.lucko.luckperms.common.filter.Constraint;
 import me.lucko.luckperms.common.filter.PageParameters;
 import me.lucko.luckperms.common.storage.implementation.sql.builder.AbstractSqlBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ConstraintSqlBuilder extends AbstractSqlBuilder {
 

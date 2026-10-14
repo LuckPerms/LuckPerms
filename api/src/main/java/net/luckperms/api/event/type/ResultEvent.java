@@ -26,7 +26,7 @@
 package net.luckperms.api.event.type;
 
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <T> the type of the result
  * @since 5.3
  */
-public interface ResultEvent<T> {
+public interface ResultEvent<T extends @Nullable Object> {
 
     /**
      * Gets an {@link AtomicReference} containing the result.
@@ -44,7 +44,7 @@ public interface ResultEvent<T> {
      * @return the result
      */
     @Param(-1)
-    @NonNull AtomicReference<T> result();
+    AtomicReference<T> result();
 
     /**
      * Gets if a result has been set for the event.

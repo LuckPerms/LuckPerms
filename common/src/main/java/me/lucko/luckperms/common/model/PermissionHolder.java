@@ -52,8 +52,8 @@ import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -258,7 +258,7 @@ public abstract class PermissionHolder {
     }
 
     public SortedSet<Node> getOwnNodesSorted(QueryOptions queryOptions) {
-        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.reverse());
+        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.descending());
         for (DataType dataType : queryOrder(queryOptions)) {
             getData(dataType).copyTo(nodes, queryOptions);
         }
@@ -301,7 +301,7 @@ public abstract class PermissionHolder {
             return getOwnNodesSorted(queryOptions);
         }
 
-        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.reverse());
+        SortedSet<Node> nodes = new TreeSet<>(NodeWithContextComparator.descending());
         InheritanceGraph graph = this.plugin.getInheritanceGraphFactory().getGraph(queryOptions);
         for (PermissionHolder holder : graph.traverse(this)) {
             for (DataType dataType : holder.queryOrder(queryOptions)) {

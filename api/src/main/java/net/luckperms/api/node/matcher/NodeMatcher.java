@@ -30,7 +30,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.MetaNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.util.function.Predicate;
@@ -54,7 +53,7 @@ public interface NodeMatcher<T extends Node> extends Predicate<Node> {
      * @param key the key
      * @return the matcher
      */
-    static @NonNull NodeMatcher<Node> key(@NonNull String key) {
+    static NodeMatcher<Node> key(String key) {
         return LuckPermsProvider.get().getNodeMatcherFactory().key(key);
     }
 
@@ -67,7 +66,7 @@ public interface NodeMatcher<T extends Node> extends Predicate<Node> {
      * @param <T> the node type
      * @return the matcher
      */
-    static <T extends Node> @NonNull NodeMatcher<T> key(@NonNull T node) {
+    static <T extends Node> NodeMatcher<T> key(T node) {
         return LuckPermsProvider.get().getNodeMatcherFactory().key(node);
     }
 
@@ -78,7 +77,7 @@ public interface NodeMatcher<T extends Node> extends Predicate<Node> {
      * @param startingWith the string to match
      * @return the matcher
      */
-    static @NonNull NodeMatcher<Node> keyStartsWith(@NonNull String startingWith) {
+    static NodeMatcher<Node> keyStartsWith(String startingWith) {
         return LuckPermsProvider.get().getNodeMatcherFactory().keyStartsWith(startingWith);
     }
 
@@ -92,7 +91,7 @@ public interface NodeMatcher<T extends Node> extends Predicate<Node> {
      * @param <T> the node type
      * @return the matcher
      */
-    static <T extends Node> @NonNull NodeMatcher<T> equals(@NonNull T other, @NonNull NodeEqualityPredicate equalityPredicate) {
+    static <T extends Node> NodeMatcher<T> equals(T other, NodeEqualityPredicate equalityPredicate) {
         return LuckPermsProvider.get().getNodeMatcherFactory().equals(other, equalityPredicate);
     }
 
@@ -105,7 +104,7 @@ public interface NodeMatcher<T extends Node> extends Predicate<Node> {
      * @param metaKey the meta key
      * @return the matcher
      */
-    static @NonNull NodeMatcher<MetaNode> metaKey(@NonNull String metaKey) {
+    static NodeMatcher<MetaNode> metaKey(String metaKey) {
         return LuckPermsProvider.get().getNodeMatcherFactory().metaKey(metaKey);
     }
 
@@ -118,7 +117,7 @@ public interface NodeMatcher<T extends Node> extends Predicate<Node> {
      * @param metaNode the meta node to use for the meta key
      * @return the matcher
      */
-    static @NonNull NodeMatcher<MetaNode> metaKey(@NonNull MetaNode metaNode) {
+    static NodeMatcher<MetaNode> metaKey(MetaNode metaNode) {
         return metaKey(metaNode.getMetaKey());
     }
 
@@ -133,7 +132,7 @@ public interface NodeMatcher<T extends Node> extends Predicate<Node> {
      * @param <T> the node type
      * @return the matcher
      */
-    static <T extends Node> @NonNull NodeMatcher<T> type(@NonNull NodeType<? extends T> type) {
+    static <T extends Node> NodeMatcher<T> type(NodeType<? extends T> type) {
         return LuckPermsProvider.get().getNodeMatcherFactory().type(type);
     }
 
@@ -144,5 +143,5 @@ public interface NodeMatcher<T extends Node> extends Predicate<Node> {
      * @return true if the node matched
      */
     @Override
-    boolean test(@NonNull Node node);
+    boolean test(Node node);
 }

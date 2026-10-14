@@ -113,6 +113,8 @@ public class FabricConnectionListener extends AbstractConnectionListener {
             this.plugin.getLogger().info("Processing login for " + player.getUUID() + " - " + player.getGameProfile().name());
         }
 
+        handleLoggedIn(player.getUUID());
+
         final User user = this.plugin.getUserManager().getIfLoaded(player.getUUID());
 
         /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */

@@ -26,4 +26,5 @@
 /**
  * Events relating to a player {@link java.util.UUID unique id} or username lookup.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.player.lookup;

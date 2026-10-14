@@ -68,7 +68,7 @@ import net.luckperms.rest.model.UpdateTrackRequest;
 import net.luckperms.rest.model.UpdateUserRequest;
 import net.luckperms.rest.model.UserLookupResult;
 import net.luckperms.rest.model.UserSearchResult;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import retrofit2.Response;
 
 import java.io.IOException;

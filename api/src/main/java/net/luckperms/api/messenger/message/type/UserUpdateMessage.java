@@ -26,12 +26,11 @@
 package net.luckperms.api.messenger.message.type;
 
 import net.luckperms.api.messenger.message.Message;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;
 
 /**
- * Represents an "user update" message.
+ * Represents a "user update" message.
  *
  * <p>Used to notify other servers of a change to a specific user.</p>
  */
@@ -42,6 +41,6 @@ public interface UserUpdateMessage extends Message {
      *
      * @return the user
      */
-    @NonNull UUID getUserUniqueId();
+    UUID getUserUniqueId();
 
 }

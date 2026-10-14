@@ -26,7 +26,7 @@
 package net.luckperms.api.cacheddata;
 
 import net.luckperms.api.node.Node;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents the result of a cached data lookup.
