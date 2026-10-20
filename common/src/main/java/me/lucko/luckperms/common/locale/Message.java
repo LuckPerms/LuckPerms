@@ -626,7 +626,7 @@ public interface Message {
     );
 
     Args1<String> USER_INVALID_ENTRY = invalid -> prefixed(translatable()
-            // "&4{}&c is not a valid username/uuid."
+            // "&4{}&c is not a valid username/uuid. To allow invalid usernames, set allow-invalid-usernames to true in the config."
             .key("luckperms.command.misc.loading.error.user-invalid")
             .color(RED)
             .args(text(invalid, DARK_RED))
