@@ -5,7 +5,7 @@
   "Description": "A permissions plugin",
   "Authors": [{"Name": "Luck"}],
   "Website": "https://luckperms.net",
-  "ServerVersion": "${hytaleVersion}",
+  "ServerVersion": "^${hytaleVersion}",
   "Dependencies": {},
   "OptionalDependencies": {},
   "DisabledByDefault": false,
