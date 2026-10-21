@@ -33,11 +33,9 @@ import me.lucko.luckperms.common.minecraft.MinecraftSenderFactory;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
-import me.lucko.luckperms.fabric.mixin.ServerLoginPacketListenerImplAccessor;
 import me.lucko.luckperms.fabric.model.MixinUser;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchronizer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.MinecraftServer;
@@ -45,42 +43,56 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FabricConnectionListener extends AbstractConnectionListener {
+    private static volatile FabricConnectionListener instance;
+
     private final LPFabricPlugin plugin;
+    private final Map<ServerLoginPacketListenerImpl, CompletableFuture<Boolean>> pendingLogins = new ConcurrentHashMap<>();
 
     public FabricConnectionListener(LPFabricPlugin plugin) {
         super(plugin);
         this.plugin = plugin;
+        instance = this;
     }
 
     public void registerListeners() {
-        ServerLoginConnectionEvents.QUERY_START.register(this::onPreLogin);
+        ServerLoginConnectionEvents.DISCONNECT.register(this::onLoginDisconnect);
         ServerPlayConnectionEvents.JOIN.register(this::onLogin);
         ServerPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
     }
 
-    private void onPreLogin(ServerLoginPacketListenerImpl netHandler, MinecraftServer server, PacketSender packetSender, LoginSynchronizer sync) {
-        /* Called when the player first attempts a connection with the server. */
+    public static boolean shouldContinueLogin(ServerLoginPacketListenerImpl netHandler, GameProfile profile) {
+        FabricConnectionListener listener = instance;
+        if (listener == null) {
+            throw new IllegalStateException("Fabric connection listener has not been initialized");
+        }
+        return listener.prepareLogin(netHandler, profile);
+    }
 
-        // Get their profile from the net handler - it should have been initialised by now.
-        GameProfile profile = ((ServerLoginPacketListenerImplAccessor) netHandler).getAuthenticatedProfile();
+    private boolean prepareLogin(ServerLoginPacketListenerImpl netHandler, GameProfile profile) {
+        CompletableFuture<Boolean> future = this.pendingLogins.computeIfAbsent(netHandler, ignored ->
+                CompletableFuture.supplyAsync(() -> loadUserForLogin(netHandler, profile), this.plugin.getBootstrap().getScheduler().async())
+                        .exceptionally(ex -> {
+                            Throwable cause = ex instanceof CompletionException && ex.getCause() != null ? ex.getCause() : ex;
+                            denyLogin(netHandler, profile.id(), profile.name(), cause);
+                            return false;
+                        })
+        );
+        return future.getNow(false);
+    }
+
+    private boolean loadUserForLogin(ServerLoginPacketListenerImpl netHandler, GameProfile profile) {
         UUID uniqueId = profile.id();
         String username = profile.name();
 
         if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Processing pre-login (sync phase) for " + uniqueId + " - " + username);
-        }
-
-        // Register with the LoginSynchronizer that we want to perform a task before the login proceeds.
-        sync.waitFor(CompletableFuture.runAsync(() -> onPreLoginAsync(netHandler, uniqueId, username), this.plugin.getBootstrap().getScheduler().async()));
-    }
-
-    private void onPreLoginAsync(ServerLoginPacketListenerImpl netHandler, UUID uniqueId, String username) {
-        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Processing pre-login (async phase) for " + uniqueId + " - " + username);
+            this.plugin.getLogger().info("Processing pre-login for " + uniqueId + " - " + username);
         }
 
         /* Actually process the login for the connection.
@@ -96,14 +108,23 @@ public class FabricConnectionListener extends AbstractConnectionListener {
             User user = loadUser(uniqueId, username);
             recordConnection(uniqueId);
             this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, user);
+            return true;
         } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + uniqueId + " - " + username, ex);
-
-            // deny the connection
-            Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
-            netHandler.disconnect(MinecraftSenderFactory.toNativeText(reason));
-            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, null);
+            denyLogin(netHandler, uniqueId, username, ex);
+            return false;
         }
+    }
+
+    private void denyLogin(ServerLoginPacketListenerImpl netHandler, UUID uniqueId, String username, Throwable cause) {
+        this.plugin.getLogger().severe("Exception occurred whilst loading data for " + uniqueId + " - " + username, cause);
+
+        Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
+        netHandler.disconnect(MinecraftSenderFactory.toNativeText(reason));
+        this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, null);
+    }
+
+    private void onLoginDisconnect(ServerLoginPacketListenerImpl netHandler, MinecraftServer server) {
+        this.pendingLogins.remove(netHandler);
     }
 
     private void onLogin(ServerGamePacketListenerImpl netHandler, PacketSender packetSender, MinecraftServer server) {

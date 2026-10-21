@@ -5,7 +5,7 @@
   "mixins": [
     "CommandsMixin",
     "CommandSourceStackAccessor",
-    "ServerLoginPacketListenerImplAccessor",
+    "ServerLoginPacketListenerImplMixin",
     "ServerPlayerMixin"
   ],
   "client": [
