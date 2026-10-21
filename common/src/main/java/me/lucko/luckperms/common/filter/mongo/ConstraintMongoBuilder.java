@@ -81,7 +81,8 @@ public class ConstraintMongoBuilder {
 
         int pageSize = params.pageSize();
         int pageNumber = params.pageNumber();
-        return iterable.limit(pageSize).skip((pageNumber - 1) * pageSize);
+        int skip = (int) Math.min((long) (pageNumber - 1) * pageSize, Integer.MAX_VALUE);
+        return iterable.limit(pageSize).skip(skip);
     }
 
 }
