@@ -294,9 +294,13 @@ public class LuckPermsPermissible extends PermissibleBase {
         // (#invalidate is a fast call)
         if (this.queryOptionsSupplier != null) { // this method is called by the super class constructor, before this class has fully initialised
             this.queryOptionsSupplier.invalidateCache();
-        }
 
-        // but we don't need to do anything else in this method, unlike the CB impl.
+            if (!this.plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED) &&
+                    !this.plugin.getConfiguration().get(ConfigKeys.AUTO_OP) &&
+                    this.player.isOp()) {
+                this.player.setOp(false);
+            }
+        }
     }
 
     @Override
