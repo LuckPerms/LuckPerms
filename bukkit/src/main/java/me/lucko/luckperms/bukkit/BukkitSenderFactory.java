@@ -106,7 +106,11 @@ public abstract class BukkitSenderFactory extends SenderFactory<LPBukkitPlugin, 
 
     @Override
     protected boolean isConsole(CommandSender sender) {
-        return sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender;
+        // The FeedbackForwardingSender returned by Bukkit#createCommandSender is backed by the
+        // console's permissions, but is not a ConsoleCommandSender, so it must be treated as one.
+        return sender instanceof ConsoleCommandSender
+                || sender instanceof RemoteConsoleCommandSender
+                || sender.getClass().getName().equals("io.papermc.paper.commands.FeedbackForwardingSender");
     }
 
     /**
