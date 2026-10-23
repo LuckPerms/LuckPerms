@@ -59,6 +59,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
+
+import org.spongepowered.api.Server;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
@@ -208,12 +210,12 @@ public class LPSpongePlugin extends AbstractLuckPermsPlugin {
         }
 
         @Listener
-        public void onPermissionServiceProvide(ProvideServiceEvent.EngineScoped<PermissionService> event) {
+        public void onPermissionServiceProvide(ProvideServiceEvent.EngineScoped<PermissionService, Server> event) {
             event.suggest(this.service::sponge);
         }
 
         @Listener
-        public void onContextServiceProvide(ProvideServiceEvent.EngineScoped<ContextService> event) {
+        public void onContextServiceProvide(ProvideServiceEvent.EngineScoped<ContextService, Server> event) {
             event.suggest(this.service::sponge);
         }
     }
