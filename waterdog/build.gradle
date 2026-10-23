@@ -1,0 +1,51 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
+repositories {
+    maven { url 'https://repo.waterdog.dev/main/' }
+    maven { url 'https://repo.opencollab.dev/main/' }
+}
+
+dependencies {
+    implementation project(':common')
+    compileOnly project(':common:loader-utils')
+
+    compileOnly 'dev.waterdog.waterdogpe:waterdog:2.0.4-SNAPSHOT'
+}
+
+shadowJar {
+    archiveFileName = 'luckperms-waterdog.jarinjar'
+
+    dependencies {
+        include(dependency('me.lucko.luckperms:.*'))
+
+        // WaterdogPE does not provide Guava on the plugin classpath (unlike Bukkit, BungeeCord,
+        // Nukkit and Velocity), so it has to be bundled. It is intentionally not relocated, as the
+        // common module references com.google.common directly.
+        include(dependency('com.google.guava:guava'))
+    }
+
+    relocate 'net.kyori.adventure', 'me.lucko.luckperms.lib.adventure'
+    relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
+    relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
+    relocate 'okio', 'me.lucko.luckperms.lib.okio'
+    relocate 'okhttp3', 'me.lucko.luckperms.lib.okhttp3'
+    relocate 'net.bytebuddy', 'me.lucko.luckperms.lib.bytebuddy'
+    relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
+    relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
+    relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
+    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
+    relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
+    relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
+    relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
+    relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
+    relocate 'io.nats.client', 'me.lucko.luckperms.lib.nats'
+    relocate 'com.rabbitmq', 'me.lucko.luckperms.lib.rabbitmq'
+    relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
+    relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
+}
+
+artifacts {
+    archives shadowJar
+}

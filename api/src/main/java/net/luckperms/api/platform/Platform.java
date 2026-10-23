@@ -73,6 +73,7 @@ public interface Platform {
         BUNGEECORD("BungeeCord"),
         SPONGE("Sponge"),
         NUKKIT("Nukkit"),
+        WATERDOG("Waterdog"),
         VELOCITY("Velocity"),
         FABRIC("Fabric"),
         NEOFORGE("NeoForge"),
