@@ -268,6 +268,7 @@ redis:
   address: localhost
   username: ''
   password: ''
+  ssl: false
 
 # Settings for Nats.
 # Port 4222 is used by default; set address to "host:port" if differs
@@ -277,6 +278,7 @@ nats:
   username: ''
   password: ''
   token: ''
+  ssl: false
 
 # Settings for RabbitMQ.
 # Port 5672 is used by default; set address to "host:port" if differs
