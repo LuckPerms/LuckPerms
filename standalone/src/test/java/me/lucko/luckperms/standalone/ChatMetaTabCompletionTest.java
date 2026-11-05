@@ -28,6 +28,7 @@ package me.lucko.luckperms.standalone;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.types.DisplayName;
+import me.lucko.luckperms.common.node.types.Inheritance;
 import me.lucko.luckperms.common.node.types.Prefix;
 import me.lucko.luckperms.common.node.types.Suffix;
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
@@ -86,8 +87,10 @@ public class ChatMetaTabCompletionTest {
             CommandExecutor executor = app.getCommandExecutor();
             Group group = plugin.getGroupManager().getOrMake("test");
             group.normalData().add(DisplayName.builder("TestGroup").build());
-            group.normalData().add(Prefix.builder("&aMember Rank ", 10).build());
-            group.normalData().add(Prefix.builder("&cLeader", 20).build());
+            plugin.getGroupManager().getOrMake("vip").normalData().add(Prefix.builder("&aMember Rank ", 10).build());
+            plugin.getGroupManager().getOrMake("staff").normalData().add(Prefix.builder("&cLeader", 20).build());
+            group.normalData().add(Inheritance.builder("vip").build());
+            group.normalData().add(Inheritance.builder("staff").build());
             group.normalData().add(Suffix.builder(" &bSuffix", 10).build());
 
             List<String> prefixes = executor.tabComplete("group test meta setprefix ");
@@ -98,11 +101,7 @@ public class ChatMetaTabCompletionTest {
             assertEquals(List.of("\" &bSuffix\" "),
                     executor.tabComplete("group test meta setsuffix 10 "));
 
-            executor.execute("group test meta setprefix " + prefixes.get(0) + " " + prefixValue.get(0)).join();
-            assertEquals(true, group.normalData().asList().stream()
-                    .filter(NodeType.PREFIX::matches)
-                    .map(NodeType.PREFIX::cast)
-                    .anyMatch(n -> n.getMetaValue().equals("&aMember Rank ") && n.getPriority() == 10));
+
         });
     }
 

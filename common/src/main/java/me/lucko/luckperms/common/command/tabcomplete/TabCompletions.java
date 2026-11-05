@@ -29,6 +29,7 @@ import com.google.common.base.Splitter;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.treeview.TreeNode;
 import me.lucko.luckperms.common.util.Predicates;
@@ -162,9 +163,9 @@ public final class TabCompletions {
                 return Collections.emptyList();
             }
 
-            List<ChatMetaNode> nodes = target.normalData().asList().stream()
-                    .filter(type.nodeType()::matches)
-                    .map(type.nodeType()::cast)
+            List<ChatMetaNode> nodes = target.resolveInheritedNodes(type.nodeType(), QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)
+                    .stream()
+                    .map(node -> (ChatMetaNode) node)
                     .collect(Collectors.toList());
 
             OptionalInt priority = getProvidedPriority(args);

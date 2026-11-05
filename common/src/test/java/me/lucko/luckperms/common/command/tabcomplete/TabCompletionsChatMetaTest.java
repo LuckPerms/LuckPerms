@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.command.tabcomplete;
 import me.lucko.luckperms.common.command.utils.ArgumentList;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.nodemap.RecordedNodeMap;
+import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.PrefixNode;
@@ -39,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,6 +51,10 @@ public class TabCompletionsChatMetaTest {
         RecordedNodeMap map = mock(RecordedNodeMap.class);
         when(map.asList()).thenReturn(Arrays.asList(nodes));
         when(holder.normalData()).thenReturn(map);
+        when(holder.resolveInheritedNodes(any(net.luckperms.api.node.NodeType.class), any(QueryOptions.class)))
+                .thenAnswer(invocation -> Arrays.asList(nodes).stream()
+                        .filter(invocation.<net.luckperms.api.node.NodeType<Node>>getArgument(0)::matches)
+                        .collect(java.util.stream.Collectors.toList()));
         return holder;
     }
 
