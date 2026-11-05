@@ -78,7 +78,8 @@ public class ConstraintSqlBuilder extends AbstractSqlBuilder {
 
         int pageSize = params.pageSize();
         int pageNumber = params.pageNumber();
-        this.builder.append(" LIMIT " + pageSize + " OFFSET " + (pageNumber - 1) * pageSize);
+        long offset = (long) (pageNumber - 1) * pageSize;
+        this.builder.append(" LIMIT " + pageSize + " OFFSET " + offset);
     }
 
 }

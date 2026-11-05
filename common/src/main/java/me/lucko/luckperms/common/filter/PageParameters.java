@@ -55,13 +55,13 @@ public class PageParameters {
     }
 
     public <T> List<T> paginate(List<T> input) {
-        int fromIndex = this.pageSize * (this.pageNumber - 1);
+        long fromIndex = (long) this.pageSize * (this.pageNumber - 1);
         if (fromIndex >= input.size()) {
             return Collections.emptyList();
         }
 
-        int toIndex = Math.min(fromIndex + this.pageSize, input.size());
-        return input.subList(fromIndex, toIndex);
+        int toIndex = (int) Math.min(fromIndex + this.pageSize, input.size());
+        return input.subList((int) fromIndex, toIndex);
     }
 
     public <T> Stream<T> paginate(Stream<T> input) {
@@ -73,7 +73,7 @@ public class PageParameters {
             return 0;
         }
 
-        return (totalEntries + this.pageSize - 1) / this.pageSize;
+        return (int) (((long) totalEntries + this.pageSize - 1) / this.pageSize);
     }
 
 }
