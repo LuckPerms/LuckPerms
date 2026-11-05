@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.model.HolderType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.CaffeineFactory;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +91,11 @@ public class GroupParentCommand extends ParentCommand<Group, String> {
     @Override
     protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
         return StorageAssistant.loadGroup(target, sender, plugin, true);
+    }
+
+    @Override
+    protected @Nullable Group getTabCompleteTarget(String target, LuckPermsPlugin plugin) {
+        return plugin.getGroupManager().getByDisplayName(target);
     }
 
     @Override

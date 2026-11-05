@@ -38,6 +38,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -81,6 +82,21 @@ public abstract class GenericChildCommand {
 
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
         return Collections.emptyList();
+    }
+
+    /**
+     * Tab completion method which also has access to the target of the command,
+     * if it could be resolved. The default implementation ignores the target and
+     * delegates to {@link #tabComplete(LuckPermsPlugin, Sender, ArgumentList)}.
+     *
+     * @param plugin the plugin instance
+     * @param sender the sender
+     * @param target the resolved command target, or null if it couldn't be resolved
+     * @param args the arguments
+     * @return the tab completions
+     */
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, @Nullable PermissionHolder target, ArgumentList args) {
+        return tabComplete(plugin, sender, args);
     }
 
     public CommandSpec getSpec() {

@@ -26,16 +26,24 @@
 package me.lucko.luckperms.common.command.tabcomplete;
 
 import com.google.common.base.Splitter;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.treeview.TreeNode;
 import me.lucko.luckperms.common.util.Predicates;
 import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.types.ChatMetaNode;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -138,6 +146,61 @@ public final class TabCompletions {
 
     public static CompletionSupplier contexts(LuckPermsPlugin plugin) {
         return plugin.getCommandManager().getTabCompletions().contexts;
+    }
+
+    /**
+     * Completes with existing chat meta priorities or values on the target holder.
+     * Multiple values start with their priorities; a single value can be completed
+     * directly. Values are quoted so spaces remain part of the argument.
+     *
+     * @param type the type of chat meta to complete (prefix or suffix)
+     * @param target the target holder, or null if it couldn't be resolved
+     * @param args the arguments of the command being completed
+     * @return the completion supplier
+     */
+    public static CompletionSupplier chatMeta(ChatMetaType type, @Nullable PermissionHolder target, ArgumentList args) {
+        return partial -> {
+            if (target == null) {
+                return Collections.emptyList();
+            }
+
+            List<ChatMetaNode> nodes = target.resolveInheritedNodes(type.nodeType(), QueryOptionsImpl.DEFAULT_NON_CONTEXTUAL)
+                    .stream()
+                    .map(node -> (ChatMetaNode) node)
+                    .collect(Collectors.toList());
+
+            OptionalInt priority = getProvidedPriority(args);
+            if (!priority.isPresent() && nodes.size() > 1) {
+                return nodes.stream()
+                        .map(ChatMetaNode::getPriority)
+                        .distinct()
+                        .sorted(Comparator.reverseOrder())
+                        .map(priorityValue -> Integer.toString(priorityValue))
+                        .filter(Predicates.startsWithIgnoreCase(partial))
+                        .collect(Collectors.toList());
+            }
+
+            String partialValue = partial.startsWith("\"") ? partial.substring(1) : partial;
+            return nodes.stream()
+                    .filter(n -> !priority.isPresent() || n.getPriority() == priority.getAsInt())
+                    .map(ChatMetaNode::getMetaValue)
+                    .distinct()
+                    .filter(Predicates.startsWithIgnoreCase(partialValue))
+                    .map(value -> "\"" + value + "\" ")
+                    .collect(Collectors.toList());
+        };
+    }
+
+    private static OptionalInt getProvidedPriority(ArgumentList args) {
+        if (args.size() <= 1) {
+            return OptionalInt.empty();
+        }
+        try {
+            return OptionalInt.of(Integer.parseInt(args.get(0)));
+        } catch (NumberFormatException e) {
+            // the first argument is a partial meta value, not a priority
+            return OptionalInt.empty();
+        }
     }
 
 }

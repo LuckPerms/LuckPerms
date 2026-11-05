@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -134,7 +135,7 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
                                 .filter(s -> s.isAuthorized(sender))
                                 .filter(s -> s.getName().equalsIgnoreCase(args.get(1)))
                                 .findFirst()
-                                .map(cmd -> cmd.tabComplete(plugin, sender, args.subList(2, args.size())))
+                                .map(cmd -> cmd.tabComplete(plugin, sender, getTabCompleteTarget(args.get(0), plugin), args.subList(2, args.size())))
                                 .orElse(Collections.emptyList())
                         )
                         .complete(args);
@@ -197,6 +198,22 @@ public abstract class ParentCommand<T, I> extends Command<Void> {
 
     protected T getTarget(I target, LuckPermsPlugin plugin, Sender sender) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Resolves a target for use during tab completion.
+     *
+     * <p>Unlike {@link #getTarget(Object, LuckPermsPlugin, Sender)}, this method
+     * should not perform any loading from storage or send any messages to the
+     * sender, and should simply return a target which is already loaded in
+     * memory, or null if one could not be found.</p>
+     *
+     * @param target the raw target argument
+     * @param plugin the plugin instance
+     * @return the resolved target, or null if it couldn't be resolved
+     */
+    protected @Nullable T getTabCompleteTarget(String target, LuckPermsPlugin plugin) {
+        return null;
     }
 
     protected void cleanup(T t, LuckPermsPlugin plugin) {

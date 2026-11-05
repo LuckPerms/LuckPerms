@@ -47,6 +47,7 @@ import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.ChatMetaType;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
@@ -144,9 +145,11 @@ public class MetaSetChatMeta extends GenericChildCommand {
     }
 
     @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, @Nullable PermissionHolder target, ArgumentList args) {
+        int metaIndex = args.size() > 1 && args.getIntOrDefault(0, Integer.MIN_VALUE) != Integer.MIN_VALUE ? 1 : 0;
         return TabCompleter.create()
-                .from(1, TabCompletions.contexts(plugin))
+                .at(metaIndex, TabCompletions.chatMeta(this.type, target, args))
+                .from(metaIndex + 1, TabCompletions.contexts(plugin))
                 .complete(args);
     }
 }

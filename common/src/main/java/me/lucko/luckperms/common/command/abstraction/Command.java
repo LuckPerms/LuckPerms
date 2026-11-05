@@ -153,6 +153,21 @@ public abstract class Command<T> {
     }
 
     /**
+     * Tab completion method which also has access to the resolved target of the
+     * command, if one is available. The default implementation ignores the
+     * target and delegates to {@link #tabComplete(LuckPermsPlugin, Sender, ArgumentList)}.
+     *
+     * @param plugin the plugin instance
+     * @param sender the sender
+     * @param target the resolved command target, or null if it couldn't be resolved
+     * @param args the arguments
+     * @return the tab completions
+     */
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, @Nullable T target, ArgumentList args) {
+        return tabComplete(plugin, sender, args);
+    }
+
+    /**
      * Sends a brief command usage message to the Sender.
      * If this command has child commands, the children are listed. Otherwise, a basic usage message is sent.
      *

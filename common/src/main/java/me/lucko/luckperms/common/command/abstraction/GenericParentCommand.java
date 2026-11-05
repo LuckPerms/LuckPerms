@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.Predicates;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -94,6 +95,11 @@ public class GenericParentCommand<T extends PermissionHolder> extends ChildComma
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, ArgumentList args) {
+        return tabComplete(plugin, sender, null, args);
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, @Nullable T target, ArgumentList args) {
         return TabCompleter.create()
                 .at(0, CompletionSupplier.startsWith(() -> this.children.stream()
                         .filter(s -> s.isAuthorized(sender, this.type))
@@ -103,7 +109,7 @@ public class GenericParentCommand<T extends PermissionHolder> extends ChildComma
                         .filter(s -> s.isAuthorized(sender, this.type))
                         .filter(s -> s.getName().equalsIgnoreCase(args.get(0)))
                         .findFirst()
-                        .map(cmd -> cmd.tabComplete(plugin, sender, args.subList(1, args.size())))
+                        .map(cmd -> cmd.tabComplete(plugin, sender, target, args.subList(1, args.size())))
                         .orElse(Collections.emptyList())
                 )
                 .complete(args);
