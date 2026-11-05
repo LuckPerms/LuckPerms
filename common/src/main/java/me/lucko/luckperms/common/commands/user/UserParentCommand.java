@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.util.CaffeineFactory;
 import me.lucko.luckperms.common.util.Uuids;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,6 +114,15 @@ public class UserParentCommand extends ParentCommand<User, UserIdentifier> {
         User user = plugin.getStorage().loadUser(target.getUniqueId(), target.getUsername().orElse(null)).join();
         user.auditTemporaryNodes();
         return user;
+    }
+
+    @Override
+    protected @Nullable User getTabCompleteTarget(String target, LuckPermsPlugin plugin) {
+        UUID uuid = Uuids.parse(target);
+        if (uuid != null) {
+            return plugin.getUserManager().getIfLoaded(uuid);
+        }
+        return plugin.getUserManager().getByUsername(target);
     }
 
     @Override

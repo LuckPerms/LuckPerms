@@ -26,16 +26,22 @@
 package me.lucko.luckperms.common.command.tabcomplete;
 
 import com.google.common.base.Splitter;
+import me.lucko.luckperms.common.command.utils.ArgumentList;
+import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionRegistry;
 import me.lucko.luckperms.common.treeview.TreeNode;
 import me.lucko.luckperms.common.util.Predicates;
 import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.node.ChatMetaType;
+import net.luckperms.api.node.types.ChatMetaNode;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -138,6 +144,60 @@ public final class TabCompletions {
 
     public static CompletionSupplier contexts(LuckPermsPlugin plugin) {
         return plugin.getCommandManager().getTabCompletions().contexts;
+    }
+
+    /**
+     * Completes with the chat meta values (prefixes or suffixes) which are
+     * currently set on the target holder, wrapped in quotes so that the whole
+     * value (including any spaces) is treated as a single argument.
+     *
+     * <p>If a priority has been provided as the first argument, only values set
+     * at that priority are completed. If the priority provided has no value set,
+     * nothing is completed.</p>
+     *
+     * @param type the type of chat meta to complete (prefix or suffix)
+     * @param target the target holder, or null if it couldn't be resolved
+     * @param args the arguments of the command being completed
+     * @return the completion supplier
+     */
+    public static CompletionSupplier chatMeta(ChatMetaType type, @Nullable PermissionHolder target, ArgumentList args) {
+        return partial -> {
+            if (target == null) {
+                return Collections.emptyList();
+            }
+
+            // check if the priority has been provided as the first argument
+            OptionalInt priority = getProvidedPriority(args);
+
+            // strip a leading quote from the partial, so that the existing value
+            // can still be matched when the user has started typing it
+            String partialValue = partial;
+            if (partialValue.startsWith("\"")) {
+                partialValue = partialValue.substring(1);
+            }
+
+            return target.normalData().asList().stream()
+                    .filter(type.nodeType()::matches)
+                    .map(type.nodeType()::cast)
+                    .filter(n -> !priority.isPresent() || n.getPriority() == priority.getAsInt())
+                    .map(ChatMetaNode::getMetaValue)
+                    .distinct()
+                    .filter(Predicates.startsWithIgnoreCase(partialValue))
+                    .map(value -> "\"" + value + "\" ")
+                    .collect(Collectors.toList());
+        };
+    }
+
+    private static OptionalInt getProvidedPriority(ArgumentList args) {
+        if (args.size() <= 1) {
+            return OptionalInt.empty();
+        }
+        try {
+            return OptionalInt.of(Integer.parseInt(args.get(0)));
+        } catch (NumberFormatException e) {
+            // the first argument is a partial meta value, not a priority
+            return OptionalInt.empty();
+        }
     }
 
 }
