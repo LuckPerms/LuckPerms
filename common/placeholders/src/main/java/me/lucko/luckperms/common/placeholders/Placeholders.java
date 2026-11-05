@@ -265,13 +265,7 @@ public final class Placeholders {
             return "";
         }
 
-        List<Group> groups = ctx.user().getNodes(NodeType.INHERITANCE).stream()
-                .filter(n -> track.containsGroup(n.getGroupName()))
-                .filter(n -> ctx.queryOptions().satisfies(n.getContexts()))
-                .distinct()
-                .map(n -> ctx.api().getGroupManager().getGroup(n.getGroupName()))
-                .collect(Collectors.toList());
-
+        List<Group> groups = getGroupsOnTrack(ctx, track);
         if (groups.size() != 1) {
             return "";
         }
@@ -286,13 +280,7 @@ public final class Placeholders {
             return "";
         }
 
-        List<Group> groups = ctx.user().getNodes(NodeType.INHERITANCE).stream()
-                .filter(n -> track.containsGroup(n.getGroupName()))
-                .filter(n -> ctx.queryOptions().satisfies(n.getContexts()))
-                .distinct()
-                .map(n -> ctx.api().getGroupManager().getGroup(n.getGroupName()))
-                .collect(Collectors.toList());
-
+        List<Group> groups = getGroupsOnTrack(ctx, track);
         if (groups.size() != 1) {
             return "";
         }
@@ -307,13 +295,7 @@ public final class Placeholders {
             return "";
         }
 
-        List<Group> groups = ctx.user().getNodes(NodeType.INHERITANCE).stream()
-                .filter(n -> track.containsGroup(n.getGroupName()))
-                .filter(n -> ctx.queryOptions().satisfies(n.getContexts()))
-                .distinct()
-                .map(n -> ctx.api().getGroupManager().getGroup(n.getGroupName()))
-                .collect(Collectors.toList());
-
+        List<Group> groups = getGroupsOnTrack(ctx, track);
         if (groups.size() != 1) {
             return "";
         }
@@ -420,6 +402,17 @@ public final class Placeholders {
 
     private static String stringNullToEmpty(String string) {
         return string == null ? "" : string;
+    }
+
+    private static List<Group> getGroupsOnTrack(PlaceholderContext ctx, Track track) {
+        return ctx.user().getNodes(NodeType.INHERITANCE).stream()
+                .filter(n -> ctx.queryOptions().satisfies(n.getContexts()))
+                .map(InheritanceNode::getGroupName)
+                .filter(track::containsGroup)
+                .distinct()
+                .map(name -> ctx.api().getGroupManager().getGroup(name))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     private static String convertGroupDisplayName(PlaceholderContext ctx, String groupName) {
