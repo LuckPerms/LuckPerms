@@ -147,13 +147,9 @@ public final class TabCompletions {
     }
 
     /**
-     * Completes with the chat meta values (prefixes or suffixes) which are
-     * currently set on the target holder, wrapped in quotes so that the whole
-     * value (including any spaces) is treated as a single argument.
-     *
-     * <p>If a priority has been provided as the first argument, only values set
-     * at that priority are completed. If the priority provided has no value set,
-     * nothing is completed.</p>
+     * Completes with existing chat meta priorities or values on the target holder.
+     * Multiple values start with their priorities; a single value can be completed
+     * directly. Values are quoted so spaces remain part of the argument.
      *
      * @param type the type of chat meta to complete (prefix or suffix)
      * @param target the target holder, or null if it couldn't be resolved
@@ -166,19 +162,22 @@ public final class TabCompletions {
                 return Collections.emptyList();
             }
 
-            // check if the priority has been provided as the first argument
-            OptionalInt priority = getProvidedPriority(args);
-
-            // strip a leading quote from the partial, so that the existing value
-            // can still be matched when the user has started typing it
-            String partialValue = partial;
-            if (partialValue.startsWith("\"")) {
-                partialValue = partialValue.substring(1);
-            }
-
-            return target.normalData().asList().stream()
+            List<ChatMetaNode> nodes = target.normalData().asList().stream()
                     .filter(type.nodeType()::matches)
                     .map(type.nodeType()::cast)
+                    .collect(Collectors.toList());
+
+            OptionalInt priority = getProvidedPriority(args);
+            if (!priority.isPresent() && nodes.size() > 1) {
+                return nodes.stream()
+                        .map(n -> Integer.toString(n.getPriority()))
+                        .distinct()
+                        .filter(Predicates.startsWithIgnoreCase(partial))
+                        .collect(Collectors.toList());
+            }
+
+            String partialValue = partial.startsWith("\"") ? partial.substring(1) : partial;
+            return nodes.stream()
                     .filter(n -> !priority.isPresent() || n.getPriority() == priority.getAsInt())
                     .map(ChatMetaNode::getMetaValue)
                     .distinct()

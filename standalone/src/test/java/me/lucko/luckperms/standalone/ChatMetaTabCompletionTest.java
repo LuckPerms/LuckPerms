@@ -64,12 +64,14 @@ public class ChatMetaTabCompletionTest {
             user.normalData().add(Prefix.builder("&7Admin", 2).build());
             user.normalData().add(Suffix.builder(" &aSuffix", 1).build());
 
-            assertEquals(Set.of("\"&8[&#ECC97DMember&8] \" ", "\"&7Admin\" "),
+            assertEquals(Set.of("1", "2"),
                     Set.copyOf(executor.tabComplete("user testuser meta setprefix ")));
             assertEquals(List.of("\"&8[&#ECC97DMember&8] \" "),
                     executor.tabComplete("user " + uniqueId + " meta setprefix 1 "));
+            assertEquals(List.of("2"),
+                    executor.tabComplete("user TestUser meta setprefix 2"));
             assertEquals(List.of("\"&7Admin\" "),
-                    executor.tabComplete("user TestUser meta setprefix &7a"));
+                    executor.tabComplete("user TestUser meta setprefix 2 "));
             assertEquals(List.of("\"&7Admin\" "),
                     executor.tabComplete("user TestUser meta setprefix 2 \"&7a"));
             assertEquals(List.of("\" &aSuffix\" "),
@@ -85,21 +87,22 @@ public class ChatMetaTabCompletionTest {
             Group group = plugin.getGroupManager().getOrMake("test");
             group.normalData().add(DisplayName.builder("TestGroup").build());
             group.normalData().add(Prefix.builder("&aMember Rank ", 10).build());
+            group.normalData().add(Prefix.builder("&cLeader", 20).build());
             group.normalData().add(Suffix.builder(" &bSuffix", 10).build());
 
             List<String> prefixes = executor.tabComplete("group test meta setprefix ");
-            assertEquals(List.of("\"&aMember Rank \" "), prefixes);
-            assertEquals(prefixes, executor.tabComplete("group TestGroup meta setprefix 10 "));
-            assertEquals(prefixes, executor.tabComplete("group test meta setprefix \"&amember R"));
+            assertEquals(Set.of("10", "20"), Set.copyOf(prefixes));
+            List<String> prefixValue = executor.tabComplete("group test meta setprefix 10 ");
+            assertEquals(List.of("\"&aMember Rank \" "), prefixValue);
+            assertEquals(prefixValue, executor.tabComplete("group test meta setprefix 10 \"&amember R"));
             assertEquals(List.of("\" &bSuffix\" "),
                     executor.tabComplete("group test meta setsuffix 10 "));
 
-            executor.execute("group test meta setprefix " + prefixes.get(0)).join();
-            assertEquals(List.of("&aMember Rank "), group.normalData().asList().stream()
+            executor.execute("group test meta setprefix " + prefixes.get(0) + " " + prefixValue.get(0)).join();
+            assertEquals(true, group.normalData().asList().stream()
                     .filter(NodeType.PREFIX::matches)
                     .map(NodeType.PREFIX::cast)
-                    .map(n -> n.getMetaValue())
-                    .toList());
+                    .anyMatch(n -> n.getMetaValue().equals("&aMember Rank ") && n.getPriority() == 10));
         });
     }
 

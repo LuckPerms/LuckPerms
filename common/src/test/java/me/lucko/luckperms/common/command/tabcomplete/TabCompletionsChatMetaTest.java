@@ -107,6 +107,19 @@ public class TabCompletionsChatMetaTest {
     }
 
     @Test
+    public void testCompletesPrioritiesWhenMultipleValuesAreSet() {
+        PermissionHolder holder = holderWithNodes(
+                prefix("&8Member", 1),
+                prefix("&7Admin", 2),
+                prefix("&6Owner", 2)
+        );
+
+        CompletionSupplier supplier = TabCompletions.chatMeta(ChatMetaType.PREFIX, holder, args(""));
+
+        assertEquals(Arrays.asList("1", "2"), supplier.supplyCompletions(""));
+    }
+
+    @Test
     public void testCompletesAllValuesWhenNoPriorityProvided() {
         PermissionHolder holder = holderWithNodes(
                 prefix("&8Member", 1),
@@ -115,7 +128,15 @@ public class TabCompletionsChatMetaTest {
 
         CompletionSupplier supplier = TabCompletions.chatMeta(ChatMetaType.PREFIX, holder, args(""));
 
-        assertEquals(Arrays.asList("\"&8Member\" ", "\"&7Admin\" "), supplier.supplyCompletions(""));
+        assertEquals(Arrays.asList("1", "2"), supplier.supplyCompletions(""));
+    }
+
+    @Test
+    public void testCompletesOnlyValueDirectlyWhenItIsTheOnlyOneSet() {
+        PermissionHolder holder = holderWithNodes(prefix("&8Member", 5));
+        CompletionSupplier supplier = TabCompletions.chatMeta(ChatMetaType.PREFIX, holder, args(""));
+
+        assertEquals(Collections.singletonList("\"&8Member\" "), supplier.supplyCompletions(""));
     }
 
     @Test
@@ -127,7 +148,7 @@ public class TabCompletionsChatMetaTest {
 
         CompletionSupplier supplier = TabCompletions.chatMeta(ChatMetaType.PREFIX, holder, args(""));
 
-        assertEquals(Collections.singletonList("\"&7Admin\" "), supplier.supplyCompletions("&7"));
+        assertEquals(Collections.singletonList("2"), supplier.supplyCompletions("2"));
     }
 
     @Test
@@ -150,7 +171,7 @@ public class TabCompletionsChatMetaTest {
 
         CompletionSupplier supplier = TabCompletions.chatMeta(ChatMetaType.PREFIX, holder, args(""));
 
-        assertEquals(Collections.singletonList("\"&8Member\" "), supplier.supplyCompletions(""));
+        assertEquals(Collections.singletonList("1"), supplier.supplyCompletions("1"));
     }
 
     @Test
