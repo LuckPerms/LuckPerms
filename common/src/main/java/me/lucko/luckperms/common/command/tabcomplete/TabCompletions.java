@@ -40,6 +40,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.OptionalInt;
@@ -171,8 +172,10 @@ public final class TabCompletions {
             OptionalInt priority = getProvidedPriority(args);
             if (!priority.isPresent() && nodes.size() > 1) {
                 return nodes.stream()
-                        .map(n -> Integer.toString(n.getPriority()))
+                        .map(ChatMetaNode::getPriority)
                         .distinct()
+                        .sorted(Comparator.reverseOrder())
+                        .map(priorityValue -> Integer.toString(priorityValue))
                         .filter(Predicates.startsWithIgnoreCase(partial))
                         .collect(Collectors.toList());
             }

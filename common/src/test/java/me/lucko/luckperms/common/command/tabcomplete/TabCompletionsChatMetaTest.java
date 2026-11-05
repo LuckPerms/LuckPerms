@@ -122,7 +122,7 @@ public class TabCompletionsChatMetaTest {
 
         CompletionSupplier supplier = TabCompletions.chatMeta(ChatMetaType.PREFIX, holder, args(""));
 
-        assertEquals(Arrays.asList("1", "2"), supplier.supplyCompletions(""));
+        assertEquals(Arrays.asList("2", "1"), supplier.supplyCompletions(""));
     }
 
     @Test
@@ -134,7 +134,7 @@ public class TabCompletionsChatMetaTest {
 
         CompletionSupplier supplier = TabCompletions.chatMeta(ChatMetaType.PREFIX, holder, args(""));
 
-        assertEquals(Arrays.asList("1", "2"), supplier.supplyCompletions(""));
+        assertEquals(Arrays.asList("2", "1"), supplier.supplyCompletions(""));
     }
 
     @Test

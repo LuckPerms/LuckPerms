@@ -65,8 +65,8 @@ public class ChatMetaTabCompletionTest {
             user.normalData().add(Prefix.builder("&7Admin", 2).build());
             user.normalData().add(Suffix.builder(" &aSuffix", 1).build());
 
-            assertEquals(Set.of("1", "2"),
-                    Set.copyOf(executor.tabComplete("user testuser meta setprefix ")));
+            assertEquals(List.of("2", "1"),
+                    executor.tabComplete("user testuser meta setprefix "));
             assertEquals(List.of("\"&8[&#ECC97DMember&8] \" "),
                     executor.tabComplete("user " + uniqueId + " meta setprefix 1 "));
             assertEquals(List.of("2"),
@@ -94,7 +94,7 @@ public class ChatMetaTabCompletionTest {
             group.normalData().add(Suffix.builder(" &bSuffix", 10).build());
 
             List<String> prefixes = executor.tabComplete("group test meta setprefix ");
-            assertEquals(Set.of("10", "20"), Set.copyOf(prefixes));
+            assertEquals(List.of("20", "10"), prefixes);
             List<String> prefixValue = executor.tabComplete("group test meta setprefix 10 ");
             assertEquals(List.of("\"&aMember Rank \" "), prefixValue);
             assertEquals(prefixValue, executor.tabComplete("group test meta setprefix 10 \"&amember R"));
