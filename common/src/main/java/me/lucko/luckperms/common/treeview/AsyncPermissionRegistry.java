@@ -36,12 +36,21 @@ public class AsyncPermissionRegistry extends PermissionRegistry implements AutoC
 
     /** A queue of permission strings to be added to the tree */
     private final Queue<String> queue;
-    /** The tick task */
-    private final SchedulerTask task;
+    /** The scheduler used to run the tick task */
+    private final SchedulerAdapter scheduler;
+    /** The tick task, null until started */
+    private SchedulerTask task;
 
     public AsyncPermissionRegistry(SchedulerAdapter scheduler) {
         this.queue = new ConcurrentLinkedQueue<>();
-        this.task = scheduler.asyncRepeating(this::tick, 1, TimeUnit.SECONDS);
+        this.scheduler = scheduler;
+    }
+
+    /**
+     * Starts the async tick task; must not be called before the platform has finished loading plugins.
+     */
+    public void start() {
+        this.task = this.scheduler.asyncRepeating(this::tick, 1, TimeUnit.SECONDS);
     }
 
     @Override
@@ -64,7 +73,9 @@ public class AsyncPermissionRegistry extends PermissionRegistry implements AutoC
 
     @Override
     public void close() {
-        this.task.cancel();
+        if (this.task != null) {
+            this.task.cancel();
+        }
     }
 
 }
