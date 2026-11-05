@@ -554,6 +554,8 @@ apply-nukkit-child-permissions: true
 # - Plugin authors can define permissions which should be given to all users by default, or setup
 #   permissions which should/shouldn't be given to opped players.
 # - If this option is set to false, LuckPerms will ignore these defaults.
+# - Opped players will then be granted any permission which isn't otherwise set, even if a plugin
+#   has defined it as not given to operators.
 apply-nukkit-default-permissions: true
 
 # If the plugin should apply attachment permissions.
@@ -629,6 +631,8 @@ auto-op: false
 # Defines if "opped" players should be able to use all LuckPerms commands by default.
 #
 # - Set to false to only allow users who have the permissions access to the commands
+# - This is implemented using Nukkit default permissions, so setting it to false only has an effect
+#   if the "apply-nukkit-default-permissions" option above is enabled.
 commands-allow-op: true
 
 # +----------------------------------------------------------------------------------------------+ #
