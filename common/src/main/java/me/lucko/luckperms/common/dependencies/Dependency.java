@@ -257,6 +257,13 @@ public enum Dependency {
             "WqlvAFCEE56xB32UtV3GQo7KfafizFPqtEp3M5H4qo8=",
             Relocation.of("rabbitmq", "com{}rabbitmq")
     ),
+    KAFKA(
+            "org{}apache{}kafka",
+            "kafka-clients",
+            "4.3.1",
+            "UlAbe0dRDGb4mIca2vbSloq3JGVh1EztQ2Q6ilh/CzY=",
+            Relocation.of("kafka", "org{}apache{}kafka")
+    ),
     COMMONS_POOL_2(
             "org.apache.commons",
             "commons-pool2",

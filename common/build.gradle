@@ -113,4 +113,5 @@ dependencies {
     compileOnly 'org.postgresql:postgresql:42.7.6'
     compileOnly 'org.yaml:snakeyaml:1.33'
     compileOnly 'net.luckperms:rest-api-java-client:0.1'
+    compileOnly 'org.apache.kafka:kafka-clients:4.3.1'
 }

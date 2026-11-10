@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.messaging;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
+import me.lucko.luckperms.common.messaging.kafka.KafkaMessenger;
 import me.lucko.luckperms.common.messaging.nats.NatsMessenger;
 import me.lucko.luckperms.common.messaging.postgres.PostgresMessenger;
 import me.lucko.luckperms.common.messaging.rabbitmq.RabbitMQMessenger;
@@ -72,6 +73,8 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                 messagingType = "rabbitmq";
             } else if (this.plugin.getConfiguration().get(ConfigKeys.NATS_ENABLED)) {
                 messagingType = "nats";
+            } else if (this.plugin.getConfiguration().get(ConfigKeys.KAFKA_ENABLED)) {
+                messagingType = "kafka";
             } else {
                 for (StorageImplementation implementation : this.plugin.getStorage().getImplementations()) {
                     if (implementation instanceof SqlStorage) {
@@ -149,6 +152,12 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
                 return new LuckPermsMessagingService(this.plugin, new PostgresMessengerProvider());
             } catch (Exception e) {
                 getPlugin().getLogger().severe("Exception occurred whilst enabling Postgres messaging service", e);
+            }
+        } else if (messagingType.equals("kafka")) {
+            try {
+                return new LuckPermsMessagingService(this.plugin, new KafkaMessengerProvider());
+            }  catch (Exception e) {
+                getPlugin().getLogger().severe("Exception occurred whilst enabling Kafka messaging service", e);
             }
         }
 
@@ -238,6 +247,24 @@ public class MessagingFactory<P extends LuckPermsPlugin> {
             }
 
             return redis;
+        }
+    }
+
+    private class KafkaMessengerProvider implements MessengerProvider {
+        @Override
+        public @NonNull String getName() {
+            return "Kafka";
+        }
+
+        @Override
+        public @NonNull Messenger obtain(@NonNull IncomingMessageConsumer incomingMessageConsumer) {
+            KafkaMessenger kafka = new KafkaMessenger(getPlugin(), incomingMessageConsumer);
+
+            LuckPermsConfiguration config = getPlugin().getConfiguration();
+            String address = config.get(ConfigKeys.KAFKA_ADDRESS);
+
+            kafka.init(address);
+            return kafka;
         }
     }
 

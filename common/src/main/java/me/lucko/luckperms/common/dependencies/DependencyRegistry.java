@@ -70,7 +70,7 @@ public class DependencyRegistry {
         this.platformType = platformType;
     }
 
-    public Set<Dependency> resolveStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats) {
+    public Set<Dependency> resolveStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats, boolean kafka) {
         Set<Dependency> dependencies = new LinkedHashSet<>();
         for (StorageType storageType : storageTypes) {
             dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));
@@ -89,6 +89,12 @@ public class DependencyRegistry {
 
         if (rabbitmq) {
             dependencies.add(Dependency.RABBITMQ);
+        }
+
+        if (kafka) {
+            dependencies.add(Dependency.KAFKA);
+            dependencies.add(Dependency.SLF4J_API);
+            dependencies.add(Dependency.SLF4J_SIMPLE);
         }
 
         // don't load slf4j if it's already present

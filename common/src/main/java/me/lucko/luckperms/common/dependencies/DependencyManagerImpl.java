@@ -131,8 +131,8 @@ public class DependencyManagerImpl implements DependencyManager {
     }
 
     @Override
-    public void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats) {
-        loadDependencies(this.registry.resolveStorageDependencies(storageTypes, redis, rabbitmq, nats));
+    public void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats, boolean kafka) {
+        loadDependencies(this.registry.resolveStorageDependencies(storageTypes, redis, rabbitmq, nats, kafka));
     }
 
     @Override

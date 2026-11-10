@@ -48,8 +48,9 @@ public interface DependencyManager extends AutoCloseable {
      * @param redis if redis is being used
      * @param rabbitmq if rabbitmq is being used
      * @param nats if nats is being used
+     * @param kafka if kafka is being used
      */
-    void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats);
+    void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats, boolean kafka);
 
     /**
      * Obtains an isolated classloader containing the given dependencies.

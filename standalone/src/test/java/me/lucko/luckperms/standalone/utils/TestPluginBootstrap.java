@@ -111,7 +111,7 @@ public final class TestPluginBootstrap extends LPStandaloneBootstrap {
         }
 
         @Override
-        public void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats) {
+        public void loadStorageDependencies(Set<StorageType> storageTypes, boolean redis, boolean rabbitmq, boolean nats, boolean kafka) {
 
         }
 

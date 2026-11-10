@@ -71,6 +71,7 @@ def deps = [
         [name: "jedis-5.2.0.jarinjar", url:  "https://repo1.maven.org/maven2/redis/clients/jedis/5.2.0/jedis-5.2.0.jar", sha256: "3U+9osED8xmrSVrbK8GQYTmEB0bP1MZrJ3ENGvmDgtQ="],
         [name: "nats-2.21.1.jarinjar", url:  "https://repo1.maven.org/maven2/io/nats/jnats/2.21.1/jnats-2.21.1.jar", sha256: "QHUHUCnCCy/oRSwoqhy0245SrvD4lwCfc+ZVmemHXLg="],
         [name: "rabbitmq-5.25.0.jarinjar", url:  "https://repo1.maven.org/maven2/com/rabbitmq/amqp-client/5.25.0/amqp-client-5.25.0.jar", sha256: "WqlvAFCEE56xB32UtV3GQo7KfafizFPqtEp3M5H4qo8="],
+        [name: "kafka-4.3.1.jarinjar", url:  "https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/4.3.1/kafka-clients-4.3.1.jar", sha256: "UlAbe0dRDGb4mIca2vbSloq3JGVh1EztQ2Q6ilh/CzY="],
         [name: "commons-pool-2-2.12.1.jarinjar", url:  "https://repo1.maven.org/maven2/org/apache/commons/commons-pool2/2.12.1/commons-pool2-2.12.1.jar", sha256: "UnPIvIwNyiIRF1wNJ++9cijvrplomqwAGo4e+Ohy6e8="],
         [name: "configurate-core-3.7.3.jarinjar", url:  "https://repo1.maven.org/maven2/org/spongepowered/configurate-core/3.7.3/configurate-core-3.7.3.jar", sha256: "06R3WDViB84WtSkHTudV8TSPxF1eQyCyfab8L7Pvo2M="],
         [name: "configurate-gson-3.7.3.jarinjar", url:  "https://repo1.maven.org/maven2/org/spongepowered/configurate-gson/3.7.3/configurate-gson-3.7.3.jar", sha256: "QM+bGrgrzfwT9nvIvTHtR2TUEpun+RwlXIO/a9BU0Mc="],

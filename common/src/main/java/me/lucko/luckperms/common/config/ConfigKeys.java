@@ -676,6 +676,16 @@ public final class ConfigKeys {
     public static final ConfigKey<Boolean> BROADCAST_RECEIVED_LOG_ENTRIES = notReloadable(booleanKey("broadcast-received-log-entries", false));
 
     /**
+     * If kafka messaging is enabled
+     */
+    public static final ConfigKey<Boolean> KAFKA_ENABLED = notReloadable(booleanKey("kafka.enabled", false));
+
+    /**
+     * The address of the kafka server
+     */
+    public static final ConfigKey<String> KAFKA_ADDRESS = notReloadable(stringKey("kafka.address", null));
+
+    /**
      * If redis messaging is enabled
      */
     public static final ConfigKey<Boolean> REDIS_ENABLED = notReloadable(booleanKey("redis.enabled", false));
