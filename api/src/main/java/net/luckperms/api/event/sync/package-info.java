@@ -26,4 +26,5 @@
 /**
  * Events relating to {@link net.luckperms.api.LuckPerms#runUpdateTask() sync/update task}s.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.sync;

@@ -60,6 +60,12 @@ public class LogSearch extends ChildCommand<Void> {
         }
 
         final String query = String.join(" ", args);
+
+        if (page < 1) {
+            Message.LOG_INVALID_PAGE_RANGE.send(sender, 1);
+            return;
+        }
+
         PageParameters pageParams = new PageParameters(ENTRIES_PER_PAGE, page);
         LogPage log = plugin.getStorage().getLogPage(ActionFilters.search(query), pageParams).join();
 
@@ -69,7 +75,7 @@ public class LogSearch extends ChildCommand<Void> {
             return;
         }
 
-        if (page < 1 || page > maxPage) {
+        if (page > maxPage) {
             Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
             return;
         }

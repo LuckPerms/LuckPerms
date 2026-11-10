@@ -28,7 +28,6 @@ package net.luckperms.api.messaging;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.event.messaging.CustomMessageReceiveEvent;
 import net.luckperms.api.model.user.User;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A means to send messages to other servers using the platforms networking
@@ -40,13 +39,13 @@ public interface MessagingService {
      *
      * @return the name of this messaging service
      */
-    @NonNull String getName();
+    String getName();
 
     /**
      * Uses the messaging service to inform other servers about a general
      * change.
      *
-     * <p>The standard response by other servers will be to execute a overall
+     * <p>The standard response by other servers will be to execute an overall
      * sync of all live data, equivalent to calling
      * {@link LuckPerms#runUpdateTask()}.</p>
      *
@@ -70,14 +69,14 @@ public interface MessagingService {
      *
      * @param user the user to push the update for
      */
-    void pushUserUpdate(@NonNull User user);
+    void pushUserUpdate(User user);
 
     /**
      * Uses the messaging service to send a message with a custom payload.
      *
      * <p>The intended use case of this functionality is to allow plugins/mods
      * to send <b>lightweight</b> and <b>permissions-related</b> custom messages
-     * between instances, piggy-backing on top of the messenger abstraction
+     * between instances, piggybacking on top of the messenger abstraction
      * already built into LuckPerms.</p>
      *
      * <p>It is <b>not</b> intended as a full message broker replacement/abstraction.
@@ -110,6 +109,6 @@ public interface MessagingService {
      * @param payload the message payload
      * @since 5.5
      */
-    void sendCustomMessage(@NonNull String channelId, @NonNull String payload);
+    void sendCustomMessage(String channelId, String payload);
 
 }

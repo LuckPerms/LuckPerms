@@ -38,14 +38,19 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class LuckPermsPermissionProvider implements PermissionProvider {
     private static final String PERMISSION_PROVIDER_NAME = "LuckPerms";
+
+    private static final String WILDCARD_PERMISSION = "*";
+    private static final String NEGATIVE_WILDCARD_PERMISSION = "-*";
 
     /** LuckPerms plugin */
     private final LPHytalePlugin plugin;
@@ -195,14 +200,63 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
                 : Set.of();
     }
 
+    @Override
+    public @NonNull Set<UUID> getUsersWithPermission(@NonNull String permission) {
+        Set<UUID> users = this.plugin.getUserManager().getAll().values().stream()
+                .filter(user -> userHasPermission(user, permission))
+                .map(User::getUniqueId)
+                .collect(Collectors.toSet());
+
+        if (this.delegateToHytaleProvider) {
+            users = new HashSet<>(users);
+            users.addAll(this.hytaleProvider.getUsersWithPermission(permission));
+        }
+
+        return users;
+    }
+
+    @Override
+    public @NonNull Set<UUID> addUserPermissions(@NonNull Collection<UUID> userUniqueIds, @NonNull Set<String> permissions) {
+        return this.delegateToHytaleProvider
+                ? this.hytaleProvider.addUserPermissions(userUniqueIds, permissions)
+                : Set.of();
+    }
+
+    @Override
+    public @NonNull Set<UUID> removeUserPermissionFromAll(@NonNull String permission) {
+        return this.delegateToHytaleProvider
+                ? this.hytaleProvider.removeUserPermissionFromAll(permission)
+                : Set.of();
+    }
+
     /**
-     * A permissions set that tricks {@link PermissionsModule#hasPermission(Set, String)} into always
-     * returning according to LuckPerms data.
+     * Checks if a LuckPerms user has a given permission, taking into account the possibility
+     * of inverted permissions (i.e., permissions that start with a '-').
+     *
+     * @param user the user
+     * @param permission the permission to check
+     * @return true if the user has the permission, false otherwise
+     */
+    private static boolean userHasPermission(User user, String permission) {
+        if (WILDCARD_PERMISSION.equals(permission) || NEGATIVE_WILDCARD_PERMISSION.equals(permission)) {
+            return false; // let LuckPerms handle wildcards itself
+        }
+
+        boolean inverted = false;
+        if (!permission.isEmpty() && permission.charAt(0) == '-') {
+            inverted = true;
+            permission = permission.substring(1);
+        }
+
+        Tristate result = user.getCachedData().getPermissionData().checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
+        return inverted != result.asBoolean();
+    }
+
+    /**
+     * A permissions set that makes {@link PermissionsModule#hasPermission(Set, String)} return
+     * results according to LuckPerms data.
      */
     private static final class LuckPermsPermissionsSet extends AbstractSet<String> {
-        private static final String WILDCARD_PERMISSION = "*";
-        private static final String NEGATIVE_WILDCARD_PERMISSION = "-*";
-
         private final User user;
 
         private LuckPermsPermissionsSet(User user) {
@@ -215,18 +269,7 @@ public class LuckPermsPermissionProvider implements PermissionProvider {
                 throw new IllegalArgumentException("Not a string: " + o);
             }
 
-            if (WILDCARD_PERMISSION.equals(permission) || NEGATIVE_WILDCARD_PERMISSION.equals(permission)) {
-                return false; // let LuckPerms handle wildcards itself
-            }
-
-            boolean inverted = false;
-            if (!permission.isEmpty() && permission.charAt(0) == '-') {
-                inverted = true;
-                permission = permission.substring(1);
-            }
-
-            Tristate result = this.user.getCachedData().getPermissionData().checkPermission(permission, CheckOrigin.PLATFORM_API_HAS_PERMISSION).result();
-            return inverted != result.asBoolean();
+            return userHasPermission(this.user, permission);
         }
 
         @Override

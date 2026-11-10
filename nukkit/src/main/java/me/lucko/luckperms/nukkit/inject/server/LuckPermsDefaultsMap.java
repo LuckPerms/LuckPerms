@@ -32,7 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.common.cache.Cache;
 import me.lucko.luckperms.nukkit.LPNukkitPlugin;
 import net.luckperms.api.util.Tristate;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collections;
 import java.util.HashMap;

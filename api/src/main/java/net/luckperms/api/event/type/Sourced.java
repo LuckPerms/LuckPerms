@@ -27,7 +27,6 @@ package net.luckperms.api.event.type;
 
 import net.luckperms.api.event.source.Source;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents an event with a {@link Source}.
@@ -42,6 +41,6 @@ public interface Sourced {
      *
      * @return the source
      */
-    @NonNull @Param(-1) Source getSource();
+    @Param(-1) Source getSource();
 
 }

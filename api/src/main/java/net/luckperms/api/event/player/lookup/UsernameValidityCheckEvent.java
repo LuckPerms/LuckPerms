@@ -27,7 +27,6 @@ package net.luckperms.api.event.player.lookup;
 
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -44,7 +43,7 @@ public interface UsernameValidityCheckEvent extends LuckPermsEvent {
      * @return the username
      */
     @Param(0)
-    @NonNull String getUsername();
+    String getUsername();
 
     /**
      * Gets the current validity state for the username.
@@ -52,7 +51,7 @@ public interface UsernameValidityCheckEvent extends LuckPermsEvent {
      * @return the validity state
      */
     @Param(1)
-    @NonNull AtomicBoolean validityState();
+    AtomicBoolean validityState();
 
     /**
      * Gets if the username is currently considered to be valid.

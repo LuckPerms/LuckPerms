@@ -27,4 +27,5 @@
  * Events relating to changes to a {@link net.luckperms.api.model.user.User} or
  * {@link net.luckperms.api.model.group.Group}s {@link net.luckperms.api.model.data.NodeMap}.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.node;

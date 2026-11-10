@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.node;
 
 import com.google.common.collect.ImmutableSet;
+import me.lucko.luckperms.common.node.utils.ShorthandParseException;
 import me.lucko.luckperms.common.node.utils.ShorthandParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,7 +36,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ShorthandParserTest {
 
@@ -44,6 +45,7 @@ public class ShorthandParserTest {
                 // numeric range
                 Arguments.of("{2-4}", new String[]{"2", "3", "4"}),
                 Arguments.of("{4-2}", new String[]{"2", "3", "4"}),
+                Arguments.of("{2147483647-2147483647}", new String[]{"2147483647"}),
 
                 // character range
                 Arguments.of("{a-d}", new String[]{"a", "b", "c", "d"}),
@@ -69,7 +71,7 @@ public class ShorthandParserTest {
 
     @ParameterizedTest
     @MethodSource
-    public void testParse(String shorthand, String[] expected) {
+    public void testParse(String shorthand, String[] expected) throws ShorthandParseException {
         Assertions.assertEquals(ImmutableSet.copyOf(expected), ShorthandParser.expandShorthand(shorthand));
     }
 
@@ -79,9 +81,11 @@ public class ShorthandParserTest {
             "{1000-1}",
             "{!-က}",
             "{က-!}",
+            "{1-100}{1-100}{1-100}",
+            "{5--2147483647}"
     })
     public void testTooManyElements(String shorthand) {
-        assertTrue(ShorthandParser.expandShorthand(shorthand).size() <= 1);
+        assertThrows(ShorthandParseException.class, () -> ShorthandParser.expandShorthand(shorthand));
     }
 
 }

@@ -44,7 +44,7 @@ import net.luckperms.api.event.cause.CreationCause;
 import net.luckperms.api.event.cause.DeletionCause;
 import net.luckperms.api.model.PlayerSaveResult;
 import net.luckperms.api.node.Node;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.messaging.message;
 
 import net.luckperms.api.messenger.message.Message;
 import net.luckperms.api.messenger.message.OutgoingMessage;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
 

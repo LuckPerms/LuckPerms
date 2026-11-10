@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.metastacking.MetaStackDefinition Meta stacking} functionality.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.metastacking;

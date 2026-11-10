@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.util;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.function.Predicate;

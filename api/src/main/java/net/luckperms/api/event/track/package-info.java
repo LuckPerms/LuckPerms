@@ -26,4 +26,5 @@
 /**
  * Events relating to {@link net.luckperms.api.track.Track}s.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.track;

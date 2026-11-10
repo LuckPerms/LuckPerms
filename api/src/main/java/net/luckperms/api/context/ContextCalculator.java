@@ -25,7 +25,7 @@
 
 package net.luckperms.api.context;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -38,8 +38,8 @@ import java.util.function.Function;
  * <ul>
  *     <li>Context lookups should be <i>fast</i>: lookup methods are likely to
  *     be invoked frequently, and should therefore be fast to execute. If
- *     determining the current contexts involves a particularly time consuming
- *     lookup (database queries, network requests, etc), then such results
+ *     determining the current contexts involves a particularly time-consuming
+ *     lookup (database queries, network requests, etc.), then such results
  *     should be cached ahead of time.</li>
  *
  *     <li>Context lookups should be <i>thread-safe</i>: lookups will sometimes
@@ -70,7 +70,7 @@ public interface ContextCalculator<T> {
      * @param <T> the contextual type
      * @return the resultant calculator
      */
-    static <T> @NonNull ContextCalculator<T> forSingleContext(@NonNull String key, @NonNull Function<T, String> valueFunction) {
+    static <T> ContextCalculator<T> forSingleContext(String key, Function<T, @Nullable String> valueFunction) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(valueFunction, "valueFunction");
         return (target, consumer) -> {
@@ -92,7 +92,7 @@ public interface ContextCalculator<T> {
      * @param target the target contextual subject for this operation
      * @param consumer the {@link ContextConsumer} to submit contexts to
      */
-    void calculate(@NonNull T target, @NonNull ContextConsumer consumer);
+    void calculate(T target, ContextConsumer consumer);
 
     /**
      * Gets a {@link ContextSet}, containing some/all of the contexts this
@@ -103,7 +103,7 @@ public interface ContextCalculator<T> {
      *
      * @return a set of potential contexts
      */
-    default @NonNull ContextSet estimatePotentialContexts() {
+    default ContextSet estimatePotentialContexts() {
         return ImmutableContextSet.empty();
     }
 

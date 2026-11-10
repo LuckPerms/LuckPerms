@@ -27,9 +27,8 @@ package net.luckperms.api.node;
 
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.temporal.TemporalAccessor;
@@ -53,7 +52,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @return the builder
      * @see Node#getValue()
      */
-    @NonNull B value(boolean value);
+    B value(boolean value);
 
     /**
      * Sets the value of negated for the node.
@@ -62,7 +61,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @return the builder
      * @see Node#isNegated()
      */
-    @NonNull B negated(boolean negated);
+    B negated(boolean negated);
 
     /**
      * Sets the time when the node should expire.
@@ -74,7 +73,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @return the builder
      * @see Node#getExpiry()
      */
-    @NonNull B expiry(long expiryEpochSeconds);
+    B expiry(long expiryEpochSeconds);
 
     /**
      * Sets the time when the node should expire.
@@ -83,7 +82,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @return the builder
      * @see Node#getExpiry()
      */
-    @NonNull B expiry(@Nullable TemporalAccessor expiry);
+    B expiry(@Nullable TemporalAccessor expiry);
 
     /**
      * Sets the time when the node should expire.
@@ -96,7 +95,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @see Node#getExpiry()
      * @since 5.1
      */
-    @NonNull B expiry(@Nullable TemporalAmount duration);
+    B expiry(@Nullable TemporalAmount duration);
 
     /**
      * Sets the time when the node should expire.
@@ -108,7 +107,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @param unit     the unit <code>duration</code> is measured in
      * @return the builder
      */
-    default @NonNull B expiry(long duration, @NonNull TimeUnit unit) {
+    default B expiry(long duration, TimeUnit unit) {
         if (duration <= 0) {
             throw new IllegalArgumentException("duration must be positive");
         }
@@ -121,7 +120,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      *
      * @return the builder
      */
-    @NonNull B clearExpiry();
+    B clearExpiry();
 
     /**
      * Sets the extra contexts for the node.
@@ -131,7 +130,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @see ContextSet
      * @see Node#getContexts()
      */
-    @NonNull B context(@NonNull ContextSet contextSet);
+    B context(ContextSet contextSet);
 
     /**
      * Appends an extra context onto the node.
@@ -142,7 +141,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @see ContextSet
      * @see Node#getContexts()
      */
-    @NonNull B withContext(@NonNull String key, @NonNull String value);
+    B withContext(String key, String value);
 
     /**
      * Appends extra contexts onto the node.
@@ -152,7 +151,7 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @see ContextSet
      * @see Node#getContexts()
      */
-    @NonNull B withContext(@NonNull ContextSet contextSet);
+    B withContext(ContextSet contextSet);
 
     /**
      * Sets the given metadata for the node.
@@ -162,12 +161,12 @@ public interface NodeBuilder<N extends ScopedNode<N, B>, B extends NodeBuilder<N
      * @param <T> the metadata type
      * @return the builder
      */
-    <T> @NonNull B withMetadata(@NonNull NodeMetadataKey<T> key, @Nullable T metadata);
+    <T> B withMetadata(NodeMetadataKey<T> key, @Nullable T metadata);
 
     /**
      * Creates a {@link Node} instance from the builder.
      *
      * @return a new node instance
      */
-    @NonNull N build();
+    N build();
 }

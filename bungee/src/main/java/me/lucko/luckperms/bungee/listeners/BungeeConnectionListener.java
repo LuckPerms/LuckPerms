@@ -118,6 +118,8 @@ public class BungeeConnectionListener extends AbstractConnectionListener impleme
             this.plugin.getLogger().info("Processing post-login for " + player.getUniqueId() + " - " + player.getName());
         }
 
+        handleLoggedIn(player.getUniqueId());
+
         if (user == null) {
             if (!getUniqueConnections().contains(player.getUniqueId())) {
                 this.plugin.getLogger().warn("User " + player.getUniqueId() + " - " + player.getName() +

@@ -28,7 +28,6 @@ package net.luckperms.api.node.types;
 import net.luckperms.api.node.ChatMetaType;
 import net.luckperms.api.node.NodeBuilder;
 import net.luckperms.api.node.ScopedNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a chat meta node. (a {@link PrefixNode} or {@link SuffixNode})
@@ -57,7 +56,7 @@ public interface ChatMetaNode<N extends ChatMetaNode<N, B>, B extends ChatMetaNo
      *
      * @return the type
      */
-    @NonNull ChatMetaType getMetaType();
+    ChatMetaType getMetaType();
 
     /**
      * A {@link ChatMetaNode} builder.
@@ -73,7 +72,7 @@ public interface ChatMetaNode<N extends ChatMetaNode<N, B>, B extends ChatMetaNo
          * @param priority the priority
          * @return the builder
          */
-        @NonNull B priority(int priority);
+        B priority(int priority);
 
     }
 

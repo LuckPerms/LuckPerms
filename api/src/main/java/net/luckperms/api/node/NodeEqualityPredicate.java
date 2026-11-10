@@ -25,8 +25,6 @@
 
 package net.luckperms.api.node;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import java.util.function.Predicate;
 
 /**
@@ -59,7 +57,7 @@ public interface NodeEqualityPredicate {
      * @param o2 the second node
      * @return true if equal
      */
-    boolean areEqual(@NonNull Node o1, @NonNull Node o2);
+    boolean areEqual(Node o1, Node o2);
 
     /**
      * Returns a {@link Predicate}, returning true if the tested node is equal
@@ -142,7 +140,7 @@ public interface NodeEqualityPredicate {
     NodeEqualityPredicate IGNORE_EXPIRY_TIME_AND_VALUE = new DummyNodeEqualityPredicate("IGNORE_EXPIRY_TIME_AND_VALUE");
 
     /**
-     * All attributes must match, except for {@link Node#getValue() value} and the if the node
+     * All attributes must match, except for {@link Node#getValue() value} and if the node
      * {@link Node#hasExpiry() has an expiry}, which are ignored.
      *
      * <p>Effectively only considers the key and the context.</p>

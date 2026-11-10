@@ -25,8 +25,8 @@
 
 package me.lucko.luckperms.common.placeholders;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * A placeholder definition.

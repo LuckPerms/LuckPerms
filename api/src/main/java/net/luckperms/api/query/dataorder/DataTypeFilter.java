@@ -27,7 +27,6 @@ package net.luckperms.api.query.dataorder;
 
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -101,7 +100,7 @@ public enum DataTypeFilter implements Predicate<DataType> {
      * @param predicate the predicate to filter with
      * @return the list of data types
      */
-    public static @NonNull List<DataType> values(@NonNull Predicate<? super DataType> predicate) {
+    public static List<DataType> values(Predicate<? super DataType> predicate) {
         boolean normal = predicate.test(DataType.NORMAL);
         boolean trans = predicate.test(DataType.TRANSIENT);
 

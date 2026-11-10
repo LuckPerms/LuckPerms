@@ -34,7 +34,6 @@ import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.RegexPermissionNode;
 import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -52,7 +51,8 @@ public interface NodeType<T extends Node> {
     NodeType<PermissionNode> PERMISSION = new SimpleNodeType<>(
             "PERMISSION",
             n -> n instanceof PermissionNode,
-            n -> (PermissionNode) n
+            n -> (PermissionNode) n,
+            7
     );
 
     /**
@@ -61,7 +61,8 @@ public interface NodeType<T extends Node> {
     NodeType<RegexPermissionNode> REGEX_PERMISSION = new SimpleNodeType<>(
             "REGEX_PERMISSION",
             n -> n instanceof RegexPermissionNode,
-            n -> (RegexPermissionNode) n
+            n -> (RegexPermissionNode) n,
+            6
     );
 
     /**
@@ -70,7 +71,8 @@ public interface NodeType<T extends Node> {
     NodeType<InheritanceNode> INHERITANCE = new SimpleNodeType<>(
             "INHERITANCE",
             n -> n instanceof InheritanceNode,
-            n -> (InheritanceNode) n
+            n -> (InheritanceNode) n,
+            0
     );
 
     /**
@@ -79,7 +81,8 @@ public interface NodeType<T extends Node> {
     NodeType<PrefixNode> PREFIX = new SimpleNodeType<>(
             "PREFIX",
             n -> n instanceof PrefixNode,
-            n -> (PrefixNode) n
+            n -> (PrefixNode) n,
+            1
     );
 
     /**
@@ -88,7 +91,8 @@ public interface NodeType<T extends Node> {
     NodeType<SuffixNode> SUFFIX = new SimpleNodeType<>(
             "SUFFIX",
             n -> n instanceof SuffixNode,
-            n -> (SuffixNode) n
+            n -> (SuffixNode) n,
+            2
     );
 
     /**
@@ -97,7 +101,8 @@ public interface NodeType<T extends Node> {
     NodeType<MetaNode> META = new SimpleNodeType<>(
             "META",
             n -> n instanceof MetaNode,
-            n -> (MetaNode) n
+            n -> (MetaNode) n,
+            3
     );
 
     /**
@@ -106,7 +111,8 @@ public interface NodeType<T extends Node> {
     NodeType<WeightNode> WEIGHT = new SimpleNodeType<>(
             "WEIGHT",
             n -> n instanceof WeightNode,
-            n -> (WeightNode) n
+            n -> (WeightNode) n,
+            4
     );
 
     /**
@@ -115,7 +121,8 @@ public interface NodeType<T extends Node> {
     NodeType<DisplayNameNode> DISPLAY_NAME = new SimpleNodeType<>(
             "DISPLAY_NAME",
             n -> n instanceof DisplayNameNode,
-            n -> (DisplayNameNode) n
+            n -> (DisplayNameNode) n,
+            5
     );
 
     /**
@@ -127,7 +134,8 @@ public interface NodeType<T extends Node> {
     NodeType<ChatMetaNode<?, ?>> CHAT_META = new SimpleNodeType<>(
             "CHAT_META",
             n -> n instanceof ChatMetaNode<?, ?>,
-            n -> (ChatMetaNode<?, ?>) n
+            n -> (ChatMetaNode<?, ?>) n,
+            -1
     );
 
     /**
@@ -139,7 +147,8 @@ public interface NodeType<T extends Node> {
     NodeType<Node> META_OR_CHAT_META = new SimpleNodeType<>(
             "META_OR_CHAT_META",
             n -> META.matches(n) || CHAT_META.matches(n),
-            Function.identity()
+            Function.identity(),
+            -1
     );
 
     /**
@@ -147,7 +156,7 @@ public interface NodeType<T extends Node> {
      *
      * @return a name
      */
-    @NonNull String name();
+    String name();
 
     /**
      * Returns if the passed node matches the type
@@ -155,7 +164,7 @@ public interface NodeType<T extends Node> {
      * @param node the node to test
      * @return true if the node has the same type
      */
-    boolean matches(@NonNull Node node);
+    boolean matches(Node node);
 
     /**
      * Casts the given {@link Node} to the type defined by the {@link NodeType}.
@@ -164,10 +173,10 @@ public interface NodeType<T extends Node> {
      * not {@link #matches(Node) match} the type.</p>
      *
      * @param node the node to cast
-     * @return the casted node
+     * @return the cast node
      * @throws IllegalArgumentException if the node to cast does not match the type
      */
-    @NonNull T cast(@NonNull Node node);
+    T cast(Node node);
 
     /**
      * Attempts to cast the given {@link Node} to the type defined by the
@@ -177,9 +186,9 @@ public interface NodeType<T extends Node> {
      * does not {@link #matches(Node) match} the type.</p>
      *
      * @param node the node to cast
-     * @return an optional, possibly containing a casted node
+     * @return an optional, possibly containing a cast node
      */
-    default @NonNull Optional<T> tryCast(@NonNull Node node) {
+    default Optional<T> tryCast(Node node) {
         Objects.requireNonNull(node, "node");
         if (!matches(node)) {
             return Optional.empty();
@@ -194,7 +203,7 @@ public interface NodeType<T extends Node> {
      *
      * @return a predicate for the {@link #matches(Node)} method.
      */
-    default @NonNull Predicate<Node> predicate() {
+    default Predicate<Node> predicate() {
         return this::matches;
     }
 
@@ -206,7 +215,7 @@ public interface NodeType<T extends Node> {
      * @param and a predicate to AND with the result of the type match check
      * @return a matching predicate, ANDed with the given predicate parameter
      */
-    default @NonNull Predicate<Node> predicate(@NonNull Predicate<? super T> and) {
+    default Predicate<Node> predicate(Predicate<? super T> and) {
         return node -> matches(node) && and.test(cast(node));
     }
 

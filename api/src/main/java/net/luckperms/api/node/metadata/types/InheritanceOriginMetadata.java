@@ -29,7 +29,6 @@ import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.metadata.NodeMetadataKey;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 /**
@@ -54,7 +53,7 @@ public interface InheritanceOriginMetadata {
      *
      * @return where the node was inherited from.
      */
-    PermissionHolder.@NonNull Identifier getOrigin();
+    PermissionHolder.Identifier getOrigin();
 
     /**
      * Gets the {@link DataType type} of the {@link net.luckperms.api.model.data.NodeMap}
@@ -63,7 +62,7 @@ public interface InheritanceOriginMetadata {
      * @return the type of the NodeMap the node was inherited from.
      * @since 5.4
      */
-    @NonNull DataType getDataType();
+    DataType getDataType();
 
     /**
      * Gets whether the associated node was inherited from another holder.
@@ -74,7 +73,7 @@ public interface InheritanceOriginMetadata {
      * @return if true the node was inherited, false if it was defined by the same holder
      * @since 5.3
      */
-    default boolean wasInherited(PermissionHolder.@NonNull Identifier holder) {
+    default boolean wasInherited(PermissionHolder.Identifier holder) {
         return !holder.equals(getOrigin());
     }
 

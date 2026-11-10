@@ -40,7 +40,7 @@ import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public class BungeePlayerCalculator implements ContextCalculator<ProxiedPlayer>, Listener {
     private final LPBungeePlugin plugin;

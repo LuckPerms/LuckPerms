@@ -92,8 +92,8 @@ public class HytaleCommandManager extends CommandManager {
         }
 
         @Override
-        protected boolean canGeneratePermission() {
-            return false;
+        public @Nullable String getPermission() {
+            return null;
         }
 
         @Override

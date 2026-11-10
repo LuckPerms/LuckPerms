@@ -25,8 +25,6 @@
 
 package net.luckperms.api.event.user.track;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 /**
  * Called when a user is promoted up a track.
  *
@@ -35,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public interface UserPromoteEvent extends UserTrackEvent {
 
     @Override
-    default @NonNull TrackAction getAction() {
+    default TrackAction getAction() {
         return TrackAction.PROMOTION;
     }
 }

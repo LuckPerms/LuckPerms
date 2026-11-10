@@ -28,4 +28,5 @@
  * ({@link net.luckperms.api.model.user.User}s and {@link net.luckperms.api.model.group.Group}s) and
  * their corresponding {@link net.luckperms.api.model.data.NodeMap data}.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.model;

@@ -50,8 +50,8 @@ import net.luckperms.api.messenger.message.type.ActionLogMessage;
 import net.luckperms.api.messenger.message.type.CustomMessage;
 import net.luckperms.api.messenger.message.type.UpdateMessage;
 import net.luckperms.api.messenger.message.type.UserUpdateMessage;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Set;

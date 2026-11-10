@@ -30,7 +30,6 @@ import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.type.Cancellable;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.platform.PlatformEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a log entry is about to be sent to specific notifiable object on
@@ -48,7 +47,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      * @return the log entry to be sent
      */
     @Param(0)
-    @NonNull Action getEntry();
+    Action getEntry();
 
     /**
      * Gets where the log entry originated from.
@@ -56,7 +55,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      * @return the origin of the log
      */
     @Param(1)
-    @NonNull Origin getOrigin();
+    Origin getOrigin();
 
     /**
      * Gets the object to be notified.
@@ -64,7 +63,7 @@ public interface LogNotifyEvent extends LuckPermsEvent, Cancellable {
      * @return the object to notify
      */
     @Param(2)
-    @NonNull PlatformEntity getNotifiable();
+    PlatformEntity getNotifiable();
 
     /**
      * Represents where a log entry is from

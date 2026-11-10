@@ -26,7 +26,6 @@
 package net.luckperms.api.messenger.message;
 
 import net.luckperms.api.messenger.Messenger;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 
 import java.util.UUID;
@@ -45,6 +44,6 @@ public interface Message {
      *
      * @return the id of the message
      */
-    @NonNull UUID getId();
+    UUID getId();
 
 }

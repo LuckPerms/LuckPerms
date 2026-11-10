@@ -45,6 +45,7 @@ import java.util.SortedSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -91,84 +92,80 @@ public class RecordedNodeMap implements NodeMap {
     public Difference<Node> addDefaultNodeToChangeSet() {
         Difference<Node> diff = new Difference<>();
         diff.recordChange(Difference.ChangeType.ADD, Inheritance.builder(GroupManager.DEFAULT_GROUP_NAME).build());
-        return record(diff);
+        return record(map -> diff);
     }
 
-    private Difference<Node> record(Difference<Node> result) {
+    private Difference<Node> record(Function<NodeMap, Difference<Node>> func) {
         this.lock.lock();
         try {
+            Difference<Node> result = func.apply(this.delegate);
             this.changes.mergeFrom(result);
+            return result;
         } finally {
             this.lock.unlock();
         }
-        return result;
     }
 
     // delegate, but pass the result through #record(MutateResult)
     
     @Override
     public Difference<Node> add(Node nodeWithoutInheritanceOrigin) {
-        return record(this.delegate.add(nodeWithoutInheritanceOrigin));
+        return record(map -> map.add(nodeWithoutInheritanceOrigin));
     }
 
     @Override
     public Difference<Node> remove(Node node) {
-        return record(this.delegate.remove(node));
+        return record(map -> map.remove(node));
     }
 
     @Override
     public Difference<Node> removeExact(Node node) {
-        return record(this.delegate.removeExact(node));
+        return record(map -> map.removeExact(node));
     }
 
     @Override
     public Difference<Node> removeIf(Predicate<? super Node> predicate) {
-        return record(this.delegate.removeIf(predicate));
+        return record(map -> map.removeIf(predicate));
     }
 
     @Override
     public Difference<Node> removeIf(ContextSet contextSet, Predicate<? super Node> predicate) {
-        return record(this.delegate.removeIf(contextSet, predicate));
+        return record(map -> map.removeIf(contextSet, predicate));
     }
 
     @Override
     public Difference<Node> removeThenAdd(Node nodeToRemove, Node nodeToAdd) {
-        return record(this.delegate.removeThenAdd(nodeToRemove, nodeToAdd));
+        return record(map -> map.removeThenAdd(nodeToRemove, nodeToAdd));
     }
 
     @Override
     public Difference<Node> clear() {
-        return record(this.delegate.clear());
+        return record(map -> map.clear());
     }
 
     @Override
     public Difference<Node> clear(ContextSet contextSet) {
-        return record(this.delegate.clear(contextSet));
+        return record(map -> map.clear(contextSet));
     }
 
     @Override
     public Difference<Node> setContent(Iterable<? extends Node> set) {
-        return record(this.delegate.setContent(set));
-    }
-
-    @Override
-    public Difference<Node> setContent(Stream<? extends Node> stream) {
-        return record(this.delegate.setContent(stream));
+        return record(map -> map.setContent(set));
     }
 
     @Override
     public Difference<Node> applyChanges(Difference<Node> changes) {
-        return record(this.delegate.applyChanges(changes));
+        return record(map -> map.applyChanges(changes));
     }
 
     @Override
     public Difference<Node> addAll(Iterable<? extends Node> set) {
-        return record(this.delegate.addAll(set));
+        return record(map -> map.addAll(set));
     }
 
     @Override
     public Difference<Node> addAll(Stream<? extends Node> stream) {
-        return record(this.delegate.addAll(stream));
+        return record(map -> map.addAll(stream));
     }
 
     // just plain delegation

@@ -28,9 +28,8 @@ package net.luckperms.api.model.group;
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.matcher.NodeMatcher;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -66,7 +65,7 @@ public interface GroupManager {
      * @return the resultant group
      * @throws NullPointerException if the name is null
      */
-    @NonNull CompletableFuture<Group> createAndLoadGroup(@NonNull String name);
+    CompletableFuture<Group> createAndLoadGroup(String name);
 
     /**
      * Loads a group from the plugin's storage provider into memory.
@@ -78,7 +77,7 @@ public interface GroupManager {
      * @return the resultant group
      * @throws NullPointerException if the name is null
      */
-    @NonNull CompletableFuture<Optional<Group>> loadGroup(@NonNull String name);
+    CompletableFuture<Optional<Group>> loadGroup(String name);
 
     /**
      * Saves a group's data back to the plugin's storage provider.
@@ -90,7 +89,7 @@ public interface GroupManager {
      * @throws NullPointerException  if group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    @NonNull CompletableFuture<Void> saveGroup(@NonNull Group group);
+    CompletableFuture<Void> saveGroup(Group group);
 
     /**
      * Permanently deletes a group from the plugin's storage provider.
@@ -100,7 +99,7 @@ public interface GroupManager {
      * @throws NullPointerException  if group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    @NonNull CompletableFuture<Void> deleteGroup(@NonNull Group group);
+    CompletableFuture<Void> deleteGroup(Group group);
 
     /**
      * Loads (or creates) a group from the plugin's storage provider, applies the given
@@ -115,7 +114,7 @@ public interface GroupManager {
      * @return a future to encapsulate the operation
      * @since 5.1
      */
-    default @NonNull CompletableFuture<Void> modifyGroup(@NonNull String name, @NonNull Consumer<? super Group> action) {
+    default CompletableFuture<Void> modifyGroup(String name, Consumer<? super Group> action) {
         /* This default method is overridden in the implementation, and is just here
            to demonstrate what this method does in the API sources. */
         return createAndLoadGroup(name)
@@ -128,7 +127,7 @@ public interface GroupManager {
      *
      * @return a future to encapsulate the operation.
      */
-    @NonNull CompletableFuture<Void> loadAllGroups();
+    CompletableFuture<Void> loadAllGroups();
 
     /**
      * Searches the {@link Group#data() normal node maps} of all known {@link Group}s for {@link Node}
@@ -138,7 +137,7 @@ public interface GroupManager {
      * @return the entries which matched
      * @since 5.1
      */
-    <T extends Node> @NonNull CompletableFuture<@Unmodifiable Map<String, Collection<T>>> searchAll(@NonNull NodeMatcher<? extends T> matcher);
+    <T extends Node> CompletableFuture<@Unmodifiable Map<String, Collection<T>>> searchAll(NodeMatcher<? extends T> matcher);
 
     /**
      * Searches for a list of groups with a given permission.
@@ -149,7 +148,7 @@ public interface GroupManager {
      * @deprecated Use {@link #searchAll(NodeMatcher)} instead
      */
     @Deprecated
-    @NonNull CompletableFuture<@Unmodifiable List<HeldNode<String>>> getWithPermission(@NonNull String permission);
+    CompletableFuture<@Unmodifiable List<HeldNode<String>>> getWithPermission(String permission);
 
     /**
      * Gets a loaded group.
@@ -158,14 +157,14 @@ public interface GroupManager {
      * @return a {@link Group} object, if one matching the name exists, or null if not
      * @throws NullPointerException if the name is null
      */
-    @Nullable Group getGroup(@NonNull String name);
+    @Nullable Group getGroup(String name);
 
     /**
      * Gets a set of all loaded groups.
      *
      * @return a {@link Set} of {@link Group} objects
      */
-    @NonNull @Unmodifiable Set<Group> getLoadedGroups();
+    @Unmodifiable Set<Group> getLoadedGroups();
 
     /**
      * Check if a group is loaded in memory
@@ -174,6 +173,6 @@ public interface GroupManager {
      * @return true if the group is loaded
      * @throws NullPointerException if the name is null
      */
-    boolean isLoaded(@NonNull String name);
+    boolean isLoaded(String name);
 
 }

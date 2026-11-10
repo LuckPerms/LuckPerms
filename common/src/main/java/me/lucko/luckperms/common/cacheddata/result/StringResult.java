@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.cacheddata.result;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.ChatMetaNode;
 import net.luckperms.api.node.types.MetaNode;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents the result of a meta lookup

@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.model;
 
 import net.luckperms.api.track.PromotionResult;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 import java.util.Optional;

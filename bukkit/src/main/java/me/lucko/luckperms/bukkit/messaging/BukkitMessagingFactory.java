@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.messaging.MessagingFactory;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
     public BukkitMessagingFactory(LPBukkitPlugin plugin) {

@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.config.generic.adapter;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class SystemPropertyConfigAdapter extends StringBasedConfigurationAdapter {
     private static final String PREFIX = "luckperms.";

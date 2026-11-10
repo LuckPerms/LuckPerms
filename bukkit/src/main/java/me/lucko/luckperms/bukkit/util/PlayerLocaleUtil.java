@@ -25,42 +25,55 @@
 
 package me.lucko.luckperms.bukkit.util;
 
+import me.lucko.luckperms.common.locale.TranslationManager;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Method;
+import java.util.Locale;
 import java.util.function.Function;
 
 public final class PlayerLocaleUtil {
     private PlayerLocaleUtil() {}
 
-    private static final Function<Player, String> GET_LOCALE_FUNCTION;
+    private static final Function<Player, Locale> GET_LOCALE_FUNCTION = getLocaleFunction();
 
-    static {
-        Function<Player, String> function;
+    private static Function<Player, Locale> getLocaleFunction() {
+        // modern Paper
         try {
-            // modern bukkit
-            Player.class.getMethod("getLocale");
-            function = Player::getLocale;
-        } catch (ReflectiveOperationException ex) {
-            try {
-                // legacy spigot method
-                Method legacyMethod = Player.Spigot.class.getMethod("getLocale");
-                function = player -> {
-                    try {
-                        return (String) legacyMethod.invoke(player.spigot());
-                    } catch (ReflectiveOperationException e) {
-                        throw new RuntimeException(e);
-                    }
-                };
-            } catch (ReflectiveOperationException e) {
-                // fallback
-                function = player -> null;
-            }
+            Player.class.getMethod("locale");
+            return Player::locale;
+        } catch (ReflectiveOperationException e) {
+            // ignore
         }
-        GET_LOCALE_FUNCTION = function;
+
+        // modern bukkit
+        try {
+            Player.class.getMethod("getLocale");
+            return player -> TranslationManager.parseLocale(player.getLocale());
+        } catch (ReflectiveOperationException e) {
+            // ignore
+        }
+
+        // legacy spigot method
+        try {
+            Method legacyMethod = Player.Spigot.class.getMethod("getLocale");
+            return player -> {
+                try {
+                    String localeString = (String) legacyMethod.invoke(player.spigot());
+                    return TranslationManager.parseLocale(localeString);
+                } catch (ReflectiveOperationException ex) {
+                    throw new RuntimeException(ex);
+                }
+            };
+        } catch (ReflectiveOperationException e) {
+            // ignore
+        }
+
+        // fallback
+        return player -> null;
     }
 
-    public static String getLocale(Player player) {
+    public static Locale getLocale(Player player) {
         return GET_LOCALE_FUNCTION.apply(player);
     }
 

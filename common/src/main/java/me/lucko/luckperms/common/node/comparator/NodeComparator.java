@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.node.comparator;
 
 import net.luckperms.api.node.Node;
+import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.PermissionNode;
 
 import java.util.Comparator;
@@ -49,8 +50,15 @@ public class NodeComparator implements Comparator<Node> {
             return 0;
         }
 
+        // compare node types - special types (inheritance, prefix, etc) have priority over standard permissions
+        //noinspection unchecked
+        int result = -((Comparable<NodeType<?>>) o1.getType()).compareTo(o2.getType());
+        if (result != 0) {
+            return result;
+        }
+
         // compare whether nodes are temporary - temporary has priority
-        int result = Boolean.compare(o1.hasExpiry(), o2.hasExpiry());
+        result = Boolean.compare(o1.hasExpiry(), o2.hasExpiry());
         if (result != 0) {
             return result;
         }

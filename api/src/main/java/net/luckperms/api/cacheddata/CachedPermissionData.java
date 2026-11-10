@@ -27,7 +27,6 @@ package net.luckperms.api.cacheddata;
 
 import net.luckperms.api.node.Node;
 import net.luckperms.api.util.Tristate;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Map;
@@ -52,7 +51,7 @@ public interface CachedPermissionData extends CachedData {
      * @throws NullPointerException if permission is null
      * @since 5.4
      */
-    @NonNull Result<Tristate, Node> queryPermission(@NonNull String permission);
+    Result<Tristate, Node> queryPermission(String permission);
 
     /**
      * Performs a permission check for the given {@code permission} node.
@@ -64,7 +63,7 @@ public interface CachedPermissionData extends CachedData {
      * @return a tristate result
      * @throws NullPointerException if permission is null
      */
-    default @NonNull Tristate checkPermission(@NonNull String permission) {
+    default Tristate checkPermission(String permission) {
         return queryPermission(permission).result();
     }
 
@@ -80,6 +79,6 @@ public interface CachedPermissionData extends CachedData {
      *
      * @return an immutable set of permissions
      */
-    @NonNull @Unmodifiable Map<String, Boolean> getPermissionMap();
+    @Unmodifiable Map<String, Boolean> getPermissionMap();
 
 }

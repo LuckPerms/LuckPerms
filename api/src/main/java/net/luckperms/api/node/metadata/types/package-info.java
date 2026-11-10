@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.node.Node} metadata types.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.node.metadata.types;

@@ -125,6 +125,8 @@ public class ForgeConnectionListener extends AbstractConnectionListener {
             this.plugin.getLogger().info("Processing post-login for " + profile.id() + " - " + profile.name());
         }
 
+        handleLoggedIn(player.getUUID());
+
         User user = this.plugin.getUserManager().getIfLoaded(profile.id());
 
         if (user == null) {

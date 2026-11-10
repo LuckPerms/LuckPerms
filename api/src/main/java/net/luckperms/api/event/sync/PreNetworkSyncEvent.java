@@ -28,8 +28,7 @@ package net.luckperms.api.event.sync;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.type.Cancellable;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -47,7 +46,7 @@ public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
      * @return the id of the sync request
      */
     @Param(0)
-    @NonNull UUID getSyncId();
+    UUID getSyncId();
 
     /**
      * Gets the sync type.
@@ -56,7 +55,7 @@ public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
      * @since 5.5
      */
     @Param(1)
-    @NonNull SyncType getType();
+    SyncType getType();
 
     /**
      * Gets the unique id of the specific user that will be synced, if applicable.

@@ -27,4 +27,5 @@
  * Context functionality, including {@link net.luckperms.api.context.ContextSet}s and
  * {@link net.luckperms.api.context.ContextCalculator}s.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.context;

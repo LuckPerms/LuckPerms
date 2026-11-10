@@ -133,6 +133,7 @@ public final class LPFabricBootstrap extends MinecraftLuckPermsBootstrap impleme
         // Register the Server startup/shutdown events now
         ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStarting);
         ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStopping);
+        ServerLifecycleEvents.SERVER_STOPPED.register(this::onServerStopped);
         this.plugin.registerFabricListeners();
     }
 
@@ -143,6 +144,15 @@ public final class LPFabricBootstrap extends MinecraftLuckPermsBootstrap impleme
     }
 
     private void onServerStopping(MinecraftServer server) {
+        this.plugin.disable();
+        this.server = null;
+    }
+
+    private void onServerStopped(MinecraftServer server) {
+        if (this.server == null) {
+            return;
+        }
+
         this.plugin.disable();
         this.server = null;
     }

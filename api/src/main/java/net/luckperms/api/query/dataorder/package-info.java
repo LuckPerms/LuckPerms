@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.query.QueryOptions} data order and filter customization.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.query.dataorder;

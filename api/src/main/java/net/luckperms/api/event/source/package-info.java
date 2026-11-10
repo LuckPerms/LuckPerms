@@ -26,4 +26,5 @@
 /**
  * Event sources.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.event.source;

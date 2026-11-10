@@ -28,7 +28,6 @@ package net.luckperms.api.query.dataorder;
 import net.luckperms.api.model.PermissionHolder;
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.query.OptionKey;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -52,7 +51,7 @@ public interface DataQueryOrderFunction {
      * @return the data query order function
      * @since 5.2
      */
-    static @NonNull DataQueryOrderFunction always(@NonNull Comparator<DataType> comparator) {
+    static DataQueryOrderFunction always(Comparator<DataType> comparator) {
         Objects.requireNonNull(comparator, "comparator");
         return id -> comparator;
     }
@@ -64,6 +63,6 @@ public interface DataQueryOrderFunction {
      * @param holderIdentifier the holder identifier
      * @return the comparator to use
      */
-    @NonNull Comparator<DataType> getOrderComparator(PermissionHolder.@NonNull Identifier holderIdentifier);
+    Comparator<DataType> getOrderComparator(PermissionHolder.Identifier holderIdentifier);
 
 }

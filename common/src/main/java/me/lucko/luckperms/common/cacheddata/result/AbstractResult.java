@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.cacheddata.result;
 
 import net.luckperms.api.cacheddata.Result;
 import net.luckperms.api.node.Node;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class AbstractResult<T, N extends Node, S extends AbstractResult<T, N, S>> implements Result<T, N> {
 

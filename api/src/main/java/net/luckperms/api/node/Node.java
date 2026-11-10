@@ -36,10 +36,9 @@ import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.RegexPermissionNode;
 import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -107,7 +106,7 @@ public interface Node {
      * @param key the key
      * @return the node builder
      */
-    static @NonNull NodeBuilder<?, ?> builder(@NonNull String key) {
+    static NodeBuilder<?, ?> builder(String key) {
         return LuckPermsProvider.get().getNodeBuilderRegistry().forKey(key);
     }
 
@@ -116,14 +115,14 @@ public interface Node {
      *
      * @return the node type
      */
-    @NonNull NodeType<?> getType();
+    NodeType<?> getType();
 
     /**
      * Gets the key ({@link String}) of the node.
      *
      * @return the key
      */
-    @NonNull String getKey();
+    String getKey();
 
     /**
      * Gets the value of the node.
@@ -153,7 +152,7 @@ public interface Node {
      *
      * @return a list of full nodes
      */
-    @NonNull @Unmodifiable Collection<String> resolveShorthand();
+    @Unmodifiable Collection<String> resolveShorthand();
 
     /**
      * Gets if this node is assigned temporarily.
@@ -195,7 +194,7 @@ public interface Node {
      *
      * @return the contexts required for this node to apply
      */
-    @NonNull ImmutableContextSet getContexts();
+    ImmutableContextSet getContexts();
 
     /**
      * Gets the metadata corresponding to the given <code>key</code>, if present.
@@ -204,7 +203,7 @@ public interface Node {
      * @param key the key
      * @return the data, if present
      */
-    <T> Optional<T> getMetadata(@NonNull NodeMetadataKey<T> key);
+    <T> Optional<T> getMetadata(NodeMetadataKey<T> key);
 
     /**
      * Gets the metadata corresponding to the given <code>key</code>, throwing an exception
@@ -215,7 +214,7 @@ public interface Node {
      * @return the data
      * @throws IllegalStateException if data isn't present
      */
-    default <T> T metadata(@NonNull NodeMetadataKey<T> key) throws IllegalStateException {
+    default <T> T metadata(NodeMetadataKey<T> key) throws IllegalStateException {
         return getMetadata(key).orElseThrow(() -> new IllegalStateException("Node '" + getKey() + "' does not have '" + key.name() + "' attached."));
     }
 
@@ -237,7 +236,7 @@ public interface Node {
      * @param equalityPredicate the predicate
      * @return true if this node is considered equal
      */
-    boolean equals(@NonNull Node other, @NonNull NodeEqualityPredicate equalityPredicate);
+    boolean equals(Node other, NodeEqualityPredicate equalityPredicate);
 
     /**
      * Gets a {@link NodeBuilder}, with the attributes of this node already
@@ -245,6 +244,6 @@ public interface Node {
      *
      * @return an editable, builder form of this node
      */
-    @NonNull NodeBuilder<?, ?> toBuilder();
+    NodeBuilder<?, ?> toBuilder();
 
 }

@@ -25,7 +25,6 @@
 
 package net.luckperms.api.metastacking;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public interface MetaStackFactory {
      * @param definition the definition
      * @return the parsed element, if present
      */
-    @NonNull Optional<MetaStackElement> fromString(@NonNull String definition);
+    Optional<MetaStackElement> fromString(String definition);
 
     /**
      * Parses a list of {@link MetaStackElement}s from string, using the pre-defined elements in the plugin.
@@ -52,7 +51,7 @@ public interface MetaStackFactory {
      * @param definitions the definition strings
      * @return a list of parsed elements
      */
-    @NonNull @Unmodifiable List<MetaStackElement> fromStrings(@NonNull List<String> definitions);
+    @Unmodifiable List<MetaStackElement> fromStrings(List<String> definitions);
 
     /**
      * Creates a new {@link MetaStackDefinition} with the given properties.
@@ -64,7 +63,7 @@ public interface MetaStackFactory {
      * @param endSpacer                the spacer to be included at the end of the stacks output
      * @return the new stack definition instance
      */
-    @NonNull MetaStackDefinition createDefinition(@NonNull List<MetaStackElement> elements, @NonNull DuplicateRemovalFunction duplicateRemovalFunction, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer);
+    MetaStackDefinition createDefinition(List<MetaStackElement> elements, DuplicateRemovalFunction duplicateRemovalFunction, String startSpacer, String middleSpacer, String endSpacer);
 
 
 }

@@ -30,7 +30,6 @@ import net.luckperms.api.event.type.Sourced;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.track.Track;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 
@@ -45,7 +44,7 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      * @return the track involved in the event
      */
     @Param(0)
-    @NonNull Track getTrack();
+    Track getTrack();
 
     /**
      * Gets the user who was promoted or demoted
@@ -53,14 +52,14 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      * @return the user involved in the event
      */
     @Param(1)
-    @NonNull User getUser();
+    User getUser();
 
     /**
      * Gets the action performed
      *
      * @return the action performed
      */
-    @NonNull TrackAction getAction();
+    TrackAction getAction();
 
     /**
      * Gets the group the user was promoted/demoted from.
@@ -70,7 +69,7 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      * @return the group the user was promoted/demoted from
      */
     @Param(2)
-    @NonNull Optional<String> getGroupFrom();
+    Optional<String> getGroupFrom();
 
     /**
      * Gets the group the user was promoted/demoted to
@@ -78,6 +77,6 @@ public interface UserTrackEvent extends LuckPermsEvent, Sourced {
      * @return the group the user was promoted/demoted to
      */
     @Param(3)
-    @NonNull Optional<String> getGroupTo();
+    Optional<String> getGroupTo();
 
 }

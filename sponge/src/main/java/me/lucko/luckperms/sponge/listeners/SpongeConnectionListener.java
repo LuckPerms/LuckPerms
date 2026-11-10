@@ -131,6 +131,8 @@ public class SpongeConnectionListener extends AbstractConnectionListener {
             this.plugin.getLogger().info("Processing login event for " + profile.uniqueId() + " - " + profile.name());
         }
 
+        handleLoggedIn(profile.uniqueId());
+
         final User user = this.plugin.getUserManager().getIfLoaded(profile.uniqueId());
 
         /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */

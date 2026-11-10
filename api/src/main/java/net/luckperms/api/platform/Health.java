@@ -42,9 +42,9 @@ public interface Health {
     boolean isHealthy();
 
     /**
-     * Gets extra metadata/details about the healthcheck result.
+     * Gets extra metadata/details about the health check result.
      *
-     * @return details about the healthcheck status
+     * @return details about the health check status
      */
     Map<String, Object> getDetails();
 

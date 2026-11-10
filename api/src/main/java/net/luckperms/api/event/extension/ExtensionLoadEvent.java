@@ -28,7 +28,6 @@ package net.luckperms.api.event.extension;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.extension.Extension;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when an {@link Extension} is loaded.
@@ -41,6 +40,6 @@ public interface ExtensionLoadEvent extends LuckPermsEvent {
      * @return the extension
      */
     @Param(0)
-    @NonNull Extension getExtension();
+    Extension getExtension();
 
 }

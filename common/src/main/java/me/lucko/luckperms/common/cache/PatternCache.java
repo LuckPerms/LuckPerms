@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.cache;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;

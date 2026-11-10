@@ -62,7 +62,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -285,24 +288,25 @@ public abstract class AbstractStorageTest {
 
         Group group = this.storage.createAndLoadGroup("test");
 
-        group.normalData().add(Permission.builder()
+        Node node1 = Permission.builder()
                 .permission("test.1")
                 .withContext("server", "test")
-                .build()
-        );
-        group.normalData().add(Permission.builder()
+                .build();
+        Node node2 = Permission.builder()
                 .permission("test.2")
                 .withContext("world", "test")
-                .build()
-        );
-        group.normalData().add(Permission.builder()
+                .build();
+        Node node3 = Permission.builder()
                 .permission("test.3")
                 .expiry(1, TimeUnit.HOURS)
                 .withContext("server", "test")
                 .withContext("world", "test")
                 .withContext("hello", "test")
-                .build()
-        );
+                .build();
+
+        group.normalData().add(node1);
+        group.normalData().add(node2);
+        group.normalData().add(node3);
 
         Set<Node> nodes = group.normalData().asSet();
         assertEquals(3, nodes.size());
@@ -314,6 +318,27 @@ public abstract class AbstractStorageTest {
         assertNotNull(loaded);
         assertNotSame(group, loaded);
         assertEquals(nodes, loaded.normalData().asSet());
+
+        // now edit the loaded group - removing a node and adding a new one - and ensure
+        // the resulting diff (produced via RecordedNodeMap#exportChanges) is persisted correctly
+        Node node4 = Permission.builder()
+                .permission("test.4")
+                .withContext("server", "test2")
+                .build();
+
+        loaded.normalData().remove(node2);
+        loaded.normalData().add(node4);
+
+        Set<Node> editedNodes = loaded.normalData().asSet();
+        assertEquals(ImmutableSet.of(node1, node3, node4), editedNodes);
+
+        this.storage.saveGroup(loaded);
+        groupManager.unload("test");
+
+        Group reloaded = this.storage.loadGroup("test").orElse(null);
+        assertNotNull(reloaded);
+        assertNotSame(loaded, reloaded);
+        assertEquals(editedNodes, reloaded.normalData().asSet());
     }
 
     @Test
@@ -356,6 +381,63 @@ public abstract class AbstractStorageTest {
         // reload user data from the db and assert that it is unchanged
         user = this.storage.loadUser(exampleUniqueId, exampleUsername);
         assertEquals(ImmutableSet.of(defaultGroupNode, examplePermission), user.normalData().asSet());
+
+        // now edit the user - removing a node and adding a new one - and ensure the
+        // resulting diff (produced via RecordedNodeMap#exportChanges) is persisted correctly
+        PermissionNode anotherPermission = Permission.builder()
+                .permission("test.2")
+                .withContext("world", "test")
+                .build();
+
+        user.normalData().remove(examplePermission);
+        user.normalData().add(anotherPermission);
+
+        Set<Node> editedNodes = user.normalData().asSet();
+        assertEquals(ImmutableSet.of(defaultGroupNode, anotherPermission), editedNodes);
+
+        this.storage.saveUser(user);
+        assertTrue(this.storage.getUniqueUsers().contains(exampleUniqueId));
+
+        user = this.storage.loadUser(exampleUniqueId, exampleUsername);
+        assertEquals(editedNodes, user.normalData().asSet());
+    }
+
+    @Test
+    public void testBulkLoadUsers() throws Exception {
+        StandardUserManager userManager = new StandardUserManager(this.plugin);
+
+        //noinspection unchecked,rawtypes
+        when(this.plugin.getUserManager()).thenReturn((UserManager) userManager);
+
+        Map<UUID, String> users = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            UUID uuid = UUID.randomUUID();
+            String username = "User" + i;
+            users.put(uuid, username);
+
+            this.storage.savePlayerData(uuid, username);
+
+            User user = this.storage.loadUser(uuid, username);
+            user.setNode(DataType.NORMAL, Permission.builder()
+                    .permission("test.1")
+                    .withContext("server", "test")
+                    .build(), true);
+            this.storage.saveUser(user);
+        }
+
+        userManager.retainAll(List.of());
+
+        Set<UUID> usersToLoad = new HashSet<>(users.keySet());
+        usersToLoad.add(UUID.randomUUID()); // add a user that doesn't exist
+
+        Map<UUID, User> loadedUsers = this.storage.loadUsers(usersToLoad);
+        assertEquals(usersToLoad.size(), loadedUsers.size());
+
+        UUID uuid = users.keySet().iterator().next();
+        User user = loadedUsers.get(uuid);
+        assertNotNull(user);
+
+        assertEquals(2, user.normalData().asList().size());
     }
 
 }

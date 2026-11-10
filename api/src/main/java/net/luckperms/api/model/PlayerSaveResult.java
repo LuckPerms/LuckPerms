@@ -26,16 +26,15 @@
 package net.luckperms.api.model;
 
 import net.luckperms.api.model.user.UserManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 /**
- * Encapsulates the result of an operation to save uuid data about a player.
+ * Encapsulates the result of an operation to save UUID data about a player.
  *
  * <p>The corresponding method can be found at
  * {@link UserManager#savePlayerData(UUID, String)}.</p>
@@ -47,7 +46,7 @@ public interface PlayerSaveResult {
      *
      * @return the status
      */
-    @NonNull @Unmodifiable Set<Outcome> getOutcomes();
+    @Unmodifiable Set<Outcome> getOutcomes();
 
     /**
      * Gets if the result includes a certain outcome.
@@ -55,7 +54,7 @@ public interface PlayerSaveResult {
      * @param outcome the outcome to check for
      * @return if the result includes the outcome
      */
-    default boolean includes(@NonNull Outcome outcome) {
+    default boolean includes(Outcome outcome) {
         Objects.requireNonNull(outcome, "outcome");
         return getOutcomes().contains(outcome);
     }
@@ -72,12 +71,12 @@ public interface PlayerSaveResult {
     @Nullable String getPreviousUsername();
 
     /**
-     * Gets the other uuids involved in the result.
+     * Gets the other UUIDs involved in the result.
      *
      * <p>Returns null when the result doesn't {@link #includes(Outcome) include} the
      * {@link Outcome#OTHER_UNIQUE_IDS_PRESENT_FOR_USERNAME} status.</p>
      *
-     * @return the other uuids
+     * @return the other UUIDs
      * @see Outcome#OTHER_UNIQUE_IDS_PRESENT_FOR_USERNAME
      */
     @Nullable @Unmodifiable Set<UUID> getOtherUniqueIds();
@@ -88,7 +87,7 @@ public interface PlayerSaveResult {
     enum Outcome {
 
         /**
-         * There was no existing data saved for either the uuid or username
+         * There was no existing data saved for either the UUID or username
          */
         CLEAN_INSERT,
 
@@ -105,7 +104,7 @@ public interface PlayerSaveResult {
         USERNAME_UPDATED,
 
         /**
-         * There was already a record for the username saved, but it was under a different uuid.
+         * There was already a record for the username saved, but it was under a different UUID.
          *
          * <p>This is a bit of a cause for concern. It's possible that "player1" has changed
          * their username to "player2", and "player3" has changed their username to "player1".

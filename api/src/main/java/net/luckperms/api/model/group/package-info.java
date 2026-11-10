@@ -26,4 +26,5 @@
 /**
  * {@link net.luckperms.api.model.group.Group} data model and functionality.
  */
+@org.jspecify.annotations.NullMarked
 package net.luckperms.api.model.group;

@@ -26,7 +26,6 @@
 package net.luckperms.api.event.source;
 
 import net.luckperms.api.platform.PlatformEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents the source of an event.
@@ -40,7 +39,7 @@ public interface Source {
      *
      * @return the type
      */
-    @NonNull Type getType();
+    Type getType();
 
     /**
      * Represents a type of source

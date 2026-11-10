@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.WeightNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Locale;
 import java.util.Map;

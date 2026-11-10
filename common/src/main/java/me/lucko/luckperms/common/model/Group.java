@@ -38,7 +38,7 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.DisplayNameNode;
 import net.luckperms.api.node.types.WeightNode;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Locale;
 import java.util.Optional;

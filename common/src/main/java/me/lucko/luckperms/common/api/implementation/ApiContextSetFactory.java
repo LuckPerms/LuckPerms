@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.context.MutableContextSetImpl;
 import net.luckperms.api.context.ContextSetFactory;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.context.MutableContextSet;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public class ApiContextSetFactory implements ContextSetFactory {
     public static final ApiContextSetFactory INSTANCE = new ApiContextSetFactory();

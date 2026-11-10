@@ -33,7 +33,6 @@ import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.RegexPermissionNode;
 import net.luckperms.api.node.types.SuffixNode;
 import net.luckperms.api.node.types.WeightNode;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
@@ -52,7 +51,7 @@ public interface NodeBuilderRegistry {
      * @return the node builder
      * @see Node#builder(String)
      */
-    @NonNull NodeBuilder<?, ?> forKey(String key);
+    NodeBuilder<?, ?> forKey(String key);
 
     /**
      * Gets a {@link NodeBuilder} for {@link PermissionNode}s.
@@ -62,7 +61,7 @@ public interface NodeBuilderRegistry {
      * @return the node builder
      * @see PermissionNode#builder()
      */
-    PermissionNode.@NonNull Builder forPermission();
+    PermissionNode.Builder forPermission();
 
     /**
      * Gets a {@link NodeBuilder} for {@link RegexPermissionNode}s.
@@ -72,7 +71,7 @@ public interface NodeBuilderRegistry {
      * @return the node builder
      * @see RegexPermissionNode#builder()
      */
-    RegexPermissionNode.@NonNull Builder forRegexPermission();
+    RegexPermissionNode.Builder forRegexPermission();
 
     /**
      * Gets a {@link NodeBuilder} for {@link InheritanceNode}s.
@@ -82,7 +81,7 @@ public interface NodeBuilderRegistry {
      * @return the node builder
      * @see InheritanceNode#builder()
      */
-    InheritanceNode.@NonNull Builder forInheritance();
+    InheritanceNode.Builder forInheritance();
 
     /**
      * Gets a {@link NodeBuilder} for {@link PrefixNode}s.
@@ -92,7 +91,7 @@ public interface NodeBuilderRegistry {
      * @return the node builder
      * @see PrefixNode#builder()
      */
-    PrefixNode.@NonNull Builder forPrefix();
+    PrefixNode.Builder forPrefix();
 
     /**
      * Gets a {@link NodeBuilder} for {@link SuffixNode}s.
@@ -102,7 +101,7 @@ public interface NodeBuilderRegistry {
      * @return the node builder
      * @see SuffixNode#builder()
      */
-    SuffixNode.@NonNull Builder forSuffix();
+    SuffixNode.Builder forSuffix();
 
     /**
      * Gets a {@link NodeBuilder} for {@link MetaNode}s.
@@ -112,7 +111,7 @@ public interface NodeBuilderRegistry {
      * @return the node builder
      * @see MetaNode#builder()
      */
-    MetaNode.@NonNull Builder forMeta();
+    MetaNode.Builder forMeta();
 
     /**
      * Gets a {@link NodeBuilder} for {@link WeightNode}s.
@@ -122,7 +121,7 @@ public interface NodeBuilderRegistry {
      * @return the node builder
      * @see WeightNode#builder()
      */
-    WeightNode.@NonNull Builder forWeight();
+    WeightNode.Builder forWeight();
 
     /**
      * Gets a {@link NodeBuilder} for {@link DisplayNameNode}s.
@@ -132,6 +131,6 @@ public interface NodeBuilderRegistry {
      * @return the node builder
      * @see DisplayNameNode#builder()
      */
-    DisplayNameNode.@NonNull Builder forDisplayName();
+    DisplayNameNode.Builder forDisplayName();
 
 }

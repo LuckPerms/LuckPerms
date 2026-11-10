@@ -28,7 +28,6 @@ package net.luckperms.api.event.messaging;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
 import net.luckperms.api.messaging.MessagingService;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Called when a custom payload message is received via the {@link MessagingService}.
@@ -46,7 +45,7 @@ public interface CustomMessageReceiveEvent extends LuckPermsEvent {
      * @return the channel id
      */
     @Param(0)
-    @NonNull String getChannelId();
+    String getChannelId();
 
     /**
      * Gets the custom payload that was sent.
@@ -54,6 +53,6 @@ public interface CustomMessageReceiveEvent extends LuckPermsEvent {
      * @return the custom payload
      */
     @Param(1)
-    @NonNull String getPayload();
+    String getPayload();
 
 }

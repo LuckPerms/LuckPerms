@@ -126,6 +126,8 @@ public class VelocityConnectionListener extends AbstractConnectionListener {
             this.plugin.getLogger().info("Processing post-login for " + player.getUniqueId() + " - " + player.getUsername());
         }
 
+        handleLoggedIn(player.getUniqueId());
+
         if (!e.getResult().isAllowed()) {
             return;
         }

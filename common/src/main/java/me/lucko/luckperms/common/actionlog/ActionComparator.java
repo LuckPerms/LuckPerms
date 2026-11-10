@@ -65,17 +65,12 @@ final class ActionComparator implements Comparator<Action> {
             return cmp;
         }
 
-        cmp = o1Target.getType().compareTo(o2Target.getType());
-        if (cmp != 0) {
-            return cmp;
-        }
-
         cmp = compareOptionals(o1Target.getUniqueId(), o2Target.getUniqueId());
         if (cmp != 0) {
             return cmp;
         }
 
-        cmp = o1Source.getName().compareTo(o2Source.getName());
+        cmp = o1Target.getName().compareTo(o2Target.getName());
         if (cmp != 0) {
             return cmp;
         }

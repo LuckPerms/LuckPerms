@@ -254,7 +254,15 @@ public class CommandsIntegrationTest {
 
                     .givenHasPermissions("luckperms.group.permission.info")
                     .whenRunCommand("group test permission info")
-                    .thenExpect("[LP] test does not have any permissions set.");
+                    .thenExpect("[LP] test does not have any permissions set.")
+
+                    .givenHasPermissions("luckperms.group.permission.set")
+                    .whenRunCommand("group test permission set {1-1000} true")
+                    .thenExpect("""
+                            [LP] Warning: Permission {1-1000} could not be parsed as shorthand: Range between 1 and 1000 exceeds limit of 250
+                            [LP] Set {1-1000} to true for test in context global.
+                            """
+                    );
         });
     }
 

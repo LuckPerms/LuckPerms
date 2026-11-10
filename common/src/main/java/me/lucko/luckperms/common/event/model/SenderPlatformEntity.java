@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.event.model;
 
 import me.lucko.luckperms.common.sender.Sender;
 import net.luckperms.api.platform.PlatformEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 

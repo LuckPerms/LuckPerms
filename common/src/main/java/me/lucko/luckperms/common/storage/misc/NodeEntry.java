@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.storage.misc;
 
 import net.luckperms.api.node.HeldNode;
 import net.luckperms.api.node.Node;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 @SuppressWarnings("deprecation")
 public final class NodeEntry<H extends Comparable<H>, N extends Node> implements HeldNode<H> {

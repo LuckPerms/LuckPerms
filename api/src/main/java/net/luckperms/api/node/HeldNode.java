@@ -26,7 +26,6 @@
 package net.luckperms.api.node;
 
 import net.luckperms.api.model.PermissionHolder;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * A relationship between a {@link PermissionHolder} and a {@link Node}.
@@ -42,13 +41,13 @@ public interface HeldNode<T> {
      *
      * @return the holder
      */
-    @NonNull T getHolder();
+    T getHolder();
 
     /**
      * Gets the node
      *
      * @return the node
      */
-    @NonNull Node getNode();
+    Node getNode();
 
 }

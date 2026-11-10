@@ -28,7 +28,6 @@ package net.luckperms.api.event.log;
 import net.luckperms.api.actionlog.Action;
 import net.luckperms.api.event.LuckPermsEvent;
 import net.luckperms.api.event.util.Param;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;
 
@@ -47,7 +46,7 @@ public interface LogReceiveEvent extends LuckPermsEvent {
      * @return the id of the log entry being received
      */
     @Param(0)
-    @NonNull UUID getLogId();
+    UUID getLogId();
 
     /**
      * Gets the log entry being received
@@ -55,6 +54,6 @@ public interface LogReceiveEvent extends LuckPermsEvent {
      * @return the log entry being received
      */
     @Param(1)
-    @NonNull Action getEntry();
+    Action getEntry();
 
 }

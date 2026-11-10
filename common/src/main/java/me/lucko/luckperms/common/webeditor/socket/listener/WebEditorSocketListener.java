@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.webeditor.socket.WebEditorSocket;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.EOFException;
 import java.security.PublicKey;

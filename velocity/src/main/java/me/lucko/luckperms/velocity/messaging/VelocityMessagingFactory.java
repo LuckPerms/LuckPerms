@@ -32,7 +32,7 @@ import me.lucko.luckperms.velocity.LPVelocityPlugin;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.MessengerProvider;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public class VelocityMessagingFactory extends MessagingFactory<LPVelocityPlugin> {
     public VelocityMessagingFactory(LPVelocityPlugin plugin) {

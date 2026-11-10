@@ -151,8 +151,6 @@ public interface NodeMap {
 
     Difference<Node> setContent(Iterable<? extends Node> set);
 
-    Difference<Node> setContent(Stream<? extends Node> stream);
-
     Difference<Node> applyChanges(Difference<Node> changes);
 
     Difference<Node> addAll(Iterable<? extends Node> set);

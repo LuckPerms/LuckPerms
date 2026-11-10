@@ -25,8 +25,7 @@
 
 package net.luckperms.api.platform;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -43,9 +42,9 @@ public interface PlatformEntity {
     /**
      * Gets the unique id of the entity, if it has one.
      *
-     * <p>For players, this returns their uuid assigned by the server.</p>
+     * <p>For players, this returns their UUID assigned by the server.</p>
      *
-     * @return the uuid of the object, if available
+     * @return the UUID of the object, if available
      */
     @Nullable UUID getUniqueId();
 
@@ -54,14 +53,14 @@ public interface PlatformEntity {
      *
      * @return the object name
      */
-    @NonNull String getName();
+    String getName();
 
     /**
      * Gets the entities type.
      *
      * @return the type
      */
-    @NonNull Type getType();
+    Type getType();
 
     /**
      * The different types of {@link PlatformEntity}

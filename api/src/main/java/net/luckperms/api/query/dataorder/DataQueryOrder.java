@@ -27,7 +27,6 @@ package net.luckperms.api.query.dataorder;
 
 import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -92,7 +91,7 @@ public enum DataQueryOrder implements Comparator<DataType> {
      * @param comparator the comparator
      * @return the ordered data types
      */
-    public static @NonNull List<DataType> order(@NonNull Comparator<? super DataType> comparator) {
+    public static List<DataType> order(Comparator<? super DataType> comparator) {
         int compare = comparator.compare(DataType.TRANSIENT, DataType.NORMAL);
         if (compare > 0) {
             // transient first
@@ -113,7 +112,7 @@ public enum DataQueryOrder implements Comparator<DataType> {
      * @param comparator the comparator
      * @param action the action
      */
-    public static void queryInOrder(@NonNull Comparator<? super DataType> comparator, @NonNull Consumer<? super DataType> action) {
+    public static void queryInOrder(Comparator<? super DataType> comparator, Consumer<? super DataType> action) {
         order(comparator).forEach(action);
     }
 
