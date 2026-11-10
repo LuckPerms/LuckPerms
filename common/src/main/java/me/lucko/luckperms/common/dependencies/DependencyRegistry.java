@@ -93,6 +93,8 @@ public class DependencyRegistry {
 
         if (kafka) {
             dependencies.add(Dependency.KAFKA);
+            dependencies.add(Dependency.SLF4J_API);
+            dependencies.add(Dependency.SLF4J_SIMPLE);
         }
 
         // don't load slf4j if it's already present

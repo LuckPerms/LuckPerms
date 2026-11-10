@@ -36,10 +36,13 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -138,65 +141,23 @@ public class KafkaMessenger implements Messenger {
 
 
     private KafkaProducer<String, byte[]> createProducer() {
-
         Properties properties = new Properties();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootstrapServers);
 
-        properties.put(
-                "bootstrap.servers",
-                bootstrapServers
-        );
-
-        properties.put(
-                "key.serializer",
-                "org.apache.kafka.common.serialization.StringSerializer"
-        );
-
-        properties.put(
-                "value.serializer",
-                ByteArraySerializer.class.getName()
-        );
-
-        return new KafkaProducer<>(properties);
+        return new KafkaProducer<>(properties, new StringSerializer(), new ByteArraySerializer());
     }
 
 
     private KafkaConsumer<String, byte[]> createConsumer() {
-
         Properties properties = new Properties();
-
-        properties.put(
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapServers
-        );
-
-        properties.put(
-                ConsumerConfig.GROUP_ID_CONFIG,
-                createConsumerGroup()
-        );
-
-        properties.put(
-                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                "org.apache.kafka.common.serialization.StringDeserializer"
-        );
-
-        properties.put(
-                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                ByteArrayDeserializer.class.getName()
-        );
-
-        properties.put(
-                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
-                "latest"
-        );
-
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootstrapServers);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, createConsumerGroup());
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 
         KafkaConsumer<String, byte[]> consumer =
-                new KafkaConsumer<>(properties);
+                new KafkaConsumer<>(properties, new StringDeserializer(), new ByteArrayDeserializer());
 
-        consumer.subscribe(
-                Collections.singletonList(TOPIC)
-        );
-
+        consumer.subscribe(Collections.singletonList(TOPIC));
         return consumer;
     }
 
