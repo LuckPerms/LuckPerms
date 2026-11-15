@@ -127,6 +127,6 @@ public class UserParentCommand extends ParentCommand<User, UserIdentifier> {
 
     @Override
     protected List<String> getTargets(LuckPermsPlugin plugin) {
-        return new ArrayList<>(plugin.getBootstrap().getPlayerList());
+        return new ArrayList<>(plugin.getEventDispatcher().dispatchPlayerListLookup(plugin.getBootstrap().getPlayerList()));
     }
 }
