@@ -65,6 +65,7 @@ import net.luckperms.api.event.node.NodeMutateEvent;
 import net.luckperms.api.event.node.NodeRemoveEvent;
 import net.luckperms.api.event.player.PlayerDataSaveEvent;
 import net.luckperms.api.event.player.PlayerLoginProcessEvent;
+import net.luckperms.api.event.player.lookup.PlayerListLookupEvent;
 import net.luckperms.api.event.player.lookup.UniqueIdDetermineTypeEvent;
 import net.luckperms.api.event.player.lookup.UniqueIdLookupEvent;
 import net.luckperms.api.event.player.lookup.UsernameLookupEvent;
@@ -98,8 +99,11 @@ import net.luckperms.api.model.data.DataType;
 import net.luckperms.api.node.Node;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -347,6 +351,12 @@ public final class EventDispatcher {
         postAsync(PlayerDataSaveEvent.class, uniqueId, username, result);
     }
 
+    public Set<String> dispatchPlayerListLookup(Collection<String> initial) {
+        Set<String> result = new LinkedHashSet<>(initial);
+        postSync(PlayerListLookupEvent.class, result);
+        return result;
+    }
+
     public String dispatchUniqueIdDetermineType(UUID uniqueId, String initialType) {
         AtomicReference<String> result = new AtomicReference<>(initialType);
         postSync(UniqueIdDetermineTypeEvent.class, result, uniqueId);
@@ -421,6 +431,7 @@ public final class EventDispatcher {
                 NodeRemoveEvent.class,
                 PlayerDataSaveEvent.class,
                 PlayerLoginProcessEvent.class,
+                PlayerListLookupEvent.class,
                 UniqueIdDetermineTypeEvent.class,
                 UniqueIdLookupEvent.class,
                 UsernameLookupEvent.class,
