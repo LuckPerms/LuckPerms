@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.storage.implementation.file;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import me.lucko.luckperms.common.actionlog.ActionJsonSerializer;
 import me.lucko.luckperms.common.actionlog.LogPage;
@@ -153,7 +154,10 @@ public class FileActionLogger {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
-                    JsonElement parsed = GsonProvider.parser().parse(line);
+                    JsonObject parsed = GsonProvider.parser().parse(line).getAsJsonObject();
+                    if (isMisplacedTargetEntry(parsed)) {
+                        continue;
+                    }
                     LoggedAction action = ActionJsonSerializer.deserialize(parsed);
                     if (filters.evaluate(action)) {
                         builder.add(action);
@@ -164,6 +168,12 @@ public class FileActionLogger {
             }
         }
         return builder.build();
+    }
+
+    // some 5.0 builds wrote the target's uniqueId and name next to the target object
+    // instead of inside it (fixed in #1844). These entries can't be read, so skip them.
+    private static boolean isMisplacedTargetEntry(JsonObject entry) {
+        return entry.has("target") && !entry.getAsJsonObject("target").has("name");
     }
 
     public LogPage getLogPage(FilterList<Action> filters, @Nullable PageParameters page) throws IOException {
