@@ -50,6 +50,7 @@ import me.lucko.luckperms.common.model.manager.user.UserManager;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
 import me.lucko.luckperms.common.plugin.logging.PluginLogger;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
+import me.lucko.luckperms.common.plugin.util.PlatformPermissionDefault;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.implementation.file.watcher.FileWatcher;
@@ -62,6 +63,7 @@ import net.luckperms.api.query.QueryOptions;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -319,6 +321,17 @@ public interface LuckPermsPlugin {
 
     default List<Command<?>> getExtraCommands() {
         return Collections.emptyList();
+    }
+
+    /**
+     * Gets the default values of the permissions registered on the platform.
+     *
+     * <p>Empty if the platform does not give permissions a default value.</p>
+     *
+     * @return the registered permissions and their default values
+     */
+    default Optional<Map<String, PlatformPermissionDefault>> getPermissionDefaults() {
+        return Optional.empty();
     }
 
     /**

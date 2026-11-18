@@ -28,6 +28,7 @@ package me.lucko.luckperms.standalone.utils;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender;
+import me.lucko.luckperms.common.plugin.util.PlatformPermissionDefault;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.standalone.LPStandaloneBootstrap;
@@ -37,6 +38,8 @@ import me.lucko.luckperms.standalone.app.integration.StandaloneSender;
 import me.lucko.luckperms.standalone.app.integration.StandaloneUser;
 
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
@@ -80,6 +83,7 @@ public final class TestPluginBootstrap extends LPStandaloneBootstrap {
 
     public static final class TestPlugin extends LPStandalonePlugin {
         private final Set<StandaloneSender> onlineSenders = new CopyOnWriteArraySet<>();
+        private Map<String, PlatformPermissionDefault> permissionDefaults = null;
 
         TestPlugin(LPStandaloneBootstrap bootstrap) {
             super(bootstrap);
@@ -100,6 +104,15 @@ public final class TestPluginBootstrap extends LPStandaloneBootstrap {
 
         public void addOnlineSender(StandaloneSender player) {
             this.onlineSenders.add(player);
+        }
+
+        @Override
+        public Optional<Map<String, PlatformPermissionDefault>> getPermissionDefaults() {
+            return Optional.ofNullable(this.permissionDefaults);
+        }
+
+        public void setPermissionDefaults(Map<String, PlatformPermissionDefault> permissionDefaults) {
+            this.permissionDefaults = permissionDefaults;
         }
     }
 

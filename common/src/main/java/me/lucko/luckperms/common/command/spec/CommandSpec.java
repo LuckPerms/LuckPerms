@@ -63,6 +63,10 @@ public enum CommandSpec {
             arg("permission", true),
             arg("page", false)
     ),
+    LIST_DEFAULTS("/%s listdefaults",
+            arg("default", false),
+            arg("page", false)
+    ),
     NETWORK_SYNC("/%s networksync"),
     IMPORT("/%s import <file>",
             arg("file", true),

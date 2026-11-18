@@ -40,6 +40,7 @@ public class CommandPermissionTest {
             CommandPermission.VERBOSE,
             CommandPermission.TREE,
             CommandPermission.SEARCH,
+            CommandPermission.LIST_DEFAULTS,
             CommandPermission.EXPORT,
             CommandPermission.RELOAD_CONFIG,
             CommandPermission.TRANSLATIONS,

@@ -29,6 +29,11 @@ luckperms {
   search {
     permission brigadier:string quotable_phrase;
   }
+  listdefaults {
+    default brigadier:string single_word {
+      page brigadier:integer;
+    }
+  }
   networksync;
   import {
     file brigadier:string quotable_phrase;

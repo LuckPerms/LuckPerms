@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.types.Inheritance;
+import me.lucko.luckperms.common.plugin.util.PlatformPermissionDefault;
 import me.lucko.luckperms.standalone.app.integration.CommandExecutor;
 import me.lucko.luckperms.standalone.utils.CommandTester;
 import me.lucko.luckperms.standalone.utils.TestPluginProvider;
@@ -1435,6 +1436,85 @@ public class CommandsIntegrationTest {
                     .givenHasAllPermissions()
                     .whenRunCommand("group default permission set test true")
                     .thenExpect("[LP] You do not have permission to use this command!");
+        });
+    }
+
+    @Test
+    public void testListDefaults(@TempDir Path tempDir) {
+        TestPluginProvider.use(tempDir, CONFIG, (app, bootstrap, plugin) -> {
+            CommandExecutor executor = app.getCommandExecutor();
+
+            new CommandTester(executor)
+                    .givenHasPermissions("luckperms.listdefaults")
+                    .whenRunCommand("listdefaults")
+                    .thenExpect("[LP] This platform does not give permissions default values.");
+
+            Map<String, PlatformPermissionDefault> defaults = new HashMap<>();
+            defaults.put("example.build", PlatformPermissionDefault.TRUE);
+            defaults.put("example.admin", PlatformPermissionDefault.OP);
+            defaults.put("Example.Reload", PlatformPermissionDefault.OP);
+            defaults.put("example.prevent.fly", PlatformPermissionDefault.FALSE);
+            defaults.put("example.guest", PlatformPermissionDefault.NOT_OP);
+            for (int i = 10; i < 25; i++) {
+                defaults.put("example.home." + i, PlatformPermissionDefault.TRUE);
+            }
+            plugin.setPermissionDefaults(defaults);
+
+            new CommandTester(executor)
+                    .givenHasPermissions("luckperms.listdefaults")
+                    .whenRunCommand("listdefaults op")
+                    .thenExpect("""
+                            [LP] Showing permissions that default to op:    (page 1 of 1 - 2 entries)
+                            > example.admin - op
+                            > Example.Reload - op
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.listdefaults")
+                    .whenRunCommand("listdefaults NOT_OP")
+                    .thenExpect("""
+                            [LP] Showing permissions that default to not_op:    (page 1 of 1 - 1 entries)
+                            > example.guest - not_op
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.listdefaults")
+                    .whenRunCommand("listdefaults true 2")
+                    .thenExpect("""
+                            [LP] Showing permissions that default to true:    (page 2 of 2 - 16 entries)
+                            > example.home.24 - true
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.listdefaults")
+                    .whenRunCommand("listdefaults 2")
+                    .thenExpect("""
+                            [LP] Showing permission defaults:    (page 2 of 2 - 20 entries)
+                            > example.home.22 - true
+                            > example.home.23 - true
+                            > example.home.24 - true
+                            > example.prevent.fly - false
+                            > Example.Reload - op
+                            """
+                    )
+
+                    .givenHasPermissions("luckperms.listdefaults")
+                    .whenRunCommand("listdefaults sometimes")
+                    .thenExpect("""
+                            [LP] Command Usage - ListDefaults
+                            [LP] > Lists the permissions registered on the platform and the value each one has by default
+                            [LP] Arguments:
+                            [LP] - [default] -> only show permissions with this default value (true, false, op or not_op)
+                            [LP] - [page] -> the page to view
+                            """
+                    );
+
+            plugin.setPermissionDefaults(new HashMap<>());
+
+            new CommandTester(executor)
+                    .givenHasPermissions("luckperms.listdefaults")
+                    .whenRunCommand("listdefaults")
+                    .thenExpect("[LP] No permissions were found.");
         });
     }
 
