@@ -39,6 +39,7 @@ public enum CommandPermission {
     VERBOSE_COMMAND_OTHERS("verbose.command.others", Type.NONE, false),
     TREE("tree", Type.NONE, true),
     SEARCH("search", Type.NONE, true),
+    LIST_DEFAULTS("listdefaults", Type.NONE, true),
     IMPORT("import", Type.NONE, false),
     EXPORT("export", Type.NONE, true),
     RELOAD_CONFIG("reloadconfig", Type.NONE, true),

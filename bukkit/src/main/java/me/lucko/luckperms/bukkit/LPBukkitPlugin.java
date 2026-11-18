@@ -59,6 +59,7 @@ import me.lucko.luckperms.common.model.manager.track.StandardTrackManager;
 import me.lucko.luckperms.common.model.manager.user.StandardUserManager;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener;
+import me.lucko.luckperms.common.plugin.util.PlatformPermissionDefault;
 import me.lucko.luckperms.common.sender.Sender;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.query.QueryOptions;
@@ -72,7 +73,9 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -377,6 +380,29 @@ public class LPBukkitPlugin extends AbstractLuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         return getSenderFactory().wrap(this.bootstrap.getConsole());
+    }
+
+    @Override
+    public Optional<Map<String, PlatformPermissionDefault>> getPermissionDefaults() {
+        Map<String, PlatformPermissionDefault> defaults = new HashMap<>();
+        for (Permission permission : this.bootstrap.getServer().getPluginManager().getPermissions()) {
+            defaults.put(permission.getName(), convertPermissionDefault(permission.getDefault()));
+        }
+        return Optional.of(defaults);
+    }
+
+    private static PlatformPermissionDefault convertPermissionDefault(PermissionDefault permissionDefault) {
+        switch (permissionDefault) {
+            case TRUE:
+                return PlatformPermissionDefault.TRUE;
+            case FALSE:
+                return PlatformPermissionDefault.FALSE;
+            case NOT_OP:
+                return PlatformPermissionDefault.NOT_OP;
+            case OP:
+            default:
+                return PlatformPermissionDefault.OP;
+        }
     }
 
     public BukkitSenderFactory getSenderFactory() {

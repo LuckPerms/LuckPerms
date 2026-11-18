@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.node.factory.NodeCommandFactory;
 import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap;
+import me.lucko.luckperms.common.plugin.util.PlatformPermissionDefault;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.storage.StorageMetadata;
 import me.lucko.luckperms.common.util.DurationFormatter;
@@ -756,6 +757,54 @@ public interface Message {
                     .color(AQUA)
                     .clickEvent(ClickEvent.openUrl(url))
     );
+
+    Args0 LIST_DEFAULTS_NOT_SUPPORTED = () -> prefixed(translatable()
+            // "&cThis platform does not give permissions default values."
+            .key("luckperms.command.list-defaults.not-supported")
+            .color(RED)
+            .append(FULL_STOP)
+    );
+
+    Args0 LIST_DEFAULTS_EMPTY = () -> prefixed(translatable()
+            // "&cNo permissions were found."
+            .key("luckperms.command.list-defaults.empty")
+            .color(RED)
+            .append(FULL_STOP)
+    );
+
+    Args4<PlatformPermissionDefault, Integer, Integer, Integer> LIST_DEFAULTS_HEADER = (filter, page, totalPages, totalEntries) -> prefixed(text()
+            // "&bShowing permission defaults:    &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)"
+            // "&bShowing permissions that default to &f{}&b:    &7(page &f{}&7 of &f{}&7 - &f{}&7 entries)"
+            .color(AQUA)
+            .append(filter == null
+                    ? translatable("luckperms.command.list-defaults.showing")
+                    : translatable("luckperms.command.list-defaults.showing-filtered", text(filter.getName(), WHITE)))
+            .append(text(':'))
+            .append(text("    "))
+            .append(text()
+                    .color(GRAY)
+                    .append(OPEN_BRACKET)
+                    .append(translatable()
+                            .key("luckperms.command.misc.page")
+                            .args(text(page, WHITE), text(totalPages, WHITE))
+                    )
+                    .append(text(" - "))
+                    .append(translatable()
+                            .key("luckperms.command.misc.page-entries")
+                            .args(text(totalEntries, WHITE))
+                    )
+                    .append(CLOSE_BRACKET)
+            )
+    );
+
+    Args2<String, PlatformPermissionDefault> LIST_DEFAULTS_ENTRY = (permission, value) -> text()
+            // "&3> &b{} &7- &a{}"
+            .append(text('>', DARK_AQUA))
+            .append(space())
+            .append(text(permission, AQUA))
+            .append(text(" - ", GRAY))
+            .append(text(value.getName(), value == PlatformPermissionDefault.TRUE ? GREEN : value == PlatformPermissionDefault.FALSE ? RED : YELLOW))
+            .build();
 
     Args0 TREE_UPLOAD_START = () -> prefixed(translatable()
             // "&bGenerating permission tree, please wait..."
